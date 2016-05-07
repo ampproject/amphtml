@@ -19,9 +19,10 @@ import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
-import {installCidService} from '../../src/service/cid-impl';
+import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
-import {installActivityService} from '../../src/service/activity-impl';
+import {installActivityService,} from
+    '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsService,
 } from '../../src/service/url-replacements-impl';

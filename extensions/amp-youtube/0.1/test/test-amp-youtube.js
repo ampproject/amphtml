@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-youtube');
 import {adopt} from '../../../../src/runtime';
 import {timer} from '../../../../src/timer';
@@ -37,6 +40,7 @@ describe('amp-youtube', function() {
   function getYt(videoId, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
+          doNotLoadExternalResourcesInTest(iframe.win);
           const yt = iframe.doc.createElement('amp-youtube');
 
           // TODO(mkhatib): During tests, messages are not being correctly
@@ -94,8 +98,9 @@ describe('amp-youtube', function() {
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-      expect(imgPlaceholder.getAttribute('src')).to.be.equal(
+      expect(imgPlaceholder.src).to.be.equal(
           'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');
+      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -113,6 +118,7 @@ describe('amp-youtube', function() {
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -133,6 +139,19 @@ describe('amp-youtube', function() {
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+
+      // Fake out the 404 image response dimensions of YT.
+      Object.defineProperty(imgPlaceholder, 'naturalWidth', {
+        get: function() {
+          return 120;
+        },
+      });
+      Object.defineProperty(imgPlaceholder, 'naturalHeight', {
+        get: function() {
+          return 90;
+        },
+      });
+      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;

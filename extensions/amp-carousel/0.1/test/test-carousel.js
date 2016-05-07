@@ -39,6 +39,7 @@ describe('Carousel gestures', () => {
   });
 
   afterEach(() => {
+    sandbox.restore();
     document.body.removeChild(element);
   });
 

@@ -15,6 +15,7 @@
  */
 
 import * as tr from '../../src/transition';
+import * as sinon from 'sinon';
 
 describe('Transition', () => {
 
@@ -29,8 +30,8 @@ describe('Transition', () => {
   });
 
   it('all', () => {
-    const func1 = sinon.spy();
-    const func2 = sinon.spy();
+    const func1 = sandbox.spy();
+    const func2 = sandbox.spy();
     const all = tr.all([func1, func2]);
 
     expect(func1.callCount).to.equal(0);

@@ -62,6 +62,7 @@ function tests(name, installer) {
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(url).to.match(/frame(.max)?.html#{/);
         expect(iframe.style.display).to.equal('');
+        expect(ad.implementation_.getPriority()).to.equal(2);
 
         const fragment = url.substr(url.indexOf('#') + 1);
         const data = JSON.parse(fragment);
@@ -175,7 +176,7 @@ function tests(name, installer) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
-          impl.attemptChangeSize = sinon.spy();
+          impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217, 114);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -192,7 +193,7 @@ function tests(name, installer) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
-          impl.attemptChangeSize = sinon.spy();
+          impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);

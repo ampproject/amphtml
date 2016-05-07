@@ -18,7 +18,7 @@ import {clientIdScope} from '../../ads/_config';
 import {createAdPromise} from '../../testing/ad-iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {installEmbed} from '../../builtins/amp-embed';
-import {installCidService} from '../../src/service/cid-impl';
+import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {
   installUserNotificationManager,
 } from '../../extensions/amp-user-notification/0.1/amp-user-notification';

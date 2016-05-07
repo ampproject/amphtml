@@ -28,6 +28,14 @@ describe('Slides functional', () => {
   let slides;
   let prepareCallback, switchCallback, resetCallback;
 
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   function setupElements() {
     element = document.createElement('div');
     element.setAttribute('type', 'slides');
@@ -52,9 +60,9 @@ describe('Slides functional', () => {
   }
 
   function setupSpies() {
-    slides.prepareSlide_ = prepareCallback = sinon.spy();
-    slides.commitSwitch_ = switchCallback = sinon.spy();
-    slides.resetSlide_ = resetCallback = sinon.spy();
+    slides.prepareSlide_ = prepareCallback = sandbox.spy();
+    slides.commitSwitch_ = switchCallback = sandbox.spy();
+    slides.resetSlide_ = resetCallback = sandbox.spy();
   }
 
   function teardownElements() {
@@ -191,8 +199,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in neg direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -214,8 +222,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in pos direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 1;
       slides.swipeState_ = {
         currentIndex: 1,
@@ -237,8 +245,8 @@ describe('Slides functional', () => {
     });
 
     it('should stay in-bounds on swipe', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -276,8 +284,8 @@ describe('Slides functional', () => {
     });
 
     it.skip('should go next after threshold', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -309,8 +317,8 @@ describe('Slides functional', () => {
     it('should not go past first item with a negative value when not ' +
        ' looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -337,8 +345,8 @@ describe('Slides functional', () => {
 
     it('should go past first item with a negative value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -363,8 +371,8 @@ describe('Slides functional', () => {
     it('should not go past last item with a positive value when ' +
        'not looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -387,8 +395,8 @@ describe('Slides functional', () => {
 
     it('should go past last item with a positive value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -413,8 +421,8 @@ describe('Slides functional', () => {
     });
 
     it('should go next before threshold but with velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -444,8 +452,8 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and no velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -475,8 +483,8 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and opposite velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -533,13 +541,8 @@ describe('Slides functional', () => {
           .returns(inViewport);
     }
 
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
       teardownElements();
-      sandbox.restore();
     });
 
     it('should call setupAutoplay_', () => {
@@ -753,7 +756,6 @@ describe('Slides functional', () => {
 
   describe('scheduling slides and updating viewport', () => {
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
       setupElements();
       setupSlides();
       slides.inViewport_ = true;
@@ -800,7 +802,6 @@ describe('Slides functional', () => {
 
   describe('Navigating slides', () => {
     beforeEach(() => {
-      sandbox = sinon.sandbox.create();
       setupElements();
       setupSlides();
       slides.inViewport_ = true;

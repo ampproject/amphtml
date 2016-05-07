@@ -46,6 +46,12 @@ describe('Layout', () => {
     expect(parseLength('10px')).to.equal('10px');
     expect(parseLength('10em')).to.equal('10em');
     expect(parseLength('10vmin')).to.equal('10vmin');
+    expect(parseLength('10cm')).to.equal('10cm');
+    expect(parseLength('10mm')).to.equal('10mm');
+    expect(parseLength('10in')).to.equal('10in');
+    expect(parseLength('10pt')).to.equal('10pt');
+    expect(parseLength('10pc')).to.equal('10pc');
+    expect(parseLength('10q')).to.equal('10q');
 
     expect(parseLength(10.1)).to.equal('10.1px');
     expect(parseLength('10.2')).to.equal('10.2px');
@@ -84,6 +90,12 @@ describe('Layout', () => {
     expect(assertLength('10px')).to.equal('10px');
     expect(assertLength('10em')).to.equal('10em');
     expect(assertLength('10vmin')).to.equal('10vmin');
+    expect(assertLength('10cm')).to.equal('10cm');
+    expect(assertLength('10mm')).to.equal('10mm');
+    expect(assertLength('10in')).to.equal('10in');
+    expect(assertLength('10pt')).to.equal('10pt');
+    expect(assertLength('10pc')).to.equal('10pc');
+    expect(assertLength('10q')).to.equal('10q');
 
     expect(assertLength('10.1px')).to.equal('10.1px');
     expect(assertLength('10.1em')).to.equal('10.1em');

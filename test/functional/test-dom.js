@@ -125,6 +125,24 @@ describe('DOM', () => {
         .to.be.null;
   });
 
+  it('childElements should find all matches', () => {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element2');
+    parent.appendChild(element2);
+
+    expect(dom.childElements(parent, () => true).length).to.equal(2);
+    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT2').length)
+        .to.equal(1);
+    expect(dom.childElements(parent, e => e.tagName == 'ELEMENT3').length)
+        .to.be.equal(0);
+  });
+
   function testChildElementByTag() {
     const parent = document.createElement('parent');
 
@@ -179,6 +197,61 @@ describe('DOM', () => {
   it('childElementByAttr should find first match', () => {
     dom.setScopeSelectorSupportedForTesting(false);
     testChildElementByAttr();
+  });
+
+  function testChildElementsByAttr() {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    element1.setAttribute('attr1', '1');
+    element1.setAttribute('attr12', '1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element2');
+    element2.setAttribute('attr2', '2');
+    element2.setAttribute('attr12', '2');
+    parent.appendChild(element2);
+
+    const element3 = document.createElement('element2');
+    element3.setAttribute('on-child', '');
+    element2.appendChild(element3);
+
+    expect(dom.childElementsByAttr(parent, 'attr1').length).to.equal(1);
+    expect(dom.childElementsByAttr(parent, 'attr2').length).to.equal(1);
+    expect(dom.childElementsByAttr(parent, 'attr12').length).to.equal(2);
+    expect(dom.childElementsByAttr(parent, 'attr3').length).to.be.equal(0);
+    expect(dom.childElementsByAttr(parent, 'on-child').length).to.be.equal(0);
+  }
+
+  it('childElementsByAttr should find all matches', testChildElementsByAttr);
+
+  it('childElementsByAttr should find all matches', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testChildElementsByAttr();
+  });
+
+  it('lastChildElementByAttr should find last match', () => {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    element1.setAttribute('attr1', '1');
+    element1.setAttribute('attr12', '1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element2');
+    element2.setAttribute('attr2', '2');
+    element2.setAttribute('attr12', '2');
+    parent.appendChild(element2);
+
+    const element3 = document.createElement('element2');
+    element3.setAttribute('on-child', '');
+    element2.appendChild(element3);
+
+    expect(dom.lastChildElementByAttr(parent, 'attr1')).to.equal(element1);
+    expect(dom.lastChildElementByAttr(parent, 'attr2')).to.equal(element2);
+    expect(dom.lastChildElementByAttr(parent, 'attr12')).to.equal(element2);
+    expect(dom.lastChildElementByAttr(parent, 'attr3')).to.be.null;
+    expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
   });
 
   describe('contains', () => {

@@ -5,11 +5,12 @@
   <title>Lorem Ipsum | PublisherName</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <!-- See https://github.com/ampproject/amp-publisher-sample -->
   <script id="amp-access" type="application/json">
     {
-      "authorization": "http://localhost:8002/amp-authorization.json?rid=READER_ID&url=CANONICAL_URL&_=RANDOM",
-      "pingback": "http://localhost:8002/amp-pingback?rid=READER_ID&url=CANONICAL_URL&views=AUTHDATA(views)",
-      "login": "http://localhost:8002/amp-login?rid=READER_ID&url=CANONICAL_URL",
+      "authorization": "http://localhost:8002/amp-access/api/amp-authorization.json?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+      "pingback": "http://localhost:8002/amp-access/api/amp-pingback?rid=READER_ID&ref=DOCUMENT_REFERRER&url=CANONICAL_URL",
+      "login": "http://localhost:8002/amp-access/login/?rid=READER_ID&url=CANONICAL_URL",
       "authorizationFallbackResponse": {"error": true}
     }
   </script>

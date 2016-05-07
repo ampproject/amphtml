@@ -41,6 +41,7 @@ import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
 import {nativo} from '../ads/nativo';
+import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
 import {mediaimpact} from '../ads/mediaimpact';
@@ -49,6 +50,7 @@ import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
 import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
+import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {sovrn} from '../ads/sovrn';
@@ -78,6 +80,7 @@ import {eplanning} from '../ads/eplanning';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  'mantis-recommend': true,
   plista: true,
 };
 
@@ -93,7 +96,10 @@ register('aduptech', aduptech);
 register('plista', plista);
 register('criteo', criteo);
 register('doubleclick', doubleclick);
+register('appnexus', appnexus);
 register('flite', flite);
+register('mantis-display', mantisDisplay);
+register('mantis-recommend', mantisRecommend);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('taboola', taboola);
