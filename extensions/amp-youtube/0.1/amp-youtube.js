@@ -164,7 +164,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
+    const imgPlaceholder = this.element.ownerDocument.createElement('img');
     const videoid = this.videoid_;
 
     setStyles(imgPlaceholder, {
