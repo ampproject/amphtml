@@ -19,10 +19,10 @@
  * has performed on the page.
  */
 
-import {getService} from '../service';
-import {viewerFor} from '../viewer';
-import {viewportFor} from '../viewport';
-import {listen} from '../event-helper';
+import {getService} from '../../../src/service';
+import {viewerFor} from '../../../src/viewer';
+import {viewportFor} from '../../../src/viewport';
+import {listen} from '../../../src/event-helper';
 
 
 /**

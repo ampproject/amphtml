@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {isPositiveNumber_, isValidPercentage_, isVisibilitySpecValid,
-  installVisibilityService} from '../../src/service/visibility-impl';
+import {
+  isPositiveNumber_,
+  isValidPercentage_,
+  isVisibilitySpecValid,
+  installVisibilityService,
+} from '../../extensions/amp-analytics/0.1/visibility-impl';
 import {installResourcesService} from '../../src/service/resources-impl';
 import {visibilityFor} from '../../src/visibility';
 import * as sinon from 'sinon';

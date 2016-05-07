@@ -18,7 +18,7 @@ import {cidFor} from '../../src/cid';
 import {
   installCidService,
   getProxySourceOrigin,
-} from '../../src/service/cid-impl';
+} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';

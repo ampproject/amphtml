@@ -19,7 +19,8 @@
  * - filesMatching - Is assumed to be all files if not provided.
  * - mustNotDependOn - If type is "forbidden" (default) then the files
  *     matched must not match the glob(s) provided.
- * - whitelist - Skip rule if file matches whitelist pattern(s).
+ * - whitelist - Skip rule if this particular dependency is found.
+ *     Syntax: fileA->fileB where -> reads "depends on"
  * @typedef {{
  *   type: (string|undefined),
  *   filesMatching: (string|!Array<string>|undefined),
@@ -30,10 +31,25 @@
 var RuleConfigDef;
 
 exports.rules = [
-  // Extensions must not import any services directly.
+  // Extensions must not import any central services directly.
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
-    whitelist: 'extensions/**/amp-analytics.js',
+  },
+  // Files under src must not depend on extensions.
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: 'extensions/**/*.js',
+  },
+  // Files under src must not depend on ads code.
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: 'ads/**/*.js',
+    whitelist: 'src/ad-cid.js->ads/_config.js',
+  },
+  // Files under src must not depend on 3p code.
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: '3p/**/*.js',
   },
 ];

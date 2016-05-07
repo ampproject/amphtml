@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
-import {getService} from '../service';
-import {resourcesFor} from '../resources';
-import {timer} from '../timer';
-import {user} from '../log';
-import {viewportFor} from '../viewport';
+import {dev} from '../../../src/log';
+import {getService} from '../../../src/service';
+import {resourcesFor} from '../../../src/resources';
+import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
+import {viewportFor} from '../../../src/viewport';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
