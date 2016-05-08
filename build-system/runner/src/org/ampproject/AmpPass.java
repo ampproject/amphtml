@@ -40,9 +40,10 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void hotSwapScript(Node scriptRoot, Node originalRoot) {
     NodeTraversal.traverseEs6(compiler, scriptRoot, this);
-    Node blah = IR.var(NodeUtil.newQName(compiler, "abc"));
-    originalRoot.getFirstChild().getFirstChild().getFirstChild().addChildToBack((blah));
-    //System.out.println(scriptRoot.getFirstChild().getFirstChild().toString());
+    Node process = IR.objectlit(IR.stringKey("env", IR.objectlit(
+        IR.stringKey("NODE_ENV", IR.string("production")))));
+    Node var = IR.var(IR.name("process"), process);
+    scriptRoot.getFirstChild().addChildToFront(var);
     compiler.reportCodeChange();
   }
 
