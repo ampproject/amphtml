@@ -87,12 +87,11 @@ function compile(entryModuleFilename, outputDir,
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
     var wrapper = windowConfig.getTemplate() +
-        '(function(){var process={env:{NODE_ENV:"production"}};' +
-        '%output%})();';
+        '(function(){%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',
           // TODO(@cramforce): Switch to define.
-          'var process={env:{NODE_ENV:"production"}};%output%');
+          '%output%');
     }
     wrapper += '\n//# sourceMappingURL=' +
         outputFilename + '.map\n';

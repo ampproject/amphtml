@@ -15,7 +15,7 @@
  */
 
 
-import {getMode} from './mode';
+import {getMode, isMinified, isLocalDev} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
@@ -64,7 +64,7 @@ export function reportError(error, opt_associatedElement) {
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!getMode().minified) {
+    if (!isMinified) {
       (console.error || console.log).call(console, error.stack);
     }
   }
@@ -108,7 +108,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     makeBodyVisible(this.document);
   }
   const mode = getMode();
-  if (mode.localDev || mode.development || mode.test) {
+  if (isLocalDev || mode.development || mode.test) {
     return;
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
