@@ -98,7 +98,7 @@ function normalizeRows(rows) {
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
 
   // normalize alp.js
-  normalizeRow(rows, 'alp.js', 'install-alp.js', true);
+  normalizeRow(rows, 'alp.js', 'alp.max.js', true);
 
   // normalize extensions
   var curName = null;
