@@ -71,5 +71,13 @@
                     data-param-text="Check this out: TITLE - CANONICAL_URL">
     Share on Whatsapp
   </amp-social-share>
+
+  <!-- Invalid: Endpoint given with a protocol that doesn't fit the whitelist -->
+  <amp-social-share type="uhm-no-hahaha"
+                    layout="container"
+                    data-share-endpoint="j a v a s c r i p t : alert('oh hi')"
+                    data-param-text="Check this out: TITLE - CANONICAL_URL">
+    Share on Whatsapp
+  </amp-social-share>
 </body>
 </html>
