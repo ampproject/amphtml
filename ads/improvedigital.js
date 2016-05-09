@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {writeScript, checkData, validateDataExists} from '../src/3p';
+import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
 const adImproveField = ['width', 'height', 'placement', 'optin', 'keyvalue'];
 const adImproveMandatoryField = ['placement'];

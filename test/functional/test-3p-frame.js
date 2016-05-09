@@ -27,7 +27,7 @@ import {loadPromise} from '../../src/event-helper';
 import {preconnectFor} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
 import {setModeForTesting} from '../../src/mode';
-import {validateData} from '../../src/3p';
+import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
 

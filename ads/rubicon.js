@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, checkData} from '../src/3p';
+import {writeScript, loadScript, checkData} from '../3p/3p';
 import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
 
