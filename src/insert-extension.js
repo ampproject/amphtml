@@ -23,6 +23,9 @@ export let ampExtensionScriptInsertedOrPresent = [];
 * Reset the ampExtensionScriptInsertedOrPresent value for each test.
 */
 export function resetExtensionScriptInsertedOrPresentForTesting(extension) {
+  if (extension == 'amp-embed') {
+    extension = 'amp-ad';
+  }
   ampExtensionScriptInsertedOrPresent[extension] = false;
 }
 

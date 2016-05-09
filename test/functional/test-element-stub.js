@@ -42,7 +42,7 @@ describe('test-element-stub', () => {
     });
   }
 
-  it('insert script', () => {
+  it('insert script for amp-ad when script is not included', () => {
     return getElementStubIframe('amp-ad').then(() => {
       resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
@@ -72,7 +72,7 @@ describe('test-element-stub', () => {
     });
   });
 
-  it('insert script for amp-embed', () => {
+  it('insert script for amp-embed when script is not included', () => {
     return getElementStubIframe('amp-embed').then(() => {
       resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
