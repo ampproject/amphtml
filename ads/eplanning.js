@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists} from '../src/3p';
+import {loadScript, validateDataExists} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,15 +22,15 @@ import {loadScript, validateDataExists} from '../src/3p';
  */
 export function eplanning(global, data) {
   validateDataExists(data, [
-    'epl_sI', 'epl_isV', 'epl_sV', 'epl_sec', 'epl_kVs', 'epl_e',
+    'epl_si', 'epl_isv', 'epl_sv', 'epl_sec', 'epl_kvs', 'epl_e',
   ]);
   // push the two object into the '_eplanning' global
   (global._eplanning = global._eplanning || []).push({
-    sI: data.epl_sI,
-    isV: data.epl_isV,
-    sV: data.epl_sV,
+    sI: data.epl_si,
+    isV: data.epl_isv,
+    sV: data.epl_sv,
     sec: data.epl_sec,
-    kVs: data.epl_kVs,
+    kVs: data.epl_kvs,
     e: data.epl_e,
   });
   loadScript(global, 'https://us.img.e-planning.net/layers/epl-amp.js');

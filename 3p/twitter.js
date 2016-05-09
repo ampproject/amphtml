@@ -16,7 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {computeInMasterFrame, loadScript} from '../src/3p';
+import {computeInMasterFrame, loadScript} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current

@@ -75,7 +75,7 @@ function Rule(config) {
   /** @private @const {!GlobsDef} */
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
-  /** @private @const {!GlobsDef} */
+  /** @private @const {!Array<string>} */
   this.whitelist_ = toArrayOrDefault(config.whitelist, []);
 }
 
@@ -86,13 +86,6 @@ function Rule(config) {
  */
 Rule.prototype.run = function(moduleName, deps) {
   var errors = [];
-  var inWhitelist = this.whitelist_.length ?
-      this.whitelist_.some(x => minimist(moduleName, x)) : false;
-
-  // Bail out early if its in the current rules whitelist.
-  if (inWhitelist) {
-    return errors;
-  }
 
   // If forbidden rule and current module has no dependencies at all
   // then no need to match.
@@ -125,6 +118,18 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
   deps.forEach(dep => {
     this.mustNotDependOn_.forEach(badDepPattern => {
       if (minimatch(dep, badDepPattern)) {
+        var inWhitelist = this.whitelist_.some(entry => {
+          var pair = entry.split('->');
+          var whitelistedModuleName = pair[0];
+          var whitelistedDep = pair[1];
+          if (!minimatch(moduleName, whitelistedModuleName)) {
+            return false;
+          }
+          return dep == whitelistedDep;
+        });
+        if (inWhitelist) {
+          return;
+        }
         mustNotDependErrors.push(`${moduleName} must not depend on ${dep}. ` +
             `Rule: ${JSON.stringify(this.config_)}.`);
       }

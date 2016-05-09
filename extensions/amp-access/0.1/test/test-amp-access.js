@@ -18,7 +18,8 @@ import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installCidService} from '../../../../src/service/cid-impl';
+import {installCidService,} from
+    '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 

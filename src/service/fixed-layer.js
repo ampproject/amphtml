@@ -189,6 +189,19 @@ export class FixedLayer {
           const element = fe.element;
           const styles = this.doc.defaultView./*OK*/getComputedStyle(
               element, null);
+          if (!styles) {
+            // Notice that `styles` can be `null`, courtesy of long-standing
+            // Gecko bug: https://bugzilla.mozilla.org/show_bug.cgi?id=548397
+            // See #3096 for more details.
+            state[fe.id] = {
+              fixed: false,
+              transferrable: false,
+              top: '',
+              zIndex: '',
+            };
+            return;
+          }
+
           const position = styles.getPropertyValue('position');
           const top = styles.getPropertyValue('top');
           const bottom = styles.getPropertyValue('bottom');

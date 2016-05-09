@@ -22,10 +22,12 @@ import * as sinon from 'sinon';
 
 describe('documentReady', () => {
 
+  let sandbox;
   let testDoc;
   let eventListeners;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     eventListeners = {};
     testDoc = {
       readyState: 'loading',
@@ -40,6 +42,11 @@ describe('documentReady', () => {
     };
   });
 
+  afterEach(() => {
+    sandbox.restore();
+
+  });
+
   it('should interprete readyState correctly', () => {
     expect(isDocumentReady(testDoc)).to.equal(false);
 
@@ -52,14 +59,14 @@ describe('documentReady', () => {
 
   it('should call callback immediately when ready', () => {
     testDoc.readyState = 'complete';
-    const callback = sinon.spy();
+    const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(1);
   });
 
   it('should wait to call callback until ready', () => {
     testDoc.readyState = 'loading';
-    const callback = sinon.spy();
+    const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(0);
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -73,7 +80,7 @@ describe('documentReady', () => {
 
   it('should wait to call callback for several loading events', () => {
     testDoc.readyState = 'loading';
-    const callback = sinon.spy();
+    const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(0);
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -94,9 +101,9 @@ describe('documentReady', () => {
 
     it('should call callback immediately when ready', () => {
       testDoc.readyState = 'complete';
-      const spy = sinon.spy();
-      const spy2 = sinon.spy();
-      const spy3 = sinon.spy();
+      const spy = sandbox.spy();
+      const spy2 = sandbox.spy();
+      const spy3 = sandbox.spy();
 
       whenDocumentReady(testDoc).then(spy).then(spy2);
 
@@ -114,7 +121,7 @@ describe('documentReady', () => {
     });
 
     it('should not call callback', () => {
-      const spy = sinon.spy();
+      const spy = sandbox.spy();
       whenDocumentReady(testDoc).then(spy);
       expect(spy.callCount).to.equal(0);
       return timer.promise().then(() => {
@@ -124,7 +131,7 @@ describe('documentReady', () => {
 
     it('should wait to call callback until ready', () => {
       testDoc.readyState = 'loading';
-      const callback = sinon.spy();
+      const callback = sandbox.spy();
       whenDocumentReady(testDoc).then(callback);
 
       return timer.promise().then(() => {

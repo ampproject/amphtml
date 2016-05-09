@@ -26,6 +26,7 @@ var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
+var minimatch = require('minimatch');
 var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
@@ -74,6 +75,7 @@ function buildExtensions(options) {
   buildExtension('amp-sidebar', '0.1', true, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-springboard-player', '0.1', false, options);
+  buildExtension('amp-sticky-ad', '0.1', true, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -186,9 +188,19 @@ function watch() {
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
-  console.log('Bundling ' + name);
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
+  var jsTestPath = path + '/test/' + 'test-' + name + '.js';
+  if (argv.files && options.bundleOnlyIfListedInFiles) {
+    const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
+    const shouldBundle = passedFiles.some(glob => {
+      return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
+    });
+    if (!shouldBundle) {
+      return;
+    }
+  }
+  console.log('Bundling ' + name);
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -244,7 +256,7 @@ function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
-  buildExtensions();
+  buildExtensions({bundleOnlyIfListedInFiles: true});
   buildExamples(false);
   compile();
 }
@@ -317,6 +329,7 @@ function buildExamples(watch) {
   buildExample('twitter.amp.html');
   buildExample('soundcloud.amp.html');
   buildExample('springboard-player.amp.html');
+  buildExample('sticky.ads.amp.html');
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');

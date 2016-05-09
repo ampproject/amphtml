@@ -18,6 +18,7 @@ import {AmpAudio} from '../amp-audio';
 import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
 import {createIframePromise} from '../../../../testing/iframe';
+import * as sinon from 'sinon';
 require('../amp-audio');
 
 adopt(window);
@@ -154,7 +155,7 @@ describe('amp-audio', () => {
       return savedCreateElement.call(document, name);
     };
     const element = document.createElement('div');
-    element.toggleFallback = sinon.spy();
+    element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
     const promise = audio.layoutCallback();
     document.createElement = savedCreateElement;

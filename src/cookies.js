@@ -27,7 +27,14 @@
  * @return {?string}
  */
 export function getCookie(win, name) {
-  const cookieString = win.document.cookie;
+  let cookieString;
+  try {
+    cookieString = win.document.cookie;
+  } catch (ignore) {
+    // Act as if no cookie is available. Exceptions can be thrown when
+    // AMP docs are opened on origins that do not allow setting
+    // cookies such as null origins.
+  }
   if (!cookieString) {
     return null;
   }
@@ -91,9 +98,16 @@ function trySetCookie(win, name, value, expirationTime, domain) {
     value = 'delete';
     expirationTime = 0;
   }
-  win.document.cookie = encodeURIComponent(name) + '=' +
+  const cookie = encodeURIComponent(name) + '=' +
       encodeURIComponent(value) +
       '; path=/' +
       (domain ? '; domain=' + domain : '') +
       '; expires=' + new Date(expirationTime).toUTCString();
+  try {
+    win.document.cookie = cookie;
+  } catch (ignore) {
+    // Do not throw if setting the cookie failed Exceptions can be thrown
+    // when AMP docs are opened on origins that do not allow setting
+    // cookies such as null origins.
+  };
 }

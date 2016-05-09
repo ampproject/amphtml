@@ -61,7 +61,7 @@ describe('History', () => {
   });
 
   it('should push new state', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     return history.push(onPop).then(unusedHistoryId => {
@@ -73,7 +73,7 @@ describe('History', () => {
   });
 
   it('should pop previously pushed state', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     bindingMock.expects('pop').withExactArgs(11)
@@ -93,7 +93,7 @@ describe('History', () => {
   });
 
   it('should return and call callback when history popped', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     return history.push(onPop).then(unusedHistoryId => {
@@ -119,7 +119,7 @@ describe('HistoryBindingNatural', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    onStackIndexUpdated = sinon.spy();
+    onStackIndexUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
@@ -173,7 +173,7 @@ describe('HistoryBindingNatural', () => {
   // This prevents IE11/Edge from coercing undefined to become the new url
   it('should not pass in `url` argument to original replace state if ' +
     'parameter is undefined', () => {
-    const replaceStateSpy = sinon.spy();
+    const replaceStateSpy = sandbox.spy();
     const windowStub = {
       history: {
         replaceState: replaceStateSpy,
@@ -258,7 +258,7 @@ describe('HistoryBindingVirtual', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    onStackIndexUpdated = sinon.spy();
+    onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
     const viewer = {
       onHistoryPoppedEvent: handler => {

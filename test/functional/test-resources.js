@@ -21,6 +21,7 @@ import {
   TaskQueue_,
 } from '../../src/service/resources-impl';
 import {VisibilityState} from '../../src/service/viewer-impl';
+import {dev} from '../../src/log';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -255,6 +256,8 @@ describe('Resources schedulePause', () => {
           return true;
         },
       },
+      getPlaceholder() {
+      },
       pauseCallback() {
       },
       unlayoutCallback() {
@@ -262,6 +265,9 @@ describe('Resources schedulePause', () => {
       },
       unlayoutOnPause() {
         return false;
+      },
+      getPriority() {
+        return 0;
       },
     };
   }
@@ -329,6 +335,140 @@ describe('Resources schedulePause', () => {
 });
 
 
+describe('Resources schedulePreload', () => {
+
+  let sandbox;
+  let resources;
+  let parent;
+  let children;
+  let child0;
+  let child1;
+  let child2;
+  let placeholder;
+
+  function createElement() {
+    return {
+      tagName: 'amp-test',
+      isBuilt() {
+        return true;
+      },
+      isUpgraded() {
+        return true;
+      },
+      getAttribute() {
+        return null;
+      },
+      contains() {
+        return true;
+      },
+      classList: {
+        contains() {
+          return true;
+        },
+      },
+      getPlaceholder() {
+        return placeholder;
+      },
+      renderOutsideViewport() {
+        return false;
+      },
+      layoutCallback() {
+      },
+      pauseCallback() {
+      },
+      unlayoutCallback() {
+        return false;
+      },
+      unlayoutOnPause() {
+        return false;
+      },
+      getPriority() {
+        return 0;
+      },
+    };
+  }
+
+  function createElementWithResource(id) {
+    const element = createElement();
+    const resource = new Resource(id, element, resources);
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.element['__AMP__RESOURCE'] = resource;
+    resource.measure = sandbox.spy();
+    resource.isDisplayed = () => true;
+    resource.isInViewport = () => true;
+    return [element, resource];
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    resources = new Resources(window);
+    const parentTuple = createElementWithResource(1);
+    parent = parentTuple[0];
+    placeholder = document.createElement('div');
+    child0 = document.createElement('div');
+    child1 = createElementWithResource(2)[0];
+    child2 = createElementWithResource(3)[0];
+    children = [child0, child1, child2];
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not throw with a single element', () => {
+    expect(() => {
+      resources.schedulePreload(parent, child1);
+    }).to.not.throw();
+  });
+
+  it('should not throw with an array of elements', () => {
+    expect(() => {
+      resources.schedulePreload(parent, [child1, child2]);
+    }).to.not.throw();
+  });
+
+  it('should be ok with non amp children', () => {
+    expect(() => {
+      resources.schedulePreload(parent, children);
+    }).to.not.throw();
+  });
+
+  it('should schedule on custom element with multiple children', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(2);
+  });
+
+  it('should schedule on nested custom element placeholder', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+
+    const placeholder1 = createElementWithResource(4)[0];
+    child1.getPlaceholder = () => placeholder1;
+
+    const placeholder2 = createElementWithResource(5)[0];
+    child2.getPlaceholder = () => placeholder2;
+
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(4);
+  });
+
+  it('should schedule amp-* placeholder inside non-amp element', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+
+    const insidePlaceholder1 = createElementWithResource(4)[0];
+    const placeholder1 = document.createElement('div');
+    child0.getElementsByClassName = () => [insidePlaceholder1];
+    child0.getPlaceholder = () => placeholder1;
+
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(3);
+  });
+});
+
+
 describe('Resources discoverWork', () => {
 
   function createElement(rect) {
@@ -354,6 +494,8 @@ describe('Resources discoverWork', () => {
       pauseCallback: () => {},
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
+      togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 1,
     };
   }
 
@@ -590,9 +732,11 @@ describe('Resources changeSize', () => {
       isRelayoutNeeded: () => true,
       contains: unused_otherElement => false,
       updateLayoutBox: () => {},
+      togglePlaceholder: () => sandbox.spy(),
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
+      getPriority: () => 0,
     };
   }
 
@@ -977,6 +1121,7 @@ describe('Resources mutateElement', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
+      getPriority: () => 0,
     };
   }
 
@@ -1195,6 +1340,8 @@ describe('Resources.Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 2,
     };
     elementMock = sandbox.mock(element);
 
@@ -1625,6 +1772,7 @@ describe('Resources.Resource', () => {
         () => {
           resource.state_ = ResourceState_.LAYOUT_COMPLETE;
           elementMock.expects('unlayoutCallback').returns(true).once();
+          elementMock.expects('togglePlaceholder').withArgs(true).once();
           resource.unlayout();
           expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
         });
@@ -1632,6 +1780,7 @@ describe('Resources.Resource', () => {
     it('updated state should bypass isRelayoutNeeded', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(true).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).once();
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
       elementMock.expects('getBoundingClientRect')
           .returns({left: 1, top: 1, width: 1, height: 1}).once();
@@ -1646,6 +1795,7 @@ describe('Resources.Resource', () => {
         ' but NOT update state', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
@@ -1667,6 +1817,7 @@ describe('Resources.Resource', () => {
     it('should delegate unload to unlayoutCallback', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unload();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
@@ -1807,6 +1958,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      getPriority: () => 0,
     };
     elementMock = sandbox.mock(element);
 
@@ -2188,5 +2340,181 @@ describe('Resource renderOutsideViewport', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
       });
     });
+  });
+});
+
+describe('Resources fix IE matchMedia', () => {
+  let sandbox;
+  let clock;
+  let windowApi, windowMock;
+  let platformMock;
+  let resources;
+  let devErrorStub;
+  let schedulePassStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(window);
+    resources.relayoutAll_ = false;
+    resources.doPass_ = () => {};
+    platformMock = sandbox.mock(resources.platform_);
+    devErrorStub = sandbox.stub(dev, 'error');
+    schedulePassStub = sandbox.stub(resources, 'schedulePass');
+
+    windowApi = {
+      innerWidth: 320,
+      setInterval: () => {},
+      clearInterval: () => {},
+      matchMedia: () => {},
+    };
+    windowMock = sandbox.mock(windowApi);
+  });
+
+  afterEach(() => {
+    platformMock.verify();
+    windowMock.verify();
+    sandbox.restore();
+  });
+
+  it('should bypass polling for non-IE browsers', () => {
+    platformMock.expects('isIe').returns(false);
+    windowMock.expects('matchMedia').never();
+    windowMock.expects('setInterval').never();
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+  });
+
+  it('should bypass polling when matchMedia is not broken', () => {
+    platformMock.expects('isIe').returns(true);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: true})
+        .once();
+    windowMock.expects('setInterval').never();
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+  });
+
+  it('should poll when matchMedia is wrong, but eventually succeeds', () => {
+    platformMock.expects('isIe').returns(true);
+
+    // Scheduling pass.
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .once();
+    const intervalId = 111;
+    let intervalCallback;
+    windowMock.expects('setInterval')
+        .withExactArgs(
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
+        )
+        .returns(intervalId)
+        .once();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    expect(intervalCallback).to.exist;
+    windowMock.verify();
+    windowMock./*OK*/restore();
+
+    // Second pass.
+    clock.tick(10);
+    windowMock = sandbox.mock(windowApi);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .once();
+    windowMock.expects('clearInterval').never();
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    windowMock.verify();
+    windowMock./*OK*/restore();
+
+    // Third pass - succeed.
+    clock.tick(10);
+    windowMock = sandbox.mock(windowApi);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: true})
+        .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.true;
+    expect(schedulePassStub.callCount).to.equal(1);
+    expect(devErrorStub.callCount).to.equal(0);
+    windowMock.verify();
+    windowMock./*OK*/restore();
+  });
+
+  it('should poll until times out', () => {
+    platformMock.expects('isIe').returns(true);
+
+    // Scheduling pass.
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .atLeast(2);
+    const intervalId = 111;
+    let intervalCallback;
+    windowMock.expects('setInterval')
+        .withExactArgs(
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
+        )
+        .returns(intervalId)
+        .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    expect(intervalCallback).to.exist;
+
+    // Second pass.
+    clock.tick(10);
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+
+    // Third pass - timeout.
+    clock.tick(2000);
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.true;
+    expect(schedulePassStub.callCount).to.equal(1);
+    expect(devErrorStub.callCount).to.equal(1);
+  });
+
+  it('should tolerate matchMedia exceptions', () => {
+    platformMock.expects('isIe').returns(true);
+
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .throws(new Error('intentional'))
+        .once();
+    windowMock.expects('setInterval').never();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(1);
+    expect(schedulePassStub.callCount).to.equal(0);
   });
 });

@@ -32,6 +32,7 @@ import {viewerFor} from '../src/viewer';
 /** @private @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true,
+  'AMP-STICKY-AD': true,
 };
 
 /**
@@ -48,6 +49,12 @@ export function installAd(win) {
   let loadingAdsCount = 0;
 
   class AmpAd extends BaseElement {
+
+    /** @override */
+    getPriority() {
+      // Loads ads after other content.
+      return 2;
+    }
 
     /** @override  */
     renderOutsideViewport() {

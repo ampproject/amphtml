@@ -45,9 +45,9 @@ limitations under the License.
 - The width of the sidebar can be set and adjusted between 45px and 80vw using CSS.
 - Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
 
-Example
+Example:
 ```html
-<amp-sidebar id='sidebar1'>
+<amp-sidebar id='sidebar1' layout='nodisplay'>
   <ul>
     <li> Nav item 1</li>
     <li> Nav item 2</li>
@@ -68,7 +68,7 @@ Setting the `on` attribute on one or more elements within the page and setting i
 
 Alternatively pressing the escape key on the keyboard will also close the lightbox.
 
-Example
+Example:
 ```html
 <div class="hamburger" on='tap:sidebar1.toggle'></button>
 <button on='tap:sidebar1'>Open</button>
@@ -83,7 +83,12 @@ Example
 The `side` attribute may be set to `left` or `right` depending upon whether sidebar should open in the left or right side of the page. If a `side` is not set on the `amp-sidebar` then it will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => right') and if one does not exist then the `side` is defaulted to `left`.
 
 **open**
+
 The `open` attribute is present on the sidebar when it is open.
+
+**layout**
+
+The only permissible value for the `layout` attribute in `amp-sidebar` is `nodisplay`.
 
 ## Styling
 
@@ -92,3 +97,35 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The `width` of the `amp-sidebar` may be set to adjust the width of the sidebar between the pre-set min(45px) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar if required. If the height exceeds 100vw then the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
+
+## Validation errors
+
+The following lists validation errors specific to the `amp-sidebar` tag
+(see also `amp-sidebar` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/0.1/validator-amp-sidebar.protoascii)):
+
+<table>
+  <tr>
+    <th class="col-fourty"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
+    <td>Error thrown when required <code>amp-sidebar</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#disallowed-tag-ancestor">The 'example1' may not appear as a descendant of tag 'example2'.</a></td>
+    <td>Error thrown when <code>amp-sidebar</code> is a child of <code>amp-sidebar</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
+    <td>Error thrown when the <code>side</code> attribute is invalid.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
+  </tr>
+</table>
