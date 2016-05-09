@@ -65,6 +65,7 @@ tags: {  # <amp-social-share>
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "sms"
+      allowed_protocol: "tel"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
       allow_relative: false
