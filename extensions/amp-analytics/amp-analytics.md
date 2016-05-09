@@ -200,6 +200,14 @@ Type attribute value: `webtrekk`
 
 Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
 
+### Linkpulse
+
+Type attribute value: `linkpulse`
+
+Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com)(http://docs.linkpulse.com)
+
+
+
 ## <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)
