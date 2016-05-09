@@ -247,14 +247,14 @@ export function lastChildElement(parent, callback) {
  * @return {!Array<!Node>}
  */
 export function childNodes(parent, callback) {
-  const childnodes = [];
+  const nodes = [];
   for (let child = parent.firstChild; child;
        child = child.nextSibling) {
     if (callback(child)) {
-      childnodes.push(child);
+      nodes.push(child);
     }
   }
-  return childnodes;
+  return nodes;
 }
 
 /**

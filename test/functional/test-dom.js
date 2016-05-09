@@ -153,8 +153,12 @@ describe('DOM', () => {
         .to.equal(1);
     expect(dom.childNodes(parent, node => node.textContent == 'text2').length)
         .to.equal(1);
+    expect(dom.childNodes(parent, node => node.textContent == 'text3').length)
+        .to.equal(0);
     expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT').length)
         .to.equal(1);
+    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT2').length)
+        .to.equal(0);
   });
 
   function testChildElementByTag() {
