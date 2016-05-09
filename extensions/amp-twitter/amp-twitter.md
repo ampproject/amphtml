@@ -67,7 +67,7 @@ Options for the Tweet appearance can be set using `data-` attributes. E.g. `data
 ## Validation errors
 
 The following lists validation errors specific to the `amp-twitter` tag
-(see also `amp-twitter` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-twitter` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii)):
 
 <!---
 What does fixed height and fixed width mean for audio layout?

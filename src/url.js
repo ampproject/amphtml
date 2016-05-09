@@ -113,7 +113,7 @@ export function addParamsToUrl(url, params) {
  * Provides an exception for localhost.
  *
  * @param {?string|undefined} urlString
- * @param {!Element} elementContext Element where the url was found.
+ * @param {!Element|string} elementContext Element where the url was found.
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
@@ -135,7 +135,7 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  user.assert(/^(http\:|https\:)/i.test(urlString),
+  user.assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;

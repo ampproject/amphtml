@@ -16,7 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {computeInMasterFrame, loadScript} from '../src/3p';
+import {computeInMasterFrame, loadScript} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -42,6 +42,9 @@ export function twitter(global, data) {
   const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
   tweet.style.width = '100%';
+  tweet.style.display = 'flex';
+  tweet.style.alignItems = 'center';
+  tweet.style.justifyContent = 'center';
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
     // Dimensions are given by the parent frame.

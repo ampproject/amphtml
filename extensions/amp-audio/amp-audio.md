@@ -78,7 +78,7 @@ If present, will mute the audio by default.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-audio` tag
-(see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/0.1/validator-amp-audio.protoascii)):
 
 <!---
 What does fixed height and fixed width mean for audio layout?

@@ -129,19 +129,22 @@ amp.validator.validateInBrowser = function(doc) {
  * and https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
+ * @param {!string=} opt_errorCategoryFilter
  * @export
  */
-amp.validator.validateUrlAndLog = function(url, opt_doc) {
+amp.validator.validateUrlAndLog = function(
+    url, opt_doc, opt_errorCategoryFilter) {
   getUrl(url).then(
-    function(html) {  // Success
-      const validationResult = amp.validator.validateString(html);
-      if (opt_doc) {
-        const browserResult = amp.validator.validateInBrowser(opt_doc);
-        validationResult.mergeFrom(browserResult);
-      }
-      validationResult.outputToTerminal(url);
-    },
-    function(reason) {  // Failure
-      console.error(reason);
-    });
+      function(html) {  // Success
+        const validationResult = amp.validator.validateString(html);
+        if (opt_doc) {
+          const browserResult = amp.validator.validateInBrowser(opt_doc);
+          validationResult.mergeFrom(browserResult);
+        }
+        validationResult.outputToTerminal(
+            url, undefined, opt_errorCategoryFilter);
+      },
+      function(reason) {  // Failure
+        console.error(reason);
+      });
 };

@@ -83,7 +83,7 @@ Layout is `fixed-height` and will fill all the available horizontal space. This 
 ## Validation errors
 
 The following lists validation errors specific to the `amp-soundcloud` tag
-(see also `amp-soundcloud` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-soundcloud` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii)):
 
 <table>
   <tr>

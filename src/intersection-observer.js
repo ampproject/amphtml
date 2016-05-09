@@ -17,7 +17,7 @@
 import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listen, postMessage} from './iframe-helper';
+import {listenFor, postMessage} from './iframe-helper';
 import {parseUrl} from './url';
 import {timer} from './timer';
 
@@ -88,11 +88,9 @@ export function getIntersectionChangeEntry(
 export class IntersectionObserver extends Observable {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element to which would request intersection
+   * @param {!Element} iframe Iframe element which requested the intersection
    *    data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
-   * @constructor
-   * @extends {Observable}
    */
   constructor(baseElement, iframe, opt_is3p) {
     super();
@@ -126,7 +124,7 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    listen(this.iframe_, 'send-intersections', () => {
+    listenFor(this.iframe_, 'send-intersections', () => {
       this.startSendingIntersectionChanges_();
     }, this.is3p_);
 
@@ -201,11 +199,16 @@ export class IntersectionObserver extends Observable {
     }
     this.pendingChanges_.push(change);
     if (!this.flushTimeout_) {
-      // Send a maximum of 10 postMessages per second.
+      // Send one immediately, …
+      this.flush_();
+      // but only send a maximum of 10 postMessages per second.
       this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
     }
   }
 
+  /**
+   * @private
+   */
   flush_() {
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {

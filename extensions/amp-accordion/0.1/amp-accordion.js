@@ -57,19 +57,29 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', event => {
-        event.preventDefault();
-        this.mutateElement(() => {
-          if (section.hasAttribute('expanded')) {
-            section.removeAttribute('expanded');
-            content.setAttribute('aria-expanded', 'false');
-          } else {
-            section.setAttribute('expanded', '');
-            content.setAttribute('aria-expanded', 'true');
-          }
-        }, content);
-      });
+      header.addEventListener('click', this.onHeaderClick_.bind(this));
     });
+  }
+
+  /**
+   * Handles accordion headers clicks to expand/collapse its content.
+   * @param {!MouseEvent} event Click event.
+   * @private
+   */
+  onHeaderClick_(event) {
+    event.preventDefault();
+    const section = event.target.parentNode;
+    const sectionComponents_ = section.children;
+    const content = sectionComponents_[1];
+    this.mutateElement(() => {
+      if (section.hasAttribute('expanded')) {
+        section.removeAttribute('expanded');
+        content.setAttribute('aria-expanded', 'false');
+      } else {
+        section.setAttribute('expanded', '');
+        content.setAttribute('aria-expanded', 'true');
+      }
+    }, content);
   }
 }
 

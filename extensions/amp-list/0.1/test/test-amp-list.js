@@ -16,7 +16,7 @@
 
 import {AmpList} from '../amp-list';
 import {templatesFor} from '../../../../src/template';
-import {xhrFor} from '../../../../src/xhr';
+import {installXhrService} from '../../../../src/service/xhr-impl';
 import * as sinon from 'sinon';
 
 
@@ -37,7 +37,7 @@ describe('amp-list component', () => {
     templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    xhr = xhrFor(window);
+    xhr = installXhrService(window);
     xhrMock = sandbox.mock(xhr);
 
     element = document.createElement('div');

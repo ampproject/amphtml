@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../../src/3p';
+import {loadScript, checkData} from '../../3p/3p';
 import {getCorrelator} from './utils';
 
 /**
@@ -22,7 +22,7 @@ import {getCorrelator} from './utils';
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.1;
+  const experimentFraction = 0.5;
 
   checkData(data, [
     'slot', 'targeting', 'categoryExclusions',

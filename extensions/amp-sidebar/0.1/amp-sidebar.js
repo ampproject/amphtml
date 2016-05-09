@@ -16,8 +16,8 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
@@ -178,9 +178,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      this.viewport_.removeFromFixedLayer(this.element);
       timer.delay(() => {
         if (!this.isOpen_()) {
+          this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
             setStyles(this.element, {
               'display': 'none',

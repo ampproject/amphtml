@@ -72,7 +72,7 @@ Must have the value `nodisplay`.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-install-serviceworker` tag
-(see also `amp-install-serviceworker` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-install-serviceworker` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii)):
 
 <table>
   <tr>

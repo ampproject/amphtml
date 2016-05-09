@@ -79,7 +79,7 @@ amp-img {
 ## Validation errors
 
 The following lists validation errors specific to the `amp-img` tag
-(see also `amp-img` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-img` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

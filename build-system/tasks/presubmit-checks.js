@@ -41,7 +41,7 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'sinon\\.(spy|stub|mock)\\(\\w[^)]*\\)': {
+  'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
@@ -55,9 +55,10 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
-      'validator/validator.js',
+      'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-in-browser.js',
+      'validator/validator.js',
     ]
   },
   'iframePing': {
@@ -86,14 +87,14 @@ var forbiddenTerms = {
   'installActivityService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/activity-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js'
     ]
   },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
@@ -102,7 +103,14 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
+    ],
+  },
+  'installUrlReplacementsService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
@@ -141,11 +149,18 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'installXhrService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/xhr-impl.js',
+    ],
+  },
   'sendMessage': {
     message: privateServiceFactory,
     whitelist: [
       'src/service/viewer-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
     ],
@@ -154,10 +169,10 @@ var forbiddenTerms = {
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'builtins/amp-ad.js',
+      'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -165,7 +180,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -173,13 +188,13 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cookies.js',
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -188,7 +203,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -229,8 +244,8 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
@@ -242,14 +257,14 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'debugger': '',
@@ -261,8 +276,9 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
-      'validator/validator.js'
+      'validator/validator.js',
     ]
   },
   '\\.endsWith': {

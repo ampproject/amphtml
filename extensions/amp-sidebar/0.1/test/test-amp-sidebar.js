@@ -20,6 +20,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {platform} from '../../../../src/platform';
 import {timer} from '../../../../src/timer';
 import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 require('../amp-sidebar');
 
 adopt(window);

@@ -14,50 +14,47 @@
  * limitations under the License.
  */
 
+let ELEMENT_NAME = 'amp-cxense';
+
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-cxense');
+require('../' + ELEMENT_NAME);
 import {adopt} from '../../../../src/runtime';
 import {parseUrl} from '../../../../src/url';
 
 adopt(window);
 
-describe('amp-cxense', () => {
-    var testSrc = 'https://media.w3.org/2010/05/sintel/trailer.mp4';
+describe(ELEMENT_NAME, () => {
 
-    function getCxense(attributes, opt_responsive) {
+    let DEFAULT_ATTRIBUTES = {
+        'data-src': 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+        'layout': 'responsive'
+    };
+
+    function createWidget(attributes) {
+        attributes = Object.assign({}, DEFAULT_ATTRIBUTES, attributes);
+        console.log("createWidget", attributes);
+
         return createIframePromise(true).then(iframe => {
-            const bc = iframe.doc.createElement('amp-cxense');
-            for (const key in attributes) {
-                bc.setAttribute(key, attributes[key]);
+            console.log("createIframePromise");
+
+            const widget = iframe.doc.createElement(ELEMENT_NAME);
+
+            let key;
+            for (key in attributes) {
+                widget.setAttribute(key, attributes[key]);
             }
-            bc.setAttribute('width', '111');
-            bc.setAttribute('height', '222');
-            if (opt_responsive) {
-                bc.setAttribute('layout', 'responsive');
-            }
-            iframe.doc.body.appendChild(bc);
-            bc.implementation_.layoutCallback();
-            return bc;
+            iframe.doc.body.appendChild(widget);
+
+            console.log(widget, typeof widget, Object.keys(widget));
+
+            return widget.implementation_.layoutCallback();
         });
     }
 
     it('renders', () => {
-        return getCxense({
-            'data-embed': '/app/player/m4/dist/',
-            'data-src': testSrc
-        }).then(A => {
-            const mpf = RAMP.Widgets.get('metaplayer');
-            expect(mpf.video.src).to.equal(testSrc);
-        });
-    });
-
-    it('renders responsively', () => {
-        return getCxense({
-            'data-embed': '/app/player/m4/dist/',
-            'data-src': testSrc
-        }).then(A => {
-            const mpf = RAMP.Widgets.get('metaplayer');
-            expect(mpf.video.src).to.equal(testSrc);
+        return createWidget({
+        }).then((widget) => {
+            expect(widget._mpf.video.src).to.equal(DEFAULT_ATTRIBUTES['data-src']);
         });
     });
 });

@@ -16,7 +16,7 @@
 
 
 import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
-import {listen} from '../../../src/iframe-helper';
+import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -41,9 +41,8 @@ class AmpFacebook extends AMP.BaseElement {
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'facebook');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', data => {
+    listenFor(iframe, 'embed-size', data => {
       iframe.height = data.height;
       iframe.width = data.width;
       const amp = iframe.parentElement;
@@ -51,6 +50,7 @@ class AmpFacebook extends AMP.BaseElement {
       amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
+    this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
 };

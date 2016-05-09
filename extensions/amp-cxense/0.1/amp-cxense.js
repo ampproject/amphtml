@@ -41,9 +41,10 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     preconnectCallback(onLayout) {
+        let self = this;
         PRE_CONNECT_URLS.forEach((url) => {
-            this.preconnect.url(url, onLayout);
-        }.bind(this));
+            self.preconnect.url(url, onLayout);
+        });
     }
 
     /** @override */
@@ -101,17 +102,19 @@ class AmpCxense extends AMP.BaseElement {
             this._createChildTarget();
         }
 
+        let self = this;
         return this._injectEmbedScript().then(() => {
-            this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id'), (embed) => {
-                this._embed = embed;
+            this._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), (embed) => {
+                self._embed = embed;
 
-                if (this._isPlayer) {
-                    return this._loadPlayer();
+                if (self._isPlayer) {
+                    return self._loadPlayer();
                 } else {
-                    this.applyFillContent(this._target);
+                    self.applyFillContent(this._target);
+                    return self;
                 }
-            }.bind(this));
-        }.bind(this));
+            });
+        });
     }
 
     /** @override */
@@ -130,10 +133,11 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _pauseMpf() {
+        let self = this;
         this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', (mpf) => {
-            this._mpf = this._mpf || mpf;
+            self._mpf = self._mpf || mpf;
             mpf.video.pause();
-        }.bind(this));
+        });
     }
 
     /** @private */
@@ -164,7 +168,7 @@ class AmpCxense extends AMP.BaseElement {
     _injectEmbedScript () {
         return this._injectScript(this._src);
     }
-    
+
     /** @private */
     _injectScript (src) {
         const doc = this._getDoc();
@@ -173,21 +177,22 @@ class AmpCxense extends AMP.BaseElement {
         doc.head.appendChild(script);
         return loadPromise(script);
     }
-    
+
     /** @private */
     _loadPlayer () {
-        return new Promise((resolve) => {
-            if (this._target && window.RAMP) {
-                return RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', (mpf) => {
-                    this._mpf = mpf;
+        let self = this;
+        return new Promise((resolve, reject) => {
+            if (self._target && window.RAMP) {
+                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', (mpf) => {
+                    self._mpf = mpf;
                     mpf.listen('ready', () => {
-                        this.applyFillContent(this._target);
-                        resolve(mpf);
-                    }.bind(this));
-                }.bind(this));
+                        self.applyFillContent(self._target);
+                        resolve(self);
+                    });
+                });
             }
             reject('cannot load player, widgets dependencies not loaded');
-        }.bind(this));
+        });
     }
 
     /** @private */
@@ -225,12 +230,12 @@ class AmpCxense extends AMP.BaseElement {
         this.element.appendChild(target);
         this._target = target;
     }
-    
+
     /** @private */
     _getDoc () {
         return this.getWin().document;
     }
-    
+
     /** @private */
     _getDataAttribute (name) {
         name = 'data-' + name.replace(/^data-/i, '');

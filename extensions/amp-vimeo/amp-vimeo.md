@@ -57,7 +57,7 @@ E.g. in https://vimeo.com/27246366 27246366 is the video id.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-vimeo` tag
-(see also `amp-vimeo` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-vimeo` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/0.1/validator-amp-vimeo.protoascii)):
 
 <table>
   <tr>

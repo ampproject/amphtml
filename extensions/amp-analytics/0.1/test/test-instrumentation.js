@@ -20,7 +20,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('instrumentation', function() {
+describe('amp-analytics.instrumentation', function() {
 
   let ins;
   let fakeViewport;
@@ -145,8 +145,8 @@ describe('instrumentation', function() {
   });
 
   it('should listen on custom events', () => {
-    const handler1 = sinon.spy();
-    const handler2 = sinon.spy();
+    const handler1 = sandbox.spy();
+    const handler2 = sandbox.spy();
     ins.addListener({'on': 'custom-event-1'}, handler1);
     ins.addListener({'on': 'custom-event-2'}, handler2);
 
@@ -172,9 +172,9 @@ describe('instrumentation', function() {
     expect(ins.customEventBuffer_['custom-event-2']).to.have.length(2);
 
     // Listeners added: immediate events fired.
-    const handler1 = sinon.spy();
-    const handler2 = sinon.spy();
-    const handler3 = sinon.spy();
+    const handler1 = sandbox.spy();
+    const handler2 = sandbox.spy();
+    const handler3 = sandbox.spy();
     ins.addListener({'on': 'custom-event-1'}, handler1);
     ins.addListener({'on': 'custom-event-2'}, handler2);
     ins.addListener({'on': 'custom-event-3'}, handler3);
@@ -326,9 +326,17 @@ describe('instrumentation', function() {
       }},
       fn1);
     ins.addListener({'on': 'scroll', 'scrollSpec': {
-      'verticalBoundaries': [90], 'horizontalBoundaries': [90]}}, fn2);
+      'verticalBoundaries': [92], 'horizontalBoundaries': [92]}}, fn2);
 
+    function matcher(expected) {
+      return actual => {
+        return actual.vars.horizontalScrollBoundary === String(expected) ||
+          actual.vars.verticalScrollBoundary === String(expected);
+      };
+    }
     expect(fn1.callCount).to.equal(2);
+    expect(fn1.getCall(0).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
+    expect(fn1.getCall(1).calledWithMatch(sinon.match(matcher(0)))).to.be.true;
     expect(fn2.callCount).to.equal(0);
 
     // Scroll Down
@@ -337,7 +345,13 @@ describe('instrumentation', function() {
     ins.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
     expect(fn1.callCount).to.equal(4);
+    expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
+        .true;
+    expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
+        .true;
     expect(fn2.callCount).to.equal(2);
+    expect(fn2.getCall(0).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
+    expect(fn2.getCall(1).calledWithMatch(sinon.match(matcher(90)))).to.be.true;
   });
 
   it('does not fire duplicates on scroll', () => {

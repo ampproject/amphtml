@@ -1,3 +1,0 @@
-FAIL
-feature_tests/amp_social_share.html:31:2 The specified layout 'CONTAINER' is not supported by tag 'amp-social-share'. (see https://www.ampproject.org/docs/reference/extended/amp-social-share.html) [AMP_LAYOUT_PROBLEM]
-feature_tests/amp_social_share.html:45:7 The tag 'amp-social-share extension .js script' is missing or incorrect, but required by 'amp-social-share'. (see https://www.ampproject.org/docs/reference/extended/amp-social-share.html) [AMP_TAG_PROBLEM]

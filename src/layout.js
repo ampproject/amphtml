@@ -32,6 +32,7 @@ export const Layout = {
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
   FILL: 'fill',
+  FLEX_ITEM: 'flex-item',
 };
 
 
@@ -66,6 +67,7 @@ export const naturalDimensions_ = {
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
+  'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
 
@@ -121,7 +123,8 @@ export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL);
+      layout == Layout.FILL ||
+      layout == Layout.FLEX_ITEM);
 }
 
 
@@ -149,7 +152,7 @@ export function parseLength(s) {
   if (!s) {
     return undefined;
   }
-  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/.test(s)) {
+  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/.test(s)) {
     return undefined;
   }
   if (/^\d+(\.\d+)?$/.test(s)) {
@@ -166,7 +169,8 @@ export function parseLength(s) {
  * @return {!LengthDef}
  */
 export function assertLength(length) {
-  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
+  user.assert(
+      /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }

@@ -19,25 +19,33 @@ import {addListener, instrumentationServiceFor} from './instrumentation';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
-import {installCidService} from '../../../src/service/cid-impl';
-import {installStorageService} from '../../../src/service/storage-impl';
-import {installActivityService} from '../../../src/service/activity-impl';
+import {installCidService} from './cid-impl';
+import {installStorageService} from './storage-impl';
+import {installActivityService} from './activity-impl';
+import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
+import {sha384} from '../../../third_party/closure-library/sha384-generated';
 
-
+installActivityService(AMP.win);
 installCidService(AMP.win);
 installStorageService(AMP.win);
-installActivityService(AMP.win);
+installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 export class AmpAnalytics extends AMP.BaseElement {
+
+  /** @override */
+  getPriority() {
+    // Loads after other content.
+    return 1;
+  }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
@@ -53,6 +61,9 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
+
+    /** @private @const Instance for testing. */
+    this.sha384_ = sha384;
   }
 
   /** @override */
@@ -155,6 +166,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
 
+    const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
@@ -168,10 +180,16 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
-        addListener(this.getWin(), trigger,
-            this.handleEvent_.bind(this, trigger));
+        promises.push(this.isSampledIn_(trigger).then(result => {
+          if (!result) {
+            return;
+          }
+          addListener(this.getWin(), trigger,
+              this.handleEvent_.bind(this, trigger));
+        }));
       }
     }
+    return Promise.all(promises);
   }
 
   /**
@@ -313,10 +331,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * method generates the request and sends the request out.
    *
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} unusedEvent Object with details about the event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise.<string|undefined>} The request that was sent out.
    * @private
    */
-  handleEvent_(trigger, unusedEvent) {
+  handleEvent_(trigger, event) {
     let request = this.requests_[trigger['request']];
     if (!request) {
       user.error(this.getName_(), 'Ignoring event. Request string ' +
@@ -330,24 +349,64 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     this.config_['vars']['requestCount']++;
-
-    // Replace placeholders with URI encoded values.
-    // Precedence is trigger.vars > config.vars.
-    // Nested expansion not supported.
-    request = expandTemplate(request, key => {
-      const match = key.match(/([^(]*)(\([^)]*\))?/);
-      const name = match[1];
-      const argList = match[2] || '';
-      const raw = (trigger['vars'] && trigger['vars'][name] ||
-          this.config_['vars'] && this.config_['vars'][name]);
-      const val = this.encodeVars_(raw != null ? raw : '', name);
-      return val + argList;
-    });
+    request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
     return urlReplacementsFor(this.getWin()).expand(request).then(request => {
       this.sendRequest_(request, trigger);
       return request;
+    });
+  }
+
+  /**
+   * @param {!JSONObject} trigger The config to use to determine sampling.
+   * @return {!Promise.<boolean>} Whether the request should be sampled in or
+   * not based on sampleSpec.
+   * @private
+   */
+  isSampledIn_(trigger) {
+    const spec = trigger['sampleSpec'];
+    const resolve = Promise.resolve(true);
+    if (!spec) {
+      return resolve;
+    }
+    const threshold = spec['threshold'];
+    if (!spec['sampleOn'] ||
+        Number.isNaN(parseFloat(threshold)) || !Number.isFinite(threshold)) {
+      console./*OK*/error(this.getName_(), 'Invalid sampling spec.');
+      return resolve;
+    }
+    const key = this.expandTemplate_(spec['sampleOn'], trigger);
+
+    return urlReplacementsFor(this.getWin()).expand(key).then(key => {
+      const digest = this.sha384_(key);
+      if (digest[0] % 100 < spec['threshold']) {
+        return resolve;
+      }
+      return Promise.resolve(false);
+    });
+  }
+
+  /**
+   * @param {string} template The template to expand.
+   * @param {!JSONObject} The object to use for variable value lookups.
+   * @param {!Object} event Object with details about the event.
+   * @return {string} The expanded string.
+   * @private
+   */
+  expandTemplate_(template, trigger, event) {
+    // Replace placeholders with URI encoded values.
+    // Precedence is event.vars > trigger.vars > config.vars.
+    // Nested expansion not supported.
+    return expandTemplate(template, key => {
+      const match = key.match(/([^(]*)(\([^)]*\))?/);
+      const name = match[1];
+      const argList = match[2] || '';
+      const raw = (event && event['vars'] && event['vars'][name]) ||
+          (trigger['vars'] && trigger['vars'][name]) ||
+          (this.config_['vars'] && this.config_['vars'][name]);
+      const val = this.encodeVars_(raw != null ? raw : '', name);
+      return val + argList;
     });
   }
 
