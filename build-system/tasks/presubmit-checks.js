@@ -421,6 +421,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  '\\.insertAmpExtensionScript(?!_):': bannedTermsHelpString,
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
         'error.cancellation() may be applicable.',

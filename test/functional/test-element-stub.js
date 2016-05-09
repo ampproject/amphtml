@@ -42,29 +42,20 @@ describe('test-element-stub', () => {
     });
   }
 
+  function getAnalyticsIframe() {
+    return createIframePromise().then(f => {
+      iframe = f;
+      testElement = iframe.doc.createElement('amp-analytics');
+      return iframe.addElement(testElement);
+    });
+  }
+
   it('insert script for amp-ad when script is not included', () => {
     return getElementStubIframe('amp-ad').then(() => {
       resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
-      expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
-          .to.be.null;
-      elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
-          .not.to.be.null;
-    });
-  });
-
-  it('only insert script once', () => {
-    return getElementStubIframe('amp-ad').then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
-      expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
-      expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
-          .to.be.null;
-      elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(1);
+          .to.have.length(0);
       elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
@@ -75,34 +66,32 @@ describe('test-element-stub', () => {
   it('insert script for amp-embed when script is not included', () => {
     return getElementStubIframe('amp-embed').then(() => {
       resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
-      expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
-          .to.be.null;
-      expect(iframe.doc.head.querySelector('[custom-element="amp-embed"]'))
-          .to.be.null;
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
+          .to.have.length(0);
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
       elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
-      expect(iframe.doc.head.querySelector('[custom-element="amp-embed"]'))
-          .to.be.null;
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
+          .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
     });
   });
 
-  it('should not insert when script exists in head', () => {
-    return getElementStubIframe('amp-ad').then(() => {
+  it('not insert script when element is not amp-ad amp-embed', () => {
+    return getAnalyticsIframe().then(() => {
       resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
-      const ampAdScript = iframe.doc.createElement('script');
-      ampAdScript.setAttribute('custom-element', 'amp-ad');
-      scriptSrc = 'http://localhost:8000/dist/v0/amp-ad-0.1.max.js';
-      expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
-          .to.be.null;
-      iframe.doc.head.appendChild(ampAdScript);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(1);
+      resetExtensionScriptInsertedOrPresentForTesting('amp-analytics');
+      expect(iframe.doc.querySelectorAll('amp-analytics')).to.have.length(1);
+      expect(iframe.doc.head.querySelectorAll(
+          '[custom-element="amp-analytics"]')).to.have.length(0);
       elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(1);
+          .to.have.length(0);
+      expect(iframe.doc.head.querySelectorAll(
+          '[custom-element="amp-analytics"]')).to.have.length(0);
     });
   });
 });
