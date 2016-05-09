@@ -87,7 +87,6 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
-  
   'burt': {
     'vars': {
       'trackingKey': 'ignore',
@@ -694,16 +693,6 @@ export const ANALYTICS_CONFIG = {
                 '&mt=${title}'+
                 '&_t=amp'+ 
                 '&_r=${random}',
-           /* 'click': '${base}/c?i=${id}'+
-                '&tp=${sourceUrl}'+
-                '&ps=${empty}'+
-                '&p=${pageUrl}'+
-                '&s=${section}'+ 
-                '&t=${type}'+ 
-                '&c=${channel}'+
-                '&ct=${totalEngagedTime}'+
-                '&_t=amp'+ 
-                '&_r=${random}',*/
             'pageload':'${base}/pl?i=${id}'+
                 '&ct=${domInteractiveTime}'+
                 '&rt=${pageDownloadTime}'+
@@ -730,11 +719,6 @@ export const ANALYTICS_CONFIG = {
                 'on': 'visible',
                 'request': 'pageview',
             },
-          /*  'click': {
-                'on': 'click',
-                'request': 'click',
-                'selector':'a'
-            },*/
             'pageload':{
                 'on': 'visible',
                 'request': 'pageload',
