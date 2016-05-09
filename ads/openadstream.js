@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {checkData, validateDataExists, writeScript} from '../src/3p';
+import {checkData, validateDataExists, writeScript} from '../3p/3p';
 
 
 /**

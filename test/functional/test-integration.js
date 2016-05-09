@@ -25,7 +25,7 @@ import {
   validateAllowedTypes,
   parseFragment,
 } from '../../3p/integration';
-import {registrations, register} from '../../src/3p';
+import {registrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
 
