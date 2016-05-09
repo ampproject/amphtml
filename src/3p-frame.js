@@ -117,6 +117,7 @@ export function getIframe(parentWindow, element, opt_type) {
   iframe.height = attributes.height;
   iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
+  /** @this {!Element} */
   iframe.onload = function() {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';

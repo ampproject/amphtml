@@ -91,8 +91,6 @@ export class IntersectionObserver extends Observable {
    * @param {!Element} iframe Iframe element which requested the intersection
    *    data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
-   * @constructor
-   * @extends {Observable}
    */
   constructor(baseElement, iframe, opt_is3p) {
     super();
