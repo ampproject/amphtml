@@ -279,12 +279,9 @@ export class Viewer {
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
      * a web view.
-     * Notice that the value of the "origin" parameter itself is never consulted
-     * here, but instead confirmed via handshake in the `setMessageDeliverer`
-     * method.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = this.isIframed_ || !!this.params_['origin'];
+    this.isEmbedded_ = this.isIframed_ || this.params_['webview'] === '1';
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
