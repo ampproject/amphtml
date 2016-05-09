@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {ElementStub, resetAdScriptInsertedOrPresentForTesting,
-    calculateAdScriptUrl} from '../../src/element-stub';
+import {ElementStub} from '../../src/element-stub';
 import {createIframePromise} from '../../testing/iframe';
 import {setModeForTesting, getMode} from '../../src/mode';
+import {resetExtensionScriptInsertedOrPresentForTesting,
+    calculateExtensionScriptUrl} from '../../src/insert-extension';
 
 
 describe('test-element-stub', () => {
@@ -44,7 +45,7 @@ describe('test-element-stub', () => {
 
   it('insert script', () => {
     return getElementStubIframe('amp-ad').then(() => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
       expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
           .to.be.null;
@@ -57,7 +58,7 @@ describe('test-element-stub', () => {
 
   it('only insert script once', () => {
     return getElementStubIframe('amp-ad').then(() => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
       expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
           .to.be.null;
@@ -74,8 +75,7 @@ describe('test-element-stub', () => {
 
   it('insert script for amp-embed', () => {
     return getElementStubIframe('amp-embed').then(() => {
-      resetAdScriptInsertedOrPresentForTesting();
-      expect(iframe.doc.querySelectorAll('amp-embed')).to.have.length(1);
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
           .to.be.null;
       expect(iframe.doc.head.querySelector('[custom-element="amp-embed"]'))
@@ -91,7 +91,7 @@ describe('test-element-stub', () => {
 
   it('should not insert when script exists in head', () => {
     return getElementStubIframe('amp-ad').then(() => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       const ampAdScript = iframe.doc.createElement('script');
       ampAdScript.setAttribute('custom-element', 'amp-ad');
       scriptSrc = 'http://localhost:8000/dist/v0/amp-ad-0.1.max.js';
@@ -109,7 +109,7 @@ describe('test-element-stub', () => {
 
   it('script should get correct attributes', () => {
     return getElementStubIframe('amp-ad').then(() => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.head.querySelector('[custom-element="amp-ad"]'))
           .to.be.null;
       elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
@@ -125,36 +125,39 @@ describe('test-element-stub', () => {
 
   describe('get correct script source', () => {
     it('with local mode normal pathname', () => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       setModeForTesting({localDev: true});
       expect(getMode().localDev).to.be.true;
-      const script = calculateAdScriptUrl('examples.build/ads.amp.html');
+      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
+          'amp-ad');
       expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
     });
 
     it('with local mode min pathname', () => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       setModeForTesting({localDev: true});
       expect(getMode().localDev).to.be.true;
-      const script = calculateAdScriptUrl('examples.build/ads.amp.min.html');
+      const script = calculateExtensionScriptUrl(
+          'examples.build/ads.amp.min.html', 'amp-ad');
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode max pathname', () => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       setModeForTesting({localDev: true});
       expect(getMode().localDev).to.be.true;
-      const script = calculateAdScriptUrl('examples.build/ads.amp.max.html');
+      const script = calculateExtensionScriptUrl(
+          'examples.build/ads.amp.max.html', 'amp-ad');
       expect(script).to.equal(
           'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with remote mode', () => {
-      resetAdScriptInsertedOrPresentForTesting();
+      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       setModeForTesting({localDev: false, version: 123});
       expect(getMode().localDev).to.be.false;
       expect(getMode().version).to.equal(123);
-      const script = calculateAdScriptUrl('');
+      const script = calculateExtensionScriptUrl('', 'amp-ad');
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
     });

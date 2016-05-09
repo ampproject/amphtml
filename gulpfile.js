@@ -298,7 +298,7 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
-  buildExample('ads.amp.with.script.html');
+  buildExample('ads.with.script.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');

@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {getMode} from '../src/mode';
+import {insertAmpExtensionScript} from './insert-extension';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -26,32 +27,21 @@ export const stubbedElements = [];
 * or when add amp-ad script to head.
 * @type {boolean}
 */
-let ampAdScriptInsertedOrPresent = false;
+//let ampAdScriptInsertedOrPresent = false;
 
 /**
 * @visibleForTesting
 * Reset the ampAdScriptInsertedOrPresent value for each test.
 */
-export function resetAdScriptInsertedOrPresentForTesting() {
-  ampAdScriptInsertedOrPresent = false;
-}
+//export function resetAdScriptInsertedOrPresentForTesting() {
+  //ampAdScriptInsertedOrPresent = false;
+//}
 
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
-    this.updateAmpAdScriptInfo(element);
+    insertAmpExtensionScript(this.getWin(), element, 'amp-ad');
     stubbedElements.push(this);
-  }
-
-  /**
-   * Check script info in HTML head and make update if necessary
-   * @param {!Element} element
-  */
-  updateAmpAdScriptInfo(element) {
-    if (isAmpAdScriptRequired(this.getWin(), element)) {
-      const ampAdScript = createAmpAdScript(this.getWin());
-      this.getWin().document.head.appendChild(ampAdScript);
-    }
   }
 
   /** @override */
@@ -65,65 +55,4 @@ export class ElementStub extends BaseElement {
     // element.
     return true;
   }
-}
-
-/**
- * Calculate script url for amp-ad, export only for testing reasons.
- * @param {string} path Location path of the window.
- * @return {string}
-*/
-export function calculateAdScriptUrl(path) {
-  let scriptSrc;
-  if (getMode().localDev) {
-    scriptSrc = 'https://cdn.ampproject.org/v0/amp-ad-0.1.js';
-    if (path.indexOf('.max') >= 0) {
-      scriptSrc = 'http://localhost:8000/dist/v0/amp-ad-0.1.max.js';
-    } else if (path.indexOf('.min') >= 0) {
-      scriptSrc = 'http://localhost:8000/dist/v0/amp-ad-0.1.js';
-    }
-  } else {
-    const domain = 'https://cdn.ampproject.org/';
-    const folderPath = getMode().version == '$internalRuntimeVersion$' ?
-        '' : `rtv/${getMode().version}/`;
-    scriptSrc = `${domain}${folderPath}v0/amp-ad-0.1.js`;
-  }
-  return scriptSrc;
-}
-
-/**
- * Create the missing amp-ad HTML script element.
- * @param {!Window} win
- * @return {!Object} Script object
- */
-function createAmpAdScript(win) {
-  const ampAdScript = win.document.createElement('script');
-  ampAdScript.async = true;
-  ampAdScript.setAttribute('custom-element', 'amp-ad');
-  ampAdScript.setAttribute('data-script', 'amp-ad');
-  const pathStr = win.location.pathname;
-  const scriptSrc = calculateAdScriptUrl(pathStr);
-  ampAdScript.src = scriptSrc;
-  return ampAdScript;
-}
-
-/**
-* Determine the need to add amp-ad script to document.
-* @param {!Window} win
-* @param {!Element} element
-* @return {boolean} Whether the action of adding an ampAdScript is required.
-*/
-function isAmpAdScriptRequired(win, element) {
-  if (ampAdScriptInsertedOrPresent) {
-    return false;
-  }
-  const tag = element.tagName;
-  if (tag == 'AMP-AD' || tag == 'AMP-EMBED') {
-    const ampAdScriptInHead = win.document.head.querySelector(
-        '[custom-element="amp-ad"]');
-    ampAdScriptInsertedOrPresent = true;
-    if (!ampAdScriptInHead) {
-      return true;
-    }
-  }
-  return false;
 }
