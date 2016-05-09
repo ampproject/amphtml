@@ -23,11 +23,7 @@ export let ampExtensionScriptInsertedOrPresent = [];
 * Reset the ampExtensionScriptInsertedOrPresent value for each test.
 */
 export function resetExtensionScriptInsertedOrPresentForTesting(extension) {
-  console.log('inside resetExtensionScriptInsertedOrPresentForTesting');
-  console.log(extension);
-  console.log(ampExtensionScriptInsertedOrPresent['amp-ad']);
   ampExtensionScriptInsertedOrPresent[extension] = false;
-  console.log(ampExtensionScriptInsertedOrPresent['amp-ad']);
 }
 
 /**
@@ -87,7 +83,8 @@ function isAmpExtensionScriptRequired(win, element, extension) {
 };
 
 /**
- * Calculate script url for amp-ad, export only for testing reasons.
+ * @visibleForTesting
+ * Calculate script url for amp-ad.
  * @param {string} path Location path of the window.
  * @param {string} extension
  * @return {string}
