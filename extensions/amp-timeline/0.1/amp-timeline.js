@@ -18,7 +18,7 @@
 
 import {CSS} from '../../../build/amp-timeline-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {assert} from '../../../src/asserts';
+import {user} from '../../../src/log';
 
 /**
  * The implementation of `amp-timeline` component. See {@link ../amp-timeline.md} for
@@ -38,7 +38,7 @@ export class AmpTimeline extends AMP.BaseElement {
     this.sections_ = this.getRealChildren();
     this.sections_.forEach(section => {
       // Check that there is a section tag defined
-      assert(
+      user.assert(
           section.tagName.toLowerCase() == 'section',
           'The first element in a timeline should be a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -57,7 +57,7 @@ export class AmpTimeline extends AMP.BaseElement {
             const card = item.children[0];
 
             // each item must be a li with class item
-            assert(item.tagName.toLowerCase() == 'li' &&
+            user.assert(item.tagName.toLowerCase() == 'li' &&
                    item.classList.contains('amp-timeline-item'),
                    'Each item in the timeline must be a <li> tag ' +
                    'with class amp-timeline-item. Item number: %s, ' +
@@ -66,7 +66,7 @@ export class AmpTimeline extends AMP.BaseElement {
                    index + 1, this.element);
 
             // each item must contain only one card element
-            assert(item.children.length == 1 &&
+            user.assert(item.children.length == 1 &&
                    card.tagName.toLowerCase() == 'div' &&
                    card.classList.contains('amp-timeline-card'),
                   'Each item in the timeline must contain only one child ' +
@@ -82,7 +82,7 @@ export class AmpTimeline extends AMP.BaseElement {
       // If there is no ul with class timeline
       if (!listExists) {
         // Check the timeline items container
-        assert(false,
+        user.assert(false,
                'The timeline should contain an ul with class ' +
                'amp-timeline-list, ' +
                'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
