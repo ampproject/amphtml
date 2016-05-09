@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {getMode} from '../src/mode';
 import {insertAmpExtensionScript} from './insert-extension';
 
 /** @type {!Array} */

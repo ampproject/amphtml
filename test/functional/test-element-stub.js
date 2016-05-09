@@ -16,8 +16,7 @@
 
 import {ElementStub} from '../../src/element-stub';
 import {createIframePromise} from '../../testing/iframe';
-import {setModeForTesting, getMode} from '../../src/mode';
-import {resetExtensionScriptInsertedOrPresentForTesting}
+import {resetExtensionScriptInsertedOrPresentForTesting,}
     from '../../src/insert-extension';
 
 describe('test-element-stub', () => {
@@ -25,7 +24,7 @@ describe('test-element-stub', () => {
   let iframe;
 
   afterEach(() => {
-      resetExtensionScriptInsertedOrPresentForTesting();
+    resetExtensionScriptInsertedOrPresentForTesting();
   });
 
   function getElementStubIframe(name) {

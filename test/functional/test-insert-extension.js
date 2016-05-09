@@ -17,7 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetExtensionScriptInsertedOrPresentForTesting,
-    calculateExtensionScriptUrl, insertAmpExtensionScript}
+    calculateExtensionScriptUrl, insertAmpExtensionScript,}
     from '../../src/insert-extension';
 
 
@@ -26,7 +26,7 @@ describe('test-insert-extension', () => {
   let iframe;
 
   afterEach(() => {
-      resetExtensionScriptInsertedOrPresentForTesting();
+    resetExtensionScriptInsertedOrPresentForTesting();
   });
 
   function getAdIframe(name) {
@@ -111,8 +111,7 @@ describe('test-insert-extension', () => {
   });
 
   describe('special case for amp-embed', () => {
-    it('insert amp-ad script for amp-embed element asking amp-embed script',
-        () => {
+    it('insert script for amp-embed element asking amp-embed script', () => {
       return getAdIframe('amp-embed').then(() => {
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
             .to.have.length(0);
@@ -127,8 +126,7 @@ describe('test-insert-extension', () => {
       });
     });
 
-    it('insert amp-ad script for amp-embed element asking amp-ad script',
-        () => {
+    it('insert script for amp-embed element asking amp-ad script', () => {
       return getAdIframe('amp-embed').then(() => {
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
             .to.have.length(0);
@@ -143,8 +141,7 @@ describe('test-insert-extension', () => {
       });
     });
 
-    it('insert amp-ad script for amp-ad element asking amp-embed script',
-        () => {
+    it('insert script for amp-ad element asking amp-embed script', () => {
       return getAdIframe('amp-ad').then(() => {
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
             .to.have.length(0);

@@ -47,7 +47,7 @@ export function insertAmpExtensionScript(win, element, extension) {
  * Create the missing amp extension HTML script element.
  * @param {!Window} win
  * @param {string} extension
- * @return {!Object} Script object
+ * @return {!HTMLScriptElement} Script object
  */
 function createAmpExtensionScript(win, extension) {
   const ampExtensionScript = win.document.createElement('script');
@@ -72,7 +72,7 @@ function isAmpExtensionScriptRequired(win, element, extension) {
     return false;
   }
   const tag = element.tagName.toLowerCase();
-  if (tag == extension || (tag=='amp-embed' && extension=='amp-ad')) {
+  if (tag == extension || (tag == 'amp-embed' && extension == 'amp-ad')) {
     const ampExtensionScriptInHead = win.document.head.querySelector(
         `[custom-element="${extension}"]`);
     ampExtensionScriptInsertedOrPresent[extension] = true;
@@ -94,7 +94,8 @@ export function calculateExtensionScriptUrl(path, extension) {
   if (getMode().localDev) {
     if (path.indexOf('.max') >= 0) {
       return `http://localhost:8000/dist/v0/${extension}-0.1.max.js`;
-    } else if (path.indexOf('.min') >= 0) {
+    }
+    if (path.indexOf('.min') >= 0) {
       return `http://localhost:8000/dist/v0/${extension}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extension}-0.1.js`;
