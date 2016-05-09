@@ -225,6 +225,27 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 
+<!-- Lotame tracking.
+  Please replace the value for "account" (12345)
+  with the correct Lotame Client ID.
+  The extraUrlParams are provided as an example,
+  the correct values are case-specific.
+-->
+<amp-analytics type="lotame">
+<script type="application/json">
+{
+  "vars": {
+    "account": 12345
+  },
+  "extraUrlParams": {
+    "int": "sports",
+    "gen": "m"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Lotame example -->
+
 <!-- Mediametrie tracking
   serial is the account id (required)
   level1 to 4 are page levels (optional)
