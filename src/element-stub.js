@@ -21,25 +21,10 @@ import {insertAmpExtensionScript} from './insert-extension';
 /** @type {!Array} */
 export const stubbedElements = [];
 
-/**
-* This value tells the ampAdScript is already presented or inserted.
-* Set the value to true when querySelector find an amp-ad script
-* or when add amp-ad script to head.
-* @type {boolean}
-*/
-//let ampAdScriptInsertedOrPresent = false;
-
-/**
-* @visibleForTesting
-* Reset the ampAdScriptInsertedOrPresent value for each test.
-*/
-//export function resetAdScriptInsertedOrPresentForTesting() {
-  //ampAdScriptInsertedOrPresent = false;
-//}
-
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
+    // Fetch amp-ad script if it is not presented.
     insertAmpExtensionScript(this.getWin(), element, 'amp-ad');
     stubbedElements.push(this);
   }

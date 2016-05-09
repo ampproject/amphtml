@@ -1,9 +1,4 @@
-<<<<<<< cc6f2db960bc6db52d385b21ec5af2cae7d357a6
 /* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
-=======
-/**
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
->>>>>>> add test
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +28,15 @@ import {viewerFor} from '../../../src/viewer';
 import {removeElement} from '../../../src/dom';
 
 
-/** @private @const These tags are allowed to have fixed positioning */
+/** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
 };
 
 /**
- * @type {number} Heuristic number as for counting whether another ad is
- * currently loading.
+ * Heuristic number as for counting whether another ad is currently loading.
+ * @type {number}
  */
 let loadingAdsCount = 0;
 
@@ -52,10 +47,10 @@ let loadingAdsCount = 0;
 let delayIdForTesting = null;
 
 /**
- * @visibleForTesting
  * For testing purpose only.
  * Set the loadingAdsCount to 0. And stop test from decreasing loadingAdsCount
  * after each run.
+ * @visibleForTesting
  */
 export function resetAdCountForTesting() {
   loadingAdsCount = 0;
@@ -65,15 +60,11 @@ export function resetAdCountForTesting() {
 class AmpAd extends AMP.BaseElement {
 
   /** @override */
-<<<<<<< cc6f2db960bc6db52d385b21ec5af2cae7d357a6
   getPriority() {
     // Loads ads after other content.
     return 2;
   }
 
-  /** @override  */
-=======
->>>>>>> add test
   renderOutsideViewport() {
     // If another ad is currently loading we only load ads that are currently
     // in viewport.

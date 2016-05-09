@@ -24,6 +24,10 @@ describe('test-element-stub', () => {
 
   let iframe;
 
+  afterEach(() => {
+      resetExtensionScriptInsertedOrPresentForTesting();
+  });
+
   function getElementStubIframe(name) {
     return createIframePromise().then(f => {
       iframe = f;
@@ -52,7 +56,6 @@ describe('test-element-stub', () => {
 
   it('insert script for amp-ad when script is not included', () => {
     return getElementStubIframe('amp-ad').then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(0);
@@ -65,7 +68,6 @@ describe('test-element-stub', () => {
 
   it('insert script for amp-embed when script is not included', () => {
     return getElementStubIframe('amp-embed').then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
@@ -81,7 +83,6 @@ describe('test-element-stub', () => {
 
   it('not insert script when element is not amp-ad amp-embed', () => {
     return getAnalyticsIframe().then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-ad');
       resetExtensionScriptInsertedOrPresentForTesting('amp-analytics');
       expect(iframe.doc.querySelectorAll('amp-analytics')).to.have.length(1);
       expect(iframe.doc.head.querySelectorAll(
