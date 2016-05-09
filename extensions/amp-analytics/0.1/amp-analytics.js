@@ -16,7 +16,8 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl, appendParamStringToUrl,} from
+    '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
@@ -137,34 +138,9 @@ export class AmpAnalytics extends AMP.BaseElement {
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
-    if (this.config_['extraUrlParams'] &&
-        this.config_['extraUrlParamsReplaceMap']) {
-      // If the config includes a extraUrlParamsReplaceMap, apply it as a set
-      // of params to String.replace to allow aliasing of the keys in
-      // extraUrlParams.
-      let count = 0;
-      for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
-        if (++count > MAX_REPLACES) {
-          user.error(this.getName_(),
-            'More than ' + MAX_REPLACES.toString() +
-            ' extraUrlParamsReplaceMap rules aren\'t allowed; Skipping the rest'
-          );
-          break;
-        }
 
-        for (const extraUrlParamsKey in this.config_['extraUrlParams']) {
-          const newkey = extraUrlParamsKey.replace(
-            replaceMapKey,
-            this.config_['extraUrlParamsReplaceMap'][replaceMapKey]
-          );
-          if (extraUrlParamsKey != newkey) {
-            const value = this.config_['extraUrlParams'][extraUrlParamsKey];
-            delete this.config_['extraUrlParams'][extraUrlParamsKey];
-            this.config_['extraUrlParams'][newkey] = value;
-          }
-        }
-      }
-    }
+    this.processExtraUrlParams_(this.config_['extraUrlParams'],
+        this.config_['extraUrlParamsReplaceMap']);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -180,6 +156,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
+        this.processExtraUrlParams_(trigger['extraUrlParams'],
+            this.config_['extraUrlParamsReplaceMap']);
         promises.push(this.isSampledIn_(trigger).then(result => {
           if (!result) {
             return;
@@ -190,6 +168,44 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
     }
     return Promise.all(promises);
+  }
+
+  /**
+   * Replace the names of keys in params object with the values in replace map.
+   *
+   * @param {Object<string, string>} params The params that need to be renamed.
+   * @param {Object<string, string>} replaceMap A map of pattern and replacement
+   *    value.
+   * @private
+   */
+  processExtraUrlParams_(params, replaceMap) {
+    if (params && replaceMap) {
+      // If the config includes a extraUrlParamsReplaceMap, apply it as a set
+      // of params to String.replace to allow aliasing of the keys in
+      // extraUrlParams.
+      let count = 0;
+      for (const replaceMapKey in replaceMap) {
+        if (++count > MAX_REPLACES) {
+          user.error(this.getName_(),
+            'More than ' + MAX_REPLACES.toString() +
+            ' extraUrlParamsReplaceMap rules aren\'t allowed; Skipping the rest'
+          );
+          break;
+        }
+
+        for (const extraUrlParamsKey in params) {
+          const newkey = extraUrlParamsKey.replace(
+            replaceMapKey,
+            replaceMap[replaceMapKey]
+          );
+          if (extraUrlParamsKey != newkey) {
+            const value = params[extraUrlParamsKey];
+            delete params[extraUrlParamsKey];
+            params[newkey] = value;
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -344,8 +360,19 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     // Add any given extraUrlParams as query string param
-    if (this.config_['extraUrlParams']) {
-      request = addParamsToUrl(request, this.config_['extraUrlParams']);
+    if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
+      const params = {};
+      Object.assign(params, this.config_['extraUrlParams'],
+          trigger['extraUrlParams']);
+      const extraUrlParams = addParamsToUrl('', params).substr(1);
+      if (extraUrlParams) {
+        const newRequest = request.replace('${extraUrlParams}', extraUrlParams);
+        if (newRequest == request) {
+          request = appendParamStringToUrl(request, extraUrlParams);
+        } else {
+          request = newRequest;
+        }
+      }
     }
 
     this.config_['vars']['requestCount']++;
