@@ -956,7 +956,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.getRealChildNodes = function() {
-    return dom.childNodes(this, e => !isInternalOrServiceNode(e));
+    return dom.childNodes(this, node => !isInternalOrServiceNode(node));
   };
 
   /**
@@ -966,7 +966,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.getRealChildren = function() {
-    return dom.childElements(this, e => !isInternalOrServiceNode(e));
+    return dom.childElements(this, element =>
+        !isInternalOrServiceNode(element));
   };
 
   /**

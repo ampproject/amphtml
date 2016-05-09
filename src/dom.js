@@ -244,17 +244,17 @@ export function lastChildElement(parent, callback) {
  * These nodes can include Text, Comment and other child nodes.
  * @param {!Node} parent
  * @param {function(!Node):boolean} callback
- * @return {!Array.<!Node>}
+ * @return {!Array<!Node>}
  */
 export function childNodes(parent, callback) {
-  const children = [];
+  const childnodes = [];
   for (let child = parent.firstChild; child;
        child = child.nextSibling) {
     if (callback(child)) {
-      children.push(child);
+      childnodes.push(child);
     }
   }
-  return children;
+  return childnodes;
 }
 
 /**
