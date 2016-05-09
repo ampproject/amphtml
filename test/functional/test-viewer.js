@@ -586,7 +586,7 @@ describe('Viewer', () => {
 
     it('should be embedded with "origin" param', () => {
       windowApi.parent = windowApi;
-      windowApi.location.hash = '#origin=google.com';
+      windowApi.location.hash = '#webview=1';
       expect(new Viewer(windowApi).isEmbedded()).to.be.true;
     });
   });
