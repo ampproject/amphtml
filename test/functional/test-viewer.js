@@ -573,6 +573,24 @@ describe('Viewer', () => {
     });
   });
 
+  describe('isEmbedded', () => {
+    it('should NOT be embedded when not iframed or w/o "origin"', () => {
+      windowApi.parent = windowApi;
+      expect(new Viewer(windowApi).isEmbedded()).to.be.false;
+    });
+
+    it('should be embedded when iframed', () => {
+      windowApi.parent = {};
+      expect(new Viewer(windowApi).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with "origin" param', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#origin=google.com';
+      expect(new Viewer(windowApi).isEmbedded()).to.be.true;
+    });
+  });
+
   describe('isTrustedViewer', () => {
 
     function test(origin, toBeTrusted) {

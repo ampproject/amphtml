@@ -141,7 +141,7 @@ export class Viewer {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -242,8 +242,8 @@ export class Viewer {
     dev.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
-    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
+    // Configure scrolling parameters when AMP is iframed on iOS.
+    if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
@@ -275,6 +275,16 @@ export class Viewer {
     /** @private @const {boolean} */
     this.performanceTracking_ = this.params_['csi'] === '1';
     dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+
+    /**
+     * Whether the AMP document is embedded in a viewer, such as an iframe or
+     * a web view.
+     * Notice that the value of the "origin" parameter itself is never consulted
+     * here, but instead confirmed via handshake in the `setMessageDeliverer`
+     * method.
+     * @private @const {boolean}
+     */
+    this.isEmbedded_ = this.isIframed_ || !!this.params_['origin'];
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -453,6 +463,14 @@ export class Viewer {
 
   /**
    * Whether the document is embedded in a iframe.
+   * @return {boolean}
+   */
+  isIframed() {
+    return this.isIframed_;
+  }
+
+  /**
+   * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
   isEmbedded() {
