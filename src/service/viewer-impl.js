@@ -15,9 +15,9 @@
  */
 
 import {Observable} from '../observable';
-import {documentStateFor} from '../document-state';
+import {documentStateFor, uninstallDocumentStateFor} from '../document-state';
 import {getMode} from '../mode';
-import {getService} from '../service';
+import {getService, getServiceOrNull, removeService} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
@@ -1024,6 +1024,52 @@ export class Viewer {
       }
     });
   }
+
+  destroy() {
+    uninstallDocumentStateFor(this.win);
+    this.win = null;
+    this.isEmbedded_ = null;
+    this.docState_.destroy();
+    this.docState_ = null;
+    this.visibilityState_ = null;
+    this.viewerVisibilityState_ = null;
+    this.viewportType_ = null;
+    this.runtimeOnObservable_.destroy();
+    this.runtimeOnObservable_ = null;
+    this.visibilityObservable_.destroy();
+    this.visibilityObservable_ = null;
+    this.viewportObservable_.destroy();
+    this.viewportObservable_ = null;
+    this.historyPoppedObservable_.destroy();
+    this.historyPoppedObservable_ = null;
+    this.broadcastObservable_.destroy();
+    this.broadcastObservable_ = null;
+    this.messageDeliverer_ = null;
+    this.messagingOrigin_ = null;
+    this.messageQueue_ = null;
+    this.params_ = null;
+    this.whenFirstVisibleResolve_ = null;
+    this.whenFirstVisiblePromise_ = null;
+    this.overtakeHistory_ = null;
+    this.viewportType_ = null;
+    this.viewportWidth_ = null;
+    this.viewportHeight_ = null;
+    this./*OK*/scrollTop_ = null;
+    this.paddingTop_ = null;
+    this.performanceTracking_ = null;
+    if (this.messagingReadyPromise_) {
+      timer.cancel(this.messagingReadyPromise_);
+    }
+    this.trustedViewerResolver_ = null;
+    this.messagingMaybePromise_ = null;
+    this.isTrustedViewer_ = null;
+    this.viewerOriginResolver_ = null;
+    this.viewerOrigin_ = null;
+    this.unconfirmedReferrerUrl_ = null;
+    this.referrerUrl_ =
+    this.resolvedViewerUrl_ = null;
+    this.viewerUrl_ = null;
+  }
 }
 
 
@@ -1075,3 +1121,11 @@ export function installViewerService(window) {
     return new Viewer(window);
   });
 };
+
+export function uninstallViewerService(window) {
+  const viewer = getServiceOrNull(window, 'viewer');
+  if (viewer) {
+    viewer.destroy();
+    removeService(window, 'viewer');
+  }
+}

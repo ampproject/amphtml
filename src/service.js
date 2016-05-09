@@ -71,6 +71,12 @@ export function getService(win, id, opt_factory) {
   return s.obj;
 }
 
+export function getServiceOrNull(win, id) {
+  const services = getServices(win);
+  const s = services[id];
+  return s && s.obj;
+}
+
 /**
  * Returns a promise for a service for the given id and window. Also expects
  * an element that has the actual implementation. The promise resolves when
@@ -129,6 +135,24 @@ function getServices(win) {
     services = win.services = {};
   }
   return services;
+}
+
+export function removeService(win, id) {
+  if (win.services && win.services[id]) {
+    win.services[id] = null;
+  }
+}
+
+/**
+ * Returns the object that holds the services registered in a window.
+ * @param {!Window} win
+ * @return {!Object<string,!ServiceHolderDef>}
+ */
+export function removeServices(win) {
+  console.log('removing services');
+  if (win.services) {
+    win.services = null;
+  }
 }
 
 /**

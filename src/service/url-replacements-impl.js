@@ -18,7 +18,7 @@ import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {loadPromise} from '../event-helper';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
@@ -533,6 +533,17 @@ class UrlReplacements {
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
+
+  destroy() {
+    this.win_ = null;
+    this.replacementExpr_ = null;
+    for (const key in this.replacements_) {
+      this.replacements_[key] = null;
+    }
+    this.replacements_ = null;
+    this.getAccessService_ = null;
+  }
+
 }
 
 /**
@@ -544,3 +555,12 @@ export function installUrlReplacementsService(window) {
     return new UrlReplacements(window);
   });
 };
+
+
+export function uninstallUrlReplacementsService(window) {
+  const service = getServiceOrNull(window, 'url-replace');
+  if (service) {
+    service.destroy();
+    removeService(window, 'url-replace');
+  }
+}

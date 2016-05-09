@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {timer} from '../timer';
-import {viewerFor} from '../viewer';
+import {viewerFor, uninstallViewerFor} from '../viewer';
 import {performanceFor} from '../performance';
 
 const collectTime = 5000;
@@ -151,6 +151,12 @@ export class Framerate {
     });
   }
 
+  destroy() {
+    uninstallViewerFor(this.win);
+    this.win = null;
+    this.viewer_ = null;
+  }
+
 };
 
 
@@ -163,3 +169,12 @@ export function installFramerateService(win) {
     return new Framerate(win);
   });
 };
+
+
+export function uninstallFramerateService(win) {
+  const service = getServiceOrNull(win, 'framerate');
+  if (service) {
+    service.destroy();
+    removeService(win, 'framerate');
+  }
+}

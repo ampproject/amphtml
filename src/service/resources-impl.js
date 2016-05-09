@@ -23,15 +23,15 @@ import {
   layoutRectLtwh,
   layoutRectsOverlap,
 } from '../layout-rect';
-import {getService} from '../service';
-import {inputFor} from '../input';
+import {getService, removeService, getServiceOrNull} from '../service';
+import {inputFor, uninstallInputFor} from '../input';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
-import {installFramerateService} from './framerate-impl';
-import {installViewerService, VisibilityState} from './viewer-impl';
-import {installViewportService} from './viewport-impl';
-import {installVsyncService} from './vsync-impl';
+import {installFramerateService, uninstallFramerateService} from './framerate-impl';
+import {installViewerService, uninstallViewerService, VisibilityState} from './viewer-impl';
+import {installViewportService, uninstallViewportService} from './viewport-impl';
+import {installVsyncService, uninstallVsyncService} from './vsync-impl';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {isArray} from '../types';
 
@@ -70,12 +70,12 @@ export function getElementPriority(tagName) {
 
 
 export class Resources {
-  constructor(window) {
+  constructor(win) {
     /** @const {!Window} */
-    this.win = window;
+    this.win = win;
 
     /** @const {!Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = installViewerService(win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -1461,6 +1461,45 @@ export class Resources {
           request => request.resource != resource);
     }
   }
+
+  destroy() {
+    uninstallViewerService(this.win);
+    uninstallViewportService(this.win);
+    uninstallVsyncService(this.win);
+    uninstallFramerateService(this.win);
+    this.win = null;
+    this.viewer_ = null;
+    // TODO: Maybe, destroy every resource.
+    //this.resources_ = [];
+    this.resources_.forEach(resource => {
+      resource.destroy();
+    });
+    this.resources_.length = 0;
+    this.resources_ = null;
+    /** @const {!Pass} */
+    this.pass_.destroy();
+    this.pass_ = null;
+    this.exec_.destroy();
+    this.exec_ = null;
+    this.queue_.destroy();
+    this.queue_ = null;
+    // TODO: Maybe need to loop over and cleanup references?
+    this.requestsChangeSize_.length = 0;
+    this.requestsChangeSize_ = null;
+    // TODO: Maybe need to loop over and cleanup references?
+    this.deferredMutates_.length = 0;
+    this.deferredMutates_ = null;
+    this.viewport_ = null;
+    this.vsync_ = null;
+    this.activeHistory_.destroy();
+    this.activeHistory_ = null;
+    this.framerate_ = null;
+    this.visibilityStateMachine_ = null;
+
+    // TODO: Remove ondocumentready listeners.
+    //onDocumentReady(this.win.document);
+  }
+
 }
 
 
@@ -2037,6 +2076,22 @@ export class Resource {
       return this.element.layoutCallback();
     });
   }
+
+  destroy() {
+    this.element = null;
+    this.debugid = null;
+    this.resources_ = null;
+    this.owner_ = null;
+    this.state_ = null;
+    this.layoutBox_ = null;
+    this.initialLayoutBox_ = null;
+    this.layoutPromise_ = null;
+    this.onUpgraded_ = null;
+    this.pendingChangeSize_ = null;
+    this.loadPromise_ = null;
+    this.loadPromiseResolve_ = null;
+  }
+
 }
 
 
@@ -2181,6 +2236,12 @@ export class TaskQueue_ {
       }
     }
   }
+
+  destroy() {
+    this.purge(() => true);
+    this.tasks_ = null;
+    this.taskIdMap_ = null;
+  }
 }
 
 
@@ -2270,3 +2331,11 @@ export function installResourcesService(win) {
     return new Resources(win);
   });
 };
+
+export function uninstallResourcesService(win) {
+  const resources = getServiceOrNull(win, 'resources');
+  if (resources) {
+    resources.destroy();
+    removeService(win, 'resources');
+  }
+}

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
-import {installActionService} from './action-impl';
-import {installResourcesService} from './resources-impl';
+import {getService, removeService, getServiceOrNull} from '../service';
+import {installActionService, uninstallActionService} from './action-impl';
+import {installResourcesService, uninstallResourcesService} from './resources-impl';
 
 
 /**
@@ -29,6 +29,7 @@ export class StandardActions {
    * @param {!Window} win
    */
   constructor(win) {
+    this.win_ = win;
     /** @const @private {!ActionService} */
     this.actions_ = installActionService(win);
 
@@ -48,6 +49,15 @@ export class StandardActions {
       invocation.target.style.display = 'none';
     });
   }
+
+  destroy() {
+    this.actions_.removeGlobalMethodHandler('hide');
+    uninstallActionService(this.win_)
+    uninstallResourcesService(this.win_);
+    this.actions_ = null;
+    this.resources_ = null;
+    this.win_ = null;
+  }
 }
 
 
@@ -60,3 +70,11 @@ export function installStandardActions(win) {
     return new StandardActions(win);
   });
 };
+
+export function uninstallStandardActions(win) {
+  const service = getServiceOrNull(win, 'standard-actions');
+  if (service) {
+    service.destroy();
+    removeService(win, 'standard-actions');
+  }
+}

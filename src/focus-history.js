@@ -135,4 +135,15 @@ export class FocusHistory {
     }
     return false;
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.history_.length = 0;
+    this.history_ = null;
+    this.observeFocus_.destroy();
+    this.observeFocus_ = null;
+    this.captureFocus_ = null;
+    this.captureBlur_ = null;
+  }
 }

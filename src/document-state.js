@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {getService} from './service';
+import {getService, removeService, getServiceOrNull} from './service';
 import {getVendorJsPropertyName} from './style';
 
 
@@ -112,6 +112,21 @@ export class DocumentState {
   onVisibilityChanged_() {
     this.visibilityObservable_.fire();
   }
+
+  destroy() {
+    this.cleanup_();
+    if (this.visibilityObservable_) {
+      this.visibilityObservable_.destroy();
+    }
+
+    this.win = null;
+    this.document_ = null;
+    this.hiddenProp_ = null;
+    this.visibilityObservable_ = null;
+    this.visibilityStateProp_ = null;
+    this.visibilityChangeEvent_ = null;
+    this.boundOnVisibilityChanged_ = null;
+  }
 }
 
 
@@ -123,4 +138,17 @@ export function documentStateFor(window) {
   return getService(window, 'documentState', () => {
     return new DocumentState(window);
   });
+};
+
+
+/**
+ * @param {!Window} window
+ * @return {!DocumentState}
+ */
+export function uninstallDocumentStateFor(window) {
+  const service = getServiceOrNull(window, 'documentState');
+  if (service) {
+    service.destroy();
+    removeService(window, 'viewer');
+  }
 };

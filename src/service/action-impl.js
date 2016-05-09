@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
@@ -71,6 +71,14 @@ class ActionInvocation {
     /** @const {?Event} */
     this.event = event;
   }
+
+  destroy() {
+    this.target = null;
+    this.method = null;
+    this.args = null;
+    this.source = null;
+    this.event = null;
+  }
 }
 
 
@@ -97,6 +105,12 @@ export class ActionService {
     /** @param {!Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
+    this.boundClickListener_ = event => {
+      if (!event.defaultPrevented) {
+        this.trigger(event.target, 'tap', event);
+      }
+    };
+
     // Add core events.
     this.addEvent('tap');
   }
@@ -110,11 +124,13 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', event => {
-        if (!event.defaultPrevented) {
-          this.trigger(event.target, 'tap', event);
-        }
-      });
+      this.win.document.addEventListener('click', this.boundClickListener_);
+    }
+  }
+
+  removeEvent(name) {
+    if (name == 'tap') {
+      this.win.document.removeEventListener('click', this.boundClickListener_);
     }
   }
 
@@ -125,6 +141,16 @@ export class ActionService {
    */
   addGlobalMethodHandler(name, handler) {
     this.globalMethodHandlers_[name] = handler;
+  }
+
+  /**
+   * Unregisters the action handler for a common method.
+   * @param {string} name
+   */
+  removeGlobalMethodHandler(name) {
+    if (this.globalMethodHandlers_) {
+      delete this.globalMethodHandlers_[name];
+    }
   }
 
   /**
@@ -316,6 +342,14 @@ export class ActionService {
     }
     return actionMap;
   }
+
+  destroy() {
+    this.removeEvent('tap');
+    this.win = null;
+    this.globalMethodHandlers_ = null;
+    this.vsync_ = null;
+  }
+
 }
 
 
@@ -609,4 +643,12 @@ export function installActionService(win) {
   return getService(win, 'action', () => {
     return new ActionService(win);
   });
+};
+
+export function uninstallActionService(win) {
+  const service = getServiceOrNull(win, 'action');
+  if (service) {
+    service.destroy();
+    removeService(win, 'action');
+  }
 };

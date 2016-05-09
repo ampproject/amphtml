@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {getService} from './service';
+import {getService, removeService, getServiceOrNull} from './service';
 import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 
@@ -84,7 +84,8 @@ export class Input {
     // mouse events.
     if (this.hasTouch_) {
       this.hasMouse_ = !this.hasTouch_;
-      listenOnce(win.document, 'mousemove', this.boundOnMouseMove_);
+      this.unlistenToMouseMove_ = listenOnce(
+          win.document, 'mousemove', this.boundOnMouseMove_);
     }
   }
 
@@ -92,6 +93,9 @@ export class Input {
   cleanup_() {
     this.win.document.removeEventListener('keydown', this.boundOnKeyDown_);
     this.win.document.removeEventListener('mousedown', this.boundOnMouseDown_);
+    if (this.unlistenToMouseMove_) {
+      this.unlistenToMouseMove_();
+    }
   }
 
   /**
@@ -209,6 +213,7 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
+    // TODO: Maybe need to clean this up as well?
     return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
         .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
   }
@@ -225,11 +230,32 @@ export class Input {
     // Repeat, if attempts allow.
     this.mouseConfirmAttemptCount_++;
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
-      listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
+      this.unlistenToMouseMove_ = listenOnce(
+          this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
       dev.fine(TAG_, 'mouse detection failed');
     }
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.boundOnKeyDown_ = null;
+    this.boundOnMouseDown_ = null;
+    this.boundOnMouseMove_ = null;
+    this.boundMouseCanceled_ = null;
+    this.boundMouseConfirmed_ = null;
+    this.touchDetectedObservable_.destroy();
+    this.touchDetectedObservable_ = null;
+    this.mouseDetectedObservable_.destroy();
+    this.mouseDetectedObservable_ = null;
+    this.keyboardStateObservable_.destroy();
+    this.keyboardStateObservable_ = null;
+    if (this.unlistenToMouseMove_) {
+      this.unlistenToMouseMove_();
+    }
+  }
+
 }
 
 
@@ -242,3 +268,11 @@ export function inputFor(window) {
     return new Input(window);
   });
 };
+
+export function uninstallInputFor(window) {
+  const service = getServiceOrNull(window, 'input');
+  if (service) {
+    service.destroy();
+    removeService(window, 'input');
+  }
+}

@@ -16,7 +16,7 @@
 
 
 import {Timer} from '../src/timer';
-import {installCoreServices} from '../src/amp-core-service';
+import {installCoreServices, uninstallCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
@@ -185,6 +185,14 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.srcdoc = '<!doctype><html><head>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
+      iframe.contentWindow.onunload = () => {
+        iframe.contentWindow.AMP_TEST = null;
+        uninstallCoreServices(iframe.contentWindow);
+        // TODO: Do we need to unregister?
+        //registerForUnitTest(iframe.contentWindow);
+        iframe.contentWindow.ampExtendedElements = null;
+      }
+
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST = true;
       if (opt_runtimeOff) {

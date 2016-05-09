@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {
   addParamToUrl,
   getSourceOrigin,
@@ -189,6 +189,11 @@ class Xhr {
       assertSuccess(response);
     });
   }
+
+  destroy() {
+    this.win = null;
+  }
+
 }
 
 
@@ -451,3 +456,11 @@ export function installXhrService(window) {
     return new Xhr(window);
   });
 };
+
+export function uninstallXhrService(window) {
+  const service = getServiceOrNull(window, 'xhr');
+  if (service) {
+    service.destroy();
+    removeService(window, 'xhr');
+  }
+}

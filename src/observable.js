@@ -76,4 +76,8 @@ export class Observable {
   getHandlerCount() {
     return this.handlers_.length;
   }
+
+  destroy() {
+    this.handlers_ = null;
+  }
 }

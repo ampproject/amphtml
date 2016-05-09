@@ -104,4 +104,10 @@ export class Pass {
       this.scheduled_ = -1;
     }
   }
+
+  destroy() {
+    this.cancel();
+    this.handler_ = null;
+  }
+
 }

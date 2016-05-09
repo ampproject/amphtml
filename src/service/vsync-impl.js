@@ -16,10 +16,10 @@
 
 import {Pass} from '../pass';
 import {cancellation} from '../error';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {dev} from '../log';
 import {timer} from '../timer';
-import {installViewerService} from './viewer-impl';
+import {installViewerService, uninstallViewerService} from './viewer-impl';
 
 
 /** @const {time} */
@@ -363,6 +363,25 @@ export class Vsync {
       this.win.setTimeout(fn, timeToCall);
     };
   }
+
+  destroy() {
+    this.win = null;
+    this.viewer_ = null;
+    this.raf_ = null;
+    this.tasks_.length = 0;
+    this.tasks_ = null;
+    this.nextTasks_.length = 0;
+    this.nextTasks_ = null;
+    this.states_.length = 0;
+    this.states_ = null;
+    this.nextStates_.length = 0;
+    this.nextStates_ = null;
+    this.nextFramePromise_ = null;
+    this.nextFrameResolver_ = null;
+    this.boundRunScheduledTasks_ = null;
+    this.pass_.destroy();
+    this.pass_ = null;
+  }
 }
 
 
@@ -375,3 +394,11 @@ export function installVsyncService(window) {
     return new Vsync(window, installViewerService(window));
   });
 };
+
+export function uninstallVsyncService(window) {
+  const service = getServiceOrNull(window, 'vsync');
+  if (service) {
+    service.destroy();
+    removeService(window, 'vsync');
+  }
+}

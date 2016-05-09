@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getService, removeService, getServiceOrNull} from './service';
 
 
 /**
@@ -24,3 +24,12 @@ import {getService} from './service';
 export function viewerFor(window) {
   return getService(window, 'viewer');
 };
+
+
+export function uninstallViewerFor(window) {
+  const service = getServiceOrNull(window, 'viewer');
+  if (service) {
+    service.destroy();
+    removeService(window, 'viewer');
+  }
+}

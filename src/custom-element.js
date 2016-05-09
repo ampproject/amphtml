@@ -1223,6 +1223,7 @@ export function registerElement(win, name, implementationClass) {
   });
 }
 
+
 /**
  * Registers a new alias for an existing custom element.
  * @param {!Window} win The window in which to register the elements.

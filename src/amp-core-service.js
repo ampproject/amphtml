@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-import {installActionService} from './service/action-impl';
-import {installFramerateService} from './service/framerate-impl';
-import {installHistoryService} from './service/history-impl';
-import {installResourcesService} from './service/resources-impl';
-import {installStandardActions} from './service/standard-actions-impl';
-import {installUrlReplacementsService} from './service/url-replacements-impl';
-import {installViewerService} from './service/viewer-impl';
-import {installViewportService} from './service/viewport-impl';
-import {installVsyncService} from './service/vsync-impl';
-import {installXhrService} from './service/xhr-impl';
+import {installActionService, uninstallActionService} from './service/action-impl';
+import {installFramerateService, uninstallFramerateService} from './service/framerate-impl';
+import {installHistoryService, uninstallHistoryService} from './service/history-impl';
+import {installResourcesService, uninstallResourcesService} from './service/resources-impl';
+import {installStandardActions, uninstallStandardActions} from './service/standard-actions-impl';
+import {installUrlReplacementsService, uninstallUrlReplacementsService} from './service/url-replacements-impl';
+import {installViewerService, uninstallViewerService} from './service/viewer-impl';
+import {installViewportService, uninstallViewportService} from './service/viewport-impl';
+import {installVsyncService, uninstallVsyncService} from './service/vsync-impl';
+import {installXhrService, uninstallXhrService} from './service/xhr-impl';
 
 
 /**
@@ -42,4 +42,17 @@ export function installCoreServices(window) {
   installFramerateService(window);
   installUrlReplacementsService(window);
   installXhrService(window);
+}
+
+export function uninstallCoreServices(window) {
+  uninstallViewerService(window);
+  uninstallViewportService(window);
+  uninstallHistoryService(window);
+  uninstallVsyncService(window);
+  uninstallActionService(window);
+  uninstallResourcesService(window);
+  uninstallStandardActions(window);
+  uninstallFramerateService(window);
+  uninstallUrlReplacementsService(window);
+  uninstallXhrService(window);
 }

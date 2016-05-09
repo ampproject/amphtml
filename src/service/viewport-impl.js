@@ -16,15 +16,15 @@
 
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
-import {installVsyncService} from './vsync-impl';
-import {installViewerService} from './viewer-impl';
+import {installVsyncService, uninstallVsyncService} from './vsync-impl';
+import {installViewerService, uninstallViewerService} from './viewer-impl';
 
 
 const TAG_ = 'Viewport';
@@ -496,6 +496,29 @@ export class Viewport {
       this.changed_(!oldSize || oldSize.width != newSize.width, 0);
     });
   }
+
+  destroy() {
+    this.cleanup_();
+    uninstallVsyncService(this.win_);
+    this.win_ = null;
+    this.binding_.destroy();
+    this.binding_ = null;
+    this.viewer_ = null;
+    this.size_ = null;
+    this.vsync_ = null;
+    this.changeObservable_.destroy();
+    this.changeObservable_ = null;
+    this.scrollObservable_.destroy();
+    this.scrollObservable_ = null;
+    this.viewportMeta_ = null;
+    this.originalViewportMetaString_ = null;
+    this.fixedLayer_.destroy();
+    // TODO: cleanup ondocumentready listener.
+    //onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
+    this.fixedLayer_ = null;
+    this.boundThrottledScroll_ = null;
+  }
+
 }
 
 
@@ -588,6 +611,9 @@ class ViewportBindingDef {
 
   /** For testing. */
   cleanup_() {}
+
+
+  destroy() {}
 }
 
 
@@ -616,15 +642,19 @@ export class ViewportBindingNatural_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
-    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+    this.boundScrollListener_ = () => this.scrollObservable_.fire();
+    this.boundResizeListener_ = () => this.resizeObservable_.fire();
+
+    this.win.addEventListener('scroll', this.boundScrollListener_);
+    this.win.addEventListener('resize', this.boundResizeListener_);
 
     dev.fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
   cleanup_() {
-    // TODO(dvoytenko): remove listeners
+    this.win.removeEventListener('scroll', this.boundScrollListener_);
+    this.win.removeEventListener('resize', this.boundResizeListener_);
   }
 
   /** @override */
@@ -729,6 +759,19 @@ export class ViewportBindingNatural_ {
     }
     return doc.documentElement;
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.scrollObservable_.destroy();
+    this.scrollObservable_ = null;
+    this.resizeObservable_.destroy();
+    this.resizeObservable_ = null;
+
+    this.boundScrollListener_ = null;
+    this.boundResizeListener_ = null;
+  }
+
 }
 
 
@@ -773,7 +816,11 @@ export class ViewportBindingNaturalIosEmbed_ {
         this.setup_();
       }, 0);
     });
+
+    this.boundResizeListener_ = () => this.resizeObservable_.fire();
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    this.boundScrollListener_ = this.onScrolled_.bind(this);
 
     dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
@@ -880,7 +927,21 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   cleanup_() {
-    // TODO(dvoytenko): remove listeners
+    this.win.removeEventListener('resize', this.boundResizeListener_);
+
+    const documentElement = this.win.document.documentElement;
+    const documentBody = this.win.document.body;
+
+    documentBody.removeChild(this.scrollPosEl_);
+    this.scrollPosEl_ = null;
+
+    documentBody.removeChild(this.scrollMoveEl_);
+    this.scrollMoveEl_ = null;
+
+    documentBody.removeChild(this.endPosEl_);
+    this.endPosEl_ = null;
+
+    documentBody.removeEventListener('scroll', this.boundScrollListener_);
   }
 
   /** @override */
@@ -1012,6 +1073,24 @@ export class ViewportBindingNaturalIosEmbed_ {
     // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
     // this case.
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.scrollPosEl_ = null;
+    this.scrollMoveEl_ = null;
+    this.pos_ = null;
+    this.scrollObservable_.destroy();
+    this.scrollObservable_ = null;
+    this.resizeObservable_.destroy();
+    this.resizeObservable_ = null;
+    this.boundResizeListener_ = null;
+    this.boundScrollListener_ = null;
+
+    // TODO: cleanup ondocumentready listeners.
+    //onDocumentReady(this.win.document);
+  }
+
 }
 
 
@@ -1134,6 +1213,16 @@ export class ViewportBindingVirtual_ {
   setScrollTop(unusedScrollTop) {
     // TODO(dvoytenko): communicate to the viewer.
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.scrollObservable_.destroy();
+    this.scrollObservable_ = null;
+    this.resizeObservable_.destroy();
+    this.resizeObservable_ = null;
+  }
+
 }
 
 
@@ -1252,3 +1341,13 @@ export function installViewportService(window) {
     return createViewport_(window);
   });
 };
+
+
+export function uninstallViewportService(window) {
+  const service = getServiceOrNull(window, 'viewport');
+  if (service) {
+    uninstallViewerService(window);
+    service.destroy();
+    removeService(window, 'viewport');
+  }
+}

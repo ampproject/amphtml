@@ -517,6 +517,18 @@ export class FixedLayer {
       }
     }
   }
+
+  destroy() {
+    if (this.fixedLayer_) {
+      this.doc.documentElement.removeChild(this.fixedLayer_);
+    }
+    this.doc = null;
+    this.vsync_ = null;
+    this.fixedLayer_ = null;
+    this.fixedElements_.length = 0;
+    this.fixedElements_ = null;
+  }
+
 }
 
 

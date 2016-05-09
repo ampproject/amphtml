@@ -15,10 +15,10 @@
  */
 
 import {Pass} from '../pass';
-import {getService} from '../service';
+import {getService, removeService, getServiceOrNull} from '../service';
 import {dev} from '../log';
 import {timer} from '../timer';
-import {installViewerService} from './viewer-impl';
+import {installViewerService, uninstallViewerService} from './viewer-impl';
 
 
 /** @private @const */
@@ -184,6 +184,17 @@ export class History {
       this.deque_();
     });
   }
+
+  destroy() {
+    this.cleanup_();
+    this.binding_.destroy();
+    this.binding_ = null;
+    this.stackOnPop_.length = 0;
+    this.stackOnPop_ = null;
+    this.queue_.length = 0;
+    this.queue_ = null;
+  }
+
 }
 
 
@@ -196,6 +207,8 @@ class HistoryBindingInterface {
 
   /** @private */
   cleanup_() {}
+
+  destroy() {}
 
   /**
    * Configures a callback to be called when stack index has been updated.
@@ -553,6 +566,22 @@ export class HistoryBindingNatural_ {
       }
     }
   }
+
+  destroy() {
+    this.cleanup_();
+    this.win = null;
+    this.waitingState_ = null;
+    this.onStackIndexUpdated_ = null;
+    this.unsupportedState_ = null;
+    this.origPushState_ = null
+    this.origReplaceState_ = null;
+    this.unsupportedState_ = null;
+    this.pushState_ = null;
+    this.replaceState_ = null;
+    this.popstateHandler_ = null;
+    this.hashchangeHandler_ = null;
+  }
+
 }
 
 
@@ -635,6 +664,13 @@ export class HistoryBindingVirtual_ {
       }
     }
   }
+
+  destroy() {
+    this.cleanup_();
+    this.viewer_ = null;
+    this.onStackIndexUpdated_ = null;
+  }
+
 }
 
 
@@ -663,3 +699,12 @@ export function installHistoryService(window) {
     return createHistory_(window);
   });
 };
+
+export function uninstallHistoryService(window) {
+  const service = getServiceOrNull(window, 'history');
+  if (service) {
+    uninstallViewerService(window);
+    service.destroy();
+    removeService(window, 'history');
+  }
+}
