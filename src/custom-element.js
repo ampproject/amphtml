@@ -956,13 +956,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.getRealChildNodes = function() {
-    const nodes = [];
-    for (let n = this.firstChild; n; n = n.nextSibling) {
-      if (!isInternalOrServiceNode(n)) {
-        nodes.push(n);
-      }
-    }
-    return nodes;
+    return dom.childNodes(this, node => !isInternalOrServiceNode(node));
   };
 
   /**
@@ -972,14 +966,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.getRealChildren = function() {
-    const elements = [];
-    for (let child = this.firstElementChild; child;
-        child = child.nextElementSibling) {
-      if (!isInternalOrServiceNode(child)) {
-        elements.push(child);
-      }
-    }
-    return elements;
+    return dom.childElements(this, element =>
+        !isInternalOrServiceNode(element));
   };
 
   /**
