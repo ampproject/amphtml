@@ -291,7 +291,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Called when elements is created. Sets instance vars since there is no
    * constructor.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.createdCallback = function() {
     this.classList.add('-amp-element');
@@ -370,7 +370,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.isInTemplate_ = undefined;
   };
 
-  /** @private */
+  /** @private @this {!Element} */
   ElementProto.assertNotTemplate_ = function() {
     dev.assert(!this.isInTemplate_, 'Must never be called in template');
   };
@@ -378,7 +378,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the element has been upgraded yet.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.isUpgraded = function() {
     return !(this.implementation_ instanceof ElementStub);
@@ -389,7 +389,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * has already been attached, it's layout validation and attachment flows
    * are repeated for the new implementation.
    * @param {function(new:BaseElement, !Element)} newImplClass
-   * @final @package
+   * @final @package @this {!Element}
    */
   ElementProto.upgrade = function(newImplClass) {
     if (this.isInTemplate_) {
@@ -416,7 +416,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Whether the element has been built. A built element had its
    * {@link buildCallback} method successfully invoked.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.isBuilt = function() {
     return this.built_;
@@ -424,7 +424,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Get the priority to load the element.
-   * @return {number}
+   * @return {number} @this {!Element}
    */
   ElementProto.getPriority = function() {
     dev.assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
@@ -449,7 +449,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    *
    * @param {boolean} force Whether or not force the build.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.build = function(force) {
     this.assertNotTemplate_();
@@ -495,6 +495,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Called to instruct the element to preconnect to hosts it uses during
    * layout.
    * @param {boolean} onLayout Whether this was called after a layout.
+   * @this {!Element}
    */
   ElementProto.preconnect = function(onLayout) {
     if (onLayout) {
@@ -511,7 +512,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * @return {!Vsync}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.getVsync_ = function() {
     return vsyncFor(this.ownerDocument.defaultView);
@@ -521,6 +522,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
    * @param {!LayoutRect} layoutBox
+   * @this {!Element}
    */
   ElementProto.updateLayoutBox = function(layoutBox) {
     this.layoutWidth_ = layoutBox.width;
@@ -555,7 +557,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * This method is called by Resources and shouldn't be called by anyone else.
    *
    * @final
-   * @package
+   * @package @this {!Element}
    */
   ElementProto.applySizesAndMediaQuery = function() {
     this.assertNotTemplate_();
@@ -600,7 +602,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @final
-   * @package
+   * @package @this {!Element}
    */
   ElementProto./*OK*/changeSize = function(newHeight, newWidth) {
     if (this.sizerElement_) {
@@ -620,7 +622,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Called when the element is first attached to the DOM. Calls
    * {@link firstAttachedCallback} if this is the first attachment.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
     if (!TEMPLATE_TAG_SUPPORTED) {
@@ -642,7 +644,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Called when the element is detached from the DOM.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.detachedCallback = function() {
     if (this.isInTemplate_) {
@@ -653,7 +655,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Called when the element is attached to the DOM for the first time.
-   * @private @final
+   * @private @final @this {!Element}
    */
   ElementProto.firstAttachedCallback_ = function() {
     if (!this.isUpgraded()) {
@@ -684,7 +686,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * @param {string} name
    * @param {!Object=} opt_data Event data.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
     const data = opt_data || {};
@@ -699,7 +701,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the element can pre-render.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.prerenderAllowed = function() {
     return this.implementation_.prerenderAllowed();
@@ -708,7 +710,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Creates a placeholder for the element.
    * @returns {?Element}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.createPlaceholder = function() {
     return this.implementation_.createPlaceholderCallback();
@@ -717,7 +719,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the element should ever render when it is not in viewport.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.renderOutsideViewport = function() {
     return this.implementation_.renderOutsideViewport();
@@ -725,7 +727,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * @return {!LayoutRect}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
     return this.resources_.getResourceForElement(this).getLayoutBox();
@@ -735,7 +737,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   * Returns a change entry for that should be compatible with
   * IntersectionObserverEntry.
   * @return {!IntersectionObserverEntry} A change entry.
-  * @final
+  * @final @this {!Element}
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
@@ -750,7 +752,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * The runtime calls this method to determine if {@link layoutCallback}
    * should be called again when layout changes.
    * @return {boolean}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.isRelayoutNeeded = function() {
     return this.implementation_.isRelayoutNeeded();
@@ -768,7 +770,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Can only be called on a upgraded and built element.
    *
    * @return {!Promise}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.layoutCallback = function() {
     this.assertNotTemplate_();
@@ -798,7 +800,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    *
    * @param {boolean} inViewport Whether the element has entered or exited
    *   the visible viewport.
-   * @final @package
+   * @final @package @this {!Element}
    */
   ElementProto.viewportCallback = function(inViewport) {
     this.assertNotTemplate_();
@@ -823,7 +825,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * @param {boolean} inViewport
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.updateInViewport_ = function(inViewport) {
     this.implementation_.inViewport_ = inViewport;
@@ -835,7 +837,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
    *
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.pauseCallback = function() {
     this.assertNotTemplate_();
@@ -850,7 +852,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * an inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content may be resumed.
    *
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.resumeCallback = function() {
     this.assertNotTemplate_();
@@ -867,7 +869,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Calling this method on unbuilt ot unupgraded element has no effect.
    *
    * @return {boolean}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.unlayoutCallback = function() {
     this.assertNotTemplate_();
@@ -887,7 +889,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * video content), and so we must unlayout to stop playback.
    *
    * @return {boolean}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.unlayoutOnPause = function() {
     return this.implementation_.unlayoutOnPause();
@@ -899,7 +901,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Otherwise the invocation is enqueued until the implementation is ready
    * to receive actions.
    * @param {!ActionInvocation} invocation
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.enqueAction = function(invocation) {
     this.assertNotTemplate_();
@@ -913,7 +915,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Dequeues events from the queue and dispatches them to the implementation
    * with "deferred" flag.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.dequeueActions_ = function() {
     if (!this.actionQueue_) {
@@ -934,7 +936,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {!ActionInvocation} invocation
    * @param {boolean} deferred
    * @final
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.executionAction_ = function(invocation, deferred) {
     try {
@@ -951,7 +953,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
    * @return {!Array<!Node>}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getRealChildNodes = function() {
     const nodes = [];
@@ -967,7 +969,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Returns the original children of the custom element without any service
    * nodes that could have been added for markup.
    * @return {!Array<!Element>}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getRealChildren = function() {
     const elements = [];
@@ -983,7 +985,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getPlaceholder = function() {
     return dom.lastChildElementByAttr(this, 'placeholder');
@@ -992,7 +994,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Hides or shows the placeholder, if available.
    * @param {boolean} show
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.togglePlaceholder = function(show) {
     this.assertNotTemplate_();
@@ -1006,7 +1008,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional placeholder element for this custom element.
    * @return {!Array.<!Element>}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.getAllPlaceholders_ = function() {
     return dom.childElementsByAttr(this, 'placeholder');
@@ -1014,7 +1016,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Hides all placeholders in an element.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.hideAllPlaceholders_ = function() {
     const placeholders = this.getAllPlaceholders_();
@@ -1025,7 +1027,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Shows the last placeholder in an element.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.showLastPlaceholder_ = function() {
     const placeholder = this.getPlaceholder();
@@ -1037,7 +1039,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional fallback element for this custom element.
    * @return {?Element}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getFallback = function() {
     return dom.childElementByAttr(this, 'fallback');
@@ -1047,7 +1049,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Hides or shows the fallback, if available. This function must only
    * be called inside a mutate context.
    * @param {boolean} state
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.toggleFallback = function(state) {
     this.assertNotTemplate_();
@@ -1067,7 +1069,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the loading can be shown for this element.
    * @return {boolean}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.isLoadingEnabled_ = function() {
     // No loading indicator will be shown if either one of these
@@ -1094,7 +1096,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Creates a loading object. The caller must ensure that loading can
    * actually be shown. This method must also be called in the mutate
    * context.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.prepareLoading_ = function() {
     if (!this.loadingContainer_) {
@@ -1116,7 +1118,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Turns the loading indicator on or off.
    * @param {boolean} state
    * @param {boolean=} opt_cleanup
-   * @private @final
+   * @private @final @this {!Element}
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
     this.assertNotTemplate_();
@@ -1162,7 +1164,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional overflow element for this custom element.
    * @return {?Element}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.getOverflowElement = function() {
     if (this.overflowElement_ === undefined) {
@@ -1185,7 +1187,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {boolean} overflown
    * @param {number|undefined} requestedHeight
    * @param {number|undefined} requestedWidth
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.overflowCallback = function(
       overflown, requestedHeight, requestedWidth) {
