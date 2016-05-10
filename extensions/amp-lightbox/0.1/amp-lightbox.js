@@ -80,17 +80,19 @@ class AmpLightbox extends AMP.BaseElement {
     this.requestFullOverlay();
     this.getViewport().resetTouchZoom();
     this.getViewport().hideFixedLayer();
-    this.element.style.display = '';
-    this.element.style.opacity = 0;
 
-    // TODO(dvoytenko): use new animations support instead.
-    this.element.style.transition = 'opacity 0.1s ease-in';
-    requestAnimationFrame(() => {
-      this.element.style.opacity = '';
+    this.mutateElement(() => {
+      this.element.style.display = '';
+      this.element.style.opacity = 0;
+      // TODO(dvoytenko): use new animations support instead.
+      this.element.style.transition = 'opacity 0.1s ease-in';
+      requestAnimationFrame(() => {
+        this.element.style.opacity = '';
+      });
+    }).then(() => {
+      this.updateInViewport(this.container_, true);
+      this.scheduleLayout(this.container_);
     });
-
-    this.scheduleLayout(this.container_);
-    this.updateInViewport(this.container_, true);
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
