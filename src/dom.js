@@ -383,3 +383,19 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   }
   return params;
 }
+
+
+/**
+ * Whether the element has been already fully parsed by the browser.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isElementFullyParsed(element) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (currentElement = element.parentNode);
+  return false;
+}

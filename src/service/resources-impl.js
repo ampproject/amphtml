@@ -16,7 +16,7 @@
 
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
-import {closest} from '../dom';
+import {closest, isElementFullyParsed} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {
   expandLayoutRect,
@@ -102,9 +102,6 @@ export class Resources {
     /** @private {number} */
     this.relayoutTop_ = -1;
 
-    /** @private {boolean} */
-    this.forceBuild_ = false;
-
     /** @private {time} */
     this.lastScrollTime_ = 0;
 
@@ -141,8 +138,8 @@ export class Resources {
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
 
-    /** @private {!Array<!Element>} */
-    this.openElements_ = [];
+    /** @private {?Array<!Element>} */
+    this.pendingBuildResources_ = [];
 
     /** @private {number} */
     this.scrollHeight_ = 0;
@@ -202,8 +199,8 @@ export class Resources {
     // Ensure that we attempt to rebuild things when DOM is ready.
     onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
-      this.forceBuild_ = true;
       this.buildReadyResources_();
+      this.pendingBuildResources_ = null;
       if (this.platform_.isIe()) {
         this.fixMediaIe_(this.win);
       } else {
@@ -393,11 +390,10 @@ export class Resources {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Try to immediately build element, it may already be ready.
-        resource.build(this.forceBuild_);
+        resource.build();
         this.schedulePass();
       } else {
-        // Track open elements
-        this.openElements_.push(element);
+        this.pendingBuildResources_.push(element);
       }
       this.buildReadyResources_();
     }
@@ -410,20 +406,19 @@ export class Resources {
    * @private
    */
   buildReadyResources_() {
-    const closedElements = [];
-    this.openElements_.forEach(el => {
-      if (this.documentReady_ || el.nextSibling) {
-        const resource = this.getResourceForElement(el);
-        resource.build(this.forceBuild_);
-        closedElements.push(el);
+    const builtResourcesIndexes = [];
+    this.pendingBuildResources_.forEach((resource, index) => {
+      if (this.documentReady_ || isElementFullyParsed(resource.element)) {
+        resource.build();
+        builtResourcesIndexes.push(index);
       }
     });
 
-    // Remove elements that we just built from open elements.
-    closedElements.forEach(el => {
-      const index = this.openElements_.indexOf(el);
-      this.openElements_.splice(index, 1);
-    });
+    // Remove resources that we just built from pending resources.
+    for (let i = builtResourcesIndexes.length; i > 0; i--) {
+      const index = builtResourcesIndexes[i];
+      this.pendingBuildResources_.splice(index, 1);
+    }
   }
 
   /**
@@ -450,7 +445,7 @@ export class Resources {
   upgraded(element) {
     const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
-      resource.build(this.forceBuild_);
+      resource.build();
       this.schedulePass();
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
@@ -679,7 +674,6 @@ export class Resources {
     const now = timer.now();
     dev.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
-        ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
@@ -907,7 +901,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
-        r.build(this.forceBuild_);
+        r.build();
       }
       if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1524,6 +1518,8 @@ export class Resources {
       });
       this.requestsChangeSize_ = this.requestsChangeSize_.filter(
           request => request.resource != resource);
+      this.pendingBuildResources_ = this.pendingBuildResources_.filter(
+          pendingResource => pendingResource != resource);
     }
   }
 }
@@ -1659,16 +1655,15 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @param {boolean} force
    * @return {boolean}
    */
-  build(force) {
+  build() {
     if (this.blacklisted_ || !this.element.isUpgraded()) {
       return false;
     }
     let built;
     try {
-      built = this.element.build(force);
+      built = this.element.build();
     } catch (e) {
       dev.error(TAG_, 'failed to build:', this.debugid, e);
       built = false;

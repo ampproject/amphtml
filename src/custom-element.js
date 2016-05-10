@@ -435,31 +435,19 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *
-   * If the "force" argument is "false", the element will first check if
-   * implementation is ready to build by calling
-   * {@link BaseElement.isReadyToBuild} method. If this method returns "true"
-   * the build proceeds, otherwise no build is done.
-   *
-   * If the "force" argument is "true", the element performs build regardless
-   * of what {@link BaseElement.isReadyToBuild} would return.
-   *
    * Returned value indicates whether or not build has been performed.
    *
    * This method can only be called on a upgraded element.
    *
-   * @param {boolean} force Whether or not force the build.
    * @return {boolean}
    * @final @this {!Element}
    */
-  ElementProto.build = function(force) {
+  ElementProto.build = function() {
     this.assertNotTemplate_();
     if (this.isBuilt()) {
       return true;
     }
     dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force) {
-      return false;
-    }
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
