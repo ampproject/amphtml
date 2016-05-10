@@ -1,3 +1,9 @@
+// To use this:
+// (1) Install the App Engine SDK for Go from
+//     https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go
+// (2) Type 'goapp serve webui' from the validator directory
+// (3) Point your web browser at http://localhost:8080/
+
 package webui
 
 import (
