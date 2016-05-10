@@ -457,7 +457,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       return true;
     }
     dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force && !this.implementation_.isReadyToBuild()) {
+    if (!force) {
       return false;
     }
     try {

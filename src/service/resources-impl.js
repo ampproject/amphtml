@@ -141,6 +141,9 @@ export class Resources {
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
 
+    /** @private {!Array<!Element>} */
+    this.openElements_ = [];
+
     /** @private {number} */
     this.scrollHeight_ = 0;
 
@@ -200,6 +203,7 @@ export class Resources {
     onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
       this.forceBuild_ = true;
+      this.buildReadyResources_();
       if (this.platform_.isIe()) {
         this.fixMediaIe_(this.win);
       } else {
@@ -387,12 +391,39 @@ export class Resources {
     this.resources_.push(resource);
 
     if (this.isRuntimeOn_) {
-      // Try to immediately build element, it may already be ready.
-      resource.build(this.forceBuild_);
-      this.schedulePass();
+      if (this.documentReady_) {
+        // Try to immediately build element, it may already be ready.
+        resource.build(this.forceBuild_);
+        this.schedulePass();
+      } else {
+        // Track open elements
+        this.openElements_.push(element);
+      }
+      this.buildReadyResources_();
     }
 
     dev.fine(TAG_, 'element added:', resource.debugid);
+  }
+
+  /**
+   * Builds resources that are ready to be built.
+   * @private
+   */
+  buildReadyResources_() {
+    const closedElements = [];
+    this.openElements_.forEach(el => {
+      if (this.documentReady_ || el.nextSibling) {
+        const resource = this.getResourceForElement(el);
+        resource.build(this.forceBuild_);
+        closedElements.push(el);
+      }
+    });
+
+    // Remove elements that we just built from open elements.
+    closedElements.forEach(el => {
+      const index = this.openElements_.indexOf(el);
+      this.openElements_.splice(index, 1);
+    });
   }
 
   /**
