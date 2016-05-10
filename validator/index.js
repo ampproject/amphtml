@@ -289,9 +289,13 @@ function serve(port, validatorScript) {
           response.writeHead(200, {'Content-Type': 'text/html'});
           const contents = fs.readFileSync(
               path.join(__dirname, 'webui/index.html'), 'utf-8');
-          const html = contents.replace(
-              new RegExp('\\$\\$VALIDATOR_SCRIPT\\$\\$', 'g'), validatorScript);
-          response.end(html);
+          if ('https://cdn.ampproject.org/v0/validator.js' == validatorScript) {
+            response.end(contents);
+            return;
+          }
+          response.end(contents.replace(new RegExp(
+              'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
+              validatorScript));
           return;
         }
         //
@@ -366,7 +370,7 @@ function serve(port, validatorScript) {
           readFromUrl(urlToFetch)
               .then((contents) => {
                 response.writeHead(200, {'Content-Type': 'application/json'});
-                response.end(JSON.stringify({'contents': contents}));
+                response.end(JSON.stringify({'Contents': contents}));
               })
               .catch((error) => {
                 response.writeHead(502, {'Content-Type': 'text/plain'});
