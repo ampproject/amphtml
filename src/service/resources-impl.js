@@ -394,8 +394,8 @@ export class Resources {
         this.schedulePass();
       } else {
         this.pendingBuildResources_.push(element);
+        this.buildReadyResources_();
       }
-      this.buildReadyResources_();
     }
 
     dev.fine(TAG_, 'element added:', resource.debugid);
