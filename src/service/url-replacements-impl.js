@@ -511,7 +511,7 @@ class UrlReplacements {
    * @return {!Promise<!Object<string, *>>}
    */
   collectVars(url, opt_bindings) {
-    const vars = {};
+    const vars = Object.create(null);
     return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
 
