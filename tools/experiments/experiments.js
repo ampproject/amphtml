@@ -83,6 +83,11 @@ const EXPERIMENTS = [
     name: 'AMP Live List/Blog',
     spec: 'https://github.com/ampproject/amphtml/issues/2762',
   },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+  },
 ];
 
 
