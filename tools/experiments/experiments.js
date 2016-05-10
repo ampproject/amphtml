@@ -61,11 +61,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
   },
+  // Amp Sidebar
   {
-    id: 'amp-social-share',
-    name: 'AMP Social Share',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-social-share/amp-social-share.md',
+    id: 'amp-sidebar',
+    name: 'AMP Sidebar',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sidebar/amp-sidebar.md',
   },
   {
     id: 'amp-analytics-viewability',
