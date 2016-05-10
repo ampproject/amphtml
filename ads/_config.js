@@ -151,7 +151,7 @@ export const adPreconnect = {
   microad: [
     'https://s-rtb.send.microad.jp',
     'https://cache.send.microad.jp',
-  ]
+  ],
 };
 
 /**
