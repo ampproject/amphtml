@@ -206,6 +206,15 @@ const precompiledByValidatorJs = {};
 function validateString(inputString, opt_validatorJs) {
   const validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
+  // The 'sandbox' is a Javascript object (dictionary) which holds the results
+  // of evaluating the validatorJs, so basically, it holds functions, prototypes,
+  // etc. As a side-effect of evaluating, the VM will compile this code and it's
+  // worth holding onto it. Hence, this validate function is reached via
+  // 2 codepaths - either the sandbox came from the cache,
+  // precompiledByValidatorJs - or we just constructed it after downloading
+  // and evaluating the script. The API is fancier here, vm.Script /
+  // vm.createContext / vm.runInContext and all that, but it's quite similar
+  // to a Javascript eval.
   const validate = (sandbox, resolve) => {
     const internalResult = sandbox.amp.validator.validateString(inputString);
     const result = new ValidationResult();
