@@ -739,8 +739,6 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-
-
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
