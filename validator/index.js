@@ -200,12 +200,12 @@ const precompiledByValidatorJs = {};
 /**
  * @param {!string} inputString
  * @param {string=} validatorJs_opt
- * @returns {Promise.<(ValidationResult|Error)>}
+ * @returns {Promise<(ValidationResult|Error)>}
  * @export
  */
-function validateString(inputString, validatorJs_opt) {
+function validateString(inputString, opt_validatorJs) {
   const validatorJs =
-      validatorJs_opt || 'https://cdn.ampproject.org/v0/validator.js';
+      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
   const validate = (sandbox, resolve) => {
     const internalResult = sandbox.amp.validator.validateString(inputString);
     const result = new ValidationResult();

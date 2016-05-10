@@ -43,7 +43,7 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 If you wish to install the Validator as a system command,
 install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
 run `npm install -g` in this directory. After that, you may type
-`amp_validator` in any directory to invoke the validator.
+`amp-validator` in any directory to invoke the validator.
 
 ## Using the web UI
 
@@ -60,7 +60,7 @@ This API is new and still experimental, feedback is especially welcome.
 ```
 'use strict';
 
-const ampValidator = require('amp_validator');
+const ampValidator = require('amp-validator');
 ampValidator.validateString('<html>Hello, world</html>').then(
     (result) => {
         ((result.status === 'PASS') ? console.log : console.error)(result.status);
