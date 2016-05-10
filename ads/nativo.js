@@ -19,7 +19,7 @@ import {loadScript} from '../src/3p';
 export function nativo(global, data) {
 
   let ntvAd;
-  (function (ntvAd, global, data) {
+  (function(ntvAd, global, data) {
     global
       .frames
       .location
