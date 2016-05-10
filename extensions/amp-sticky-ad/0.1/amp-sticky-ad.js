@@ -30,11 +30,13 @@ class AmpStickyAd extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
-  /** @override */
+  /**
+   * @override
+   * @this {undefined}  // Make linter happy
+   */
   buildCallback() {
     /** @const @private {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    this.viewport_ = this.getViewport();
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
@@ -43,31 +45,24 @@ class AmpStickyAd extends AMP.BaseElement {
     this.isDisplayed_ = false;
     this.initialScrollTop_ = this.viewport_.getScrollTop();
     this.scrollHeight_ = this.viewport_.getScrollHeight();
-    this.viewportHeight_ =  this.viewport_.getSize().height;
+    this.viewportHeight_ = this.viewport_.getSize().height;
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.getWin());
     this.viewport_.onScroll(() => {
-      console.log("onscroll");
-      if(!this.isDisplayed_) {
-        console.log("not displayed yet");
-        console.log('getScrollTop is ' ,this.viewport_.getScrollTop());
-        console.log('initialScrollTop')
-        const scrollDist = (this.viewport_.getScrollTop() - this.initialScrollTop_);
-        console.log('scrollDist is ', scrollDist);
-        if(this.viewportHeight_ < Math.abs(scrollDist)) {
-          console.log("should display!");
+      if (!this.isDisplayed_) {
+        const scrollDist =
+            (this.viewport_.getScrollTop() - this.initialScrollTop_);
+        if (this.viewportHeight_ < Math.abs(scrollDist)) {
           // scroll down
           if (scrollDist < 0) {
-            console.log('remain space ',this.viewport_.getScrollTop());
-            console.log('viewportheight', this.viewportHeight_);
-            if(this.viewport_.getScrollTop() < this.viewportHeight_) {
-              console.log('not enough space');
+            if (this.viewport_.getScrollTop() < this.viewportHeight_) {
+              // Not sure about this
               this.initialScrollTop_ = this.viewport_.getScrollTop();
               return;
             }
-          } /* scroll up*/else {
-            const remainHeight = this.scrollHeight - this.viewport_.getScrollTop()
-              - this.viewportHeight;
+          } /*scroll up*/else {
+            const remainHeight = this.scrollHeight_
+                - this.viewport_.getScrollTop() - this.viewportHeight;
             if (remainHeight < this.viewportHeight_) {
               this.initialScrollTop_ = this.viewport_.getScrollTop();
               return;
@@ -87,10 +82,14 @@ class AmpStickyAd extends AMP.BaseElement {
     });
   }
 
+  /**
+   * @override
+   * @this {undefined}  // Make linter happy
+   */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
     this.scheduleLayout(this.element.firstElementChild);
