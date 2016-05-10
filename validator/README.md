@@ -19,7 +19,7 @@ limitations under the License.
 A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-To use, install Node.js version 4.X on your system. E.g.,
+To use, install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
 [by downloading](https://nodejs.org/en/download/) or
 [by using a package manager](https://nodejs.org/en/download/package-manager/) or
 [by using NVM](https://github.com/creationix/nvm).
@@ -55,7 +55,8 @@ This feature is new and experimental, feedback is especially welcome.
 
 ## Using the NodeJS API
 
-This API is new and still experimental, feedback is especially welcome.
+This API is new and still experimental, feedback is especially welcome. We may
+try to port to earlier versions of NodeJS if sufficient interest exists.
 
 ```
 'use strict';
@@ -88,7 +89,7 @@ Install these packages using apt-get:
 * python-protobuf
 * python2.7
 
-In addition, install Node.js version 4.X on your system. E.g.,
+In addition, install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
   [by downloading](https://nodejs.org/en/download/) or
   [by using a package manager](https://nodejs.org/en/download/package-manager/) or
   [by using NVM](https://github.com/creationix/nvm).
