@@ -48,7 +48,7 @@ import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
+import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';

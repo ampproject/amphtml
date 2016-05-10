@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix, validateExactlyOne} from '../src/3p';
+import {writeScript, validateSrcPrefix, validateExactlyOne} from '../3p/3p';
 
 // Valid adform ad source hosts
 const hosts = {

@@ -122,7 +122,7 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
           var pair = entry.split('->');
           var whitelistedModuleName = pair[0];
           var whitelistedDep = pair[1];
-          if (moduleName != whitelistedModuleName) {
+          if (!minimatch(moduleName, whitelistedModuleName)) {
             return false;
           }
           return dep == whitelistedDep;

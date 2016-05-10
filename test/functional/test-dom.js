@@ -143,6 +143,24 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  it('childNodes should find all matches', () => {
+    const parent = document.createElement('parent');
+    parent.appendChild(document.createTextNode('text1'));
+    parent.appendChild(document.createTextNode('text2'));
+    parent.appendChild(document.createElement('element'));
+    expect(dom.childNodes(parent, () => true).length).to.equal(3);
+    expect(dom.childNodes(parent, node => node.textContent == 'text1').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.textContent == 'text2').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.textContent == 'text3').length)
+        .to.equal(0);
+    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT2').length)
+        .to.equal(0);
+  });
+
   function testChildElementByTag() {
     const parent = document.createElement('parent');
 

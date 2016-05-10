@@ -239,6 +239,23 @@ export function lastChildElement(parent, callback) {
   return null;
 }
 
+/**
+ * Finds all child nodes that satisfies the callback.
+ * These nodes can include Text, Comment and other child nodes.
+ * @param {!Node} parent
+ * @param {function(!Node):boolean} callback
+ * @return {!Array<!Node>}
+ */
+export function childNodes(parent, callback) {
+  const nodes = [];
+  for (let child = parent.firstChild; child;
+       child = child.nextSibling) {
+    if (callback(child)) {
+      nodes.push(child);
+    }
+  }
+  return nodes;
+}
 
 /**
  * @type {boolean|undefined}

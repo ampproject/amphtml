@@ -19,7 +19,7 @@
  * New customers please see www.sovrn.com to sign up and get started!
  *********
  */
-import {writeScript} from '../src/3p';
+import {writeScript} from '../3p/3p';
 /**
  * @param {!Window} global
  * @param {!Object} data

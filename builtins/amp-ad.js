@@ -32,6 +32,7 @@ import {viewerFor} from '../src/viewer';
 /** @private @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true,
+  'AMP-STICKY-AD': true,
 };
 
 /**
