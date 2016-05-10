@@ -204,7 +204,7 @@ Adds support for Webtrekk. Configuration details can be found at [supportcenter.
 
 Type attribute value: `linkpulse`
 
-Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com)(http://docs.linkpulse.com)
+Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com)
 
 
 
