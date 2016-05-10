@@ -36,6 +36,10 @@ describe('3p messaging', () => {
     });
   });
 
+  afterEach(() => {
+    testWin = null;
+  });
+
   it('should receive messages', () => {
     let progress = '';
     listenParent(testWin, 'test', function(d) {

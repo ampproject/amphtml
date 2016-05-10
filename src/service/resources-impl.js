@@ -404,6 +404,9 @@ export class Resources {
   remove(element) {
     const resource = this.getResourceForElement(element);
     const index = resource ? this.resources_.indexOf(resource) : -1;
+    if (resource) {
+      resource.element[RESOURCE_PROP_] = null;
+    }
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
