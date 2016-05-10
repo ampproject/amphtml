@@ -29,9 +29,12 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For configuration details and to generate your tags, [contact us](compass-support@microad.co.jp)
 
 Supported parameters:
 
 - width
 - height
+- data-spot
+- data-url
+- data-referrer
