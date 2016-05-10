@@ -122,7 +122,6 @@ class ValidationResult {
     this.errors = [];
   }
 }
-exports.ValidationResult = ValidationResult;
 
 /**
  * Each validation error describes a specific problem in a validated
@@ -188,7 +187,6 @@ class ValidationError {
     this.params = [];
   }
 }
-exports.ValidationError = ValidationError;
 
 /**
  * A global static map used by the validateString function to avoid loading
