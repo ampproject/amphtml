@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-instagram');
 import {adopt} from '../../../../src/runtime';
 
@@ -24,6 +27,7 @@ describe('amp-instagram', () => {
 
   function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
