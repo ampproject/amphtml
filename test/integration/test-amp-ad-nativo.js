@@ -20,7 +20,7 @@ import {
   poll,
 } from '../../testing/iframe';
 
-describe('Rendering of one ad', () => {
+describe('Rendering of nativo ad', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/nativo.html', 12000)
