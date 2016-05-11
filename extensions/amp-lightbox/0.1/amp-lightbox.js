@@ -18,6 +18,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
+import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
 
 
@@ -86,7 +87,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.element.style.opacity = 0;
       // TODO(dvoytenko): use new animations support instead.
       this.element.style.transition = 'opacity 0.1s ease-in';
-      requestAnimationFrame(() => {
+      vsyncFor(this.getWin()).mutate(() => {
         this.element.style.opacity = '';
       });
     }).then(() => {
