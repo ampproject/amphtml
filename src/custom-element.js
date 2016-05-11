@@ -355,10 +355,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.overflowElement_ = undefined;
 
     // `opt_implementationClass` is only used for tests.
-    const ctor = opt_implementationClass || knownElements[name];
+    const Ctor = opt_implementationClass || knownElements[name];
 
     /** @private {!BaseElement} */
-    this.implementation_ = new ctor(this);
+    this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
@@ -1255,6 +1255,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * This makes it possible to mark an element as loaded in a test.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
   if (!win.ampExtendedElements) {
@@ -1267,6 +1268,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * Resets our scheduled elements.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
@@ -1279,6 +1281,7 @@ export function resetScheduledElementForTesting(win, elementName) {
  * Returns a currently registered element class.
  * @param {string} elementName Name of an extended custom element.
  * @return {?function()}
+ * @visibleForTesting
  */
 export function getElementClassForTesting(elementName) {
   return knownElements[elementName] || null;
