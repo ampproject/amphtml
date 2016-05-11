@@ -81,6 +81,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   user.assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
+  knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
     // There are 3 possible states here:
@@ -279,10 +280,11 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
+ * @param {function(new:BaseElement, !Element)} opt_implementationClass For
+ *     testing only.
  * @return {!AmpElement.prototype}
  */
-export function createAmpElementProto(win, name, implementationClass) {
+export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
    * @lends {AmpElement.prototype}
    */
@@ -352,8 +354,11 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
+    // `opt_implementationClass` is only used for tests.
+    const Ctor = opt_implementationClass || knownElements[name];
+
     /** @private {!BaseElement} */
-    this.implementation_ = new implementationClass(this);
+    this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
@@ -1168,7 +1173,7 @@ export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
   win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name, implementationClass),
+    prototype: createAmpElementProto(win, name),
   });
 }
 
@@ -1184,8 +1189,9 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
 
   if (implementationClass) {
+    knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
-      prototype: createAmpElementProto(win, aliasName, implementationClass),
+      prototype: createAmpElementProto(win, aliasName),
     });
   } else {
     throw new Error(`Element name is unknown: ${sourceName}.` +
@@ -1199,6 +1205,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * This makes it possible to mark an element as loaded in a test.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
   if (!win.ampExtendedElements) {
@@ -1211,6 +1218,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * Resets our scheduled elements.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
@@ -1219,3 +1227,12 @@ export function resetScheduledElementForTesting(win, elementName) {
   delete knownElements[elementName];
 }
 
+/**
+ * Returns a currently registered element class.
+ * @param {string} elementName Name of an extended custom element.
+ * @return {?function()}
+ * @visibleForTesting
+ */
+export function getElementClassForTesting(elementName) {
+  return knownElements[elementName] || null;
+}
