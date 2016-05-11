@@ -83,8 +83,9 @@ class AmpCxense extends AMP.BaseElement {
         /** @private @const {boolean} */
         this._noui = this.element.getAttribute('data-noui') === "true";
 
-        if (window.RAMP) {
-            RAMP.Widgets && RAMP.Widgets.init && RAMP.Widgets.init();
+        this._setCXV();
+        if (this._CXV) {
+            this._CXV.Widgets && this._CXV.Widgets.init && this._CXV.Widgets.init();
         }
 
         if (!this.getPlaceholder() && this._placeholder && !this._noui) {
@@ -104,14 +105,35 @@ class AmpCxense extends AMP.BaseElement {
 
         let self = this;
         return this._injectEmbedScript().then(() => {
-            this._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), (embed) => {
-                self._embed = embed;
+            self._setCXV();
 
-                if (self._isPlayer) {
-                    return self._loadPlayer();
+            return new Promise((resolve) => {
+                if (self._target && self._CXV) {
+                    self._CXV.Widgets.get('#' + self._target.getAttribute('id'), function (embed) {
+                        self._embed = embed;
+
+                        console.log("request-from-amp-cxense.js, document.location.protocol=", document.location.protocol, DEFAULT_AMD_SRC);
+
+                        if (self._isPlayer) {
+                            let selector = '#' + self._target.getAttribute('id') + '.metaplayer';
+                            self._CXV.Widgets.get(selector, function (mpf) {
+                                console.log("got mpf");
+
+                                self._mpf = mpf;
+                                mpf.listen('ready', () => {
+                                    self.applyFillContent(self._target);
+                                    resolve(self);
+                                });
+                            });
+                        } else {
+                            self.applyFillContent(self._target);
+                            resolve(self);
+                        }
+                    });
                 } else {
-                    self.applyFillContent(this._target);
-                    return self;
+                    console.log("dont GOT CX");
+
+                    resolve(self);
                 }
             });
         });
@@ -134,9 +156,17 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     _pauseMpf() {
         let self = this;
-        this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', (mpf) => {
-            self._mpf = self._mpf || mpf;
-            mpf.video.pause();
+
+        return new Promise((resolve) => {
+            if (self._target && self._CXV) {
+                self._CXV.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', (mpf) => {
+                    self._mpf = self._mpf || mpf;
+                    mpf.video.pause();
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
         });
     }
 
@@ -179,23 +209,6 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @private */
-    _loadPlayer () {
-        let self = this;
-        return new Promise((resolve, reject) => {
-            if (self._target && window.RAMP) {
-                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', (mpf) => {
-                    self._mpf = mpf;
-                    mpf.listen('ready', () => {
-                        self.applyFillContent(self._target);
-                        resolve(self);
-                    });
-                });
-            }
-            reject('cannot load player, widgets dependencies not loaded');
-        });
-    }
-
-    /** @private */
     _createChildTarget () {
         const target = this._getDoc().createElement('div');
         setStyles(target, {
@@ -229,6 +242,11 @@ class AmpCxense extends AMP.BaseElement {
         }
         this.element.appendChild(target);
         this._target = target;
+    }
+
+    /** @private */
+    _setCXV () {
+        this._CXV = this.getWin().RAMP;
     }
 
     /** @private */

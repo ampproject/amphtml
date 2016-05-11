@@ -16,45 +16,54 @@
 
 let ELEMENT_NAME = 'amp-cxense';
 
+// require('../' + ELEMENT_NAME); // <-- why does this fail? :/ all the other kids are doing it.
+require('../amp-cxense'); // but this doesn't fail
+
 import {createIframePromise} from '../../../../testing/iframe';
-require('../' + ELEMENT_NAME);
 import {adopt} from '../../../../src/runtime';
 import {parseUrl} from '../../../../src/url';
 
 adopt(window);
 
-describe(ELEMENT_NAME, () => {
+describe(ELEMENT_NAME, function () {
+    this.timeout(1000000);
 
-    let DEFAULT_ATTRIBUTES = {
+    const DEFAULT_ATTRIBUTES = {
         'data-src': 'https://media.w3.org/2010/05/sintel/trailer.mp4',
-        'layout': 'responsive'
+        'layout': 'responsive',
+        'height': 90,
+        'width': 160
     };
 
-    function createWidget(attributes) {
+    function createWidget(attributes, doc) {
+        doc = doc || document;
         attributes = Object.assign({}, DEFAULT_ATTRIBUTES, attributes);
-        console.log("createWidget", attributes);
 
+        const widget = doc.createElement(ELEMENT_NAME);
+
+        let key;
+        for (key in attributes) {
+            widget.setAttribute(key, attributes[key]);
+        }
+        doc.body.appendChild(widget);
+
+        widget.implementation_.buildCallback();
+
+        return widget.implementation_.layoutCallback();
+    }
+
+    // doesn't work yet
+    // https://jira.cxense.com/browse/CXVID-296
+    function createSanboxedWidget(attributes) {
         return createIframePromise(true).then(iframe => {
-            console.log("createIframePromise");
-
-            const widget = iframe.doc.createElement(ELEMENT_NAME);
-
-            let key;
-            for (key in attributes) {
-                widget.setAttribute(key, attributes[key]);
-            }
-            iframe.doc.body.appendChild(widget);
-
-            console.log(widget, typeof widget, Object.keys(widget));
-
-            return widget.implementation_.layoutCallback();
+            return createWidget(attributes, iframe.doc);
         });
     }
 
-    it('renders', () => {
-        return createWidget({
-        }).then((widget) => {
-            expect(widget._mpf.video.src).to.equal(DEFAULT_ATTRIBUTES['data-src']);
-        });
+    it('renders', function () {
+        return createWidget({})
+            .then(function (widget) {
+                expect(widget._mpf.video.src).to.equal(DEFAULT_ATTRIBUTES['data-src']);
+            });
     });
 });
