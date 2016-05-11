@@ -78,6 +78,11 @@ const EXPERIMENTS = [
     name: 'AMP Sticky Ad',
     spec: 'https://github.com/ampproject/amphtml/issues/2472',
   },
+  {
+    id: 'amp-live-list',
+    name: 'AMP Live List/Blog',
+    spec: 'https://github.com/ampproject/amphtml/issues/2762',
+  },
 ];
 
 
