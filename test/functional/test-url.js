@@ -305,6 +305,16 @@ describe('addParamToUrl', () => {
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar&elementId=n1&ampUserId=12345');
   });
 
+  it('should optionally add params to the front', () => {
+    let url = addParamToUrl('https://www.ampproject.org/get/here?hello=world&foo=bar',
+        'elementId', 'n1', /* addToFront */ true);
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1&hello=world&foo=bar');
+
+    url = addParamToUrl('https://www.ampproject.org/get/here',
+        'elementId', 'n1', /* addToFront */ true);
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1');
+  });
+
   it('should encode uri values', () => {
     url = addParamToUrl(url, 'foo', 'b ar');
     expect(url).to.equal('https://www.ampproject.org/get/here?foo=b%20ar#hash-value');
