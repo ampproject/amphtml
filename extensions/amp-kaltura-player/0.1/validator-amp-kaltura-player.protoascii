@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 
-tags: {  # amp-social-share
+tags: {  # amp-kaltura-player
   tag_name: "script"
-  spec_name: "amp-social-share extension .js script"
+  spec_name: "amp-kaltura-player extension .js script"
   mandatory_parent: "head"
   attrs: {
     name: "async"
@@ -26,13 +26,13 @@ tags: {  # amp-social-share
   attrs: {
     name: "custom-element"
     mandatory: true
-    value: "amp-social-share"
+    value: "amp-kaltura-player"
     dispatch_key: true
   }
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-kaltura-player-(latest|0\\.1)\\.js"
   }
   attrs: {
     name: "type"
@@ -44,38 +44,21 @@ tags: {  # amp-social-share
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
 }
-tags: {  # <amp-social-share>
-  tag_name: "amp-social-share"
+# amp-kaltura-player either comes with a video-id attribute, or with
+# a data-videoid attribute.
+tags: {  # <amp-kaltura-player>
+  tag_name: "amp-kaltura-player"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires_tag: "amp-social-share extension .js script"
-  attrs: {
-    name: "type"
-    mandatory: true
-  }
-  attrs: {
-    name: "data-share-endpoint"
-    value_url: {
-      allowed_protocol: "ftp"
-      allowed_protocol: "http"
-      allowed_protocol: "https"
-      allowed_protocol: "mailto"
-      # Whitelisting additional commonly observed third party
-      # protocols which should be safe
-      allowed_protocol: "snapchat"
-      allowed_protocol: "sms"
-      allowed_protocol: "tel"
-      allowed_protocol: "viber"
-      allowed_protocol: "whatsapp"
-      allow_relative: false
-    }
-  }
+  also_requires_tag: "amp-kaltura-player extension .js script"
+
+  attrs: { name: "data-partner" mandatory: true }
+
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
   amp_layout: {
-    supported_layouts: CONTAINER
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT

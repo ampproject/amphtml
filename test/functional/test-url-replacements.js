@@ -615,6 +615,26 @@ describe('UrlReplacements', () => {
       });
   });
 
+  it('should collect vars', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com?p1=foo');
+    return installUrlReplacementsService(win)
+        .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
+          'SIMPLE': 21,
+          'FUNC': () => 22,
+          'PROMISE': () => Promise.resolve(23),
+        })
+        .then(res => {
+          expect(res).to.deep.equal({
+            'SOURCE_HOST': 'example.com',
+            'QUERY_PARAM(p1)': 'foo',
+            'SIMPLE': 21,
+            'FUNC': 22,
+            'PROMISE': 23,
+          });
+        });
+  });
+
   describe('access values', () => {
 
     let accessService;

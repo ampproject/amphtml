@@ -398,7 +398,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isEmbedded()) {
+    if (this.viewer_.isIframed()) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }

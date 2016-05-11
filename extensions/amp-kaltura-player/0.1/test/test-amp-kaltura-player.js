@@ -69,7 +69,7 @@ describe('amp-kaltura-player', () => {
 
   it('requires data-account', () => {
     return getKaltura({}).should.eventually.be.rejectedWith(
-            /The data-account attribute is required for/);
+            /The data-partner attribute is required for/);
   });
 
   it('should pass data-param-* attributes to the iframe src', () => {

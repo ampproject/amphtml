@@ -46,7 +46,7 @@ class AmpKaltura extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const partnerid = user.assert(
         this.element.getAttribute('data-partner'),
-        'The data-account attribute is required for <amp-kaltura-player> %s',
+        'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);
     const uiconfid = this.element.getAttribute('data-uiconf') ||
     this.element.getAttribute('data-uiconf-id') ||
@@ -81,7 +81,7 @@ class AmpKaltura extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const partnerid = user.assert(
       this.element.getAttribute('data-partner'),
-      'The data-account attribute is required for <amp-kaltura-player> %s',
+      'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element);
     const entryid = this.element.getAttribute('data-entryid') || 'default';
     let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/thumbnail/entry_id/${encodeURIComponent(entryid)}`;

@@ -251,7 +251,7 @@ function getBaseCid(cid, persistenceConsent) {
   // If we are being embedded, try to get the base cid from the viewer.
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
-  if (viewer.isEmbedded()) {
+  if (viewer.isIframed()) {
     return viewer.getBaseCid().then(cid => {
       if (!cid) {
         throw new Error('No CID');
