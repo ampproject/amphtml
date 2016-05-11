@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+require('../amp-timeline');
 
+describe('amp-timeline', () => {
+  it('', () => {
 
-/**
- * TODO add tests
- *
- */
+  });
+});
