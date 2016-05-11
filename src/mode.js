@@ -60,6 +60,17 @@ export function setModeForTesting(m) {
   mode = m;
 }
 
+export const isMinified = process.env.NODE_ENV == 'production';
+
+export const isLocalDev = process.env.NODE_ENV != 'production' &&
+      (location.hostname == 'localhost' ||
+      (location.ancestorOrigins && location.ancestorOrigins[0] &&
+          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
+      // Filter out localhost running against a prod script.
+      // Because all allowed scripts are ours, we know that these can only
+      // occur during local dev.
+      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
+
 /**
  * Provides info about the current app.
  * @return {!ModeDef}
@@ -68,13 +79,6 @@ function getMode_() {
   if (window.context && window.context.mode) {
     return window.context.mode;
   }
-  const isLocalDev = (location.hostname == 'localhost' ||
-      (location.ancestorOrigins && location.ancestorOrigins[0] &&
-          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
-      // Filter out localhost running against a prod script.
-      // Because all allowed scripts are ours, we know that these can only
-      // occur during local dev.
-      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
   const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
@@ -92,7 +96,7 @@ function getMode_() {
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
-    minified: process.env.NODE_ENV == 'production',
+    minified: isMinified,
     test: window.AMP_TEST,
     log: developmentQuery['log'],
     version: fullVersion,

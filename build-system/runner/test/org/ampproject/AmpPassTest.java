@@ -26,6 +26,10 @@ public class AmpPassTest extends Es6CompilerTestCase {
   }
 
   public void testDevFineRemoval() throws Exception {
+    test("\"hello world\"", "\"hello world\"");
+  }
+/*
+  public void testDevFineRemoval() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -129,4 +133,5 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
+  */
 }

@@ -5,7 +5,9 @@ import java.util.Set;
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.HotSwapCompilerPass;
 import com.google.javascript.jscomp.NodeTraversal;
+import com.google.javascript.jscomp.NodeUtil;
 import com.google.javascript.jscomp.NodeTraversal.AbstractPostOrderCallback;
+import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
 /**
@@ -38,6 +40,11 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void hotSwapScript(Node scriptRoot, Node originalRoot) {
     NodeTraversal.traverseEs6(compiler, scriptRoot, this);
+    Node process = IR.objectlit(IR.stringKey("env", IR.objectlit(
+        IR.stringKey("NODE_ENV", IR.string("production")))));
+    Node var = IR.var(IR.name("process"), process);
+    scriptRoot.getFirstChild().addChildToFront(var);
+    compiler.reportCodeChange();
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
