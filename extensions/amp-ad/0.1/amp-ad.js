@@ -391,7 +391,7 @@ class AmpAd extends AMP.BaseElement {
       }
       // Remove the iframe only if it is not the master.
       if (this.iframe_.name.indexOf('_master') == -1) {
-        this.element.removeChild(this.iframe_);
+        removeElement(this.iframe_);
         this.iframe_ = null;
       }
     });

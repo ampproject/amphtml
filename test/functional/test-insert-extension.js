@@ -173,6 +173,14 @@ describe('test-insert-extension', () => {
   });
 
   describe('get correct script source', () => {
+    it('with local mode for testing', () => {
+      setModeForTesting({localDev: true});
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
+          'amp-ad', true);
+      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+    });
+
     it('with local mode normal pathname', () => {
       setModeForTesting({localDev: true});
       expect(getMode().localDev).to.be.true;

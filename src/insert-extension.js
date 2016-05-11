@@ -16,14 +16,19 @@
 
 import {getMode} from './mode';
 
-export let ampExtensionScriptInsertedOrPresent = [];
+/**
+ * Keep a list of extension elements whose scripts are included in HTML head.
+ * Note the list may not be complete, an extension name will only be added
+ * when `insertAmpExtensionScript()` is called.
+ */
+let ampExtensionScriptInsertedOrPresent = Object.create(null);
 
 /**
  * Reset the ampExtensionScriptInsertedOrPresent value for each test.
  * @visibleForTesting
  */
 export function resetExtensionScriptInsertedOrPresentForTesting() {
-  ampExtensionScriptInsertedOrPresent = [];
+  ampExtensionScriptInsertedOrPresent = Object.create(null);
 }
 
 /**
@@ -32,11 +37,10 @@ export function resetExtensionScriptInsertedOrPresentForTesting() {
  * @param {!Element} element
  * @param {string} extension
  */
-export function insertAmpExtensionScript/*OK*/(win, element, extension) {
+export function insertAmpExtensionScript(win, element, extension) {
   if (extension == 'amp-embed') {
     extension = 'amp-ad';
   }
-  ampExtensionScriptInsertedOrPresent[extension] = false;
   if (isAmpExtensionScriptRequired(win, element, extension)) {
     const ampExtensionScript = createAmpExtensionScript(win, extension);
     win.document.head.appendChild(ampExtensionScript);
@@ -55,7 +59,8 @@ function createAmpExtensionScript(win, extension) {
   ampExtensionScript.setAttribute('custom-element', extension);
   ampExtensionScript.setAttribute('data-script', extension);
   const pathStr = win.location.pathname;
-  const scriptSrc = calculateExtensionScriptUrl(pathStr, extension);
+  const scriptSrc = calculateExtensionScriptUrl(pathStr, extension,
+      win.AMP_TEST);
   ampExtensionScript.src = scriptSrc;
   return ampExtensionScript;
 };
@@ -86,12 +91,16 @@ function isAmpExtensionScriptRequired(win, element, extension) {
 /**
  * Calculate script url for amp-ad.
  * @visibleForTesting
- * @param {string} path Location path of the window.
+ * @param {string} path Location path of the window
  * @param {string} extension
+ * @param {bool=} isTest
  * @return {string}
  */
-export function calculateExtensionScriptUrl(path, extension) {
+export function calculateExtensionScriptUrl(path, extension, isTest) {
   if (getMode().localDev) {
+    if (isTest) {
+      return `/base/dist/v0/${extension}-0.1.js`;
+    }
     if (path.indexOf('.max') >= 0) {
       return `http://localhost:8000/dist/v0/${extension}-0.1.max.js`;
     }
