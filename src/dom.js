@@ -375,10 +375,10 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    const matches = attr.name.match(/^data-param-(.+)/);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
-      params[computeParamNameFunc(param)] = attr.nodeValue;
+      params[computeParamNameFunc(param)] = attr.value;
     }
   }
   return params;
