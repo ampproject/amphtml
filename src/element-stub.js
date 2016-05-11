@@ -20,10 +20,23 @@ import {BaseElement} from './base-element';
 /** @type {!Array} */
 export const stubbedElements = [];
 
+/**
+ * Maps lower case tag names to the non-stubbed implementation classes.
+ * @type {!Object<string, !Function>}
+ */
+export const directUpgrade = {};
+
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
-    stubbedElements.push(this);
+    // If the implementation is already available, immediately upgrade the
+    // element.
+    const implementation = directUpgrade[element.tagName.toLowerCase()]
+    if (implementation) {
+      element.upgrade(implementation);
+    } else {
+      stubbedElements.push(this);
+    }
   }
 
   /** @override */
