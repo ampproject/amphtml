@@ -22,8 +22,11 @@ import {timer} from '../../../src/timer';
 
 const DEFAULT_AMD_SRC = location.protocol + '//embed.widget.cx/amd.js';
 const DEFAULT_EMBED_APP = '/app/player/m4/dist/';
-const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([location.protocol + '//api.widget.cx', location.protocol + '//api.ramp.com']);
-const DATA_ATTR_NAME_MIDFIX = '-ramp-';
+const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([
+    location.protocol + '//api.widget.cx',
+    location.protocol + '//api.ramp.com' // todo: rm when safe
+]);
+const DATA_ATTR_NAME_MIDFIX = '-ramp-'; // todo: change to -cx- when safe
 
 let skipTransfer = {
     'data-isplayer': true,
