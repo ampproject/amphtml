@@ -73,6 +73,14 @@ const EXPERIMENTS = [
     name: 'Viewability APIs for amp-analytics',
     spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
   },
+
+  // Amp Timeline
+  {
+    id: 'amp-timeline',
+    name: 'Amp Timeline',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-timeline/amp-timeline.md',
+  },
 ];
 
 
