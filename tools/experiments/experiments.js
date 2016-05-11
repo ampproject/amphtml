@@ -66,6 +66,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-accordion/amp-accordion.md',
   },
+
+  // Amp Timeline
+  {
+    id: 'amp-timeline',
+    name: 'Amp Timeline',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-timeline/amp-timeline.md',
+  },
 ];
 
 
