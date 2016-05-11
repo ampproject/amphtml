@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-kaltura-player');
 import {adopt} from '../../../../src/runtime';
 
@@ -24,6 +26,7 @@ describe('amp-kaltura-player', () => {
 
   function getKaltura(attributes, opt_responsive) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const kalturaPlayer = iframe.doc.createElement('amp-kaltura-player');
       for (const key in attributes) {
         kalturaPlayer.setAttribute(key, attributes[key]);
