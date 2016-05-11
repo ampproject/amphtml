@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {insertAmpExtensionScript} from './insert-extension';
+import {insertAmpExtensionScript/*OK*/} from './insert-extension';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -24,7 +24,7 @@ export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
     // Fetch amp-ad script if it is not presented.
-    insertAmpExtensionScript(this.getWin(), element, 'amp-ad');
+    insertAmpExtensionScript/*OK*/(this.getWin(), element, 'amp-ad');
     stubbedElements.push(this);
   }
 

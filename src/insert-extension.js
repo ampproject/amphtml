@@ -32,7 +32,7 @@ export function resetExtensionScriptInsertedOrPresentForTesting() {
  * @param {!Element} element
  * @param {string} extension
  */
-export function insertAmpExtensionScript(win, element, extension) {
+export function insertAmpExtensionScript/*OK*/(win, element, extension) {
   if (extension == 'amp-embed') {
     extension = 'amp-ad';
   }
