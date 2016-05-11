@@ -88,6 +88,14 @@ const EXPERIMENTS = [
     name: 'AMP Access server side prototype',
     spec: '',
   },
+
+  // Amp Timeline
+  {
+    id: 'amp-timeline',
+    name: 'Amp Timeline',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-timeline/amp-timeline.md',
+  },
 ];
 
 
