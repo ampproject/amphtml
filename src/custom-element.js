@@ -1229,6 +1229,7 @@ export function registerElement(win, name, implementationClass) {
 export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
   if (implementationClass) {
+    // Update on the knownElements to prevent register again.
     knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
       prototype: createAmpElementProto(win, aliasName),
