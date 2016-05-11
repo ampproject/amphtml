@@ -18,7 +18,11 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
-import {ElementStub, stubbedElements} from './element-stub';
+import {
+  ElementStub,
+  directUpgrade,
+  stubbedElements,
+} from './element-stub';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
@@ -71,7 +75,7 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string}
- * @param {function(!Function)} toClass
+ * @param {!Function} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   if (!knownElements[name]) {
@@ -100,6 +104,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
       }
     }
   }
+  directUpgrade[name] = toClass;
 }
 
 
