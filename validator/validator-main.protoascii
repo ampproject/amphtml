@@ -21,7 +21,6 @@
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
 min_validator_revision_required: 133
-min_validator_revision_required: 112
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
