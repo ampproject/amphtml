@@ -26,10 +26,13 @@ import {parseUrl} from '../../../../src/url';
 adopt(window);
 
 describe(ELEMENT_NAME, function () {
-    this.timeout(1000000);
+    // you should'nt use an arrow-function here, mocha is screwing up the context
+    // https://github.com/mochajs/mocha/issues/2018
+    // same goes with individual it() tests
+    this.timeout(10000);
 
     const DEFAULT_ATTRIBUTES = {
-        'data-src': 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+        'data-src': location.protocol + '//media.w3.org/2010/05/sintel/trailer.mp4',
         'layout': 'responsive',
         'height': 90,
         'width': 160
@@ -39,17 +42,20 @@ describe(ELEMENT_NAME, function () {
         doc = doc || document;
         attributes = Object.assign({}, DEFAULT_ATTRIBUTES, attributes);
 
-        const widget = doc.createElement(ELEMENT_NAME);
+        const node = doc.createElement(ELEMENT_NAME);
 
         let key;
         for (key in attributes) {
-            widget.setAttribute(key, attributes[key]);
+            node.setAttribute(key, attributes[key]);
         }
-        doc.body.appendChild(widget);
+        doc.body.appendChild(node);
 
-        widget.implementation_.buildCallback();
+        node.implementation_.buildCallback();
 
-        return widget.implementation_.layoutCallback();
+        return node.implementation_.layoutCallback().then((implementation_) => {
+            // just to point out that out layoutCallback promise resolves with the implementation_
+            return implementation_;
+        });
     }
 
     // doesn't work yet
@@ -60,10 +66,36 @@ describe(ELEMENT_NAME, function () {
         });
     }
 
-    it('renders', function () {
+    it('renders', () => {
         return createWidget({})
-            .then(function (widget) {
-                expect(widget._mpf.video.src).to.equal(DEFAULT_ATTRIBUTES['data-src']);
+            .then(function (implementation_) {
+                expect(document.getElementById(implementation_._id)).to.be.ok;
+                expect(implementation_._mpf.video.src).to.equal(DEFAULT_ATTRIBUTES['data-src']);
+            });
+    });
+
+    it('renders responsively', () => {
+        return createWidget({})
+            .then(function (implementation_) {
+                expect(implementation_._target.className).to.match(/-amp-fill-content/);
+            });
+    });
+
+
+    it('pauses on request', () => {
+        return createWidget({})
+            .then(function (implementation_) {
+                implementation_.pauseCallback();
+                expect(implementation_._mpf.video.paused).to.be.true;
+            });
+    });
+
+
+    it('removes target div after unlayoutCallback', () => {
+        return createWidget({})
+            .then(function (implementation_) {
+                implementation_.unlayoutCallback();
+                expect(document.getElementById(implementation_._id)).to.be.null;
             });
     });
 });

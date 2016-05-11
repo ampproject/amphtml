@@ -95,45 +95,53 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     layoutCallback() {
+        let self = this;
+
+        if (this._loaded) {
+            return new Promise(resolve => {
+                resolve(self);
+            });
+        }
+
         if (this._noui) {
             setStyles(this.element, {
                 'display': 'none'
             });
         } else {
             this._createChildTarget();
+            this._id = this._target.getAttribute('id');
         }
 
-        let self = this;
         return this._injectEmbedScript().then(() => {
             self._setCXV();
 
             return new Promise((resolve) => {
+                let newResolve = function (arg) {
+                    self._loaded = true;
+                    return resolve(arg);
+                };
+
                 if (self._target && self._CXV) {
-                    self._CXV.Widgets.get('#' + self._target.getAttribute('id'), function (embed) {
+                    self._CXV.Widgets.get('#' + self._id, function (embed) {
                         self._embed = embed;
 
-                        console.log("request-from-amp-cxense.js, document.location.protocol=", document.location.protocol, DEFAULT_AMD_SRC);
-
                         if (self._isPlayer) {
-                            let selector = '#' + self._target.getAttribute('id') + '.metaplayer';
+                            let selector = '#' + self._id + '.metaplayer';
                             self._CXV.Widgets.get(selector, function (mpf) {
-                                console.log("got mpf");
 
                                 self._mpf = mpf;
                                 mpf.listen('ready', () => {
                                     self.applyFillContent(self._target);
-                                    resolve(self);
+                                    newResolve(self);
                                 });
                             });
                         } else {
                             self.applyFillContent(self._target);
-                            resolve(self);
+                            newResolve(self);
                         }
                     });
                 } else {
-                    console.log("dont GOT CX");
-
-                    resolve(self);
+                    newResolve(self);
                 }
             });
         });
@@ -143,6 +151,7 @@ class AmpCxense extends AMP.BaseElement {
     unlayoutCallback() {
         this._embed && this._embed.destroy();
         this._target && this._target.parentNode.removeChild(this._target);
+        this._target = null;
         return true;
     }
 
