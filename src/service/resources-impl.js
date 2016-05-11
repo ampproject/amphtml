@@ -16,7 +16,7 @@
 
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
-import {closest, isElementFullyParsed} from '../dom';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {
   expandLayoutRect,
@@ -393,7 +393,7 @@ export class Resources {
         resource.build();
         this.schedulePass();
       } else {
-        this.pendingBuildResources_.push(element);
+        this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
       }
     }
@@ -408,14 +408,14 @@ export class Resources {
   buildReadyResources_() {
     const builtResourcesIndexes = [];
     this.pendingBuildResources_.forEach((resource, index) => {
-      if (this.documentReady_ || isElementFullyParsed(resource.element)) {
+      if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
         resource.build();
         builtResourcesIndexes.push(index);
       }
     });
 
     // Remove resources that we just built from pending resources.
-    for (let i = builtResourcesIndexes.length; i > 0; i--) {
+    for (let i = builtResourcesIndexes.length - 1; i > 0; i--) {
       const index = builtResourcesIndexes[i];
       this.pendingBuildResources_.splice(index, 1);
     }
@@ -1655,22 +1655,17 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @return {boolean}
    */
   build() {
     if (this.blacklisted_ || !this.element.isUpgraded()) {
-      return false;
+      return;
     }
-    let built;
     try {
-      built = this.element.build();
+      this.element.build();
     } catch (e) {
       dev.error(TAG_, 'failed to build:', this.debugid, e);
-      built = false;
       this.blacklisted_ = true;
-    }
-    if (!built) {
-      return false;
+      return;
     }
 
     if (this.hasBeenMeasured()) {
@@ -1678,7 +1673,6 @@ export class Resource {
     } else {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
-    return true;
   }
 
   /**

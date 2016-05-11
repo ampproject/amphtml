@@ -435,17 +435,14 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *
-   * Returned value indicates whether or not build has been performed.
-   *
    * This method can only be called on a upgraded element.
    *
-   * @return {boolean}
    * @final @this {!Element}
    */
   ElementProto.build = function() {
     this.assertNotTemplate_();
     if (this.isBuilt()) {
-      return true;
+      return;
     }
     dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
     try {
@@ -476,7 +473,6 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.appendChild(placeholder);
       }
     }
-    return true;
   };
 
   /**

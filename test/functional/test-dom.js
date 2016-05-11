@@ -457,4 +457,28 @@ describe('DOM', () => {
       expect(params.attr1).to.be.undefined;
     });
   });
+
+  describe.only('isElementFullyParsed', () => {
+    it('should return true when the element has a nextSibling', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const sibling = document.createElement('div');
+      expect(dom.isElementFullyParsed(element)).to.be.false;
+      parent.appendChild(element);
+      parent.appendChild(sibling);
+      expect(dom.isElementFullyParsed(element)).to.be.true;
+    });
+
+    it('should return true when element ancestor has nextSibling', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const uncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      expect(dom.isElementFullyParsed(element)).to.be.false;
+      ancestor.appendChild(parent);
+      ancestor.appendChild(uncle);
+      parent.appendChild(element);
+      expect(dom.isElementFullyParsed(element)).to.be.true;
+    });
+  });
 });
