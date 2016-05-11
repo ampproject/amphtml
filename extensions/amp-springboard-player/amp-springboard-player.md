@@ -35,45 +35,6 @@ limitations under the License.
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-springboard-player` tag
-(see also `amp-springboard-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-springboard-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-site-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-mode</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-content-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-player-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-domain</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-      <td>Error thrown when <code>data-items</code> attribute is missing.</td>
-  </tr>
-  
-</table>
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -117,3 +78,7 @@ The Springboard partner domain.
 **data-items**
 
 The number of videos in playlist
+
+## Validation
+
+See [amp-springboard-player validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/0.1/validator-amp-springboard-player.protoascii)

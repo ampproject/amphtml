@@ -40,19 +40,6 @@ limitations under the License.
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-reach-player` tag
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-    <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'.</a></td>
-      <td>Error thrown when <code>data-embed-id</code> attribute is missing.</td>
-    </tr>
-</table>
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
@@ -73,4 +60,8 @@ Example:
 **data-embed-id**
 
 The Reach player embed id found in the "players" section or in the generated embed itself.
+
+## Validation
+
+See [amp-reach-player validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/0.1/validator-amp-reach-player.protoascii)
 
