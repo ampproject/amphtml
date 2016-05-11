@@ -17,7 +17,7 @@
 import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listen, postMessage} from './iframe-helper';
+import {listen, postMessageToWindows} from './iframe-helper';
 import {parseUrl} from './url';
 import {timer} from './timer';
 
@@ -100,6 +100,8 @@ export class IntersectionObserver extends Observable {
     this.baseElement_ = baseElement;
     /** @private {?Element} */
     this.iframe_ = iframe;
+    /** @private {!Array<{win: !Window, origin: string}>} */
+    this.clientWindows_ = [];
     /** @private {boolean} */
     this.is3p_ = opt_is3p || false;
     /** @private {boolean} */
@@ -126,7 +128,17 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    listen(this.iframe_, 'send-intersections', () => {
+    listen(this.iframe_, 'send-intersections', (data, source) => {
+      let isNew = true;
+      for (const clientWindow of this.clientWindows_) {
+        if (clientWindow.win == source.win) {
+          isNew = false;
+          break;
+        }
+      }
+      if (isNew) {
+        this.clientWindows_.push(source);
+      }
       this.startSendingIntersectionChanges_();
     }, this.is3p_);
 
@@ -211,13 +223,11 @@ export class IntersectionObserver extends Observable {
     if (!this.pendingChanges_.length) {
       return;
     }
-    const targetOrigin =
-        this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-    postMessage(
+    postMessageToWindows(
         this.iframe_,
+        this.clientWindows_,
         'intersection',
         {changes: this.pendingChanges_},
-        targetOrigin,
         this.is3p_);
     this.pendingChanges_.length = 0;
   }

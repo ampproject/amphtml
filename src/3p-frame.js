@@ -75,6 +75,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    amp3pSentinel: generateSentinel_(),
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -113,6 +114,7 @@ export function getIframe(parentWindow, element, opt_type) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+  iframe.setAttribute('data-amp-3p-sentinel', attributes._context.amp3pSentinel);
   return iframe;
 }
 
@@ -246,4 +248,16 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
       parseUrl(url).origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+let windowDepth_ = null;
+
+function generateSentinel_() {
+  if (windowDepth_ === null) {
+    windowDepth_ = 0;
+    for (let win = window; win != window.top; win = win.parent) {
+      windowDepth_++;
+    }
+  }
+  return '' + windowDepth_ + '-' + Math.round(Math.random() * 1000000);
 }

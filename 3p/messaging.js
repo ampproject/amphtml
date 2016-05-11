@@ -25,7 +25,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = 'amp-$internalRuntimeToken$';
+  object.sentinel = window.context.amp3pSentinel;
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
@@ -78,7 +78,7 @@ function startListening(win) {
     }
     // Parse JSON only once per message.
     const data = JSON.parse(event.data.substr(4));
-    if (data.sentinel != 'amp-$internalRuntimeToken$') {
+    if (data.sentinel != window.context.amp3pSentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.

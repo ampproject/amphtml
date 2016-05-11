@@ -17,6 +17,10 @@
 import {dev} from './log';
 import {parseUrl} from './url';
 
+/**
+ * @typedef {{win: !Window, origin: string}}
+ */
+let Target;
 
 /**
  * Allows listening for message from the iframe. Returns an unlisten
@@ -24,7 +28,7 @@ import {parseUrl} from './url';
  *
  * @param {!Element} iframe.
  * @param {string} typeOfMessage.
- * @param {function(!Object)} callback Called when a message of this type
+ * @param {function(!Object, !Target)} callback Called when a message of this type
  *     arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @return {!Unlisten}
@@ -33,7 +37,7 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   dev.assert(iframe.src, 'only iframes with src supported');
   const origin = parseUrl(iframe.src).origin;
   let win = iframe.ownerDocument.defaultView;
-  const sentinel = getSentinel_(opt_is3P);
+  const sentinel = getSentinel_(iframe, opt_is3P);
   let unlisten;
   let listener = function(event) {
     // If this iframe no longer has a contentWindow is was removed
@@ -43,11 +47,26 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
       unlisten();
       return;
     }
-    if (event.origin != origin) {
-      return;
-    }
-    if (event.source != iframe.contentWindow) {
-      return;
+    if (opt_is3P) {
+      // 3P variant supports messages from any window within the iframe.
+      // Origin is explicitly not checked as we cannot predict its value.
+      // However, the sentinel for 3P iframes is generated per iframe.
+      let iframeWin = event.source;
+      while (iframeWin && iframeWin != iframe.contentWindow && iframeWin != iframeWin.parent) {
+        iframeWin = iframeWin.parent;
+      }
+      if (iframeWin != iframe.contentWindow) {
+        return;
+      }
+    } else {
+      // Non-3P variant supports only messages directly from the
+      // iframe's window.
+      if (event.origin != origin) {
+        return;
+      }
+      if (event.source != iframe.contentWindow) {
+        return;
+      }
     }
     if (!event.data) {
       return;
@@ -59,7 +78,14 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
     if (data.type != typeOfMessage) {
       return;
     }
-    callback(data);
+
+    // We can't use event.origin to send postMessage back if the
+    // window belongs to a sandboxed iframe without allow-same-origin.
+    // If the origin seems broken we simply use '*'. The primary
+    // authentication comes from the sentinel anyway.
+    const originForResponse =
+        event.origin && event.origin !== 'null' ? event.origin : '*';
+    callback(data, {win: event.source, origin: originForResponse});
   };
 
   win.addEventListener('message', listener);
@@ -82,15 +108,15 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
  *
  * @param {!Element} iframe.
  * @param {string} typeOfMessage.
- * @param {function(!Object)} callback Called when a message of this type
+ * @param {function(!Object, !Target)} callback Called when a message of this type
  *     arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @return {!Unlisten}
  */
 export function listenOnce(iframe, typeOfMessage, callback, opt_is3P) {
-  const unlisten = listen(iframe, typeOfMessage, data => {
+  const unlisten = listen(iframe, typeOfMessage, (data, source) => {
     unlisten();
-    return callback(data);
+    return callback(data, source);
   }, opt_is3P);
   return unlisten;
 }
@@ -104,26 +130,41 @@ export function listenOnce(iframe, typeOfMessage, callback, opt_is3P) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
 export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
+  postMessageToWindows(
+      iframe,
+      [{win: iframe.contentWindow, origin: targetOrigin}],
+      type, object, opt_is3P);
+}
+
+/**
+ * Posts an identical message to multiple windows within the same iframe.
+ * @param {!Array<!Target>} targets
+ * @param {string} type Type of the message.
+ * @param {!Object} object Message payload.
+ * @param {boolean=} opt_is3P set to true if the iframe is 3p.
+ */
+export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
   if (!iframe.contentWindow) {
     return;
   }
   object.type = type;
-  object.sentinel = getSentinel_(opt_is3P);
+  object.sentinel = getSentinel_(iframe, opt_is3P);
   if (opt_is3P) {
     // Serialize ourselves because that is much faster in Chrome.
     object = 'amp-' + JSON.stringify(object);
   }
-  iframe.contentWindow./*OK*/postMessage(object, targetOrigin);
+  targets.forEach(target => target.win./*OK*/postMessage(object, target.origin));
 }
 
 /**
  * Gets the sentinel string.
+ * @param {!Element} iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @returns {string} Sentinel string.
  * @private
  */
-function getSentinel_(opt_is3P) {
-  return opt_is3P ? 'amp-$internalRuntimeToken$' : 'amp';
+function getSentinel_(iframe, opt_is3P) {
+  return opt_is3P ? iframe.getAttribute('data-amp-3p-sentinel')  : 'amp';
 }
 
 /**
