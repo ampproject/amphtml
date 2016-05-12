@@ -91,22 +91,23 @@ function readFromStdin() {
  */
 function readFromUrl(url) {
   return new Promise(function(resolve, reject) {
-    const clientModule = url.startsWith('http://') ? http : https;
-    clientModule.get(url, (response) => {
-      if (response.statusCode != 200) {
-        // https://nodejs.org/api/http.html says: "[...] However, if
-        // you add a 'response' event handler, then you must consume
-        // the data from the response object, either by calling
-        // response.read() whenever there is a 'readable' event, or by
-        // adding a 'data' handler, or by calling the .resume()
-        // method."
-        response.resume();
-        reject(new Error('HTTP Status ' + response.statusCode));
-      } else {
-        resolve(response);
-      }
-    });
-  }).then(readFromReadable);
+           const clientModule = url.startsWith('http://') ? http : https;
+           clientModule.get(url, (response) => {
+             if (response.statusCode != 200) {
+               // https://nodejs.org/api/http.html says: "[...] However, if
+               // you add a 'response' event handler, then you must consume
+               // the data from the response object, either by calling
+               // response.read() whenever there is a 'readable' event, or by
+               // adding a 'data' handler, or by calling the .resume()
+               // method."
+               response.resume();
+               reject(new Error('HTTP Status ' + response.statusCode));
+             } else {
+               resolve(response);
+             }
+           });
+         })
+      .then(readFromReadable);
 }
 
 /**
@@ -237,12 +238,12 @@ class Validator {
     this.sandbox = vm.createContext();
     new vm.Script(scriptContents).runInContext(this.sandbox);
 
-    this.validationErrorCodeByEnumValue = enumValuesByKeysFor(
-        this.sandbox.amp.validator.ValidationError.Code);
+    this.validationErrorCodeByEnumValue =
+        enumValuesByKeysFor(this.sandbox.amp.validator.ValidationError.Code);
     this.validationErrorSeverityByEnumValue = enumValuesByKeysFor(
         this.sandbox.amp.validator.ValidationError.Severity);
-    this.errorCategoryCodeByEnumValue = enumValuesByKeysFor(
-        this.sandbox.amp.validator.ErrorCategory.Code);
+    this.errorCategoryCodeByEnumValue =
+        enumValuesByKeysFor(this.sandbox.amp.validator.ErrorCategory.Code);
   }
 
   /**
@@ -257,8 +258,8 @@ class Validator {
     result.status = internalResult.status;
     for (const internalError of internalResult.errors) {
       const error = new ValidationError();
-      error.severity = this.validationErrorSeverityByEnumValue[
-        internalError.severity];
+      error.severity =
+          this.validationErrorSeverityByEnumValue[internalError.severity];
       error.line = internalError.line;
       error.col = internalError.col;
       error.message =
@@ -267,8 +268,8 @@ class Validator {
       error.code = this.validationErrorCodeByEnumValue[internalError.code];
       error.params = internalError.params;
       error.category =
-          this.errorCategoryCodeByEnumValue[
-            this.sandbox.amp.validator.categorizeError(internalError)];
+          this.errorCategoryCodeByEnumValue
+              [this.sandbox.amp.validator.categorizeError(internalError)];
       result.errors.push(error);
     }
     return result;
