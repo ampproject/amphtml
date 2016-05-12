@@ -703,7 +703,7 @@ describe('Resources discoverWork', () => {
 
     // Removes them even from scheduling queue.
     resource2.unload();
-    resources.cleanupTasks_(resource2, /*opt_removePending*/true);
+    resources.cleanupTasks_(resource2, /* opt_removePending */ true);
     expect(resources.queue_.getSize()).to.equal(0);
     expect(resources.pendingBuildResources_.length).to.equal(1);
 

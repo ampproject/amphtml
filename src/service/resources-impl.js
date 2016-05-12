@@ -430,7 +430,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    this.cleanupTasks_(resource, /** removePending */ true);
+    this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
 
@@ -1519,7 +1519,8 @@ export class Resources {
           request => request.resource != resource);
     }
 
-    if (resource.getState() == ResourceState_.NOT_BUILT && opt_removePending) {
+    if (resource.getState() == ResourceState_.NOT_BUILT && opt_removePending &&
+        this.pendingBuildResources_) {
       const pendingIndex = this.pendingBuildResources_.indexOf(resource);
       if (pendingIndex != -1) {
         this.pendingBuildResources_.splice(pendingIndex, 1);
