@@ -327,7 +327,7 @@ export class Performance {
    * @param {number} value
    */
   prerenderComplete_(value) {
-    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
+    if (this.viewer_) {
       this.viewer_.prerenderComplete({
         'value': value,
       });
