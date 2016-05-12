@@ -87,6 +87,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
 };
 
 
