@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-vimeo/">amp-vimeo.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
   </tr>
@@ -56,4 +60,4 @@ E.g. in https://vimeo.com/27246366 27246366 is the video id.
 
 ## Validation
 
-See [amp-vimeo validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/0.1/validator-amp-vimeo.protoascii)
+See [amp-vimeo validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/0.1/validator-amp-vimeo.protoascii).

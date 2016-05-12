@@ -399,4 +399,4 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 ## Validation
 
-See [amp-analytics validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/validator-amp-analytics.protoascii)
+See [amp-analytics validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/validator-amp-analytics.protoascii).

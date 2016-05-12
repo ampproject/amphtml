@@ -484,4 +484,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 
 ## Validation
 
-See [`amp-access` validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii)
+See [amp-access validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii).
