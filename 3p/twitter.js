@@ -16,7 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {computeInMasterFrame, loadScript} from '../src/3p';
+import {computeInMasterFrame, loadScript} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -59,19 +59,47 @@ export function twitter(global, data) {
         // We listen for resize to learn when things are
         // really done.
         iframe.contentWindow.addEventListener('resize', function() {
-          render();
+          resize(iframe.contentWindow.document.body);
         }, true);
-        render();
+        resize(iframe.contentWindow.document.body);
+      } else if (global.MutationObserver) {
+        // If no iframe is created, Twitter likely went into their ShadowDOM
+        // based pass. MutationObserver should definitely be available then.
+        // Because Twitter does not actually provide an event for when
+        // rendering is done, we use a MutationObserver and schedule a measure
+        // operation whenever any elements were added to the DOM.
+        let timeout;
+        function measure() {
+          // Throttle if multiple things happen at once.
+          clearTimeout(timeout);
+          timeout = setTimeout(function() {
+            const root = global.document.querySelector('#tweet *');
+            if (root) {
+              resize(root);
+            }
+          }, 0);
+        }
+        const observer = new MutationObserver(measure);
+        observer.observe(global.document.querySelector('#c'), {
+          subtree: true,
+          childList: true,
+        });
+        measure();
+      } else {
+        console./*OK*/error('No iframe or shadow root found for tweet.');
       }
     });
   });
 
-
-  function render() {
-    const iframe = global.document.querySelector('#c iframe');
-    const body = iframe.contentWindow.document.body;
+  function resize(container) {
+    const height = container./*OK*/offsetHeight;
+    // 0 height is always wrong and we should get another resize request
+    // later.
+    if (height == 0) {
+      return;
+    }
     context.updateDimensions(
-        body./*OK*/offsetWidth,
-        body./*OK*/offsetHeight + /* margins */ 20);
+        container./*OK*/offsetWidth,
+        height + /* margins */ 20);
   }
 }

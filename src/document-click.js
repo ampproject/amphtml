@@ -70,7 +70,7 @@ export class ClickHandler {
     this.history_ = historyFor(this.win);
 
     // Only intercept clicks when iframed.
-    if (this.viewer_.isEmbedded() && this.viewer_.isOvertakeHistory()) {
+    if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
       this.win.document.documentElement.addEventListener(

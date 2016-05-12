@@ -65,7 +65,7 @@ export function handleClick(e) {
   // Tag the original href with &amp=1 and make it a fragment param with
   // name click.
   const fragment = 'click=' + encodeURIComponent(
-      addParamToUrl(link.a.href, 'amp', '1'));
+      addParamToUrl(link.a.href, 'amp', '1', /* opt_addToFront */ true));
   let destination = link.eventualUrl;
   if (link.eventualUrl.indexOf('#') == -1) {
     destination += '#' + fragment;

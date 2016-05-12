@@ -101,6 +101,7 @@ export function installErrorReporting(win) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
+ * @this {!Window|undefined}
  */
 function reportErrorToServer(message, filename, line, col, error) {
   // Make an attempt to unhide the body.

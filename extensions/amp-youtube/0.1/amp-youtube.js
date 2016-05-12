@@ -17,6 +17,8 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
@@ -76,10 +78,14 @@ class AmpYoutube extends AMP.BaseElement {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
+
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
+
+    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
+
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        this.videoid_) + '?enablejsapi=1';
+    iframe.src = src;
     this.applyFillContent(iframe);
     iframe.width = this.width_;
     iframe.height = this.height_;
@@ -164,7 +170,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
+    const imgPlaceholder = this.element.ownerDocument.createElement('img');
     const videoid = this.videoid_;
 
     setStyles(imgPlaceholder, {

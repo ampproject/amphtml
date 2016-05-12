@@ -37,6 +37,9 @@
     "social": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
     "timing": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
   },
+  "lotame": {
+    "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
+  },
   "krux": {
     "beaconHost": "https://beacon.krxd.net",
     "timing": "t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_",
@@ -96,5 +99,11 @@
   },
   "mpulse": {
     "onvisible": "https://$beacon_url?h.d=$h.d&h.key=$h.key&h.t=$h.t&h.cr=$h.cr&rt.start=navigation&rt.si=_client_id_&rt.ss=_timestamp_&rt.end=_timestamp_&t_resp=_nav_timing_&t_page=_nav_timing_&t_done=_nav_timing_&nt_nav_type=_nav_type_&nt_red_cnt=_nav_redirect_count_&nt_nav_st=_nav_timing_&nt_red_st=_nav_timing_&nt_red_end=_nav_timing_&nt_fet_st=_nav_timing_&nt_dns_st=_nav_timing_&nt_dns_end=_nav_timing_&nt_con_st=_nav_timing_&nt_ssl_st=_nav_timing_&nt_con_end=_nav_timing_&nt_req_st=_nav_timing_&nt_res_st=_nav_timing_&nt_unload_st=_nav_timing_&nt_unload_end=_nav_timing_&nt_domloading=_nav_timing_&nt_res_end=_nav_timing_&nt_domint=_nav_timing_&nt_domcontloaded_st=_nav_timing_&nt_domcontloaded_end=_nav_timing_&nt_domcomp=_nav_timing_&nt_load_st=_nav_timing_&nt_load_end=_nav_timing_&v=1&http.initiator=amp&u=_source_url_&amp.u=_ampdoc_url_&r2=_document_referrer_&scr.xy=_screen_width_x_screen_height_",
-  }
+  },
+ "linkpulse": {
+    "base": "https://$host",
+    "pageview": "https://$host/p?i=$id&r=_document_referrer_&p=$pageUrl&s=$section&t=$type&c=$channel&mt=_title_&_t=amp&_r=_random_",
+    "pageload": "https://$host/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=$pageUrl&c=$channel&t=$type&s=$section&_t=amp&_r=_random_",
+    "ping": "https://$host/u?i=$id&u=_client_id_&p=$pageUrl&uActive=true&isPing=yes&c=$channel&t=$type&s=$section&_t=amp&_r=_random_",
+  },
 }

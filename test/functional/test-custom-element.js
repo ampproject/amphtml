@@ -24,15 +24,99 @@ import * as sinon from 'sinon';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
   createAmpElementProto,
+  getElementClassForTesting,
   markElementScheduledForTesting,
+  registerElement,
   resetScheduledElementForTesting,
   stubElements,
+  upgradeOrRegisterElement,
 } from '../../src/custom-element';
 // TODO(@cramforce): Move tests into their own file.
 import {
   getElementService,
   getElementServiceIfAvailable,
 } from '../../src/element-service';
+
+
+describe('CustomElement register', () => {
+
+  class ConcreteElement extends BaseElement {}
+
+  let sandbox;
+  let win;
+  let doc;
+  let registeredElements = {};
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    resetScheduledElementForTesting(window, 'amp-element1');
+
+    win = {
+      Object: window.Object,
+      HTMLElement: window.HTMLElement,
+      services: window.services,
+    };
+
+    registeredElements = {};
+    doc = {
+      registerElement: (name, spec) => {
+        if (registeredElements[name]) {
+          throw new Error('already registered: ' + name);
+        }
+        registeredElements[name] = spec;
+      },
+    };
+    win.document = doc;
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    resetScheduledElementForTesting(window, 'amp-element1');
+  });
+
+  function createElement(elementName) {
+    const spec = registeredElements[elementName];
+    if (!spec) {
+      throw new Error('unknown element: ' + elementName);
+    }
+    let ctor = spec.ctor;
+    if (!ctor) {
+      const proto = spec.prototype;
+      ctor = function() {
+        const el = document.createElement(elementName);
+        el.__proto__ = proto;
+        return el;
+      };
+      ctor.prototype = proto;
+      proto.constructor = ctor;
+      spec.ctor = ctor;
+    }
+    const element = new ctor();
+    element.createdCallback();
+    return element;
+  }
+
+  it('should go through stub/upgrade cycle', () => {
+    registerElement(win, 'amp-element1', ElementStub);
+    expect(getElementClassForTesting('amp-element1')).to.equal(ElementStub);
+    expect(registeredElements['amp-element1']).to.exist;
+    expect(registeredElements['amp-element1'].prototype).to.exist;
+
+    // Pre-download elements are created as ElementStub.
+    const element1 = createElement('amp-element1');
+    expect(element1.implementation_).to.be.instanceOf(ElementStub);
+
+    // Post-download, elements are upgraded.
+    upgradeOrRegisterElement(win, 'amp-element1', ConcreteElement);
+    expect(getElementClassForTesting('amp-element1')).to.equal(ConcreteElement);
+    expect(element1.implementation_).to.be.instanceOf(ConcreteElement);
+
+    // Elements created post-download and immediately upgraded.
+    const element2 = createElement('amp-element1');
+    element2.createdCallback();
+    expect(element2.implementation_).to.be.instanceOf(ConcreteElement);
+  });
+});
 
 
 describe('CustomElement', () => {

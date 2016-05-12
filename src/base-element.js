@@ -140,6 +140,16 @@ export class BaseElement {
     this.resources_ = resourcesFor(this.getWin());
   }
 
+  /**
+  * This is the priority of loading elements (layoutCallback).
+  * The lower the number, the higher the priority.
+  * The default priority for base elements is 0.
+  * @return {number}
+  */
+  getPriority() {
+    return 0;
+  }
+
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
@@ -655,7 +665,7 @@ export class BaseElement {
   * @return {!Promise}
   */
   mutateElement(mutator, opt_element) {
-    this.resources_.mutateElement(opt_element || this.element, mutator);
+    return this.resources_.mutateElement(opt_element || this.element, mutator);
   }
 
   /**

@@ -62,19 +62,27 @@ export function parseUrl(url) {
 }
 
 /**
- * Appends the string just before the fragment part of the URL.
+ * Appends the string just before the fragment part (or optionally
+ * to the front of the query string) of the URL.
  * @param {string} url
  * @param {string} paramString
+ * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString) {
+function appendParamStringToUrl(url, paramString, opt_addToFront) {
   if (!paramString) {
     return url;
   }
-  const parts = url.split('#', 2);
-  let newUrl = parts[0] + (
-      parts[0].indexOf('?') >= 0 ? `&${paramString}` : `?${paramString}`);
-  newUrl += parts[1] ? `#${parts[1]}` : '';
+  const mainAndFragment = url.split('#', 2);
+  const mainAndQuery = mainAndFragment[0].split('?', 2);
+
+  let newUrl = mainAndQuery[0] + (
+      mainAndQuery[1]
+          ? (opt_addToFront
+              ? `?${paramString}&${mainAndQuery[1]}`
+              : `?${mainAndQuery[1]}&${paramString}`)
+          : `?${paramString}`);
+  newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
   return newUrl;
 }
 /**
@@ -83,11 +91,12 @@ function appendParamStringToUrl(url, paramString) {
  * @param {string} url
  * @param {string} key
  * @param {string} value
+ * @param {boolean=} opt_addToFront
  * @return {string}
  */
-export function addParamToUrl(url, key, value) {
+export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  return appendParamStringToUrl(url, field);
+  return appendParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**

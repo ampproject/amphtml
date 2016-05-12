@@ -18,7 +18,7 @@ import {cidFor} from '../../src/cid';
 import {
   installCidService,
   getProxySourceOrigin,
-} from '../../src/service/cid-impl';
+} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
@@ -26,7 +26,7 @@ import * as sinon from 'sinon';
 
 describe('cid', () => {
 
-  let isEmbedded;
+  let isIframed;
   let sandbox;
   let clock;
   let fakeWin;
@@ -36,7 +36,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
-    isEmbedded = false;
+    isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     storage = {};
@@ -69,8 +69,8 @@ describe('cid', () => {
       },
     };
     const viewer = installViewerService(fakeWin);
-    sandbox.stub(viewer, 'isEmbedded', function() {
-      return isEmbedded;
+    sandbox.stub(viewer, 'isIframed', function() {
+      return isIframed;
     });
     sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
@@ -175,14 +175,14 @@ describe('cid', () => {
   });
 
   it('should retrieve cid from viewer if embedded', () => {
-    isEmbedded = true;
+    isIframed = true;
     return compare(
         'e2',
         'sha384(from-viewerhttp://www.origin.come2)');
   });
 
   it('should prefer value in storage if present', () => {
-    isEmbedded = true;
+    isIframed = true;
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
       time: timer.now(),
@@ -205,7 +205,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
-    installViewerService(win).isEmbedded = () => false;
+    installViewerService(win).isIframed = () => false;
     installCidService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {

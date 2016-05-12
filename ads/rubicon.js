@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, loadScript, checkData} from '../src/3p';
+import {writeScript, loadScript, checkData} from '../3p/3p';
 import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
 
@@ -26,7 +26,8 @@ export function rubicon(global, data) {
   checkData(data, [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
-    'overrideWidth', 'overrideHeight',
+    'overrideWidth', 'overrideHeight', 'loadingStrategy',
+    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
     'account', 'site', 'zone', 'size',
     'pos', 'kw', 'visitor', 'inventory',
     'type', 'method', 'callback',
@@ -101,6 +102,7 @@ function fastLane(global, data) {
       if (data.visitor) { setFPD('V', data.visitor); };
       if (data.inventory) { setFPD('I', data.inventory); };
       rubicontag.setUrl(getSourceUrl(context.location.href));
+      rubicontag.setIntegration('amp');
       rubicontag.run(gptrun, 1000);
 
     });
@@ -122,6 +124,7 @@ function smartTag(global, data) {
   global.rp_kw = data.kw;
   global.rp_visitor = data.visitor;
   global.rp_inventory = data.inventory;
+  global.rp_amp = 'st';
   global.rp_callback = data.callback;
   /* eslint-enable */
   writeScript(global, 'https://ads.rubiconproject.com/ad/' + encodeURIComponent(data.account) + '.js');

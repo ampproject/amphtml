@@ -21,6 +21,7 @@ import {
   TaskQueue_,
 } from '../../src/service/resources-impl';
 import {VisibilityState} from '../../src/service/viewer-impl';
+import {dev} from '../../src/log';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -265,6 +266,9 @@ describe('Resources schedulePause', () => {
       unlayoutOnPause() {
         return false;
       },
+      getPriority() {
+        return 0;
+      },
     };
   }
 
@@ -378,6 +382,9 @@ describe('Resources schedulePreload', () => {
       unlayoutOnPause() {
         return false;
       },
+      getPriority() {
+        return 0;
+      },
     };
   }
 
@@ -488,6 +495,7 @@ describe('Resources discoverWork', () => {
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 1,
     };
   }
 
@@ -728,6 +736,7 @@ describe('Resources changeSize', () => {
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
+      getPriority: () => 0,
     };
   }
 
@@ -1112,6 +1121,7 @@ describe('Resources mutateElement', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
+      getPriority: () => 0,
     };
   }
 
@@ -1331,6 +1341,7 @@ describe('Resources.Resource', () => {
       resumeCallback: () => false,
       viewportCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 2,
     };
     elementMock = sandbox.mock(element);
 
@@ -1947,6 +1958,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      getPriority: () => 0,
     };
     elementMock = sandbox.mock(element);
 
@@ -2328,5 +2340,181 @@ describe('Resource renderOutsideViewport', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
       });
     });
+  });
+});
+
+describe('Resources fix IE matchMedia', () => {
+  let sandbox;
+  let clock;
+  let windowApi, windowMock;
+  let platformMock;
+  let resources;
+  let devErrorStub;
+  let schedulePassStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(window);
+    resources.relayoutAll_ = false;
+    resources.doPass_ = () => {};
+    platformMock = sandbox.mock(resources.platform_);
+    devErrorStub = sandbox.stub(dev, 'error');
+    schedulePassStub = sandbox.stub(resources, 'schedulePass');
+
+    windowApi = {
+      innerWidth: 320,
+      setInterval: () => {},
+      clearInterval: () => {},
+      matchMedia: () => {},
+    };
+    windowMock = sandbox.mock(windowApi);
+  });
+
+  afterEach(() => {
+    platformMock.verify();
+    windowMock.verify();
+    sandbox.restore();
+  });
+
+  it('should bypass polling for non-IE browsers', () => {
+    platformMock.expects('isIe').returns(false);
+    windowMock.expects('matchMedia').never();
+    windowMock.expects('setInterval').never();
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+  });
+
+  it('should bypass polling when matchMedia is not broken', () => {
+    platformMock.expects('isIe').returns(true);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: true})
+        .once();
+    windowMock.expects('setInterval').never();
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+  });
+
+  it('should poll when matchMedia is wrong, but eventually succeeds', () => {
+    platformMock.expects('isIe').returns(true);
+
+    // Scheduling pass.
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .once();
+    const intervalId = 111;
+    let intervalCallback;
+    windowMock.expects('setInterval')
+        .withExactArgs(
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
+        )
+        .returns(intervalId)
+        .once();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    expect(intervalCallback).to.exist;
+    windowMock.verify();
+    windowMock./*OK*/restore();
+
+    // Second pass.
+    clock.tick(10);
+    windowMock = sandbox.mock(windowApi);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .once();
+    windowMock.expects('clearInterval').never();
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    windowMock.verify();
+    windowMock./*OK*/restore();
+
+    // Third pass - succeed.
+    clock.tick(10);
+    windowMock = sandbox.mock(windowApi);
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: true})
+        .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.true;
+    expect(schedulePassStub.callCount).to.equal(1);
+    expect(devErrorStub.callCount).to.equal(0);
+    windowMock.verify();
+    windowMock./*OK*/restore();
+  });
+
+  it('should poll until times out', () => {
+    platformMock.expects('isIe').returns(true);
+
+    // Scheduling pass.
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .returns({matches: false})
+        .atLeast(2);
+    const intervalId = 111;
+    let intervalCallback;
+    windowMock.expects('setInterval')
+        .withExactArgs(
+            sinon.match(arg => {
+              intervalCallback = arg;
+              return true;
+            }),
+            10
+        )
+        .returns(intervalId)
+        .once();
+    windowMock.expects('clearInterval').withExactArgs(intervalId).once();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+    expect(intervalCallback).to.exist;
+
+    // Second pass.
+    clock.tick(10);
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.false;
+    expect(devErrorStub.callCount).to.equal(0);
+    expect(schedulePassStub.callCount).to.equal(0);
+
+    // Third pass - timeout.
+    clock.tick(2000);
+    intervalCallback();
+    expect(resources.relayoutAll_).to.be.true;
+    expect(schedulePassStub.callCount).to.equal(1);
+    expect(devErrorStub.callCount).to.equal(1);
+  });
+
+  it('should tolerate matchMedia exceptions', () => {
+    platformMock.expects('isIe').returns(true);
+
+    windowMock.expects('matchMedia')
+        .withExactArgs('(min-width: 320px) AND (max-width: 320px)')
+        .throws(new Error('intentional'))
+        .once();
+    windowMock.expects('setInterval').never();
+
+    resources.fixMediaIe_(windowApi);
+    expect(resources.relayoutAll_).to.be.true;
+    expect(devErrorStub.callCount).to.equal(1);
+    expect(schedulePassStub.callCount).to.equal(0);
   });
 });
