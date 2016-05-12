@@ -398,7 +398,7 @@ function tests(name, installer) {
     });
 
     describe('renderOutsideViewport', () => {
-      function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
+      function getGoodAd(cb, layoutCb, opt_attrs) {
         const attributes = {
           width: 300,
           height: 250,
@@ -410,8 +410,9 @@ function tests(name, installer) {
           // Test precedence
           'data-width': '6666',
         };
-        if (opt_loadingStrategy) {
-          attributes['data-loading-strategy'] = opt_loadingStrategy;
+        opt_attrs = opt_attrs || null;
+        for (var prop in opt_attrs) {
+          attributes[prop] = opt_attrs[prop];
         }
         return getAd(attributes, 'https://schema.org', element => {
           cb(element.implementation_);
@@ -422,7 +423,7 @@ function tests(name, installer) {
       it('should not return false after scrolling, then false for 1s', () => {
         let clock;
         return getGoodAd(ad => {
-          expect(ad.renderOutsideViewport()).not.to.be.false;
+          expect(ad.renderOutsideViewport()).to.be.true;
         }, () => {
           clock = sandbox.useFakeTimers();
         }).then(ad => {
@@ -431,23 +432,45 @@ function tests(name, installer) {
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
-          expect(ad.renderOutsideViewport()).not.to.be.false;
+          expect(ad.renderOutsideViewport()).to.be.true;
         });
       });
 
       it('should prefer-viewability-over-views', () => {
         let clock;
         return getGoodAd(ad => {
-          expect(ad.renderOutsideViewport()).not.to.be.false;
+          expect(ad.renderOutsideViewport()).to.be.true;
         }, () => {
           clock = sandbox.useFakeTimers();
-        }, 'prefer-viewability-over-views').then(ad => {
+        }, {
+            'data-loading-strategy': 'prefer-viewability-over-views',
+            // Included to verify loading-strategy is prioritized.
+            'data-loading-distance': '2',
+        }).then(ad => {
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
           expect(ad.renderOutsideViewport()).to.equal(1.25);
+        });
+      });
+
+      it('should load inside loading-distance', () => {
+        let clock;
+        return getGoodAd(ad => {
+          expect(ad.renderOutsideViewport()).to.be.true;
+        }, () => {
+          clock = sandbox.useFakeTimers();
+        }, {
+            'data-loading-distance': '2',
+        }).then(ad => {
+          // False because we just rendered one.
+          expect(ad.renderOutsideViewport()).to.be.false;
+          clock.tick(900);
+          expect(ad.renderOutsideViewport()).to.be.false;
+          clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.equal(2);
         });
       });
     });

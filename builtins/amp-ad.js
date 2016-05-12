@@ -65,15 +65,25 @@ export function installAd(win) {
         return false;
       }
 
+      // Legacy code from #2425, deprecated by the loading distance attribute.
       // Ad opts into lazier loading strategy where we only load ads that are
       // at closer than 1.25 viewports away.
-      if (this.element.getAttribute('data-loading-strategy') ==
-          'prefer-viewability-over-views') {
+      const loadingStrategy = this.element.getAttribute('data-loading-strategy');
+      if (loadingStrategy == 'prefer-viewability-over-views') {
         return 1.25;
       }
 
+      // Ad opts into lazier loading strategy where we only load ads that are
+      // at closer than `distance` viewports away.
+      const loadingDistance = parseFloat(
+          this.element.getAttribute('data-loading-distance')
+      );
+      if (!isNaN(loadingDistance)) {
+        return loadingDistance;
+      }
+
       // Otherwise the ad is good to go.
-      return super.renderOutsideViewport();
+      return true;
     }
 
     /** @override */
