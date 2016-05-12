@@ -2600,5 +2600,5 @@ describe('Resources.add', () => {
       expect(parent.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
-  })
+  });
 });
