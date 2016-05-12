@@ -31,10 +31,16 @@ it('deployed validator rejects the empty file', (done) => {
   // Note: This will fetch and use the validator from
   // 'https://cdn.ampproject.org/v0/validator.js', since only one argument
   // is supplied to validateString.
-  ampValidator.validateString('').then((validationResult) => {
-    expect(validationResult.status).toBe('FAIL');
-    done();
-  });
+  ampValidator.getInstance()
+      .then((instance) => {
+        const validationResult = instance.validateString('');
+        expect(validationResult.status).toBe('FAIL');
+        done();
+      })
+      .catch((error) => {
+        fail(error);
+        done();
+      });
 });
 
 it('validator_minified.js was built (run build.py if this fails)', () => {
@@ -43,24 +49,32 @@ it('validator_minified.js was built (run build.py if this fails)', () => {
 
 it('built validator rejects the empty file', (done) => {
   // Note: This will use the validator that was built with build.py.
-  ampValidator.validateString('', /*validatorJs*/ 'dist/validator_minified.js')
-      .then((validationResult) => {
+  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+      .then((instance) => {
+        const validationResult = instance.validateString('')
         expect(validationResult.status).toBe('FAIL');
         done();
-      }).catch((error) => {fail(error); done(); });
+      })
+      .catch((error) => {
+        fail(error);
+        done();
+      });
 });
 
 it('accepts the minimum valid AMP file', (done) => {
   // Note: This will use the validator that was built with build.py.
   const mini =
       fs.readFileSync('testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
-  ampValidator
-      .validateString(mini, /*validatorJs*/ 'dist/validator_minified.js')
-      .then((validationResult) => {
-        expect(validationResult.status).toBe('PASS');
-        expect(validationResult.errors.length).toEqual(0);
+  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+      .then((instance) => {
+        const validationResult = instance.validateString('')
+        expect(validationResult.status).toBe('FAIL');
         done();
-      }).catch((error) => {fail(error); done(); });
+      })
+      .catch((error) => {
+        fail(error);
+        done();
+      });
 });
 
 it('rejects a specific file that is known to have errors', (done) => {
@@ -69,11 +83,9 @@ it('rejects a specific file that is known to have errors', (done) => {
       fs.readFileSync('testdata/feature_tests/several_errors.html', 'utf-8');
   const severalErrorsOut =
       fs.readFileSync('testdata/feature_tests/several_errors.out', 'utf-8');
-  ampValidator
-      .validateString(
-          severalErrorsHtml,
-          /*validatorJs*/ 'dist/validator_minified.js')
-      .then((validationResult) => {
+  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+      .then((instance) => {
+        const validationResult = instance.validateString(severalErrorsHtml);
         expect(validationResult.status).toBe('FAIL');
         // Here, we assemble the output from the validationResult that was
         // computed by the validator and compare it with the golden file.
@@ -88,7 +100,11 @@ it('rejects a specific file that is known to have errors', (done) => {
         }
         expect(out).toBe(severalErrorsOut);
         done();
-      }).catch((error) => {fail(error); done(); });
+      })
+      .catch((error) => {
+        fail(error);
+        done();
+      });
 });
 
 jasmine.onComplete(function(passed) { process.exit(passed ? 0 : 1); });

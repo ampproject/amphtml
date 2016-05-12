@@ -28,8 +28,8 @@ const url = require('url');
 const util = require('util');
 
 /**
- * Convenience function to detect whether an argument is a ULR or
- * (perhaps) a local file.
+ * Convenience function to detect whether an argument is a URL. If not,
+ * it may be a local file.
  * @param {!string} url
  * @returns {!boolean}
  */
@@ -188,33 +188,33 @@ class ValidationError {
   }
 }
 
-/**
- * A global static map used by the validateString function to avoid loading
- * AMP Validators more than once.
- * @type {!Object<string, Object>}
- */
-const precompiledByValidatorJs = {};
+class Validator {
+  /**
+   * @param {!string} scriptContents
+   */
+  constructor(scriptContents) {
+    // The 'sandbox' is a Javascript object (dictionary) which holds
+    // the results of evaluating the validatorJs / scriptContents, so
+    // basically, it holds functions, prototypes, etc. As a
+    // side-effect of evaluating, the VM will compile this code and
+    // it's worth holding onto it. Hence, this validate function is
+    // reached via 2 codepaths - either the sandbox came from the
+    // cache, precompiledByValidatorJs - or we just constructed it
+    // after downloading and evaluating the script. The API is fancier
+    // here, vm.Script / vm.createContext / vm.runInContext and all
+    // that, but it's quite similar to a Javascript eval.
+    this.sandbox = vm.createContext();
+    new vm.Script(scriptContents).runInContext(this.sandbox);
+  }
 
-/**
- * @param {!string} inputString
- * @param {string=} validatorJs_opt
- * @returns {Promise<(ValidationResult|Error)>}
- * @export
- */
-function validateString(inputString, opt_validatorJs) {
-  const validatorJs =
-      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
-  // The 'sandbox' is a Javascript object (dictionary) which holds the results
-  // of evaluating the validatorJs, so basically, it holds functions, prototypes,
-  // etc. As a side-effect of evaluating, the VM will compile this code and it's
-  // worth holding onto it. Hence, this validate function is reached via
-  // 2 codepaths - either the sandbox came from the cache,
-  // precompiledByValidatorJs - or we just constructed it after downloading
-  // and evaluating the script. The API is fancier here, vm.Script /
-  // vm.createContext / vm.runInContext and all that, but it's quite similar
-  // to a Javascript eval.
-  const validate = (sandbox, resolve) => {
-    const internalResult = sandbox.amp.validator.validateString(inputString);
+  /**
+   * @param {!string} inputString
+   * @returns {!ValidationResult}
+   * @export
+   */
+  validateString(inputString) {
+    const internalResult =
+        this.sandbox.amp.validator.validateString(inputString);
     const result = new ValidationResult();
     result.status = internalResult.status;
     for (const internalError of internalResult.errors) {
@@ -222,19 +222,37 @@ function validateString(inputString, opt_validatorJs) {
       error.severity = internalError.severity;
       error.line = internalError.line;
       error.col = internalError.col;
-      error.message = sandbox.amp.validator.renderErrorMessage(internalError);
+      error.message =
+          this.sandbox.amp.validator.renderErrorMessage(internalError);
       error.specUrl = internalError.specUrl;
       error.code = internalError.code;
       error.params = internalError.params;
-      error.category = sandbox.amp.validator.categorizeError(internalError);
+      error.category =
+          this.sandbox.amp.validator.categorizeError(internalError);
       result.errors.push(error);
     }
-    resolve(result);
-  };
-  if (precompiledByValidatorJs.hasOwnProperty(validatorJs)) {
+    return result;
+  }
+}
+
+/**
+ * A global static map used by the getInstance function to avoid loading
+ * AMP Validators more than once.
+ * @type {!Object<string, Validator>}
+ */
+const instanceByValidatorJs = {};
+
+/**
+ * @param {string=} validatorJs_opt
+ * @returns {Promise<(Validator|Error)>}
+ * @export
+ */
+function getInstance(opt_validatorJs) {
+  const validatorJs =
+      opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
+  if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return new Promise(function(resolve, reject) {
-      const sandbox = precompiledByValidatorJs[validatorJs];
-      validate(sandbox, resolve);
+      resolve(instanceByValidatorJs[validatorJs]);
     });
   }
   const validatorJsPromise =
@@ -242,16 +260,14 @@ function validateString(inputString, opt_validatorJs) {
   return new Promise(function(resolve, reject) {
     validatorJsPromise
         .then((scriptContents) => {
-          const script = new vm.Script(scriptContents);
-          const sandbox = vm.createContext();
-          script.runInContext(sandbox);
-          precompiledByValidatorJs[validatorJs] = sandbox;
-          validate(sandbox, resolve);
+          const instance = new Validator(scriptContents);
+          instanceByValidatorJs[validatorJs] = instance;
+          resolve(instance);
         })
         .catch(reject);
   });
-};
-exports.validateString = validateString;
+}
+exports.getInstance = getInstance;
 
 /**
  * Maps from file extension to a mime-type.
@@ -300,8 +316,9 @@ function serve(port, validatorScript) {
             response.end(contents);
             return;
           }
-          response.end(contents.replace(new RegExp(
-              'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
+          response.end(contents.replace(
+              new RegExp(
+                  'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
               validatorScript));
           return;
         }
@@ -452,8 +469,9 @@ function main() {
           }
           input
               .then((data) => {
-                validateString(data, program.validator_js)
-                    .then((validationResult) => {
+                getInstance(program.validator_js)
+                    .then((validator) => {
+                      const validationResult = validator.validateString(data);
                       logValidationResult(item, validationResult);
                       if (validationResult.status !== 'PASS') {
                         process.exitCode = 1;
