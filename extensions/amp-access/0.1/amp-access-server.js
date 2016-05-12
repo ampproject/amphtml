@@ -95,15 +95,16 @@ export class AccessServerAdapter {
     this.serverState_ = stateElement ?
         stateElement.getAttribute('content') : null;
 
-    /** @private @const {boolean} */
-    this.isProxyOrigin_ = isProxyOrigin(this.win.location);
+    const isInExperiment = isExperimentOn(win, TAG);
 
-    const serviceUrlOverride = isExperimentOn(win, TAG) ?
+    /** @private @const {boolean} */
+    this.isProxyOrigin_ = isProxyOrigin(win.location) || isInExperiment;
+
+    const serviceUrlOverride = isInExperiment ?
         this.viewer_.getParam('serverAccessService') : null;
 
     /** @private @const {string} */
-    this.serviceUrl_ = serviceUrlOverride ||
-        removeFragment(this.win.location.href);
+    this.serviceUrl_ = serviceUrlOverride || removeFragment(win.location.href);
   }
 
   /** @override */
