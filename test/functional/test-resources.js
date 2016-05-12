@@ -659,6 +659,9 @@ describe('Resources discoverWork', () => {
   });
 
   it('should eject stale tasks when element unloaded', () => {
+    const pendingResource = createResource(5, layoutRectLtwh(0, 0, 0, 0));
+    pendingResource.state_ = ResourceState_.NOT_BUILT;
+    resources.pendingBuildResources_ = [pendingResource];
     resources.visible_ = true;
     // Don't resolve layout - immulating DOM being removed and load
     // promise not resolving.
@@ -679,6 +682,7 @@ describe('Resources discoverWork', () => {
     expect(resources.queue_.getSize()).to.equal(2);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
     expect(resources.queue_.tasks_[1].resource).to.equal(resource2);
+    expect(resources.pendingBuildResources_.length).to.equal(1);
 
     resources.work_();
     expect(resources.exec_.getSize()).to.equal(2);
@@ -699,8 +703,13 @@ describe('Resources discoverWork', () => {
 
     // Removes them even from scheduling queue.
     resource2.unload();
-    resources.cleanupTasks_(resource2);
+    resources.cleanupTasks_(resource2, /*opt_removePending*/true);
     expect(resources.queue_.getSize()).to.equal(0);
+    expect(resources.pendingBuildResources_.length).to.equal(1);
+
+    const pendingElement = {'__AMP__RESOURCE': pendingResource};
+    resources.remove(pendingElement);
+    expect(resources.pendingBuildResources_.length).to.equal(0);
   });
 
 });

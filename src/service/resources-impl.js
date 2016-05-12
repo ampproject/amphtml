@@ -138,7 +138,7 @@ export class Resources {
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
 
-    /** @private {?Array<!Element>} */
+    /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
 
     /** @private {number} */
@@ -430,6 +430,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    this.cleanupTasks_(resource, /** removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
 
@@ -1498,9 +1499,10 @@ export class Resources {
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
    * @param resource
+   * @param opt_removePending Whether to remove from pending build resources.
    * @private
    */
-  cleanupTasks_(resource) {
+  cleanupTasks_(resource, opt_removePending) {
     if (resource.getState() == ResourceState_.NOT_LAID_OUT) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1515,6 +1517,13 @@ export class Resources {
       });
       this.requestsChangeSize_ = this.requestsChangeSize_.filter(
           request => request.resource != resource);
+    }
+
+    if (resource.getState() == ResourceState_.NOT_BUILT && opt_removePending) {
+      const pendingIndex = this.pendingBuildResources_.indexOf(resource);
+      if (pendingIndex != -1) {
+        this.pendingBuildResources_.splice(pendingIndex, 1);
+      }
     }
   }
 }
