@@ -40,7 +40,7 @@ function isHttpOrHttpsUrl(url) {
 /**
  * Creates a promise which reads from a file.
  * @param {!string} name
- * @returns {!Promise<(!string|!Error)>}
+ * @returns {!Promise<!string>}
  */
 function readFromFile(name) {
   return new Promise(function(resolve, reject) {
@@ -57,7 +57,7 @@ function readFromFile(name) {
 /**
  * Creates a promise which reads from a stream.
  * @param {!stream.Readable} readable
- * @returns {!Promise<!string|Error>}
+ * @returns {!Promise<!string>}
  */
 function readFromReadable(readable) {
   return new Promise(function(resolve, reject) {
@@ -71,7 +71,7 @@ function readFromReadable(readable) {
 
 /**
  * Creates a promise which reads from standard input.
- * @returns {!Promise<!string|Error>}
+ * @returns {!Promise<!string>}
  */
 function readFromStdin() {
   return new Promise(function(resolve, reject) {
@@ -89,7 +89,7 @@ function readFromStdin() {
  * the contents located at the URL by using the 'http' or 'https' module.
  * Any HTTP status other than 200 is interpreted as an error.
  * @param {!string} url
- * @returns {!Promise<!string|Error>}
+ * @returns {!Promise<!string>}
  */
 function readFromUrl(url) {
   return new Promise((resolve, reject) => {
@@ -244,7 +244,7 @@ const instanceByValidatorJs = {};
 
 /**
  * @param {string=} validatorJs_opt
- * @returns {Promise<(Validator|Error)>}
+ * @returns {!Promise<Validator>}
  * @export
  */
 function getInstance(opt_validatorJs) {
