@@ -70,7 +70,9 @@ function readFromReadable(readable) {
 }
 
 /**
- * Creates a promise which reads from standard input.
+ * Creates a promise which reads from standard input. Even though it would
+ * be easy to make a function that just returns the data, we return a promise
+ * for consistency with readFromUrl and readFromFile.
  * @returns {!Promise<!string>}
  */
 function readFromStdin() {
