@@ -76,13 +76,9 @@ function readFromReadable(readable) {
  * @returns {!Promise<!string>}
  */
 function readFromStdin() {
-  return new Promise(function(resolve, reject) {
-    readFromReadable(process.stdin)
-        .then((data) => {
-          process.stdin.resume();
-          resolve(data);
-        })
-        .catch(reject);
+  return readFromReadable(process.stdin).then((data) => {
+    process.stdin.resume();
+    return data;
   });
 }
 
