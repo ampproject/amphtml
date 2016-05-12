@@ -76,4 +76,4 @@ E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
 
 ## Validation
 
-See [amp-instagram validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii).
+See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii) in the AMP validator specification.

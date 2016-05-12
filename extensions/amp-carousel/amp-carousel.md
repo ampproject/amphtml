@@ -122,4 +122,4 @@ You may override this with your own svg or image like so:
 ```
 ## Validation
 
-See [amp-carousel validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii).
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii) in the AMP validator specification.

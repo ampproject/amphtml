@@ -81,4 +81,4 @@ If present, will mute the audio by default.
 
 ## Validation
 
-See [amp-audio validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/0.1/validator-amp-audio.protoascii).
+See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/0.1/validator-amp-audio.protoascii) in the AMP validator specification.

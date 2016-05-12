@@ -75,4 +75,4 @@ Must have the value `nodisplay`.
 
 ## Validation
 
-See [amp-install-serviceworker validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii).
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

@@ -104,4 +104,4 @@ The attributes above should all behave like they do on standard elements.
 
 ## Validation
 
-See [amp-font validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii).
+See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii) in the AMP validator specification.

@@ -86,4 +86,4 @@ The `expanded` attribute can be set on any `<section>` that needs to be expanded
 
 ## Validation
 
-See [amp-accordion validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii).
+See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii) in the AMP validator specification.

@@ -116,4 +116,4 @@ Default value: `"true"`
 
 ## Validation
 
-See [amp-dailymotion validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/0.1/validator-amp-dailymotion.protoascii).
+See [amp-dailymotion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/0.1/validator-amp-dailymotion.protoascii) in the AMP validator specification.

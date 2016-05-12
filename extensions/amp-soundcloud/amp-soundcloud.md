@@ -86,4 +86,4 @@ Layout is `fixed-height` and will fill all the available horizontal space. This 
 
 ## Validation
 
-See [amp-soundcloud validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii)
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii) in the AMP validator specification.

@@ -57,4 +57,4 @@ The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is
 
 ## Validation
 
-See [amp-vine validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/0.1/validator-amp-vine.protoascii).
+See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/0.1/validator-amp-vine.protoascii) in the AMP validator specification.

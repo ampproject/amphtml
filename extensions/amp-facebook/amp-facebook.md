@@ -74,4 +74,4 @@ Checkout the documentation for differences between [post embeds](https://develop
 
 ## Validation
 
-See [amp-facebook validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii).
+See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii) in the AMP validator specification.

@@ -60,4 +60,4 @@ E.g. in https://vimeo.com/27246366 27246366 is the video id.
 
 ## Validation
 
-See [amp-vimeo validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/0.1/validator-amp-vimeo.protoascii).
+See [amp-vimeo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/0.1/validator-amp-vimeo.protoascii) in the AMP validator specification.

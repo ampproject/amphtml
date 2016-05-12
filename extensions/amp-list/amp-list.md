@@ -120,4 +120,4 @@ elements rendered via the template.
 
 ## Validation
 
-See [amp-list validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii).
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii) in the AMP validator specification.

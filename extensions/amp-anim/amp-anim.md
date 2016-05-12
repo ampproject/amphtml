@@ -82,4 +82,4 @@ amp-anim {
 ```
 ## Validation
 
-See [amp-anim validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii).
+See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii) in the AMP validator specification.

@@ -104,4 +104,4 @@ The `amp-sidebar` component can be styled with standard CSS.
 
 ## Validation
 
-See [amp-sidebar validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/0.1/validator-amp-sidebar.protoascii).
+See [amp-sidebar rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/0.1/validator-amp-sidebar.protoascii) in the AMP validator specification.

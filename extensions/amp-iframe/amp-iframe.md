@@ -182,4 +182,4 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 
 ## Validation
 
-See [amp-iframe validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii).
+See [amp-iframe rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii) in the AMP validator specification.

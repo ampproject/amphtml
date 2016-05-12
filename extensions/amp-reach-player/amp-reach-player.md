@@ -67,4 +67,4 @@ The Reach player embed id found in the "players" section or in the generated emb
 
 ## Validation
 
-See [amp-reach-player validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/0.1/validator-amp-reach-player.protoascii).
+See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/0.1/validator-amp-reach-player.protoascii) in the AMP validator specification.

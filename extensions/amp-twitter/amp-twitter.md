@@ -70,4 +70,4 @@ Options for the Tweet appearance can be set using `data-` attributes. E.g. `data
 
 ## Validation
 
-See [amp-twitter validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii).
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii) in the AMP validator specification.

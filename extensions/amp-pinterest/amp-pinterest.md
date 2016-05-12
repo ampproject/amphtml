@@ -126,4 +126,4 @@ When building the Embedded Pin widget, `data-url` is required and must contain t
 
 ## Validation
 
-See [amp-pinterest validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/0.1/validator-amp-pinterest.protoascii).
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/0.1/validator-amp-pinterest.protoascii) in the AMP validator specification.

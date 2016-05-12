@@ -64,4 +64,4 @@ The `amp-lightbox` component can be styled with standard CSS.
 
 ## Validation
 
-See [amp-lightbox validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii).
+See [amp-lightbox rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii) in the AMP validator specification.

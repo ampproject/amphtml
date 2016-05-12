@@ -75,4 +75,4 @@ The Brid.tv playlist ID. Embed must either have video or playlist attribute.
 
 ## Validation
 
-See [amp-brid-player validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/0.1/validator-amp-brid-player.protoascii).
+See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/0.1/validator-amp-brid-player.protoascii) in the AMP validator specification.
