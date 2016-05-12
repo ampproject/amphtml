@@ -115,8 +115,9 @@ function readFromUrl(url) {
 
 /**
  * ValidationResult is the record computed by the validator for each
- * document. It contains an overall status (PASS/FAIL) and the list
- * of errors, if any.
+ * document. It contains an overall status (PASS/FAIL) and the list of
+ * errors, if any. This class corresponds to the ValidationResult
+ * message in validator.proto in this directory.
  * @export
  */
 class ValidationResult {
@@ -133,7 +134,8 @@ class ValidationResult {
 
 /**
  * Each validation error describes a specific problem in a validated
- * document.
+ * document. This class corresponds to the ValidationError message in
+ * validator.proto in this directory.
  * @export
  */
 class ValidationError {
@@ -196,6 +198,12 @@ class ValidationError {
   }
 }
 
+/**
+ * The validator instance is a proxy object to a precompiled
+ * validator.js script - in practice the script was either downloaded
+ * from 'https://cdn.ampproject.org/v0/validator.js' or read from a
+ * local file.
+ */
 class Validator {
   /**
    * @param {!string} scriptContents
@@ -265,14 +273,10 @@ function getInstance(opt_validatorJs) {
   }
   const validatorJsPromise =
       (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
-  return new Promise(function(resolve, reject) {
-    validatorJsPromise
-        .then((scriptContents) => {
-          const instance = new Validator(scriptContents);
-          instanceByValidatorJs[validatorJs] = instance;
-          resolve(instance);
-        })
-        .catch(reject);
+  return validatorJsPromise.then((scriptContents) => {
+    const instance = new Validator(scriptContents);
+    instanceByValidatorJs[validatorJs] = instance;
+    return instance;
   });
 }
 exports.getInstance = getInstance;
