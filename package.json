@@ -20,8 +20,9 @@
     "heroku-postbuild": "gulp clean && gulp build --fortesting && gulp dist --fortesting"
   },
   "dependencies": {
-    "promise-pjs": "1.1.1",
-    "document-register-element": "0.5.4"
+    "document-register-element": "0.5.4",
+    "extend": "^3.0.0",
+    "promise-pjs": "1.1.1"
   },
   "devDependencies": {
     "autoprefixer": "6.1.1",

@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-cxense"></a> `amp-cxense`
+# <a name="amp-cxense-player"></a> `amp-cxense-player`
 
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>An <code>amp-cxense</code> component displays Cxense widgets/Players</td>
+    <td>An <code>amp-cxense-player</code> component displays Cxense widgets/Players</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -27,11 +27,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-cxense" src="https://cdn.ampproject.org/v0/amp-cxense-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-cxense-player" src="https://cdn.ampproject.org/v0/amp-cxense-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-cxense">amp-cxense.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-cxense-player">amp-cxense-player.html</a></td>
   </tr>
 </table>
 
@@ -40,7 +40,7 @@ limitations under the License.
 Example:
 
 ```html
-<amp-cxense
+<amp-cxense-player
     data-widget="12345"
     data-api-key="xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     data-item-id="987654"
@@ -49,7 +49,7 @@ Example:
     data-ad-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
     layout="responsive"
     width="480" height="480">
-</amp-cxense>
+</amp-cxense-player>
 ```
 
 ## Attributes

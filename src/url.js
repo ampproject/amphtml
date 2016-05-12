@@ -67,7 +67,7 @@ export function parseUrl(url) {
  * @param {string} paramString
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString) {
+export function appendParamStringToUrl(url, paramString) {
   if (!paramString) {
     return url;
   }

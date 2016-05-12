@@ -1,7 +1,7 @@
 /*
     inspired from http://connoratherton.com/loaders
 */
-.amp-cxense .amp-cxense-placeholder {
+.amp-cxense-player .amp-cxense-player-placeholder {
     position: absolute;
     top: 0;
     height: 100%;
@@ -9,7 +9,7 @@
     overflow: hidden;
     background: black;
 }
-.amp-cxense .amp-cxense-placeholder .amp-cxense-loader {
+.amp-cxense-player .amp-cxense-player-placeholder .amp-cxense-player-loader {
     position: absolute;
     top: 0;
     right: 0;
@@ -19,7 +19,7 @@
     height: 60px;
     margin: auto;
 }
-.amp-cxense .amp-cxense-placeholder .amp-cxense-loader > div {
+.amp-cxense-player .amp-cxense-player-placeholder .amp-cxense-player-loader > div {
     -webkit-animation-fill-mode: both;
     animation-fill-mode: both;
     position: absolute;
@@ -29,10 +29,10 @@
     height: 50px;
     border-radius: 100%;
     border: 2px solid #fff;
-    -webkit-animation: amp-cxense-loader 1.25s 0s infinite cubic-bezier(.21, .53, .56, .8);
-    animation: amp-cxense-loader 1.25s 0s infinite cubic-bezier(.21, .53, .56, .8);
+    -webkit-animation: amp-cxense-player-loader 1.25s 0s infinite cubic-bezier(.21, .53, .56, .8);
+    animation: amp-cxense-player-loader 1.25s 0s infinite cubic-bezier(.21, .53, .56, .8);
 }
-@-webkit-keyframes amp-cxense-loader {
+@-webkit-keyframes amp-cxense-player-loader {
     0% {
         -webkit-transform: scale(0.1);
         transform: scale(0.1);
@@ -47,7 +47,7 @@
         opacity: 0.0;
     }
 }
-@keyframes amp-cxense-loader {
+@keyframes amp-cxense-player-loader {
     0% {
         -webkit-transform: scale(0.1);
         transform: scale(0.1);
@@ -62,15 +62,15 @@
         opacity: 0.0;
     }
 }
-.amp-cxense .amp-cxense-placeholder .amp-cxense-loader > div:nth-child(1) {
+.amp-cxense-player .amp-cxense-player-placeholder .amp-cxense-player-loader > div:nth-child(1) {
     -webkit-animation-delay: 0s;
     animation-delay: 0s;
 }
-.amp-cxense .amp-cxense-placeholder .amp-cxense-loader > div:nth-child(2) {
+.amp-cxense-player .amp-cxense-player-placeholder .amp-cxense-player-loader > div:nth-child(2) {
     -webkit-animation-delay: 0.2s;
     animation-delay: 0.2s;
 }
-.amp-cxense .amp-cxense-placeholder .amp-cxense-loader > div:nth-child(3) {
+.amp-cxense-player .amp-cxense-player-placeholder .amp-cxense-player-loader > div:nth-child(3) {
     -webkit-animation-delay: 0.4s;
     animation-delay: 0.4s;
 }
