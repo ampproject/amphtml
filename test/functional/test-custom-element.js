@@ -49,7 +49,6 @@ describe('CustomElement', () => {
   let testElementUnlayoutCallback;
   let testElementPauseCallback;
   let testElementResumeCallback;
-  let testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -65,7 +64,7 @@ describe('CustomElement', () => {
       testElementFirstAttachedCallback();
     }
     isReadyToBuild() {
-      return testElementIsReadyToBuild;
+      return true;
     }
     buildCallback() {
       testElementBuildCallback();
@@ -220,9 +219,7 @@ describe('CustomElement', () => {
     expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
-    testElementIsReadyToBuild = true;
-    element.build(false);
-
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(element).to.not.have.class('-amp-notbuilt');
     expect(element).to.not.have.class('amp-notbuilt');
@@ -233,9 +230,7 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
 
-    testElementIsReadyToBuild = true;
-    element.build(false);
-
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
   });
@@ -247,9 +242,7 @@ describe('CustomElement', () => {
     element.appendChild(placeholder);
     expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
 
-    testElementIsReadyToBuild = true;
-    element.build(false);
-
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
   });
@@ -259,55 +252,18 @@ describe('CustomElement', () => {
     expect(element.isBuilt()).to.equal(false);
     expect(testElementBuildCallback.callCount).to.equal(0);
 
-    testElementIsReadyToBuild = true;
-    let res = element.build(false);
-    expect(res).to.equal(true);
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.callCount).to.equal(0);
 
     // Call again.
-    res = element.build(false);
-    expect(res).to.equal(true);
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.callCount).to.equal(0);
     clock.tick(1);
     expect(testElementPreconnectCallback.callCount).to.equal(1);
-  });
-
-  it('Element - build not allowed', () => {
-    const element = new ElementClass();
-    expect(element).to.have.class('-amp-element');
-    expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
-    expect(testElementBuildCallback.callCount).to.equal(0);
-
-    testElementIsReadyToBuild = false;
-    element.build(false);
-
-    expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
-    expect(testElementBuildCallback.callCount).to.equal(0);
-  });
-
-  it('Element - build not allowed but forced', () => {
-    const element = new ElementClass();
-    expect(element).to.have.class('-amp-element');
-    expect(element.isBuilt()).to.equal(false);
-    expect(element).to.have.class('-amp-notbuilt');
-    expect(element).to.have.class('amp-notbuilt');
-    expect(testElementBuildCallback.callCount).to.equal(0);
-
-    testElementIsReadyToBuild = false;
-    element.build(true);
-
-    expect(element.isBuilt()).to.equal(true);
-    expect(element).to.not.have.class('-amp-notbuilt');
-    expect(element).to.not.have.class('amp-notbuilt');
-    expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
   it('Element - build NOT allowed when in template', () => {
@@ -319,9 +275,8 @@ describe('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     element.isInTemplate_ = true;
-    testElementIsReadyToBuild = true;
     expect(() => {
-      element.build(false);
+      element.build();
     }).to.throw(/Must never be called in template/);
 
     expect(element.isBuilt()).to.equal(false);
@@ -337,7 +292,7 @@ describe('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     expect(() => {
-      element.build(true);
+      element.build();
     }).to.throw(/Cannot build unupgraded element/);
 
     expect(element.isBuilt()).to.equal(false);
@@ -346,7 +301,6 @@ describe('CustomElement', () => {
 
   it('Element - createPlaceholder', () => {
     const element = new ElementClass();
-    testElementIsReadyToBuild = true;
     element.createPlaceholder();
     expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
   });
@@ -458,7 +412,7 @@ describe('CustomElement', () => {
   it('Element - layoutCallback', () => {
     const element = new ElementClass();
     element.setAttribute('layout', 'fill');
-    element.build(true);
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
     clock.tick(1);
@@ -478,7 +432,7 @@ describe('CustomElement', () => {
       () => {
         const element = new ElementClass();
         element.setAttribute('layout', 'fill');
-        element.build(true);
+        element.build();
 
         const p = element.layoutCallback();
         expect(testElementLayoutCallback.callCount).to.equal(1);
@@ -486,7 +440,7 @@ describe('CustomElement', () => {
         return p.then(() => {
           expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
 
-      // But not second time.
+          // But not second time.
           const p2 = element.layoutCallback();
           expect(testElementLayoutCallback.callCount).to.equal(2);
           expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
@@ -499,7 +453,7 @@ describe('CustomElement', () => {
   it('Element - layoutCallback is NOT allowed in template', () => {
     const element = new ElementClass();
     element.setAttribute('layout', 'fill');
-    element.build(true);
+    element.build();
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
 
@@ -514,7 +468,7 @@ describe('CustomElement', () => {
     element.setAttribute('layout', 'fill');
     resourcesMock.expects('upgraded').withExactArgs(element).once();
     element.upgrade(TestElement);
-    element.build(true);
+    element.build();
     expect(element.isUpgraded()).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
@@ -544,7 +498,7 @@ describe('CustomElement', () => {
     const element = new ElementClass();
     const handler = sandbox.spy();
     element.implementation_.executeAction = handler;
-    element.build(true);
+    element.build();
 
     const inv = {};
     element.enqueAction(inv);
@@ -567,7 +521,7 @@ describe('CustomElement', () => {
     expect(element.actionQueue_[1]).to.equal(inv2);
     expect(handler.callCount).to.equal(0);
 
-    element.build(true);
+    element.build();
     clock.tick(10);
     expect(handler.callCount).to.equal(2);
     expect(handler.getCall(0).args[0]).to.equal(inv1);
@@ -707,7 +661,7 @@ describe('CustomElement', () => {
         return true;
       };
       // Built element receives unlayoutCallback.
-      element.build(true);
+      element.build();
       element.unlayoutCallback();
       expect(testElementUnlayoutCallback.callCount).to.equal(1);
       expect(element.layoutCount_).to.equal(0);
@@ -715,7 +669,7 @@ describe('CustomElement', () => {
 
     it('should not reset layoutCount if relayout not requested', () => {
       const element = new ElementClass();
-      element.build(true);
+      element.build();
       element.implementation_.layoutCallback = () => {
         testElementLayoutCallback();
         element.layoutCount_++;
@@ -750,7 +704,7 @@ describe('CustomElement', () => {
       expect(testElementPauseCallback.callCount).to.equal(0);
 
       // Built element receives pauseCallback.
-      element.build(true);
+      element.build();
       element.pauseCallback();
       expect(testElementPauseCallback.callCount).to.equal(1);
     });
@@ -773,7 +727,7 @@ describe('CustomElement', () => {
       expect(testElementResumeCallback.callCount).to.equal(0);
 
       // Built element receives resumeCallback.
-      element.build(true);
+      element.build();
       element.resumeCallback();
       expect(testElementResumeCallback.callCount).to.equal(1);
     });
@@ -823,7 +777,7 @@ describe('CustomElement', () => {
     it('Element - should be called once built', () => {
       const element = new ElementClass();
       element.setAttribute('layout', 'fill');
-      element.build(true);
+      element.build();
       expect(element.isBuilt()).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(0);
 
@@ -837,7 +791,7 @@ describe('CustomElement', () => {
       element.setAttribute('layout', 'fill');
       resourcesMock.expects('upgraded').withExactArgs(element).once();
       element.upgrade(TestElement);
-      element.build(true);
+      element.build();
       expect(element.isUpgraded()).to.equal(true);
       expect(element.isBuilt()).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(0);
@@ -854,7 +808,7 @@ describe('CustomElement', () => {
       expect(element.isInViewport_).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(0);
 
-      element.build(true);
+      element.build();
       expect(element.isBuilt()).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(1);
     });
@@ -862,7 +816,7 @@ describe('CustomElement', () => {
     it('Element - should NOT be called in template', () => {
       const element = new ElementClass();
       element.setAttribute('layout', 'fill');
-      element.build(true);
+      element.build();
       expect(element.isBuilt()).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(0);
 
@@ -1180,7 +1134,7 @@ describe('CustomElement Loading Indicator', () => {
 
   it('should toggle loading off after layout complete', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
-    element.build(true);
+    element.build();
     return element.layoutCallback().then(() => {
       expect(toggle.callCount).to.equal(1);
       expect(toggle.firstCall.args[0]).to.equal(false);
@@ -1194,7 +1148,7 @@ describe('CustomElement Loading Indicator', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
     const implMock = sandbox.mock(element.implementation_);
     implMock.expects('layoutCallback').returns(Promise.reject());
-    element.build(true);
+    element.build();
     return element.layoutCallback().then(() => {
       throw new Error('Should never happen.');
     }, () => {
@@ -1208,7 +1162,7 @@ describe('CustomElement Loading Indicator', () => {
     resourcesMock.expects('deferMutate').once();
     element.prepareLoading_();
     element.toggleLoading_(true);
-    element.build(true);
+    element.build();
     return element.layoutCallback().then(() => {
       expect(vsyncTasks).to.have.length(2);
 

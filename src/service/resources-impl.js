@@ -389,10 +389,11 @@ export class Resources {
 
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
-        // Try to immediately build element, it may already be ready.
+        // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
       } else {
+        // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
       }
@@ -406,18 +407,14 @@ export class Resources {
    * @private
    */
   buildReadyResources_() {
-    const builtResourcesIndexes = [];
-    this.pendingBuildResources_.forEach((resource, index) => {
+    for (let i = 0; i < this.pendingBuildResources_.length; i++) {
+      const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
         resource.build();
-        builtResourcesIndexes.push(index);
+        // Resource is built remove it from the pending list and step back
+        // one in the index to account for the removed item.
+        this.pendingBuildResources_.splice(i--, 1);
       }
-    });
-
-    // Remove resources that we just built from pending resources.
-    for (let i = builtResourcesIndexes.length - 1; i > 0; i--) {
-      const index = builtResourcesIndexes[i];
-      this.pendingBuildResources_.splice(index, 1);
     }
   }
 
@@ -1518,8 +1515,6 @@ export class Resources {
       });
       this.requestsChangeSize_ = this.requestsChangeSize_.filter(
           request => request.resource != resource);
-      this.pendingBuildResources_ = this.pendingBuildResources_.filter(
-          pendingResource => pendingResource != resource);
     }
   }
 }

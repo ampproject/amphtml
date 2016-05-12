@@ -1329,7 +1329,7 @@ describe('Resources.Resource', () => {
       isUpgraded: () => false,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
-      build: unused_force => false,
+      build: () => false,
       getBoundingClientRect: () => null,
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,
@@ -1376,51 +1376,29 @@ describe('Resources.Resource', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     elementMock.expects('build').never();
 
-    // Force = false.
-    expect(resource.build(false)).to.equal(false);
-    expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
-
-    // Force = true.
-    expect(resource.build(true)).to.equal(false);
+    resource.build();
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
   });
 
-  it('should build after upgraded, but before ready', () => {
-    elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(false).returns(false).once();
-    expect(resource.build(false)).to.equal(false);
-    expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
-  });
 
   it('should build after upgraded', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(false).returns(true).once();
-    expect(resource.build(false)).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
-  });
-
-  it('should force-build after upgraded', () => {
-    elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(true).returns(true).once();
-    expect(resource.build(true)).to.equal(true);
+    elementMock.expects('build').once();
+    resource.build();
     expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(true)
-        .throws('Failed').once();
-    expect(resource.build(true)).to.equal(false);
+    elementMock.expects('build').throws('Failed').once();
+    resource.build();
     expect(resource.blacklisted_).to.equal(true);
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
-
-    // Second attempt would not even try to build.
-    expect(resource.build(true)).to.equal(false);
   });
 
   it('should mark as ready for layout if already measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(true).once();
+    elementMock.expects('build').once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
     resource.build(false);
     expect(stub.calledOnce).to.be.true;
@@ -1429,7 +1407,7 @@ describe('Resources.Resource', () => {
 
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(true).once();
+    elementMock.expects('build').once();
     const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
     resource.build(false);
     expect(stub.calledOnce).to.be.true;
@@ -1461,8 +1439,8 @@ describe('Resources.Resource', () => {
 
   it('should measure and update state', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(true).once();
-    expect(resource.build(true)).to.equal(true);
+    elementMock.expects('build').once();
+    resource.build();
 
     elementMock.expects('getBoundingClientRect')
         .returns({left: 11, top: 12, width: 111, height: 222})
@@ -1482,8 +1460,8 @@ describe('Resources.Resource', () => {
 
   it('should update initial box only on first measure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').returns(true).once();
-    expect(resource.build(true)).to.equal(true);
+    elementMock.expects('build').once();
+    resource.build();
 
     element.getBoundingClientRect = () =>
         ({left: 11, top: 12, width: 111, height: 222});
@@ -1947,7 +1925,7 @@ describe('Resource renderOutsideViewport', () => {
       isUpgraded: () => false,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
-      build: unused_force => false,
+      build: () => false,
       getBoundingClientRect: () => null,
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,
@@ -2517,4 +2495,110 @@ describe('Resources fix IE matchMedia', () => {
     expect(devErrorStub.callCount).to.equal(1);
     expect(schedulePassStub.callCount).to.equal(0);
   });
+});
+
+
+describe('Resources.add', () => {
+  let sandbox;
+  let resources;
+  let parent;
+  let parentResource;
+  let child1;
+  let resource1;
+  let child2;
+  let resource2;
+
+  function createElement() {
+    const element = {
+      tagName: 'amp-test',
+      isBuilt() {
+        return true;
+      },
+      isUpgraded() {
+        return true;
+      },
+    };
+    element.build = sandbox.spy();
+    return element;
+  }
+
+  function createElementWithResource(id) {
+    const element = createElement();
+    const resource = new Resource(id, element, resources);
+    resource.state_ = ResourceState_.NOT_BUILT;
+    resource.element['__AMP__RESOURCE'] = resource;
+    return [element, resource];
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    resources = new Resources(window);
+    resources.pendingBuildResources_ = [];
+    parent = createElementWithResource(1)[0];
+    parentResource = parent['__AMP__RESOURCE'];
+    child1 = createElementWithResource(2)[0];
+    resource1 = child1['__AMP__RESOURCE'];
+    child2 = createElementWithResource(3)[0];
+    resource2 = child2['__AMP__RESOURCE'];
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should build elements immediately if the document is ready', () => {
+    resources.documentReady_ = false;
+    resources.add(child1);
+    expect(child1.build.called).to.be.false;
+    resources.documentReady_ = true;
+    resources.add(child2);
+    expect(child2.build.calledOnce).to.be.true;
+  });
+
+  it('should add element to pending build when document is not ready', () => {
+    resources.buildReadyResources_ = sandbox.spy();
+    resources.documentReady_ = false;
+    resources.add(child1);
+    expect(child1.build.called).to.be.false;
+    expect(resources.pendingBuildResources_.length).to.be.equal(1);
+    resources.add(child2);
+    expect(child2.build.called).to.be.false;
+    expect(resources.pendingBuildResources_.length).to.be.equal(2);
+    expect(resources.buildReadyResources_.calledTwice).to.be.true;
+  });
+
+  describe('buildReadyResources_', () => {
+    it('should build ready resources and remove them from pending', () => {
+      resources.documentReady_ = false;
+      resources.pendingBuildResources_ = [resource1, resource2];
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.false;
+      expect(child2.build.called).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(2);
+
+      child1.nextSibling = child2;
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.true;
+      expect(child2.build.called).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(1);
+      expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
+
+      child2.parentNode = parent;
+      parent.nextSibling = true;
+      resources.buildReadyResources_();
+      expect(child1.build.calledTwice).to.be.false;
+      expect(child2.build.called).to.be.true;
+      expect(resources.pendingBuildResources_.length).to.be.equal(0);
+    });
+
+    it('should build everything pending when document is ready', () => {
+      resources.documentReady_ = true;
+      resources.pendingBuildResources_ = [parentResource, resource1, resource2];
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.true;
+      expect(child2.build.called).to.be.true;
+      expect(parent.build.called).to.be.true;
+      expect(resources.pendingBuildResources_.length).to.be.equal(0);
+    });
+  })
 });
