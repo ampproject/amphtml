@@ -434,6 +434,17 @@ class UrlReplacements {
    * @return {!Promise<string>}
    */
   expand(url, opt_bindings) {
+    return this.expand_(url, opt_bindings);
+  }
+
+  /**
+   * @param {string} url
+   * @param {!Object<string, *>=} opt_bindings
+   * @param {!Object<string, *>=} opt_collectVars
+   * @return {!Promise<string>}
+   * @private
+   */
+  expand_(url, opt_bindings, opt_collectVars) {
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
@@ -467,6 +478,9 @@ class UrlReplacements {
           rethrowAsync(err);
         }).then(v => {
           url = url.replace(match, encodeValue(v));
+          if (opt_collectVars) {
+            opt_collectVars[match] = v;
+          }
         });
         if (replacementPromise) {
           replacementPromise = replacementPromise.then(() => p);
@@ -474,6 +488,9 @@ class UrlReplacements {
           replacementPromise = p;
         }
         return match;
+      }
+      if (opt_collectVars) {
+        opt_collectVars[match] = val;
       }
       return encodeValue(val);
     });
@@ -483,6 +500,19 @@ class UrlReplacements {
     }
 
     return replacementPromise || Promise.resolve(url);
+  }
+
+  /**
+   * Collects all substitutions in the provided URL and expands them to the
+   * values for known variables. Optional `opt_bindings` can be used to add
+   * new variables or override existing ones.
+   * @param {string} url
+   * @param {!Object<string, *>=} opt_bindings
+   * @return {!Promise<!Object<string, *>>}
+   */
+  collectVars(url, opt_bindings) {
+    const vars = Object.create(null);
+    return this.expand_(url, opt_bindings, vars).then(() => vars);
   }
 
   /**

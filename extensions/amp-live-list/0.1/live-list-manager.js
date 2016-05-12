@@ -26,8 +26,6 @@ import {xhrFor} from '../../../src/xhr';
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
  * if necessary.
- *
- * @visibleForTesting
  */
 export class LiveListManager {
 
@@ -144,6 +142,25 @@ export class LiveListManager {
         this.poller_.stop();
       }
     });
+  }
+
+  /**
+   * Default minimum data poll interval value.
+   *
+   * @return {number}
+   */
+  static getMinDataPollInterval() {
+    // TODO(erwinm): determine if value is too low
+    return 15000;
+  }
+
+  /**
+   * Default minimum data max items per page value.
+   *
+   * @return {number}
+   */
+  static getMinDataMaxItemsPerPage() {
+    return 10;
   }
 }
 

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-soundcloud');
 import {adopt} from '../../../../src/runtime';
 
@@ -26,6 +29,7 @@ describe('amp-soundcloud', () => {
 
   function getIns(trackid, optVisualMode, optColor, optFixedHeight) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-soundcloud');
       ins.setAttribute('data-trackid', trackid);
       ins.setAttribute('height', '237');

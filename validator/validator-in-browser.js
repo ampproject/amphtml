@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.validateString');
 goog.require('goog.Promise');
 
 goog.provide('amp.validator.validateInBrowser');
-goog.provide('amp.validator.validateTapActionsA11y');
 goog.provide('amp.validator.validateUrlAndLog');
 
 /**
@@ -47,61 +45,6 @@ function getUrl(url) {
 }
 
 /**
- * Prints an element reference for error messages.
- * @param {!HTMLElement} element
- * @return {!string}
- */
-function printElementRef(element) {
-  // TODO(dvoytenko,johannes): Propagate the element object itself
-  // into the error object and log that to the browser's console.
-  if (element.hasAttribute('id')) {
-    return 'Element ' + element.tagName + '#' + element.getAttribute('id');
-  }
-  return 'Element ' + element.tagName;
-}
-
-/**
- * This looks for elements with an on attribute with missing role / tabindex
- * attr. Taken from https://github.com/ampproject/amphtml/pull/358.
- * @param {!Document} doc
- * @param {!amp.validator.ValidationResult} validationResult
- */
-amp.validator.validateTapActionsA11y = function(doc, validationResult) {
-  // TODO(johannes): Unfortunately this doesn't come with a way to
-  // generate line / column numbers like we do for all of our errors,
-  // and also it could work just fine with SAX. Port this to validator.js +
-  // validator.protoascii.
-
-  const elements = doc.querySelectorAll('[on*="tap:"]');
-  for (let i = 0; i < elements.length; i++) {
-    const element = goog.asserts.assertInstanceof(elements[i], HTMLElement);
-    if (element.tagName === 'A' || element.tagName === 'BUTTON') {
-      continue;
-    }
-    if (!element.hasAttribute('role')) {
-      const error = new amp.validator.ValidationError();
-      error.severity = amp.validator.ValidationError.Severity.ERROR;
-      error.code = amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING;
-      error.detail =
-          'A11Y: ' + printElementRef(element) + ' must have "role" attribute ' +
-          'due to "tap" action, e.g. role="button".';
-      validationResult.errors.push(error);
-      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-    if (!element.hasAttribute('tabindex')) {
-      const error = new amp.validator.ValidationError();
-      error.severity = amp.validator.ValidationError.Severity.ERROR;
-      error.code = amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING;
-      error.detail =
-          'A11Y: ' + printElementRef(element) + ' must have "tabindex" ' +
-          'attribute due to "tap" action.';
-      validationResult.errors.push(error);
-      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-    }
-  }
-};
-
-/**
  * Validates doc in the browser by inspecting elements, attributes, etc. in
  * the DOM. This method is exported so it can be unittested.
  * @param {!Document} doc
@@ -110,10 +53,8 @@ amp.validator.validateTapActionsA11y = function(doc, validationResult) {
 amp.validator.validateInBrowser = function(doc) {
   const result = new amp.validator.ValidationResult();
   result.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  amp.validator.validateTapActionsA11y(doc, result);
 
-  // If adding more in-browser validation functions, please add them here,
-  // much like validateTapActionsA11y.
+  // If adding in-browser validation functions, please add them here.
   // Note that result.status is set to UNKNOWN by default. If a routine
   // finds an error, then it should be set to 'FAIL'. Otherwise, it
   // should be left alone - that is, even for warnings it should be left

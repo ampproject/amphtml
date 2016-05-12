@@ -379,7 +379,7 @@ describe('Viewport META', () => {
         getScrollTop: () => 0,
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
-        isEmbedded: () => false,
+        isIframed: () => false,
       };
       viewerMock = sandbox.mock(viewer);
 
@@ -436,7 +436,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore disable TouchZoom if embedded', () => {
-      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewerMock.expects('isIframed').returns(true).atLeast(1);
       viewport.disableTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
@@ -478,7 +478,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore reset TouchZoom if embedded', () => {
-      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewerMock.expects('isIframed').returns(true).atLeast(1);
       viewport.resetTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
