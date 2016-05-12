@@ -15,6 +15,7 @@
  */
 
 import {AccessServerAdapter} from '../amp-access-server';
+import {removeFragment} from '../../../../src/url';
 import * as sinon from 'sinon';
 
 describe('AccessServerAdapter', () => {
@@ -159,6 +160,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
+          'url': removeFragment(window.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -169,8 +171,6 @@ describe('AccessServerAdapter', () => {
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-              credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
@@ -200,6 +200,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
+          'url': removeFragment(window.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -210,8 +211,6 @@ describe('AccessServerAdapter', () => {
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-              credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
@@ -237,6 +236,7 @@ describe('AccessServerAdapter', () => {
             }))
             .once();
         const request = {
+          'url': removeFragment(window.location.href),
           'state': 'STATE1',
           'vars': {
             'READER_ID': 'reader1',
@@ -247,8 +247,6 @@ describe('AccessServerAdapter', () => {
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
               body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-              credentials: 'include',
-              requireAmpResponseSourceOrigin: true,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },

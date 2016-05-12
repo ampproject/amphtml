@@ -15,9 +15,11 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {timer} from '../../../src/timer';
+import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -28,7 +30,35 @@ const TAG = 'amp-access-server';
 const AUTHORIZATION_TIMEOUT = 3000;
 
 
-/** @implements {AccessTypeAdapterDef} */
+/**
+ * This class implements server-side authorization protocol. In this approach
+ * only immediately visible sections are downloaded. For authorization, the
+ * CDN calls the authorization endpoint directly and returns back to the
+ * authorization response and the authorized content fragments, which are
+ * merged into the document.
+ *
+ * The approximate diagram looks like this:
+ *
+ *        Initial GET
+ *            ||
+ *            ||   [Limited document: fragments requiring
+ *            ||      authorization are exlcuded]
+ *            ||
+ *            \/
+ *    Authorize request to CDN
+ *            ||
+ *            ||   [Authorization response]
+ *            ||   [Authorized fragments]
+ *            ||
+ *            \/
+ *    Merge authorized fragments
+ *            ||
+ *            ||
+ *            \/
+ *    Apply authorization response
+ *
+ * @implements {AccessTypeAdapterDef}
+ */
 export class AccessServerAdapter {
 
   /**
@@ -45,6 +75,9 @@ export class AccessServerAdapter {
 
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(win, configJson, context);
+
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(win);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(win);
@@ -65,8 +98,12 @@ export class AccessServerAdapter {
     /** @private @const {boolean} */
     this.isProxyOrigin_ = isProxyOrigin(this.win.location);
 
+    const serviceUrlOverride = isExperimentOn(win, TAG) ?
+        this.viewer_.getParam('serverAccessService') : null;
+
     /** @private @const {string} */
-    this.serviceUrl_ = removeFragment(this.win.location.href);
+    this.serviceUrl_ = serviceUrlOverride ||
+        removeFragment(this.win.location.href);
   }
 
   /** @override */
@@ -107,6 +144,7 @@ export class AccessServerAdapter {
         }
       }
       const request = {
+        'url': removeFragment(this.win.location.href),
         'state': this.serverState_,
         'vars': requestVars,
       };
@@ -118,8 +156,6 @@ export class AccessServerAdapter {
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
