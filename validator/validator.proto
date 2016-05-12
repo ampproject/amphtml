@@ -358,7 +358,7 @@ message ErrorCategory {
     // the invocation of the AMP engine, specific style boilerplate,
     // a viewport declaration, etc.
     MANDATORY_AMP_TAG_MISSING_OR_INCORRECT = 5;
-    // AMP HTML tags (amp-img, amp-video, amp-brightcove, amp-cxense, etc.) require
+    // AMP HTML tags (amp-img, amp-video, amp-brightcove, etc.) require
     // specific attributes, attribute values, etc. Something went wrong
     // with an amp- tag.
     AMP_TAG_PROBLEM = 6;
