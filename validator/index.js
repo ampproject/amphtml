@@ -94,17 +94,23 @@ function readFromStdin() {
  * @returns {!Promise<!string>}
  */
 function readFromUrl(url) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     const clientModule = url.startsWith('http://') ? http : https;
     clientModule.get(url, (response) => {
       if (response.statusCode != 200) {
+        // https://nodejs.org/api/http.html says: "[...] However, if
+        // you add a 'response' event handler, then you must consume
+        // the data from the response object, either by calling
+        // response.read() whenever there is a 'readable' event, or by
+        // adding a 'data' handler, or by calling the .resume()
+        // method."
         response.resume();
         reject(new Error('HTTP Status ' + response.statusCode));
       } else {
-        readFromReadable(response).then(resolve);
+        resolve(response);
       }
     });
-  });
+  }).then(readFromReadable);
 }
 
 /**
