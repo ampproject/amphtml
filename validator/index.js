@@ -263,10 +263,8 @@ function getInstance(opt_validatorJs) {
   const validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
-    return new Promise(function(resolve, reject) {
-      resolve(instanceByValidatorJs[validatorJs]);
-    });
-  }
+    return Promise.resolve(instanceByValidatorJs[validatorJs]);
+  };
   const validatorJsPromise =
       (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
   return validatorJsPromise.then((scriptContents) => {
