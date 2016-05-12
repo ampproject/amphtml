@@ -40,7 +40,7 @@ Some ad formats are not fully supported at the moment and we recommend testing t
 
 #### Video Player
 
-*Examples : Brightcove, Ooyala, Cxense*
+*Examples : Brightcove, Ooyala*
 
 A video player that works in regular HTML pages will not work in AMP and therefore a specific tag needs to be created that will allow the AMP runtime to load your player.
 Brightcove has created a custom [amp-brightcove](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md) tag that allows media and ads to be played in AMP pages.
