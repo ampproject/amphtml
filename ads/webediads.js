@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../src/3p';
+import {loadScript, checkData, validateDataExists} from '../3p/3p';
 
 /** Created by Webedia on 07/03/16 */
 export function webediads(global, data) {

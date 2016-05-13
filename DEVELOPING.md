@@ -111,6 +111,10 @@ If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/out
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
 
+#### Deploying AMP on Cloud for testing on devices
+
+For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
+
 ## Repository Layout
 <pre>
   3p/             - Implementation of third party sandbox iframes.

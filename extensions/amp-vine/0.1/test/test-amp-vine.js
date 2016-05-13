@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-vine');
 import {adopt} from '../../../../src/runtime';
 
@@ -23,6 +26,7 @@ adopt(window);
 describe('amp-vine', () => {
   function getVine(vineId, opt_responsive) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const vine = iframe.doc.createElement('amp-vine');
       vine.setAttribute('data-vineid', vineId);
       vine.setAttribute('width', 400);

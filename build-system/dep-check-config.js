@@ -19,7 +19,8 @@
  * - filesMatching - Is assumed to be all files if not provided.
  * - mustNotDependOn - If type is "forbidden" (default) then the files
  *     matched must not match the glob(s) provided.
- * - whitelist - Skip rule if file matches whitelist pattern(s).
+ * - whitelist - Skip rule if this particular dependency is found.
+ *     Syntax: fileAGlob->fileB where -> reads "depends on"
  * @typedef {{
  *   type: (string|undefined),
  *   filesMatching: (string|!Array<string>|undefined),
@@ -29,11 +30,84 @@
  */
 var RuleConfigDef;
 
+// It is often OK to add things to the whitelist, but make sure to highlight
+// this in review.
 exports.rules = [
-  // Extensions must not import any services directly.
+  // Global rules
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'src/sanitizer.js',
+    whitelist: 'extensions/amp-mustache/0.1/amp-mustache.js->' +
+        'src/sanitizer.js',
+  },
+  {
+    filesMatching: '**/*.js',
+    mustNotDependOn: 'third_party/**/*.js',
+    whitelist: [
+      'extensions/amp-analytics/**/*.js->' +
+          'third_party/closure-library/sha384-generated.js',
+      'extensions/amp-mustache/0.1/amp-mustache.js->' +
+          'third_party/mustache/mustache.js',
+      '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
+      'src/sanitizer.js->third_party/caja/html-sanitizer.js',
+    ]
+  },
+  // Rules for 3p
+  {
+    filesMatching: '3p/**/*.js',
+    mustNotDependOn: 'src/**/*.js',
+    whitelist: [
+      '3p/**->src/log.js',
+      '3p/**->src/types.js',
+      '3p/**->src/string.js',
+      '3p/**->src/url.js',
+    ],
+  },
+  {
+    filesMatching: '3p/**/*.js',
+    mustNotDependOn: 'extensions/**/*.js',
+  },
+  // Rules for ads
+  {
+    filesMatching: 'ads/**/*.js',
+    mustNotDependOn: 'src/**/*.js',
+    whitelist: [
+      'ads/**->src/log.js',
+      'ads/**->src/types.js',
+      'ads/**->src/string.js',
+      'ads/**->src/url.js',
+    ],
+  },
+  {
+    filesMatching: 'ads/**/*.js',
+    mustNotDependOn: 'extensions/**/*.js',
+  },
+  // Rules for extensions.
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
-    whitelist: 'extensions/**/amp-analytics.js',
+  },
+  {
+    filesMatching: 'extensions/**/*.js',
+    mustNotDependOn: 'src/base-element.js',
+  },
+  {
+    filesMatching: 'extensions/**/*.js',
+    mustNotDependOn: 'src/polyfills/**/*.js',
+  },
+
+  // Rules for main src.
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: 'extensions/**/*.js',
+  },
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: 'ads/**/*.js',
+    whitelist: 'src/ad-cid.js->ads/_config.js',
+  },
+  {
+    filesMatching: 'src/**/*.js',
+    mustNotDependOn: '3p/**/*.js',
   },
 ];

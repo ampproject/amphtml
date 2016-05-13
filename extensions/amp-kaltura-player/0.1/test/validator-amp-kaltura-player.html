@@ -1,5 +1,5 @@
 <!--
-  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests for the amp-social-share tag. See the inline comments.
+  Tests for the amp-youtube tag. See the inline comments.
 -->
 <!doctype html>
 <html ⚡>
@@ -24,18 +24,20 @@
   <link rel="canonical" href="./regular-html-version.html" />
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+  <script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-latest.js"></script>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-social-share type="pinterest" width="60" height="44">
-    <script type="application/json">
-      {
-        "text": "Hello world",
-        "url": "https://example.com/",
-        "attribution": "AMPhtml"
-      }
-    </script>
-  </amp-social-share>
+  <!-- valid example from the documentation -->
+  <amp-kaltura-player
+     data-uiconf="33502051"
+     data-partner="1281471"
+     data-entryid="1_3ts1ms9c"
+     data-param-streamerType = "auto"
+     layout="responsive" width="480" height="270">
+  </amp-kaltura-player>
+
+  <!-- invalid example: data-partner is missing -->
+  <amp-kaltura-player width="480" height="270"></amp-kaltura-player>
 </body>
 </html>

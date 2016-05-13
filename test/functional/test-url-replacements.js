@@ -19,9 +19,10 @@ import {createIframePromise} from '../../testing/iframe';
 import {user} from '../../src/log';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
-import {installCidService} from '../../src/service/cid-impl';
+import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
-import {installActivityService} from '../../src/service/activity-impl';
+import {installActivityService,} from
+    '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsService,
 } from '../../src/service/url-replacements-impl';
@@ -612,6 +613,26 @@ describe('UrlReplacements', () => {
       .then(res => {
         expect(res).to.match(/sh=default_value&s/);
       });
+  });
+
+  it('should collect vars', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com?p1=foo');
+    return installUrlReplacementsService(win)
+        .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
+          'SIMPLE': 21,
+          'FUNC': () => 22,
+          'PROMISE': () => Promise.resolve(23),
+        })
+        .then(res => {
+          expect(res).to.deep.equal({
+            'SOURCE_HOST': 'example.com',
+            'QUERY_PARAM(p1)': 'foo',
+            'SIMPLE': 21,
+            'FUNC': 22,
+            'PROMISE': 23,
+          });
+        });
   });
 
   describe('access values', () => {

@@ -146,6 +146,18 @@ Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
+### Linkpulse
+
+Type attribute value: `linkpulse`
+
+Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com)
+
+### Lotame
+
+Type attribute value: `lotame`
+
+Adds support for Lotame.  More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+
 ### Médiamétrie
 
 Type attribute value: `mediametrie`

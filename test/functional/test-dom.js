@@ -143,6 +143,24 @@ describe('DOM', () => {
         .to.be.equal(0);
   });
 
+  it('childNodes should find all matches', () => {
+    const parent = document.createElement('parent');
+    parent.appendChild(document.createTextNode('text1'));
+    parent.appendChild(document.createTextNode('text2'));
+    parent.appendChild(document.createElement('element'));
+    expect(dom.childNodes(parent, () => true).length).to.equal(3);
+    expect(dom.childNodes(parent, node => node.textContent == 'text1').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.textContent == 'text2').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.textContent == 'text3').length)
+        .to.equal(0);
+    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT').length)
+        .to.equal(1);
+    expect(dom.childNodes(parent, node => node.tagName == 'ELEMENT2').length)
+        .to.equal(0);
+  });
+
   function testChildElementByTag() {
     const parent = document.createElement('parent');
 
@@ -437,6 +455,30 @@ describe('DOM', () => {
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
       expect(params.attr1).to.be.undefined;
+    });
+  });
+
+  describe('hasNextNodeInDocumentOrder', () => {
+    it('should return true when the element has a nextSibling', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const sibling = document.createElement('div');
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
+      parent.appendChild(element);
+      parent.appendChild(sibling);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
+    });
+
+    it('should return true when element ancestor has nextSibling', () => {
+      const element = document.createElement('div');
+      const parent = document.createElement('div');
+      const uncle = document.createElement('div');
+      const ancestor = document.createElement('div');
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
+      ancestor.appendChild(parent);
+      ancestor.appendChild(uncle);
+      parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
     });
   });
 });

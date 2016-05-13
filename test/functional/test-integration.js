@@ -25,7 +25,7 @@ import {
   validateAllowedTypes,
   parseFragment,
 } from '../../3p/integration';
-import {registrations, register} from '../../src/3p';
+import {registrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
 
@@ -44,6 +44,8 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
     expect(registrations).to.include.key('flite');
+    expect(registrations).to.include.key('mantis-display');
+    expect(registrations).to.include.key('mantis-recommend');
     expect(registrations).to.include.key('industrybrains');
     expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
@@ -57,6 +59,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('yieldbot');
     expect(registrations).to.include.key('adstir');
     expect(registrations).to.include.key('colombia');
+    expect(registrations).to.include.key('microad');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {

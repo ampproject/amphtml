@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-youtube');
 import {adopt} from '../../../../src/runtime';
 import {timer} from '../../../../src/timer';
@@ -34,9 +37,10 @@ describe('amp-youtube', function() {
     sandbox.restore();
   });
 
-  function getYt(videoId, opt_responsive, opt_beforeLayoutCallback) {
+  function getYt(attributes, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
+          doNotLoadExternalResourcesInTest(iframe.win);
           const yt = iframe.doc.createElement('amp-youtube');
 
           // TODO(mkhatib): During tests, messages are not being correctly
@@ -51,7 +55,9 @@ describe('amp-youtube', function() {
             });
           });
 
-          yt.setAttribute('data-videoid', videoId);
+          for (const key in attributes) {
+            yt.setAttribute(key, attributes[key]);
+          }
           yt.setAttribute('width', '111');
           yt.setAttribute('height', '222');
           if (opt_responsive) {
@@ -62,7 +68,7 @@ describe('amp-youtube', function() {
   }
 
   it('renders', () => {
-    return getYt('mGENRKrdoGY').then(yt => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -74,7 +80,7 @@ describe('amp-youtube', function() {
   });
 
   it('renders responsively', () => {
-    return getYt('mGENRKrdoGY', true).then(yt => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}, true).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/-amp-fill-content/);
@@ -82,19 +88,19 @@ describe('amp-youtube', function() {
   });
 
   it('requires data-videoid', () => {
-    return getYt('').should.eventually.be.rejectedWith(
+    return getYt({}).should.eventually.be.rejectedWith(
         /The data-videoid attribute is required for/);
   });
 
   it('adds an img placeholder in prerender mode', () => {
-    return getYt('mGENRKrdoGY', true, function(yt) {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
-      expect(imgPlaceholder.getAttribute('src')).to.be.equal(
+      expect(imgPlaceholder.src).to.be.equal(
           'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
@@ -106,7 +112,7 @@ describe('amp-youtube', function() {
   });
 
   it('loads only sddefault when it exists', () => {
-    return getYt('mGENRKrdoGY', true, function(yt) {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
@@ -126,13 +132,26 @@ describe('amp-youtube', function() {
   });
 
   it('loads hqdefault thumbnail source when sddefault fails', () => {
-    return getYt('FAKE', true, function(yt) {
+    return getYt({'data-videoid': 'FAKE'}, true, function(yt) {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.be.null;
 
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+
+      // Fake out the 404 image response dimensions of YT.
+      Object.defineProperty(imgPlaceholder, 'naturalWidth', {
+        get: function() {
+          return 120;
+        },
+      });
+      Object.defineProperty(imgPlaceholder, 'naturalHeight', {
+        get: function() {
+          return 90;
+        },
+      });
+      imgPlaceholder.triggerLoad();
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -146,7 +165,7 @@ describe('amp-youtube', function() {
   });
 
   it('monitors the YouTube player state', () => {
-    return getYt('mGENRKrdoGY').then(yt => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
 
@@ -167,7 +186,7 @@ describe('amp-youtube', function() {
   });
 
   it('should not pause when video not playing', () => {
-    return getYt('mGENRKrdoGY').then(yt => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       sandbox.spy(yt.implementation_, 'pauseVideo_');
       yt.implementation_.pauseCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.false;
@@ -176,11 +195,23 @@ describe('amp-youtube', function() {
   });
 
   it('should pause if the video is playing', () => {
-    return getYt('mGENRKrdoGY').then(yt => {
+    return getYt({'data-videoid': 'mGENRKrdoGY'}).then(yt => {
       yt.implementation_.playerState_ = 1;
       sandbox.spy(yt.implementation_, 'pauseVideo_');
       yt.implementation_.pauseCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.true;
+    });
+  });
+
+  it('should pass data-param-* attributes to the iframe src', () => {
+    return getYt({
+      'data-videoid': 'mGENRKrdoGY',
+      'data-param-autoplay': '1',
+      'data-param-my-param': 'hello world',
+    }).then(yt => {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe.src).to.contain('autoplay=1');
+      expect(iframe.src).to.contain('myParam=hello%20world');
     });
   });
 });

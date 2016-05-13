@@ -239,6 +239,23 @@ export function lastChildElement(parent, callback) {
   return null;
 }
 
+/**
+ * Finds all child nodes that satisfies the callback.
+ * These nodes can include Text, Comment and other child nodes.
+ * @param {!Node} parent
+ * @param {function(!Node):boolean} callback
+ * @return {!Array<!Node>}
+ */
+export function childNodes(parent, callback) {
+  const nodes = [];
+  for (let child = parent.firstChild; child;
+       child = child.nextSibling) {
+    if (callback(child)) {
+      nodes.push(child);
+    }
+  }
+  return nodes;
+}
 
 /**
  * @type {boolean|undefined}
@@ -358,11 +375,30 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    const matches = attr.name.match(/^data-param-(.+)/);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
-      params[computeParamNameFunc(param)] = attr.nodeValue;
+      params[computeParamNameFunc(param)] = attr.value;
     }
   }
   return params;
+}
+
+
+/**
+ * Whether the element have a next node in the document order.
+ * This means either:
+ *  a. The element itself has a nextSibling.
+ *  b. Any of the element ancestors has a nextSibling.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function hasNextNodeInDocumentOrder(element) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (currentElement = element.parentNode);
+  return false;
 }

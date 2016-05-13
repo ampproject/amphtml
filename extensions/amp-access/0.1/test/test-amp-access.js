@@ -16,10 +16,13 @@
 
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
+import {AccessServerAdapter} from '../amp-access-server';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installCidService} from '../../../../src/service/cid-impl';
+import {installCidService,} from
+    '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('AccessService', () => {
@@ -45,6 +48,7 @@ describe('AccessService', () => {
       document.body.removeChild(element);
     }
     sandbox.restore();
+    toggleExperiment(window, 'amp-access-server', false);
   });
 
   it('should disable service when no config', () => {
@@ -133,9 +137,16 @@ describe('AccessService', () => {
 
     config['type'] = 'server';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).type_).to.equal('client');
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'server';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerAdapter);
 
     config['type'] = 'other';
     element.textContent = JSON.stringify(config);
@@ -1418,7 +1429,7 @@ describe('AccessService analytics', () => {
     service.getReaderId_ = () => {
       return Promise.resolve('reader1');
     };
-    service.setAuthResponse_({views: 3, child: {type: 'premium'}});
+    service.setAuthResponse_({views: 3, child: {type: 'premium'}, zero: 0});
   });
 
   afterEach(() => {
@@ -1447,11 +1458,13 @@ describe('AccessService analytics', () => {
       service.getAuthdataField('child.type'),
       service.getAuthdataField('other'),
       service.getAuthdataField('child.other'),
+      service.getAuthdataField('zero'),
     ]).then(res => {
       expect(res[0]).to.equal(3);
       expect(res[1]).to.equal('premium');
       expect(res[2]).to.be.null;
       expect(res[3]).to.be.null;
+      expect(res[4]).to.equal(0);
     });
   });
 

@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-springboard-player');
 import {adopt} from '../../../../src/runtime';
 
@@ -24,6 +27,7 @@ describe('amp-springboard-player', () => {
 
   function getSpringboardPlayer(attributes) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const bc = iframe.doc.createElement('amp-springboard-player');
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);

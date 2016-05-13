@@ -23,7 +23,7 @@ import {
   validateData,
   validateDataExists,
   validateExactlyOne,
-} from '../../src/3p';
+} from '../../3p/3p';
 import * as sinon from 'sinon';
 
 describe('3p', () => {

@@ -40,13 +40,14 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
 import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
+import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';
@@ -70,6 +71,7 @@ import {adstir} from '../ads/adstir';
 import {colombia} from '../ads/colombia';
 import {sharethrough} from '../ads/sharethrough';
 import {eplanning} from '../ads/eplanning';
+import {microad} from '../ads/microad';
 
 
 /**
@@ -78,6 +80,7 @@ import {eplanning} from '../ads/eplanning';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  'mantis-recommend': true,
   plista: true,
 };
 
@@ -95,6 +98,8 @@ register('criteo', criteo);
 register('doubleclick', doubleclick);
 register('appnexus', appnexus);
 register('flite', flite);
+register('mantis-display', mantisDisplay);
+register('mantis-recommend', mantisRecommend);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('taboola', taboola);
@@ -125,6 +130,8 @@ register('adstir', adstir);
 register('colombia', colombia);
 register('sharethrough', sharethrough);
 register('eplanning', eplanning);
+register('microad', microad);
+
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

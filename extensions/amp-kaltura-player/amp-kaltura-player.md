@@ -85,7 +85,7 @@ Example:
 
 **data-partner**
 
-The Kaltura partner id.
+The Kaltura partner id. This attribute is mandatory.
 
 **data-uiconf**
 

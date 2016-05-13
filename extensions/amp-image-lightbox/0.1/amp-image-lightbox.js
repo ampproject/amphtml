@@ -993,7 +993,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
   }
 
-  /** @private {!History} */
+  /** @private @return {!History} */
   getHistory_() {
     return historyFor(this.element.ownerDocument.defaultView);
   }

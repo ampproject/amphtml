@@ -323,6 +323,53 @@ export function expectBodyToBecomeVisible(win) {
 }
 
 /**
+ * For the given iframe, makes the creation of iframes and images
+ * create elements that do not actually load their underlying
+ * resources.
+ * Calling `triggerLoad` makes the respective resource appear loaded.
+ * Calling `triggerError` on the respective resources makes them
+ * appear in error state.
+ * @param {!Window} win
+ */
+export function doNotLoadExternalResourcesInTest(win) {
+  const createElement = win.document.createElement;
+  win.document.createElement = function(tagName) {
+    const element = createElement.apply(this, arguments);
+    tagName = tagName.toLowerCase();
+    if (tagName == 'iframe' || tagName == 'img') {
+      // Make get/set write to a fake property instead of
+      // triggering invocation.
+      Object.defineProperty(element, 'src', {
+        set: function(val) {
+          this.fakeSrc = val;
+        },
+        get: function() {
+          return this.fakeSrc;
+        }
+      });
+      // Triggers a load event on the element in the next micro task.
+      element.triggerLoad = function() {
+        const e = new Event('load');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      // Triggers an error event on the element in the next micro task.
+      element.triggerError = function() {
+        const e = new Event('error');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      if (tagName == 'iframe') {
+        element.srcdoc = '<h1>Fake iframe</h1>';
+      }
+    }
+    return element;
+  };
+}
+
+/**
  * Takes a HTML document that is pointing to unminified JS and HTML
  * binaries and massages the URLs to pointed to compiled binaries
  * instead.
