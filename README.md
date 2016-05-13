@@ -115,7 +115,7 @@ To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](h
 # Further Reading
 
 If you are creating AMP pages,
-check out the docs on [ampproject.org](https://www.ampproject.org/).
+check out the docs on [ampproject.org](https://www.ampproject.org/) and samples on [ampbyexample.com](https://ampbyexample.com/).
 
 These docs are public and open-source: [https://github.com/ampproject/docs/](https://github.com/ampproject/docs/).
 See something that's missing from the docs, or that could be worded better?
