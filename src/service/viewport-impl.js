@@ -746,27 +746,16 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
     // found is to reset scrolling on the AMP doc, which overrides natural BODY
     // scrolling with overflow:auto. We need the following styling:
     // html {
-    //   overflow: auto;
     //   -webkit-overflow-scrolling: touch;
     // }
     // body {
-    //   position: absolute;
-    //   overflow: auto;
-    //   -webkit-overflow-scrolling: touch;
+    //   overflow-x: hidden;
     // }
     setStyles(documentElement, {
-      overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
       overflowX: 'hidden',
-      overflowY: 'auto',
-      webkitOverflowScrolling: 'touch',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
     });
 
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
@@ -774,14 +763,11 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
     this.scrollPosEl_ = this.win.document.createElement('div');
     this.scrollPosEl_.id = '-amp-scrollpos';
     setStyles(this.scrollPosEl_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
       width: 0,
       height: 0,
       visibility: 'hidden',
     });
-    documentBody.appendChild(this.scrollPosEl_);
+    documentBody.insertBefore(this.scrollPosEl_, documentBody.firstChild);
 
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
@@ -816,16 +802,6 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
-    onDocumentReady(this.win.document, () => {
-      // Also tried `paddingTop` but it didn't work for `position:absolute`
-      // on iOS.
-      this.win.document.body.style.borderTop =
-          `${paddingTop}px solid transparent`;
-    });
-  }
-
-  /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
   }
@@ -837,20 +813,14 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
 
   /** @override */
   getScrollLeft() {
-    return Math.round(this.pos_.x);
-  }
-
-  /** @override */
-  getScrollWidth() {
-    // There's no good way to calculate scroll width on iOS in this mode.
-    return this.win./*OK*/innerWidth;
+    return 0;
   }
 
   /** @override */
   getScrollHeight() {
     // We have to use a special "tail" element on iOS due to the issues outlined
     // in the {@link onScrolled_} method. Because we are forced to layout BODY
-    // with position:absolute, we can no longer use BODY's scrollHeight to
+    // with `height: 100%`, we can no longer use BODY's scrollHeight to
     // determine scrolling height - it will always return the viewport height.
     // Instead, we append the "tail" element as the last child of BODY and use
     // it's viewport-relative position to calculate scrolling height.
@@ -867,8 +837,16 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
   }
 
   /** @override */
-  setScrollTop(scrollTop) {
-    this.setScrollPos_(scrollTop || 1);
+  setScrollTop(scrollPos) {
+    // Stop us from scrolling _all_ the way to the top and triggering an
+    // annoying bounce animation.
+    scrollPos = Math.max(scrollPos, 1);
+    if (!this.scrollMoveEl_) {
+      return;
+    }
+    const scrollTop = this.getScrollTop();
+    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos - scrollTop}px)`);
+    this.scrollMoveEl_./*OK*/scrollIntoView(true);
   }
 
   /**
@@ -903,20 +881,11 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
     }
   }
 
-  /** @private */
-  setScrollPos_(scrollPos) {
-    if (!this.scrollMoveEl_) {
-      return;
-    }
-    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
-    this.scrollMoveEl_./*OK*/scrollIntoView(true);
-  }
-
   /**
-   * @param {!Event=} opt_event
+   * @param {!Event} event
    * @private
    */
-  adjustScrollPos_(opt_event) {
+  adjustScrollPos_(event) {
     if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
       return;
     }
@@ -926,9 +895,9 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
     // This is very sad but very necessary. See #330 for more details.
     const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
     if (scrollTop == 0) {
-      this.setScrollPos_(1);
-      if (opt_event) {
-        opt_event.preventDefault();
+      this.setScrollTop(1);
+      if (event) {
+        event.preventDefault();
       }
       return;
     }
