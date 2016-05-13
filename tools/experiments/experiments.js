@@ -88,7 +88,6 @@ const EXPERIMENTS = [
     name: 'AMP Access server side prototype',
     spec: '',
   },
-
   // Amp Timeline
   {
     id: 'amp-timeline',
