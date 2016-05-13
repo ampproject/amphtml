@@ -25,7 +25,7 @@ min_validator_revision_required: 133
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 213
+spec_file_revision: 214
 
 # Validator extensions.
 # =====================
@@ -2002,10 +2002,30 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# JSON Linked Data
 tags: {
   tag_name: "script"
   spec_name: "script type=application/ld+json"
   mandatory_parent: "head"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/ld+json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# Variant of the above, allowed in the body. See Github #2966.
+# TODO(gregable): Support repeated mandatory_parent perhaps.
+tags: {
+  tag_name: "script"
+  spec_name: "body > script type=application/ld+json"
+  mandatory_parent: "body"
   attrs: {
     name: "type"
     mandatory: true
