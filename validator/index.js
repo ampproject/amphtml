@@ -196,25 +196,6 @@ class ValidationError {
 }
 
 /**
- * Proto buffer derived Javascript enums (soon) use a number
- * internally, but for this API we'd like to return string values as
- * they're more convenient to deal with in Javascript. So we invert
- * the key->value mapping for the given enum that comes from a proto
- * buffer.
- * @param {!Object<string,?>} enumMap
- * @returns {!Object<?, string>}
- */
-function enumValuesByKeysFor(enumMap) {
-  const enumValuesByKeys = {};
-  for (const key in enumMap) {
-    if (enumMap.hasOwnProperty(key)) {
-      enumValuesByKeys[enumMap[key]] = key;
-    }
-  }
-  return enumValuesByKeys;
-}
-
-/**
  * The validator instance is a proxy object to a precompiled
  * validator.js script - in practice the script was either downloaded
  * from 'https://cdn.ampproject.org/v0/validator.js' or read from a
@@ -237,13 +218,6 @@ class Validator {
     // that, but it's quite similar to a Javascript eval.
     this.sandbox = vm.createContext();
     new vm.Script(scriptContents).runInContext(this.sandbox);
-
-    this.validationErrorCodeByEnumValue =
-        enumValuesByKeysFor(this.sandbox.amp.validator.ValidationError.Code);
-    this.validationErrorSeverityByEnumValue = enumValuesByKeysFor(
-        this.sandbox.amp.validator.ValidationError.Severity);
-    this.errorCategoryCodeByEnumValue =
-        enumValuesByKeysFor(this.sandbox.amp.validator.ErrorCategory.Code);
   }
 
   /**
@@ -258,18 +232,16 @@ class Validator {
     result.status = internalResult.status;
     for (const internalError of internalResult.errors) {
       const error = new ValidationError();
-      error.severity =
-          this.validationErrorSeverityByEnumValue[internalError.severity];
+      error.severity = internalError.severity;
       error.line = internalError.line;
       error.col = internalError.col;
       error.message =
           this.sandbox.amp.validator.renderErrorMessage(internalError);
       error.specUrl = internalError.specUrl;
-      error.code = this.validationErrorCodeByEnumValue[internalError.code];
+      error.code = internalError.code;
       error.params = internalError.params;
       error.category =
-          this.errorCategoryCodeByEnumValue
-              [this.sandbox.amp.validator.categorizeError(internalError)];
+          this.sandbox.amp.validator.categorizeError(internalError);
       result.errors.push(error);
     }
     return result;
