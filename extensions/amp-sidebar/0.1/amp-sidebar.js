@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev} from '../../../src/log';
+import {historyFor} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
@@ -74,6 +75,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
+
+    /** @private {number} */
+    this.historyId_ = -1;
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
@@ -166,6 +170,9 @@ export class AmpSidebar extends AMP.BaseElement {
         }, ANIMATION_TIMEOUT);
       });
     });
+    this.getHistory_().push(this.close_.bind(this)).then(historyId => {
+      this.historyId_ = historyId;
+    });
   }
 
   /**
@@ -190,6 +197,10 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }, ANIMATION_TIMEOUT);
     });
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
   }
 
   /**
@@ -259,6 +270,13 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.appendChild(div);
       this.bottomBarCompensated_ = true;
     }
+  }
+
+  /**
+   * @private @return {!History}
+   */
+  getHistory_() {
+    return historyFor(this.win_);
   }
 }
 
