@@ -27,7 +27,7 @@ html {
   overflow-x: hidden !important;
 }
 html, body {
-  height: auto !important;
+  height: 100% !important;
 }
 
 /**
