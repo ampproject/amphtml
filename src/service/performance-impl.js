@@ -340,7 +340,7 @@ export class Performance {
  * @param {!Window} window
  * @return {!Performance}
  */
-export function insgtallPerformanceService(window) {
+export function installPerformanceService(window) {
   return getService(window, 'performance', () => {
     return new Performance(window);
   });
