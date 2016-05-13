@@ -1419,7 +1419,7 @@ describe('AccessService analytics', () => {
     service.getReaderId_ = () => {
       return Promise.resolve('reader1');
     };
-    service.setAuthResponse_({views: 3, child: {type: 'premium'}});
+    service.setAuthResponse_({views: 3, child: {type: 'premium'}, zero: 0});
   });
 
   afterEach(() => {
@@ -1448,11 +1448,13 @@ describe('AccessService analytics', () => {
       service.getAuthdataField('child.type'),
       service.getAuthdataField('other'),
       service.getAuthdataField('child.other'),
+      service.getAuthdataField('zero'),
     ]).then(res => {
       expect(res[0]).to.equal(3);
       expect(res[1]).to.equal('premium');
       expect(res[2]).to.be.null;
       expect(res[3]).to.be.null;
+      expect(res[4]).to.equal(0);
     });
   });
 
