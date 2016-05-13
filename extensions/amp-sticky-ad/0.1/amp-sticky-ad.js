@@ -20,7 +20,6 @@ import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
-import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -39,7 +38,28 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
-    this.displayAfterScroll();
+
+    // Check `amp-sticky-ad` only have one child with tagName `amp-ad`.
+    this.getRealChildren_ = this.getRealChildren();
+    if (this.getRealChildren_.length != 1 ||
+        this.getRealChildren_[0].tagName != 'AMP-AD') {
+      return;
+    }
+
+    /** @private @const {!Viewport} */
+    this.viewport_ = this.getViewport();
+
+    /** @private {boolean} */
+    this.isDisplayed_ = false;
+
+    /** @private {number} */
+    this.initialScrollTop_ = null;
+
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+
+    // On viewport scroll, check requirements for amp-stick-ad to display.
+    this.viewport_.onScroll(() => this.displayAfterScroll());
   }
 
   /** @override */
@@ -49,58 +69,51 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
+    this.scheduleLayout(this.getRealChildren_);
     return Promise.resolve();
   }
 
+  // The sticky ad is shown when user scroll at least one viewport and
+  // there is at least one more viewport available.
   displayAfterScroll() {
-    this.getRealChildren_ = this.getRealChildren();
-    if (this.getRealChildren_.length != 1 ||
-        this.getRealChildren_[0].tagName != 'AMP-AD') {
-      return;
-    }
-    this.viewport_ = this.getViewport();
-    this.isDisplayed_ = false;
-    this.initialScrollTop_ = this.viewport_.getScrollTop();
-    this.scrollHeight_ = this.viewport_.getScrollHeight();
-    this.viewportHeight_ = this.viewport_.getSize().height;
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
-    // The sticky ad is shown when user scroll at least one viewport and
-    // there is at least one more viewport available.
-    this.viewport_.onScroll(() => {
-      if (!this.isDisplayed_) {
-        const scrollDist =
-            (this.viewport_.getScrollTop() - this.initialScrollTop_);
-        // Check user has scrolled at least one viewport from init position.
-        if (this.viewportHeight_ < Math.abs(scrollDist)) {
-          if (scrollDist < 0) {
-            // In the case of scrolling up.
-            if (this.viewport_.getScrollTop() < this.viewportHeight_) {
-              // TODO: Discuss on what need to be done when direction changes.
-              this.initialScrollTop_ = this.viewport_.getScrollTop();
-              return;
-            }
-          } else {
-            // In the case of scrolling down.
-            const remainHeight = this.scrollHeight_
-                - this.viewport_.getScrollTop() - this.viewportHeight;
-            if (remainHeight < this.viewportHeight_) {
-              // TODO: Discuss on what need to be done when direction changes.
-              this.initialScrollTop_ = this.viewport_.getScrollTop();
-              return;
-            }
-          }
-          this.isDisplayed_ = true;
-          this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'block',
-            });
-            this.viewport_.addToFixedLayer(this.element);
-            this.scheduleLayout(this.getRealChildren_);
-          });
-        }
+    if (!this.isDisplayed_) {
+      this.scrollTop_ = this.viewport_.getScrollTop();
+      this.scrollHeight_ = this.viewport_.getScrollHeight();
+      this.viewportHeight_ = this.viewport_.getSize().height;
+      if (!this.initialScrollTop_) {
+        this.initialScrollTop_ = this.scrollTop_;
       }
-    });
+      const scrollDist =
+          (this.scrollTop_ - this.initialScrollTop_);
+      // Check user has scrolled at least one viewport from init position.
+      if (this.viewportHeight_ < Math.abs(scrollDist)) {
+        if (scrollDist < 0) {
+          // In the case of scrolling up.
+          if (this.viewport_.getScrollTop() < this.viewportHeight_) {
+            // TODO: Discuss on what need to be done when direction changes.
+            this.initialScrollTop_ = this.viewport_.getScrollTop();
+            return;
+          }
+        } else {
+          // In the case of scrolling down.
+          const remainHeight = this.scrollHeight_
+              - this.viewport_.getScrollTop() - this.viewportHeight;
+          if (remainHeight < this.viewportHeight_) {
+            // TODO: Discuss on what need to be done when direction changes.
+            this.initialScrollTop_ = this.viewport_.getScrollTop();
+            return;
+          }
+        }
+        this.isDisplayed_ = true;
+        this.vsync_.mutate(() => {
+          setStyles(this.element, {
+            'display': 'block',
+          });
+          this.viewport_.addToFixedLayer(this.element);
+          this.scheduleLayout(this.element);
+        });
+      }
+    }
   }
 }
 
