@@ -38,7 +38,8 @@ describe('amp-accordion', () => {
       ampAccordion.implementation_.mutateElement = fn => fn();
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
-        section.innerHTML = '<h2>Section ' + i + '</h2><div>Loreum ipsum</div>';
+        section.innerHTML = '<h2>Section ' + i +
+            '<span>nested stuff<span></h2><div>Loreum ipsum</div>';
         ampAccordion.appendChild(section);
         if (i == 1) {
           section.setAttribute('expanded', '');
@@ -59,7 +60,23 @@ describe('amp-accordion', () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEvent = {
-        target: headerElements[0],
+        currentTarget: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(clickEvent.preventDefault.called).to.be.true;
+    });
+  });
+
+  it('should expand section when header\'s child is clicked', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEvent = {
+        currentTarget: headerElements[0],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
@@ -75,7 +92,7 @@ describe('amp-accordion', () => {
       const headerElements = iframe.doc.querySelectorAll(
           'section > *:first-child');
       const clickEvent = {
-        target: headerElements[1],
+        currentTarget: headerElements[1],
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;

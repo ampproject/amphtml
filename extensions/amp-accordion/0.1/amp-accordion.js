@@ -31,6 +31,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sections_ = this.getRealChildren();
 
     this.element.setAttribute('role', 'tablist');
+    const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
     this.sections_.forEach((section, index) => {
       user.assert(
           section.tagName.toLowerCase() == 'section',
@@ -57,7 +58,7 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', this.onHeaderClick_.bind(this));
+      header.addEventListener('click', boundOnHeaderClick_);
     });
   }
 
@@ -68,7 +69,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   onHeaderClick_(event) {
     event.preventDefault();
-    const section = event.target.parentNode;
+    const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];
     this.mutateElement(() => {
