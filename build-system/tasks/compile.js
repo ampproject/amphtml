@@ -86,7 +86,8 @@ function compile(entryModuleFilename, outputDir,
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = windowConfig.getTemplate() +
+    var wrapper = (options.includeWindowConfig ?
+        windowConfig.getTemplate() : '') +
         '(function(){var process={env:{NODE_ENV:"production"}};' +
         '%output%})();';
     if (options.wrapper) {
