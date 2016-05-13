@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-dailymotion');
 import {adopt} from '../../../../src/runtime';
 
@@ -24,6 +27,7 @@ describe('amp-dailymotion', () => {
 
   function getDailymotion(videoId, optResponsive, optCustomSettings) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const dailymotion = iframe.doc.createElement('amp-dailymotion');
       dailymotion.setAttribute('data-videoid', videoId);
       dailymotion.setAttribute('width', '111');

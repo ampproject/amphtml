@@ -1,11 +1,11 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-      http://www.apache.org/licenses/LICENSE-2.0
+  http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS-IS" BASIS,
@@ -14,28 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# IMobile
+# MicroAd
 
 ## Example
 
 ```html
-<amp-ad 
-  width="320"
-  height="50"
-  type="imobile"
-  data-pid="1847"
-  data-asid="813689"
-  data-adtype="banner"  
->
+<amp-ad width="320" height="50"
+	type="microad"
+    data-spot="b4bf837c5ddd69758d5ac924d04cf502"
+    data-url=""
+    data-referrer="">
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact inquiry@i-mobile.co.jp
+For configuration details and to generate your tags, [contact us](compass-support@microad.co.jp)
 
 Supported parameters:
 
-- data-pid
-- data-asid
-- data-adtype
+- width
+- height
+- data-spot
+- data-url
+- data-referrer

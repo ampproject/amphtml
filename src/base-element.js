@@ -665,7 +665,7 @@ export class BaseElement {
   * @return {!Promise}
   */
   mutateElement(mutator, opt_element) {
-    this.resources_.mutateElement(opt_element || this.element, mutator);
+    return this.resources_.mutateElement(opt_element || this.element, mutator);
   }
 
   /**

@@ -87,6 +87,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [MANTIS](../ads/mantis.md)
 - [MediaImpact](../ads/mediaimpact.md)
 - [Open AdStream (OAS)](../ads/openadstream.md)
+- [MicroAd](../ads/microad.md)
 - [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [PubMatic](../ads/pubmatic.md)

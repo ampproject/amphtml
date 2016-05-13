@@ -18,8 +18,8 @@ import * as sinon from 'sinon';
 import {
   ENSURE_NON_ZERO,
   Performance,
-  performanceFor,
-} from '../../src/performance';
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
@@ -323,6 +323,22 @@ describe('performance', () => {
         });
       });
 
+      it('should call prerenderComplete on viewer even if csi is ' +
+        'off', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
+        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(false);
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenReadyToRetrieveResourcesResolve();
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(prerenderSpy.firstCall.args[0].value).to.equal(400);
+          });
+        });
+      });
+
       it('should tick `pc` with opt_value=400 when user request document ' +
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
@@ -393,7 +409,7 @@ describe('performance', () => {
   });
 
   it('should setFlushParams', () => {
-    const perf = performanceFor(window);
+    const perf = installPerformanceService(window);
     const viewer = viewerFor(window);
     sandbox.stub(perf, 'whenViewportLayoutComplete_')
         .returns(Promise.resolve());

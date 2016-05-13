@@ -58,6 +58,16 @@ The Youtube video id found in every Youtube video page URL
 
 E.g. in https://www.youtube.com/watch?v=Z1q71gFeRqM Z1q71gFeRqM is the video id.
 
+**data-param-***
+
+All `data-param-*` attributes will be added as query parameter to the youtube iframe src. This may be used to pass custom values through to youtube plugins, such as autoplay.
+
+Keys and values will be URI encoded. Keys will be camel cased.
+
+- `data-param-autoplay=1` becomes `&autoplay=1`
+
+See [Youtube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for youtube.
+
 ## Validation
 
 See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/validator-amp-youtube.protoascii) in the AMP validator specification.

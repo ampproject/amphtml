@@ -69,6 +69,7 @@ function buildExtensions(options) {
   buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
+  buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
@@ -309,6 +310,7 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
