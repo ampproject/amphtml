@@ -92,6 +92,18 @@
     #amp-iframe:target {
       border: 1px solid green;
     }
+
+    #breaker {
+      height: 100px;
+      background: green;
+    }
+
+    #breaking {
+      height: 200px;
+      width: 200vw;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
   </style>
   <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
@@ -205,12 +217,12 @@
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
         width=527 height=193 layout="responsive"
-        on="tap:lightbox1"></amp-img>
+        on="tap:lightbox1" role="img" tabindex="0"></amp-img>
   </p>
 
   <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
     <div class="lightbox1-content">
-      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive" on="tap:lightbox1.close"></amp-img>
+      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive" on="tap:lightbox1.close" role="img" tabindex="1"></amp-img>
     </div>
   </amp-lightbox>
 
@@ -314,7 +326,7 @@
   <amp-instagram
     data-shortcode="fBwFP"
     width="320"
-    height="392"
+    height="320"
     layout="responsive">
   </amp-instagram>
 
@@ -362,6 +374,10 @@
     on-error-add-class="comic-amp-font-missing"
     on-load-add-class="comic-amp-font-loaded">
   </amp-font>
+
+  <div id="breaker">
+    <div id="breaking"></div>
+  </div>
 </article>
 </body>
 </html>

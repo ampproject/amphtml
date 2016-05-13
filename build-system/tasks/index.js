@@ -19,6 +19,7 @@ require('./changelog');
 require('./clean');
 require('./compile');
 require('./compile-access-expr');
+require('./dep-check');
 require('./lint');
 require('./make-golden');
 require('./presubmit-checks');

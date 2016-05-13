@@ -27,16 +27,10 @@ describe('Rendering of one ad', () => {
   function replaceUrl(win) {
     // TODO(#2402) Support glade as well.
     const path = '/test/fixtures/doubleclick.html?google_glade=0';
-    try {
-      win.location.hash = 'google_glade=0';
-      win.history.replaceState(null, null, path);
-    } catch (e) {
-      // Browsers are weird. Firefox gets here. We do, however, also in
-      // firefox pass down the parent URL. So we change that, which we
-      // can. We just need to change it back after the test.
-      beforeHref = win.parent.location.href;
-      win.parent.history.replaceState(null, null, path);
-    }
+    // We pass down the parent URL. So we change that, which we
+    // can. We just need to change it back after the test.
+    beforeHref = win.parent.location.href;
+    win.parent.history.replaceState(null, null, path);
   }
 
   beforeEach(() => {
@@ -87,6 +81,8 @@ describe('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.initialIntersection).to.be.defined;
+      expect(context.initialIntersection.rootBounds).to.be.defined;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(

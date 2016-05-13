@@ -379,14 +379,14 @@ describe('Viewport META', () => {
         getScrollTop: () => 0,
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
-        isEmbedded: () => false,
+        isIframed: () => false,
       };
       viewerMock = sandbox.mock(viewer);
 
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = sinon.spy();
+      viewportMetaSetter = sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: value => {
@@ -436,7 +436,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore disable TouchZoom if embedded', () => {
-      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewerMock.expects('isIframed').returns(true).atLeast(1);
       viewport.disableTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
@@ -478,7 +478,7 @@ describe('Viewport META', () => {
     });
 
     it('should ignore reset TouchZoom if embedded', () => {
-      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewerMock.expects('isIframed').returns(true).atLeast(1);
       viewport.resetTouchZoom();
       expect(viewportMetaSetter.callCount).to.equal(0);
     });
@@ -540,13 +540,19 @@ describe('ViewportBindingNatural', () => {
     windowApi.innerHeight = 222;
     windowApi.document = {
       documentElement: {
-        clientWidth: 111,
-        clientHeight: 222,
+        clientWidth: 333,
+        clientHeight: 444,
       },
     };
-    const size = binding.getSize();
+    let size = binding.getSize();
     expect(size.width).to.equal(111);
     expect(size.height).to.equal(222);
+
+    delete windowApi.innerWidth;
+    delete windowApi.innerHeight;
+    size = binding.getSize();
+    expect(size.width).to.equal(333);
+    expect(size.height).to.equal(444);
   });
 
   it('should calculate scrollTop from scrollElement', () => {
@@ -671,7 +677,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
           tagName: tagName,
           id: '',
           style: {},
-          scrollIntoView: sinon.spy(),
+          scrollIntoView: sandbox.spy(),
         };
       },
     };
@@ -705,6 +711,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const body = windowApi.document.body;
     expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
+    expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.overflowY).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
@@ -811,7 +818,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
@@ -831,7 +838,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: -10, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
@@ -841,7 +848,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
@@ -896,7 +903,7 @@ describe('ViewportBindingVirtual', () => {
   });
 
   it('should send event on scroll changed', () => {
-    const scrollHandler = sinon.spy();
+    const scrollHandler = sandbox.spy();
     binding.onScroll(scrollHandler);
     expect(scrollHandler.callCount).to.equal(0);
 
@@ -919,7 +926,7 @@ describe('ViewportBindingVirtual', () => {
   });
 
   it('should send event on size changed', () => {
-    const resizeHandler = sinon.spy();
+    const resizeHandler = sandbox.spy();
     binding.onResize(resizeHandler);
     expect(resizeHandler.callCount).to.equal(0);
 

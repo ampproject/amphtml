@@ -62,6 +62,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
+| `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
 
 
@@ -109,6 +110,10 @@ If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/out
 #### Chrome extension
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
+
+#### Deploying AMP on Cloud for testing on devices
+
+For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
 ## Repository Layout
 <pre>

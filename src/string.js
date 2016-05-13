@@ -35,7 +35,8 @@ export function endsWith(string, suffix) {
   if (suffix.length > string.length) {
     return false;
   }
-  return string.lastIndexOf(suffix) == string.length - suffix.length;
+  const index = string.length - suffix.length;
+  return string.indexOf(suffix, index) == index;
 }
 
 /**

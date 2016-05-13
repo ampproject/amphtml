@@ -17,7 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -46,7 +46,7 @@ class AmpKaltura extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const partnerid = user.assert(
         this.element.getAttribute('data-partner'),
-        'The data-account attribute is required for <amp-kaltura-player> %s',
+        'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);
     const uiconfid = this.element.getAttribute('data-uiconf') ||
     this.element.getAttribute('data-uiconf-id') ||
@@ -54,19 +54,8 @@ class AmpKaltura extends AMP.BaseElement {
     const entryid = this.element.getAttribute('data-entryid') || 'default';
     const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/sp/${encodeURIComponent(partnerid)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfid)}/partner_id/${encodeURIComponent(partnerid)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(entryid)}`;
-    const params = {};
-
-      // Pass through data-param-* attributes as params for plugin use
-    for (let i = 0; i < this.element.attributes.length; i++) {
-      const attr = this.element.attributes[i];
-      const matches = attr.nodeName.match(/^data-param-(.+)/);
-      if (matches) {
-        const param = dashToCamelCase(matches[1]);
-        const flashvar = 'flashvars[' + param + ']';
-        params[flashvar] = attr.nodeValue;
-      }
-    }
-
+    const params = getDataParamsFromAttributes(
+        this.element, key => `flashvars[${key}]`);
     src = addParamsToUrl(src, params);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
@@ -92,7 +81,7 @@ class AmpKaltura extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const partnerid = user.assert(
       this.element.getAttribute('data-partner'),
-      'The data-account attribute is required for <amp-kaltura-player> %s',
+      'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element);
     const entryid = this.element.getAttribute('data-entryid') || 'default';
     let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/thumbnail/entry_id/${encodeURIComponent(entryid)}`;

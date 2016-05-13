@@ -58,6 +58,7 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/base/examples/img/sample.jpg');
+      expect(ampImg.implementation_.getPriority()).to.equal(0);
     });
   });
 

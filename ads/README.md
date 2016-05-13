@@ -38,6 +38,7 @@ We will provide the following information to the ad:
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
+- `window.context.startTime` contains the time at which processing of the amp-ad element started.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
@@ -56,6 +57,8 @@ Depending on the ad server / provider some methods of rendering ads involve a se
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
+
+When a listener is registered, it will be called 2x in short order. Once with the position of the ad when its iframe was created and then again with the current position.
 
 Example usage:
 
@@ -81,6 +84,10 @@ Example usage:
   // condition to stop listening to intersection messages.
   unlisten();
 ```
+
+##### Initial position
+
+The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
 
 #### Page visibility
 

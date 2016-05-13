@@ -51,6 +51,11 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'alp',
+    name: 'Activates support for measuring incoming clicks.',
+    spec: 'https://github.com/ampproject/amphtml/issues/2934',
+  },
+  {
     id: 'amp-social-share',
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
@@ -67,6 +72,11 @@ const EXPERIMENTS = [
     id: 'amp-analytics-viewability',
     name: 'Viewability APIs for amp-analytics',
     spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
+  },
+  {
+    id: 'amp-sticky-ad',
+    name: 'AMP Sticky Ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/2472',
   },
 ];
 

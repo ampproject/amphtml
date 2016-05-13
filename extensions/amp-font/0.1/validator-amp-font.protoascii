@@ -50,7 +50,7 @@ tags: {  # <amp-font>
   tag_name: "amp-font"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-font extension .js script"
+  also_requires_tag: "amp-font extension .js script"
   attrs: {
     name: "font-family"
     mandatory: true

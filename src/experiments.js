@@ -104,24 +104,34 @@ function calcExperimentOn(win, experimentId) {
 
 
 /**
- * Toggles the expriment on or off. Returns the actual value of the expriment
+ * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
  * @param {!Window} win
  * @param {string} experimentId
  * @param {boolean=} opt_on
- * @return {boolean}
+ * @param {boolean=} opt_transientExperiment  Whether to toggle the
+ *     experiment state "transiently" (i.e., for this page load only) or
+ *     durably (by saving the experiment IDs to the cookie after toggling).
+ *     Default: false (save durably).
+ * @return {boolean} New state for experimentId.
  */
-export function toggleExperiment(win, experimentId, opt_on) {
+export function toggleExperiment(win, experimentId, opt_on,
+    opt_transientExperiment) {
   const experimentIds = getExperimentIds(win);
-  const currentlyOn = experimentIds.indexOf(experimentId) != -1;
+  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
+      (experimentId in EXPERIMENT_TOGGLES && EXPERIMENT_TOGGLES[experimentId]);
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
     if (on) {
       experimentIds.push(experimentId);
+      EXPERIMENT_TOGGLES[experimentId] = true;
     } else {
       experimentIds.splice(experimentIds.indexOf(experimentId), 1);
+      EXPERIMENT_TOGGLES[experimentId] = false;
     }
-    saveExperimentIds(win, experimentIds);
+    if (!opt_transientExperiment) {
+      saveExperimentIds(win, experimentIds);
+    }
   }
   return on;
 }

@@ -25,4 +25,5 @@ feature_tests/urls.html:80:2 Invalid URL protocol 'http:' for attribute 'src' in
 feature_tests/urls.html:81:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://www.ampproject.org/docs/reference/extended/amp-iframe.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:82:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://www.ampproject.org/docs/reference/amp-pixel.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:83:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://www.ampproject.org/docs/reference/amp-video.html) [AMP_TAG_PROBLEM]
-feature_tests/urls.html:85:7 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:84:2 Invalid URL protocol 'j a v a s c r i p t :' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:86:7 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

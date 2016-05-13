@@ -34,3 +34,6 @@ Supported parameters:
 
 - data-ad-client
 - data-ad-slot
+- data-ad-host
+- data-adtest
+- data-tag-origin

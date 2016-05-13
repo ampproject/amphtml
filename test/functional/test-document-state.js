@@ -20,12 +20,14 @@ import * as sinon from 'sinon';
 
 describe('DocumentState', () => {
 
+  let sandbox;
   let eventListeners;
   let testDoc;
   let windowApi;
   let docState;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     eventListeners = {};
     testDoc = {
       readyState: 'complete',
@@ -42,6 +44,10 @@ describe('DocumentState', () => {
     };
     windowApi = {document: testDoc};
     docState = new DocumentState(windowApi);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('resolve non-vendor properties', () => {
@@ -86,7 +92,7 @@ describe('DocumentState', () => {
   });
 
   it('should fire visibility change', () => {
-    const callback = sinon.spy();
+    const callback = sandbox.spy();
     docState.onVisibilityChanged(callback);
 
     expect(docState.isHidden()).to.equal(false);

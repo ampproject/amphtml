@@ -15,6 +15,7 @@
  */
 
 import {Timer} from '../../src/timer';
+import * as sinon from 'sinon';
 
 describe('Timer', () => {
 

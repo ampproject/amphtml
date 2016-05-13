@@ -31,6 +31,7 @@ import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
+import {maybeTrackImpression} from './impression';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -46,6 +47,7 @@ try {
       installCoreServices(window);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
+      maybeTrackImpression(window);
       templatesFor(window);
 
       installImg(window);

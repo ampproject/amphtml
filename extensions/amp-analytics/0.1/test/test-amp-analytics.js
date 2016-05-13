@@ -21,12 +21,15 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService} from '../../../../src/service';
+import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
-import {installCidService} from '../../../../src/service/cid-impl';
+import {installCidService,} from
+    '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installViewportService} from '../../../../src/service/viewport-impl';
-import {urlReplacementsFor} from '../../../../src/url-replacements';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -56,7 +59,9 @@ describe('amp-analytics', function() {
       installViewerService(iframe.win);
       installViewportService(iframe.win);
       installCidService(iframe.win);
+      installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
+      resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
           expect(init.requireAmpResponseSourceOrigin).to.be.true;
@@ -93,7 +98,7 @@ describe('amp-analytics', function() {
     const analytics = new AmpAnalytics(el);
     analytics.createdCallback();
     analytics.buildCallback();
-    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestSpy = sandbox.stub(analytics, 'sendRequest_');
     return analytics;
   }
 
@@ -151,7 +156,8 @@ describe('amp-analytics', function() {
             });
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsFor(analytics.getWin());
+            const urlReplacements = installUrlReplacementsService(
+                analytics.getWin());
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';
@@ -167,6 +173,8 @@ describe('amp-analytics', function() {
             return analytics.layoutCallback().then(() => {
               return analytics.handleEvent_({
                 request: name,
+              }, {
+                vars: Object.create(null),
               }).then(url => {
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {
@@ -582,7 +590,7 @@ describe('amp-analytics', function() {
     }, {
       'config': 'config1',
     });
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=1&foofoo=baz');
     });
@@ -597,7 +605,7 @@ describe('amp-analytics', function() {
     }, {
       'config': 'config1',
     });
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
       expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
@@ -664,6 +672,94 @@ describe('amp-analytics', function() {
     });
   });
 
+  describe('sampling', () => {
+    function getConfig(sampleRate) {
+      return {
+        'requests': {
+          'pageview1': '/test1=${requestCount}',
+        },
+        'triggers': {
+          'sampled': {
+            'on': 'visible',
+            'request': 'pageview1',
+            'sampleSpec': {
+              'sampleOn': '${requestCount}',
+              'threshold': sampleRate,
+            },
+          },
+        },
+      };
+    }
+
+    it('allows a request through', () => {
+      const analytics = getAnalyticsTag(getConfig(1));
+
+      sandbox.stub(analytics, 'sha384_').returns([0, 100, 0, 100]);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('allows a request through based on url-replacements', () => {
+      const config = getConfig(1);
+      config.triggers.sampled.sampleSpec.sampleOn = '${pageViewId}';
+      const analytics = getAnalyticsTag(config);
+
+      const urlReplacements = installUrlReplacementsService(
+                analytics.getWin());
+      sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
+      sandbox.stub(analytics, 'sha384_').withArgs('0').returns([0]);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('does not allow a request through', () => {
+      const analytics = getAnalyticsTag(getConfig(1));
+
+      sandbox.stub(analytics, 'sha384_').returns([1, 2, 3, 4]);
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('works when sampleSpec is 100%', () => {
+      const analytics = getAnalyticsTag(getConfig(100));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works when sampleSpec is 0%', () => {
+      const analytics = getAnalyticsTag(getConfig(0));
+
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('works when sampleSpec is incomplete', () => {
+      const incompleteConfig = {
+        'requests': {
+          'pageview1': '/test1=${requestCount}',
+        },
+        'triggers': [{
+          'on': 'visible',
+          'request': 'pageview1',
+          'sampleSpec': {
+            'sampleOn': '${requestCount}',
+          },
+        }],
+      };
+      const analytics = getAnalyticsTag(incompleteConfig);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+  });
+
   describe('iframePing', () => {
     it('fails for iframePing config outside of vendor config', function() {
       const analytics = getAnalyticsTag({
@@ -692,11 +788,8 @@ describe('amp-analytics', function() {
         },
       };
       return waitForSendRequest(analytics).then(() => {
-        const iframe = analytics.element
-            .ownerDocument.querySelector('iframe[amp-analytics]');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).to.contain('served/iframe.html');
-        expect(iframe.src).to.contain('Test%20Title');
+        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy.args[0][1]['iframePing']).to.be.true;
       });
     });
   });
