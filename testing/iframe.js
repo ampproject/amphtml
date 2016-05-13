@@ -17,7 +17,6 @@
 
 import {Timer} from '../src/timer';
 import {installCoreServices} from '../src/amp-core-service';
-import {registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
 
@@ -191,7 +190,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
       installCoreServices(iframe.contentWindow);
-      registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
       resolve({
@@ -239,7 +237,6 @@ export function createServedIframe(src) {
       const win = iframe.contentWindow;
       win.AMP_TEST = true;
       installCoreServices(win);
-      registerForUnitTest(win);
       resolve({
         win: win,
         doc: win.document,

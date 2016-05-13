@@ -22,7 +22,6 @@ import {getService} from './service';
 import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
@@ -163,19 +162,4 @@ export function adopt(global) {
     // go out of scope here, but just making sure.
     preregisteredElements.length = 0;
   });
-}
-
-
-/**
- * Registers all extended elements as normal elements in the given
- * window.
- * Make sure to call `adopt(window)` in your unit test as well and
- * then call this on the generated iframe.
- * @param {!Window} win
- */
-export function registerForUnitTest(win) {
-  for (let i = 0; i < elementsForTesting.length; i++) {
-    const element = elementsForTesting[i];
-    registerElement(win, element.name, element.implementationClass);
-  }
 }
