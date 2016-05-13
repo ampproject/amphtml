@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>CONTAINER</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-accordion">amp-accordion.html</a></td>
   </tr>
@@ -80,44 +84,6 @@ The `expanded` attribute can be set on any `<section>` that needs to be expanded
 - margins of the `amp-accordion`, `<section>` and the heading and content elements are set to 0 and can be overridden in custom styles.
 - Both the header and content elements are `position: relative`.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-accordion` tag
-(see also `amp-accordion` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%">Tag 'amp-accordion' is disallowed as child of tag
-        'amp-accordion'. Child tag must be one of ['section'].</td>
-    <td>Error thrown when <code>amp-accordion</code> contains
-        <code>amp-accordion</code> child tag. To make a nested
-        <code>amp-accordion</code>, place the nested <code>amp-accordion</code>
-        as the second child of a <code>section</code> instead.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%">Tag 'p' is disallowed as child of tag 'amp-accordion'.
-        Child tag must be one of ['section'].</td>
-    <td>Error thrown when <code>amp-accordion</code> contains any child tag
-        but <code>section</code>.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%">Tag 'div' is disallowed as first child of tag
-        'amp-accordion > section'. First child tag must be one of ['h1', 'h2',
-        'h3', 'h4', 'h5', 'h6', 'header'].</td>
-    <td>Error thrown when the first tag below <code>section</code> is not a
-        permissible tag for identifying the section header.</td>
-  </tr>
-  <tr>
-    <td width="40%">Tag 'amp-accordion > section' must have 2 child tags -
-        saw 3 child tags.</td>
-    <td>Error thrown when <code>section</code> does not have exactly 2 child tags -
-        a first child defining the header and a second child identifying
-        the content.</td>
-  </tr>
-</table>
+See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii) in the AMP validator specification.

@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-twitter">amp-twitter.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/twitter.amp.html">twitter.amp.html</a></td>
   </tr>
@@ -64,51 +68,6 @@ The ID of the tweet. In a URL like https://twitter.com/joemccann/status/64030096
 
 Options for the Tweet appearance can be set using `data-` attributes. E.g. `data-cards="hidden"` deactivates Twitter cards. For documentation of the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-twitter` tag
-(see also `amp-twitter` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii)):
-
-<!---
-What does fixed height and fixed width mean for audio layout?
-May need to add something to this table based on technical review.
--->
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-twitter</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The tag 'example1' is missing a mandatory attribute - pick one of example2.</a></td>
-    <td>Error thrown when neither <code>data-tweetid</code> or <code>src</code> is included. One of these attributes is mandatory.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-tweetid</code> or <code>src</code> is missing its URL.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-tweetid</code> or <code>src</code> URL is invalid.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown <code>data-tweetid</code> or <code>src</code> URL is <code>http</code>; <code>https</code> protocol required.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
-  </tr>
-</table>
+See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/0.1/validator-amp-twitter.protoascii) in the AMP validator specification.

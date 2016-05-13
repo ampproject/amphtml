@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FIXED_HEIGHT</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-soundcloud/">amp-soundcloud.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/soundcloud.amp.html">soundcloud.amp.html</a></td>
   </tr>
@@ -80,34 +84,6 @@ Custom color override for the "Classic" mode. Ignored in "Visual" mode.
 **width and height**
 Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for "Classic" mode, but for "Visual", height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-soundcloud` tag
-(see also `amp-soundcloud` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-soundcloud</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-trackid</code> attribute missing.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the <code>data-trackid</code> attribute is invalid. Only integers allowed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>FIXED_HEIGHT</code>. Error thrown if implied layout is any other value.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>FIXED_HEIGHT</code>. Error thrown if specified layout is any other value.</td>
-  </tr>
-</table>
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/0.1/validator-amp-soundcloud.protoascii) in the AMP validator specification.
