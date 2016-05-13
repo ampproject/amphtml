@@ -15,8 +15,8 @@
  */
 
 import './polyfills';
+import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {performanceFor} from './performance';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
 import {installAd} from '../builtins/amp-ad';
@@ -39,7 +39,7 @@ import {maybeTrackImpression} from './impression';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
-  const perf = performanceFor(window);
+  const perf = installPerformanceService(window);
 
   perf.tick('is');
   installStyles(document, cssText, () => {

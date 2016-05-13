@@ -18,8 +18,8 @@ import * as sinon from 'sinon';
 import {
   ENSURE_NON_ZERO,
   Performance,
-  performanceFor,
-} from '../../src/performance';
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
@@ -409,7 +409,7 @@ describe('performance', () => {
   });
 
   it('should setFlushParams', () => {
-    const perf = performanceFor(window);
+    const perf = installPerformanceService(window);
     const viewer = viewerFor(window);
     sandbox.stub(perf, 'whenViewportLayoutComplete_')
         .returns(Promise.resolve());
