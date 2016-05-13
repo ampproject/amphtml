@@ -30,10 +30,8 @@ class AmpStickyAd extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
-  /**
-   * @override
-   * @this {undefined}  // Make linter happy
-   */
+
+  /** @override */
   buildCallback() {
     /** @const @private {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
@@ -41,60 +39,64 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
-    this.viewport_ = this.getViewport();
-    this.isDisplayed_ = false;
-    this.initialScrollTop_ = this.viewport_.getScrollTop();
-    this.scrollHeight_ = this.viewport_.getScrollHeight();
-    this.viewportHeight_ = this.viewport_.getSize().height;
-    /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.getWin());
-    this.viewport_.onScroll(() => {
-      if (!this.isDisplayed_) {
-        const scrollDist =
-            (this.viewport_.getScrollTop() - this.initialScrollTop_);
-        if (this.viewportHeight_ < Math.abs(scrollDist)) {
-          // scroll down
-          if (scrollDist < 0) {
-            if (this.viewport_.getScrollTop() < this.viewportHeight_) {
-              // Not sure about this
-              this.initialScrollTop_ = this.viewport_.getScrollTop();
-              return;
-            }
-          } /*scroll up*/else {
-            const remainHeight = this.scrollHeight_
-                - this.viewport_.getScrollTop() - this.viewportHeight;
-            if (remainHeight < this.viewportHeight_) {
-              this.initialScrollTop_ = this.viewport_.getScrollTop();
-              return;
-            }
-          }
-          this.isDisplayed_ = true;
-          this.element.style.display = 'block';
-          this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'block',
-            });
-            this.viewport_.addToFixedLayer(this.element);
-            this.scheduleLayout(this.getRealChildren());
-          });
-        }
-      }
-    });
+    this.displayAfterScroll();
   }
 
-  /**
-   * @override
-   * @this {undefined}  // Make linter happy
-   */
+  /** @override */
   layoutCallback() {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
-    this.scheduleLayout(this.element.firstElementChild);
-    this.updateInViewport(this.element.firstElementChild, true);
     return Promise.resolve();
+  }
+
+  displayAfterScroll() {
+    this.viewport_ = this.getViewport();
+    this.isDisplayed_ = false;
+    this.initialScrollTop_ = this.viewport_.getScrollTop();
+    this.scrollHeight_ = this.viewport_.getScrollHeight();
+    this.viewportHeight_ = this.viewport_.getSize().height;
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+    // The sticky ad is shown when user scroll at least one viewport and
+    // there is at least one more viewport available.
+    this.viewport_.onScroll(() => {
+      if (!this.isDisplayed_) {
+        const scrollDist =
+            (this.viewport_.getScrollTop() - this.initialScrollTop_);
+        // Check user has scrolled at least one viewport from init position.
+        if (this.viewportHeight_ < Math.abs(scrollDist)) {
+          if (scrollDist < 0) {
+            // In the case of scrolling up.
+            if (this.viewport_.getScrollTop() < this.viewportHeight_) {
+              // TODO: Discuss on what need to be done when direction changes.
+              this.initialScrollTop_ = this.viewport_.getScrollTop();
+              return;
+            }
+          } else {
+            // In the case of scrolling down.
+            const remainHeight = this.scrollHeight_
+                - this.viewport_.getScrollTop() - this.viewportHeight;
+            if (remainHeight < this.viewportHeight_) {
+              // TODO: Discuss on what need to be done when direction changes.
+              this.initialScrollTop_ = this.viewport_.getScrollTop();
+              return;
+            }
+          }
+          this.isDisplayed_ = true;
+          this.vsync_.mutate(() => {
+            setStyles(this.element, {
+              'display': 'block',
+            });
+            // TODO: Check children has tagName `amp-ad`.
+            this.viewport_.addToFixedLayer(this.element);
+            this.scheduleLayout(this.getRealChildren());
+          });
+        }
+      }
+    });
   }
 }
 

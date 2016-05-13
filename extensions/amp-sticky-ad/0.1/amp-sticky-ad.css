@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
- amp-sticky-ad {
- 	position: fixed;
- 	bottom: 0;
- 	left: 0 !important;
- 	z-index: 1;
- 	width: 100%;
- 	display: none;
- 	max-height: 100px;
- }
+amp-sticky-ad {
+  position: fixed !important;
+  text-align:center;
+  bottom: 0 !important;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  max-height: 100px !important;
+}
