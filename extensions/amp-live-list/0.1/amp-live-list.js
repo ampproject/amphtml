@@ -254,10 +254,7 @@ export class AmpLiveList extends AMP.BaseElement {
         const orphan = this.win.document.importNode(child, true);
         insert.push(orphan);
         this.cacheChild_(child);
-        continue;
-      }
-
-      if (this.isChildUpdate_(child)) {
+      } else if (this.isChildUpdate_(child)) {
         const updateTime = this.getUpdateTime_(child);
         this.knownItems_[id] = updateTime;
         const orphan = this.win.document.importNode(child, true);
@@ -290,6 +287,11 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   isChildUpdate_(elem) {
+    // It can't be a child update if it actually has no data-update-time
+    // attribute.
+    if (!elem.hasAttribute('data-update-time')) {
+      return false;
+    }
     const id = elem.getAttribute('id');
     const updateTime = this.getUpdateTime_(elem);
     return id in this.knownItems_ && updateTime > this.knownItems_[id];
