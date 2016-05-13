@@ -70,15 +70,15 @@ export class LiveListInterface {
 
 /**
  * Helper function that either returns a number derived from the given
- * string value or returns the default value passed in.
+ * string value if its greater than the default, else returns the default.
  *
  * @param {string} value
  * @param {number} defaultValue
  * @return {number}
+ * @visibleForTesting
  */
-function getNumberOrDefault(value, defaultValue) {
-  value = Number(value);
-  return value > 0 ? Math.max(value, defaultValue) : defaultValue;
+export function getNumberMaxOrDefault(value, defaultValue) {
+  return Math.max(parseInt(value, 10) || 0, defaultValue);
 }
 
 
@@ -118,7 +118,7 @@ export class AmpLiveList extends AMP.BaseElement {
         'amp-live-list must have an id.');
 
     /** @private @const {number} */
-    this.pollInterval_ = getNumberOrDefault(
+    this.pollInterval_ = getNumberMaxOrDefault(
         this.element.getAttribute('data-poll-interval'),
         LiveListManager.getMinDataPollInterval());
 
@@ -129,11 +129,14 @@ export class AmpLiveList extends AMP.BaseElement {
         `Found ${maxItems}`);
 
     /** @private @const {number} */
-    this.maxItemsPerPage_ = getNumberOrDefault(maxItems,
+    this.maxItemsPerPage_ = getNumberMaxOrDefault(maxItems,
         LiveListManager.getMinDataMaxItemsPerPage());
 
+    /** @private {number} */
+    this.updateTime_ = 0;
+
     /** @private @const {!Object<string, string>} */
-    this.knownChildIds_ = Object.create(null);
+    this.knownItems_ = Object.create(null);
 
     this.manager_.register(this.liveListId_, this);
 
@@ -141,11 +144,11 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.updateSlot_ = user.assert(
        this.getUpdateSlot_(this.element),
-       'amp-live-list must have an `update` slot.');
+       'amp-live-list must have an "update" slot.');
 
     this.itemsSlot_ = user.assert(
         this.getItemsSlot_(this.element),
-        'amp-live-list must have an `items` slot.');
+        'amp-live-list must have an "items" slot.');
 
     this.updateSlot_.classList.add('-amp-hidden');
     this.eachChildElement_(this.itemsSlot_, item => {
@@ -166,7 +169,8 @@ export class AmpLiveList extends AMP.BaseElement {
 
     // Insert/new items will be contiguous at the top even though they
     // weren't in the actual request DOM structure.
-    mutateItems.insert.sort(this.sortByDataSortTime_).forEach(child => {
+    const comparator = this.sortByDataSortTime_.bind(this);
+    mutateItems.insert.sort(comparator).forEach(child => {
       child.classList.add(classes.ITEM);
       child.classList.add(classes.NEW_ITEM);
       // Since we only manipulate the DocumentFragment instance and not the
@@ -180,6 +184,8 @@ export class AmpLiveList extends AMP.BaseElement {
         this.updateSlot_.classList.remove('-amp-hidden');
       });
     }
+
+    return this.updateTime_;
   }
 
   /**
@@ -244,15 +250,20 @@ export class AmpLiveList extends AMP.BaseElement {
         child = child.nextElementSibling) {
       const id = child.getAttribute('id');
 
-      if (this.isChildNew_(id)) {
+      if (this.isChildNew_(child)) {
         const orphan = this.win.document.importNode(child, true);
         insert.push(orphan);
-        this.cacheChildId_(id, child.getAttribute('data-update-time'));
+        this.cacheChild_(child);
         continue;
       }
 
-      if (this.isChildUpdate_(child, id)) {
+      if (this.isChildUpdate_(child)) {
+        const updateTime = this.getUpdateTime_(child);
+        this.knownItems_[id] = updateTime;
         const orphan = this.win.document.importNode(child, true);
+        if (updateTime > this.updateTime_) {
+          this.updateTime_ = updateTime;
+        }
         updates.push(orphan);
       }
     }
@@ -262,19 +273,26 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /**
    * Predicate to check if the child passed in is new.
+   * @param {!Element} elem
+   * @return {boolean}
    * @private
    */
-  isChildNew_(id) {
-    return !(id in this.knownChildIds_);
+  isChildNew_(elem) {
+    const id = elem.getAttribute('id');
+    return !(id in this.knownItems_);
   }
 
   /**
    * Predicate to check if the child passed in is an update, determined
    * by data-update-time attribute.
+   * @param {!Element} elem
+   * @return {boolean}
    * @private
    */
-  isChildUpdate_(unusedChild, unusedId) {
-    return false;
+  isChildUpdate_(elem) {
+    const id = elem.getAttribute('id');
+    const updateTime = this.getUpdateTime_(elem);
+    return id in this.knownItems_ && updateTime > this.knownItems_[id];
   }
 
   /**
@@ -289,12 +307,16 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Record ids of previously seen children to cache.
    *
-   * @param {string} id
-   * @param {?string} updateTime
+   * @param {!Element} child
    * @private
    */
-  cacheChildId_(id, updateTime) {
-    this.knownChildIds_[id] = updateTime;
+  cacheChild_(child) {
+    const id = child.getAttribute('id');
+    const updateTime = this.getUpdateTime_(child);
+    if (updateTime > this.updateTime_) {
+      this.updateTime_ = updateTime;
+    }
+    this.knownItems_[id] = updateTime;
   }
 
   /**
@@ -304,7 +326,7 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   removeChildId_(id) {
-    delete this.knownChildIds_[id];
+    delete this.knownItems_[id];
   }
 
   /**
@@ -315,7 +337,8 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   isValidChild_(child) {
-    return !!child.getAttribute('id');
+    return !!child.hasAttribute('id') &&
+        Number(child.getAttribute('data-sort-time')) > 0;
   }
 
   /**
@@ -333,13 +356,13 @@ export class AmpLiveList extends AMP.BaseElement {
       if (!this.isValidChild_(child)) {
         foundInvalid = true;
       } else if (opt_cacheIds) {
-        this.cacheChildId_(child.getAttribute('id'),
-            child.getAttribute('data-update-time'));
+        this.cacheChild_(child);
       }
     });
     user.assert(!foundInvalid,
         `All amp-live-list-items under amp-live-list#${this.liveListId_} ` +
-        `children must have an id.`);
+        `children must have id and data-sort-time attributes. ` +
+        `data-sort-time must be a Number greater than 0.`);
   }
 
   /**
@@ -379,13 +402,45 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   sortByDataSortTime_(a, b) {
-    const aTime = Number(a.getAttribute('data-sort-time'));
-    const bTime = Number(b.getAttribute('data-sort-time'));
-    user.assert(aTime > 0, '`data-sort-time` attribute must exist and value' +
-        ' must be a number. Found %s.', aTime);
-    user.assert(bTime > 0, '`data-sort-time` attribute must exist and value' +
-        ' must be a number. Found %s.', aTime);
-    return aTime - bTime;
+    return this.getSortTime_(a) - this.getSortTime_(b);
+  }
+
+  /**
+   * @param {!Element} elem
+   * @return {number}
+   * @private
+   */
+  getSortTime_(elem) {
+    return this.getTimeAttr_(elem, 'data-sort-time');
+  }
+
+  /**
+   * @param {!Element} elem
+   * @return {number}
+   * @private
+   */
+  getUpdateTime_(elem) {
+    if (!elem.hasAttribute('data-update-time')) {
+      return this.getSortTime_(elem);
+    }
+    return this.getTimeAttr_(elem, 'data-update-time');
+  }
+
+  /**
+   * @param {!Element} elem
+   * @return {number}
+   * @private
+   */
+  getTimeAttr_(elem, attr) {
+    // TODO(erwinm): add memoization for these time properties when possible.
+    // For example since data-sort-time should be immutable we can do so, but
+    // we can't for data-update-time since we always have to evaluate if it
+    // changed or not if it exists.
+    const time = Number(elem.getAttribute(attr));
+    user.assert(time > 0, `"${attr}" attribute must exist and value ` +
+        `must be a number greater than 0. Found ${time} on ` +
+        `${elem.getAttribute('id')} instead.`);
+    return time;
   }
 }
 
