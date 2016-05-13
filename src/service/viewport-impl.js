@@ -507,103 +507,6 @@ export class Viewport {
 class ViewportBindingDef {
 
   /**
-   * Whether the binding requires fixed elements to be transfered to a
-   * independent fixed layer.
-   * @return {boolean}
-   */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
-
-  /**
-   * Register a callback for scroll events.
-   * @param {function()} unusedCallback
-   */
-  onScroll(unusedCallback) {}
-
-  /**
-   * Register a callback for resize events.
-   * @param {function()} unusedCallback
-   */
-  onResize(unusedCallback) {}
-
-  /**
-   * Updates binding with the new viewer's viewport info.
-   * @param {!Viewer} unusedViewer
-   */
-  updateViewerViewport(unusedViewer) {}
-
-  /**
-   * Updates binding with the new padding.
-   * @param {number} unusedPaddingTop
-   */
-  updatePaddingTop(unusedPaddingTop) {}
-
-  /**
-   * Returns the size of the viewport.
-   * @return {!{width: number, height: number}}
-   */
-  getSize() {}
-
-  /**
-   * Returns the top scroll position for the viewport.
-   * @return {number}
-   */
-  getScrollTop() {}
-
-  /**
-   * Sets scroll top position to the specified value or the nearest possible.
-   * @param {number} unusedScrollTop
-   */
-  setScrollTop(unusedScrollTop) {}
-
-  /**
-   * Returns the left scroll position for the viewport.
-   * @return {number}
-   */
-  getScrollLeft() {}
-
-  /**
-   * Returns the scroll width of the content of the document.
-   * @return {number}
-   */
-  getScrollWidth() {}
-
-  /**
-   * Returns the scroll height of the content of the document.
-   * @return {number}
-   */
-  getScrollHeight() {}
-
-  /**
-   * Returns the rect of the element within the document.
-   * @param {!Element} unusedEl
-   * @param {number=} unusedScrollLeft Optional arguments that the caller may
-   *     pass in, if they cached these values and would like to avoid
-   *     remeasure. Requires appropriate updating the values on scroll.
-   * @param {number=} unusedScrollTop Same comment as above.
-   * @return {!LayoutRect}
-   */
-  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
-
-  /** For testing. */
-  cleanup_() {}
-}
-
-
-/**
- * Implementation of ViewportBindingDef based on the native window. It assumes that
- * the native window is sized properly and events represent the actual
- * scroll/resize events. This mode is applicable to a standalone document
- * display or when an iframe has a fixed size.
- *
- * Visible for testing.
- *
- * @implements {ViewportBindingDef}
- */
-export class ViewportBindingNatural_ {
-
-  /**
    * @param {!Window} win
    */
   constructor(win) {
@@ -615,44 +518,51 @@ export class ViewportBindingNatural_ {
 
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
-
-    this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
-    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
-
-    dev.fine(TAG_, 'initialized natural viewport');
   }
 
-  /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
-  }
-
-  /** @override */
+  /**
+   * Whether the binding requires fixed elements to be transfered to a
+   * independent fixed layer.
+   * @return {boolean}
+   */
   requiresFixedLayerTransfer() {
     return false;
   }
 
-  /** @override */
+  /**
+   * Register a callback for scroll events.
+   * @param {function()} callback
+   */
   onScroll(callback) {
     this.scrollObservable_.add(callback);
   }
 
-  /** @override */
+  /**
+   * Register a callback for resize events.
+   * @param {function()} callback
+   */
   onResize(callback) {
     this.resizeObservable_.add(callback);
   }
 
-  /** @override */
-  updateViewerViewport(unusedViewer) {
-    // Viewer's viewport is ignored since this window is fully accurate.
-  }
+  /**
+   * Updates binding with the new viewer's viewport info.
+   * @param {!Viewer} unusedViewer
+   */
+  updateViewerViewport(unusedViewer) {}
 
-  /** @override */
+  /**
+   * Updates binding with the new padding.
+   * @param {number} paddingTop
+   */
   updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
   }
 
-  /** @override */
+  /**
+   * Returns the size of the viewport.
+   * @return {!{width: number, height: number}}
+   */
   getSize() {
     // Prefer window innerWidth/innerHeight but fall back to
     // documentElement clientWidth/clientHeight.
@@ -667,29 +577,49 @@ export class ViewportBindingNatural_ {
     return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
   }
 
-  /** @override */
+  /**
+   * Returns the top scroll position for the viewport.
+   * @return {number}
+   */
   getScrollTop() {
     return this.getScrollingElement_()./*OK*/scrollTop ||
         this.win./*OK*/pageYOffset;
   }
 
-  /** @override */
+  /**
+   * Returns the left scroll position for the viewport.
+   * @return {number}
+   */
   getScrollLeft() {
     return this.getScrollingElement_()./*OK*/scrollLeft ||
         this.win./*OK*/pageXOffset;
   }
 
-  /** @override */
+  /**
+   * Returns the scroll width of the content of the document.
+   * @return {number}
+   */
   getScrollWidth() {
     return this.getScrollingElement_()./*OK*/scrollWidth;
   }
 
-  /** @override */
+  /**
+   * Returns the scroll height of the content of the document.
+   * @return {number}
+   */
   getScrollHeight() {
     return this.getScrollingElement_()./*OK*/scrollHeight;
   }
 
-  /** @override */
+  /**
+   * Returns the rect of the element within the document.
+   * @param {!Element} el
+   * @param {number=} opt_scrollLeft Optional arguments that the caller may
+   *     pass in, if they cached these values and would like to avoid
+   *     remeasure. Requires appropriate updating the values on scroll.
+   * @param {number=} opt_scrollTop Same comment as above.
+   * @return {!LayoutRect}
+   */
   getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
     const scrollTop = opt_scrollTop != undefined
         ? opt_scrollTop
@@ -704,7 +634,10 @@ export class ViewportBindingNatural_ {
         Math.round(b.height));
   }
 
-  /** @override */
+  /**
+   * Sets scroll top position to the specified value or the nearest possible.
+   * @param {number} scrollTop
+   */
   setScrollTop(scrollTop) {
     this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
   }
@@ -733,6 +666,32 @@ export class ViewportBindingNatural_ {
 
 
 /**
+ * Implementation of ViewportBindingDef based on the native window. It assumes that
+ * the native window is sized properly and events represent the actual
+ * scroll/resize events. This mode is applicable to a standalone document
+ * display or when an iframe has a fixed size.
+ *
+ * Visible for testing.
+ *
+ * @implements {ViewportBindingDef}
+ */
+export class ViewportBindingNatural_ extends ViewportBindingDef {
+
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    super(win);
+
+    this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
+    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    dev.fine(TAG_, 'initialized natural viewport');
+  }
+}
+
+
+/**
  * Implementation of ViewportBindingDef based on the native window in case when
  * the AMP document is embedded in a IFrame on iOS. It assumes that the native
  * window is sized properly and events represent the actual resize events.
@@ -743,13 +702,12 @@ export class ViewportBindingNatural_ {
  *
  * @implements {ViewportBindingDef}
  */
-export class ViewportBindingNaturalIosEmbed_ {
+export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
   /**
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
+    super(win);
 
     /** @private {?Element} */
     this.scrollPosEl_ = null;
@@ -759,12 +717,6 @@ export class ViewportBindingNaturalIosEmbed_ {
 
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
-
-    /** @private @const {!Observable} */
-    this.scrollObservable_ = new Observable();
-
-    /** @private @const {!Observable} */
-    this.resizeObservable_ = new Observable();
 
     onDocumentReady(this.win.document, () => {
       // Microtask is necessary here to let Safari to recalculate scrollWidth
@@ -864,11 +816,6 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  updateViewerViewport(unusedViewer) {
-    // Viewer's viewport is ignored since this window is fully accurate.
-  }
-
-  /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, () => {
       // Also tried `paddingTop` but it didn't work for `position:absolute`
@@ -881,24 +828,6 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
-  }
-
-  /** @override */
-  onScroll(callback) {
-    this.scrollObservable_.add(callback);
-  }
-
-  /** @override */
-  onResize(callback) {
-    this.resizeObservable_.add(callback);
-  }
-
-  /** @override */
-  getSize() {
-    return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight,
-    };
   }
 
   /** @override */
@@ -934,11 +863,7 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getLayoutRect(el) {
-    const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left + this.pos_.x),
-        Math.round(b.top + this.pos_.y),
-        Math.round(b.width),
-        Math.round(b.height));
+    return super.getLayoutRect(el, this.pos_.x, this.pos_.y)
   }
 
   /** @override */
@@ -1025,15 +950,14 @@ export class ViewportBindingNaturalIosEmbed_ {
  *
  * @implements {ViewportBindingDef}
  */
-export class ViewportBindingVirtual_ {
+export class ViewportBindingVirtual_ extends ViewportBindingDef {
 
   /**
    * @param {!Window} win
    * @param {!Viewer} viewer
    */
   constructor(win, viewer) {
-    /** @private @const {!Window} */
-    this.win = win;
+    super(win);
 
     /** @private {number} */
     this.width_ = viewer.getViewportWidth();
@@ -1044,23 +968,12 @@ export class ViewportBindingVirtual_ {
     /** @private {number} */
     this./*OK*/scrollTop_ = viewer.getScrollTop();
 
-    /** @private @const {!Observable} */
-    this.scrollObservable_ = new Observable();
-
-    /** @private @const {!Observable} */
-    this.resizeObservable_ = new Observable();
-
     dev.fine(TAG_, 'initialized virtual viewport');
   }
 
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
-  }
-
-  /** @override */
-  requiresFixedLayerTransfer() {
-    return false;
   }
 
   /** @override */
@@ -1078,21 +991,6 @@ export class ViewportBindingVirtual_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
-    this.win.document.documentElement.style.paddingTop = px(paddingTop);
-  }
-
-  /** @override */
-  onScroll(callback) {
-    this.scrollObservable_.add(callback);
-  }
-
-  /** @override */
-  onResize(callback) {
-    this.resizeObservable_.add(callback);
-  }
-
-  /** @override */
   getSize() {
     return {width: this.width_, height: this.height_};
   }
@@ -1107,27 +1005,13 @@ export class ViewportBindingVirtual_ {
     return 0;
   }
 
-  /** @override */
-  getScrollWidth() {
-    return this.win.document.documentElement./*OK*/scrollWidth;
-  }
-
-  /** @override */
-  getScrollHeight() {
-    return this.win.document.documentElement./*OK*/scrollHeight;
-  }
-
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
-    const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left),
-        Math.round(b.top),
-        Math.round(b.width),
-        Math.round(b.height));
+    return super.getLayoutRect(el, 0, 0);
   }
 
   /** @override */
