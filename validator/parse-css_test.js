@@ -145,13 +145,8 @@ describe('tokenize', () => {
          {'line': 2, 'col': 2, 'tokenType': 'EOF_TOKEN'}],
         tokenlist);
     assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 1,
-          'tokenType': 'ERROR',
-          'code': 47,
-          'params': ['style']
-        }],
+        [{'line': 1, 'col': 1, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']}],
         errors);
   });
 
@@ -161,43 +156,20 @@ describe('tokenize', () => {
         'line 2 "unterminated\n';
     let errors = [];
     parse_css.tokenize(css, 1, 0, errors);
-    assertJSONEquals(
-        [
-          {
-            'line': 1,
-            'col': 7,
-            'tokenType': 'ERROR',
-            'code': 47,
-            'params': ['style']
-          },
-          {
-            'line': 2,
-            'col': 7,
-            'tokenType': 'ERROR',
-            'code': 47,
-            'params': ['style']
-          }
-        ],
-        errors);
+    assertJSONEquals([
+      {'line': 1, 'col': 7, 'tokenType': 'ERROR',
+       'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']},
+      {'line': 2, 'col': 7, 'tokenType': 'ERROR',
+       'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']}], errors);
     errors = [];
     parse_css.tokenize(css, 5, 5, errors);
     assertJSONEquals(
-        [
-          {
-            'line': 5,
-            'col': 12,
-            'tokenType': 'ERROR',
-            'code': 47,
-            'params': ['style']
-          },
-          {
-            'line': 6,
-            'col': 7,
-            'tokenType': 'ERROR',
-            'code': 47,
-            'params': ['style']
-          }
-        ],
+        [{'line': 5, 'col': 12, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING',
+          'params': ['style']},
+         {'line': 6, 'col': 7, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING',
+          'params': ['style']}],
         errors);
   });
 
@@ -206,38 +178,22 @@ describe('tokenize', () => {
     let errors = [];
     parse_css.tokenize('a trailing \\\nbackslash', 1, 0, errors);
     assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 11,
-          'tokenType': 'ERROR',
-          'code': 45,
-          'params': ['style']
-        }],
+        [{'line': 1, 'col': 11, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_STRAY_TRAILING_BACKSLASH', 'params': ['style']}],
         errors);
 
     errors = [];
     parse_css.tokenize('h1 {color: red; } /*', 1, 0, errors);
     assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 17,
-          'tokenType': 'ERROR',
-          'code': 46,
-          'params': ['style']
-        }],
+        [{'line': 1, 'col': 17, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_COMMENT', 'params': ['style']}],
         errors);
 
     errors = [];
     parse_css.tokenize('oh hi url(foo"bar)', 1, 0, errors);
     assertJSONEquals(
-        [{
-          'line': 1,
-          'col': 6,
-          'tokenType': 'ERROR',
-          'code': 48,
-          'params': ['style']
-        }],
-        errors);
+        [{'line': 1, 'col': 6, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_BAD_URL', 'params': ['style']}], errors);
   });
 });
 
@@ -600,30 +556,13 @@ describe('parseAStylesheet', () => {
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
-        [
-          {
-            'line': 1,
-            'col': 7,
-            'tokenType': 'ERROR',
-            'code': 51,
-            'params': ['style']
-          },
-          {
-            'line': 2,
-            'col': 13,
-            'tokenType': 'ERROR',
-            'code': 44,
-            'params': ['style', 'media']
-          },
-          {
-            'line': 4,
-            'col': 0,
-            'tokenType': 'ERROR',
-            'code': 49,
-            'params': ['style']
-          }
-        ],
-        errors);
+        [{'line': 1, 'col': 7, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INCOMPLETE_DECLARATION', 'params': ['style']},
+         {'line': 2, 'col': 13, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INVALID_AT_RULE', 'params': ['style', 'media']},
+         {'line': 4, 'col': 0, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE',
+          'params': ['style']}], errors);
   });
 
   it('generates errors based on the grammar', () => {
@@ -635,13 +574,8 @@ describe('parseAStylesheet', () => {
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
-        [{
-          'line': 2,
-          'col': 5,
-          'tokenType': 'ERROR',
-          'code': 51,
-          'params': ['style']
-        }],
+        [{'line': 2, 'col': 5, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INCOMPLETE_DECLARATION', 'params': ['style']}],
         errors);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'STYLESHEET', 'rules':
@@ -914,14 +848,8 @@ describe('extractUrls', () => {
     const parsedUrls = [];
     parse_css.extractUrls(sheet, parsedUrls, errors);
     assertJSONEquals(
-        [{
-          'line': 4,
-          'col': 11,
-          'tokenType': 'ERROR',
-          'code': 48,
-          'params': ['style']
-        }],
-        errors);
+        [{'line': 4, 'col': 11, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_BAD_URL', 'params': ['style']}], errors);
     assertJSONEquals([], parsedUrls);
   });
 });
@@ -1268,13 +1196,8 @@ describe('css_selectors', () => {
     const errors = [];
     const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {
-          'code': 55,
-          'col': 8,
-          'line': 1,
-          'params': ['style'],
-          'tokenType': 'ERROR'
-        },
+        {'code': 'CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR',
+         'col': 8, 'line': 1, 'params': ['style'], 'tokenType': 'ERROR'},
         selector);
   });
 

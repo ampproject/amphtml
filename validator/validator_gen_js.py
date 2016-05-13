@@ -184,27 +184,12 @@ def PrintEnumFor(enum_desc, out):
         which this function will append.
   """
   out.append('/**')
-  # ErrorCategories are provided to the validator as strings for category
-  # filter arguments. As a result, we must keep the string mapping around
-  # so that we can match codes up to the string argument. It's nice to have
-  # the argument be a string, so it's more human-readable.
-  # Layout strings are provided as part of our error messages, so these are
-  # also important to have as strings.
-  if enum_desc.full_name in ['amp.validator.ErrorCategory.Code',
-                             'amp.validator.AmpLayout.Layout']:
-    out.append(' * @enum {string}')
-  else:
-    out.append(' * @enum {number}')
+  out.append(' * @enum {string}')
   out.append(' * @export')
   out.append(' */')
   out.append('%s = {' % enum_desc.full_name)
-  if enum_desc.full_name in ['amp.validator.ErrorCategory.Code',
-                             'amp.validator.AmpLayout.Layout']:
-    out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name)
-                           for v in enum_desc.values]))
-  else:
-    out.append(',\n'.join(['  %s: %s' % (v.name, v.index)
-                           for v in enum_desc.values]))
+  out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name)
+                         for v in enum_desc.values]))
   out.append('};')
   out.append('')
 

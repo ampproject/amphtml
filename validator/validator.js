@@ -3239,10 +3239,7 @@ function errorLine(filenameOrUrl, error) {
  */
 amp.validator.renderValidationResult = function(validationResult, filename) {
   const rendered = [];
-  rendered.push(
-      validationResult.status == amp.validator.ValidationResult.Status.PASS ?
-          'PASS' :
-          'FAIL');
+  rendered.push(validationResult.status);
   for (const error of validationResult.errors) {
     rendered.push(errorLine(filename, error));
   }
