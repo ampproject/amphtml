@@ -53,6 +53,11 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   displayAfterScroll() {
+    this.getRealChildren_ = this.getRealChildren();
+    if (this.getRealChildren_.length != 1 ||
+        this.getRealChildren_[0].tagName != 'AMP-AD') {
+      return;
+    }
     this.viewport_ = this.getViewport();
     this.isDisplayed_ = false;
     this.initialScrollTop_ = this.viewport_.getScrollTop();
@@ -90,9 +95,8 @@ class AmpStickyAd extends AMP.BaseElement {
             setStyles(this.element, {
               'display': 'block',
             });
-            // TODO: Check children has tagName `amp-ad`.
             this.viewport_.addToFixedLayer(this.element);
-            this.scheduleLayout(this.getRealChildren());
+            this.scheduleLayout(this.getRealChildren_);
           });
         }
       }
