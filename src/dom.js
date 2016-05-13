@@ -383,3 +383,22 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   }
   return params;
 }
+
+
+/**
+ * Whether the element have a next node in the document order.
+ * This means either:
+ *  a. The element itself has a nextSibling.
+ *  b. Any of the element ancestors has a nextSibling.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function hasNextNodeInDocumentOrder(element) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (currentElement = element.parentNode);
+  return false;
+}
