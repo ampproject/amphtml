@@ -460,7 +460,8 @@ export class AccessService {
       if (!this.authResponse_) {
         return null;
       }
-      return getValueForExpr(this.authResponse_, field) || null;
+      const v = getValueForExpr(this.authResponse_, field);
+      return v !== undefined ? v : null;
     });
   }
 
