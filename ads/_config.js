@@ -74,6 +74,7 @@ export const adPrefetch = {
   ],
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
+  caprofitx: 'https://cdn.caprofitx.com/pfx.min.js',
 };
 
 /**
@@ -195,6 +196,10 @@ export const adPreconnect = {
   yieldmo: [
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
+  ],
+  caprofitx: [
+    'https://cdn.caprofitx.com',
+    'https://ad.caprofitx.adtdp.com',
   ],
   zergnet: [
     'https://www.zergnet.com',

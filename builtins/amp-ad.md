@@ -123,6 +123,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldmo](../ads/yieldmo.md)
 - [YahooJP](../ads/yahoojp.md)
 - [yieldone](../ads/yieldone.md)
+- [CA-ProFit-X](../ads/caprofitx.md)
 
 ## Styling
 

@@ -90,6 +90,8 @@ import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
+import {caprofitx} from '../ads/caprofitx';
+
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -161,10 +163,10 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
-
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
+register('caprofitx', caprofitx);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
