@@ -21,6 +21,7 @@ import logging
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 
@@ -398,6 +399,31 @@ def RunTests(out_dir, nodejs_cmd):
   logging.info('... success')
 
 
+def CreateWebuiAppengineDist(out_dir):
+  logging.info('entering ...')
+  webui_out = os.path.join(out_dir, 'webui_appengine')
+  shutil.copytree('webui', webui_out)
+  shutil.copytree('node_modules/codemirror',
+                  os.path.join(webui_out, 'codemirror'),
+                  symlinks=False,
+                  ignore=lambda d, files: [
+                      f for f in files
+                      if not os.path.isdir(os.path.join(d, f)) and
+                      os.path.splitext(f)[1] not in ['.css', '.js']])
+  shutil.copytree('node_modules/@polymer',
+                  os.path.join(webui_out, 'polymer'),
+                  symlinks=False,
+                  ignore=lambda d, files: [
+                      f for f in files
+                      if not os.path.isdir(os.path.join(d, f)) and
+                      os.path.splitext(f)[1] != '.html'])
+  webcomponents_out = os.path.join(out_dir, 'webcomponents-lite')
+  os.mkdir(webcomponents_out)
+  shutil.copyfile('node_modules/webcomponents-lite/webcomponents-lite.js',
+                  os.path.join(webcomponents_out, 'webcomponents-lite.js'))
+  logging.info('... success')
+
+
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
@@ -420,6 +446,7 @@ def Main():
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  CreateWebuiAppengineDist(out_dir='dist')
 
 
 if __name__ == '__main__':
