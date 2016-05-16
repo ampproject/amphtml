@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode} from '../../../src/mode';
+import {isLocalDev} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
@@ -275,7 +275,7 @@ class WebLoginDialog {
   getReturnUrl_() {
     const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
-    if (getMode().localDev) {
+    if (isLocalDev) {
       const loc = this.win.location;
       returnUrl = loc.protocol + '//' + loc.host +
           '/extensions/amp-access/0.1/amp-login-done.html';
