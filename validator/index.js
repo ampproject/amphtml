@@ -56,16 +56,20 @@ function readFromFile(name) {
 
 /**
  * Creates a promise which reads from a stream.
+ * @param {!string} name
  * @param {!stream.Readable} readable
  * @returns {!Promise<!string>}
  */
-function readFromReadable(readable) {
+function readFromReadable(name, readable) {
   return new Promise(function(resolve, reject) {
     const chunks = [];
     readable.setEncoding('utf8');
     readable.on('data', (chunk) => { chunks.push(chunk); });
     readable.on('end', () => { resolve(chunks.join('')); });
-    readable.on('error', (error) => { reject(error); });
+    readable.on('error', (error) => {
+      reject(error);
+      reject(new Error('Could not read from ' + name + ' - ' + error.message));
+    });
   });
 }
 
@@ -76,7 +80,7 @@ function readFromReadable(readable) {
  * @returns {!Promise<!string>}
  */
 function readFromStdin() {
-  return readFromReadable(process.stdin).then((data) => {
+  return readFromReadable('stdin', process.stdin).then((data) => {
     process.stdin.resume();
     return data;
   });
@@ -101,13 +105,15 @@ function readFromUrl(url) {
                // adding a 'data' handler, or by calling the .resume()
                // method."
                response.resume();
-               reject(new Error('HTTP Status ' + response.statusCode));
+               reject(new Error(
+                   'Unable to fetch ' + url + ' - HTTP Status ' +
+                   response.statusCode));
              } else {
                resolve(response);
              }
            });
          })
-      .then(readFromReadable);
+      .then(readFromReadable.bind(null, url));
 }
 
 /**
@@ -485,13 +491,13 @@ function main() {
                       }
                     })
                     .catch((error) => {
-                      console.error(
-                          'Could not fetch validator.js: ' + error.message);
+                      console.error(error);
                       process.exitCode = 1;
                     });
+
               })
               .catch((error) => {
-                console.error(item + ': unable to fetch - ' + error.message);
+                console.error(error);
                 process.exitCode = 1;
               });
         }
