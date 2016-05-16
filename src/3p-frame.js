@@ -18,7 +18,7 @@
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
-import {getMode} from './mode';
+import {getMode, isLocalDev, isMinified} from './mode';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
@@ -196,12 +196,12 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  if (getMode().localDev || getMode().test) {
+  if (isLocalDev || getMode().test) {
     const prefix = getMode().test ? '/base' : '';
     return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
         prefix + '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
+        (isMinified ? '-min/frame' : '/frame.max') +
         '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
