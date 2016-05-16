@@ -1,5 +1,5 @@
 {
-  "name": "amp_validator",
+  "name": "amp-validator",
   "version": "0.1.0",
   "description": "Validator for AMP HTML (www.ampproject.org)",
   "engines": {
@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "bin": {
-    "amp_validator": "index.js"
+    "amp-validator": "index.js"
   },
   "dependencies": {
     "commander": "2.9.0",
