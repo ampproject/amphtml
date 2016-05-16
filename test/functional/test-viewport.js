@@ -652,12 +652,11 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const WindowApi = function() {};
     windowEventHandlers = {};
     bodyEventListeners = {};
-    bodyChildren = [];
+    bodyChildren = [document.createTextNode('text')];
     WindowApi.prototype.addEventListener = function(eventType, handler) {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
-    windowApi.innerWidth = 555;
     windowApi.document = {
       readyState: 'complete',
       documentElement: {style: {}},
@@ -665,6 +664,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
         scrollWidth: 777,
         scrollHeight: 999,
         style: {},
+        firstChild: bodyChildren[0],
+        insertBefore: (child, reference) => {
+          for (let i = 0; i < bodyChildren.length; i++) {
+            if (bodyChildren[i] === reference) {
+              bodyChildren.splice(i, 0, child);
+              return;
+            }
+          }
+          bodyChildren.push(child);
+        },
         appendChild: child => {
           bodyChildren.push(child);
         },
@@ -702,57 +711,49 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyEventListeners['scroll']).to.not.equal(undefined);
   });
 
-  it('should always have scrollWidth equal window.innerWidth', () => {
-    expect(binding.getScrollWidth()).to.equal(555);
+  it('should have scrollWidth equal body scrollWidth', () => {
+    expect(binding.getScrollWidth()).to.equal(777);
   });
 
   it('should setup document for embed scrolling', () => {
     const documentElement = windowApi.document.documentElement;
     const body = windowApi.document.body;
-    expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.overflowX).to.equal('hidden');
-    expect(body.style.overflowY).to.equal('auto');
-    expect(body.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.position).to.equal('absolute');
-    expect(body.style.top).to.equal(0);
-    expect(body.style.left).to.equal(0);
-    expect(body.style.right).to.equal(0);
-    expect(body.style.bottom).to.equal(0);
 
-    expect(bodyChildren.length).to.equal(3);
+    expect(bodyChildren.length).to.equal(4);
 
+    // scrollpos is inserted as first child
     expect(bodyChildren[0].id).to.equal('-amp-scrollpos');
-    expect(bodyChildren[0].style.position).to.equal('absolute');
-    expect(bodyChildren[0].style.top).to.equal(0);
-    expect(bodyChildren[0].style.left).to.equal(0);
+    expect(bodyChildren[0].style.position).to.be.undefined;
+    expect(bodyChildren[0].style.top).to.be.undefined;
     expect(bodyChildren[0].style.width).to.equal(0);
     expect(bodyChildren[0].style.height).to.equal(0);
     expect(bodyChildren[0].style.visibility).to.equal('hidden');
 
-    expect(bodyChildren[1].id).to.equal('-amp-scrollmove');
-    expect(bodyChildren[1].style.position).to.equal('absolute');
-    expect(bodyChildren[1].style.top).to.equal(0);
-    expect(bodyChildren[1].style.left).to.equal(0);
-    expect(bodyChildren[1].style.width).to.equal(0);
-    expect(bodyChildren[1].style.height).to.equal(0);
-    expect(bodyChildren[1].style.visibility).to.equal('hidden');
-
-    expect(bodyChildren[2].id).to.equal('-amp-endpos');
-    expect(bodyChildren[2].style.position).to.be.undefined;
-    expect(bodyChildren[2].style.top).to.be.undefined;
+    // scrollmove is appended
+    expect(bodyChildren[2].id).to.equal('-amp-scrollmove');
+    expect(bodyChildren[2].style.position).to.equal('absolute');
+    expect(bodyChildren[2].style.top).to.equal(0);
+    expect(bodyChildren[2].style.left).to.equal(0);
     expect(bodyChildren[2].style.width).to.equal(0);
     expect(bodyChildren[2].style.height).to.equal(0);
     expect(bodyChildren[2].style.visibility).to.equal('hidden');
+
+    // endpos is appended
+    expect(bodyChildren[3].id).to.equal('-amp-endpos');
+    expect(bodyChildren[3].style.position).to.be.undefined;
+    expect(bodyChildren[3].style.top).to.be.undefined;
+    expect(bodyChildren[3].style.width).to.equal(0);
+    expect(bodyChildren[3].style.height).to.equal(0);
+    expect(bodyChildren[3].style.visibility).to.equal('hidden');
   });
 
-  it('should update border on BODY', () => {
-    windowApi.document = {
-      body: {style: {}},
-    };
+  it('should update padding on HTML', () => {
+    windowApi.document.documentElement.style = {};
     binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.borderTop).to
-        .equal('31px solid transparent');
+    expect(windowApi.document.documentElement.style.paddingTop).to
+        .equal('31px');
   });
 
   it('should calculate size', () => {
@@ -775,14 +776,14 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     bodyChildren[0].getBoundingClientRect = () => {
       return {top: -17, left: -11};
     };
-    bodyChildren[2].getBoundingClientRect = () => {
+    bodyChildren[3].getBoundingClientRect = () => {
       return {top: 100, left: -11};
     };
     expect(binding.getScrollHeight()).to.equal(117);
   });
 
   it('should update scroll position via moving element', () => {
-    const moveEl = bodyChildren[1];
+    const moveEl = bodyChildren[2];
     binding.setScrollTop(17);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(17px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
@@ -807,8 +808,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   });
 
   it('should set scroll position via moving element', () => {
-    const moveEl = bodyChildren[1];
-    binding.setScrollPos_(10);
+    const moveEl = bodyChildren[2];
+    binding.setScrollTop(10);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
@@ -817,7 +818,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   it('should adjust scroll position when scrolled to 0', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
-    const moveEl = bodyChildren[1];
+    const moveEl = bodyChildren[2];
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
@@ -829,7 +830,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   it('should adjust scroll position when scrolled to 0; w/o event', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
-    const moveEl = bodyChildren[1];
+    const moveEl = bodyChildren[2];
     binding.adjustScrollPos_();
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
   });
@@ -837,7 +838,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   it('should NOT adjust scroll position when scrolled away from 0', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: -10, left: 0};};
-    const moveEl = bodyChildren[1];
+    const moveEl = bodyChildren[2];
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
@@ -847,7 +848,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   it('should NOT adjust scroll position when overscrolled', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
-    const moveEl = bodyChildren[1];
+    const moveEl = bodyChildren[2];
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
