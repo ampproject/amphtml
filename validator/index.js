@@ -95,7 +95,7 @@ function readFromStdin() {
 function readFromUrl(url) {
   return new Promise(function(resolve, reject) {
            const clientModule = url.startsWith('http://') ? http : https;
-           clientModule.get(url, (response) => {
+           const req = clientModule.request(url, (response) => {
              if (response.statusCode != 200) {
                // https://nodejs.org/api/http.html says: "[...] However, if
                // you add a 'response' event handler, then you must consume
@@ -111,6 +111,11 @@ function readFromUrl(url) {
                resolve(response);
              }
            });
+           req.on('error', (error) => {  // E.g., DNS resolution errors.
+             reject(
+                 new Error('Unable to fetch ' + url + ' - ' + error.message));
+           });
+           req.end();
          })
       .then(readFromReadable.bind(null, url));
 }
@@ -209,6 +214,7 @@ class ValidationError {
 class Validator {
   /**
    * @param {!string} scriptContents
+   * @throws {!Error}
    */
   constructor(scriptContents) {
     // The 'sandbox' is a Javascript object (dictionary) which holds
@@ -222,7 +228,11 @@ class Validator {
     // here, vm.Script / vm.createContext / vm.runInContext and all
     // that, but it's quite similar to a Javascript eval.
     this.sandbox = vm.createContext();
-    new vm.Script(scriptContents).runInContext(this.sandbox);
+    try {
+      new vm.Script(scriptContents).runInContext(this.sandbox);
+    } catch (error) {
+      throw new Error('Could not instantiate validator.js - ' + error.message);
+    }
   }
 
   /**
@@ -274,7 +284,16 @@ function getInstance(opt_validatorJs) {
   const validatorJsPromise =
       (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
   return validatorJsPromise.then((scriptContents) => {
-    const instance = new Validator(scriptContents);
+    let instance;
+    try {
+      instance = new Validator(scriptContents);
+    } catch (error) {
+      // It may be useful to cache errors and exceptions encountered
+      // here, but for now we don't do this for e.g. http errors when
+      // fetching the validator, so we shouldn't do it for syntax
+      // errors etc. either (which lead to the constructor throwing an error).
+      throw error;
+    }
     instanceByValidatorJs[validatorJs] = instance;
     return instance;
   });
@@ -490,13 +509,13 @@ function main() {
                       }
                     })
                     .catch((error) => {
-                      console.error(error);
+                      console.error(error.message);
                       process.exitCode = 1;
                     });
 
               })
               .catch((error) => {
-                console.error(error);
+                console.error(error.message);
                 process.exitCode = 1;
               });
         }
