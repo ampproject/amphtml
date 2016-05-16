@@ -76,7 +76,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     user.assert(
       layoutBox.bottom <= docHeight - viewportHeight,
       '<amp-fx-flying-carpet> elements must be positioned before the last ' +
-      'viewport: %s Current position: %s. Min: %s',
+      'viewport: %s Current position: %s. Max: %s',
       this.element,
       layoutBox.bottom,
       docHeight - viewportHeight
