@@ -681,6 +681,7 @@ function buildAlp(options) {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
+    includeWindowConfig: true,
     includePolyfills: true,
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,

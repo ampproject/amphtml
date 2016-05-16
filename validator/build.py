@@ -307,6 +307,23 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('... done')
 
 
+def RunIndexTest(nodejs_cmd):
+  """Runs the index_test.js, which tests the NodeJS API.
+
+  Args:
+    nodejs_cmd: the command for calling Node.js
+  """
+  logging.info('entering ...')
+  p = subprocess.Popen([nodejs_cmd, 'index_test.js'],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+  (stdout, stderr) = p.communicate()
+  if p.returncode != 0:
+    Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
+        (p.returncode, stdout, stderr))
+  logging.info('... done')
+
+
 def CompileValidatorTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
@@ -422,6 +439,7 @@ def Main():
   GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunIndexTest(nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
