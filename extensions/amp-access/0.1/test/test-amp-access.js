@@ -21,6 +21,8 @@ import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
+import {installPerformanceService} from
+    '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
@@ -35,6 +37,7 @@ describe('AccessService', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     element = document.createElement('script');
     element.setAttribute('id', 'amp-access');
@@ -240,6 +243,7 @@ describe('AccessService adapter context', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -310,6 +314,7 @@ describe('AccessService authorization', () => {
   let cidMock;
   let analyticsMock;
   let adapterMock;
+  let performanceMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -318,6 +323,7 @@ describe('AccessService authorization', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -378,6 +384,8 @@ describe('AccessService authorization', () => {
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
+
+    performanceMock = sandbox.mock(service.performance_);
   });
 
   afterEach(() => {
@@ -395,6 +403,7 @@ describe('AccessService authorization', () => {
     }
     adapterMock.verify();
     analyticsMock.verify();
+    performanceMock.verify();
     sandbox.restore();
   });
 
@@ -546,6 +555,12 @@ describe('AccessService authorization', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-authorization-received')
         .once();
+    performanceMock.expects('tick')
+        .withExactArgs('aaa')
+        .once();
+    performanceMock.expects('tickSinceVisible')
+        .withExactArgs('aaav')
+        .once();
     expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
       return service.whenFirstAuthorized();
@@ -613,6 +628,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -759,6 +775,7 @@ describe('AccessService pingback', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1093,6 +1110,7 @@ describe('AccessService login', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1412,6 +1430,7 @@ describe('AccessService analytics', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');

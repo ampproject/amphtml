@@ -147,6 +147,59 @@ describe('performance', () => {
       flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
 
+    describe('tickSinceVisible', () => {
+
+      let tickDeltaStub;
+      let firstVisibleTime;
+
+      beforeEach(() => {
+        tickDeltaStub = sandbox.stub(perf, 'tickDelta');
+        firstVisibleTime = null;
+        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+      });
+
+      it('should always be zero before viewer is set', () => {
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
+
+      it('should always be zero before visible', () => {
+        perf.coreServicesAvailable();
+
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
+
+      it('should calculate after visible', () => {
+        perf.coreServicesAvailable();
+        firstVisibleTime = 5;
+
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(5);
+      });
+
+      it('should be zero after visible but for earlier event', () => {
+        perf.coreServicesAvailable();
+        firstVisibleTime = 5;
+
+        // An earlier event, since event time (4) is less than visible time (5).
+        clock.tick(4);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
+    });
+
     describe('and performanceTracking is off', () => {
 
       beforeEach(() => {

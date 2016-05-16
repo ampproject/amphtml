@@ -237,6 +237,17 @@ export class Performance {
     this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
   }
 
+  /**
+   * Tick time delta since the document has become visible.
+   * @param {string} label The variable name as it will be reported.
+   */
+  tickSinceVisible(label) {
+    const now = timer.now();
+    const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
+    const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
+    this.tickDelta(label, v);
+  }
+
 
   /**
    * Calls the "flushTicks" function on the viewer.

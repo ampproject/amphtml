@@ -206,6 +206,9 @@ export class Viewer {
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
 
+    /** @private {?time} */
+    this.firstVisibleTime_ = null;
+
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
@@ -441,6 +444,9 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      if (!this.firstVisibleTime_) {
+        this.firstVisibleTime_ = timer.now();
+      }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -594,6 +600,15 @@ export class Viewer {
   */
   whenFirstVisible() {
     return this.whenFirstVisiblePromise_;
+  }
+
+  /**
+   * Returns the time when the document has become visible for the first time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getFirstVisibleTime() {
+    return this.firstVisibleTime_;
   }
 
   /**
