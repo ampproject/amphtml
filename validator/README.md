@@ -30,7 +30,7 @@ system (tested with v4.4.2). E.g.,
 [by using a package manager](https://nodejs.org/en/download/package-manager/) or
 [by using NVM](https://github.com/creationix/nvm).
 
-## Using the command-line tool (beta!)
+## Using the command-line tool (Beta!)
 
 * Type `./index.js` in this directory to get started:
 
@@ -51,7 +51,7 @@ install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
 run `npm install -g` in this directory. After that, you may type
 `amp-validator` in any directory to invoke the validator.
 
-## Using the web UI (beta!)
+## Using the web UI (Beta!)
 
 This is a simple web editor which validates AMP HTML documents on the fly.
 This feature is new and experimental, feedback is especially welcome.
@@ -59,7 +59,7 @@ This feature is new and experimental, feedback is especially welcome.
 * Type `./index.js webui` in this directory.
 * Point your web browser to http://127.0.0.1:8765/
 
-## Using the NodeJS API (beta!)
+## Using the NodeJS API (Beta!)
 
 This API is new and still experimental, feedback is especially welcome. We may
 try to port to earlier versions of NodeJS if sufficient interest exists.
