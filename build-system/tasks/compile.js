@@ -68,6 +68,14 @@ function cleanupBuildDir() {
   rimraf.sync('build/fake-module');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
+  fs.mkdirsSync('build/fake-module/src/polyfills/');
+  if (argv.fortesting) {
+    fs.copySync('build-system/env/process-dev.js',
+        'build/fake-module/src/process.js');
+  } else {
+    fs.copySync('build-system/env/process-prod.js',
+        'build/fake-module/src/process.js');
+  }
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
@@ -87,12 +95,10 @@ function compile(entryModuleFilename, outputDir,
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
     var wrapper = windowConfig.getTemplate() +
-        '(function(){var process={env:{NODE_ENV:"production"}};' +
-        '%output%})();';
+        '(function(){%output%})();';
     if (options.wrapper) {
-      wrapper = options.wrapper.replace('<%= contents %>',
-          // TODO(@cramforce): Switch to define.
-          'var process={env:{NODE_ENV:"production"}};%output%');
+      // TODO(@cramforce): Switch to define.
+      wrapper = options.wrapper.replace('<%= contents %>', '%output%');
     }
     wrapper += '\n//# sourceMappingURL=' +
         outputFilename + '.map\n';
@@ -134,6 +140,8 @@ function compile(entryModuleFilename, outputDir,
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!src/process.js',
+      'build/fake-module/src/process.js'
     ];
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
