@@ -410,6 +410,16 @@ function serve(port, validatorScript) {
           return;
         }
         //
+        // Handle '/amp_favicon.png'
+        //
+        if (request.url == '/amp_favicon.png') {
+          const contents = fs.readFileSync(
+              path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
+          response.writeHead(200, {'Content-Type': 'image/png'});
+          response.end(contents, 'binary');
+          return;
+        }
+        //
         // Handle fetch?, a request to fetch an arbitrary doc from the
         // internet. It presents the results as JSON.
         //
