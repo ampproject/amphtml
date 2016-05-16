@@ -38,7 +38,7 @@
     "connect-livereload": "0.5.4",
     "cssnano": "3.3.2",
     "del": "2.2.0",
-    "eslint": "1.10.3",
+    "eslint": "2.10.2",
     "eslint-plugin-google-camelcase": "0.0.2",
     "finalhandler": "0.4.0",
     "fs-extra": "0.27.0",
