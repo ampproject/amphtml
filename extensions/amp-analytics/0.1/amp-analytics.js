@@ -16,8 +16,7 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
-import {assertHttpsUrl, addParamsToUrl, appendParamStringToUrl,} from
-    '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
@@ -364,14 +363,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       const params = {};
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
-      const extraUrlParams = addParamsToUrl('', params).substr(1);
-      if (extraUrlParams) {
-        const newRequest = request.replace('${extraUrlParams}', extraUrlParams);
-        if (newRequest == request) {
-          request = appendParamStringToUrl(request, extraUrlParams);
-        } else {
-          request = newRequest;
-        }
+      if (request.indexOf('${extraUrlParams}') >= 0) {
+        const extraUrlParams = addParamsToUrl('', params).substr(1);
+        request = request.replace('${extraUrlParams}', extraUrlParams);
+      } else {
+        request = addParamsToUrl(request, params);
       }
     }
 

@@ -592,6 +592,14 @@ describe('amp-analytics', function() {
       };
     });
 
+    function verifyRequest() {
+      expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    }
+
     it('are sent', () => {
       const analytics = getAnalyticsTag(config, {'config': 'config1'});
       return waitForSendRequest(analytics).then(() => {
@@ -604,11 +612,7 @@ describe('amp-analytics', function() {
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
       const analytics = getAnalyticsTag(config , {'config': 'config1'});
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
-        expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
-        expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
-        expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
-        expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+        verifyRequest();
       });
     });
 
@@ -617,8 +621,9 @@ describe('amp-analytics', function() {
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
       const analytics = getAnalyticsTag(config, {'config': 'config1'});
       return waitForSendRequest(analytics).then(() => {
-        expect(sendRequestSpy.args[0][0]).to.equal(
-            'https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=1&c=d&v=e');
+        verifyRequest();
+        expect(sendRequestSpy.args[0][0]).to.have.string('c=d');
+        expect(sendRequestSpy.args[0][0]).to.have.string('v=e');
       });
     });
 
