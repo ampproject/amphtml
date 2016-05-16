@@ -833,7 +833,7 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
 
   /** @override */
   getLayoutRect(el) {
-    return super.getLayoutRect(el, this.pos_.x, this.pos_.y)
+    return super.getLayoutRect(el, this.pos_.x, this.pos_.y);
   }
 
   /** @override */
@@ -844,8 +844,8 @@ export class ViewportBindingNaturalIosEmbed_ extends ViewportBindingDef {
     if (!this.scrollMoveEl_) {
       return;
     }
-    const scrollTop = this.getScrollTop();
-    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos - scrollTop}px)`);
+    scrollPos -= this.getScrollTop();
+    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
     this.scrollMoveEl_./*OK*/scrollIntoView(true);
   }
 
