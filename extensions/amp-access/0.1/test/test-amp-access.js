@@ -21,7 +21,7 @@ import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
-import {installPerformanceService} from
+import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
