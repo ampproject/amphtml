@@ -107,5 +107,20 @@ it('rejects a specific file that is known to have errors', (done) => {
       });
 });
 
+it('handles syntax errors in validator file', (done) => {
+  // Note: This points the library at a file that's not even Javascript.
+  ampValidator.getInstance(/*validatorJs*/ 'dist/validator.protoascii')
+      .then((instance) => {
+        fail('We should not get here since this is not a good validator.');
+        done();
+      })
+      .catch((error) => {
+        expect(error.message)
+            .toBe(
+                'Could not instantiate validator.js - Unexpected token ILLEGAL');
+        done();
+      });
+});
+
 jasmine.onComplete(function(passed) { process.exit(passed ? 0 : 1); });
 jasmine.execute();
