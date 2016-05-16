@@ -1,3 +1,4 @@
+version: 1
 runtime: go
 api_version: go1
 
@@ -10,13 +11,13 @@ handlers:
   upload: index.html
 
 - url: /cm/(.*\.(js|css))$
-  static_files: ../node_modules/codemirror/\1
-  upload: ../node_modules/codemirror/.*\.(js|css)$
+  static_files: codemirror/\1
+  upload: codemirror/.*\.(js|css)$
 
 - url: /pm/(.*\.html)$
-  static_files: ../node_modules/@polymer/\1
-  upload: ../node_modules/@polymer/.*\.html$
+  static_files: polymer/\1
+  upload: polymer/.*\.html$
 
 - url: /webcomponents-lite.js$
-  static_files: ../node_modules/webcomponents-lite/webcomponents-lite.js
-  upload: ../node_modules/webcomponents-lite/webcomponents-lite\.js$
+  static_files: webcomponents-lite/webcomponents-lite.js
+  upload: webcomponents-lite/webcomponents-lite\.js$
