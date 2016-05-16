@@ -111,6 +111,14 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 export function stubElements(win) {
   if (!win.ampExtendedElements) {
     win.ampExtendedElements = {};
+    // If amp-ad and amp-embed haven't been registered, manually register them
+    // with ElementStub, in case the script to the element is not included.
+    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
+      win.ampExtendedElements['amp-ad'] = true;
+      registerElement(win, 'amp-ad', ElementStub);
+      win.ampExtendedElements['amp-embed'] = true;
+      registerElement(win, 'amp-embed', ElementStub);
+    }
   }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
@@ -1223,6 +1231,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
 
   if (implementationClass) {
+    // Update on the knownElements to prevent register again.
     knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
       prototype: createAmpElementProto(win, aliasName),

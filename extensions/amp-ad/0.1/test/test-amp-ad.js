@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import {createAdPromise} from '../../testing/ad-iframe';
-import {installAd} from '../../builtins/amp-ad';
-import {installEmbed} from '../../builtins/amp-embed';
+import {createAdPromise} from '../../../../testing/ad-iframe';
+import {resetAdCountForTesting} from '../amp-ad';
 import * as sinon from 'sinon';
 
+describe('amp-ad', tests('amp-ad'));
+describe('amp-embed', tests('amp-embed'));
 
-describe('amp-ad', tests('amp-ad', installAd));
-describe('amp-embed', tests('amp-embed', win => {
-  installAd(win);
-  installEmbed(win);
-}));
-
-function tests(name, installer) {
+function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
-                 opt_beforeLayoutCallback) {
-    return createAdPromise(name, installer, attributes, canonical,
-                           opt_handleElement, opt_beforeLayoutCallback);
+      opt_beforeLayoutCallback) {
+    return createAdPromise(name, attributes, canonical,
+        opt_handleElement, opt_beforeLayoutCallback);
   }
 
   return () => {
@@ -40,6 +35,7 @@ function tests(name, installer) {
       sandbox = sinon.sandbox.create();
     });
     afterEach(() => {
+      resetAdCountForTesting();
       sandbox.restore();
     });
 
@@ -378,7 +374,6 @@ function tests(name, installer) {
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
           expect(placeholder.classList.contains('amp-hidden')).to.be.false;
-
           const fallback = document.createElement('div');
           fallback.setAttribute('fallback', '');
           ad.appendChild(fallback);
