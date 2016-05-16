@@ -67,7 +67,6 @@ function readFromReadable(name, readable) {
     readable.on('data', (chunk) => { chunks.push(chunk); });
     readable.on('end', () => { resolve(chunks.join('')); });
     readable.on('error', (error) => {
-      reject(error);
       reject(new Error('Could not read from ' + name + ' - ' + error.message));
     });
   });
