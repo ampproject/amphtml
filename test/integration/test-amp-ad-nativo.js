@@ -33,7 +33,6 @@ describe('Rendering of nativo ad', () => {
   it('should create an iframe loaded', function() {
     this.timeout(50000);
     let iframe;
-    let ampAd;
     const isEdge = navigator.userAgent.match(/Edge/);
     return pollForLayout(fixture.win, 1, 5500).then(() => {
       return poll('frame to be in DOM', () => {
