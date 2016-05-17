@@ -19,12 +19,18 @@ limitations under the License.
 A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-To use, install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
+If you just want to validate a page that you're looking at in your web browser,
+add `#development=1` to your URL and look for the validation messages in the
+Javascript console. See also
+[our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
+
+For the additional choices listed below, install Node.js version 4.X on your
+system (tested with v4.4.2). E.g.,
 [by downloading](https://nodejs.org/en/download/) or
 [by using a package manager](https://nodejs.org/en/download/package-manager/) or
 [by using NVM](https://github.com/creationix/nvm).
 
-## Using the command-line tool
+## Using the command-line tool (Beta!)
 
 * Type `./index.js` in this directory to get started:
 
@@ -45,7 +51,7 @@ install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
 run `npm install -g` in this directory. After that, you may type
 `amp-validator` in any directory to invoke the validator.
 
-## Using the web UI
+## Using the web UI (Beta!)
 
 This is a simple web editor which validates AMP HTML documents on the fly.
 This feature is new and experimental, feedback is especially welcome.
@@ -53,7 +59,7 @@ This feature is new and experimental, feedback is especially welcome.
 * Type `./index.js webui` in this directory.
 * Point your web browser to http://127.0.0.1:8765/
 
-## Using the NodeJS API
+## Using the NodeJS API (Beta!)
 
 This API is new and still experimental, feedback is especially welcome. We may
 try to port to earlier versions of NodeJS if sufficient interest exists.

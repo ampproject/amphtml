@@ -60,8 +60,9 @@ The AMP JS library provides [builtin](builtins/README.md) AMP Components, manage
 
 ## The AMP Validator
 
-The AMP Validator allows a web developer to easily identify if the web page
-doesn't meet the [AMP HTML specification](https://www.ampproject.org/docs/reference/spec.html).
+[The AMP Validator](validator/README.md) allows a web developer to easily
+identify if the web page doesn't meet the
+[AMP HTML specification](https://www.ampproject.org/docs/reference/spec.html).
 
 Adding "#development=1" to the URL of the page instructs the AMP Runtime to run
 a series of assertions confirming the page's markup meets the AMP HTML
@@ -74,7 +75,9 @@ the specification.  This allows an app to make sure the page is fast and
 mobile-friendly, as pages adhering to the AMP HTML specification are reliably
 fast.
 
-Learn more about [validating your AMP pages](https://www.ampproject.org/docs/guides/validate.html).
+Learn more about
+[validating your AMP pages](https://www.ampproject.org/docs/guides/validate.html).
+Also see [additional choices to invoke the validator](validator/README.md).
 
 ## AMP HTML Components
 
