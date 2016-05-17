@@ -306,11 +306,11 @@ exports.getInstance = getInstance;
  * @returns {!string}
  */
 function extToMime(extension) {
-  if (extension === 'html') {
+  if (extension === '.html') {
     return 'text/html';
-  } else if (extension === 'js') {
+  } else if (extension === '.js') {
     return 'text/javascript';
-  } else if (extension === 'css') {
+  } else if (extension === '.css') {
     return 'text/css';
   }
   return 'text/plain';
@@ -362,54 +362,6 @@ function serve(port, validatorScript) {
           return;
         }
         //
-        // Handle '/cm/*', that is, CodeMirror (editor control).
-        //
-        if (request.url.startsWith('/cm/')) {
-          const parsed = request.url.match(/\/cm\/([a-z0-9\/_-]*\.(js|css))$/);
-          if (parsed === null) {
-            response.writeHead(400, {'Content-Type': 'text/plain'});
-            response.end('Bad request.');
-            return;
-          }
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'node_modules/codemirror', parsed[1]),
-              'utf-8');
-          response.writeHead(200, {'Content-Type': extToMime(parsed[2])});
-          response.end(contents);
-          return;
-        }
-        //
-        // Handle '/py/*', that is, Polymer (HTML Components library).
-        //
-        if (request.url.startsWith('/pm/')) {
-          console.log('request.url = ' + request.url);
-          const parsed = request.url.match(/\/pm\/([a-zA-Z0-9\/_-]*\.(html))$/);
-          if (parsed === null) {
-            response.writeHead(400, {'Content-Type': 'text/plain'});
-            response.end('Bad request.');
-            return;
-          }
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'node_modules/@polymer', parsed[1]),
-              'utf-8');
-          response.writeHead(200, {'Content-Type': extToMime(parsed[2])});
-          response.end(contents);
-          return;
-        }
-        //
-        // Handle '/webcomponents-lite.js'
-        //
-        if (request.url == '/webcomponents-lite.js') {
-          const contents = fs.readFileSync(
-              path.join(
-                  __dirname, 'node_modules/webcomponents-lite/' +
-                      'webcomponents-lite.js'),
-              'utf-8');
-          response.writeHead(200, {'Content-Type': 'text/javascript'});
-          response.end(contents);
-          return;
-        }
-        //
         // Handle '/amp_favicon.png'
         //
         if (request.url == '/amp_favicon.png') {
@@ -442,6 +394,26 @@ function serve(port, validatorScript) {
                 response.end('Bad gateway (' + error.message + ').');
               });
           return;
+        }
+        // Look up any other resources relative to node_modules.
+        const relative_path = request.url.substr(1);  // Strip leading '/'.
+        const node_modules_path =
+            path.join(__dirname, 'node_modules', relative_path);
+
+        // Only serve .js .html .css below node_modules.
+        if (path.resolve(node_modules_path)
+                .startsWith(path.resolve(__dirname)) &&
+            ['.js', '.html', '.css'].indexOf(path.extname(node_modules_path)) !=
+                -1) {
+          try {
+            const contents = fs.readFileSync(node_modules_path, 'utf-8');
+            response.writeHead(
+                200,
+                {'Content-Type': extToMime(path.extname(node_modules_path))});
+            response.end(contents);
+          } catch (error) {
+            // Fall through for 404 below.
+          }
         }
         response.writeHead(404, {'Content-Type': 'text/plain'});
         response.end('Not found.');

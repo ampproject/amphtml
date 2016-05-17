@@ -49,6 +49,7 @@
   "devDependencies": {
     "google-closure-compiler": "20151015.0.0",
     "google-closure-library": "20151015.0.0",
-    "jasmine": "2.3.2"
+    "jasmine": "2.3.2",
+    "vulcanize": "1.14.8"
   }
 }
