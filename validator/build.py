@@ -417,10 +417,8 @@ def CreateWebuiAppengineDist(out_dir):
                       f for f in files
                       if not os.path.isdir(os.path.join(d, f)) and
                       os.path.splitext(f)[1] != '.html'])
-  webcomponents_out = os.path.join(out_dir, 'webcomponents-lite')
-  os.mkdir(webcomponents_out)
   shutil.copyfile('node_modules/webcomponents-lite/webcomponents-lite.js',
-                  os.path.join(webcomponents_out, 'webcomponents-lite.js'))
+                  os.path.join(webui_out, 'webcomponents-lite.js'))
   logging.info('... success')
 
 
