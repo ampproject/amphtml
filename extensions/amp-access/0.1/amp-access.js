@@ -34,6 +34,7 @@ import {dev, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
+import {performanceFor} from '../../../src/performance';
 import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timer} from '../../../src/timer';
@@ -136,6 +137,9 @@ export class AccessService {
     /** @private @const {!Resources} */
     this.resources_ = resourcesFor(win);
 
+    /** @private @const {!Performance} */
+    this.performance_ = performanceFor(win);
+
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, win);
 
@@ -171,6 +175,9 @@ export class AccessService {
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
+      this.performance_.tick('aaa');
+      this.performance_.tickSinceVisible('aaav');
+      this.performance_.flush();
     });
   }
 
