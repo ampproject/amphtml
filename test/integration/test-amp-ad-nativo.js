@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,16 @@ import {
 
 describe('Rendering of nativo ad', () => {
   let fixture;
+
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/nativo.html', 12000)
-    .then(f => {
+    replaceParentHref = false;
+    return createFixtureIframe('test/fixtures/nativo.html', 3000).then(f => {
       fixture = f;
     });
   });
 
-  it('should create an iframe', function() {
-    this.timeout(2000);
+  it('should create an iframe loaded', function() {
+    this.timeout(50000);
     let iframe;
     let ampAd;
     const isEdge = navigator.userAgent.match(/Edge/);
@@ -42,9 +43,7 @@ describe('Rendering of nativo ad', () => {
       iframe = iframeElement;
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
       ampAd = iframe.parentElement;
-      expect(iframe.src)
-        .to
-        .match(/http\:\/\/ads\.localhost:8000\/dist\.3p\/(.*)/);
+      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
@@ -52,23 +51,22 @@ describe('Rendering of nativo ad', () => {
       });
     }).then(unusedCanvas => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
+    }).then(context => {
+      expect(context.hidden).to.be.false;
+      // In some browsers the referrer is empty. But in Chrome it works, so
+      // we always check there.
+      if (context.referrer !== '' ||
+        (navigator.userAgent.match(/Chrome/) && !isEdge)) {
+        expect(context.referrer).to.contain('http://localhost:' + location.port);
+      }
+      expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.initialIntersection).to.be.defined;
+      expect(context.initialIntersection.rootBounds).to.be.defined;
     }).then(() => {
-      return poll('render-start message received', () => {
-        return fixture.messages.filter(message => {
-          return message.type == 'render-start';
-        }).length;
-      });
-    }).then(() => {
-      expect(iframe.style.visibility).to.equal('');
+      expect(iframe.contentWindow.context.hidden).to.be.false;
     }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('350');
       expect(iframe.getAttribute('height')).to.equal('150');
-      if (isEdge) {
-        return;
-      }
-      return poll('Creative id transmitted. Ad fully rendered.', () => {
-        return ampAd.creativeId;
-      }, null, 15000);
     });
   });
 });
