@@ -27,7 +27,7 @@ limitations under the License.
       data-epl_sv="https://ads.us.e-planning.net"
       data-epl_isv="https://us.img.e-planning.net"
       data-epl_sec="Home"
-      data-epl_kvs="{target1:'food', target2:'cars'}"
+      data-epl_kvs='{"target1":"food", "target2":"cars"}'
       data-epl_e="Banner1">
 </amp-ad>
 ```
