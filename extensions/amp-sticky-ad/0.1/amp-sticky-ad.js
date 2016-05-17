@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
@@ -48,14 +48,12 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
-
-    /** @const @private {!Unlisten}
+    /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
+     * @const @private {!Unlisten}
      */
-    this.onScrollListener_ =
-        this.viewport_.onScroll(() => this.displayAfterScroll());
+    this.scrollUnlisten_ =
+        this.viewport_.onScroll(() => this.displayAfterScroll_());
   }
 
   /** @override */
@@ -68,14 +66,30 @@ class AmpStickyAd extends AMP.BaseElement {
     return Promise.resolve();
   }
 
-  /** @private
+  /** @override */
+  detachedCallback() {
+    this.removeOnScrollListener_();
+  }
+
+  /**
+   * The function that remove listener to viewport onScroll event.
+   * @private
+   */
+  removeOnScrollListener_() {
+    if (this.scrollUnlisten_) {
+      this.scrollUnlisten_();
+      this.scrollUnlisten_ = null;
+    }
+  }
+
+  /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
    * there is at least one more viewport available.
+   * @private
    */
-  displayAfterScroll() {
+  displayAfterScroll_() {
     this.scrollTop_ = this.viewport_.getScrollTop();
-    this.scrollHeight_ = this.viewport_.getScrollHeight();
     this.viewportHeight_ = this.viewport_.getSize().height;
     // TODO(zhouyx): When calculate 'has scrolled through at least 1 viewport'
     // do we want to count height from top or from initial position?
@@ -83,14 +97,14 @@ class AmpStickyAd extends AMP.BaseElement {
     // to figure out later.
 
     // Check user has scrolled at least one viewport from init position.
-    if (this.viewportHeight_ < this.scrollTop_) {
+    if (this.scrollTop_ > this.viewportHeight_) {
+      this.scrollHeight_ = this.viewport_.getScrollHeight();
       const remainHeight = this.scrollHeight_
           - this.scrollTop_ - this.viewportHeight_;
       if (remainHeight < this.viewportHeight_) {
         // TODO(zhouyx): Figure if early unlisten is needed earlier
         // if scrollHeight is less than 2*viewportHeight.
-        this.onScrollListener_();
-        this.onScrollListener_ = null;
+        this.removeOnScrollListener_();
         return;
       }
       this.deferMutate(() => {
@@ -99,9 +113,7 @@ class AmpStickyAd extends AMP.BaseElement {
         });
         this.viewport_.addToFixedLayer(this.element);
         this.scheduleLayout(this.ad_);
-        // Unlisten to onScroll event
-        this.onScrollListener_();
-        this.onScrollListener_ = null;
+        this.removeOnScrollListener_();
       });
     }
   }

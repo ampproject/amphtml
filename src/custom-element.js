@@ -648,6 +648,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       return;
     }
     this.resources_.remove(this);
+    this.implementation_.detachedCallback();
   };
 
   /**
