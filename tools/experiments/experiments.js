@@ -61,13 +61,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-social-share/amp-social-share.md',
   },
-  // Amp Sidebar
-  {
-    id: 'amp-sidebar',
-    name: 'AMP Sidebar',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sidebar/amp-sidebar.md',
-  },
   {
     id: 'amp-analytics-viewability',
     name: 'Viewability APIs for amp-analytics',
