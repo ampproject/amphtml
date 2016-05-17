@@ -254,6 +254,14 @@ export class BaseElement {
   }
 
   /**
+   * Override in subclass to adjust the element when it is being removed from
+   * the DOM. Could e.g. be used to remove a listener.
+   */
+  detachedCallback() {
+    // Subclasses may override.
+  }
+
+  /**
    * Sets this element as the owner of the specified element. By setting itself
    * as an owner, the element declares that it will manage the lifecycle of
    * the owned element itself. This element, as an owner, will have to call
