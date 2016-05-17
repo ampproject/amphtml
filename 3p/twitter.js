@@ -16,7 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {computeInMasterFrame, loadScript} from './3p';
+import {loadScript} from './3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -27,11 +27,20 @@ import {computeInMasterFrame, loadScript} from './3p';
  * @param {function(!Object)} cb
  */
 function getTwttr(global, cb) {
-  computeInMasterFrame(global, 'twttrCbs', done => {
-    loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
-      done(global.twttr);
-    });
-  }, cb);
+  loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
+    cb(global.twttr);
+  });
+  // Temporarily disabled the code sharing between frames.
+  // The iframe throttling implemented in modern browsers can break with this,
+  // because things may execute in frames that are currently throttled, even
+  // though they are needed in the main frame.
+  // See https://github.com/ampproject/amphtml/issues/3220
+  //
+  // computeInMasterFrame(global, 'twttrCbs', done => {
+  //  loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
+  //    done(global.twttr);
+  //  });
+  //}, cb);
 }
 
 /**
