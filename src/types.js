@@ -36,10 +36,37 @@ export function isArray(value) {
 }
 
 /**
+ * Creates a new Array from an array-like or iterable object
+ *    (e.g. NodeList, NodeCollection).
+ * @param {!NodeList|!Collection|*) arrayLike.
+ * @returns {!Array.<*>}
+ */
+export function toArray(arrayLike) {
+  if (!arrayLike) {
+    return [];
+  }
+
+  const array = [];
+  for (let i = 0; i < arrayLike.length; i++) {
+    array.push(arrayLike[i]);
+  }
+  return array;
+}
+
+/**
  * Determines if value is actually an Object.
  * @param {*} value
  * @return {boolean}
  */
 export function isObject(value) {
   return toString(value) === '[object Object]';
+}
+
+/**
+ * Determines if value is of FormData type.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isFormData(value) {
+  return toString(value) === '[object FormData]';
 }

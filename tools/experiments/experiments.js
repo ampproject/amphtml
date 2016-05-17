@@ -84,7 +84,11 @@ const EXPERIMENTS = [
   {
     id: 'amp-carouscroll',
     name: 'AMP carousel using horizontal scroll',
-    spec: '',
+  },
+  {
+    id: 'amp-form',
+    name: 'AMP Form Support',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
 ];
 

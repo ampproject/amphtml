@@ -1,0 +1,155 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>JWPlayer AMP Example</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+        form.success {
+            border: 1px solid #0e5829;
+        }
+
+        form.success .amp-form-messages {
+            color: #0e5829;
+        }
+
+        form.success fieldset,
+        .success-message,
+        .error-message {
+            display: none;
+        }
+
+        form.error {
+            border: 1px solid #dc4e41;
+        }
+
+        form.error .amp-form-messages {
+            color: #dc4e41;
+        }
+
+        form.success .success-message {
+            display: block;
+        }
+
+        form.error .error-message {
+            display: block;
+        }
+
+        form.invalid input:invalid {
+            background-color: #dc4e41;
+        }
+
+        form .invalid-message,
+        /* was invalid but now valid */
+        form.invalid:valid .invalid-message,
+        form .now-valid-message {
+            display: none;
+        }
+
+        form.invalid .invalid-message {
+            display: block;
+            color: #dc4e41;
+        }
+
+        /* was invalid but now valid */
+        form.invalid:valid .now-valid-message {
+            display: block;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h2>Subscribe to our weekly Newsletter</h2>
+
+    <!--
+         AMP would add a class to reflect the validity and submit state of
+         the form. These would only be applied if the user (.success, .error)
+         tried to (or succeeded in) submit the form - unlike (:valid, :invalid)
+         pseudo classes which the browser applies them directly if the form
+         was valid or invalid.
+
+         This way publishers can control when their success and error messages
+         appear.
+
+         AMP will try only generate the messages DOM if there were success/error
+         templates elements and will by default show the .success message inside
+         a form with a class .success and the other way around for error
+         messages.
+    -->
+    <form action="/form/echo-json/post" target="_top">
+        <fieldset>
+            <!-- TODO: Figure out when vars are evaluated -->
+            <input type="hidden" name="referral" value="AMP_URL">
+            <label>
+                <span>Your name</span>
+                <input type="text" name="name" required>
+            </label>
+            <label>
+                <span>Your email</span>
+                <input type="email" name="email" required>
+            </label>
+            <input type="submit" value="Subscribe">
+        </fieldset>
+        <!-- AMP generated DOM
+
+        <div class="amp-form-messages">
+            <h1 class="title">Thanks {{name}}</h1>
+            <p class="description">Your email {{email}} is now subscribed!</p>
+        </div>
+
+        OR
+        <div class="messages-container">
+            <h1 class="title">An error occured!</h1>
+            <p class="description">{{message}}</p>
+        </div>
+
+        -->
+        <template success type="amp-mustache">
+            <h1 class="title">Thanks {{name}}</h1>
+            <p class="description">Your email {{email}} is now subscribed!</p>
+        </template>
+
+        <template error type="amp-mustache">
+            <h1 class="title">An error occured!</h1>
+            <p class="description">{{message}}</p>
+        </template>
+    </form>
+
+    <form action="/form/echo-json/post" target="_top">
+        <fieldset>
+            <input type="hidden" name="referral" value="AMP_URL">
+            <label>
+                <span>Your name</span>
+                <input type="text" name="name" required>
+            </label>
+            <label>
+                <span>Your email</span>
+                <input type="email" name="email" required>
+            </label>
+            <input type="submit" value="Subscribe">
+        </fieldset>
+
+        <div class="invalid-message">
+            There are some input that needs fixing. Please fix them.
+        </div>
+        <div class="now-valid-message">
+            Thanks for fixing these! Now you can submit!
+        </div>
+
+        <div class="success-message">
+            <h3 class="title">Thanks for subscribing!</h3>
+            <p class="description">Please confirm your email!</p>
+        </div>
+
+        <div class="error-message">
+            <h3 class="title">An error occured! Please try again later.</h3>
+        </div>
+    </form>
+</body>
+</html>
