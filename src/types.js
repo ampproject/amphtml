@@ -43,3 +43,7 @@ export function isArray(value) {
 export function isObject(value) {
   return toString(value) === '[object Object]';
 }
+
+export function isFormData(value) {
+  return toString(value) === '[object FormData]';
+}

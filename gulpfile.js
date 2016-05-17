@@ -57,7 +57,6 @@ function buildExtensions(options) {
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
-  buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
@@ -65,6 +64,8 @@ function buildExtensions(options) {
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
+  buildExtension('amp-form', '0.1', true, options);
+  buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
@@ -323,8 +324,9 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-json-ld.amp.html');
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
-  buildExample('font.amp.html');
   buildExample('facebook.amp.html');
+  buildExample('font.amp.html');
+  buildExample('forms.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
   buildExample('pinterest.amp.html');

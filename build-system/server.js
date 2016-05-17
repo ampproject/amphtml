@@ -23,6 +23,7 @@ var app = require('connect')();
 var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
+var formidable = require('formidable');
 var fs = BBPromise.promisifyAll(require('fs'));
 var path = require('path');
 var url = require('url');
@@ -66,6 +67,18 @@ app.use('/api/dont-show', function(req, res) {
 app.use('/api/echo/post', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(req.body, null, 2));
+});
+
+app.use('/form/echo-json/post', function(req, res) {
+  var form = new formidable.IncomingForm();
+
+  form.parse(req, function(err, fields) {
+    if (fields['email'] == 'already@subscribed.com') {
+      res.statusCode = 500;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(fields));
+  });
 });
 
 // Fetches an AMP document from the AMP proxy and replaces JS
