@@ -21,5 +21,6 @@ amp-sticky-ad {
   left: 0;
   z-index: 1;
   width: 100%;
+  /* TODO(zhouyx): discuss on what the max-height should be? */
   max-height: 100px !important;
 }

@@ -39,27 +39,23 @@ class AmpStickyAd extends AMP.BaseElement {
       return;
     }
 
-    // Check `amp-sticky-ad` only have one child with tagName `amp-ad`.
-    this.getRealChildren_ = this.getRealChildren();
-    if (this.getRealChildren_.length != 1 ||
-        this.getRealChildren_[0].tagName != 'AMP-AD') {
-      return;
-    }
+    const children = this.getRealChildren();
+    user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
+        'amp-sticky-ad must have a single amp-ad child');
+    /** @const @private {!Element} */
+    this.ad_ = children[0];
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
-    /** @private {boolean} */
-    this.isDisplayed_ = false;
-
-    /** @private {number} */
-    this.initialScrollTop_ = null;
-
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
-    // On viewport scroll, check requirements for amp-stick-ad to display.
-    this.viewport_.onScroll(() => this.displayAfterScroll());
+    /** @const @private {!Unlisten}
+     * On viewport scroll, check requirements for amp-stick-ad to display.
+     */
+    this.onScrollListener_ =
+        this.viewport_.onScroll(() => this.displayAfterScroll());
   }
 
   /** @override */
@@ -69,50 +65,44 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
-    this.scheduleLayout(this.getRealChildren_);
     return Promise.resolve();
   }
 
-  // The sticky ad is shown when user scroll at least one viewport and
-  // there is at least one more viewport available.
+  /** @private
+   * The listener function that listen on onScroll event and
+   * show sticky ad when user scroll at least one viewport and
+   * there is at least one more viewport available.
+   */
   displayAfterScroll() {
-    if (!this.isDisplayed_) {
-      this.scrollTop_ = this.viewport_.getScrollTop();
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
-      this.viewportHeight_ = this.viewport_.getSize().height;
-      if (!this.initialScrollTop_) {
-        this.initialScrollTop_ = this.scrollTop_;
+    this.scrollTop_ = this.viewport_.getScrollTop();
+    this.scrollHeight_ = this.viewport_.getScrollHeight();
+    this.viewportHeight_ = this.viewport_.getSize().height;
+    // TODO(zhouyx): When calculate 'has scrolled through at least 1 viewport'
+    // do we want to count height from top or from initial position?
+    // Will assume user start from `this.scrollTop_ = 0` here. Need
+    // to figure out later.
+
+    // Check user has scrolled at least one viewport from init position.
+    if (this.viewportHeight_ < this.scrollTop_) {
+      const remainHeight = this.scrollHeight_
+          - this.scrollTop_ - this.viewportHeight_;
+      if (remainHeight < this.viewportHeight_) {
+        // TODO(zhouyx): Figure if early unlisten is needed earlier
+        // if scrollHeight is less than 2*viewportHeight.
+        this.onScrollListener_();
+        this.onScrollListener_ = null;
+        return;
       }
-      const scrollDist =
-          (this.scrollTop_ - this.initialScrollTop_);
-      // Check user has scrolled at least one viewport from init position.
-      if (this.viewportHeight_ < Math.abs(scrollDist)) {
-        if (scrollDist < 0) {
-          // In the case of scrolling up.
-          if (this.viewport_.getScrollTop() < this.viewportHeight_) {
-            // TODO: Discuss on what need to be done when direction changes.
-            this.initialScrollTop_ = this.viewport_.getScrollTop();
-            return;
-          }
-        } else {
-          // In the case of scrolling down.
-          const remainHeight = this.scrollHeight_
-              - this.viewport_.getScrollTop() - this.viewportHeight;
-          if (remainHeight < this.viewportHeight_) {
-            // TODO: Discuss on what need to be done when direction changes.
-            this.initialScrollTop_ = this.viewport_.getScrollTop();
-            return;
-          }
-        }
-        this.isDisplayed_ = true;
-        this.vsync_.mutate(() => {
-          setStyles(this.element, {
-            'display': 'block',
-          });
-          this.viewport_.addToFixedLayer(this.element);
-          this.scheduleLayout(this.element);
+      this.deferMutate(() => {
+        setStyles(this.element, {
+          'display': 'block',
         });
-      }
+        this.viewport_.addToFixedLayer(this.element);
+        this.scheduleLayout(this.ad_);
+        // Unlisten to onScroll event
+        this.onScrollListener_();
+        this.onScrollListener_ = null;
+      });
     }
   }
 }
