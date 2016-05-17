@@ -89,24 +89,16 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   displayAfterScroll_() {
-    this.scrollTop_ = this.viewport_.getScrollTop();
-    this.viewportHeight_ = this.viewport_.getSize().height;
-    // TODO(zhouyx): When calculate 'has scrolled through at least 1 viewport'
-    // do we want to count height from top or from initial position?
-    // Will assume user start from `this.scrollTop_ = 0` here. Need
-    // to figure out later.
+    const scrollTop = this.viewport_.getScrollTop();
+    const viewportHeight = this.viewport_.getSize().height;
+    const scrollHeight = this.viewport_.getScrollHeight();
+    if (scrollHeight < viewportHeight * 2) {
+      this.removeOnScrollListener_();
+      return;
+    }
 
     // Check user has scrolled at least one viewport from init position.
-    if (this.scrollTop_ > this.viewportHeight_) {
-      this.scrollHeight_ = this.viewport_.getScrollHeight();
-      const remainHeight = this.scrollHeight_
-          - this.scrollTop_ - this.viewportHeight_;
-      if (remainHeight < this.viewportHeight_) {
-        // TODO(zhouyx): Figure if early unlisten is needed earlier
-        // if scrollHeight is less than 2*viewportHeight.
-        this.removeOnScrollListener_();
-        return;
-      }
+    if (scrollTop > viewportHeight) {
       this.deferMutate(() => {
         setStyles(this.element, {
           'display': 'block',
