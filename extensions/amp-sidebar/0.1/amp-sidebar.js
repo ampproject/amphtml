@@ -16,19 +16,11 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev} from '../../../src/log';
 import {historyFor} from '../../../src/history';
-import {isExperimentOn} from '../../../src/experiments';
 import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
-
-/** @const */
-const EXPERIMENT = 'amp-sidebar';
-
-/** @const */
-const TAG = 'amp-sidebar';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -49,9 +41,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
-
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
@@ -81,11 +70,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
-
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
-      return;
-    }
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =

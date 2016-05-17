@@ -19,7 +19,6 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platform} from '../../../../src/platform';
 import {timer} from '../../../../src/timer';
-import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 require('../amp-sidebar');
 
@@ -31,7 +30,6 @@ describe('amp-sidebar', () => {
   function getAmpSidebar(options) {
     options = options || {};
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-sidebar', true);
       const ampSidebar = iframe.doc.createElement('amp-sidebar');
       const list = iframe.doc.createElement('ul');
       for (let i = 0; i < 10; i++) {
