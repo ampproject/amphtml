@@ -69,7 +69,7 @@ export function adopt(global) {
       elementsForTesting.push({
         name: name,
         implementationClass: implementationClass,
-        css: opt_css
+        css: opt_css,
       });
       // Resolve this extension's Service Promise.
       getService(global, name, () => {

@@ -28,7 +28,7 @@ describe('amp-fx-flying-carpet', () => {
 
   function getAmpFlyingCarpet(opt_childrenCallback, opt_top) {
     let viewport;
-    let top = opt_top || '200vh';
+    const top = opt_top || '200vh';
     return createIframePromise().then(i => {
       iframe = i;
       toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
@@ -43,7 +43,7 @@ describe('amp-fx-flying-carpet', () => {
       parent.style.top = top;
 
       const flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
-      flyingCarpet.setAttribute('height', '10px')
+      flyingCarpet.setAttribute('height', '10px');
       if (opt_childrenCallback) {
         const children = opt_childrenCallback(iframe);
         children.forEach(child => {
@@ -104,7 +104,7 @@ describe('amp-fx-flying-carpet', () => {
     }, error => {
       expect(error.message).to.have.string(
         'elements must be positioned after the first viewport'
-      )
+      );
     });
   });
 
@@ -114,7 +114,7 @@ describe('amp-fx-flying-carpet', () => {
     }, error => {
       expect(error.message).to.have.string(
         'elements must be positioned before the last viewport'
-      )
+      );
     });
   });
 });
