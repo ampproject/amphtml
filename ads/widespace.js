@@ -21,5 +21,11 @@ import {writeScript} from '../src/3p';
  * @param {!Object} data
  */
 export function widespace(global, data) {
-  writeScript(global, 'http://engine.widespace.com/map/engine/dynamic?sid=' + data.sid);
+  if (!data.sid) {
+    return;
+  }
+
+  const url = 'http://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + data.sid;
+
+  writeScript(global, url);
 }
