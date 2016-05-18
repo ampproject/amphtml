@@ -350,10 +350,6 @@
   <dom-module id="main-page">
     <template>
       <ampproject-toolbar></ampproject-toolbar>
-      <paper-button raised on-click="loadValidExample">Try valid AMP HTML
-      </paper-button>
-      <paper-button raised on-click="loadInvalidExample">Try invalid AMP HTML
-      </paper-button>
       <url-form id="urlForm"></url-form>
 
       <amphtml-editor id="amphtmlEditor"></amphtml-editor>
@@ -363,20 +359,26 @@
     <script>
       Polymer({
         is: 'main-page',
-        loadValidExample: function() {
-          this.loadExample('minimum_valid_amp.html');
-        },
-        loadInvalidExample: function() {
-          this.loadExample('several_errors.html');
-        },
-        loadExample: function(featureTestName) {
-          this.$.urlForm.setURLAndValidate(
-              'https://raw.githubusercontent.com/ampproject/amphtml/master/' +
-              'validator/testdata/feature_tests/' + featureTestName);
-        },
         ready: function() {
           // The editor control in the center of the screen.
           var editor = this.$.amphtmlEditor;
+          var minimumValidAmp =
+              '\x3C!--\n' +
+              '     This is the minimum valid AMP HTML document. Just type away\n' +
+              '     here and the AMP Validator will re-check your document on the fly.\n' +
+              '-->\n' +
+              '\x3C!doctype html>\n' +
+              '\x3Chtml ⚡>\n' +
+              '\x3Chead>\n' +
+              '  \x3Cmeta charset="utf-8">\n' +
+              '  \x3Clink rel="canonical" href="self.html" />\n' +
+              '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
+              '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
+              '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+              '\x3C/head>\n' +
+              '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
+              '\x3C/html>\n';
+          editor.setEditorValue(minimumValidAmp);
 
           // validationTimeout is used to implement a slight delay for
           // validation to prevent jank.
@@ -389,6 +391,7 @@
 
           // The status bar below the editor.
           var statusBar = this.$.statusBar;
+          statusBar.status = 'PASS';  // Start out valid.
 
           // The listbox has the errors at the bottom of the screen.
           var listbox = this.$.errorListBox;
