@@ -51,7 +51,7 @@ it('built validator rejects the empty file', (done) => {
   // Note: This will use the validator that was built with build.py.
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
       .then((instance) => {
-        const validationResult = instance.validateString('')
+        const validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
         done();
       })
@@ -67,7 +67,7 @@ it('accepts the minimum valid AMP file', (done) => {
       fs.readFileSync('testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
       .then((instance) => {
-        const validationResult = instance.validateString('')
+        const validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
         done();
       })
@@ -91,7 +91,7 @@ it('rejects a specific file that is known to have errors', (done) => {
         // computed by the validator and compare it with the golden file.
         let out = 'FAIL\n';
         for (const error of validationResult.errors) {
-          out += 'feature_tests/several_errors.html'
+          out += 'feature_tests/several_errors.html';
           out += ':' + error.line + ':' + error.col + ' ' + error.message;
           if (error.specUrl) {
             out += ' (see ' + error.specUrl + ')';
