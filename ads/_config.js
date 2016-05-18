@@ -56,7 +56,10 @@ export const adPrefetch = {
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
   microad: 'https://j.microad.net/js/camp.js',
-  yahoojp: 'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
+  yahoojp: [
+    'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
+    'https://yads.c.yimg.jp/js/yads.js'
+  ],
 };
 
 /**
@@ -153,7 +156,10 @@ export const adPreconnect = {
     'https://s-rtb.send.microad.jp',
     'https://cache.send.microad.jp',
   ],
-  yahoojp: 'https://s.yimg.jp',
+  yahoojp: [
+    'https://s.yimg.jp',
+    'https://yads.yahoo.co.jp'
+  ],
 };
 
 /**
