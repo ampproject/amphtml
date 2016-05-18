@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {writeScript} from '../3p/3p';
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-// export function yahoojp(global, data) {
-//   global.yahoojpParam = data;
-//   writeScript(global, 'https://mwakkiy.github.io/yjamp/amp.js');	//@todo:本物に変更
-// }
 export function yahoojp(global, data) {
   global.yahoojpParam = data;
-  writeScript(global, 'https://mwakkiy.github.io/yjamp/amp.js');
+  writeScript(global, 'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js');
 }
