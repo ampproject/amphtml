@@ -305,11 +305,16 @@
         color: #0379C4;
         margin: 10px 0;
       }
-      .ampproject-link a:link { color: #0379C4; text-decoration: none; }
-      .ampproject-link a:visited { color: #0379C4; text-decoration: none; }
-      .ampproject-link a:hover { color: #0379C4; text-decoration: none; }
-      .ampproject-link a:active { color: #0379C4; text-decoration: none; }
-
+      .ampproject-link a:link,
+      .ampproject-link a:visited,
+      .ampproject-link a:hover,
+      .ampproject-link a:active {
+        color: #0379C4;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 0.04em;
+      }
       .flex-horizontal {
         @apply(--layout-horizontal);
         @apply(--layout-center);
