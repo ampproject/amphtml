@@ -31,6 +31,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sections_ = this.getRealChildren();
 
     this.element.setAttribute('role', 'tablist');
+    const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
     this.sections_.forEach((section, index) => {
       user.assert(
           section.tagName.toLowerCase() == 'section',
@@ -57,19 +58,29 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', event => {
-        event.preventDefault();
-        this.mutateElement(() => {
-          if (section.hasAttribute('expanded')) {
-            section.removeAttribute('expanded');
-            content.setAttribute('aria-expanded', 'false');
-          } else {
-            section.setAttribute('expanded', '');
-            content.setAttribute('aria-expanded', 'true');
-          }
-        }, content);
-      });
+      header.addEventListener('click', boundOnHeaderClick_);
     });
+  }
+
+  /**
+   * Handles accordion headers clicks to expand/collapse its content.
+   * @param {!MouseEvent} event Click event.
+   * @private
+   */
+  onHeaderClick_(event) {
+    event.preventDefault();
+    const section = event.currentTarget.parentNode;
+    const sectionComponents_ = section.children;
+    const content = sectionComponents_[1];
+    this.mutateElement(() => {
+      if (section.hasAttribute('expanded')) {
+        section.removeAttribute('expanded');
+        content.setAttribute('aria-expanded', 'false');
+      } else {
+        section.setAttribute('expanded', '');
+        content.setAttribute('aria-expanded', 'true');
+      }
+    }, content);
   }
 }
 

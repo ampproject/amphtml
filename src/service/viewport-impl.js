@@ -202,6 +202,14 @@ export class Viewport {
   }
 
   /**
+   * Returns the height of the viewport.
+   * @return {number}
+   */
+  getHeight() {
+    return this.getSize().height;
+  }
+
+  /**
    * Returns the width of the viewport.
    * @return {number}
    */
@@ -398,7 +406,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isEmbedded()) {
+    if (this.viewer_.isIframed()) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }
@@ -654,15 +662,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getSize() {
-    // Notice, that documentElement./*OK*/clientHeight is buggy on iOS Safari
-    // and thus cannot be used. But when the values are undefined, fallback to
-    // documentElement./*OK*/clientHeight.
-    if (platform.isIos() && !platform.isChrome()) {
-      const winWidth = this.win./*OK*/innerWidth;
-      const winHeight = this.win./*OK*/innerHeight;
-      if (winWidth && winHeight) {
-        return {width: winWidth, height: winHeight};
-      }
+    // Prefer window innerWidth/innerHeight but fall back to
+    // documentElement clientWidth/clientHeight.
+    // documentElement./*OK*/clientHeight is buggy on iOS Safari
+    // and thus cannot be used.
+    const winWidth = this.win./*OK*/innerWidth;
+    const winHeight = this.win./*OK*/innerHeight;
+    if (winWidth && winHeight) {
+      return {width: winWidth, height: winHeight};
     }
     const el = this.win.document.documentElement;
     return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
@@ -808,6 +815,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
+      overflowX: 'hidden',
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 112
+min_validator_revision_required: 133
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 207
+spec_file_revision: 217
 
 # Validator extensions.
 # =====================
@@ -118,6 +118,7 @@ attr_lists: {
 tags: {
   tag_name: "link"
   spec_name: "link rel="
+  disallowed_ancestor: "template"
   attrs: { name: "href" }
   attr_lists: "common-link-attrs"
   attrs: {
@@ -563,7 +564,7 @@ tags: {
   mandatory_alternatives: "head > style : boilerplate"
   unique: true
   mandatory_parent: "head"
-  also_requires: "noscript > style : boilerplate"
+  also_requires_tag: "noscript > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -583,7 +584,7 @@ tags: {
   mandatory_alternatives: "noscript > style : boilerplate"
   unique: true
   mandatory_parent: "noscript"
-  also_requires: "head > style : boilerplate"
+  also_requires_tag: "head > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -836,6 +837,14 @@ tags: {
         "stylesheet|"  # Only allowed for link tags, specific req's for AMP.
         "subresource|"
         ")(\\s|$)"
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
   }
   attrs: {
     name: "target"
@@ -1948,6 +1957,14 @@ tags: {
     value: ""
   }
   attrs: { name: "name" }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
   attrs: { name: "type" }
   attrs: { name: "value" }
 }
@@ -1985,10 +2002,30 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# JSON Linked Data
 tags: {
   tag_name: "script"
   spec_name: "script type=application/ld+json"
   mandatory_parent: "head"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/ld+json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# Variant of the above, allowed in the body. See Github #2966.
+# TODO(gregable): Support repeated mandatory_parent perhaps.
+tags: {
+  tag_name: "script"
+  spec_name: "body > script type=application/ld+json"
+  mandatory_parent: "body"
   attrs: {
     name: "type"
     mandatory: true
@@ -2131,6 +2168,7 @@ tags: {  # <amp-ad>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2157,6 +2195,7 @@ tags: {  # <amp-embed>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2176,6 +2215,7 @@ tags: {  # <amp-img>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2213,6 +2253,7 @@ tags: {  # <amp-video>
   attrs: { name: "muted"    value: "" }
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
+  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
   attrs: {
     name: "src"
     value_url: {
@@ -2226,6 +2267,7 @@ tags: {  # <amp-video>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2299,6 +2341,14 @@ attr_lists: {
   attrs: { name: "aria-valuemin" }
   attrs: { name: "aria-valuenow" }
   attrs: { name: "aria-valuetext" }
+  attrs: {
+    name: "on"
+    trigger: {
+      if_value_regex: "tap:.*"
+      also_requires_attr: "role"
+      also_requires_attr: "tabindex"
+    }
+  }
   attrs: { name: "role" }
   # For placeholders inside amp-ad and other tags, we allow the
   # placeholder empty attribute. See e.g.
@@ -2307,7 +2357,6 @@ attr_lists: {
   # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
   attrs: { name: "lightbox" }
-  attrs: { name: "on" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
   # https://www.ampproject.org/docs/reference/extended/amp-access-spec.html
@@ -2338,6 +2387,11 @@ error_formats {
 error_formats {
   code: TAG_REQUIRED_BY_MISSING
   format: "The tag '%1' is missing or incorrect, but required by '%2'."
+}
+error_formats {
+  code: ATTR_REQUIRED_BUT_MISSING
+  format: "The attribute '%1' in tag '%2' is missing or incorrect, but "
+          "required by attribute '%3'."
 }
 error_formats {
   code: DISALLOWED_TAG

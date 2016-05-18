@@ -17,8 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
-import {removeElement} from '../../../src/dom';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
@@ -53,7 +52,6 @@ class AmpBrightcove extends AMP.BaseElement {
     const embed = (this.element.getAttribute('data-embed') || 'default');
     const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
-    const params = {};
 
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
@@ -64,16 +62,7 @@ class AmpBrightcove extends AMP.BaseElement {
     }
 
     // Pass through data-param-* attributes as params for plugin use
-    for (let i = 0; i < this.element.attributes.length; i++) {
-      const attr = this.element.attributes[i];
-      const matches = attr.nodeName.match(/^data-param-(.+)/);
-      if (matches) {
-        const param = dashToCamelCase(matches[1]);
-        params[param] = attr.nodeValue;
-      }
-    }
-
-    src = addParamsToUrl(src, params);
+    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;

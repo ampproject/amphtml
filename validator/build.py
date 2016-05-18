@@ -21,8 +21,10 @@ import logging
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 
 def Die(msg):
@@ -269,95 +271,6 @@ def CompileValidatorMinified(out_dir):
   logging.info('... done')
 
 
-def GenerateValidateBin(out_dir, nodejs_cmd):
-  """Generates the validator binary, a Node.js script.
-
-  Args:
-    out_dir: output directory
-    nodejs_cmd: the command for calling Node.js
-  """
-  logging.info('entering ...')
-  f = open('%s/validate' % out_dir, 'w')
-  f.write('#!/usr/bin/env %s\n' % nodejs_cmd)
-  for l in open('%s/validator_minified.js' % out_dir):
-    f.write(l)
-  f.write("""
-      var fs = require('fs');
-      var path = require('path');
-      var http = require('http');
-      var https = require('https');
-      var url = require('url');
-
-      function validateFile(contents, filename) {
-        var results = amp.validator.validateString(contents);
-        var output = amp.validator.renderValidationResult(results, filename);
-
-        if (output[0] === 'PASS') {
-          for (var i = 0; i < output.length; ++i) {
-            console.info(output[i]);
-          }
-          process.exit(0);
-        } else {  // FAIL
-          for (var i = 0; i < output.length; ++i) {
-            console.error(output[i]);
-          }
-          process.exit(1);
-        }
-      }
-
-      function main() {
-        if (process.argv.length < 3) {
-          console.error('usage: validate <file.html>|<url>|-');
-          process.exit(1)
-        }
-        var args = process.argv.slice(2);
-        var full_path = args[0];
-
-        var callback = function(response) {
-          var chunks = [];
-
-          response.on('data', function (chunk) {
-            chunks.push(chunk);
-          });
-
-          response.on('end', function () {
-            validateFile(chunks.join(''), full_path);
-          });
-
-        };
-
-        if (full_path === '-') {
-          callback(process.stdin);
-          process.stdin.resume();
-        } else {
-
-          if (full_path.indexOf('http://') === 0 ||
-              full_path.indexOf('https://') === 0) {
-
-            var clientModule = http;
-            if (full_path.indexOf('https://') === 0) {
-              clientModule = https;
-            }
-            clientModule.request(url.parse(full_path), callback).end();
-
-          } else {
-            var filename = path.basename(full_path);
-            var contents = fs.readFileSync(full_path, 'utf8');
-            validateFile(contents, filename);
-          }
-
-        }
-
-      }
-
-      if (require.main === module) {
-        main();
-      }
-      """)
-  os.chmod('%s/validate' % out_dir, 0750)
-  logging.info('... done')
-
-
 def RunSmokeTest(out_dir, nodejs_cmd):
   """Runs a smoke test (minimum valid AMP and empty html file).
 
@@ -366,28 +279,49 @@ def RunSmokeTest(out_dir, nodejs_cmd):
     nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  # Run dist/validate on the minimum valid amp and observe that it passes.
+  # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
-      [nodejs_cmd, '%s/validate' % out_dir,
+      [nodejs_cmd, 'index.js', '--validator_js',
+       '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/minimum_valid_amp.html'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  if ('PASS\n', '', p.returncode) != (stdout, stderr, 0):
+  if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '',
+      p.returncode) != (stdout, stderr, 0):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
-  # Run dist/validate on an empty file and observe that it fails.
-  open('%s/empty.html' % out_dir, 'w').close()
+  # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
-      [nodejs_cmd, '%s/validate' % out_dir, '%s/empty.html' % out_dir],
+      [nodejs_cmd, 'index.js', '--validator_js',
+       '%s/validator_minified.js' % out_dir,
+       'testdata/feature_tests/empty.html'],
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
-  if not stderr.startswith('FAIL\nempty.html:1:0 The mandatory tag \'html'):
-    Die('smoke test failed; stderr was: "%s"' % stdout)
+  if not stderr.startswith('testdata/feature_tests/empty.html:1:0 '
+                           'The mandatory tag \'html'):
+    Die('smoke test failed; stderr was: "%s"' % stderr)
+  logging.info('... done')
+
+
+def RunIndexTest(nodejs_cmd):
+  """Runs the index_test.js, which tests the NodeJS API.
+
+  Args:
+    nodejs_cmd: the command for calling Node.js
+  """
+  logging.info('entering ...')
+  p = subprocess.Popen([nodejs_cmd, 'index_test.js'],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+  (stdout, stderr) = p.communicate()
+  if p.returncode != 0:
+    Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
+        (p.returncode, stdout, stderr))
   logging.info('... done')
 
 
@@ -466,6 +400,31 @@ def RunTests(out_dir, nodejs_cmd):
   logging.info('... success')
 
 
+def CreateWebuiAppengineDist(out_dir):
+  logging.info('entering ...')
+  try:
+    tempdir = tempfile.mkdtemp()
+    shutil.copytree('webui', os.path.join(tempdir, 'webui'))
+    os.symlink(os.path.abspath('node_modules/codemirror'),
+               os.path.join(tempdir, 'webui/codemirror'))
+    os.symlink(os.path.abspath('node_modules/@polymer'),
+               os.path.join(tempdir, 'webui/@polymer'))
+    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
+               os.path.join(tempdir, 'webui/webcomponents-lite'))
+    vulcanized_index_html = subprocess.check_output([
+        'node_modules/vulcanize/bin/vulcanize',
+        '--inline-scripts', '--inline-css',
+        '-p', os.path.join(tempdir, 'webui'), 'index.html'])
+  finally:
+    shutil.rmtree(tempdir)
+  webui_out = os.path.join(out_dir, 'webui_appengine')
+  shutil.copytree('webui', webui_out)
+  f = open(os.path.join(webui_out, 'index.html'), 'w')
+  f.write(vulcanized_index_html)
+  f.close()
+  logging.info('... success')
+
+
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
@@ -480,14 +439,15 @@ def Main():
   GenValidatorGeneratedJs(out_dir='dist')
   GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
-  GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunIndexTest(nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  CreateWebuiAppengineDist(out_dir='dist')
 
 
 if __name__ == '__main__':

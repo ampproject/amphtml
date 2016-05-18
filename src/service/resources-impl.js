@@ -16,7 +16,7 @@
 
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
-import {closest} from '../dom';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {
   expandLayoutRect,
@@ -32,7 +32,9 @@ import {installFramerateService} from './framerate-impl';
 import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
+import {platformFor} from '../platform';
 import {FiniteStateMachine} from '../finite-state-machine';
+import {isArray} from '../types';
 
 
 const TAG_ = 'Resources';
@@ -49,32 +51,16 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
-/**
- * Returns the element-based priority. A value from 0 to 10.
- * @param {string} tagName
- * @return {number}
- */
-export function getElementPriority(tagName) {
-  // Filed https://github.com/ampproject/amphtml/issues/2714 to get this
-  // method into the element implementation classes.
-  tagName = tagName.toLowerCase();
-  if (tagName == 'amp-ad') {
-    return 2;
-  }
-  if (tagName == 'amp-pixel' || tagName == 'amp-analytics') {
-    return 1;
-  }
-  return 0;
-}
-
-
 export class Resources {
   constructor(window) {
     /** @const {!Window} */
     this.win = window;
 
-    /** @const {!Viewer} */
+    /** @const @private {!Viewer} */
     this.viewer_ = installViewerService(window);
+
+    /** @const @private {!Platform} */
+    this.platform_ = platformFor(window);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -116,9 +102,6 @@ export class Resources {
     /** @private {number} */
     this.relayoutTop_ = -1;
 
-    /** @private {boolean} */
-    this.forceBuild_ = false;
-
     /** @private {time} */
     this.lastScrollTime_ = 0;
 
@@ -154,6 +137,9 @@ export class Resources {
 
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
+
+    /** @private {?Array<!Resource>} */
+    this.pendingBuildResources_ = [];
 
     /** @private {number} */
     this.scrollHeight_ = 0;
@@ -213,13 +199,63 @@ export class Resources {
     // Ensure that we attempt to rebuild things when DOM is ready.
     onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
-      this.forceBuild_ = true;
-      this.relayoutAll_ = true;
+      this.buildReadyResources_();
+      this.pendingBuildResources_ = null;
+      if (this.platform_.isIe()) {
+        this.fixMediaIe_(this.win);
+      } else {
+        this.relayoutAll_ = true;
+      }
       this.schedulePass();
       this.monitorInput_();
     });
 
     this.schedulePass();
+  }
+
+  /**
+   * An ugly fix for IE's problem with `matchMedia` API, where media queries
+   * are evaluated incorrectly. See #2577 for more details.
+   * @param {!Window} win
+   * @private
+   */
+  fixMediaIe_(win) {
+    if (!this.platform_.isIe() || this.matchMediaIeQuite_(win)) {
+      this.relayoutAll_ = true;
+      return;
+    }
+
+    // Poll until the expression resolves correctly, but only up to a point.
+    const endTime = timer.now() + 2000;
+    const interval = win.setInterval(() => {
+      const now = timer.now();
+      const matches = this.matchMediaIeQuite_(win);
+      if (matches || now > endTime) {
+        win.clearInterval(interval);
+        this.relayoutAll_ = true;
+        this.schedulePass();
+        if (!matches) {
+          dev.error(TAG_, 'IE media never resolved');
+        }
+      }
+    }, 10);
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean}
+   * @private
+   */
+  matchMediaIeQuite_(win) {
+    const q = `(min-width: ${win./*OK*/innerWidth}px)` +
+        ` AND (max-width: ${win./*OK*/innerWidth}px)`;
+    try {
+      return win.matchMedia(q).matches;
+    } catch (e) {
+      dev.error(TAG_, 'IE matchMedia failed: ', e);
+      // Return `true` to avoid polling on a broken API.
+      return true;
+    }
   }
 
   /**
@@ -352,12 +388,34 @@ export class Resources {
     this.resources_.push(resource);
 
     if (this.isRuntimeOn_) {
-      // Try to immediately build element, it may already be ready.
-      resource.build(this.forceBuild_);
-      this.schedulePass();
+      if (this.documentReady_) {
+        // Build resource immediately, the document has already been parsed.
+        resource.build();
+        this.schedulePass();
+      } else {
+        // Otherwise add to pending resources and try to build any ready ones.
+        this.pendingBuildResources_.push(resource);
+        this.buildReadyResources_();
+      }
     }
 
     dev.fine(TAG_, 'element added:', resource.debugid);
+  }
+
+  /**
+   * Builds resources that are ready to be built.
+   * @private
+   */
+  buildReadyResources_() {
+    for (let i = 0; i < this.pendingBuildResources_.length; i++) {
+      const resource = this.pendingBuildResources_[i];
+      if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
+        resource.build();
+        // Resource is built remove it from the pending list and step back
+        // one in the index to account for the removed item.
+        this.pendingBuildResources_.splice(i--, 1);
+      }
+    }
   }
 
   /**
@@ -372,6 +430,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
 
@@ -384,7 +443,7 @@ export class Resources {
   upgraded(element) {
     const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
-      resource.build(this.forceBuild_);
+      resource.build();
       this.schedulePass();
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
@@ -613,7 +672,6 @@ export class Resources {
     const now = timer.now();
     dev.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
-        ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
@@ -841,7 +899,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
-        r.build(this.forceBuild_);
+        r.build();
       }
       if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1326,6 +1384,11 @@ export class Resources {
     // Breadth-first search.
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
+      // Also schedule amp-element that is a placeholder for the element.
+      const placeholder = element.getPlaceholder();
+      if (placeholder) {
+        this.discoverResourcesForElement_(placeholder, callback);
+      }
     } else {
       const ampElements = element.getElementsByClassName('-amp-element');
       const seen = [];
@@ -1436,9 +1499,10 @@ export class Resources {
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
    * @param resource
+   * @param opt_removePending Whether to remove from pending build resources.
    * @private
    */
-  cleanupTasks_(resource) {
+  cleanupTasks_(resource, opt_removePending) {
     if (resource.getState() == ResourceState_.NOT_LAID_OUT) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1453,6 +1517,14 @@ export class Resources {
       });
       this.requestsChangeSize_ = this.requestsChangeSize_.filter(
           request => request.resource != resource);
+    }
+
+    if (resource.getState() == ResourceState_.NOT_BUILT && opt_removePending &&
+        this.pendingBuildResources_) {
+      const pendingIndex = this.pendingBuildResources_.indexOf(resource);
+      if (pendingIndex != -1) {
+        this.pendingBuildResources_.splice(pendingIndex, 1);
+      }
     }
   }
 }
@@ -1488,9 +1560,6 @@ export class Resource {
 
     /** @const {!AmpElement|undefined|null} */
     this.owner_ = undefined;
-
-    /** @const {number} */
-    this.priority_ = getElementPriority(element.tagName);
 
     /** @private {!ResourceState_} */
     this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
@@ -1577,7 +1646,7 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
-    return this.priority_;
+    return this.element.getPriority();
   }
 
   /**
@@ -1591,23 +1660,17 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @param {boolean} force
-   * @return {boolean}
    */
-  build(force) {
+  build() {
     if (this.blacklisted_ || !this.element.isUpgraded()) {
-      return false;
+      return;
     }
-    let built;
     try {
-      built = this.element.build(force);
+      this.element.build();
     } catch (e) {
       dev.error(TAG_, 'failed to build:', this.debugid, e);
-      built = false;
       this.blacklisted_ = true;
-    }
-    if (!built) {
-      return false;
+      return;
     }
 
     if (this.hasBeenMeasured()) {
@@ -1615,7 +1678,6 @@ export class Resource {
     } else {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
-    return true;
   }
 
   /**
@@ -1901,6 +1963,15 @@ export class Resource {
   }
 
   /**
+   * Returns true if the resource layout has not completed or failed.
+   * @return {boolean}
+   * */
+  isLayoutPending() {
+    return this.state_ != ResourceState_.LAYOUT_COMPLETE &&
+        this.state_ != ResourceState_.LAYOUT_FAILED;
+  }
+
+  /**
    * Returns a promise that is resolved when this resource is laid out
    * for the first time and the resource was loaded.
    * @return {!Promise}
@@ -1941,6 +2012,7 @@ export class Resource {
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
+      this.element.togglePlaceholder(true);
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;
@@ -2182,10 +2254,7 @@ export class TaskQueue_ {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  if (elements.length !== undefined) {
-    return elements;
-  }
-  return [elements];
+  return isArray(elements) ? elements : [elements];
 }
 
 

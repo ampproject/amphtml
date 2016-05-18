@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {AccessClientAdapter} from './amp-access-client';
+import {AccessOtherAdapter} from './amp-access-other';
+import {AccessServerAdapter} from './amp-access-server';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
@@ -24,12 +27,14 @@ import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
+import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
+import {performanceFor} from '../../../src/performance';
 import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timer} from '../../../src/timer';
@@ -37,25 +42,10 @@ import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
-import {xhrFor} from '../../../src/xhr';
 
 
-/**
- * The configuration properties are:
- * - type: The type of access workflow: client, server or other.
- * - authorization: The URL of the Authorization endpoint.
- * - pingback: The URL of the Pingback endpoint.
- * - loginMap: The URL of the Login Page or a map of URLs.
- *
- * @typedef {{
- *   type: !AccessType,
- *   authorization: (string|undefined),
- *   pingback: (string|undefined),
- *   loginMap: !Object<string, string>,
- *   authorizationFallbackResponse: !JSONObject
- * }}
- */
-let AccessConfigDef;
+/** @const */
+const TAG = 'amp-access';
 
 /**
  * The type of access flow.
@@ -66,12 +56,6 @@ const AccessType = {
   SERVER: 'server',
   OTHER: 'other',
 };
-
-/** @const */
-const TAG = 'amp-access';
-
-/** @const {number} */
-const AUTHORIZATION_TIMEOUT = 3000;
 
 /** @const {number} */
 const VIEW_TIMEOUT = 2000;
@@ -100,11 +84,31 @@ export class AccessService {
       return;
     }
 
+    /** @const @private {boolean} */
+    this.isServerEnabled_ = isExperimentOn(this.win, 'amp-access-server');
+
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    /** @const @private {!AccessConfigDef} */
-    this.config_ = this.buildConfig_();
+    let configJson;
+    try {
+      configJson = JSON.parse(this.accessElement_.textContent);
+    } catch (e) {
+      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
+    }
+
+    /** @const @private {!AccessType} */
+    this.type_ = this.buildConfigType_(configJson);
+
+    /** @const @private {!Object<string, string>} */
+    this.loginConfig_ = this.buildConfigLoginMap_(configJson);
+
+    /** @const @private {!JSONObject} */
+    this.authorizationFallbackResponse_ =
+        configJson['authorizationFallbackResponse'];
+
+    /** @const @private {!AccessTypeAdapterDef} */
+    this.adapter_ = this.createAdapter_(configJson);
 
     /** @const @private {string} */
     this.pubOrigin_ = getSourceOrigin(win.location);
@@ -114,9 +118,6 @@ export class AccessService {
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);
-
-    /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(win);
 
     /** @const @private {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(win);
@@ -135,6 +136,9 @@ export class AccessService {
 
     /** @private @const {!Resources} */
     this.resources_ = resourcesFor(win);
+
+    /** @private @const {!Performance} */
+    this.performance_ = performanceFor(win);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, win);
@@ -171,61 +175,55 @@ export class AccessService {
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
+      this.performance_.tick('aaa');
+      this.performance_.tickSinceVisible('aaav');
+      this.performance_.flush();
     });
   }
 
   /**
-   * @return {!AccessConfigDef}
+   * @param {!JSONObject} configJson
+   * @return {!AccessTypeAdapterDef}
    * @private
    */
-  buildConfig_() {
-    let configJson;
-    try {
-      configJson = JSON.parse(this.accessElement_.textContent);
-    } catch (e) {
-      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
+  createAdapter_(configJson) {
+    const context = /** @type {!AccessTypeAdapterContextDef} */ ({
+      buildUrl: this.buildUrl_.bind(this),
+      collectUrlVars: this.collectUrlVars_.bind(this),
+    });
+    switch (this.type_) {
+      case AccessType.CLIENT:
+        return new AccessClientAdapter(this.win, configJson, context);
+      case AccessType.SERVER:
+        return new AccessServerAdapter(this.win, configJson, context);
+      case AccessType.OTHER:
+        return new AccessOtherAdapter(this.win, configJson, context);
     }
-
-    // Access type.
-    const type = configJson['type'] ?
-        user.assertEnumValue(AccessType, configJson['type'], 'access type') :
-        AccessType.CLIENT;
-    const config = {
-      type: type,
-      authorization: configJson['authorization'],
-      pingback: configJson['pingback'],
-      loginMap: this.buildConfigLoginMap_(configJson['login']),
-      authorizationFallbackResponse:
-          configJson['authorizationFallbackResponse'],
-    };
-
-    // Check that all URLs are valid.
-    if (config.authorization) {
-      assertHttpsUrl(config.authorization);
-    }
-    if (config.pingback) {
-      assertHttpsUrl(config.pingback);
-    }
-    for (const k in config.loginMap) {
-      assertHttpsUrl(config.loginMap[k]);
-    }
-
-    // Validate type = client/server.
-    if (type == AccessType.CLIENT || type == AccessType.SERVER) {
-      user.assert(config.authorization,
-          '"authorization" URL must be specified');
-      user.assert(config.pingback, '"pingback" URL must be specified');
-      user.assert(Object.keys(config.loginMap).length > 0,
-          'At least one "login" URL must be specified');
-    }
-    return config;
+    throw dev.createError('Unsuported access type: ', this.type_);
   }
 
   /**
+   * @param {!JSONObject} configJson
+   * @return {!AccessType}
+   */
+  buildConfigType_(configJson) {
+    let type = configJson['type'] ?
+        user.assertEnumValue(AccessType, configJson['type'], 'access type') :
+        AccessType.CLIENT;
+    if (type == AccessType.SERVER && !this.isServerEnabled_) {
+      user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
+      type = AccessType.CLIENT;
+    }
+    return type;
+  }
+
+  /**
+   * @param {!JSONObject} configJson
    * @return {?Object<string, string>}
    * @private
    */
-  buildConfigLoginMap_(loginConfig) {
+  buildConfigLoginMap_(configJson) {
+    const loginConfig = configJson['login'];
     const loginMap = {};
     if (!loginConfig) {
       // Ignore: in some cases login config is not necessary.
@@ -238,6 +236,11 @@ export class AccessService {
     } else {
       user.assert(false,
           '"login" must be either a single URL or a map of URLs');
+    }
+
+    // Check that all URLs are valid.
+    for (const k in loginMap) {
+      assertHttpsUrl(loginMap[k]);
     }
     return loginMap;
   }
@@ -274,7 +277,8 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    dev.fine(TAG, 'config:', this.config_);
+    dev.fine(TAG, 'config:', this.type_, this.loginConfig_,
+        this.adapter_.getConfig());
 
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
@@ -333,6 +337,29 @@ export class AccessService {
    * @private
    */
   buildUrl_(url, useAuthData) {
+    return this.prepareUrlVars_(useAuthData).then(vars => {
+      return this.urlReplacements_.expand(url, vars);
+    });
+  }
+
+  /**
+   * @param {string} url
+   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
+   * @return {!Promise<!Object<string, *>>}
+   * @private
+   */
+  collectUrlVars_(url, useAuthData) {
+    return this.prepareUrlVars_(useAuthData).then(vars => {
+      return this.urlReplacements_.collectVars(url, vars);
+    });
+  }
+
+  /**
+   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
+   * @return {!Promise<!Object<string, *>>}
+   * @private
+   */
+  prepareUrlVars_(useAuthData) {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
@@ -346,7 +373,7 @@ export class AccessService {
           return undefined;
         };
       }
-      return this.urlReplacements_.expand(url, vars);
+      return vars;
     });
   }
 
@@ -359,35 +386,25 @@ export class AccessService {
    * @private
    */
   runAuthorization_(opt_disableFallback) {
-    if (this.config_.type == AccessType.OTHER) {
-      dev.fine(TAG, 'Ignore authorization due to type=other');
+    if (!this.adapter_.isAuthorizationEnabled()) {
+      dev.fine(TAG, 'Ignore authorization for type=', this.type_);
       this.firstAuthorizationResolver_();
       return Promise.resolve();
     }
 
-    dev.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
-    const urlPromise = this.buildUrl_(
-        this.config_.authorization, /* useAuthData */ false);
-    const promise = urlPromise.then(url => {
-      dev.fine(TAG, 'Authorization URL: ', url);
-      return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchJson(url, {
-            credentials: 'include',
-            requireAmpResponseSourceOrigin: true,
-          }));
-    }).catch(error => {
+    const responsePromise = this.adapter_.authorize().catch(error => {
       this.analyticsEvent_('access-authorization-failed');
-      if (this.config_.authorizationFallbackResponse && !opt_disableFallback) {
+      if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.
         user.error(TAG, 'Authorization failed: ', error);
-        return this.config_.authorizationFallbackResponse;
+        return this.authorizationFallbackResponse_;
       } else {
         // Rethrow the error, it will be processed in the bottom `catch`.
         throw error;
       }
-    }).then(response => {
+    });
+    const promise = responsePromise.then(response => {
       dev.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
@@ -450,7 +467,8 @@ export class AccessService {
       if (!this.authResponse_) {
         return null;
       }
-      return getValueForExpr(this.authResponse_, field) || null;
+      const v = getValueForExpr(this.authResponse_, field);
+      return v !== undefined ? v : null;
     });
   }
 
@@ -667,24 +685,7 @@ export class AccessService {
    * @private
    */
   reportViewToServer_() {
-    if (!this.config_.pingback) {
-      dev.fine(TAG, 'Ignore pingback');
-      return Promise.resolve();
-    }
-    const promise = this.buildUrl_(
-        this.config_.pingback, /* useAuthData */ true);
-    return promise.then(url => {
-      dev.fine(TAG, 'Pingback URL: ', url);
-      return this.xhr_.sendSignal(url, {
-        method: 'POST',
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: '',
-      });
-    }).then(() => {
+    return this.adapter_.pingback().then(() => {
       dev.fine(TAG, 'Pingback complete');
       this.analyticsEvent_('access-pingback-sent');
     }).catch(error => {
@@ -745,7 +746,7 @@ export class AccessService {
     }
 
     dev.fine(TAG, 'Start login: ', type);
-    user.assert(this.config_.loginMap[type],
+    user.assert(this.loginConfig_[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
     const loginUrl = user.assert(this.loginUrlMap_[type],
@@ -760,15 +761,18 @@ export class AccessService {
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
         this.loginAnalyticsEvent_(type, 'success');
+      } else {
+        this.loginAnalyticsEvent_(type, 'rejected');
+      }
+      if (success || !s) {
+        // In case of a success, repeat the authorization and pingback flows.
+        // Also do this for an empty response to avoid false negatives.
+        // Pingback is repeated in this case since this could now be a new
+        // "view" with a different access profile.
         this.broadcastReauthorize_();
-        // Repeat the authorization and pingback flows. Pingback is repeated
-        // in this case since this is now a new "view" with a different access
-        // profile.
         return this.runAuthorization_(/* disableFallback */ true).then(() => {
           this.scheduleView_(/* timeToView */ 0);
         });
-      } else {
-        this.loginAnalyticsEvent_(type, 'rejected');
       }
     }).catch(reason => {
       dev.fine(TAG, 'Login dialog failed: ', type, reason);
@@ -800,20 +804,57 @@ export class AccessService {
    * @private
    */
   buildLoginUrls_() {
-    const loginMap = this.config_.loginMap;
-    if (Object.keys(loginMap).length == 0) {
+    if (Object.keys(this.loginConfig_).length == 0) {
       return null;
     }
     const promises = [];
-    for (const k in loginMap) {
+    for (const k in this.loginConfig_) {
       promises.push(
-          this.buildUrl_(loginMap[k], /* useAuthData */ true).then(url => {
-            this.loginUrlMap_[k] = url;
-            return {type: k, url: url};
-          }));
+          this.buildUrl_(this.loginConfig_[k], /* useAuthData */ true)
+              .then(url => {
+                this.loginUrlMap_[k] = url;
+                return {type: k, url: url};
+              }));
     }
     return Promise.all(promises);
   }
+}
+
+
+/**
+ * @typedef {{
+ *   buildUrl: function(url:string, useAuthData:boolean):!Promise<string>,
+ *   collectUrlVars: function(url:string, useAuthData:boolean):
+ *       !Promise<!Object<string, *>>
+ * }}
+ */
+let AccessTypeAdapterContextDef;
+
+
+/**
+ * @interface
+ */
+class AccessTypeAdapterDef {
+
+  /**
+   * @return {!JSONObject}
+   */
+  getConfig() {}
+
+  /**
+   * @return {boolean}
+   */
+  isAuthorizationEnabled() {}
+
+  /**
+   * @return {!Promise<!JSONObject>}
+   */
+  authorize() {}
+
+  /**
+   * @return {!Promise<>}
+   */
+  pingback() {}
 }
 
 

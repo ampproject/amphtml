@@ -353,7 +353,7 @@ describe('vsync', () => {
 
   it('should reject mutate series when invisible', () => {
     viewer.isVisible = () => false;
-    const mutatorSpy = sinon.spy();
+    const mutatorSpy = sandbox.spy();
 
     const promise = vsync.runAnimMutateSeries(mutatorSpy);
     return promise.then(() => {

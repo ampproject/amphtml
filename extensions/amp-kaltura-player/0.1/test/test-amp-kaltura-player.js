@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-kaltura-player');
 import {adopt} from '../../../../src/runtime';
-import {parseUrl} from '../../../../src/url';
 
 adopt(window);
 
@@ -25,6 +26,7 @@ describe('amp-kaltura-player', () => {
 
   function getKaltura(attributes, opt_responsive) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const kalturaPlayer = iframe.doc.createElement('amp-kaltura-player');
       for (const key in attributes) {
         kalturaPlayer.setAttribute(key, attributes[key]);
@@ -70,11 +72,10 @@ describe('amp-kaltura-player', () => {
 
   it('requires data-account', () => {
     return getKaltura({}).should.eventually.be.rejectedWith(
-            /The data-account attribute is required for/);
+            /The data-partner attribute is required for/);
   });
 
-    // TODO(erwinm) unskip this when we figure out why it fails on travis
-  it.skip('should pass data-param-* attributes to the iframe src', () => {
+  it('should pass data-param-* attributes to the iframe src', () => {
     return getKaltura({
       'data-partner': '1281471',
       'data-entryid': '1_3ts1ms9c',
@@ -82,8 +83,7 @@ describe('amp-kaltura-player', () => {
       'data-param-my-param': 'hello world',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
-      const params = parseUrl(iframe.src).search.split('&');
-      expect(params).to.contain('flashvars[myParam]=hello%20world');
+      expect(iframe.src).to.contain('flashvars%5BmyParam%5D=hello%20world');
     });
   });
 });

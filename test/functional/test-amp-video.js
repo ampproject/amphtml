@@ -16,6 +16,7 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
+import * as sinon from 'sinon';
 
 describe('amp-video', () => {
 

@@ -23,6 +23,7 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {viewerFor} from '../../src/viewer';
 import {resourcesFor} from '../../src/resources';
 import {VisibilityState} from '../../src/service/viewer-impl';
+import * as sinon from 'sinon';
 
 describe('Viewer Visibility State', () => {
 
@@ -93,7 +94,7 @@ describe('Viewer Visibility State', () => {
       unlayoutCallback = sandbox.spy(protoElement, 'unlayoutCallback');
       pauseCallback = sandbox.spy(protoElement, 'pauseCallback');
       resumeCallback = sandbox.spy(protoElement, 'resumeCallback');
-      unselect = sinon.spy();
+      unselect = sandbox.spy();
       sandbox.stub(fixture.win, 'getSelection').returns({
         removeAllRanges: unselect,
       });

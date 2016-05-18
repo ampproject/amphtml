@@ -18,11 +18,14 @@
  * @fileoverview Creates an http server to handle static
  * files and list directories for use with the gulp live server
  */
+var BBPromise = require('bluebird');
 var app = require('connect')();
 var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
+var fs = BBPromise.promisifyAll(require('fs'));
 var path = require('path');
+var url = require('url');
 var request = require('request');
 var serveIndex = require('serve-index');
 var serveStatic = require('serve-static');
@@ -91,6 +94,15 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
+app.use('/examples.build/live-list.amp.max.html', function(req, res) {
+  res.setHeader('Content-Type', 'text/html');
+  res.statusCode = 200;
+  fs.readFileAsync(process.cwd() +
+      '/examples.build/live-list.amp.max.html').then((file) => {
+        res.end(file);
+  });
+});
+
 // Proxy with unminified JS.
 // Example:
 // http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
@@ -107,9 +119,18 @@ app.use('/min/', function(req, res) {
 
 app.use(clr());
 
+function setAMPAccessControlHeader(res, path) {
+  var curUrl = url.parse(path, true);
+  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        'http://localhost:' + port);
+  }
+}
+
 paths.split(',').forEach(function(pth) {
   // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth)));
+  app.use(serveStatic(path.join(process.cwd(), pth),
+        {setHeaders: setAMPAccessControlHeader}));
   // Serve directory listings
   app.use(serveIndex(path.join(process.cwd(), pth),
     {'icons':true,'view':'details'}));
@@ -123,7 +144,7 @@ app.use(function notFound(req, res) {
   done(err);
 });
 
-// Start up the server
-app.listen(port, function () {
+app.listen(port, function() {
   console./*OK*/log('serving %s at http://localhost:%s', paths, port);
 });
+

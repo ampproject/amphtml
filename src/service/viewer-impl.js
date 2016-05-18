@@ -141,7 +141,7 @@ export class Viewer {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!DocumentState} */
     this.docState_ = documentStateFor(this.win);
@@ -206,6 +206,9 @@ export class Viewer {
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
 
+    /** @private {?time} */
+    this.firstVisibleTime_ = null;
+
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
@@ -242,8 +245,8 @@ export class Viewer {
     dev.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
-    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
+    // Configure scrolling parameters when AMP is iframed on iOS.
+    if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
@@ -275,6 +278,13 @@ export class Viewer {
     /** @private @const {boolean} */
     this.performanceTracking_ = this.params_['csi'] === '1';
     dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+
+    /**
+     * Whether the AMP document is embedded in a viewer, such as an iframe or
+     * a web view.
+     * @private @const {boolean}
+     */
+    this.isEmbedded_ = this.isIframed_ || this.params_['webview'] === '1';
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -409,8 +419,9 @@ export class Viewer {
       }
     });
 
-    // Remove hash - no reason to keep it around, but only when embedded.
-    if (this.isEmbedded_) {
+    // Remove hash - no reason to keep it around, but only when embedded or we have
+    // an incoming click tracking string (see impression.js).
+    if (this.isEmbedded_ || this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -433,6 +444,9 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      if (!this.firstVisibleTime_) {
+        this.firstVisibleTime_ = timer.now();
+      }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -452,6 +466,14 @@ export class Viewer {
 
   /**
    * Whether the document is embedded in a iframe.
+   * @return {boolean}
+   */
+  isIframed() {
+    return this.isIframed_;
+  }
+
+  /**
+   * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
   isEmbedded() {
@@ -581,6 +603,15 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the first time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getFirstVisibleTime() {
+    return this.firstVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
@@ -652,6 +683,15 @@ export class Viewer {
    */
   getViewerUrl() {
     return this.viewerUrl_;
+  }
+
+  /**
+   * Possibly return the messaging origin if set. This would be the origin
+   * of the parent viewer.
+   * @return {?string}
+   */
+  maybeGetMessagingOrigin() {
+    return this.messagingOrigin_;
   }
 
   /**

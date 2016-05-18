@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-reach-player');
 import {adopt} from '../../../../src/runtime';
 
@@ -24,6 +27,7 @@ describe('amp-reach-player', () => {
 
   function getReach(attributes, opt_responsive) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const reach = iframe.doc.createElement('amp-reach-player');
       for (const key in attributes) {
         reach.setAttribute(key, attributes[key]);

@@ -54,18 +54,72 @@ export function parseSizeList(s, opt_allowPercentAsLength) {
 
     let mediaStr;
     let sizeStr;
-    const spaceIndex = sSize.lastIndexOf(' ');
-    if (spaceIndex != -1) {
-      mediaStr = sSize.substring(0, spaceIndex).trim();
-      sizeStr = sSize.substring(spaceIndex + 1).trim();
+
+    // Process the expression from the end.
+    const lastChar = sSize.charAt(sSize.length - 1);
+    let div;
+    let func = false;
+    if (lastChar == ')') {
+      // Value is the CSS function, e.g. `calc(50vw + 10px)`.
+      func = true;
+
+      // First, skip to the opening paren.
+      let parens = 1;
+      div = sSize.length - 2;
+      for (; div >= 0; div--) {
+        const c = sSize.charAt(div);
+        if (c == '(') {
+          parens--;
+        } else if (c == ')') {
+          parens++;
+        }
+        if (parens == 0) {
+          break;
+        }
+      }
+
+      // Then, skip to the begining to the function's name.
+      const funcEnd = div - 1;
+      if (div > 0) {
+        div--;
+        for (; div >= 0; div--) {
+          const c = sSize.charAt(div);
+          if (!(c == '%' || c == '-' || c == '_' ||
+                (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9'))) {
+            break;
+          }
+        }
+      }
+      user.assert(div < funcEnd, 'Invalid CSS function in "%s"', sSize);
+    } else {
+      // Value is the length or a percent: accept a wide range of values,
+      // including invalid values - they will be later asserted to conform
+      // to exact CSS length or percent value.
+      div = sSize.length - 2;
+      for (; div >= 0; div--) {
+        const c = sSize.charAt(div);
+        if (!(c == '%' || c == '.' ||
+              (c >= 'a' && c <= 'z') ||
+              (c >= 'A' && c <= 'Z') ||
+              (c >= '0' && c <= '9'))) {
+          break;
+        }
+      }
+    }
+    if (div >= 0) {
+      mediaStr = sSize.substring(0, div + 1).trim();
+      sizeStr = sSize.substring(div + 1).trim();
     } else {
       sizeStr = sSize;
       mediaStr = undefined;
     }
     sizes.push({mediaQuery: mediaStr,
-      size: opt_allowPercentAsLength ?
-          assertLengthOrPercent(sizeStr) :
-          assertLength(sizeStr)});
+      size: func ? sizeStr :
+          opt_allowPercentAsLength ?
+              assertLengthOrPercent(sizeStr) :
+              assertLength(sizeStr)});
   });
   return new SizeList(sizes);
 };
@@ -109,7 +163,7 @@ export class SizeList {
    *
    * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
    * @param {!Window} win
-   * @return {!Length}
+   * @return {!LengthDef|string}
    */
   select(win) {
     for (let i = 0; i < this.sizes_.length - 1; i++) {
@@ -123,7 +177,7 @@ export class SizeList {
 
   /**
    * Returns the last size in the SizeList, which is the default.
-   * @return {!Length}
+   * @return {!LengthDef|string}
    */
   getLast() {
     return this.sizes_[this.sizes_.length - 1].size;

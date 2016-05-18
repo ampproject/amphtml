@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>CONTAINER</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-accordion">amp-accordion.html</a></td>
   </tr>
@@ -41,7 +45,7 @@ Each of the `amp-accordion` component’s immediate children is considered a sec
 
 - An `amp-accordion` can contain one or more `<section>`s as its direct children.
 - Each `<section>` must contain exactly two direct children.
-- The first child (of the section) must be one of `h1`, `h2`, ..., `h6` and is the heading of the section.
+- The first child (of the section) must be one of `h1`, `h2`, ..., `h6`, `header`, and is the heading of the section.
 - The second child (of the section) can be any tag allowed in AMP HTML and is the content of the section.
 - Clicking/tapping on the heading of a section expands/ or collapses the section.
 
@@ -79,3 +83,7 @@ The `expanded` attribute can be set on any `<section>` that needs to be expanded
 - The content element is clear-fixed with `overflow: hidden` and hence cannot have scrollbars.
 - margins of the `amp-accordion`, `<section>` and the heading and content elements are set to 0 and can be overridden in custom styles.
 - Both the header and content elements are `position: relative`.
+
+## Validation
+
+See [amp-accordion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-accordion/0.1/validator-amp-accordion.protoascii) in the AMP validator specification.

@@ -71,6 +71,22 @@
   <!-- valid: layout=fill -->
   <amp-img layout="fill" src="itshappening.gif"></amp-img>
 
+  <!-- invalid: layout=fill with height=auto; height=auto is only allowed
+       for flex-item -->
+  <amp-img layout="fill" width="50" height="auto"></amp-img>
+
+  <!-- valid: layout=flex-item -->
+  <amp-img layout="flex-item" src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with width="auto" -->
+  <amp-img layout="flex-item" width="auto" height="50"
+           src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with height=auto -->
+  <amp-img layout="flex-item" width="50" height="auto"
+           src="itshappening.gif"></amp-img>
+  <!-- valid: layout=flex-item with width and height -->
+  <amp-img layout="flex-item" width="50" height="50"
+           src="itshappening.gif"></amp-img>
+
   <!-- invalid: layout=container
        Note that this would be valid if amp-img allowed container.
        It doesn't and there is no other element that does.

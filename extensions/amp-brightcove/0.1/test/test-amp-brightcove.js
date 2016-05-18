@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-brightcove');
 import {adopt} from '../../../../src/runtime';
 import {parseUrl} from '../../../../src/url';
@@ -25,6 +28,7 @@ describe('amp-brightcove', () => {
 
   function getBrightcove(attributes, opt_responsive) {
     return createIframePromise(true).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const bc = iframe.doc.createElement('amp-brightcove');
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);

@@ -353,6 +353,26 @@ describe('FixedLayer', () => {
       expect(state['F1'].fixed).to.equal(false);
     });
 
+    it('should tolerate getComputedStyle = null', () => {
+      // See #3096 and https://bugzilla.mozilla.org/show_bug.cgi?id=548397
+      documentApi.defaultView.getComputedStyle = () => null;
+
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(false);
+      expect(state['F0'].transferrable).to.equal(false);
+      expect(state['F0'].top).to.equal('');
+      expect(state['F0'].zIndex).to.equal('');
+
+      expect(state['F1'].fixed).to.equal(false);
+    });
+
     it('should mutate element to fixed without top', () => {
       const fe = fixedLayer.fixedElements_[0];
       fixedLayer.mutateFixedElement_(fe, 1, {
@@ -374,6 +394,34 @@ describe('FixedLayer', () => {
 
       expect(fe.fixedNow).to.be.true;
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
+    });
+
+    it('should reset top upon being removed from fixedlayer', () => {
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+
+      // Add.
+      fixedLayer.addElement(element3, '*');
+      expect(fixedLayer.fixedElements_).to.have.length(3);
+      const fe = fixedLayer.fixedElements_[2];
+      expect(fe.id).to.equal('F2');
+      expect(fe.element).to.equal(element3);
+      expect(fe.selectors).to.deep.equal(['*']);
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        top: '17px',
+      });
+
+      expect(fe.fixedNow).to.be.true;
+      expect(fe.element.style.top).to.equal('calc(17px + 11px)');
+      // Remove.
+      fixedLayer.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      fixedLayer.removeElement(element3);
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+      expect(element3.style.top).to.equal('');
     });
 
     it('should mutate element to non-fixed', () => {
@@ -569,6 +617,7 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['opacity'] = '0';
 
       expect(vsyncTasks).to.have.length(1);
@@ -579,10 +628,11 @@ describe('FixedLayer', () => {
       expect(state['F0'].transferrable).to.equal(false);
     });
 
-    it('should disregard visibility=hidden element', () => {
+    it('should force transfer for visibility=hidden element', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['visibility'] = 'hidden';
 
       expect(vsyncTasks).to.have.length(1);
@@ -590,7 +640,7 @@ describe('FixedLayer', () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.equal(true);
-      expect(state['F0'].transferrable).to.equal(false);
+      expect(state['F0'].transferrable).to.equal(true);
     });
   });
 });

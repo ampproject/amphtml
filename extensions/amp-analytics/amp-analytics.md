@@ -107,6 +107,12 @@ Type attribute value: `chartbeat`
 
 Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
+### ColAnalytics
+
+Type attribute value: `colanalytics`
+
+Adds support for ColAnalytics. Additionally, need the value for `id`.
+
 ### comScore
 
 Type attribute value: `comscore`
@@ -140,6 +146,18 @@ Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
+### Linkpulse
+
+Type attribute value: `linkpulse`
+
+Adds support for Linkpulse. Configuration details can be found at [docs.linkpulse.com](http://docs.linkpulse.com)
+
+### Lotame
+
+Type attribute value: `lotame`
+
+Adds support for Lotame.  More information and configuration details can be found at [mylotame.force.com](https://mylotame.force.com/s/article/Google-AMP).
+
 ### Médiamétrie
 
 Type attribute value: `mediametrie`
@@ -163,6 +181,12 @@ Adds support for Piano.  Configuration details can be found at [vx.piano.io](htt
 Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
+### SOASTA mPulse
+
+Type attribute value: `mpulse`
+
+Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
 
 ### SimpleReach
 
@@ -203,7 +227,7 @@ the `type` attribute.
 
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that **(i) remote configuration takes precedence over inline configuration and (ii) inline configuration
-takes precendence over vendor configuration**.
+takes precedence over vendor configuration**.
 
 The `<amp-analytics>` configuration object uses the following format:
 
@@ -299,7 +323,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
 
 #### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
-  - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
+  - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
 
     ```javascript
@@ -309,7 +333,8 @@ Use this configuration to fire a request under certain conditions when the page 
         "scrollSpec": {
           "verticalBoundaries": [25, 50, 90],
           "horizontalBoundaries": [90]
-        }
+        },
+        "request": "event"
       }
     }
     ```
@@ -378,22 +403,6 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 
 `extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-analytics` tag
-(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
-
-<table>
-  <tr>
-    <th class="col-fourty"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-analytics</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-analytics-0.1.js"</code>.</td>
-  </tr>
-</table>
+See [amp-analytics rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/validator-amp-analytics.protoascii) in the AMP validator specification.

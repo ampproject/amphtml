@@ -15,22 +15,21 @@
  */
 
 import './polyfills';
+import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {performanceFor} from './performance';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
-import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
-import {installEmbed} from '../builtins/amp-embed';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
+import {maybeTrackImpression} from './impression';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -38,7 +37,7 @@ import {maybeValidate} from './validator-integration';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
-  const perf = performanceFor(window);
+  const perf = installPerformanceService(window);
 
   perf.tick('is');
   installStyles(document, cssText, () => {
@@ -46,13 +45,12 @@ try {
       installCoreServices(window);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
+      maybeTrackImpression(window);
       templatesFor(window);
 
       installImg(window);
-      installAd(window);
       installPixel(window);
       installVideo(window);
-      installEmbed(window);
 
       adopt(window);
       stubElements(window);

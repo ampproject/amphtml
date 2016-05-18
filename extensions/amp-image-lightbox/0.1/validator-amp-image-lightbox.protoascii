@@ -50,7 +50,7 @@ tags: {  # <amp-image-lightbox>
   tag_name: "amp-image-lightbox"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-image-lightbox extension .js script"
+  also_requires_tag: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attrs: { name: "controls" }
   attr_lists: "extended-amp-global"

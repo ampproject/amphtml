@@ -29,6 +29,9 @@ script:
   - gulp build --fortesting
   - gulp dist --fortesting
   - gulp presubmit
+  # dep-check needs to occur after build since we rely on build to generate
+  # the css files into js files.
+  - gulp dep-check
   # Unit tests with Travis' default chromium
   - gulp test --compiled --fortesting
   # Integration tests with all saucelabs browsers
