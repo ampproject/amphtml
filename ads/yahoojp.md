@@ -23,7 +23,7 @@ limitations under the License.
   width="320"
   height="50"
   type="yahoojp"
-  data-yadsid="69472_107276"
+  data-yadsid="79712_113431"
 >
 </amp-ad>
 ```
