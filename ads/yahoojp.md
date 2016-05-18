@@ -30,10 +30,10 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact inquiry@i-mobile.co.jp
+For configuration details and to generate your tags, please contact http://marketing.yahoo.co.jp/contact/
+
+
 
 Supported parameters:
 
-- data-pid
-- data-asid
-- data-adtype
+- data-yadsid
