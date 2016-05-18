@@ -401,6 +401,7 @@ def RunTests(out_dir, nodejs_cmd):
 
 
 def CreateWebuiAppengineDist(out_dir):
+  """Generates the directory from which to deploy the Appengine WebUI."""
   logging.info('entering ...')
   try:
     tempdir = tempfile.mkdtemp()
