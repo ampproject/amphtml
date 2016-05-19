@@ -246,7 +246,7 @@
     </style>
     <template>
       <div class="container flex-horizontal">
-        <paper-input auto-validate required pattern="[^ \s]+:.*"
+        <paper-input auto-validate required pattern="[^ \s]+(://|\.[a-z]+/).*"
             error-message="Please enter a valid URL" on-focus="checkURL"
             on-input="checkURL" label="URL" id="urlToFetch"
             class="flexchild"></paper-input>
@@ -456,6 +456,11 @@
           button.addEventListener('click', function() {
             var urlToFetch = input.value.trim();
             if (urlToFetch.length > 0) {
+              if (!(urlToFetch.indexOf('http://') == 0 ||
+                    urlToFetch.indexOf('https://') == 0)) {
+                urlToFetch = 'https://' + urlToFetch;
+                input.value = urlToFetch;
+              }
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
