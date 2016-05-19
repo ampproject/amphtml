@@ -87,6 +87,11 @@ const EXPERIMENTS = [
     name: 'AMP Access server side prototype',
     spec: '',
   },
+  {
+    id: 'amp-carouscroll',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+  },
 ];
 
 
