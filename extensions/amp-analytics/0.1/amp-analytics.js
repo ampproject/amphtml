@@ -413,10 +413,17 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} template The template to expand.
    * @param {!JSONObject} The object to use for variable value lookups.
    * @param {!Object} event Object with details about the event.
+   * @param {number} opt_iterations Number of recursive expansions to perform.
+   *    Defaults to 2 substitutions.
    * @return {string} The expanded string.
    * @private
    */
-  expandTemplate_(template, trigger, event) {
+  expandTemplate_(template, trigger, event, opt_iterations) {
+    opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
+    if (opt_iterations < 0) {
+      return '';
+    }
+
     // Replace placeholders with URI encoded values.
     // Precedence is event.vars > trigger.vars > config.vars.
     // Nested expansion not supported.
@@ -424,9 +431,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const raw = (event && event['vars'] && event['vars'][name]) ||
+      let raw = (event && event['vars'] && event['vars'][name]) ||
           (trigger['vars'] && trigger['vars'][name]) ||
           (this.config_['vars'] && this.config_['vars'][name]);
+      if (typeof raw == 'string') {
+        raw = this.expandTemplate_(raw, trigger, event, opt_iterations - 1);
+      }
       const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;
     });
