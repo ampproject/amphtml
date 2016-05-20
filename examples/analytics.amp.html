@@ -55,6 +55,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "eventName": "page-loaded",
         "eventId": "42"
+      },
+      "extraUrlParams": {
+        "param1": "Another value"
       }
     },
     "visibility": {
@@ -463,6 +466,72 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End SOASTA mPulse example -->
+
+<!-- Adobe Analytics example -->
+<!--
+For complete documentation and additional examples please see: https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html
+-->
+<amp-analytics type=adobeanalytics>
++<!-- adobeanalytics type -->
+<script type="application/json">
+{
+  "requests": {
+    "myClick": "${click}&v1=${eVar1}"
+  },
+  "vars": {
+    "host": "metrics.example.com",
+    "reportSuites": "reportSuiteID"
+  },
+  "triggers": {
+    "pageLoad": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "myClick",
+      "vars": {
+        "eVar1": "button clicked"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
+<!-- adobeanalytics_nativeConfig type -->
+<amp-analytics type="adobeanalytics_nativeConfig">
+<script type="application/json">
+{
+  "requests": {
+    "base": "https://${host}",
+    "iframeMessage": "${base}/stats.html?campaign=${queryParam(campaign)}&pageURL=${ampdocUrl}"
+  },
+  "vars": {
+    "host": "example.publishersite.com"
+  },
+  "extraUrlParams": {
+    "pageName": "Adobe Analytics using amp-analytics adobeanalytics_nativeConfig",
+    "v1": "eVar1 test value"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Adobe Analytics example -->
+
+<!-- Linkpulse example - please replace id with your Linkpulse id -->
+<amp-analytics type="linkpulse">
+<script type="application/json">
+{
+  "vars": {
+    "id": "aabbcceedd00000000000000"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Linkpulse example -->
+
 </div>
 
 <div class="logo"></div>

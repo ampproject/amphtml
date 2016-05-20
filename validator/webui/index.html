@@ -18,29 +18,31 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
   <title>The AMP Validator</title>
   <meta charset="utf-8"/>
-  <script src="webcomponents-lite.js"></script>
-  <link rel="import" href="/pm/iron-collapse/iron-collapse.html">
-  <link rel="import" href="/pm/iron-flex-layout/iron-flex-layout.html">
-  <link rel="import" href="/pm/iron-icon/iron-icon.html">
-  <link rel="import" href="/pm/iron-icons/communication-icons.html">
-  <link rel="import" href="/pm/iron-icons/iron-icons.html">
-  <link rel="import" href="/pm/iron-resizable-behavior/iron-resizable-behavior.html">
-  <link rel="import" href="/pm/paper-button/paper-button.html">
-  <link rel="import" href="/pm/paper-input/paper-input.html">
-  <link rel="import" href="/pm/paper-item/paper-item.html">
-  <link rel="import" href="/pm/paper-listbox/paper-listbox.html">
-  <link rel="import" href="/pm/paper-material/paper-material.html">
-  <link rel="import" href="/pm/paper-styles/demo-pages.html">
-  <link rel="import" href="/pm/paper-toolbar/paper-toolbar.html">
-  <link rel="import" href="/pm/polymer/polymer.html">
-  <link rel="stylesheet" href="/cm/lib/codemirror.css">
-  <script src="/cm/lib/codemirror.js"></script>
-  <script src="/cm/addon/selection/selection-pointer.js"></script>
-  <script src="/cm/mode/css/css.js"></script>
-  <script src="/cm/mode/htmlmixed/htmlmixed.js"></script>
-  <script src="/cm/mode/javascript/javascript.js"></script>
-  <script src="/cm/mode/xml/xml.js"></script>
-  <script src="$$VALIDATOR_SCRIPT$$"></script>
+
+  <link rel="shortcut icon" href="/amp_favicon.png">
+  <script src="webcomponents-lite/webcomponents-lite.js"></script>
+  <link rel="import" href="@polymer/iron-collapse/iron-collapse.html">
+  <link rel="import" href="@polymer/iron-flex-layout/iron-flex-layout.html">
+  <link rel="import" href="@polymer/iron-icon/iron-icon.html">
+  <link rel="import" href="@polymer/iron-icons/communication-icons.html">
+  <link rel="import" href="@polymer/iron-icons/iron-icons.html">
+  <link rel="import" href="@polymer/iron-resizable-behavior/iron-resizable-behavior.html">
+  <link rel="import" href="@polymer/paper-button/paper-button.html">
+  <link rel="import" href="@polymer/paper-input/paper-input.html">
+  <link rel="import" href="@polymer/paper-item/paper-item.html">
+  <link rel="import" href="@polymer/paper-listbox/paper-listbox.html">
+  <link rel="import" href="@polymer/paper-material/paper-material.html">
+  <link rel="import" href="@polymer/paper-styles/demo-pages.html">
+  <link rel="import" href="@polymer/paper-toolbar/paper-toolbar.html">
+  <link rel="import" href="@polymer/polymer/polymer.html">
+  <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+  <script src="codemirror/lib/codemirror.js"></script>
+  <script src="codemirror/addon/selection/selection-pointer.js"></script>
+  <script src="codemirror/mode/css/css.js"></script>
+  <script src="codemirror/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="codemirror/mode/javascript/javascript.js"></script>
+  <script src="codemirror/mode/xml/xml.js"></script>
+  <script src="https://cdn.ampproject.org/v0/validator.js"></script>
   <style is="custom-style">
     paper-item {
       --paper-item: {
@@ -283,9 +285,11 @@
       paper-toolbar {
         --paper-toolbar-background: #fbfafb;
         --paper-toolbar-color: #0379C4;
-        --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; }
+        --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; };
+        --width: 100%
       }
-      .ampproject {
+      .ampproject-left {
+        @apply(--layout-flex);
         color: #0379C4;
         padding: 15px 10px 15px 50px;
         margin: 10px 0;
@@ -297,18 +301,40 @@
         background-size: 40px 40px;
         background-position: center left;
       }
-      .ampproject a:link { color: #0379C4; text-decoration: none; }
-      .ampproject a:visited { color: #0379C4; text-decoration: none; }
-      .ampproject a:hover { color: #0379C4; text-decoration: none; }
-      .ampproject a:active { color: #0379C4; text-decoration: none; }
+      .ampproject-right {
+        color: #0379C4;
+        margin: 10px 0;
+      }
+      .ampproject-link a:link,
+      .ampproject-link a:visited,
+      .ampproject-link a:hover,
+      .ampproject-link a:active {
+        color: #0379C4;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 300;
+        letter-spacing: 0.04em;
+      }
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        margin-bottom: 10px;
+      }
+      .flexchild {
+      }
     </style>
     <template>
       <paper-toolbar>
-        <div class="ampproject">
+        <div class="ampproject-left ampproject-link">
           <a href="https://www.ampproject.org/"
-             target="_blank">Accelerated Mobile Pages Project</a> -
+             target="_blank">Accelerated Mobile Pages Project</a>
+        </div>
+        <div class="ampproject-right ampproject-link">
           <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
-             target="_blank">Validator</a>
+             target="_blank">GITHUB</a>
+          &nbsp;&nbsp;&nbsp;
+          <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
+             target="_blank">CHROME EXTENSION</a>
         </div>
       </paper-toolbar>
     </template>
@@ -324,10 +350,6 @@
   <dom-module id="main-page">
     <template>
       <ampproject-toolbar></ampproject-toolbar>
-      <paper-button raised on-click="loadValidExample">Try valid AMP HTML
-      </paper-button>
-      <paper-button raised on-click="loadInvalidExample">Try invalid AMP HTML
-      </paper-button>
       <url-form id="urlForm"></url-form>
 
       <amphtml-editor id="amphtmlEditor"></amphtml-editor>
@@ -337,17 +359,6 @@
     <script>
       Polymer({
         is: 'main-page',
-        loadValidExample: function() {
-          this.loadExample('minimum_valid_amp.html');
-        },
-        loadInvalidExample: function() {
-          this.loadExample('several_errors.html');
-        },
-        loadExample: function(featureTestName) {
-          this.$.urlForm.setURLAndValidate(
-              'https://raw.githubusercontent.com/ampproject/amphtml/master/' +
-              'validator/testdata/feature_tests/' + featureTestName);
-        },
         ready: function() {
           // The editor control in the center of the screen.
           var editor = this.$.amphtmlEditor;
@@ -448,13 +459,31 @@
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                  editor.setEditorValue(JSON.parse(xmlHttp.responseText).contents);
+                  editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
                 }
               };
               xmlHttp.open("GET", "/fetch?url=" + encodeURIComponent(urlToFetch), true);
               xmlHttp.send();
             }
           });
+
+          var minimumValidAmp =
+              '\x3C!--\n' +
+              '     This is the minimum valid AMP HTML document. Just type away\n' +
+              '     here and the AMP Validator will re-check your document on the fly.\n' +
+              '-->\n' +
+              '\x3C!doctype html>\n' +
+              '\x3Chtml ⚡>\n' +
+              '\x3Chead>\n' +
+              '  \x3Cmeta charset="utf-8">\n' +
+              '  \x3Clink rel="canonical" href="self.html" />\n' +
+              '  \x3Cmeta name="viewport" content="width=device-width,minimum-scale=1">\n' +
+              '  \x3Cstyle amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}\x3C/style>\x3Cnoscript>\x3Cstyle amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\x3C/style>\x3C/noscript>\n' +
+              '  \x3Cscript async src="https://cdn.ampproject.org/v0.js">\x3C/script>\n' +
+              '\x3C/head>\n' +
+              '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
+              '\x3C/html>\n';
+          editor.setEditorValue(minimumValidAmp);
         }
       });
     </script>

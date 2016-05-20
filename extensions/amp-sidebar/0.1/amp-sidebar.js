@@ -16,18 +16,11 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {historyFor} from '../../../src/history';
 import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
-
-/** @const */
-const EXPERIMENT = 'amp-sidebar';
-
-/** @const */
-const TAG = 'amp-sidebar';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -48,9 +41,6 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
-
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
@@ -75,13 +65,11 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
+    /** @private {number} */
+    this.historyId_ = -1;
+
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
-
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
-      return;
-    }
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -166,6 +154,9 @@ export class AmpSidebar extends AMP.BaseElement {
         }, ANIMATION_TIMEOUT);
       });
     });
+    this.getHistory_().push(this.close_.bind(this)).then(historyId => {
+      this.historyId_ = historyId;
+    });
   }
 
   /**
@@ -190,6 +181,10 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }, ANIMATION_TIMEOUT);
     });
+    if (this.historyId_ != -1) {
+      this.getHistory_().pop(this.historyId_);
+      this.historyId_ = -1;
+    }
   }
 
   /**
@@ -259,6 +254,13 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.appendChild(div);
       this.bottomBarCompensated_ = true;
     }
+  }
+
+  /**
+   * @private @return {!History}
+   */
+  getHistory_() {
+    return historyFor(this.win_);
   }
 }
 

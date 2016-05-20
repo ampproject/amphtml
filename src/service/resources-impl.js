@@ -16,7 +16,7 @@
 
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
-import {closest} from '../dom';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {
   expandLayoutRect,
@@ -102,9 +102,6 @@ export class Resources {
     /** @private {number} */
     this.relayoutTop_ = -1;
 
-    /** @private {boolean} */
-    this.forceBuild_ = false;
-
     /** @private {time} */
     this.lastScrollTime_ = 0;
 
@@ -140,6 +137,9 @@ export class Resources {
 
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
+
+    /** @private {?Array<!Resource>} */
+    this.pendingBuildResources_ = [];
 
     /** @private {number} */
     this.scrollHeight_ = 0;
@@ -199,7 +199,8 @@ export class Resources {
     // Ensure that we attempt to rebuild things when DOM is ready.
     onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
-      this.forceBuild_ = true;
+      this.buildReadyResources_();
+      this.pendingBuildResources_ = null;
       if (this.platform_.isIe()) {
         this.fixMediaIe_(this.win);
       } else {
@@ -387,12 +388,34 @@ export class Resources {
     this.resources_.push(resource);
 
     if (this.isRuntimeOn_) {
-      // Try to immediately build element, it may already be ready.
-      resource.build(this.forceBuild_);
-      this.schedulePass();
+      if (this.documentReady_) {
+        // Build resource immediately, the document has already been parsed.
+        resource.build();
+        this.schedulePass();
+      } else {
+        // Otherwise add to pending resources and try to build any ready ones.
+        this.pendingBuildResources_.push(resource);
+        this.buildReadyResources_();
+      }
     }
 
     dev.fine(TAG_, 'element added:', resource.debugid);
+  }
+
+  /**
+   * Builds resources that are ready to be built.
+   * @private
+   */
+  buildReadyResources_() {
+    for (let i = 0; i < this.pendingBuildResources_.length; i++) {
+      const resource = this.pendingBuildResources_[i];
+      if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
+        resource.build();
+        // Resource is built remove it from the pending list and step back
+        // one in the index to account for the removed item.
+        this.pendingBuildResources_.splice(i--, 1);
+      }
+    }
   }
 
   /**
@@ -407,6 +430,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
 
@@ -419,7 +443,7 @@ export class Resources {
   upgraded(element) {
     const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
-      resource.build(this.forceBuild_);
+      resource.build();
       this.schedulePass();
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
@@ -648,7 +672,6 @@ export class Resources {
     const now = timer.now();
     dev.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
-        ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
@@ -876,7 +899,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
-        r.build(this.forceBuild_);
+        r.build();
       }
       if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1476,9 +1499,10 @@ export class Resources {
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
    * @param resource
+   * @param opt_removePending Whether to remove from pending build resources.
    * @private
    */
-  cleanupTasks_(resource) {
+  cleanupTasks_(resource, opt_removePending) {
     if (resource.getState() == ResourceState_.NOT_LAID_OUT) {
       // If the layout promise for this resource has not resolved yet, remove
       // it from the task queues to make sure this resource can be rescheduled
@@ -1493,6 +1517,14 @@ export class Resources {
       });
       this.requestsChangeSize_ = this.requestsChangeSize_.filter(
           request => request.resource != resource);
+    }
+
+    if (resource.getState() == ResourceState_.NOT_BUILT && opt_removePending &&
+        this.pendingBuildResources_) {
+      const pendingIndex = this.pendingBuildResources_.indexOf(resource);
+      if (pendingIndex != -1) {
+        this.pendingBuildResources_.splice(pendingIndex, 1);
+      }
     }
   }
 }
@@ -1628,23 +1660,17 @@ export class Resource {
   /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
-   * @param {boolean} force
-   * @return {boolean}
    */
-  build(force) {
+  build() {
     if (this.blacklisted_ || !this.element.isUpgraded()) {
-      return false;
+      return;
     }
-    let built;
     try {
-      built = this.element.build(force);
+      this.element.build();
     } catch (e) {
       dev.error(TAG_, 'failed to build:', this.debugid, e);
-      built = false;
       this.blacklisted_ = true;
-    }
-    if (!built) {
-      return false;
+      return;
     }
 
     if (this.hasBeenMeasured()) {
@@ -1652,7 +1678,6 @@ export class Resource {
     } else {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
-    return true;
   }
 
   /**

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+goog.require('amp.validator.CssLengthAndUnit');
 goog.require('amp.validator.validateString');
 goog.require('amp.validator.renderValidationResult');
 goog.provide('amp.validator.ValidatorTest');

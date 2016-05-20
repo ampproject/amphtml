@@ -51,6 +51,7 @@ function buildExtensions(options) {
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
+  buildExtension('amp-ad', '0.1', false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -62,6 +63,7 @@ function buildExtensions(options) {
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
+  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
@@ -69,6 +71,7 @@ function buildExtensions(options) {
   buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
+  buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
@@ -296,6 +299,7 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('ads.with.script.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
@@ -309,6 +313,7 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -679,6 +684,7 @@ function buildAlp(options) {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
+    includeWindowConfig: true,
     includePolyfills: true,
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,

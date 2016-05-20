@@ -347,7 +347,7 @@ export function doNotLoadExternalResourcesInTest(win) {
           return this.fakeSrc;
         }
       });
-      // Triggers an error event on the element in the next micro task.
+      // Triggers a load event on the element in the next micro task.
       element.triggerLoad = function() {
         const e = new Event('load');
         Promise.resolve().then(() => {

@@ -56,38 +56,6 @@ may make a request to something like `https://foo.com/pixel?0.8390278471201` whe
 
 `amp-pixel` should not be styled.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-pixel` tag
-(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
-
-<table>
-  <tr>
-    <th class="col-fourty"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
-  </tr>
-  <tr>
-  <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
-  </tr>
-</table>
+See [amp-pixel rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.

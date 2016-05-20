@@ -99,6 +99,13 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installPerformanceService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/service/performance-impl.js',
+    ],
+  },
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
@@ -322,6 +329,7 @@ var forbiddenTerms = {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
+      'build-system/server.js',
       'validator/validator.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
@@ -413,6 +421,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  'insertAmpExtensionScript': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/insert-extension.js',
+      'src/element-stub.js',
+    ],
+  },
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
         'error.cancellation() may be applicable.',

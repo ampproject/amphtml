@@ -1,3 +1,4 @@
+version: 1
 runtime: go
 api_version: go1
 
@@ -9,14 +10,6 @@ handlers:
   static_files: index.html
   upload: index.html
 
-- url: /cm/(.*\.(js|css))$
-  static_files: ../node_modules/codemirror/\1
-  upload: ../node_modules/codemirror/.*\.(js|css)$
-
-- url: /pm/(.*\.html)$
-  static_files: ../node_modules/@polymer/\1
-  upload: ../node_modules/@polymer/.*\.html$
-
-- url: /webcomponents-lite.js$
-  static_files: ../node_modules/webcomponents-lite/webcomponents-lite.js
-  upload: ../node_modules/webcomponents-lite/webcomponents-lite\.js$
+- url: /amp_favicon.png$
+  static_files: amp_favicon.png
+  upload: amp_favicon\.png$

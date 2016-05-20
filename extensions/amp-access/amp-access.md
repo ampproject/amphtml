@@ -482,26 +482,6 @@ This section will cover a detailed explanation of the design underlying the amp-
 [12]: #metering
 [13]: #first-click-free
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-access` tag
-(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii)):
-
-<table>
-  <tr>
-    <th class="col-fourty"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-access</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when the <code>amp-access</code> extension <code>.json</code> script is missing the mandatory attribute, <code>type</code>.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the attribute, <code>type</code>, is any value other than the required value: <code>application/json</code>. Error also thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-access-0.1.js"</code>.</td>
-  </tr>
-</table>
+See [amp-access rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii) in the AMP validator specification.

@@ -21,8 +21,10 @@ import logging
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 
 
 def Die(msg):
@@ -306,6 +308,23 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('... done')
 
 
+def RunIndexTest(nodejs_cmd):
+  """Runs the index_test.js, which tests the NodeJS API.
+
+  Args:
+    nodejs_cmd: the command for calling Node.js
+  """
+  logging.info('entering ...')
+  p = subprocess.Popen([nodejs_cmd, 'index_test.js'],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+  (stdout, stderr) = p.communicate()
+  if p.returncode != 0:
+    Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
+        (p.returncode, stdout, stderr))
+  logging.info('... done')
+
+
 def CompileValidatorTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
@@ -381,6 +400,32 @@ def RunTests(out_dir, nodejs_cmd):
   logging.info('... success')
 
 
+def CreateWebuiAppengineDist(out_dir):
+  """Generates the directory from which to deploy the Appengine WebUI."""
+  logging.info('entering ...')
+  try:
+    tempdir = tempfile.mkdtemp()
+    shutil.copytree('webui', os.path.join(tempdir, 'webui'))
+    os.symlink(os.path.abspath('node_modules/codemirror'),
+               os.path.join(tempdir, 'webui/codemirror'))
+    os.symlink(os.path.abspath('node_modules/@polymer'),
+               os.path.join(tempdir, 'webui/@polymer'))
+    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
+               os.path.join(tempdir, 'webui/webcomponents-lite'))
+    vulcanized_index_html = subprocess.check_output([
+        'node_modules/vulcanize/bin/vulcanize',
+        '--inline-scripts', '--inline-css',
+        '-p', os.path.join(tempdir, 'webui'), 'index.html'])
+  finally:
+    shutil.rmtree(tempdir)
+  webui_out = os.path.join(out_dir, 'webui_appengine')
+  shutil.copytree('webui', webui_out)
+  f = open(os.path.join(webui_out, 'index.html'), 'w')
+  f.write(vulcanized_index_html)
+  f.close()
+  logging.info('... success')
+
+
 def Main():
   """The main method, which executes all build steps and runs the tests."""
   logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
@@ -396,12 +441,14 @@ def Main():
   GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunIndexTest(nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  CreateWebuiAppengineDist(out_dir='dist')
 
 
 if __name__ == '__main__':

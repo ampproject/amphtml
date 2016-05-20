@@ -627,7 +627,9 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
         '|\'[^\']*\'' +
         // The positive lookahead is used to make sure that in
         // <foo bar= baz=boo>, the value for bar is blank, not "baz=boo".
-        '|(?=[a-z][a-z-]*\\s*=)' +
+        // Note that <foo bar=baz=boo zik=zak>, the value for bar is
+        // "baz=boo" and the value for zip is "zak".
+        '|(?=[a-z][a-z-]*\\s+=)' +
         // An unquoted value that is not an attribute name.
         // We know it is not an attribute name because the previous
         // zero-width match would've eliminated that possibility.

@@ -17,11 +17,11 @@ limitations under the License.
 ### <a name="amp-social-share"></a> `amp-social-share`
 
 <table>
-   <tr>
+  <tr>
     <td class="col-fourty"><strong>Description</strong></td>
     <td>Displays a social share button.</td>
   </tr>
-   <tr>
+  <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>
       <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>
@@ -36,7 +36,11 @@ limitations under the License.
       </div>
     </td>
   </tr>
-   <tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>CONTAINER, FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/social-share.amp.html">social-share.amp.html</a>
     </td>

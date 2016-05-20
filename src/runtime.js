@@ -69,6 +69,7 @@ export function adopt(global) {
       elementsForTesting.push({
         name: name,
         implementationClass: implementationClass,
+        css: opt_css,
       });
       // Resolve this extension's Service Promise.
       getService(global, name, () => {
@@ -176,6 +177,12 @@ export function adopt(global) {
 export function registerForUnitTest(win) {
   for (let i = 0; i < elementsForTesting.length; i++) {
     const element = elementsForTesting[i];
-    registerElement(win, element.name, element.implementationClass);
+    if (element.css) {
+      installStyles(win.document, element.css, () => {
+        registerElement(win, element.name, element.implementationClass);
+      }, false, element.name);
+    } else {
+      registerElement(win, element.name, element.implementationClass);
+    }
   }
 }

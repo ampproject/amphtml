@@ -448,6 +448,7 @@ export const ANALYTICS_CONFIG = {
   },
 
   'adobeanalytics': {
+    'transport': {'xhrpost': false, 'beacon': false, 'image': true},
     'vars': {
       'pageName': 'TITLE',
       'host': '',
@@ -472,6 +473,15 @@ export const ANALYTICS_CONFIG = {
           '&s=${screenWidth}x${screenHeight}',
       'pageview': 'https://${host}${requestPath}?${basePrefix}',
       'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
+    },
+  },
+
+  'adobeanalytics_nativeConfig': {
+    'triggers': {
+      'pageLoad': {
+        'on': 'visible',
+        'request': 'iframeMessage',
+      },
     },
   },
 
@@ -661,7 +671,79 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'linkpulse': {
+    'vars': {
+      'id': '',
+      'pageUrl': 'CANONICAL_URL',
+      'title': 'TITLE',
+      'section': '',
+      'channel': 'amp',
+      'type': '',
+      'host': 'pp.lp4.io',
+      'empty': '',
+    },
+    'requests': {
+      'base': 'https://${host}',
+      'pageview': '${base}/p?i=${id}' +
+                '&r=${documentReferrer}' +
+                '&p=${pageUrl}' +
+                '&s=${section}' +
+                '&t=${type}' +
+                '&c=${channel}' +
+                '&mt=${title}' +
+                '&_t=amp' +
+                '&_r=${random}',
+      'pageload': '${base}/pl?i=${id}' +
+                '&ct=${domInteractiveTime}' +
+                '&rt=${pageDownloadTime}' +
+                '&pt=${pageLoadTime}' +
+                '&p=${pageUrl}' +
+                '&c=${channel}' +
+                '&t=${type}' +
+                '&s=${section}' +
+                '&_t=amp' +
+                '&_r=${random}',
+      'ping': '${base}/u?i=${id}' +
+                '&u=${clientId(_lp4_u)}' +
+                '&p=${pageUrl}' +
+                '&uActive=true' +
+                '&isPing=yes' +
+                '&c=${channel}' +
+                '&t=${type}' +
+                '&s=${section}' +
+                '&_t=amp' +
+                '&_r=${random}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'pageload': {
+        'on': 'visible',
+        'request': 'pageload',
+      },
+      'ping': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 30,
+          'maxTimerLength': 7200,
+        },
+        'request': 'ping',
+
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
+  ['triggers']['pageLoad']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 

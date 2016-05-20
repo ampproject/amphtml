@@ -315,6 +315,14 @@ Example usage: `${clientId(foo)}`
 
 Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynbUWtIodJxP5TEIYBic4qcV`
 
+### extraUrlParams
+
+Provides all the params defined in extraUrlParams block of the config as a variable. If this variable is used, the parameters are not appended to the end of the URL.
+
+Example usage: `${extraUrlParams}`
+
+Example value: 'foo=bar&baz=something'
+
 ### pageViewId
 
 Provides a string that is intended to be random and likely to be unique per URL, user and day.
