@@ -160,6 +160,9 @@ export const adPreconnect = {
     'https://s.yimg.jp',
     'https://yads.yahoo.co.jp',
   ],
+  chargeads: [
+    'https://www.chargeplatform.com',
+  ],
 };
 
 /**
