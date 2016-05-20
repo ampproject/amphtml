@@ -19,7 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {platform} from '../../../../src/platform';
 import {timer} from '../../../../src/timer';
-import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 require('../amp-sidebar');
 
 adopt(window);
@@ -30,7 +30,6 @@ describe('amp-sidebar', () => {
   function getAmpSidebar(options) {
     options = options || {};
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-sidebar', true);
       const ampSidebar = iframe.doc.createElement('amp-sidebar');
       const list = iframe.doc.createElement('ul');
       for (let i = 0; i < 10; i++) {
@@ -98,7 +97,21 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
+      const historyPushSpy = sandbox.spy();
+      const historyPopSpy = sandbox.spy();
       impl.scheduleLayout = sandbox.spy();
+      impl.getHistory_ = function() {
+        return {
+          push: function() {
+            historyPushSpy();
+            return Promise.resolve(11);
+          },
+          pop: function() {
+            historyPopSpy();
+            return Promise.resolve(11);
+          },
+        };
+      };
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
@@ -112,6 +125,9 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
       expect(sidebarElement.style.display).to.equal('block');
       expect(impl.scheduleLayout.callCount).to.equal(1);
+      expect(historyPushSpy.callCount).to.equal(1);
+      expect(historyPopSpy.callCount).to.equal(0);
+      expect(impl.historyId_).to.not.equal('-1');
     });
   });
 
@@ -120,6 +136,22 @@ describe('amp-sidebar', () => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
       impl.schedulePause = sandbox.spy();
+      const historyPushSpy = sandbox.spy();
+      const historyPopSpy = sandbox.spy();
+      impl.scheduleLayout = sandbox.spy();
+      impl.getHistory_ = function() {
+        return {
+          push: function() {
+            historyPushSpy();
+            return Promise.resolve(11);
+          },
+          pop: function() {
+            historyPopSpy();
+            return Promise.resolve(11);
+          },
+        };
+      };
+      impl.historyId_ = 100;
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
@@ -133,6 +165,9 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
       expect(sidebarElement.style.display).to.equal('none');
       expect(impl.schedulePause.callCount).to.equal(1);
+      expect(historyPushSpy.callCount).to.equal(0);
+      expect(historyPopSpy.callCount).to.equal(1);
+      expect(impl.historyId_).to.equal(-1);
     });
   });
 

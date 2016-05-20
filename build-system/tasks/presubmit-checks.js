@@ -41,7 +41,7 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'sinon\\.(spy|stub|mock)\\(\\w[^)]*\\)': {
+  'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
@@ -87,23 +87,30 @@ var forbiddenTerms = {
   'installActivityService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/activity-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js'
     ]
   },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installPerformanceService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/service/performance-impl.js',
     ],
   },
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'installUrlReplacementsService': {
@@ -160,7 +167,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/viewer-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
     ],
@@ -180,7 +187,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -188,13 +195,13 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cookies.js',
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -203,7 +210,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -244,8 +251,8 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
@@ -322,6 +329,7 @@ var forbiddenTerms = {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
+      'build-system/server.js',
       'validator/validator.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
@@ -413,6 +421,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  'insertAmpExtensionScript': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/insert-extension.js',
+      'src/element-stub.js',
+    ],
+  },
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
         'error.cancellation() may be applicable.',

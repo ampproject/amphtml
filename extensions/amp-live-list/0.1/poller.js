@@ -72,14 +72,16 @@ export class Poller {
 
   /**
    * Initalize any work needed to start polling.
+   * @param {boolean=} opt_immediate execute current work instead of queueing
+   *     it in a timeout.
    */
-  start() {
+  start(opt_immediate) {
     if (this.isRunning_) {
       return;
     }
 
     this.isRunning_ = true;
-    this.poll_();
+    this.poll_(opt_immediate);
   }
 
   /**
@@ -107,14 +109,16 @@ export class Poller {
   /**
    * Queues a timeout that executes the work and recursively calls
    * itself on success.
+   * @param {boolean=} opt_immediate execute current work instead of queueing
+   *     it in a timeout.
    * @private
    */
-  poll_() {
+  poll_(opt_immediate) {
     if (!this.isRunning_) {
       return;
     }
 
-    this.lastTimeoutId_ = timer.delay(() => {
+    const work = () => {
       this.lastWorkPromise_ = this.work_()
           .then(() => {
             if (this.backoffClock_) {
@@ -131,6 +135,12 @@ export class Poller {
               throw err;
             }
           });
-    }, this.getTimeout_());
+    };
+
+    if (opt_immediate) {
+      work();
+    } else {
+      this.lastTimeoutId_ = timer.delay(work, this.getTimeout_());
+    }
   }
 }

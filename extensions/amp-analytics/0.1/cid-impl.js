@@ -22,15 +22,19 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {getCookie, setCookie} from '../cookies';
-import {getService} from '../service';
-import {getSourceOrigin, isProxyOrigin, parseUrl} from '../url';
-import {timer} from '../timer';
-import {viewerFor} from '../viewer';
+import {getCookie, setCookie} from '../../../src/cookies';
+import {getService} from '../../../src/service';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  parseUrl,
+} from '../../../src/url';
+import {timer} from '../../../src/timer';
+import {viewerFor} from '../../../src/viewer';
 import {
   sha384Base64,
-} from '../../third_party/closure-library/sha384-generated';
-import {user} from '../log';
+} from '../../../third_party/closure-library/sha384-generated';
+import {user} from '../../../src/log';
 
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -247,7 +251,7 @@ function getBaseCid(cid, persistenceConsent) {
   // If we are being embedded, try to get the base cid from the viewer.
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
-  if (viewer.isEmbedded()) {
+  if (viewer.isIframed()) {
     return viewer.getBaseCid().then(cid => {
       if (!cid) {
         throw new Error('No CID');

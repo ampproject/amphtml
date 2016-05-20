@@ -66,6 +66,13 @@ export class AccessClientAdapter {
     };
   }
 
+  /**
+   * @return {string}
+   */
+  getAuthorizationUrl() {
+    return this.authorizationUrl_;
+  }
+
   /** @override */
   isAuthorizationEnabled() {
     return true;

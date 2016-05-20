@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import {createAdPromise} from '../../testing/ad-iframe';
-import {installAd} from '../../builtins/amp-ad';
-import {installEmbed} from '../../builtins/amp-embed';
+import {createAdPromise} from '../../../../testing/ad-iframe';
+import {resetAdCountForTesting} from '../amp-ad';
 import * as sinon from 'sinon';
 
+describe('amp-ad', tests('amp-ad'));
+describe('amp-embed', tests('amp-embed'));
 
-describe('amp-ad', tests('amp-ad', installAd));
-describe('amp-embed', tests('amp-embed', win => {
-  installAd(win);
-  installEmbed(win);
-}));
-
-function tests(name, installer) {
+function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
-                 opt_beforeLayoutCallback) {
-    return createAdPromise(name, installer, attributes, canonical,
-                           opt_handleElement, opt_beforeLayoutCallback);
+      opt_beforeLayoutCallback) {
+    return createAdPromise(name, attributes, canonical,
+        opt_handleElement, opt_beforeLayoutCallback);
   }
 
   return () => {
@@ -40,6 +35,7 @@ function tests(name, installer) {
       sandbox = sinon.sandbox.create();
     });
     afterEach(() => {
+      resetAdCountForTesting();
       sandbox.restore();
     });
 
@@ -62,6 +58,7 @@ function tests(name, installer) {
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(url).to.match(/frame(.max)?.html#{/);
         expect(iframe.style.display).to.equal('');
+        expect(ad.implementation_.getPriority()).to.equal(2);
 
         const fragment = url.substr(url.indexOf('#') + 1);
         const data = JSON.parse(fragment);
@@ -175,7 +172,7 @@ function tests(name, installer) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
-          impl.attemptChangeSize = sinon.spy();
+          impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217, 114);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -192,7 +189,7 @@ function tests(name, installer) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
-          impl.attemptChangeSize = sinon.spy();
+          impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -377,7 +374,6 @@ function tests(name, installer) {
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
           expect(placeholder.classList.contains('amp-hidden')).to.be.false;
-
           const fallback = document.createElement('div');
           fallback.setAttribute('fallback', '');
           ad.appendChild(fallback);

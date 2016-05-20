@@ -16,9 +16,7 @@
 
 import {clientIdScope} from '../../ads/_config';
 import {createAdPromise} from '../../testing/ad-iframe';
-import {installAd} from '../../builtins/amp-ad';
-import {installEmbed} from '../../builtins/amp-embed';
-import {installCidService} from '../../src/service/cid-impl';
+import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {
   installUserNotificationManager,
 } from '../../extensions/amp-user-notification/0.1/amp-user-notification';
@@ -26,16 +24,13 @@ import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
 
 
-describe('ad-cid', tests('amp-ad', installAd));
-describe('ad-cid-embed', tests('amp-embed', win => {
-  installAd(win);
-  installEmbed(win);
-}));
+describe('ad-cid', tests('amp-ad'));
+describe('ad-cid-embed', tests('amp-embed'));
 
-function tests(name, installer) {
+function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
                  opt_beforeLayoutCallback) {
-    return createAdPromise(name, installer, attributes, canonical,
+    return createAdPromise(name, attributes, canonical,
                            opt_handleElement, opt_beforeLayoutCallback);
   }
 

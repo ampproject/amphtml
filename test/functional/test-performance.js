@@ -18,8 +18,8 @@ import * as sinon from 'sinon';
 import {
   ENSURE_NON_ZERO,
   Performance,
-  performanceFor,
-} from '../../src/performance';
+  installPerformanceService,
+} from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
@@ -145,6 +145,59 @@ describe('performance', () => {
       viewer = viewerFor(window);
       tickSpy = sandbox.stub(viewer, 'tick');
       flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
+    });
+
+    describe('tickSinceVisible', () => {
+
+      let tickDeltaStub;
+      let firstVisibleTime;
+
+      beforeEach(() => {
+        tickDeltaStub = sandbox.stub(perf, 'tickDelta');
+        firstVisibleTime = null;
+        sandbox.stub(viewer, 'getFirstVisibleTime', () => firstVisibleTime);
+      });
+
+      it('should always be zero before viewer is set', () => {
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
+
+      it('should always be zero before visible', () => {
+        perf.coreServicesAvailable();
+
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
+
+      it('should calculate after visible', () => {
+        perf.coreServicesAvailable();
+        firstVisibleTime = 5;
+
+        clock.tick(10);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(5);
+      });
+
+      it('should be zero after visible but for earlier event', () => {
+        perf.coreServicesAvailable();
+        firstVisibleTime = 5;
+
+        // An earlier event, since event time (4) is less than visible time (5).
+        clock.tick(4);
+        perf.tickSinceVisible('test');
+
+        expect(tickDeltaStub.callCount).to.equal(1);
+        expect(tickDeltaStub.firstCall.args[1]).to.equal(0);
+      });
     });
 
     describe('and performanceTracking is off', () => {
@@ -323,6 +376,22 @@ describe('performance', () => {
         });
       });
 
+      it('should call prerenderComplete on viewer even if csi is ' +
+        'off', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
+        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(false);
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenReadyToRetrieveResourcesResolve();
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(prerenderSpy.firstCall.args[0].value).to.equal(400);
+          });
+        });
+      });
+
       it('should tick `pc` with opt_value=400 when user request document ' +
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
@@ -393,7 +462,7 @@ describe('performance', () => {
   });
 
   it('should setFlushParams', () => {
-    const perf = performanceFor(window);
+    const perf = installPerformanceService(window);
     const viewer = viewerFor(window);
     sandbox.stub(perf, 'whenViewportLayoutComplete_')
         .returns(Promise.resolve());

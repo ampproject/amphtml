@@ -16,6 +16,7 @@
 
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
+import {AccessServerAdapter} from './amp-access-server';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
@@ -26,12 +27,14 @@ import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
+import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
+import {performanceFor} from '../../../src/performance';
 import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timer} from '../../../src/timer';
@@ -80,6 +83,9 @@ export class AccessService {
     if (!this.enabled_) {
       return;
     }
+
+    /** @const @private {boolean} */
+    this.isServerEnabled_ = isExperimentOn(this.win, 'amp-access-server');
 
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
@@ -131,6 +137,9 @@ export class AccessService {
     /** @private @const {!Resources} */
     this.resources_ = resourcesFor(win);
 
+    /** @private @const {!Performance} */
+    this.performance_ = performanceFor(win);
+
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, win);
 
@@ -166,6 +175,9 @@ export class AccessService {
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
+      this.performance_.tick('aaa');
+      this.performance_.tickSinceVisible('aaav');
+      this.performance_.flush();
     });
   }
 
@@ -177,11 +189,13 @@ export class AccessService {
   createAdapter_(configJson) {
     const context = /** @type {!AccessTypeAdapterContextDef} */ ({
       buildUrl: this.buildUrl_.bind(this),
+      collectUrlVars: this.collectUrlVars_.bind(this),
     });
     switch (this.type_) {
       case AccessType.CLIENT:
-      case AccessType.SERVER:
         return new AccessClientAdapter(this.win, configJson, context);
+      case AccessType.SERVER:
+        return new AccessServerAdapter(this.win, configJson, context);
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
@@ -193,9 +207,13 @@ export class AccessService {
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
-    const type = configJson['type'] ?
+    let type = configJson['type'] ?
         user.assertEnumValue(AccessType, configJson['type'], 'access type') :
         AccessType.CLIENT;
+    if (type == AccessType.SERVER && !this.isServerEnabled_) {
+      user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
+      type = AccessType.CLIENT;
+    }
     return type;
   }
 
@@ -319,6 +337,29 @@ export class AccessService {
    * @private
    */
   buildUrl_(url, useAuthData) {
+    return this.prepareUrlVars_(useAuthData).then(vars => {
+      return this.urlReplacements_.expand(url, vars);
+    });
+  }
+
+  /**
+   * @param {string} url
+   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
+   * @return {!Promise<!Object<string, *>>}
+   * @private
+   */
+  collectUrlVars_(url, useAuthData) {
+    return this.prepareUrlVars_(useAuthData).then(vars => {
+      return this.urlReplacements_.collectVars(url, vars);
+    });
+  }
+
+  /**
+   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
+   * @return {!Promise<!Object<string, *>>}
+   * @private
+   */
+  prepareUrlVars_(useAuthData) {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
@@ -332,7 +373,7 @@ export class AccessService {
           return undefined;
         };
       }
-      return this.urlReplacements_.expand(url, vars);
+      return vars;
     });
   }
 
@@ -426,7 +467,8 @@ export class AccessService {
       if (!this.authResponse_) {
         return null;
       }
-      return getValueForExpr(this.authResponse_, field) || null;
+      const v = getValueForExpr(this.authResponse_, field);
+      return v !== undefined ? v : null;
     });
   }
 
@@ -781,7 +823,9 @@ export class AccessService {
 
 /**
  * @typedef {{
- *   buildUrl: function(url:string, useAuthData:boolean):!Promise<string>
+ *   buildUrl: function(url:string, useAuthData:boolean):!Promise<string>,
+ *   collectUrlVars: function(url:string, useAuthData:boolean):
+ *       !Promise<!Object<string, *>>
  * }}
  */
 let AccessTypeAdapterContextDef;

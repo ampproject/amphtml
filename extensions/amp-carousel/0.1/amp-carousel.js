@@ -17,6 +17,7 @@
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
+import {isExperimentOn} from '../../../src/experiments';
 
 class CarouselSelector {
 
@@ -24,6 +25,9 @@ class CarouselSelector {
     if (element.hasAttribute('type') &&
         element.getAttribute('type') == 'slides') {
       return new AmpSlides(element);
+    }
+    if (isExperimentOn(element.ownerDocument.defaultView, 'amp-carouscroll')) {
+      return new AmpCarouscroll(element);
     }
     return new AmpCarousel(element);
   }

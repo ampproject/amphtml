@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var brotliSize = require('brotli-size');
 var del = require('del');
 var fs = require('fs');
 var gulp = require('gulp-help')(require('gulp'));
@@ -26,18 +27,19 @@ var util = require('gulp-util');
 
 var tempFolderName = '__size-temp';
 
-var MAX_FILE_SIZE_POS = 0;
-var MIN_FILE_SIZE_POS = 1;
-var FILENAME_POS = 2;
+var MIN_FILE_SIZE_POS = 0;
+var GZIP_POS = 1;
+var BROTLI_POS = 2;
+var FILENAME_POS = 3;
 
 // normalized table headers
 var tableHeaders = [
-  ['max', 'min', 'gzip', 'file'],
-  ['---', '---', '---', '---'],
+  ['max', 'min', 'gzip', 'brotli', 'file'],
+  ['---', '---', '---', '---', '---'],
 ];
 
 var tableOptions = {
-  align: ['r', 'r', 'r', 'l'],
+  align: ['r', 'r', 'r', 'r', 'l'],
   hsep: '   |   ',
 };
 
@@ -52,7 +54,7 @@ var tableOptions = {
 function findMaxIndexByFilename(rows, predicate) {
   for (var i = 0; i < rows.length; i++) {
     var curRow = rows[i];
-    var curFilename = curRow[2];
+    var curFilename = curRow[FILENAME_POS];
     if (predicate(curFilename)) {
       return i;
     }
@@ -80,7 +82,7 @@ function normalizeRow(rows, minFilename, maxFilename, mergeNames) {
     if (mergeNames) {
       rows[minIndex][FILENAME_POS] += ' / ' + rows[maxIndex][FILENAME_POS];
     }
-    rows[minIndex].unshift(rows[maxIndex][MAX_FILE_SIZE_POS]);
+    rows[minIndex].unshift(rows[maxIndex][MIN_FILE_SIZE_POS]);
     rows.splice(maxIndex, 1);
   }
 }
@@ -98,7 +100,7 @@ function normalizeRows(rows) {
   normalizeRow(rows, 'current-min/f.js', 'current/integration.js', true);
 
   // normalize alp.js
-  normalizeRow(rows, 'alp.js', 'install-alp.js', true);
+  normalizeRow(rows, 'alp.js', 'alp.max.js', true);
 
   // normalize extensions
   var curName = null;
@@ -159,6 +161,7 @@ function onFileThrough(rows, file, enc, cb) {
   rows.push([
     prettyBytes(file.contents.length),
     prettyBytes(gzipSize.sync(file.contents)),
+    prettyBytes(brotliSize.sync(file.contents)),
     file.relative,
   ]);
 

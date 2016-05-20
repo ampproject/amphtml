@@ -56,22 +56,41 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
   },
   {
+    id: 'amp-fx-flying-carpet',
+    name: 'AMP Flying Carpet',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
+  },
+  {
     id: 'amp-social-share',
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-social-share/amp-social-share.md',
   },
-  // Amp Sidebar
-  {
-    id: 'amp-sidebar',
-    name: 'AMP Sidebar',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sidebar/amp-sidebar.md',
-  },
   {
     id: 'amp-analytics-viewability',
     name: 'Viewability APIs for amp-analytics',
     spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
+  },
+  {
+    id: 'amp-sticky-ad',
+    name: 'AMP Sticky Ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/2472',
+  },
+  {
+    id: 'amp-live-list',
+    name: 'AMP Live List/Blog',
+    spec: 'https://github.com/ampproject/amphtml/issues/2762',
+  },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+  },
+  {
+    id: 'amp-carouscroll',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
   },
 ];
 

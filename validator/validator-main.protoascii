@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 133
+min_validator_revision_required: 135
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 212
+spec_file_revision: 219
 
 # Validator extensions.
 # =====================
@@ -265,6 +265,7 @@ tags: {
       properties: { name: "initial-scale" }
       properties: { name: "minimum-scale" mandatory: true value_double: 1.0 }
       properties: { name: "maximum-scale" }
+      properties: { name: "shrink-to-fit" }
       properties: { name: "user-scalable" }
     }
   }
@@ -2002,10 +2003,30 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# JSON Linked Data
 tags: {
   tag_name: "script"
   spec_name: "script type=application/ld+json"
   mandatory_parent: "head"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/ld+json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+}
+# Variant of the above, allowed in the body. See Github #2966.
+# TODO(gregable): Support repeated mandatory_parent perhaps.
+tags: {
+  tag_name: "script"
+  spec_name: "body > script type=application/ld+json"
+  mandatory_parent: "body"
   attrs: {
     name: "type"
     mandatory: true
@@ -2233,6 +2254,7 @@ tags: {  # <amp-video>
   attrs: { name: "muted"    value: "" }
   attrs: { name: "placeholder" }
   attrs: { name: "poster" }
+  attrs: { name: "preload" value_regex: "(none|metadata|auto|)" }
   attrs: {
     name: "src"
     value_url: {
@@ -2320,7 +2342,14 @@ attr_lists: {
   attrs: { name: "aria-valuemin" }
   attrs: { name: "aria-valuenow" }
   attrs: { name: "aria-valuetext" }
-  attrs: { name: "on" }
+  attrs: {
+    name: "on"
+    trigger: {
+      if_value_regex: "tap:.*"
+      also_requires_attr: "role"
+      also_requires_attr: "tabindex"
+    }
+  }
   attrs: { name: "role" }
   # For placeholders inside amp-ad and other tags, we allow the
   # placeholder empty attribute. See e.g.

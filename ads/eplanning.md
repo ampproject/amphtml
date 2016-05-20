@@ -23,13 +23,13 @@ limitations under the License.
 <amp-ad width=320 height=50
       type="eplanning"
       layout=responsive
-      data-epl_sI="3ee5"
-      data-epl_sV="https://ads.us.e-planning.net"
-      data-epl_isV="https://us.img.e-planning.net"
+      data-epl_si="3ee5"
+      data-epl_sv="https://ads.us.e-planning.net"
+      data-epl_isv="https://us.img.e-planning.net"
       data-epl_sec="Home"
-      data-epl_kVs="{target1:'food', target2:'cars'}"
-      data-epl_e="Banner1"
-  </amp-ad>
+      data-epl_kvs='{"target1":"food", "target2":"cars"}'
+      data-epl_e="Banner1">
+</amp-ad>
 ```
 
 ## Configuration
@@ -38,9 +38,9 @@ For semantics of configuration, please see [ad network documentation](https://ww
 
 Supported parameters:
 
-- data-epl_sI : Site ID
-- data-epl_sV : Default adserver
-- data-epl_isV : Default CDN
+- data-epl_si : Site ID
+- data-epl_sv : Default adserver
+- data-epl_isv : Default CDN
 - data-epl_sec : Section
-- data-epl_kVs : Data keywords
+- data-epl_kvs : Data keywords
 - data-epl_e : Space name

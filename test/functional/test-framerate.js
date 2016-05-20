@@ -37,8 +37,8 @@ describe('the framerate service', () => {
     visible = true;
     csiOn = true;
     performance = {
-      tickDelta: sinon.spy(),
-      flush: sinon.spy(),
+      tickDelta: sandbox.spy(),
+      flush: sandbox.spy(),
     };
     viewer = {
       isVisible: () => {
@@ -47,7 +47,7 @@ describe('the framerate service', () => {
       isPerformanceTrackingOn() {
         return csiOn;
       },
-      onVisibilityChanged: sinon.spy(),
+      onVisibilityChanged: sandbox.spy(),
     };
     win = {
       services: {

@@ -276,7 +276,7 @@ describe('XHR', function() {
         setupMockXhr();
         expect(requests[0]).to.be.undefined;
         const promise = xhr.fetchDocument('/index.html').then(doc => {
-          expect(doc instanceof Document).to.be.true;
+          expect(doc.nodeType).to.equal(9);
         });
         expect(requests[0].requestHeaders['Accept']).to.equal('text/html');
         requests[0].respond(200, {
@@ -325,7 +325,7 @@ describe('XHR', function() {
         });
       });
 
-      it('should error on non document response', () => {
+      it('should error on non truthy responseXML', () => {
         setupMockXhr();
         expect(requests[0]).to.be.undefined;
         const promise = xhr.fetchDocument('/index.html');
@@ -334,7 +334,7 @@ describe('XHR', function() {
         }, '{"hello": "world"}');
         return promise.catch(e => {
           expect(e.message)
-              .to.match(/responseXML should be a Document instance/);
+              .to.match(/responseXML should exist/);
         });
       });
     });

@@ -202,6 +202,14 @@ export class Viewport {
   }
 
   /**
+   * Returns the height of the viewport.
+   * @return {number}
+   */
+  getHeight() {
+    return this.getSize().height;
+  }
+
+  /**
    * Returns the width of the viewport.
    * @return {number}
    */
@@ -398,7 +406,7 @@ export class Viewport {
    * @private
    */
   getViewportMeta_() {
-    if (this.viewer_.isEmbedded()) {
+    if (this.viewer_.isIframed()) {
       // An embedded document does not control its viewport meta tag.
       return null;
     }
@@ -807,6 +815,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
+      overflowX: 'hidden',
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',

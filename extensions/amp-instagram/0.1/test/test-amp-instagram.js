@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-instagram');
 import {adopt} from '../../../../src/runtime';
-import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-instagram', () => {
-  let sandbox;
-  let inViewport;
 
-  beforeEach(() => {
-    inViewport = true;
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  function getIns(shortcode, opt_responsive) {
-    return createIframePromise().then(iframe => {
+  function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
+    return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
@@ -43,18 +35,15 @@ describe('amp-instagram', () => {
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
-      sandbox.stub(ins.implementation_, 'isInViewport', () => {
-        return inViewport;
-      });
       return iframe.addElement(ins);
     });
   }
 
   function testImage(image) {
     expect(image).to.not.be.null;
-    expect(image.src).to.equal('https://www.instagram.com/p/fBwFP/media/?size=l');
-    expect(image.getAttribute('width')).to.equal('111');
-    expect(image.getAttribute('height')).to.equal('222');
+    expect(image.getAttribute('src')).to.equal(
+        'https://www.instagram.com/p/fBwFP/media/?size=l');
+    expect(image.getAttribute('layout')).to.equal('fill');
   }
 
   function testIframe(iframe) {
@@ -64,53 +53,47 @@ describe('amp-instagram', () => {
     expect(iframe.getAttribute('height')).to.equal('222');
   }
 
-  it('renders in viewport', () => {
+  it('renders', () => {
     return getIns('fBwFP').then(ins => {
       testIframe(ins.querySelector('iframe'));
-      testImage(ins.querySelector('img'));
+      testImage(ins.querySelector('amp-img'));
     });
   });
 
-  it('renders outside viewport', () => {
-    inViewport = false;
-    return getIns('fBwFP').then(ins => {
-      const wrapper = ins.querySelector('wrapper');
-      let iframe = ins.querySelector('iframe');
+  it('builds a placeholder image without inserting iframe', () => {
+    return getIns('fBwFP', true, ins => {
+      console.log(ins);
+      const placeholder = ins.querySelector('[placeholder]');
+      const iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
-
+      expect(placeholder.style.display).to.be.equal('');
+      testImage(placeholder.querySelector('amp-img'));
+    }).then(ins => {
+      const placeholder = ins.querySelector('[placeholder]');
+      const iframe = ins.querySelector('iframe');
       ins.getVsync = () => {
         return {
           mutate: fn => fn(),
         };
       };
-
-      // Still not in viewport
-      ins.implementation_.viewportCallback(false);
-      iframe = ins.querySelector('iframe');
-      expect(iframe).to.be.null;
-      expect(wrapper.style.display).to.be.equal('');
-
-      // In viewport
-      ins.implementation_.viewportCallback(true);
-      iframe = ins.querySelector('iframe');
       testIframe(iframe);
-      testImage(ins.querySelector('img'));
+      testImage(placeholder.querySelector('amp-img'));
       ins.implementation_.iframePromise_.then(() => {
-        expect(wrapper.style.display).to.be.equal('none');
+        expect(placeholder.style.display).to.be.equal('none');
       });
     });
   });
 
   it('removes iframe after unlayoutCallback', () => {
     return getIns('fBwFP').then(ins => {
-      const wrapper = ins.querySelector('wrapper');
+      const placeholder = ins.querySelector('[placeholder]');
       testIframe(ins.querySelector('iframe'));
       const obj = ins.implementation_;
       obj.unlayoutCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;
-      expect(wrapper.style.display).to.be.equal('');
+      expect(placeholder.style.display).to.be.equal('');
     });
   });
 

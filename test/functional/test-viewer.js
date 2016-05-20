@@ -144,6 +144,28 @@ describe('Viewer', () => {
     expect(viewer.getVisibilityState()).to.equal('visible');
     expect(viewer.isVisible()).to.equal(true);
     expect(viewer.getPrerenderSize()).to.equal(1);
+    expect(viewer.getFirstVisibleTime()).to.equal(0);
+  });
+
+  it('should initialize firstVisibleTime for initially visible doc', () => {
+    clock.tick(1);
+    const viewer = new Viewer(windowApi);
+    expect(viewer.isVisible()).to.be.true;
+    expect(viewer.getFirstVisibleTime()).to.equal(1);
+  });
+
+  it('should initialize firstVisibleTime when doc becomes visible', () => {
+    clock.tick(1);
+    windowApi.location.hash = '#visibilityState=prerender&prerenderSize=3';
+    const viewer = new Viewer(windowApi);
+    expect(viewer.isVisible()).to.be.false;
+    expect(viewer.getFirstVisibleTime()).to.be.null;
+
+    viewer.receiveMessage('visibilitychange', {
+      state: 'visible',
+    });
+    expect(viewer.isVisible()).to.be.true;
+    expect(viewer.getFirstVisibleTime()).to.equal(1);
   });
 
   it('should configure visibilityState and prerender', () => {
@@ -570,6 +592,24 @@ describe('Viewer', () => {
         expect(m1Resolved).to.be.false;
         expect(m2Resolved).to.be.false;
       });
+    });
+  });
+
+  describe('isEmbedded', () => {
+    it('should NOT be embedded when not iframed or w/o "origin"', () => {
+      windowApi.parent = windowApi;
+      expect(new Viewer(windowApi).isEmbedded()).to.be.false;
+    });
+
+    it('should be embedded when iframed', () => {
+      windowApi.parent = {};
+      expect(new Viewer(windowApi).isEmbedded()).to.be.true;
+    });
+
+    it('should be embedded with "origin" param', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#webview=1';
+      expect(new Viewer(windowApi).isEmbedded()).to.be.true;
     });
   });
 

@@ -17,7 +17,7 @@
 import {
   loadScript, writeScript, validateDataExists,
 }
-from '../src/3p';
+from '../3p/3p';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 

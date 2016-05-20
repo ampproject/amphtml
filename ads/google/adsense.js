@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {checkData} from '../../src/3p';
+import {checkData} from '../../3p/3p';
 
 /**
  * @param {!Window} global

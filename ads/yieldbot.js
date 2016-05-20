@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateDataExists, checkData, loadScript} from '../src/3p';
+import {validateDataExists, checkData, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {rethrowAsync} from '../src/log';
 

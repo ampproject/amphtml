@@ -204,6 +204,59 @@ export function childElement(parent, callback) {
   return null;
 }
 
+
+/**
+ * Finds all child elements that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {!Array.<!Element>}
+ */
+export function childElements(parent, callback) {
+  const children = [];
+  for (let child = parent.firstElementChild; child;
+       child = child.nextElementSibling) {
+    if (callback(child)) {
+      children.push(child);
+    }
+  }
+  return children;
+}
+
+
+/**
+ * Finds the last child element that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {?Element}
+ */
+export function lastChildElement(parent, callback) {
+  for (let child = parent.lastElementChild; child;
+       child = child.previousElementSibling) {
+    if (callback(child)) {
+      return child;
+    }
+  }
+  return null;
+}
+
+/**
+ * Finds all child nodes that satisfies the callback.
+ * These nodes can include Text, Comment and other child nodes.
+ * @param {!Node} parent
+ * @param {function(!Node):boolean} callback
+ * @return {!Array<!Node>}
+ */
+export function childNodes(parent, callback) {
+  const nodes = [];
+  for (let child = parent.firstChild; child;
+       child = child.nextSibling) {
+    if (callback(child)) {
+      nodes.push(child);
+    }
+  }
+  return nodes;
+}
+
 /**
  * @type {boolean|undefined}
  * @visiblefortesting
@@ -245,10 +298,45 @@ export function childElementByAttr(parent, attr) {
     return parent.querySelector(':scope > [' + attr + ']');
   }
   return childElement(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds the last child element that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {?Element}
+ */
+export function lastChildElementByAttr(parent, attr) {
+  return lastChildElement(parent, el => {
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds all child elements that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {!Array.<!Element>}
+ */
+export function childElementsByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
+    // Convert NodeList into Array.<Element>.
+    const children = [];
+    for (let i = 0; i < nodeList.length; i++) {
+      children.push(nodeList[i]);
     }
-    return true;
+    return children;
+  }
+  return childElements(parent, el => {
+    return el.hasAttribute(attr);
   });
 }
 
@@ -287,11 +375,30 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    const matches = attr.name.match(/^data-param-(.+)/);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
-      params[computeParamNameFunc(param)] = attr.nodeValue;
+      params[computeParamNameFunc(param)] = attr.value;
     }
   }
   return params;
+}
+
+
+/**
+ * Whether the element have a next node in the document order.
+ * This means either:
+ *  a. The element itself has a nextSibling.
+ *  b. Any of the element ancestors has a nextSibling.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function hasNextNodeInDocumentOrder(element) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (currentElement = element.parentNode);
+  return false;
 }

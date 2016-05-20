@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
+import {loadScript, validateDataExists, validateExactlyOne} from '../3p/3p';
 
 /**
  * @param {!Window} global
