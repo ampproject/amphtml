@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {CSS} from '../../../build/amp-cxense-player-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrl, addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
 import {setStyles} from '../../../src/style';
 
@@ -27,7 +28,7 @@ const cxDefaults = {
   debugEmbedApp: '/app/player/m4/debug/',
   // can't access the window.top.location.href from the iframe.
   attrs: {
-    'share.enable': false
+    'share.enable': false,
   },
 };
 
@@ -97,9 +98,12 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     getIframeSrc_() {
-      let attrs = this.getDataAttributes_();
+      const attrs = this.getDataAttributes_();
       return addParamsToUrl(this.cxDefaults_.embedHost
-            + (attrs.debug ? this.cxDefaults_.debugEmbedApp : this.cxDefaults_.distEmbedApp)
+            + (attrs.debug
+                ? this.cxDefaults_.debugEmbedApp
+                : this.cxDefaults_.distEmbedApp
+              )
             , attrs);
     }
 
@@ -111,12 +115,10 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     postMessage_(data) {
       data = extend({
-        location: location,
-        width: this.getWin().offsetWidth,
-        height: this.getWin().offsetHeight,
+        location: location
       }, data || {});
 
-      return this.iframe_.contentWindow.postMessage(
+      return this.iframe_.contentWindow./*OK*/postMessage(
             JSON.stringify(data), this.cxDefaults_.embedHost
         );
     }
@@ -151,7 +153,7 @@ function attrHash(el, prefix) {
   const ret = {};
   const attrs = Array.prototype.slice.call(el.attributes);
   const p = prefix || '';
-  attrs.forEach(function(node, i) {
+  attrs.forEach(node => {
     if (node.nodeName.indexOf(p + '-') == 0) {
       const name = dashToCamelCase(node.nodeName.slice(p.length + 1));
       ret[name] = node.nodeValue;
@@ -160,16 +162,16 @@ function attrHash(el, prefix) {
   return ret;
 }
 
-function extend (target, source) {
-    for (var prop in source) {
-        if (source.hasOwnProperty(prop)) {
-            if (target[prop] && typeof source[prop] === 'object') {
-                extend(target[prop], source[prop]);
-            }
+function extend(target, source) {
+  for (const prop in source) {
+    if (source.hasOwnProperty(prop)) {
+      if (target[prop] && typeof source[prop] === 'object') {
+          extend(target[prop], source[prop]);
+        }
             else {
-                target[prop] = source[prop];
-            }
+          target[prop] = source[prop];
         }
     }
-    return target;
+  }
+  return target;
 }
