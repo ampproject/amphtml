@@ -115,7 +115,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     postMessage_(data) {
       data = extend({
-        location: location
+        location: location,
       }, data || {});
 
       return this.iframe_.contentWindow./*OK*/postMessage(
@@ -166,11 +166,11 @@ function extend(target, source) {
   for (const prop in source) {
     if (source.hasOwnProperty(prop)) {
       if (target[prop] && typeof source[prop] === 'object') {
-          extend(target[prop], source[prop]);
-        }
+        extend(target[prop], source[prop]);
+      }
             else {
-          target[prop] = source[prop];
-        }
+        target[prop] = source[prop];
+      }
     }
   }
   return target;
