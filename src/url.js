@@ -69,7 +69,7 @@ export function parseUrl(url) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-export function appendParamStringToUrl(url, paramString, opt_addToFront) {
+function appendParamStringToUrl(url, paramString, opt_addToFront) {
   if (!paramString) {
     return url;
   }
