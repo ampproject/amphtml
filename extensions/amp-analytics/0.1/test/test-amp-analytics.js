@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {instrumentationServiceFor} from '../instrumentation';
 import {
   installUserNotificationManager,
 } from '../../../amp-user-notification/0.1/amp-user-notification';
@@ -526,6 +527,33 @@ describe('amp-analytics', function() {
           'https://example.com/test1=x&' +
           'test2=http%3A%2F%2Flocalhost%3A9876%2Fcontext.html' +
           '&title=Test%20Title');
+    });
+  });
+
+  it('expands selector with config variable', () => {
+    const ins = instrumentationServiceFor(windowApi);
+    const addListenerSpy = sandbox.spy(ins, 'addListener');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
+      vars: {foo: 'bar'},
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addListenerSpy.callCount).to.equal(1);
+      expect(addListenerSpy.args[0][0]['selector']).to.equal('bar');
+    });
+  });
+
+  it('does not expands selector with platform variable', () => {
+    const ins = instrumentationServiceFor(windowApi);
+    const addListenerSpy = sandbox.spy(ins, 'addListener');
+    const analytics = getAnalyticsTag({
+      requests: {foo: 'https://example.com/bar'},
+      triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
+    });
+    return waitForNoSendRequest(analytics).then(() => {
+      expect(addListenerSpy.callCount).to.equal(1);
+      expect(addListenerSpy.args[0][0]['selector']).to.equal('TITLE');
     });
   });
 
