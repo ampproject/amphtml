@@ -17,7 +17,7 @@
 import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listen, postMessageToWindows} from './iframe-helper';
+import {listenFor, postMessageToWindows} from './iframe-helper';
 import {parseUrl} from './url';
 import {timer} from './timer';
 
@@ -126,16 +126,17 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    listen(this.iframe_, 'send-intersections', (data, source) => {
+    listenFor(this.iframe_, 'send-intersections', (data, source, origin) => {
+      console.log('registering intersection', source, origin);
       let isNew = true;
       for (const clientWindow of this.clientWindows_) {
-        if (clientWindow.win == source.win) {
+        if (clientWindow.win == source) {
           isNew = false;
           break;
         }
       }
       if (isNew) {
-        this.clientWindows_.push(source);
+        this.clientWindows_.push({win: source, origin: origin});
       }
       this.startSendingIntersectionChanges_();
     }, this.is3p_);
