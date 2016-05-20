@@ -29,9 +29,13 @@ describe('3p messaging', () => {
       testWin = i.win;
       testWin.context = {
         location: window.location,
+        amp3pSentinel: 'test'
       };
       iframe = {
         contentWindow: testWin,
+        getAttribute(attr) {
+          return attr == 'data-amp-3p-sentinel' ? 'test' : undefined;
+        }
       };
     });
   });
@@ -45,7 +49,7 @@ describe('3p messaging', () => {
     postMessage(iframe, 'test', {s: 'b'}, '*', false);
     postMessage(iframe, 'other', {s: 'c'}, '*', true);
     postMessage(iframe, 'test', {s: 'd'}, '*', true);
-    return timer.promise(10).then(() => {
+    return timer.promise(100).then(() => {
       expect(progress).to.equal('ad');
     });
   });

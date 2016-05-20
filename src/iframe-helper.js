@@ -126,7 +126,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
         windowEvents = we;
         break;
       }
-    } else if (isDescendantWindow_(contentWindow, triggerWin)) {
+    } else if (contentWindow === triggerWin || isDescendantWindow_(contentWindow, triggerWin)) {
       windowEvents = we;
       break;
     }

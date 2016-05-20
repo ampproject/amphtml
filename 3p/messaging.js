@@ -78,7 +78,7 @@ function startListening(win) {
     }
     // Parse JSON only once per message.
     const data = JSON.parse(event.data.substr(4));
-    if (data.sentinel != window.context.amp3pSentinel) {
+    if (data.sentinel != win.context.amp3pSentinel) {
       return;
     }
     // Don't let other message handlers interpret our events.
