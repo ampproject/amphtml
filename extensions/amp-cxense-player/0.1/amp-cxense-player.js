@@ -16,21 +16,18 @@
 import {CSS} from '../../../build/amp-cxense-player-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {appendParamStringToUrl, parseUrl} from '../../../src/url';
+import {parseUrl, addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
 import {setStyles} from '../../../src/style';
-const extend = require('extend');
 
 const cxDefaults = {
   apiHost: 'https://api.widget.cx',
   embedHost: 'https://embed.widget.cx',
   distEmbedApp: '/app/player/m4/dist/',
   debugEmbedApp: '/app/player/m4/debug/',
+  // can't access the window.top.location.href from the iframe.
   attrs: {
-        // can't access the window.top.location.href from the iframe.
-    share: {
-      enable: false,
-    },
+    'share.enable': false
   },
 };
 
@@ -39,9 +36,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @override */
     preconnectCallback(onLayout) {
       this.preconnect.url(cxDefaults.apiHost, onLayout);
-      this.preconnect.prefetch(
-            cxDefaults.embedHost + cxDefaults.distEmbedApp, 'iframe'
-        );
+      this.preconnect.prefetch(this.getIframeSrc_(), 'document');
     }
 
     /** @override */
@@ -52,6 +47,9 @@ class AmpCxense extends AMP.BaseElement {
     /** @override */
     buildCallback() {
       this.element.classList.add('amp-cxense-player');
+
+      /** @private @const {object} */
+      this.cxDefaults_ = JSON.parse(JSON.stringify(cxDefaults));
 
       if (!this.getPlaceholder()) {
         this.buildWidgetPlaceholder_();
@@ -73,7 +71,6 @@ class AmpCxense extends AMP.BaseElement {
       setStyles(this.iframe_, {display: 'none'});
 
       this.element.appendChild(this.iframe_);
-      this.listenForPostMessages_();
 
       return loadPromise(this.iframe_).then(ret => {
         if (self.placeholder_) {
@@ -99,74 +96,28 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @private */
-    listenForPostMessages_() {
-      const hostRegExp = new RegExp(
-            '^' + parseUrl(cxDefaults.embedHost).hostname
-        );
-
-      this.getWin().addEventListener('message', e => {
-        if (e && e.data) {
-          let message = {data: {}};
-          try {
-            message = JSON.parse(e.data);
-          } catch (e) {}
-
-          if (!message.type
-                    || !message.data.location
-                    || !hostRegExp.test(message.data.location.hostname)
-                ) {
-            return;
-          }
-                // console.log("messge from iframe", message);
-                // todo: could implement a dispatch function here - not needed for now.
-                // this.dispatch_('')
-        }
-      }, false);
-    }
-
-    /** @private */
     getIframeSrc_() {
-      const attrs = this.getExpandedDataAttributes_();
-      return appendParamStringToUrl(
-            cxDefaults.embedHost
-            + (attrs.debug
-                    ? cxDefaults.debugEmbedApp
-                    : cxDefaults.distEmbedApp
-            ),
-            queryString(this.getCollapsedDataAttributes_(attrs))
-        );
+      let attrs = this.getDataAttributes_();
+      return addParamsToUrl(this.cxDefaults_.embedHost
+            + (attrs.debug ? this.cxDefaults_.debugEmbedApp : this.cxDefaults_.distEmbedApp)
+            , attrs);
     }
 
     /** @private */
-    getExpandedDataAttributes_(element) {
-      element = element || this.element;
-      return extend(true,
-            {},
-            cxDefaults.attrs,
-            expandKeys(attrHash(element, 'data'))
-        );
-    }
-
-    /** @private */
-    getCollapsedDataAttributes_(hash) {
-      hash = hash || this.getExpandedDataAttributes_();
-      const newHash = {};
-      recurseObject(hash, function(keypath, value) {
-        newHash[keypath] = value;
-      });
-      return newHash;
+    getDataAttributes_() {
+      return extend(this.cxDefaults_.attrs, attrHash(this.element, 'data'));
     }
 
     /** @private */
     postMessage_(data) {
-      data = extend(true, {
+      data = extend({
         location: location,
         width: this.getWin().offsetWidth,
         height: this.getWin().offsetHeight,
       }, data || {});
 
       return this.iframe_.contentWindow.postMessage(
-            JSON.stringify(data), cxDefaults.embedHost
+            JSON.stringify(data), this.cxDefaults_.embedHost
         );
     }
 
@@ -198,122 +149,27 @@ AMP.registerElement('amp-cxense-player', AmpCxense, CSS);
 
 function attrHash(el, prefix) {
   const ret = {};
-  const attrs = el.attributes;
+  const attrs = Array.prototype.slice.call(el.attributes);
   const p = prefix || '';
-  forEach(attrs, function(i, node) {
+  attrs.forEach(function(node, i) {
     if (node.nodeName.indexOf(p + '-') == 0) {
       const name = dashToCamelCase(node.nodeName.slice(p.length + 1));
-      ret[name] = resolveType(node.nodeValue);
+      ret[name] = node.nodeValue;
     }
   });
   return ret;
 }
 
-function forEach(arr, callback) {
-  const a = arr || [];
-  let i;
-  const l = a.length;
-  let ret;
-  if (a instanceof Array || a.length >= 0) {
-    for (i = 0;i < l;i++) {
-      ret = callback(i,a[i]);
-      if (ret == false) {
-        break;
-      }
-    }
-  }
-    else if (a instanceof Object) {
-      for (i in a) {
-        if (!a.hasOwnProperty(i)) {
-          continue;
+function extend (target, source) {
+    for (var prop in source) {
+        if (source.hasOwnProperty(prop)) {
+            if (target[prop] && typeof source[prop] === 'object') {
+                extend(target[prop], source[prop]);
+            }
+            else {
+                target[prop] = source[prop];
+            }
         }
-        ret = callback(i,a[i]);
-        if (ret == false) {
-          break;
-        }
-      }
     }
+    return target;
 }
-
-function queryString(obj) {
-  const parts = [];
-  if (!obj) {
-    return '';
-  }
-  forEach(obj, function(key, val) {
-    if (val != null) {
-      parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
-    }
-  });
-  return parts.join('&');
-}
-
-// expands an object with dot notation keys into a multi-level tree
-function expandKeys(obj) {
-  const ret = {};
-  forEach(obj, function(key, val) {
-    expandKey(key, val, ret);
-  });
-  return ret;
-}
-
-// expands a dot notation key into the given object
-function expandKey(key, value, parent) {
-  const parts = key.split('.');
-  if (!parent) {
-    parent = {};
-  }
-  let node = parent;
-  let k;
-  while (k = parts.shift()) {
-    if (parts.length == 0) {
-      node[k] = value;
-    } else if (typeof node[k] == 'object') {
-      node = node[k];
-    } else {
-      node = node[k] = {};
-    }
-  }
-  return parent;
-}
-
-function recurseObject(object, onKeypathFn, keypathPrefix) {
-  for (const property in object) {
-    if (object.hasOwnProperty(property)) {
-      if (typeof object[property] === 'object') {
-        recurseObject(object[property],
-                    onKeypathFn,
-                    keypathPrefix ? keypathPrefix + '.' + property : property
-                );
-      } else {
-        onKeypathFn(
-                    keypathPrefix ? keypathPrefix + '.' + property : property,
-                    object[property]
-                );
-      }
-    }
-  }
-}
-
-function resolveType(token) {
-    // guesses and resolves type of a string
-  if (typeof token != 'string') {
-    return token;
-  }
-
-  if (token.length < 15 && token.match(/^(0|-?(0\.|[1-9]\d*\.?)\d*)$/)) {
-        // don't match long ints where we would lose precision
-        // don't match numeric strings with leading zeros that are not decimals or "0"
-    token = parseFloat(token);
-  }
-    else if (token.match(/^true|false$/i)) {
-      token = Boolean(token.match(/true/i));
-    }
-    else if (token === 'undefined') {
-      token = undefined;
-    }
-    else if (token === 'null') {
-      token = null;
-    }
-  return token;
-};
