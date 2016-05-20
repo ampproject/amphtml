@@ -167,8 +167,7 @@ function extend(target, source) {
     if (source.hasOwnProperty(prop)) {
       if (target[prop] && typeof source[prop] === 'object') {
         extend(target[prop], source[prop]);
-      }
-            else {
+      } else {
         target[prop] = source[prop];
       }
     }
