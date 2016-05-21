@@ -47,7 +47,6 @@ goog.provide('amp.htmlparser.HtmlSaxHandlerWithLocation');
  * called while the HTML is being parsed.
  */
 amp.htmlparser.HtmlSaxHandler = class {
-
   /**
    * Handler called when the parser found a new tag.
    * @param {string} name The name of the tag that is starting.
@@ -123,8 +122,8 @@ amp.htmlparser.DocLocator = class {
  * Handler with a setDocLocator method in addition to the parser callbacks.
  * @extends {amp.htmlparser.HtmlSaxHandler}
  */
-amp.htmlparser.HtmlSaxHandlerWithLocation = class
-extends amp.htmlparser.HtmlSaxHandler {
+amp.htmlparser.HtmlSaxHandlerWithLocation =
+    class extends amp.htmlparser.HtmlSaxHandler {
   constructor() { super(); }
 
   /**
@@ -161,11 +160,11 @@ amp.htmlparser.HtmlParser = class {
    */
   parse(handler, htmlText) {
     let htmlLower = null;
-    let inTag = false;  // True iff we're currently processing a tag.
+    let inTag = false;   // True iff we're currently processing a tag.
     const attribs = [];  // Accumulates attribute names and values.
-    let tagName;  // The name of the tag currently being processed.
-    let eflags;  // The element flags for the current tag.
-    let openTag;  // True if the current tag is an open tag.
+    let tagName;         // The name of the tag currently being processed.
+    let eflags;          // The element flags for the current tag.
+    let openTag;         // True if the current tag is an open tag.
 
     // Only provide location information if the handler implements the
     // setDocLocator method.
@@ -178,11 +177,11 @@ amp.htmlparser.HtmlParser = class {
     // Lets the handler know that we are starting to parse the document.
     handler.startDoc();
 
-    // Consumes tokens from the htmlText and stops once all tokens are processed.
+    // Consumes tokens from the htmlText and stops once all tokens are
+    // processed.
     while (htmlText) {
-      const regex = inTag ?
-          amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
-          amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
+      const regex = inTag ? amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
+                            amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
       // Gets the next token
       const m = htmlText.match(regex);
       if (locator) {
@@ -193,23 +192,24 @@ amp.htmlparser.HtmlParser = class {
 
       // TODO(goto): cleanup this code breaking it into separate methods.
       if (inTag) {
-        if (m[1]) { // Attribute.
+        if (m[1]) {  // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
           const attribName = amp.htmlparser.toLowerCase(m[1]);
           // Use empty string as value for valueless attribs, so
           //   <input type=checkbox checked>
           // gets attributes ['type', 'checkbox', 'checked', '']
-          let decodedValue = "";
+          let decodedValue = '';
           if (m[2]) {
             let encodedValue = m[3];
             switch (encodedValue.charCodeAt(0)) {  // Strip quotes.
-              case 34:  // double quote "
-              case 39:  // single quote '
-              encodedValue = encodedValue.substring(
-                  1, encodedValue.length - 1);
-              break;
+              case 34:                             // double quote "
+              case 39:                             // single quote '
+                encodedValue =
+                    encodedValue.substring(1, encodedValue.length - 1);
+                break;
             }
-            decodedValue = this.unescapeEntities_(this.stripNULs_(encodedValue));
+            decodedValue =
+                this.unescapeEntities_(this.stripNULs_(encodedValue));
           }
           attribs.push(attribName, decodedValue);
         } else if (m[4]) {
@@ -225,14 +225,13 @@ amp.htmlparser.HtmlParser = class {
             }
           }
 
-          if (openTag && (eflags &
-              (amp.htmlparser.HtmlParser.EFlags.CDATA |
-              amp.htmlparser.HtmlParser.EFlags.RCDATA))) {
+          if (openTag && (eflags & (amp.htmlparser.HtmlParser.EFlags.CDATA |
+                                    amp.htmlparser.HtmlParser.EFlags.RCDATA))) {
             if (htmlLower === null) {
               htmlLower = amp.htmlparser.toLowerCase(htmlText);
             } else {
-              htmlLower = htmlLower.substring(
-                  htmlLower.length - htmlText.length);
+              htmlLower =
+                  htmlLower.substring(htmlLower.length - htmlText.length);
             }
             let dataEnd = htmlLower.indexOf('</' + tagName);
             if (dataEnd < 0) {
@@ -276,9 +275,15 @@ amp.htmlparser.HtmlParser = class {
           handler.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
-            case '<': handler.pcdata('&lt;'); break;
-            case '>': handler.pcdata('&gt;'); break;
-            default: handler.pcdata('&amp;'); break;
+            case '<':
+              handler.pcdata('&lt;');
+              break;
+            case '>':
+              handler.pcdata('&gt;');
+              break;
+            default:
+              handler.pcdata('&amp;');
+              break;
           }
         }
       }
@@ -301,16 +306,15 @@ amp.htmlparser.HtmlParser = class {
   lookupEntity_(entity) {
     // TODO(goto): use {amp.htmlparserDecode} instead ?
     // TODO(goto): &pi; is different from &Pi;
-    const name = amp.htmlparser.toLowerCase(
-        entity.substring(1, entity.length - 1));
+    const name =
+        amp.htmlparser.toLowerCase(entity.substring(1, entity.length - 1));
     if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
       return amp.htmlparser.HtmlParser.Entities[name];
     }
     let m = name.match(amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_);
     if (m) {
       return String.fromCharCode(parseInt(m[1], 10));
-    } else if (
-        !!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
+    } else if (!!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
       return String.fromCharCode(parseInt(m[1], 16));
     }
     // If unable to decode, return the name.
@@ -323,9 +327,7 @@ amp.htmlparser.HtmlParser = class {
    * @return {string} A string without null characters.
    * @private
    */
-  stripNULs_(s) {
-    return s.replace(amp.htmlparser.HtmlParser.NULL_RE_, '');
-  }
+  stripNULs_(s) { return s.replace(amp.htmlparser.HtmlParser.NULL_RE_, ''); }
 
   /**
    * The plain text of a chunk of HTML CDATA which possibly containing.
@@ -349,10 +351,9 @@ amp.htmlparser.HtmlParser = class {
    * @private
    */
   normalizeRCData_(rcdata) {
-    return rcdata.
-        replace(amp.htmlparser.HtmlParser.LOOSE_AMP_RE_, '&amp;$1').
-        replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;').
-        replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
+    return rcdata.replace(amp.htmlparser.HtmlParser.LOOSE_AMP_RE_, '&amp;$1')
+        .replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;')
+        .replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
   }
 }
 
@@ -612,38 +613,36 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
         // interpreters are inconsistent in whether a group that matches nothing
         // is null, undefined, or the empty string.
         ('(?:' +
-        // Allow attribute names to start with /, avoiding assigning the / in
-        // close-tag syntax */>.
-        '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' + // e.g. "href"
-         '[^\\t\\r\\n =>]+[^ >]|' +            // e.g. "/asdfs/asd"
-         '\/+(?!>))' +                         // e.g. "/"
-        // Optionally followed by:
-        ('(' +
-        '\\s*=\\s*' +
-        ('(' +
-        // A double quoted string.
-        '\"[^\"]*\"' +
-        // A single quoted string.
-        '|\'[^\']*\'' +
-        // The positive lookahead is used to make sure that in
-        // <foo bar= baz=boo>, the value for bar is blank, not "baz=boo".
-        // Note that <foo bar=baz=boo zik=zak>, the value for bar is
-        // "baz=boo" and the value for zip is "zak".
-        '|(?=[a-z][a-z-]*\\s+=)' +
-        // An unquoted value that is not an attribute name.
-        // We know it is not an attribute name because the previous
-        // zero-width match would've eliminated that possibility.
-        '|[^>\"\'\\s]*' +
-        ')'
-        ) +
-            ')'
-        ) + '?' +
-            ')'
-        ) +
-            // End of tag captured in group 3.
-            '|(/?>)' +
-            // Don't capture cruft
-            '|[^a-z\\s>]+)',
+         // Allow attribute names to start with /, avoiding assigning the / in
+         // close-tag syntax */>.
+         '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' +  // e.g. "href"
+         '[^\\t\\r\\n =>]+[^ >]|' +              // e.g. "/asdfs/asd"
+         '\/+(?!>))' +                           // e.g. "/"
+         // Optionally followed by:
+         ('(' +
+          '\\s*=\\s*' +
+          ('(' +
+           // A double quoted string.
+           '\"[^\"]*\"' +
+           // A single quoted string.
+           '|\'[^\']*\'' +
+           // The positive lookahead is used to make sure that in
+           // <foo bar= baz=boo>, the value for bar is blank, not "baz=boo".
+           // Note that <foo bar=baz=boo zik=zak>, the value for bar is
+           // "baz=boo" and the value for zip is "zak".
+           '|(?=[a-z][a-z-]*\\s+=)' +
+           // An unquoted value that is not an attribute name.
+           // We know it is not an attribute name because the previous
+           // zero-width match would've eliminated that possibility.
+           '|[^>\"\'\\s]*' +
+           ')') +
+          ')') +
+         '?' +
+         ')') +
+        // End of tag captured in group 3.
+        '|(/?>)' +
+        // Don't capture cruft
+        '|[^a-z\\s>]+)',
     'i');
 
 
@@ -672,8 +671,8 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
  * An implementation of the {@code amp.htmlparser.DocLocator} interface
  * for use within the {@code amp.htmlparser.HtmlParser}.
  */
-amp.htmlparser.HtmlParser.DocLocatorImpl = class
-extends amp.htmlparser.DocLocator {
+amp.htmlparser.HtmlParser.DocLocatorImpl =
+    class extends amp.htmlparser.DocLocator {
   /**
    * @param {string} htmlText text of the entire HTML document to be processed.
    */

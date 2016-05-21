@@ -112,11 +112,11 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   this.expectedOutputFile = path.join(
       path.dirname(ampHtmlFile), path.basename(ampHtmlFile, '.html') + '.out');
   /** @type {!string} */
-  this.ampHtmlFileContents = fs.readFileSync(
-      absolutePathFor(this.ampHtmlFile), 'utf8');
+  this.ampHtmlFileContents =
+      fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8');
   /** @type {!string} */
-  this.expectedOutput = fs.readFileSync(
-      absolutePathFor(this.expectedOutputFile), 'utf8').trim();
+  this.expectedOutput =
+      fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
 };
 
 /**
@@ -126,8 +126,8 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
 ValidatorTestCase.prototype.run = function() {
   const results = amp.validator.validateString(this.ampHtmlFileContents);
   amp.validator.annotateWithErrorCategories(results);
-  const observed = amp.validator.renderValidationResult(
-      results, this.ampUrl).join('\n');
+  const observed =
+      amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
   if (observed === this.expectedOutput) {
     return;
   }
@@ -144,8 +144,7 @@ describe('ValidatorTestdata', () => {
     const result = amp.validator.validateString(
         '<!doctype lemur data-amp-report-test="foo">');
     assertStrictEqual(
-        result.status,
-        amp.validator.ValidationResult.Status.FAIL);
+        result.status, amp.validator.ValidationResult.Status.FAIL);
     assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
   });
 });
@@ -172,7 +171,8 @@ describe('ValidatorOutput', () => {
   // What's tested here is that if a URL with #development=1 is passed
   // (or any other hash), the validator output won't include the hash.
   it('produces expected output with hash in the URL', () => {
-    const test = new ValidatorTestCase('feature_tests/no_custom_js.html',
+    const test = new ValidatorTestCase(
+        'feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
     test.expectedOutput = 'FAIL\n' +
@@ -200,8 +200,8 @@ describe('ValidatorCssLengthValidation', () => {
     assertStrictEqual(50000, maxBytes.length);
 
     const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
-        '.replaceme {}', maxBytes);
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('.replaceme {}', maxBytes);
     test.run();
   });
 
@@ -209,11 +209,10 @@ describe('ValidatorCssLengthValidation', () => {
     const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
     assertStrictEqual(50001, oneTooMany.length);
     const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
-        '.replaceme {}', oneTooMany);
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('.replaceme {}', oneTooMany);
     test.expectedOutputFile = null;
-    test.expectedOutput =
-        'FAIL\n' +
+    test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
         'whereas the limit is 50000 bytes. ' +
@@ -226,11 +225,10 @@ describe('ValidatorCssLengthValidation', () => {
     const multiByteSheet = Array(5000).join(validStyleBlob) + 'h {a: 😺}';
     assertStrictEqual(49999, multiByteSheet.length);  // character length
     const test = new ValidatorTestCase('feature_tests/css_length.html');
-    test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
-        '.replaceme {}', multiByteSheet);
+    test.ampHtmlFileContents =
+        test.ampHtmlFileContents.replace('.replaceme {}', multiByteSheet);
     test.expectedOutputFile = null;
-    test.expectedOutput =
-        'FAIL\n' +
+    test.expectedOutput = 'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
         'whereas the limit is 50000 bytes. ' +
@@ -242,8 +240,8 @@ describe('ValidatorCssLengthValidation', () => {
 
 describe('CssLengthAndUnit', () => {
   it('parses a basic example', () => {
-    const parsed = new amp.validator.CssLengthAndUnit(
-        '10.1em', /* allowAuto */ false);
+    const parsed =
+        new amp.validator.CssLengthAndUnit('10.1em', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('em');
@@ -253,8 +251,8 @@ describe('CssLengthAndUnit', () => {
   it('supports several units', () => {
     for (const allowedUnit of ['px', 'em', 'rem', 'vh', 'vmin', 'vmax']) {
       const example = '10' + allowedUnit;
-      const parsed = new amp.validator.CssLengthAndUnit(
-          example, /* allowAuto */ false);
+      const parsed =
+          new amp.validator.CssLengthAndUnit(example, /* allowAuto */ false);
       expect(parsed.isSet).toBe(true);
       expect(parsed.isValid).toBe(true);
       expect(parsed.unit).toEqual(allowedUnit);
@@ -263,8 +261,8 @@ describe('CssLengthAndUnit', () => {
   });
 
   it('understands empty unit as "px"', () => {
-    const parsed = new amp.validator.CssLengthAndUnit(
-        '10', /* allowAuto */ false);
+    const parsed =
+        new amp.validator.CssLengthAndUnit('10', /* allowAuto */ false);
     expect(parsed.isSet).toBe(true);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('px');
@@ -272,8 +270,8 @@ describe('CssLengthAndUnit', () => {
   });
 
   it('understands undefined input as valid (means attr is not set)', () => {
-    const parsed = new amp.validator.CssLengthAndUnit(
-        undefined, /* allowAuto */ false);
+    const parsed =
+        new amp.validator.CssLengthAndUnit(undefined, /* allowAuto */ false);
     expect(parsed.isSet).toBe(false);
     expect(parsed.isValid).toBe(true);
     expect(parsed.unit).toEqual('px');
@@ -281,51 +279,55 @@ describe('CssLengthAndUnit', () => {
   });
 
   it('understands empty string as invalid (means attr value is empty)', () => {
-    const parsed = new amp.validator.CssLengthAndUnit(
-        "", /* allowAuto */ false);
+    const parsed =
+        new amp.validator.CssLengthAndUnit('', /* allowAuto */ false);
     expect(parsed.isValid).toBe(false);
   });
 
   it('considers other garbage as invalid', () => {
-    expect(new amp.validator.CssLengthAndUnit(
-        '100%', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(
-        'not a number', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(
-        '1.1.1', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(
-        '5 inches', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(
-        'fahrenheit', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(
-        'px', /* allowAuto */ false).isValid).toBe(false);
-    expect(new amp.validator.CssLengthAndUnit(  // screen size in ancient Rome.
-        'ix unciae', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit('100%', /* allowAuto */ false)
+               .isValid)
+        .toBe(false);
+    expect(new amp.validator
+               .CssLengthAndUnit('not a number', /* allowAuto */ false)
+               .isValid)
+        .toBe(false);
+    expect(new amp.validator.CssLengthAndUnit('1.1.1', /* allowAuto */ false)
+               .isValid)
+        .toBe(false);
+    expect(new amp.validator.CssLengthAndUnit('5 inches', /* allowAuto */ false)
+               .isValid)
+        .toBe(false);
+    expect(
+        new amp.validator.CssLengthAndUnit('fahrenheit', /* allowAuto */ false)
+            .isValid)
+        .toBe(false);
+    expect(
+        new amp.validator.CssLengthAndUnit('px', /* allowAuto */ false).isValid)
+        .toBe(false);
+    expect(new amp.validator
+               .CssLengthAndUnit(  // screen size in ancient Rome.
+                   'ix unciae', /* allowAuto */ false)
+               .isValid)
+        .toBe(false);
   });
 
   it('recongizes auto if allowed', () => {
-    {  // allow_auto = false with input != auto
-      const parsed = new amp.validator.CssLengthAndUnit(
-          "1", /* allowAuto */ false);
-      expect(parsed.isValid).toBe(true);
-      expect(parsed.isAuto).toBe(false);
-    }
-    {  // allow_auto = true with input == auto
-      const parsed = new amp.validator.CssLengthAndUnit(
-          "1", /* allowAuto */ true);
-      expect(parsed.isValid).toBe(true);
-      expect(parsed.isAuto).toBe(false);
-    }
-    {  // allow_auto = false with input = auto
-      const parsed = new amp.validator.CssLengthAndUnit(
-          "auto", /* allowAuto */ false);
-      expect(parsed.isValid).toBe(false);
-    }
-    {  // allow_auto = true with input = auto
-      const parsed = new amp.validator.CssLengthAndUnit(
-          "auto", /* allowAuto */ true);
-      expect(parsed.isValid).toBe(true);
-      expect(parsed.isAuto).toBe(true);
-    }
+    {// allow_auto = false with input != auto
+     const parsed =
+         new amp.validator.CssLengthAndUnit('1', /* allowAuto */ false);
+     expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
+        // allow_auto = true with input == auto
+        const parsed =
+            new amp.validator.CssLengthAndUnit('1', /* allowAuto */ true);
+        expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(false);} {
+        // allow_auto = false with input = auto
+        const parsed =
+            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ false);
+        expect(parsed.isValid).toBe(false);} {
+        // allow_auto = true with input = auto
+        const parsed =
+            new amp.validator.CssLengthAndUnit('auto', /* allowAuto */ true);
+        expect(parsed.isValid).toBe(true); expect(parsed.isAuto).toBe(true);}
   });
 });
