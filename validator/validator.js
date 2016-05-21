@@ -482,7 +482,9 @@ class ChildTagMatcher {
       if (names.indexOf(tagName) == -1) {
         const allowedNames = '[\'' + names.join('\', \'') + '\']';
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
+            context.getDocLocator(),
             /* params */
             [tagName, getTagSpecName(this.parentSpec_), allowedNames],
             this.parentSpec_.specUrl, result);
@@ -494,7 +496,9 @@ class ChildTagMatcher {
       if (names.indexOf(tagName) == -1) {
         const allowedNames = '[\'' + names.join('\', \'') + '\']';
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME,
+            context.getDocLocator(),
             /* params */
             [tagName, getTagSpecName(this.parentSpec_), allowedNames],
             this.parentSpec_.specUrl, result);
@@ -515,9 +519,10 @@ class ChildTagMatcher {
     if (expected === null || expected === this.numChildTagsSeen_) {
       return;
     }
-    context.addErrorWithLineCol(
-        this.lineCol_,
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
+        this.lineCol_,
         /* params */
         [
           getTagSpecName(this.parentSpec_), expected.toString(),
@@ -751,9 +756,10 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
   /** @inheritDoc */
   visitAtRule(atRule) {
     if (!isAtRuleValid(this.cssSpec, atRule.name)) {
-      this.context.addErrorWithLineCol(
-          new LineCol(atRule.line, atRule.col),
+      this.context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+          new LineCol(atRule.line, atRule.col),
           /* params */[getTagSpecName(this.tagSpec), atRule.name],
           /* url */ '', this.result);
       this.errorsSeen = true;
@@ -838,15 +844,17 @@ class CdataMatcher {
    */
   match(cdata, context, validationResult) {
     const cdataSpec = this.tagSpec_.cdata;
-    if (cdataSpec === null) return;
-    if (context.getProgress(validationResult).complete) return;
-
+    if (cdataSpec === null) {
+      return;
+    }
     // Max CDATA Byte Length
     if (cdataSpec.maxBytes !== null) {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
+            context.getDocLocator(),
             /* params */
             [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
             cdataSpec.maxBytesSpecUrl, validationResult);
@@ -855,7 +863,6 @@ class CdataMatcher {
         return;
       }
     }
-    if (context.getProgress(validationResult).complete) return;
 
     // The mandatory_cdata, cdata_regex, and css_spec fields are treated
     // like a oneof, but we're not using oneof because it's a feature
@@ -867,8 +874,10 @@ class CdataMatcher {
     if (cdataSpec.mandatoryCdata !== null) {
       if (cdataSpec.mandatoryCdata !== cdata) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code
                 .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+            context.getDocLocator(),
             /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
             validationResult);
       }
@@ -879,8 +888,10 @@ class CdataMatcher {
       const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
       if (!cdataRegex.test(cdata)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code
                 .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+            context.getDocLocator(),
             /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
             validationResult);
         return;
@@ -910,9 +921,10 @@ class CdataMatcher {
         let params = errorToken.params;
         // Override the first parameter with the name of this style tag.
         params[0] = getTagSpecName(this.tagSpec_);
-        context.addErrorWithLineCol(
-            new LineCol(errorToken.line, errorToken.col), errorToken.code,
-            params, /* url */ '', validationResult);
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+            new LineCol(errorToken.line, errorToken.col), params, /* url */ '',
+            validationResult);
       }
       const parsedFontUrlSpec =
           new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
@@ -937,13 +949,12 @@ class CdataMatcher {
 
     // Blacklisted CDATA Regular Expressions
     for (const blacklist of cdataSpec.blacklistedCdataRegex) {
-      if (context.getProgress(validationResult).complete) {
-        return;
-      }
       const blacklistRegex = new RegExp(blacklist.regex, 'i');
       if (blacklistRegex.test(cdata)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            context.getDocLocator(),
             /* params */[getTagSpecName(this.tagSpec_), blacklist.errorMessage],
             this.tagSpec_.specUrl, validationResult);
       }
@@ -958,19 +969,6 @@ class CdataMatcher {
 }
 
 /**
- * @param {amp.validator.ValidationError.Code} code
- * @return {amp.validator.ValidationError.Severity}
- */
-function SeverityFor(code) {
-  if (code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
-    return amp.validator.ValidationError.Severity.WARNING;
-  } else if (code === amp.validator.ValidationError.Code.DEPRECATED_ATTR) {
-    return amp.validator.ValidationError.Severity.WARNING;
-  }
-  return amp.validator.ValidationError.Severity.ERROR;
-}
-
-/**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
  * So, this constitutes the mutable state for the validator except for
@@ -978,19 +976,7 @@ function SeverityFor(code) {
  * @private
  */
 class Context {
-  /**
-   * @param {number} maxErrors Maximum number of errors to output. -1 means all.
-   */
-  constructor(maxErrors) {
-    goog.asserts.assert(
-        isInteger(maxErrors), 'Unrecognized value for maxErrors.');
-    goog.asserts.assert(maxErrors >= -1, 'Unrecognized value for maxErrors.');
-    /**
-     * Maximum number of errors to return.
-     * @type {number}
-     * @private
-     */
-    this.maxErrors_ = maxErrors;
+  constructor() {
     /**
      * The mandatory alternatives that we've validated.
      * @type {!goog.structs.Set<string>}
@@ -1033,91 +1019,32 @@ class Context {
   getDocLocator() { return this.docLocator_; }
 
   /**
-   * Returns an object with two fields, complete and wantsMoreErrors. When
-   * complete is true, we can exit the validator. This happens only at the end of
-   * the document or if the validation has FAILED. wantsMoreErrors returns true
-   * if we we haven't hit the required number of errors.
-   * @param {!amp.validator.ValidationResult} validationResult
-   * @return {!Object<string, boolean>} progress tuple
-   */
-  getProgress(validationResult) {
-    // If maxErrors is set to -1, it means that we want to keep going no
-    // matter what, because there may be more errors.
-    if (this.maxErrors_ === -1) {
-      return {complete: false, wantsMoreErrors: true};
-    }
-
-    // For maxErrors set to 0, if the status is FAIL then we know that
-    // we are done. Otherwise, we are forced to keep going. This is
-    // because in practice, the validator uses PASS as a default value.
-    if (this.maxErrors_ === 0) {
-      return {
-        complete: validationResult.status ===
-            amp.validator.ValidationResult.Status.FAIL,
-        wantsMoreErrors: false
-      };
-    }
-
-    // For maxErrors > 0, we want to keep going if we haven't seen maxErrors
-    // errors yet.
-    const wantsMoreErrors = validationResult.errors.length < this.maxErrors_;
-    return {complete: !wantsMoreErrors, wantsMoreErrors: wantsMoreErrors};
-  }
-
-  /**
-   * Returns true if the result was changed; false otherwise.
-   * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
+   * @param {!amp.validator.ValidationError.Severity} severity
    * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
+   * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
    * @param {!Array<!string>} params
    * @param {?string} specUrl a link (URL) to the amphtml spec
    * @param {!amp.validator.ValidationResult} validationResult
-   * @return {boolean}
    */
-  addErrorWithLineCol(
-      lineCol, validationErrorCode, params, specUrl, validationResult) {
-    const progress = this.getProgress(validationResult);
-    if (progress.complete) {
-      goog.asserts.assert(
-          validationResult.status ===
-              amp.validator.ValidationResult.Status.FAIL,
-          'Early PASS exit without full verification.');
-      return false;
-    }
-    const severity = SeverityFor(validationErrorCode);
-
+  addError(
+      severity, validationErrorCode, lineCol, params, specUrl,
+      validationResult) {
     // If any of the errors amount to more than a WARNING, validation fails.
     if (severity !== amp.validator.ValidationError.Severity.WARNING) {
       validationResult.status = amp.validator.ValidationResult.Status.FAIL;
     }
-    if (progress.wantsMoreErrors) {
-      const error = new amp.validator.ValidationError();
-      error.severity = severity;
-      error.code = validationErrorCode;
-      error.params = params;
-      error.line = lineCol.getLine();
-      error.col = lineCol.getCol();
-      error.specUrl = (specUrl === null ? '' : specUrl);
-      const reportTestValue = this.tagStack_.getReportTestValue();
-      if (reportTestValue !== null)
-        error.dataAmpReportTestValue = reportTestValue;
-      goog.asserts.assert(validationResult.errors !== undefined);
-      validationResult.errors.push(error);
-    }
-    return true;
-  }
-
-  /**
-   * Returns true if the result was changed; false otherwise.
-   * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
-   * @param {!Array<!string>} params
-   * @param {?string} specUrl a link (URL) to the amphtml spec
-   * @param {!amp.validator.ValidationResult} validationResult
-   * @return {boolean}
-   */
-  addError(validationErrorCode, params, specUrl, validationResult) {
-    return this.addErrorWithLineCol(
-        this.docLocator_, validationErrorCode, params, specUrl,
-        validationResult);
+    const error = new amp.validator.ValidationError();
+    error.severity = severity;
+    error.code = validationErrorCode;
+    error.params = params;
+    error.line = lineCol.getLine();
+    error.col = lineCol.getCol();
+    error.specUrl = (specUrl === null ? '' : specUrl);
+    const reportTestValue = this.tagStack_.getReportTestValue();
+    if (reportTestValue !== null)
+      error.dataAmpReportTestValue = reportTestValue;
+    goog.asserts.assert(validationResult.errors !== undefined);
+    validationResult.errors.push(error);
   }
 
   /**
@@ -1285,7 +1212,8 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
    */
   missingUrl(context, tagSpec, result) {
     context.addError(
-        amp.validator.ValidationError.Code.MISSING_URL,
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.MISSING_URL, context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec)], tagSpec.specUrl,
         result);
   }
@@ -1298,7 +1226,8 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
    */
   invalidUrl(context, url, tagSpec, result) {
     context.addError(
-        amp.validator.ValidationError.Code.INVALID_URL,
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.INVALID_URL, context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), url],
         tagSpec.specUrl, result);
   }
@@ -1311,7 +1240,9 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
    */
   invalidUrlProtocol(context, protocol, tagSpec, result) {
     context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
         tagSpec.specUrl, result);
   }
@@ -1324,7 +1255,9 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
    */
   disallowedRelativeUrl(context, url, tagSpec, result) {
     context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+        context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), url],
         tagSpec.specUrl, result);
   }
@@ -1352,9 +1285,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
    * @param {!amp.validator.ValidationResult} result
    */
   missingUrl(context, tagSpec, result) {
-    context.addErrorWithLineCol(
-        this.lineCol_,
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL,
+        this.lineCol_,
         /* params */[getTagSpecName(tagSpec)], tagSpec.specUrl, result);
   }
 
@@ -1365,9 +1299,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
    * @param {!amp.validator.ValidationResult} result
    */
   invalidUrl(context, url, tagSpec, result) {
-    context.addErrorWithLineCol(
-        this.lineCol_,
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL,
+        this.lineCol_,
         /* params */[getTagSpecName(tagSpec), url], tagSpec.specUrl, result);
   }
 
@@ -1378,9 +1313,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
    * @param {!amp.validator.ValidationResult} result
    */
   invalidUrlProtocol(context, protocol, tagSpec, result) {
-    context.addErrorWithLineCol(
-        this.lineCol_,
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL,
+        this.lineCol_,
         /* params */[getTagSpecName(tagSpec), protocol], tagSpec.specUrl,
         result);
   }
@@ -1392,9 +1328,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
    * @param {!amp.validator.ValidationResult} result
    */
   disallowedRelativeUrl(context, url, tagSpec, result) {
-    context.addErrorWithLineCol(
-        this.lineCol_,
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
         amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL,
+        this.lineCol_,
         /* params */[getTagSpecName(tagSpec), url], tagSpec.specUrl, result);
   }
 };
@@ -1561,7 +1498,9 @@ class ParsedAttrSpec {
         return;
       }
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(tagSpec), attrValue],
           tagSpec.specUrl, result);
     } else if (
@@ -1574,7 +1513,9 @@ class ParsedAttrSpec {
       }
       if (!valueRegex.test(attrValue)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
             /* params */[attrName, getTagSpecName(tagSpec), attrValue],
             tagSpec.specUrl, result);
       }
@@ -1604,7 +1545,9 @@ class ParsedAttrSpec {
       let srcset = goog.string.trim(attrValue);
       if (srcset == '') {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MISSING_URL,
+            context.getDocLocator(),
             /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
             result);
         return;
@@ -1613,7 +1556,8 @@ class ParsedAttrSpec {
       const parseResult = parse_srcset.parseSrcset(srcset);
       if (!parseResult.success) {
         context.addError(
-            parseResult.errorCode,
+            amp.validator.ValidationError.Severity.ERROR, parseResult.errorCode,
+            context.getDocLocator(),
             /* params */[attrName, getTagSpecName(tagSpec), attrValue],
             tagSpec.specUrl, result);
         return;
@@ -1626,7 +1570,9 @@ class ParsedAttrSpec {
     }
     if (maybeUris.length === 0) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.MISSING_URL,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
           result);
       return;
@@ -1668,8 +1614,10 @@ class ParsedAttrSpec {
       const value = properties.get(name);
       if (!this.valuePropertyByName_.containsKey(name)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code
                 .DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+            context.getDocLocator(),
             /* params */[name, attrName, getTagSpecName(tagSpec)],
             tagSpec.specUrl, result);
         continue;
@@ -1678,16 +1626,20 @@ class ParsedAttrSpec {
       if (propertySpec.value !== null) {
         if (propertySpec.value != value.toLowerCase()) {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code
                   .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+              context.getDocLocator(),
               /* params */[name, attrName, getTagSpecName(tagSpec), value],
               tagSpec.specUrl, result);
         }
       } else if (propertySpec.valueDouble !== null) {
         if (parseFloat(value) != propertySpec.valueDouble) {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code
                   .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+              context.getDocLocator(),
               /* params */[name, attrName, getTagSpecName(tagSpec), value],
               tagSpec.specUrl, result);
         }
@@ -1696,8 +1648,10 @@ class ParsedAttrSpec {
     const notSeen = subtractDiff(this.mandatoryValuePropertyNames_, names);
     for (const name of notSeen) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code
               .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */[name, attrName, getTagSpecName(tagSpec)],
           tagSpec.specUrl, result);
     }
@@ -2192,7 +2146,9 @@ class ParsedTagSpec {
     if (layoutAttr !== undefined &&
         inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */['layout', getTagSpecName(this.spec_), layoutAttr],
           this.spec_.specUrl, result);
       return;
@@ -2201,7 +2157,9 @@ class ParsedTagSpec {
         new amp.validator.CssLengthAndUnit(widthAttr, /* allowAuto */ true);
     if (!inputWidth.isValid) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */['width', getTagSpecName(this.spec_), widthAttr],
           this.spec_.specUrl, result);
       return;
@@ -2210,7 +2168,9 @@ class ParsedTagSpec {
         new amp.validator.CssLengthAndUnit(heightAttr, /* allowAuto */ true);
     if (!inputHeight.isValid) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */['height', getTagSpecName(this.spec_), heightAttr],
           this.spec_.specUrl, result);
       return;
@@ -2226,7 +2186,9 @@ class ParsedTagSpec {
     // height="auto" is only allowed if the layout is FLEX_ITEM.
     if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */['height', getTagSpecName(this.spec_), heightAttr],
           this.spec_.specUrl, result);
       return;
@@ -2238,8 +2200,10 @@ class ParsedTagSpec {
           amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
           amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
       context.addError(
-          code, /* params */[layout, getTagSpecName(this.spec_)],
-          this.spec_.specUrl, result);
+          amp.validator.ValidationError.Severity.ERROR, code,
+          context.getDocLocator(),
+          /* params */[layout, getTagSpecName(this.spec_)], this.spec_.specUrl,
+          result);
       return;
     }
     // Check other constraints imposed by the particular layouts.
@@ -2248,7 +2212,9 @@ class ParsedTagSpec {
          layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
         !height.isSet) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getDocLocator(),
           /* params */['height', getTagSpecName(this.spec_)],
           this.spec_.specUrl, result);
       return;
@@ -2256,7 +2222,9 @@ class ParsedTagSpec {
     if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
         !width.isAuto) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+          context.getDocLocator(),
           /* params */
           [
             widthAttr, 'width', getTagSpecName(this.spec_), 'FIXED_HEIGHT',
@@ -2269,13 +2237,17 @@ class ParsedTagSpec {
         layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
       if (!width.isSet) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+            context.getDocLocator(),
             /* params */['width', getTagSpecName(this.spec_)],
             this.spec_.specUrl, result);
         return;
       } else if (width.isAuto) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
             /* params */['width', getTagSpecName(this.spec_), 'auto'],
             this.spec_.specUrl, result);
         return;
@@ -2284,8 +2256,10 @@ class ParsedTagSpec {
     if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
         width.unit !== height.unit) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code
               .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
+          context.getDocLocator(),
           /* params */[getTagSpecName(this.spec_), width.unit, height.unit],
           this.spec_.specUrl, result);
       return;
@@ -2297,7 +2271,9 @@ class ParsedTagSpec {
           amp.validator.ValidationError.Code
               .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
       context.addError(
-          code, /* params */['heights', getTagSpecName(this.spec_), layout],
+          amp.validator.ValidationError.Severity.ERROR, code,
+          context.getDocLocator(),
+          /* params */['heights', getTagSpecName(this.spec_), layout],
           this.spec_.specUrl, result);
       return;
     }
@@ -2335,12 +2311,16 @@ class ParsedTagSpec {
     // more specific error in the case of Mustache template characters.
     if (attrName.indexOf('{{') != -1) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(this.spec_)],
           this.templateSpecUrl_, result);
     } else {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(this.spec_)],
           this.spec_.specUrl, result);
     }
@@ -2356,12 +2336,16 @@ class ParsedTagSpec {
   validateAttrValueBelowTemplateTag(context, attrName, attrValue, result) {
     if (ParsedTagSpec.valueHasUnescapedTemplateSyntax(attrValue)) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(this.spec_), attrValue],
           this.templateSpecUrl_, result);
     } else if (ParsedTagSpec.valueHasPartialsTemplateSyntax(attrValue)) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+          context.getDocLocator(),
           /* params */[attrName, getTagSpecName(this.spec_), attrValue],
           this.templateSpecUrl_, result);
     }
@@ -2421,7 +2405,9 @@ class ParsedTagSpec {
       }
       if (parsedSpec.getSpec().deprecation !== null) {
         context.addError(
+            amp.validator.ValidationError.Severity.WARNING,
             amp.validator.ValidationError.Code.DEPRECATED_ATTR,
+            context.getDocLocator(),
             /* params */
             [
               attrName, getTagSpecName(this.spec_),
@@ -2443,7 +2429,9 @@ class ParsedTagSpec {
             new RegExp(parsedSpec.getSpec().blacklistedValueRegex, 'i');
         if (blacklistedValueRegex.test(attrValue)) {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getDocLocator(),
               /* params */[attrName, getTagSpecName(this.spec_), attrValue],
               this.spec_.specUrl, result);
           return;
@@ -2458,7 +2446,9 @@ class ParsedTagSpec {
       if (parsedSpec.getSpec().mandatoryOneof &&
           mandatoryOneofsSeen.contains(parsedSpec.getSpec().mandatoryOneof)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+            context.getDocLocator(),
             /* params */
             [getTagSpecName(this.spec_), parsedSpec.getSpec().mandatoryOneof],
             this.spec_.specUrl, result);
@@ -2478,7 +2468,9 @@ class ParsedTagSpec {
     for (const mandatoryOneof of this.mandatoryOneofs_) {
       if (!mandatoryOneofsSeen.contains(mandatoryOneof)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
+            context.getDocLocator(),
             /* params */[getTagSpecName(this.spec_), mandatoryOneof],
             this.spec_.specUrl, result);
       }
@@ -2491,7 +2483,9 @@ class ParsedTagSpec {
         }
         if (!attrspecsValidated.contains(parsedSpec.getId())) {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
+              context.getDocLocator(),
               /* params */
               [
                 parsedSpec.getSpec().name, getTagSpecName(this.spec_),
@@ -2505,7 +2499,9 @@ class ParsedTagSpec {
     const diffs = subtractDiff(this.mandatoryAttrIds_, mandatoryAttrsSeen);
     for (const diff of diffs) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+          context.getDocLocator(),
           /* params */
           [this.attrsById_[diff].getSpec().name, getTagSpecName(this.spec_)],
           this.spec_.specUrl, result);
@@ -2524,7 +2520,9 @@ class ParsedTagSpec {
       // Output a parent/child error using CSS Child Selector syntax which is
       // both succinct and should be well understood by web developers.
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
+          context.getDocLocator(),
           /* params */
           [
             getTagSpecName(this.spec_), context.getTagStack().getParent(),
@@ -2545,8 +2543,10 @@ class ParsedTagSpec {
       if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
         if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code
                   .MANDATORY_TAG_ANCESTOR_WITH_HINT,
+              context.getDocLocator(),
               /* params */
               [
                 this.spec_.tagName, mandatoryAncestor,
@@ -2555,7 +2555,9 @@ class ParsedTagSpec {
               this.spec_.specUrl, validationResult);
         } else {
           context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
+              context.getDocLocator(),
               /* params */[this.spec_.tagName, mandatoryAncestor],
               this.spec_.specUrl, validationResult);
         }
@@ -2565,7 +2567,9 @@ class ParsedTagSpec {
     for (const disallowedAncestor of this.spec_.disallowedAncestor) {
       if (context.getTagStack().hasAncestor(disallowedAncestor)) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+            context.getDocLocator(),
             /* params */[this.spec_.tagName, disallowedAncestor],
             this.spec_.specUrl, validationResult);
         return;
@@ -2763,7 +2767,9 @@ class ParsedValidatorRules {
     const tagSpecDispatch = this.tagSpecByTagName_.get(tagName);
     if (tagSpecDispatch === undefined) {
       context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code.DISALLOWED_TAG,
+          context.getDocLocator(),
           /* params */[tagName], /* specUrl */ '', validationResult);
       return;
     }
@@ -2808,7 +2814,9 @@ class ParsedValidatorRules {
         // TODO(gregable): Determine a good way to source a specUrl in these
         // instances.
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+            context.getDocLocator(),
             /* params */[tagName], /* specUrl */ '', validationResult);
         return;
       }
@@ -2878,7 +2886,9 @@ class ParsedValidatorRules {
 
     if (spec.deprecation !== null) {
       context.addError(
+          amp.validator.ValidationError.Severity.WARNING,
           amp.validator.ValidationError.Code.DEPRECATED_TAG,
+          context.getDocLocator(),
           /* params */[getTagSpecName(spec), spec.deprecation],
           spec.deprecationUrl, resultForBestAttempt);
       // Deprecation is only a warning, so we don't return.
@@ -2890,7 +2900,9 @@ class ParsedValidatorRules {
       // to be unique, we've found an error that we must report.
       if (spec.unique && !isUnique) {
         context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+            context.getDocLocator(),
             /* params */[getTagSpecName(spec)], spec.specUrl,
             resultForBestAttempt);
         return;
@@ -2917,12 +2929,11 @@ class ParsedValidatorRules {
     for (const tagspecId of this.mandatoryTagSpecs_) {
       if (!context.getTagspecsValidated().contains(tagspecId)) {
         const spec = this.tagSpecById_[tagspecId].getSpec();
-        if (!context.addError(
-                amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-                /* params */[getTagSpecName(spec)], spec.specUrl,
-                validationResult)) {
-          return;
-        }
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(spec)], spec.specUrl, validationResult);
       }
     }
   }
@@ -2941,16 +2952,16 @@ class ParsedValidatorRules {
       for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().contains(alsoRequiresTagspecId)) {
           const alsoRequiresTagspec = this.tagSpecById_[alsoRequiresTagspecId];
-          if (!context.addError(
-                  amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
-                  /* params */
-                  [
-                    getTagSpecName(alsoRequiresTagspec.getSpec()),
-                    getTagSpecName(spec.getSpec())
-                  ],
-                  spec.getSpec().specUrl, validationResult)) {
-            return;
-          }
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
+              context.getDocLocator(),
+              /* params */
+              [
+                getTagSpecName(alsoRequiresTagspec.getSpec()),
+                getTagSpecName(spec.getSpec())
+              ],
+              spec.getSpec().specUrl, validationResult);
         }
       }
     }
@@ -2978,12 +2989,12 @@ class ParsedValidatorRules {
       }
     }
     for (const tagMissing of sortAndUniquify(missing)) {
-      if (!context.addError(
-              amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-              /* params */[tagMissing],
-              /* specUrl */ specUrlsByMissing[tagMissing], validationResult)) {
-        return;
-      }
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
+          context.getDocLocator(),
+          /* params */[tagMissing], /* specUrl */ specUrlsByMissing[tagMissing],
+          validationResult);
     }
   }
 
@@ -2994,11 +3005,8 @@ class ParsedValidatorRules {
    * @param {!amp.validator.ValidationResult} validationResult
    */
   maybeEmitGlobalTagValidationErrors(context, validationResult) {
-    if (context.getProgress(validationResult).complete) return;
     this.maybeEmitMandatoryTagValidationErrors(context, validationResult);
-    if (context.getProgress(validationResult).complete) return;
     this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
-    if (context.getProgress(validationResult).complete) return;
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
   }
@@ -3035,15 +3043,12 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
     this.validationResult_ = new amp.validator.ValidationResult();
     this.validationResult_.status =
         amp.validator.ValidationResult.Status.UNKNOWN;
-    // TODO(greggrothaus): plumb maxErrors all the way back to our API so the
-    // test can exercise the different options or get rid of maxErrors
-    // altogether.
     /**
      * Validation Context.
      * @type {!Context}
      * @private
      */
-    this.context_ = new Context(/* maxErrors */ -1);
+    this.context_ = new Context();
     /**
      * Rules from parsed JSON configuration.
      * @type {!ParsedValidatorRules}
@@ -3096,9 +3101,6 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
    * tag presence.
    */
   endDoc() {
-    if (this.context_.getProgress(this.validationResult_).complete) {
-      return;
-    }
     this.context_.setCdataMatcher(
         new CdataMatcher(new amp.validator.TagSpec()));
     this.rules_.maybeEmitGlobalTagValidationErrors(
@@ -3120,9 +3122,6 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
     goog.asserts.assert(attrs !== null, 'Null attributes for tag: ' + tagName);
     this.context_.setCdataMatcher(
         new CdataMatcher(new amp.validator.TagSpec()));
-    if (this.context_.getProgress(this.validationResult_).complete) {
-      return;
-    }
     this.context_.getTagStack().enterTag(
         tagName, this.context_, this.validationResult_, attrs);
     this.rules_.validateTag(
