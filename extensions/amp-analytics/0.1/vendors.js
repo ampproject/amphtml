@@ -77,7 +77,7 @@ export const ANALYTICS_CONFIG = {
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${suffix}',
+        's2=${level2}${extraUrlParams}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
