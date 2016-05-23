@@ -271,7 +271,7 @@ class Validator {
 const instanceByValidatorJs = {};
 
 /**
- * @param {string=} validatorJs_opt
+ * @param {string=} opt_validatorJs
  * @returns {!Promise<Validator>}
  * @export
  */
@@ -280,7 +280,7 @@ function getInstance(opt_validatorJs) {
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
-  };
+  }
   const validatorJsPromise =
       (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
   return validatorJsPromise.then((scriptContents) => {
@@ -428,13 +428,13 @@ function serve(port, validatorScript) {
  * @param {!string} filename
  * @param {!ValidationResult} validationResult
  */
-function logValidationResult(fileName, validationResult) {
+function logValidationResult(filename, validationResult) {
   if (validationResult.status === 'PASS') {
-    console.log(fileName + ': PASS');
+    console.log(filename + ': PASS');
   }
   for (const error of validationResult.errors) {
     let msg =
-        fileName + ':' + error.line + ':' + error.col + ' ' + error.message;
+        filename + ':' + error.line + ':' + error.col + ' ' + error.message;
     if (error.specUrl) {
       msg += ' (see ' + error.specUrl + ')';
     }
