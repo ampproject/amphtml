@@ -58,7 +58,7 @@ export const adPrefetch = {
   microad: 'https://j.microad.net/js/camp.js',
   yahoojp: [
     'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
-    'https://yads.c.yimg.jp/js/yads.js'
+    'https://yads.c.yimg.jp/js/yads.js',
   ],
 };
 
@@ -158,7 +158,7 @@ export const adPreconnect = {
   ],
   yahoojp: [
     'https://s.yimg.jp',
-    'https://yads.yahoo.co.jp'
+    'https://yads.yahoo.co.jp',
   ],
 };
 
