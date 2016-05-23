@@ -66,10 +66,9 @@ export class LiveListManager {
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
-      const isUpdateExample = this.win.location.pathname == '/examples.build/' +
-          'live-list-update.amp.max.html' ||
-          this.win.location.pathname == '/examples/live-list-update.amp.html';
-      if (getMode().localDev && isUpdateExample) {
+      if (getMode().localDev && this.win.location.pathname == '/examples' +
+          '.build/live-list-update.amp.max.html' ||
+          this.win.location.pathname == '/examples/live-list-update.amp.html') {
         this.interval_ = 5000;
       }
 

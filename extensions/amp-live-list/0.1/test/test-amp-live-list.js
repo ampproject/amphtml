@@ -391,15 +391,15 @@ describe('amp-live-list', () => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-      expect(elem.querySelector('[update]')).to.have.class('-amp-hidden');
+      expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
 
       const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       expect(liveList.pendingItemsInsert_).to.have.length(1);
-      expect(liveList.updateSlot_).to.not.have.class('-amp-hidden');
+      expect(liveList.updateSlot_).to.not.have.class('amp-hidden');
 
       return liveList.updateAction_(fromServer1).then(() => {
-        expect(liveList.updateSlot_).to.have.class('-amp-hidden');
+        expect(liveList.updateSlot_).to.have.class('amp-hidden');
       });
     });
 
@@ -407,7 +407,7 @@ describe('amp-live-list', () => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-      expect(elem.querySelector('[update]')).to.have.class('-amp-hidden');
+      expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
 
       const oldDate = Date.now();
 
