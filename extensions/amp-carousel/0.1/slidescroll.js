@@ -21,6 +21,15 @@ export class AmpCarouscroll extends BaseCarousel {
   }
   /** @override */
   buildCarousel() {
+    this.element.classList.add('-amp-slidescroll');
+
+    /** @private {!Array<!Element>} */
+    this.slides_ = this.getRealChildren();
+
+    this.slides_.forEach(slide => {
+      this.setAsOwner(slide);
+      slide.classList.add('-amp-slide-item');
+    });
   }
 
   /** @override */

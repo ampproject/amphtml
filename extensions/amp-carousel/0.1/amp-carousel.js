@@ -24,10 +24,12 @@ class CarouselSelector {
   constructor(element) {
     if (element.hasAttribute('type') &&
         element.getAttribute('type') == 'slides') {
+      const slideScrollExpt =
+          isExperimentOn(element.ownerDocument.defaultView, 'amp-slidescroll');
+      if (slideScrollExpt) {
+        return new AmpCarouscroll(element);
+      }
       return new AmpSlides(element);
-    }
-    if (isExperimentOn(element.ownerDocument.defaultView, 'amp-carouscroll')) {
-      return new AmpCarouscroll(element);
     }
     return new AmpCarousel(element);
   }

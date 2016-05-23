@@ -82,7 +82,7 @@ const EXPERIMENTS = [
     spec: '',
   },
   {
-    id: 'amp-carouscroll',
+    id: 'amp-slidescroll',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
   },
