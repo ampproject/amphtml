@@ -89,6 +89,9 @@ describe('amp-live-list', () => {
       if ('updateTime' in childAttr) {
         child.setAttribute('data-update-time', `${childAttr.updateTime}`);
       }
+      if ('tombstone' in childAttr) {
+        child.setAttribute('data-tombstone', '');
+      }
       itemsCont.appendChild(child);
     }
     return parent;
@@ -163,6 +166,7 @@ describe('amp-live-list', () => {
   it('should enforce max-items-per-page', () => {
     let attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': ''});
     buildElement(elem, attrs);
+    // Errors out because no data-max-items-per-page is given
     expect(liveList.element.getAttribute('data-max-items-per-page'))
         .to.equal('');
     expect(() => {
@@ -171,6 +175,7 @@ describe('amp-live-list', () => {
           .to.equal(LiveListManager.getMinDataMaxItemsPerPage());
     }).to.throw(/must have data-max-items-per-page/);
 
+    // Errors out because data-max-items-per-page is not parseable as a number
     attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': 'hello'});
     buildElement(elem, attrs);
     expect(liveList.element.getAttribute('data-max-items-per-page'))
@@ -189,6 +194,25 @@ describe('amp-live-list', () => {
       liveList.buildCallback();
       expect(liveList.maxItemsPerPage_).to.equal(10);
     }).to.not.throw(/must have data-max-items-per-page/);
+  });
+
+  it('should use actual initial items count instead of ' +
+     'data-max-items-per-page if greater', () => {
+    for (let i = 0; i < 20; i++) {
+      const child = document.createElement('div');
+      child.setAttribute('data-sort-time', Date.now());
+      child.setAttribute('id', i);
+      if (i == 15) {
+        child.setAttribute('data-tombstone', '');
+      }
+      itemsSlot.appendChild(child);
+    }
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+    expect(liveList.maxItemsPerPage_)
+        .to.not.equal(LiveListManager.getMinDataMaxItemsPerPage());
+    expect(liveList.maxItemsPerPage_)
+        .to.equal(19);
   });
 
   it('should enforce update slot', () => {
@@ -577,6 +601,161 @@ describe('amp-live-list', () => {
         .to.equal('127');
 
     expect(spy.callCount).to.equal(0);
+  });
+
+  it('should find items to tombstone', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ]);
+    expect(liveList.pendingItemsTombstone_).to.have.length(0);
+
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsTombstone_).to.have.length(2);
+  });
+
+  it('should empty out descendants of tombstones item', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ]);
+    expect(liveList.pendingItemsTombstone_).to.have.length(0);
+
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsTombstone_).to.have.length(2);
+    expect(child1.childNodes).to.have.length(2);
+    expect(child2.childNodes).to.have.length(0);
+
+    return liveList.updateAction_().then(() => {
+      expect(child1.childNodes).to.have.length(0);
+      expect(child2.childNodes).to.have.length(0);
+    });
+  });
+
+  it('should not tombstone item multiple times', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ]);
+    expect(liveList.pendingItemsTombstone_).to.have.length(0);
+
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsTombstone_).to.have.length(2);
+    expect(child1.childNodes).to.have.length(2);
+    expect(child2.childNodes).to.have.length(0);
+
+    return liveList.updateAction_().then(() => {
+      expect(child1.childNodes).to.have.length(0);
+      expect(child2.childNodes).to.have.length(0);
+    }).then(() => {
+      const fromServer2 = createFromServer([
+        {id: 'id1', tombstone: null},
+        {id: 'id3'},
+        {id: 'id2', tombstone: null},
+      ]);
+      expect(liveList.pendingItemsTombstone_).to.have.length(0);
+      liveList.update(fromServer2);
+      // Shouldn't find anything a second time around
+      expect(liveList.pendingItemsTombstone_).to.have.length(0);
+    });
+  });
+
+  it('should choose tombstone over update', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 999, tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ]);
+    expect(liveList.pendingItemsTombstone_).to.have.length(0);
+    expect(liveList.pendingItemsReplace_).to.have.length(0);
+
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsTombstone_).to.have.length(2);
+    expect(liveList.pendingItemsReplace_).to.have.length(0);
+  });
+
+
+  it('should choose tombstone over insert', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child1.textContent = 'hello world';
+    child1.appendChild(document.createElement('div'));
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id3', tombstone: null},
+    ]);
+    expect(liveList.pendingItemsTombstone_).to.have.length(0);
+    expect(liveList.pendingItemsInsert_).to.have.length(0);
+
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsTombstone_).to.have.length(1);
+    expect(liveList.pendingItemsInsert_).to.have.length(0);
   });
 
   describe('#getNumberMaxOrDefault', () => {
