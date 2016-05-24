@@ -62,12 +62,6 @@ const EXPERIMENTS = [
         'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
   },
   {
-    id: 'amp-social-share',
-    name: 'AMP Social Share',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-social-share/amp-social-share.md',
-  },
-  {
     id: 'amp-analytics-viewability',
     name: 'Viewability APIs for amp-analytics',
     spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
@@ -85,6 +79,11 @@ const EXPERIMENTS = [
   {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
+    spec: '',
+  },
+  {
+    id: 'amp-carouscroll',
+    name: 'AMP carousel using horizontal scroll',
     spec: '',
   },
 ];

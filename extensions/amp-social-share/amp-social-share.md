@@ -24,8 +24,7 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>
-      <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>
-       or <code>AMP.toggleExperiment('amp-social-share')</code> (if #development=1 is enabled)
+      Stable
     </td>
   </tr>
   <tr>

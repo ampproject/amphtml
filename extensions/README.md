@@ -30,17 +30,22 @@ Current list of extended components:
 | [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md) | Expands or shrinks font size to fit the content within the space given. |
 | [`amp-font`](amp-font/amp-font.md) | Triggers and monitors the loading of custom fonts. |
+| [`amp-fx-flying-carpet`](amp-fx-flying-carpet/amp-fx-flying-carpet.md) | Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport. |
 | [`amp-iframe`](amp-iframe/amp-iframe.md) | Displays an iframe. |
 | [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for an “image lightbox” or similar experience. |
 | [`amp-instagram`](amp-instagram/amp-instagram.md) | Displays an Instagram embed. |
 | [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md) | Installs a ServiceWorker. |
+| [`amp-jwplayer`](amp-jwplayer/amp-jwplayer.md) | Displays a cloud-hosted [JW Player](https://www.jwplayer.com/). |
+| [`amp-kaltura-player`](amp-kaltura-player/amp-kaltura-player.md) | Displays the Kaltura Player as used in [Kaltura's Video Platform](https://corp.kaltura.com/). |
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md) | Allows for a “lightbox” or similar experience. |
 | [`amp-list`](amp-list/amp-list.md) | Dynamically downloads data and creates list items using a template. |
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
 | [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
+| [`amp-sidebar`](amp-sidebar/amp-sidebar.md) | Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. |
+| [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
-| [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a Springboard Platform video player |
+| [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a [Springboard Platform](http://publishers.springboardplatform.com/users/login) video player |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
 | [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |

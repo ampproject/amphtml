@@ -38,7 +38,7 @@ const classes = {
 /**
  * @typedef {{
  *   insert: !Array<!Element>,
- *   update: !Array<!Element>,
+ *   replace: !Array<!Element>,
  *   tombstone: !Array<!Element>
  * }}
  */
@@ -54,6 +54,7 @@ export class LiveListInterface {
    * Update the underlying live list dom structure.
    *
    * @param {?Element} element
+   * @return {time}
    */
   update(unusedElement) {
   }
@@ -85,6 +86,7 @@ export function getNumberMaxOrDefault(value, defaultValue) {
 /**
  * Component class that handles updates to its underlying children dom
  * structure.
+ *
  * @implements {LiveListInterface}
  */
 export class AmpLiveList extends AMP.BaseElement {
@@ -140,7 +142,11 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.manager_.register(this.liveListId_, this);
 
-    this.insertFragment_ = this.win.document.createDocumentFragment();
+    /** @private @const {!Array<!Element>} */
+    this.pendingItemsInsert_ = [];
+
+    /** @private @const {!Array<!Element>} */
+    this.pendingItemsReplace_ = [];
 
     this.updateSlot_ = user.assert(
        this.getUpdateSlot_(this.element),
@@ -158,6 +164,9 @@ export class AmpLiveList extends AMP.BaseElement {
     this.validateLiveListItems_(this.itemsSlot_, true);
 
     this.registerAction('update', this.updateAction_.bind(this));
+
+    /** @private @const {function(!Element, !Element): number} */
+    this.comparator_ = this.sortByDataSortTime_.bind(this);
   }
 
   /** @override */
@@ -167,22 +176,17 @@ export class AmpLiveList extends AMP.BaseElement {
     this.validateLiveListItems_(container);
     const mutateItems = this.getUpdates_(container);
 
-    // Insert/new items will be contiguous at the top even though they
-    // weren't in the actual request DOM structure.
-    const comparator = this.sortByDataSortTime_.bind(this);
-    mutateItems.insert.sort(comparator).forEach(child => {
-      child.classList.add(classes.ITEM);
-      child.classList.add(classes.NEW_ITEM);
-      // Since we only manipulate the DocumentFragment instance and not the
-      // live dom we don't need to be inside a vsync.mutate context.
-      this.insertFragment_.insertBefore(child,
-          this.insertFragment_.firstElementChild);
-    });
+    this.preparePendingItemsInsert_(mutateItems.insert);
+    this.preparePendingItemsReplace_(mutateItems.replace);
 
-    if (mutateItems.insert.length > 0) {
+    // We prefer user interaction if we have pending items to insert at the
+    // top of the component.
+    if (this.pendingItemsInsert_.length > 0) {
       this.deferMutate(() => {
         this.updateSlot_.classList.remove('-amp-hidden');
       });
+    } else if (this.pendingItemsReplace_.length > 0) {
+      this.updateAction_();
     }
 
     return this.updateTime_;
@@ -191,37 +195,146 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Mutates the current elements dom and compensates for scroll
    * change if necessary.
+   * Makes sure to zero out the pending items arrays after flushing
+   * server DOM to live client DOM.
+   *
    * @return {!Promise}
    * @private
    */
   updateAction_() {
-    if (this.insertFragment_.childElementCount == 0) {
-      return Promise.resolve();
-    }
+    const hasNewInsert = this.pendingItemsInsert_.length > 0;
 
     // TODO(erwinm): do in place update as well as sorting,
     // correct insertion, tombstoning etc.
-    return this.mutateElement(() => {
-      // Remove the new class from the previously inserted items.
-      this.eachChildElement_(this.itemsSlot_, child => {
-        child.classList.remove(classes.NEW_ITEM);
-      });
-      // Items are reparented from the document fragment to the live DOM
-      // by the `insertBefore` and `appendChild` operations, so we can reuse
-      // the same document fragment instance safely.
-      this.itemsSlot_.insertBefore(this.insertFragment_,
-          this.itemsSlot_.firstElementChild);
+    let promise = this.mutateElement(() => {
 
-      // Hide the update button in case we previously displayed it.
+      if (hasNewInsert) {
+        // Remove the new class from the previously inserted items if
+        // we are inserting new items.
+        this.eachChildElement_(this.itemsSlot_, child => {
+          child.classList.remove(classes.NEW_ITEM);
+        });
+
+        this.insert_(this.itemsSlot_, this.pendingItemsInsert_);
+        this.pendingItemsInsert_.length = 0;
+      }
+
+      if (this.pendingItemsReplace_.length > 0) {
+        this.replace_(this.itemsSlot_, this.pendingItemsReplace_);
+        this.pendingItemsReplace_.length = 0;
+      }
+
+      // Always hide update slot after mutation operation.
       this.updateSlot_.classList.add('-amp-hidden');
-
-      // TODO(erwinm): Handle updates
-    }).then(() => {
-      this.getVsync().mutate(() => {
-        // Should scroll into view be toggleable
-        this.viewport_./*OK*/scrollIntoView(this.element);
-      });
     });
+
+    if (hasNewInsert) {
+      promise = promise.then(() => {
+        this.getVsync().mutate(() => {
+          // Should scroll into view be toggleable
+          this.viewport_./*OK*/scrollIntoView(this.element);
+        });
+      });
+    }
+    return promise;
+  }
+
+  /**
+   * Reparents the html from the server to the live DOM.
+   *
+   * @param {!Element} parent
+   * @param {!Array<!Element>} orphans
+   * @private
+   */
+  insert_(parent, orphans) {
+    const fragment = this.win.document.createDocumentFragment();
+    orphans.forEach(elem => {
+      fragment.insertBefore(elem, fragment.firstElementChild);
+    });
+    parent.insertBefore(fragment, parent.firstElementChild);
+  }
+
+  /**
+   * Does an inline replace of a list item using the element ID.
+   * Does nothing if item has already been tombstoned or removed from the
+   * live DOM.
+   *
+   * @param {!Element} parent
+   * @param {!Array<!Element>} orphans
+   * @private
+   */
+  replace_(parent, orphans) {
+    orphans.forEach(orphan => {
+      const orphanId = orphan.getAttribute('id');
+      const liveElement = parent.querySelector(`#${orphanId}`);
+      // Don't bother updating if live element is tombstoned or
+      // if we can't find it.
+      if (!liveElement || liveElement.hasAttribute('data-tombstone')) {
+        return;
+      }
+      parent.replaceChild(orphan, liveElement);
+    });
+  }
+
+  /**
+   * Prepares the items from the server to be inserted into the DOM
+   * by sorting using `data-sort-time` and adding the needed list items
+   * classes for styling.
+   *
+   * @param {!Array<!Element>} items
+   * @private
+   */
+  preparePendingItemsInsert_(items) {
+    // Insert/new items will be contiguous at the top even though they
+    // weren't in the actual request DOM structure as it doesn't make sense
+    // to insert new items between old items.
+    // Order matters as this is how it will be appended into the DOM.
+    items.sort(this.comparator_).forEach(elem => {
+      elem.classList.add(classes.ITEM);
+      elem.classList.add(classes.NEW_ITEM);
+    });
+    this.pendingItemsInsert_.push.apply(this.pendingItemsInsert_, items);
+  }
+
+  /**
+   * Prepares the items from the server to directly replace an item in the
+   * live DOM. If item has a counterpart in the current pending changes
+   * that hasn't been flushed yet we just swap it out directly, else
+   * we push it into the array.
+   * Makes sure to add the `amp-live-list-item` class for items styling.
+   *
+   * @param {!Array<!Element>} items
+   * @private
+   */
+  preparePendingItemsReplace_(items) {
+    // Order doesn't matter since we do an in place replacement.
+    items.forEach(elem => {
+      const hasPendingCounterpart = this.hasMatchingPendingElement_(
+          this.pendingItemsReplace_, elem);
+      elem.classList.add('amp-live-list-item');
+      if (hasPendingCounterpart == -1) {
+        this.pendingItemsReplace_.push(elem);
+      } else {
+        this.pendingItemsReplace_[hasPendingCounterpart] = elem;
+      }
+    });
+  }
+
+  /**
+   * Returns the index of the matching element from the queue using the
+   * element id. Otherwise returns -1 for not found.
+   *
+   * @param {!Array<!Element>} pendingQueue
+   * @param {!Element} elem
+   * @return {number}
+   */
+  hasMatchingPendingElement_(pendingQueue, elem) {
+    for (let i = 0; i < pendingQueue.length; i++) {
+      if (pendingQueue[i].getAttribute('id') == elem.getAttribute('id')) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   /** @override */
@@ -243,7 +356,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // trigger `createdCallback`s even though we won't actually be
     // reparenting those nodes to this tree.
     const insert = [];
-    const updates = [];
+    const replace = [];
     const tombstone = [];
 
     for (let child = updatedElement.firstElementChild; child;
@@ -261,15 +374,16 @@ export class AmpLiveList extends AMP.BaseElement {
         if (updateTime > this.updateTime_) {
           this.updateTime_ = updateTime;
         }
-        updates.push(orphan);
+        replace.push(orphan);
       }
     }
 
-    return {insert, updates, tombstone};
+    return {insert, replace, tombstone};
   }
 
   /**
    * Predicate to check if the child passed in is new.
+   *
    * @param {!Element} elem
    * @return {boolean}
    * @private
@@ -282,6 +396,7 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Predicate to check if the child passed in is an update, determined
    * by data-update-time attribute.
+   *
    * @param {!Element} elem
    * @return {boolean}
    * @private
@@ -370,6 +485,7 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Iterates over the child elements and invokes the callback with
    * the current child element passed in as the first argument.
+   *
    * @param {!Element} parent
    * @param {function(!Element)} cb
    * @private
@@ -400,16 +516,17 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * @param {!Element} a
    * @param {!Element} b
-   * @return {number}
+   * @return {time}
    * @private
    */
   sortByDataSortTime_(a, b) {
-    return this.getSortTime_(a) - this.getSortTime_(b);
+    // Sort from newest to oldest so we don't have to reverse
+    return this.getSortTime_(b) - this.getSortTime_(a);
   }
 
   /**
    * @param {!Element} elem
-   * @return {number}
+   * @return {time}
    * @private
    */
   getSortTime_(elem) {
@@ -418,7 +535,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /**
    * @param {!Element} elem
-   * @return {number}
+   * @return {time}
    * @private
    */
   getUpdateTime_(elem) {
@@ -430,7 +547,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /**
    * @param {!Element} elem
-   * @return {number}
+   * @return {time}
    * @private
    */
   getTimeAttr_(elem, attr) {

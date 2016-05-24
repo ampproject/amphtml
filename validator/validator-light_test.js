@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
  */
 goog.provide('amp.validator.ValidatorTest');
 goog.require('amp.validator.CssLengthAndUnit');
-goog.require('amp.validator.renderValidationResult');
 goog.require('amp.validator.validateString');
 
 /**
@@ -116,7 +115,8 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
       fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8');
   /** @type {!string} */
   this.expectedOutput =
-      fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
+      fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8')
+          .split('\n')[0];
 };
 
 /**
@@ -124,10 +124,8 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
  * against the golden file content.
  */
 ValidatorTestCase.prototype.run = function() {
-  const results = amp.validator.validateString(this.ampHtmlFileContents);
-  amp.validator.annotateWithErrorCategories(results);
   const observed =
-      amp.validator.renderValidationResult(results, this.ampUrl).join('\n');
+      amp.validator.validateString(this.ampHtmlFileContents).status;
   if (observed === this.expectedOutput) {
     return;
   }
@@ -167,23 +165,6 @@ describe('ValidatorFeatures', () => {
   }
 });
 
-describe('ValidatorOutput', () => {
-  // What's tested here is that if a URL with #development=1 is passed
-  // (or any other hash), the validator output won't include the hash.
-  it('produces expected output with hash in the URL', () => {
-    const test = new ValidatorTestCase(
-        'feature_tests/no_custom_js.html',
-        'http://google.com/foo.html#development=1');
-    test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
-        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
-    test.run();
-  });
-});
-
 describe('ValidatorCssLengthValidation', () => {
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
@@ -212,12 +193,7 @@ describe('ValidatorCssLengthValidation', () => {
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replaceme {}', oneTooMany);
     test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
-        'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
-        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.expectedOutput = 'FAIL';
     test.run();
   });
 
@@ -228,12 +204,7 @@ describe('ValidatorCssLengthValidation', () => {
     test.ampHtmlFileContents =
         test.ampHtmlFileContents.replace('.replaceme {}', multiByteSheet);
     test.expectedOutputFile = null;
-    test.expectedOutput = 'FAIL\n' +
-        'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
-        'whereas the limit is 50000 bytes. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
-        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
+    test.expectedOutput = 'FAIL';
     test.run();
   });
 });
