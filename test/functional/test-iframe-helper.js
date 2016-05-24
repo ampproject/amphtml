@@ -99,8 +99,8 @@ describe('iframe-helper', function() {
     });
   });
 
-  // TODO(mkhatib): Figure out why this fails. Probably have to do with removing
-  // the iframes in _init_tests (#3314).
+  // TODO(#3314): Figure out why this fails. Probably have to do with removing
+  // the iframes in _init_tests.
   it.skip('should un-listen on next message when iframe is unattached', () => {
     let calls = 0;
     let otherCalls = 0;

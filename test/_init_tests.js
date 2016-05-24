@@ -78,8 +78,8 @@ sinon.sandbox.create = function(config) {
 // to selector.
 afterEach(() => {
   const cleanupTagNames = ['link', 'meta'];
-  if (platform.isChrome()) {
-    // Removing test iframes break tests on Safari (#3315).
+  if (!platform.isSafari()) {
+    // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }
   const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
