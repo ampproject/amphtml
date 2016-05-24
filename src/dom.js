@@ -399,6 +399,6 @@ export function hasNextNodeInDocumentOrder(element) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while (currentElement = element.parentNode);
+  } while (currentElement = currentElement.parentNode);
   return false;
 }
