@@ -31,6 +31,8 @@ describe('cid', () => {
   let clock;
   let fakeWin;
   let storage;
+  let cid;
+  let viewerBaseCidStub;
 
   const hasConsent = Promise.resolve();
 
@@ -72,7 +74,7 @@ describe('cid', () => {
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
     });
-    sandbox.stub(viewer, 'getBaseCid', function() {
+    viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
     });
     installCidService(fakeWin);
@@ -178,7 +180,17 @@ describe('cid', () => {
     isIframed = true;
     return compare(
         'e2',
-        'sha384(from-viewerhttp://www.origin.come2)');
+        'sha384(from-viewerhttp://www.origin.come2)')
+        .then(() => {
+          expect(cid.baseCid_).to.equal('from-viewer');
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+
+          // Ensure it's called only once.
+          return compare('e3', 'sha384(from-viewerhttp://www.origin.come3)');
+        })
+        .then(() => {
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+        });
   });
 
   it('should prefer value in storage if present', () => {
