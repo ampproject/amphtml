@@ -367,15 +367,18 @@ export function childElementByTag(parent, tagName) {
  * @param {!Element} element
  * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
+ * @param {string} opt_attrPrefix if it's something different than the default 'data-param',
+ *    i.e. 'data-' or 'data-foo-'
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc, opt_attrPrefix) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const attributes = element.attributes;
   const params = Object.create(null);
+  const regexp = new RegExp('^' + (opt_attrPrefix || 'data-param-') + '(.+)');
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const matches = attr.name.match(/^data-param-(.+)/);
+    const matches = attr.name.match(regexp);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
       params[computeParamNameFunc(param)] = attr.value;

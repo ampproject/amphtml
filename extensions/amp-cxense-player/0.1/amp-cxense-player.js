@@ -19,6 +19,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 const cxDefaults = {
@@ -26,7 +27,7 @@ const cxDefaults = {
   embedHost: 'https://embed.widget.cx',
   distEmbedApp: '/app/player/m4/dist/',
   debugEmbedApp: '/app/player/m4/debug/',
-  // can't access the window.top.location.href from the iframe.
+  // can't access the window.top.location.href from the iframe to enable sharing the top url
   attrs: {
     'share.enable': false,
   },
@@ -109,7 +110,7 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     getDataAttributes_() {
-      return extend(this.cxDefaults_.attrs, attrHash(this.element, 'data'));
+      return extend(this.cxDefaults_.attrs, getDataParamsFromAttributes(this.element, null, 'data-'));
     }
 
     /** @private */
@@ -149,28 +150,13 @@ class AmpCxense extends AMP.BaseElement {
 
 AMP.registerElement('amp-cxense-player', AmpCxense, CSS);
 
-function attrHash(el, prefix) {
-  const ret = {};
-  const attrs = Array.prototype.slice.call(el.attributes);
-  const p = prefix || '';
-  attrs.forEach(node => {
-    if (node.nodeName.indexOf(p + '-') == 0) {
-      const name = dashToCamelCase(node.nodeName.slice(p.length + 1));
-      ret[name] = node.nodeValue;
-    }
-  });
-  return ret;
-}
-
 function extend(target, source) {
   for (const prop in source) {
-    if (source.hasOwnProperty(prop)) {
       if (target[prop] && typeof source[prop] === 'object') {
         extend(target[prop], source[prop]);
       } else {
         target[prop] = source[prop];
       }
-    }
   }
   return target;
 }
