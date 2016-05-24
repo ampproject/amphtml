@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-cxense-player-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
@@ -110,7 +109,10 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     getDataAttributes_() {
-      return extend(this.cxDefaults_.attrs, getDataParamsFromAttributes(this.element, null, 'data-'));
+      return extend(
+          this.cxDefaults_.attrs,
+          getDataParamsFromAttributes(this.element, null, 'data-')
+      );
     }
 
     /** @private */
@@ -152,11 +154,11 @@ AMP.registerElement('amp-cxense-player', AmpCxense, CSS);
 
 function extend(target, source) {
   for (const prop in source) {
-      if (target[prop] && typeof source[prop] === 'object') {
-        extend(target[prop], source[prop]);
-      } else {
-        target[prop] = source[prop];
-      }
+    if (target[prop] && typeof source[prop] === 'object') {
+      extend(target[prop], source[prop]);
+    } else {
+      target[prop] = source[prop];
+    }
   }
   return target;
 }

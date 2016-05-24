@@ -371,7 +371,9 @@ export function childElementByTag(parent, tagName) {
  *    i.e. 'data-' or 'data-foo-'
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc, opt_attrPrefix) {
+export function getDataParamsFromAttributes(element,
+                                            opt_computeParamNameFunc,
+                                            opt_attrPrefix) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const attributes = element.attributes;
   const params = Object.create(null);
