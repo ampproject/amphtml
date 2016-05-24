@@ -15,7 +15,7 @@
  */
 
 import * as sinon from 'sinon';
-import {AmpLiveList} from '../amp-live-list';
+import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -27,13 +27,14 @@ describe('amp-live-list', () => {
   let liveList;
   let elem;
   let dftAttrs;
+  let itemsSlot;
 
   beforeEach(() => {
     toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
     elem = document.createElement('amp-live-list');
     const updateSlot = document.createElement('button');
-    const itemsSlot = document.createElement('div');
+    itemsSlot = document.createElement('div');
     updateSlot.setAttribute('update', '');
     itemsSlot.setAttribute('items', '');
     elem.appendChild(updateSlot);
@@ -42,6 +43,7 @@ describe('amp-live-list', () => {
       'id': 'my-list',
       'data-poll-interval': 2000,
       'data-max-items-per-page': 5,
+      'data-sort-time': Date.now(),
     };
   });
 
@@ -69,23 +71,30 @@ describe('amp-live-list', () => {
     return elem;
   }
 
-  function createFromServer(numOfChild = 1, opt_withId) {
+  /**
+   * @param {!Array<number>} childIds
+   * @return {!Element<!Element>}
+   */
+  function createFromServer(childAttrs = []) {
     const parent = document.createElement('div');
     const itemsCont = document.createElement('div');
     itemsCont.setAttribute('items', '');
     parent.appendChild(itemsCont);
-    for (let i = 0; i < numOfChild; i++) {
+    for (let i = 0; i < childAttrs.length; i++) {
+      const childAttr = childAttrs[i];
       const child = document.createElement('div');
-      if (opt_withId) {
-        child.setAttribute('id', `id${i}`);
-        child.setAttribute('data-sort-time', Date.now());
+      child.setAttribute('id', `${childAttr.id}`);
+      child.setAttribute('data-sort-time',
+          `${childAttr.sortTime || Date.now()}`);
+      if ('updateTime' in childAttr) {
+        child.setAttribute('data-update-time', `${childAttr.updateTime}`);
       }
       itemsCont.appendChild(child);
     }
     return parent;
   }
 
-  it('validates that elem has an id on creation', () => {
+  it('validates that elem has an id on initial load', () => {
     buildElement(elem, {});
     expect(() => {
       liveList.buildCallback();
@@ -97,13 +106,35 @@ describe('amp-live-list', () => {
     }).to.not.throw(/must have an id/);
   });
 
-  it('validates its children to have ids', () => {
+  it('validates its items slot on initial load', () => {
+    const child = document.createElement('div');
+    elem.querySelector('[items]').appendChild(child);
+    buildElement(elem, dftAttrs);
+    const stub = sandbox.stub(liveList, 'validateLiveListItems_');
+    expect(stub.callCount).to.equal(0);
+    liveList.buildCallback();
+    expect(stub.callCount).to.equal(1);
+  });
+
+  it('validates correctly', () => {
     const child = document.createElement('div');
     elem.querySelector('[items]').appendChild(child);
     buildElement(elem, dftAttrs);
     expect(() => {
+      liveList.validateLiveListItems_(elem.querySelector('[items]'));
+    }).to.throw(/children must have id and data-sort-time/);
+
+    expect(() => {
+      child.setAttribute('id', 'child-id');
       liveList.buildCallback();
-    }).to.throw(/children must have an id/);
+    }).to.throw(/children must have id and data-sort-time/);
+
+    child.removeAttribute('id');
+
+    expect(() => {
+      child.setAttribute('data-sort-time', Date.now());
+      liveList.buildCallback();
+    }).to.throw(/children must have id and data-sort-time/);
 
     expect(() => {
       child.setAttribute('id', 'child-id');
@@ -165,7 +196,7 @@ describe('amp-live-list', () => {
     elem.removeChild(elem.querySelector('[update]'));
     expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have an `update` slot/);
+    }).to.throw(/must have an "update" slot/);
   });
 
   it('should enforce items slot', () => {
@@ -173,7 +204,7 @@ describe('amp-live-list', () => {
     elem.removeChild(elem.querySelector('[items]'));
     expect(() => {
       liveList.buildCallback();
-    }).to.throw(/must have an `items` slot/);
+    }).to.throw(/must have an "items" slot/);
   });
 
   describe('#update', () => {
@@ -189,47 +220,29 @@ describe('amp-live-list', () => {
       updateLiveListItems.setAttribute('items', '');
       update.appendChild(updateLiveListItems);
       updateLiveListItems.appendChild(document.createElement('div'));
-
+      const stub = sandbox.stub(liveList, 'validateLiveListItems_');
+      expect(stub.callCount).to.equal(0);
       expect(() => {
         liveList.update(update);
-      }).to.throw(/children must have an id/);
-
-      const update2 = document.createElement('div');
-      const update2LiveListItems = document
-          .createElement('div');
-      update2LiveListItems.setAttribute('items', '');
-      update2.appendChild(update2LiveListItems);
-      const update2Child = document.createElement('div');
-      update2Child.setAttribute('id', 'i-have-an-id');
-      update2LiveListItems.appendChild(update2Child);
-
-      expect(() => {
-        liveList.update(update2);
-      }).to.not.throw();
+      }).to.throw();
+      expect(stub.callCount).to.equal(1);
     });
 
     it('asserts that an items slot was provided on update', () => {
       const update = document.createElement('div');
       const updateLiveListItems = document.createElement('div');
-      updateLiveListItems.setAttribute('items', '');
       update.appendChild(updateLiveListItems);
       updateLiveListItems.appendChild(document.createElement('div'));
 
       expect(() => {
         liveList.update(update);
-      }).to.throw(/children must have an id/);
+      }).to.throw(/amp-live-list must have an `items` slot/);
 
-      const update2 = document.createElement('div');
-      const update2LiveListItems = document
-          .createElement('div');
-      update2.appendChild(update2LiveListItems);
-      const update2Child = document.createElement('div');
-      update2Child.setAttribute('id', 'i-have-an-id');
-      update2LiveListItems.appendChild(update2Child);
+      updateLiveListItems.setAttribute('items', '');
 
       expect(() => {
-        liveList.update(update2);
-      }).to.throw(/amp-live-list must have an `items` slot/);
+        liveList.update(update);
+      }).to.not.throw(/amp-live-list must have an `items` slot/);
     });
 
     it('discovers children to insert when they have newly discovered ' +
@@ -238,39 +251,36 @@ describe('amp-live-list', () => {
 
       const child = document.createElement('div');
       child.setAttribute('id', 'id0');
-      elem.querySelector('[items]').appendChild(child);
+      child.setAttribute('data-sort-time', '12345');
+      itemsSlot.appendChild(child);
 
       liveList.buildCallback();
       expect(liveList.itemsSlot_.childElementCount).to.equal(1);
 
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
-      expect(liveList.insertFragment_.childElementCount).to.equal(0);
+      expect(liveList.pendingItemsInsert_).to.have.length(0);
 
-      const fromServer2 = createFromServer(3, true);
+      const fromServer2 = createFromServer([
+        {id: 'id0'}, {id: 'id1'}, {id: 'id2'},
+      ]);
       const fromServer2ItemsCont = fromServer2
           .querySelector('[items]');
       expect(fromServer2ItemsCont.childElementCount).to.equal(3);
-      expect(liveList.insertFragment_.childElementCount).to.equal(0);
+      expect(liveList.pendingItemsInsert_).to.have.length(0);
       liveList.update(fromServer2);
-      expect(liveList.insertFragment_.childElementCount).to.equal(2);
+      expect(liveList.pendingItemsInsert_).to.have.length(2);
     });
 
     it('should wait for user interaction before inserting', () => {
       buildElement(elem, dftAttrs);
       liveList.buildCallback();
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
-      expect(liveList.insertFragment_.childElementCount).to.equal(1);
+      expect(liveList.pendingItemsInsert_).to.have.length(1);
       return liveList.updateAction_().then(() => {
-        expect(liveList.insertFragment_.childElementCount).to.equal(0);
+        expect(liveList.pendingItemsInsert_).to.have.length(0);
         expect(liveList.itemsSlot_.childElementCount).to.equal(1);
       });
     });
@@ -285,9 +295,6 @@ describe('amp-live-list', () => {
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
 
       const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('amp-live-list-items');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
       liveList.update(fromServer1);
       expect(liveList.insertFragment_.childElementCount).to.equal(0);
       expect(liveList.itemsSlot_.childElementCount).to.equal(1);
@@ -300,10 +307,9 @@ describe('amp-live-list', () => {
 
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
 
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([
+        {id: 'id0'},
+      ]);
       liveList.update(fromServer1);
       return liveList.updateAction_().then(() => {
         expect(liveList.itemsSlot_.firstElementChild)
@@ -318,20 +324,14 @@ describe('amp-live-list', () => {
 
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
 
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       return liveList.updateAction_().then(() => {
         expect(liveList.itemsSlot_.lastElementChild)
             .to.have.class('amp-live-list-item-new');
         expect(liveList.itemsSlot_.childElementCount).to.equal(1);
 
-        const fromServer2 = createFromServer();
-        const fromServer2ItemsCont = fromServer2
-            .querySelector('[items]');
-        fromServer2ItemsCont.firstElementChild.setAttribute('id', 'id1');
+        const fromServer2 = createFromServer([{id: 'id1'}]);
         liveList.update(fromServer2);
         return liveList.updateAction_().then(() => {
           expect(liveList.itemsSlot_.childElementCount).to.equal(2);
@@ -347,19 +347,13 @@ describe('amp-live-list', () => {
 
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
 
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
       return liveList.updateAction_().then(() => {
         expect(liveList.itemsSlot_.lastElementChild)
             .to.have.class('amp-live-list-item');
 
-        const fromServer2 = createFromServer();
-        const fromServer2ItemsCont = fromServer2
-            .querySelector('[items]');
-        fromServer2ItemsCont.firstElementChild.setAttribute('id', 'id1');
+        const fromServer2 = createFromServer([{id: 'id1'}]);
         liveList.update(fromServer2);
         return liveList.updateAction_().then(() => {
           expect(liveList.itemsSlot_.childElementCount).to.equal(2);
@@ -375,63 +369,14 @@ describe('amp-live-list', () => {
       expect(liveList.itemsSlot_.childElementCount).to.equal(0);
       expect(elem.querySelector('[update]')).to.have.class('-amp-hidden');
 
-      const fromServer1 = createFromServer();
-      const fromServer1ItemsCont = fromServer1
-          .querySelector('[items]');
-      fromServer1ItemsCont.firstElementChild.setAttribute('id', 'id0');
+      const fromServer1 = createFromServer([{id: 'id0'}]);
       liveList.update(fromServer1);
-      expect(liveList.insertFragment_.childElementCount).to.equal(1);
+      expect(liveList.pendingItemsInsert_).to.have.length(1);
       expect(liveList.updateSlot_).to.not.have.class('-amp-hidden');
 
       return liveList.updateAction_(fromServer1).then(() => {
         expect(liveList.updateSlot_).to.have.class('-amp-hidden');
       });
-    });
-
-    it('should validate that updates have data-sort-time', () => {
-      buildElement(elem, dftAttrs);
-      liveList.buildCallback();
-      expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-      expect(elem.querySelector('[update]')).to.have.class('-amp-hidden');
-
-      const fromServer1 = document.createElement('amp-live-list');
-      const fromServer1Items = document.createElement('div');
-      fromServer1Items.setAttribute('items', '');
-      fromServer1.appendChild(fromServer1Items);
-      const fromServer1ItemsChild1 = document.createElement('div');
-      fromServer1ItemsChild1.setAttribute('id', 'unique-id-num-3');
-      const fromServer1ItemsChild2 = document.createElement('div');
-      fromServer1ItemsChild2.setAttribute('id', 'unique-id-num-4');
-      fromServer1Items.appendChild(fromServer1ItemsChild1);
-      fromServer1Items.appendChild(fromServer1ItemsChild2);
-
-      expect(() => {
-        liveList.update(fromServer1);
-      }).to.throw(/`data-sort-time` attribute must exist/);
-    });
-
-    it('should validate that data-sort-time values are Numbers', () => {
-      buildElement(elem, dftAttrs);
-      liveList.buildCallback();
-      expect(liveList.itemsSlot_.childElementCount).to.equal(0);
-      expect(elem.querySelector('[update]')).to.have.class('-amp-hidden');
-
-      const fromServer1 = document.createElement('amp-live-list');
-      const fromServer1Items = document.createElement('div');
-      fromServer1Items.setAttribute('items', '');
-      fromServer1.appendChild(fromServer1Items);
-      const fromServer1ItemsChild1 = document.createElement('div');
-      fromServer1ItemsChild1.setAttribute('id', 'unique-id-num-3');
-      fromServer1ItemsChild1.setAttribute('data-sort-time', 'hello');
-      const fromServer1ItemsChild2 = document.createElement('div');
-      fromServer1ItemsChild2.setAttribute('id', 'unique-id-num-4');
-      fromServer1ItemsChild2.setAttribute('data-sort-time', 'world');
-      fromServer1Items.appendChild(fromServer1ItemsChild1);
-      fromServer1Items.appendChild(fromServer1ItemsChild2);
-
-      expect(() => {
-        liveList.update(fromServer1);
-      }).to.throw(/value must be a number/);
     });
 
     it('should have correct insertion by using data-sort-time', () => {
@@ -442,31 +387,210 @@ describe('amp-live-list', () => {
 
       const oldDate = Date.now();
 
-      const fromServer1 = document.createElement('amp-live-list');
-      const fromServer1Items = document.createElement('div');
-      fromServer1Items.setAttribute('items', '');
-      fromServer1.appendChild(fromServer1Items);
-      const fromServer1ItemsChild1 = document.createElement('div');
-      fromServer1ItemsChild1.setAttribute('id', 'unique-id-num-3');
-      fromServer1ItemsChild1.setAttribute('data-sort-time', oldDate + 1);
-      const fromServer1ItemsChild2 = document.createElement('div');
-      fromServer1ItemsChild2.setAttribute('id', 'unique-id-num-4');
-      fromServer1ItemsChild2.setAttribute('data-sort-time', oldDate + 2);
-      const fromServer1ItemsChild3 = document.createElement('div');
-      fromServer1ItemsChild3.setAttribute('id', 'unique-id-num-5');
-      fromServer1ItemsChild3.setAttribute('data-sort-time', oldDate);
-      fromServer1Items.appendChild(fromServer1ItemsChild1);
-      fromServer1Items.appendChild(fromServer1ItemsChild2);
-      fromServer1Items.appendChild(fromServer1ItemsChild3);
+      const fromServer1 = createFromServer([
+        {id: 'unique-id-num-3', sortTime: oldDate + 1},
+        {id: 'unique-id-num-4', sortTime: oldDate + 2},
+        {id: 'unique-id-num-5', sortTime: oldDate},
+      ]);
 
       liveList.update(fromServer1);
 
-      expect(liveList.insertFragment_.children[0].getAttribute('id'))
+      expect(liveList.pendingItemsInsert_[0].getAttribute('id'))
           .to.equal('unique-id-num-4');
-      expect(liveList.insertFragment_.children[1].getAttribute('id'))
+      expect(liveList.pendingItemsInsert_[1].getAttribute('id'))
           .to.equal('unique-id-num-3');
-      expect(liveList.insertFragment_.children[2].getAttribute('id'))
+      expect(liveList.pendingItemsInsert_[2].getAttribute('id'))
           .to.equal('unique-id-num-5');
+    });
+  });
+
+  it('should have the correct "update time"', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    expect(() => {
+      liveList.buildCallback();
+    }).to.not.throw();
+    expect(liveList.updateTime_).to.equal(124);
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', sortTime: 129},
+    ]);
+    // Does not get updated since it is a cached id.
+    expect(liveList.update(fromServer1)).to.equal(124);
+
+    // Find the highest data-sort-time
+    const fromServer2 = createFromServer([
+      {id: 'id3', sortTime: 130},
+      {id: 'id4', sortTime: 133},
+    ]);
+    expect(liveList.update(fromServer2)).to.equal(133);
+
+    // Find the highest data-update-time
+    const fromServer3 = createFromServer([
+      {id: 'id6', sortTime: 150, updateTime: 200},
+      {id: 'id7', sortTime: 150, updateTime: 180},
+    ]);
+    expect(liveList.update(fromServer3)).to.equal(200);
+
+    // No update is made since data-update-time did not change
+    // and only data-sort-time changed, but its treated
+    // immutable even if the server sent us a new value.
+    const fromServer4 = createFromServer([
+      {id: 'id6', sortTime: 300, updateTime: 200},
+    ]);
+    expect(liveList.update(fromServer4)).to.equal(200);
+
+    // data-update-time is used
+    const fromServer5 = createFromServer([
+      {id: 'id6', sortTime: 300, updateTime: 600},
+    ]);
+    expect(liveList.update(fromServer5)).to.equal(600);
+  });
+
+  it('should be able to accumulate insert items', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 125},
+      {id: 'id3'},
+    ]);
+
+    const spy = sandbox.spy(liveList, 'updateAction_');
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsInsert_).to.have.length(1);
+    expect(spy.callCount).to.equal(0);
+
+    const fromServer2 = createFromServer([
+      {id: 'id4'},
+      {id: 'id7'},
+      {id: 'id9'},
+    ]);
+    liveList.update(fromServer2);
+    expect(liveList.pendingItemsInsert_).to.have.length(4);
+    expect(spy.callCount).to.equal(0);
+  });
+
+  it('should have pending replace items', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 125},
+      {id: 'id3'},
+    ]);
+
+    const spy = sandbox.spy(liveList, 'updateAction_');
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsInsert_).to.have.length(1);
+    expect(liveList.pendingItemsReplace_).to.have.length(1);
+    // Should wait for user action until `updateAction_`
+    expect(spy.callCount).to.equal(0);
+  });
+
+  it('should have pending replace items even w/o new inserts', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 125},
+    ]);
+
+    const spy = sandbox.spy(liveList, 'updateAction_');
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsInsert_).to.have.length(0);
+    expect(liveList.pendingItemsReplace_).to.have.length(1);
+    // If there is no pending items to insert, flush the replace items
+    // right away.
+    expect(spy.callCount).to.equal(1);
+  });
+
+  it('should always use latest update to replace when in pending state', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 125},
+      {id: 'id3'},
+    ]);
+
+    const spy = sandbox.spy(liveList, 'updateAction_');
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingItemsReplace_).to.have.length(1);
+    expect(liveList.pendingItemsReplace_[0].getAttribute('id')).to.equal('id1');
+    expect(liveList.pendingItemsReplace_[0].getAttribute('data-update-time'))
+        .to.equal('125');
+    // Should wait for user action until `updateAction_`
+    expect(spy.callCount).to.equal(0);
+
+    const fromServer2 = createFromServer([
+      {id: 'id1', updateTime: 127},
+    ]);
+    liveList.update(fromServer2);
+
+    expect(liveList.pendingItemsReplace_).to.have.length(1);
+    expect(liveList.pendingItemsReplace_[0].getAttribute('id')).to.equal('id1');
+    expect(liveList.pendingItemsReplace_[0].getAttribute('data-update-time'))
+        .to.equal('127');
+
+    expect(spy.callCount).to.equal(0);
+  });
+
+  describe('#getNumberMaxOrDefault', () => {
+
+    it('should return correct value', () => {
+      expect(getNumberMaxOrDefault('', 10)).to.equal(10);
+      expect(getNumberMaxOrDefault(undefined, 10)).to.equal(10);
+      expect(getNumberMaxOrDefault(null, 10)).to.equal(10);
+      expect(getNumberMaxOrDefault('hello world', 10)).to.equal(10);
+      expect(getNumberMaxOrDefault(NaN, 10)).to.equal(10);
+      expect(getNumberMaxOrDefault('12', 10)).to.equal(12);
+      expect(getNumberMaxOrDefault('037', 10)).to.equal(37);
+      expect(getNumberMaxOrDefault('0', 10)).to.equal(10);
+      expect(getNumberMaxOrDefault(0, 10)).to.equal(10);
     });
   });
 });

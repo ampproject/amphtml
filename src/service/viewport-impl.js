@@ -202,6 +202,14 @@ export class Viewport {
   }
 
   /**
+   * Returns the height of the viewport.
+   * @return {number}
+   */
+  getHeight() {
+    return this.getSize().height;
+  }
+
+  /**
    * Returns the width of the viewport.
    * @return {number}
    */

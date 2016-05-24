@@ -1,5 +1,5 @@
 {
-  "name": "amp_validator",
+  "name": "amp-validator",
   "version": "0.1.0",
   "description": "Validator for AMP HTML (www.ampproject.org)",
   "engines": {
@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "bin": {
-    "amp_validator": "index.js"
+    "amp-validator": "index.js"
   },
   "dependencies": {
     "commander": "2.9.0",
@@ -49,6 +49,7 @@
   "devDependencies": {
     "google-closure-compiler": "20151015.0.0",
     "google-closure-library": "20151015.0.0",
-    "jasmine": "2.3.2"
+    "jasmine": "2.3.2",
+    "vulcanize": "1.14.8"
   }
 }

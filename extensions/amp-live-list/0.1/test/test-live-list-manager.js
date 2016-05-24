@@ -54,12 +54,16 @@ describe('LiveListManager', () => {
     sandbox.restore();
   });
 
-  function getLiveList(attrs = {}) {
+  function getLiveList(attrs = {}, opt_id) {
     const el = document.createElement('amp-live-list');
-    el.setAttribute('id', 'id-1');
+    el.setAttribute('id', opt_id || 'id-1');
     el.setAttribute('data-max-items-per-page', '10');
-    el.appendChild(document.createElement('amp-live-list-update'));
-    el.appendChild(document.createElement('amp-live-list-items'));
+    const updateSlot = document.createElement('div');
+    const itemsSlot = document.createElement('div');
+    updateSlot.setAttribute('update', '');
+    itemsSlot.setAttribute('items', '');
+    el.appendChild(updateSlot);
+    el.appendChild(itemsSlot);
     for (const key in attrs) {
       el.setAttribute(key, attrs[key]);
     }
@@ -242,6 +246,69 @@ describe('LiveListManager', () => {
       expect(manager.poller_.isRunning()).to.be.false;
       clock.tick(20000);
       expect(fetchSpy.callCount).to.equal(2);
+    });
+  });
+
+  it('should fetch with url', () => {
+    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+    ready();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    liveList.buildCallback();
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy.callCount).to.equal(0);
+      clock.tick(tick);
+      expect(fetchSpy.callCount).to.equal(1);
+      expect(requests[0].url).to.match(/^www\.example\.com\/foo\/bar/);
+      expect(requests[0].url).to.not.match(/amp_latest_update_time/);
+    });
+  });
+
+  it('should find highest "update time" from amp-live-list elements', () => {
+    const doc = [];
+    const list1 = getLiveList(undefined, 'id1');
+    const list2 = getLiveList(undefined, 'id2');
+    sandbox.stub(list1, 'update').returns(1000);
+    sandbox.stub(list2, 'update').returns(2000);
+    doc.getElementsByTagName = () => {
+      return [list1.element, list2.element];
+    };
+    list1.buildCallback();
+    list2.buildCallback();
+    expect(manager.latestUpdateTime_).to.equal(0);
+    manager.getLiveLists_(doc);
+    expect(manager.latestUpdateTime_).to.equal(2000);
+  });
+
+  it('should add amp_latest_update_time on requests', () => {
+    sandbox.stub(Math, 'random', () => 1);
+    sandbox.stub(viewer, 'isVisible').returns(true);
+    manager.url_ = 'www.example.com/foo/bar?hello=world#dev=1';
+    manager.latestUpdateTime_ = 2000;
+    sandbox.stub(liveList, 'update').returns(2500);
+    ready();
+    liveList.buildCallback();
+    const fetchSpy = sandbox.spy(manager, 'work_');
+    return manager.whenDocReady_().then(() => {
+      const interval = liveList.getInterval();
+      const tick = interval - jitterOffset;
+      expect(manager.poller_.isRunning()).to.be.true;
+      expect(fetchSpy.callCount).to.equal(0);
+      clock.tick(tick);
+      expect(fetchSpy.callCount).to.equal(1);
+      expect(requests[0].url).to.match(/amp_latest_update_time=2000/);
+      requests[0].respond(200, {
+        'Content-Type': 'text/xml',
+      }, '<html><amp-live-list id="id-1"></amp-live-list></html>');
+      return manager.poller_.lastWorkPromise_.then(() => {
+        clock.tick(tick);
+        expect(fetchSpy.callCount).to.equal(2);
+        expect(requests[1].url).to.match(/amp_latest_update_time=2500/);
+      });
     });
   });
 });

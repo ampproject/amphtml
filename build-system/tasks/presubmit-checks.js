@@ -57,6 +57,7 @@ var forbiddenTerms = {
     whitelist: [
       'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
+      'validator/validator-full.js',
       'validator/validator-in-browser.js',
       'validator/validator.js',
     ]
@@ -97,6 +98,13 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installPerformanceService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/service/performance-impl.js',
     ],
   },
   'installStorageService': {
@@ -278,6 +286,7 @@ var forbiddenTerms = {
     whitelist: [
       'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
+      'validator/validator-full.js',
       'validator/validator.js',
     ]
   },
@@ -323,11 +332,12 @@ var forbiddenTerms = {
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
-      'validator/validator.js',
+      'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'examples/viewer-integr.js',
+      'validator/validator-full.js',
+      'validator/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -414,6 +424,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  'insertAmpExtensionScript': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/insert-extension.js',
+      'src/element-stub.js',
+    ],
+  },
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
         'error.cancellation() may be applicable.',

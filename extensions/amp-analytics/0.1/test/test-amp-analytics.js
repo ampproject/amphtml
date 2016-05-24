@@ -581,36 +581,59 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('sends extraUrlParams', () => {
-    const analytics = getAnalyticsTag({
-      'vars': {'host': 'example.com', 'path': 'helloworld'},
-      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
-      'requests': {'foo': 'https://${host}/${path}?a=b'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'config': 'config1',
+  describe('extraUrlParams', () => {
+    let config;
+    beforeEach(() => {
+      config = {
+        vars: {host: 'example.com', path: 'helloworld'},
+        extraUrlParams: {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+        requests: {foo: 'https://${host}/${path}?a=b'},
+        triggers: {trig: {'on': 'visible', 'request': 'foo'}},
+      };
     });
-    return waitForSendRequest(analytics).then(() => {
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=1&foofoo=baz');
-    });
-  });
 
-  it('handles extraUrlParamsReplaceMap', () => {
-    const analytics = getAnalyticsTag({
-      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
-      'extraUrlParamsReplaceMap': {'s.evar': 'v'},
-      'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}],
-    }, {
-      'config': 'config1',
-    });
-    return waitForSendRequest(analytics).then(() => {
+    function verifyRequest() {
       expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
       expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
       expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    }
+
+    it('are sent', () => {
+      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=1&foofoo=baz');
+      });
+    });
+
+    it('are renamed by extraUrlParamsReplaceMap', () => {
+      config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
+      const analytics = getAnalyticsTag(config , {'config': 'config1'});
+      return waitForSendRequest(analytics).then(() => {
+        verifyRequest();
+      });
+    });
+
+    it('are supported at trigger level', () => {
+      config.triggers.trig.extraUrlParams = {c: 'd', 's.evar': 'e'};
+      config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
+      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      return waitForSendRequest(analytics).then(() => {
+        verifyRequest();
+        expect(sendRequestSpy.args[0][0]).to.have.string('c=d');
+        expect(sendRequestSpy.args[0][0]).to.have.string('v=e');
+      });
+    });
+
+    it('are supported as a var in URL', () => {
+      config.requests.foo = 'https://${host}/${path}?${extraUrlParams}&a=b';
+      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?s.evar0=0&s.evar1=1&foofoo=baz&a=b');
+      });
     });
   });
 

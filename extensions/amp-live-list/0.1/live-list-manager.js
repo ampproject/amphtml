@@ -15,6 +15,7 @@
  */
 
 import {Poller} from './poller';
+import {addParamToUrl} from '../../../src/url';
 import {getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
@@ -50,8 +51,11 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.win.location.href;
 
+    /** @private {number} */
+    this.latestUpdateTime_ = 0;
+
     /** @private @const {function(): Promise} */
-    this.work_ = this.fetchDocument_.bind(this, this.url_);
+    this.work_ = this.fetchDocument_.bind(this);
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
@@ -73,7 +77,12 @@ export class LiveListManager {
    * @param {string} url
    * @private
    */
-  fetchDocument_(url) {
+  fetchDocument_() {
+    let url = this.url_;
+    if (this.latestUpdateTime_ > 0) {
+      url = addParamToUrl(url, 'amp_latest_update_time',
+          this.latestUpdateTime_);
+    }
     return xhrFor(this.win)
         // TODO(erwinm): add update time here when possible.
         .fetchDocument(url)
@@ -88,20 +97,25 @@ export class LiveListManager {
   getLiveLists_(doc) {
     const lists = Array.prototype.slice.call(
         doc.getElementsByTagName('amp-live-list'));
-    lists.forEach(this.updateLiveList_.bind(this));
+    const updateTimes = lists.map(this.updateLiveList_.bind(this));
+    const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
+    if (latestUpdateTime > 0) {
+      this.latestUpdateTime_ = latestUpdateTime;
+    }
   }
 
   /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
    * @param {!HTMLElement} liveList
+   * @return {number}
    */
   updateLiveList_(liveList) {
     const id = liveList.getAttribute('id');
     user.assert(id, 'amp-live-list must have an id.');
-    user.assert(id in this.liveLists_, `amp-live-ist#${id} found but did not ` +
-        `exist on original page load`);
-    this.liveLists_[id].update(liveList);
+    user.assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
+        `not exist on original page load.`);
+    return this.liveLists_[id].update(liveList);
   }
 
   /**

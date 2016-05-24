@@ -24,11 +24,12 @@ var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var fs = BBPromise.promisifyAll(require('fs'));
+var jsdom = require('jsdom');
 var path = require('path');
-var url = require('url');
 var request = require('request');
 var serveIndex = require('serve-index');
 var serveStatic = require('serve-static');
+var url = require('url');
 
 var args = Array.prototype.slice.call(process.argv, 2, 4);
 var paths = args[0];
@@ -101,6 +102,34 @@ app.use('/examples.build/live-list.amp.max.html', function(req, res) {
       '/examples.build/live-list.amp.max.html').then((file) => {
         res.end(file);
   });
+});
+
+var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
+var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
+var liveListFile = fs.readFileSync(liveListUpdateFullPath);
+var ctr = 0;
+var doc = jsdom.jsdom(liveListFile);
+var win = doc.defaultView;
+app.use(liveListUpdateFile, function(req, res) {
+  var doctype = '<!doctype html>\n';
+  res.setHeader('Content-Type', 'text/html');
+  res.statusCode = 200;
+  if (ctr != 0) {
+    if (Math.random() < .7) {
+      var item1 = doc.querySelector('#list-item-1');
+      var item1Content = item1.querySelectorAll('.content');
+      item1.setAttribute('data-update-time', Date.now());
+      item1Content[0].textContent = Math.floor(Math.random() * 10);
+      item1Content[1].textContent = Math.floor(Math.random() * 10);
+    } else {
+      // Sometimes we want an empty response to simulate no changes.
+      res.end(`${doctype}<html></html>`);
+      return;
+    }
+  }
+  var outerHTML = doc.documentElement./*OK*/outerHTML;
+  res.end(`${doctype}${outerHTML}`);
+  ctr++;
 });
 
 // Proxy with unminified JS.

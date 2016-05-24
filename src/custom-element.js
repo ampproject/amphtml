@@ -111,6 +111,14 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 export function stubElements(win) {
   if (!win.ampExtendedElements) {
     win.ampExtendedElements = {};
+    // If amp-ad and amp-embed haven't been registered, manually register them
+    // with ElementStub, in case the script to the element is not included.
+    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
+      win.ampExtendedElements['amp-ad'] = true;
+      registerElement(win, 'amp-ad', ElementStub);
+      win.ampExtendedElements['amp-embed'] = true;
+      registerElement(win, 'amp-embed', ElementStub);
+    }
   }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
@@ -440,31 +448,16 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *
-   * If the "force" argument is "false", the element will first check if
-   * implementation is ready to build by calling
-   * {@link BaseElement.isReadyToBuild} method. If this method returns "true"
-   * the build proceeds, otherwise no build is done.
-   *
-   * If the "force" argument is "true", the element performs build regardless
-   * of what {@link BaseElement.isReadyToBuild} would return.
-   *
-   * Returned value indicates whether or not build has been performed.
-   *
    * This method can only be called on a upgraded element.
    *
-   * @param {boolean} force Whether or not force the build.
-   * @return {boolean}
    * @final @this {!Element}
    */
-  ElementProto.build = function(force) {
+  ElementProto.build = function() {
     this.assertNotTemplate_();
     if (this.isBuilt()) {
-      return true;
+      return;
     }
     dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force && !this.implementation_.isReadyToBuild()) {
-      return false;
-    }
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
@@ -493,7 +486,6 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
         this.appendChild(placeholder);
       }
     }
-    return true;
   };
 
   /**
@@ -656,6 +648,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       return;
     }
     this.resources_.remove(this);
+    this.implementation_.detachedCallback();
   };
 
   /**
@@ -1239,6 +1232,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
 
   if (implementationClass) {
+    // Update on the knownElements to prevent register again.
     knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
       prototype: createAmpElementProto(win, aliasName),
