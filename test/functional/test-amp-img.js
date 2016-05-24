@@ -19,7 +19,7 @@ import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
 import * as sinon from 'sinon';
 
-describe('amp-img', () => {
+describe('amp-img unit', () => {
   let sandbox;
 
   beforeEach(() => {

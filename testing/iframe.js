@@ -18,6 +18,7 @@
 import {Timer} from '../src/timer';
 import {installCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
+import {removeElement} from '../src/dom';
 
 let iframeCount = 0;
 
@@ -124,16 +125,36 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, 1000);
       // Declare the test ready to run when the document was fully parsed.
+      let resolved;
       window.afterLoad = function() {
-        resolve({
+        resolved = {
           win: win,
           doc: win.document,
           iframe: iframe,
           awaitEvent: awaitEvent,
           errors: errors,
           messages: messages,
-        });
+        };
+        resolve(resolved);
+        window.afterLoad = null;
       };
+      win.onunload = function() {
+        this.document.documentElement.innerHTML = '';
+        win.services = null;
+        win.AMP = null;
+        win = null;
+        if (resolved) {
+          for (let field in resolved) {
+            resolved[field] = null;
+          }
+        }
+        this.location.href = 'about:blank';
+        this.frameElement.contentWindow = null;
+        errors = null;
+        resolve = null;
+        reject = null;
+      };
+      window.beforeLoad = null;
     };
     // Add before and after load callbacks to the document.
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
@@ -194,13 +215,15 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
-      resolve({
+      const elements = [];
+      let resolved = {
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
           iframe.contentWindow.document.getElementById('parent')
               .appendChild(element);
+          elements.push(element);
           // Wait for mutation observer to fire.
           return new Timer(window).promise(16).then(() => {
             // Make sure it has dimensions since no styles are available.
@@ -223,7 +246,21 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             return element;
           });
         }
-      });
+      };
+      iframe.contentWindow.onunload = function() {
+        elements.forEach(e => {
+          e.implementation_ = null;
+          e.__AMP__RESOURCE = null;
+          removeElement(e);
+        });
+        elements.length = 0;
+        for (let item in resolved) {
+          resolved[item] = null;
+        }
+        iframe.onload = null;
+        iframe = null;
+      };
+      resolve(resolved);
     };
     iframe.onerror = reject;
     document.body.appendChild(iframe);
@@ -268,13 +305,16 @@ export function poll(description, condition, opt_onError, opt_timeout) {
     function poll() {
       const ret = condition();
       if (ret) {
+        condition = null;
         clearInterval(interval);
         resolve(ret);
       } else {
         if (new Date().getTime() - start > (opt_timeout || 1600)) {
+          condition = null;
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
+            opt_onError = null;
             return;
           }
           reject(new Error('Timeout waiting for ' + description));

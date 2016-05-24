@@ -35,6 +35,10 @@ describe('3p environment', () => {
     });
   });
 
+  afterEach(() => {
+    testWin = null;
+  });
+
   it('should instrument a window', () => {
     expect(testWin.setTimeout).to.match(/native/);
     manageWin(testWin);
