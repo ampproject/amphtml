@@ -16,6 +16,7 @@
 
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
+import {AmpSlideScroll} from './slidescroll';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
 
@@ -27,7 +28,7 @@ class CarouselSelector {
       const slideScrollExpt =
           isExperimentOn(element.ownerDocument.defaultView, 'amp-slidescroll');
       if (slideScrollExpt) {
-        return new AmpCarouscroll(element);
+        return new AmpSlideScroll(element);
       }
       return new AmpSlides(element);
     }

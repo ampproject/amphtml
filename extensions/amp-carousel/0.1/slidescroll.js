@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export class AmpCarouscroll extends BaseCarousel {
+export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
