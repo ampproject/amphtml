@@ -86,8 +86,8 @@ parse_css.TokenStream = class {
     // The last token is guaranteed to be the EOF token (with correct
     // line / col!) so any request past the length of the array
     // fetches that.
-    return (num < this.tokens.length) ?
-        this.tokens[num] : this.tokens[this.tokens.length - 1];
+    return (num < this.tokens.length) ? this.tokens[num] :
+                                        this.tokens[this.tokens.length - 1];
   }
 
   /**
@@ -157,8 +157,8 @@ parse_css.parseAStylesheet = function(
   const canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
   const stylesheet = new parse_css.Stylesheet();
 
-  stylesheet.rules = canonicalizer.parseAListOfRules(
-      tokenList, /* topLevel */ true, errors);
+  stylesheet.rules =
+      canonicalizer.parseAListOfRules(tokenList, /* topLevel */ true, errors);
   tokenList[0].copyStartPositionTo(stylesheet);
   const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
@@ -311,9 +311,7 @@ parse_css.Declaration = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  accept(visitor) {
-    visitor.visitDeclaration(this);
-  }
+  accept(visitor) { visitor.visitDeclaration(this); }
 };
 
 parse_css.RuleVisitor = class {
@@ -403,7 +401,8 @@ class Canonicalizer {
         continue;
       } else if (tokenStream.current() instanceof parse_css.EOFToken) {
         return rules;
-      } else if (tokenStream.current() instanceof parse_css.CDOToken ||
+      } else if (
+          tokenStream.current() instanceof parse_css.CDOToken ||
           tokenStream.current() instanceof parse_css.CDCToken) {
         if (topLevel) {
           continue;
@@ -449,8 +448,8 @@ class Canonicalizer {
 
         switch (this.blockTypeFor(rule)) {
           case parse_css.BlockType.PARSE_AS_RULES: {
-            rule.rules = this.parseAListOfRules(
-                contents, /* topLevel */ false, errors);
+            rule.rules =
+                this.parseAListOfRules(contents, /* topLevel */ false, errors);
             break;
           }
           case parse_css.BlockType.PARSE_AS_DECLARATIONS: {
@@ -494,9 +493,9 @@ class Canonicalizer {
       tokenStream.consume();
       if (tokenStream.current() instanceof parse_css.EOFToken) {
         errors.push(createParseErrorTokenAt(
-            rule,
-            amp.validator.ValidationError.Code
-                .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE, ['style']));
+            rule, amp.validator.ValidationError.Code
+                      .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
+            ['style']));
         return;
       }
       if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
@@ -548,8 +547,9 @@ class Canonicalizer {
             amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
             ['style']));
         tokenStream.reconsume();
-        while (!(tokenStream.next() instanceof parse_css.SemicolonToken ||
-            tokenStream.next() instanceof parse_css.EOFToken)) {
+        while (
+            !(tokenStream.next() instanceof parse_css.SemicolonToken ||
+              tokenStream.next() instanceof parse_css.EOFToken)) {
           tokenStream.consume();
           const dummyTokenList = [];
           consumeAComponentValue(tokenStream, dummyTokenList);
@@ -586,15 +586,17 @@ class Canonicalizer {
           amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
           ['style']));
       tokenStream.reconsume();
-      while (!(tokenStream.next() instanceof parse_css.SemicolonToken ||
-          tokenStream.next() instanceof parse_css.EOFToken)) {
+      while (
+          !(tokenStream.next() instanceof parse_css.SemicolonToken ||
+            tokenStream.next() instanceof parse_css.EOFToken)) {
         tokenStream.consume();
       }
       return;
     }
 
-    while (!(tokenStream.next() instanceof parse_css.SemicolonToken ||
-        tokenStream.next() instanceof parse_css.EOFToken)) {
+    while (
+        !(tokenStream.next() instanceof parse_css.SemicolonToken ||
+          tokenStream.next() instanceof parse_css.EOFToken)) {
       tokenStream.consume();
       consumeAComponentValue(tokenStream, decl.value);
     }
@@ -604,13 +606,14 @@ class Canonicalizer {
     for (let i = decl.value.length - 1; i >= 0; i--) {
       if (decl.value[i] instanceof parse_css.WhitespaceToken) {
         continue;
-      } else if (decl.value[i] instanceof parse_css.IdentToken &&
+      } else if (
+          decl.value[i] instanceof parse_css.IdentToken &&
           /** @type {parse_css.IdentToken} */ (decl.value[i])
-          .ASCIIMatch('important')) {
+              .ASCIIMatch('important')) {
         foundImportant = true;
-      } else if (foundImportant &&
-          decl.value[i] instanceof parse_css.DelimToken &&
-          /** @type {parse_css.DelimToken} */(decl.value[i]).value === '!') {
+      } else if (
+          foundImportant && decl.value[i] instanceof parse_css.DelimToken &&
+          /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
         decl.value.splice(i, decl.value.length);
         decl.important = true;
         break;
@@ -651,8 +654,8 @@ function consumeAComponentValue(tokenStream, tokenList) {
 function consumeASimpleBlock(tokenStream, tokenList) {
   goog.asserts.assert(
       (tokenStream.current() instanceof parse_css.OpenCurlyToken ||
-          tokenStream.current() instanceof parse_css.OpenSquareToken ||
-          tokenStream.current() instanceof parse_css.OpenParenToken),
+       tokenStream.current() instanceof parse_css.OpenSquareToken ||
+       tokenStream.current() instanceof parse_css.OpenParenToken),
       'Internal Error: consumeASimpleBlock precondition not met');
 
   const startToken =
@@ -665,9 +668,10 @@ function consumeASimpleBlock(tokenStream, tokenList) {
     if (tokenStream.current() instanceof parse_css.EOFToken) {
       tokenList.push(tokenStream.current());
       return;
-    } else if (tokenStream.current() instanceof parse_css.GroupingToken &&
-        /** @type {parse_css.GroupingToken} */(tokenStream.current())
-        .value === mirror) {
+    } else if (
+        tokenStream.current() instanceof parse_css.GroupingToken &&
+        /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
+            mirror) {
       tokenList.push(tokenStream.current());
       return;
     } else {
@@ -705,7 +709,8 @@ parse_css.extractASimpleBlock = function(tokenStream) {
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeAFunction(tokenStream, tokenList) {
-  goog.asserts.assertInstanceof(tokenStream.current(), parse_css.FunctionToken,
+  goog.asserts.assertInstanceof(
+      tokenStream.current(), parse_css.FunctionToken,
       'Internal Error: consumeAFunction precondition not met');
   tokenList.push(tokenStream.current());
   while (true) {
@@ -790,7 +795,7 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
   const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
   token.copyStartPositionTo(parsed);
-  parsed.utf8Url = /** @type {parse_css.URLToken}*/(token).value;
+  parsed.utf8Url = /** @type {parse_css.URLToken}*/ (token).value;
 }
 
 /**
@@ -807,10 +812,10 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
 function parseUrlFunction(tokens, tokenIdx, parsed) {
   const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType == parse_css.TokenType.FUNCTION_TOKEN);
-  goog.asserts.assert(/** @type {parse_css.FunctionToken} */(token).value ===
-      'url');
-  goog.asserts.assert(tokens[tokens.length - 1].tokenType ===
-      parse_css.TokenType.EOF_TOKEN);
+  goog.asserts.assert(
+      /** @type {parse_css.FunctionToken} */ (token).value === 'url');
+  goog.asserts.assert(
+      tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN);
   token.copyStartPositionTo(parsed);
   ++tokenIdx;  // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
@@ -827,7 +832,8 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
   if (tokens[tokenIdx].tokenType !== parse_css.TokenType.STRING) {
     return -1;
   }
-  parsed.utf8Url = /** @type {parse_css.StringToken} */(tokens[tokenIdx]).value;
+  parsed.utf8Url =
+      /** @type {parse_css.StringToken} */ (tokens[tokenIdx]).value;
 
   ++tokenIdx;
   // Safe: tokens ends w/ EOF_TOKEN.
@@ -868,26 +874,20 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
   }
 
   /** @inheritDoc */
-  visitStylesheet(stylesheet) {
-    this.atRuleScope = '';
-  }
+  visitStylesheet(stylesheet) { this.atRuleScope = ''; }
 
   /** @inheritDoc */
-  visitAtRule(atRule) {
-    this.atRuleScope = atRule.name;
-  }
+  visitAtRule(atRule) { this.atRuleScope = atRule.name; }
 
   /** @inheritDoc */
-  visitQualifiedRule(qualifiedRule) {
-    this.atRuleScope = '';
-  }
+  visitQualifiedRule(qualifiedRule) { this.atRuleScope = ''; }
 
   /** @inheritDoc */
   visitDeclaration(declaration) {
     goog.asserts.assert(declaration.value.length > 0);
     goog.asserts.assert(
         declaration.value[declaration.value.length - 1].tokenType ===
-            parse_css.TokenType.EOF_TOKEN);
+        parse_css.TokenType.EOF_TOKEN);
     for (let ii = 0; ii < declaration.value.length - 1;) {
       const token = declaration.value[ii];
       if (token.tokenType === parse_css.TokenType.URL) {
@@ -899,13 +899,13 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
         continue;
       }
       if (token.tokenType === parse_css.TokenType.FUNCTION_TOKEN &&
-          /** @type {!parse_css.FunctionToken} */(token).value === 'url') {
+          /** @type {!parse_css.FunctionToken} */ (token).value === 'url') {
         const parsedUrl = new parse_css.ParsedCssUrl();
         ii = parseUrlFunction(declaration.value, ii, parsedUrl);
         if (ii === -1) {
           const error = new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-              /* params */ ['style']);
+              /* params */['style']);
           token.copyStartPositionTo(error);
           this.errors.push(error);
           return;
