@@ -41,6 +41,14 @@ export function doubleclick(global, data) {
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
   ]);
 
+  if (global.context.clientId) {
+    // Read by GPT/Glade for GA/Doubleclick integration.
+    global.gaGlobal = {
+      vid: global.context.clientId,
+      hid: global.context.pageViewId,
+    };
+  }
+
   if (data.useSameDomainRenderingUntilDeprecated != undefined) {
     doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT);
   } else {
@@ -67,14 +75,6 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
   ]];
-
-  if (global.context.clientId) {
-    // Read by GPT for GA/GPT integration.
-    global.gaGlobal = {
-      vid: global.context.clientId,
-      hid: global.context.pageViewId,
-    };
-  }
 
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(() => {
