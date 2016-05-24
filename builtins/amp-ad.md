@@ -110,6 +110,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Weborama](../ads/weborama.md)
 - [Yieldbot](../ads/yieldbot.md)
 - [Yieldmo](../ads/yieldmo.md)
+- [YahooJP](../ads/yahoojp.md)
 
 ## Styling
 
