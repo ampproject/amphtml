@@ -21,7 +21,7 @@ import {writeScript, validateDataExists, checkData} from '../3p/3p';
  */
 export function yahoojp(global, data) {
   checkData(data, ['yadsid']);
-  validateDataExists(data, ['yadsid']);  
+  validateDataExists(data, ['yadsid']);
   global.yahoojpParam = data;
   writeScript(global, 'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js');
 }
