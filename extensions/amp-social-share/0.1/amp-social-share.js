@@ -17,14 +17,10 @@
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
-
-/** @const */
-const EXPERIMENT = 'amp-social-share';
 
 /** @const */
 const TAG = 'amp-social-share';
@@ -38,11 +34,6 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
-      return;
-    }
     const typeAttr = user.assert(this.element.getAttribute('type'),
         'The type attribute is required. %s', this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
