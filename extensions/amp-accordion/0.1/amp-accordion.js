@@ -30,8 +30,14 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
+    /** @const @private */
+    this.id_ = this.element.id;
+
     this.element.setAttribute('role', 'tablist');
     const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
+    const accordionSession_ = sessionStorage.getItem(this.id_);
+    console.log(accordionSession_);
+    var iter_ = 0;
     this.sections_.forEach((section, index) => {
       user.assert(
           section.tagName.toLowerCase() == 'section',
@@ -50,8 +56,19 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'tab');
       content.classList.add('-amp-accordion-content');
       content.setAttribute('role', 'tabpanel');
-      content.setAttribute(
-          'aria-expanded', section.hasAttribute('expanded').toString());
+      if (!accordionSession_) {
+        content.setAttribute(
+            'aria-expanded', section.hasAttribute('expanded').toString());
+      } else {
+        if (accordionSession_[iter_] == '1') {
+          section.setAttribute('expanded', '');
+          content.setAttribute('aria-expanded', 'true');
+        } else {
+          section.removeAttribute('expanded');
+          content.setAttribute('aria-expanded', 'false');
+        }
+        iter_++;
+      }
       let contentId = content.getAttribute('id');
       if (!contentId) {
         contentId = this.element.id + '_AMP_content_' + index;
@@ -72,7 +89,7 @@ class AmpAccordion extends AMP.BaseElement {
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];
-    this.mutateElement(() => {
+    var setPromise = this.mutateElement(() => {
       if (section.hasAttribute('expanded')) {
         section.removeAttribute('expanded');
         content.setAttribute('aria-expanded', 'false');
@@ -81,6 +98,20 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('aria-expanded', 'true');
       }
     }, content);
+    // TODO(zhouyx): ask if there's way to get index of currentTarget
+    // element directly without iterating all section.
+    var tempSession_ = '';
+    setPromise.then(() => {
+      this.sections_.forEach((section, index) => {
+        const contentIter = section.children[1];
+        if (contentIter.getAttribute('aria-expanded') == 'true') {
+          tempSession_ += '1';
+        } else {
+          tempSession_ += '0';
+        }
+      });
+      sessionStorage.setItem(this.id_, tempSession_);
+    });
   }
 }
 
