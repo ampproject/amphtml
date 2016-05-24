@@ -23,4 +23,5 @@ amp-sticky-ad {
   width: 100%;
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
+  font: 0/0 a; /* remove the gap between inline(-block) elements */
 }
