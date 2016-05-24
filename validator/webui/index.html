@@ -468,6 +468,7 @@
                 }
               };
               xmlHttp.open("GET", "/fetch?url=" + encodeURIComponent(urlToFetch), true);
+              xmlHttp.setRequestHeader('X-Requested-By', 'validator webui');
               xmlHttp.send();
             }
           });
