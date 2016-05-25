@@ -99,7 +99,10 @@ function isAmpExtensionScriptRequired(win, element, extension) {
 export function calculateExtensionScriptUrl(path, extension, isTest) {
   if (getMode().localDev) {
     if (isTest) {
-      return `/base/dist/v0/${extension}-0.1.js`;
+      if (window.ampTestRuntimeConfig.useCompiledJs) {
+        return `/base/dist/v0/${extension}-0.1.js`;
+      }
+      return `/base/dist/v0/${extension}-0.1.max.js`;
     }
     if (path.indexOf('.max') >= 0) {
       return `http://localhost:8000/dist/v0/${extension}-0.1.max.js`;
