@@ -73,14 +73,8 @@ amp-carousel .amp-carousel-button.amp-disabled {
   visibility: hidden;
 }
 
-
-/**
- * Begin Carouscroll.
- */
-
+/* Begin SlideScroll */
 .-amp-slidescroll {
-  /* remove the gap between inline(-block) elements */
-  font: 0/0 a;
   overflow: hidden;
   overflow-x: auto;
   /*VERTICAL ALIGN - http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/#update*/
@@ -101,7 +95,4 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-slide-item[show] {
   display: inline-block !important;
 }
-
-/**
- * End Carouscroll.
- */
+/* End SlideScroll */

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {BaseCarousel} from './base-carousel';
+import {Layout} from '../../../src/layout';
 
 export class AmpSlideScroll extends BaseCarousel {
   /** @override */
@@ -21,14 +23,19 @@ export class AmpSlideScroll extends BaseCarousel {
   }
   /** @override */
   buildCarousel() {
+    /** @private @const {!Window} */
+    this.win_ = this.getWin();
+
     this.element.classList.add('-amp-slidescroll');
 
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
 
     this.slides_.forEach(slide => {
-      this.setAsOwner(slide);
-      slide.classList.add('-amp-slide-item');
+      const wrapper = this.win_.document.createElement('div');
+      wrapper.appendChild(slide);
+      wrapper.classList.add('-amp-slide-item');
+      this.element.appendChild(wrapper);
     });
   }
 
