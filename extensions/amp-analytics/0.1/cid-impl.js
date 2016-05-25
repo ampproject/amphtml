@@ -252,11 +252,12 @@ function getBaseCid(cid, persistenceConsent) {
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isIframed()) {
-    return viewer.getBaseCid().then(cid => {
-      if (!cid) {
+    return viewer.getBaseCid().then(cidValue => {
+      if (!cidValue) {
         throw new Error('No CID');
       }
-      return cid;
+      cid.baseCid_ = cidValue;
+      return cidValue;
     });
   }
 
