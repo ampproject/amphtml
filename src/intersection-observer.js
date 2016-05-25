@@ -128,18 +128,16 @@ export class IntersectionObserver extends Observable {
     // record.
     listenFor(this.iframe_, 'send-intersections', (data, source, origin) => {
       console.log('registering intersection', source, origin);
-      let isNew = true;
-      for (const clientWindow of this.clientWindows_) {
-        if (clientWindow.win == source) {
-          isNew = false;
-          break;
-        }
-      }
-      if (isNew) {
+      // This message might be from any window within the iframe, we need
+      // to keep track of which windows want to be sent updates.
+      if (!this.clientWindows_.some(entry => entry.win == source)) {
         this.clientWindows_.push({win: source, origin: origin});
       }
       this.startSendingIntersectionChanges_();
-    }, this.is3p_);
+    }, this.is3p_,
+    // For 3P frames we also allow nested frames within them to listen to
+    // the intersection changes.
+    this.is3p_ /* opt_includingNestedWindows */);
 
     this.add(() => {
       this.sendElementIntersection_();
@@ -227,6 +225,7 @@ export class IntersectionObserver extends Observable {
     if (!this.pendingChanges_.length) {
       return;
     }
+    // Note that we multicast the update to all interested windows.
     postMessageToWindows(
         this.iframe_,
         this.clientWindows_,

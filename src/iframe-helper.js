@@ -47,9 +47,9 @@ function getListenFors(parentWin, opt_create) {
 }
 
 /**
- * Returns an array of WindowEventsDef that have had any listenFor listeners registered for this origin.
+ * Returns an array of WindowEventsDef that have had any listenFor listeners registered for this sentinel.
  * @param {!Window} parentWin the window that created the iframe
- * @param {string} sentinel
+ * @param {string} sentinel the sentinel of the message
  * @param {boolean} opt_create create the array if it does not exist
  * @return {?Array<!WindowEventsDef>}
  */
@@ -71,12 +71,12 @@ function getListenForSentinel(parentWin, sentinel, opt_create) {
  * @param {!Window} parentWin the window that created the iframe
  * @param {!Element} iframe the iframe element who's context will trigger the
  *     event
- * @param {string=} opt_is3p
- * @return {?Object<string, !Array<function(!object)>>}
+ * @param {string=} opt_is3P set to true if the iframe is 3p.
+ * @return {?Object<string, !Array<function(!Object, !Window, string)>>}
  */
-function getOrCreateListenForEvents(parentWin, iframe, opt_is3p) {
+function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   const origin = parseUrl(iframe.src).origin;
-  const sentinel = getSentinel_(iframe, opt_is3p);
+  const sentinel = getSentinel_(iframe, opt_is3P);
   const listenSentinel = getListenForSentinel(parentWin, sentinel, true);
 
   let windowEvents;
@@ -103,10 +103,10 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3p) {
 /**
  * Returns an mapping of event names to listenFor listeners.
  * @param {!Window} parentWin the window that created the iframe
- * @param {string} sentinel
+ * @param {string} sentinel the sentinel of the message
  * @param {string} origin the source window's origin
  * @param {!Window} triggerWin the window that triggered the event
- * @return {?Object<string, !Array<function(!object)>>}
+ * @return {?Object<string, !Array<function(!Object, !Window, string)>>}
  */
 function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   const listenSentinel = getListenForSentinel(parentWin, sentinel);
@@ -115,18 +115,24 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
     return listenSentinel;
   }
 
+  // Find the entry for the frame.
+  // TODO(@nekodo): Add a WeakMap<Window, WindowEventsDef> cache to
+  //     speed up this process.
   let windowEvents;
   for (let i = 0; i < listenSentinel.length; i++) {
     const we = listenSentinel[i];
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
       setTimeout(dropListenSentinel, 0, listenSentinel);
-    } else if (sentinel == 'amp') {
+    } else if (sentinel === 'amp') {
+      // A non-3P code path, origin must match.
       if (we.origin === origin && contentWindow === triggerWin) {
         windowEvents = we;
         break;
       }
-    } else if (contentWindow === triggerWin || isDescendantWindow_(contentWindow, triggerWin)) {
+    } else if (triggerWin === contentWindow ||
+               isDescendantWindow(contentWindow, triggerWin)) {
+      // 3P code path, we may accept messages from nested frames.
       windowEvents = we;
       break;
     }
@@ -135,10 +141,16 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
   return windowEvents ? windowEvents.events : null;
 }
 
-function isDescendantWindow_(parent, descendant) {
-  let win = descendant.parent;
-  while (win != window.top) {
-    if (win == parent) {
+/**
+ * Checks whether one window is a descendant of another by climbing
+ * the parent chain.
+ * @param {!Window} ancestor potential ancestor window
+ * @param {!Window} descendant potential descendant window
+ * @return {boolean}
+ */
+function isDescendantWindow(ancestor, descendant) {
+  for (let win = descendant; win && win !== win.top; win = win.parent) {
+    if (win === ancestor) {
       return true;
     }
   }
@@ -146,7 +158,7 @@ function isDescendantWindow_(parent, descendant) {
 }
 
 /**
- * Removes any listenFors registed on listenOrigin that do not have
+ * Removes any listenFors registed on listenSentinel that do not have
  * a contentWindow (the frame was removed from the DOM tree).
  * @param {!Array<!WindowEventsDef>} listenSentinel
  */
@@ -221,13 +233,15 @@ function registerGlobalListenerIfNeeded(parentWin) {
  *
  * @param {!Element} iframe.
  * @param {string} typeOfMessage.
- * @param {function(!Object, !Window, string)} callback Called when a message of this type
- *     arrives for this iframe.
+ * @param {function(!Object, !Window, string)} callback Called when a message of
+ *     this type arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @param {boolean=} opt_includingNestedWindows
+ * @param {boolean=} opt_includingNestedWindows set to true if a messages from
+ *     nested frames should also be accepted.
  * @return {!Unlisten}
  */
-export function listenFor(iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
+export function listenFor(
+    iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
   dev.assert(iframe.src, 'only iframes with src supported');
   dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -247,6 +261,7 @@ export function listenFor(iframe, typeOfMessage, callback, opt_is3P, opt_includi
 
   let unlisten;
   let listener = function(data, source, origin) {
+    // Exclude nested frames if necessary.
     if (!opt_includingNestedWindows && source != iframe.contentWindow) {
       return;
     }
@@ -308,9 +323,12 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
 }
 
 /**
- * Posts a message to the iframe.
+ * Posts an identical message to multiple target windows with the same
+ * sentinel.
+ * The message is serialized only once.
  * @param {!Element} iframe The iframe.
- * @param {!Array<{win: !Window, origin: string}>} targets
+ * @param {!Array<{win: !Window, origin: string}>} targets to send the message
+ *     to, pairs of window and its origin.
  * @param {string} type Type of the message.
  * @param {!Object} object Message payload.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
@@ -325,14 +343,13 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
     // Serialize ourselves because that is much faster in Chrome.
     object = 'amp-' + JSON.stringify(object);
   }
-  for (const target of targets) {
-    target.win./*OK*/postMessage(object, target.origin);
-  }
+  targets.forEach(
+      target => target.win./*OK*/postMessage(object, target.origin));
 }
 
 /**
  * Gets the sentinel string.
- * @param {!Element} iframe
+ * @param {!Element} iframe The iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @returns {string} Sentinel string.
  * @private

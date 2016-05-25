@@ -49,7 +49,7 @@ describe('3p messaging', () => {
     postMessage(iframe, 'test', {s: 'b'}, '*', false);
     postMessage(iframe, 'other', {s: 'c'}, '*', true);
     postMessage(iframe, 'test', {s: 'd'}, '*', true);
-    return timer.promise(100).then(() => {
+    return timer.promise(10).then(() => {
       expect(progress).to.equal('ad');
     });
   });

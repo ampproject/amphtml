@@ -76,7 +76,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
-    amp3pSentinel: generateSentinel_(),
+    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
         timer.now(),
         viewportFor(parentWindow).getRect(),
@@ -257,16 +257,20 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   return url + '?$internalRuntimeVersion$';
 }
 
-let windowDepth_ = null;
-
-function generateSentinel_() {
-  if (windowDepth_ === null) {
-    windowDepth_ = 0;
-    for (let win = window; win != window.top; win = win.parent) {
-      windowDepth_++;
-    }
+/**
+ * Returns a randomized sentinel value for 3p iframes.
+ * The format is "%d-%d" with the first value being the depth of current
+ * window in the window hierarchy and the second a random integer.
+ * @param {!Window} parentWindow
+ * @return {string}
+ * @visibleForTesting
+ */
+export function generateSentinel(parentWindow) {
+  let windowDepth = 0;
+  for (let win = parentWindow; win != window.top; win = win.parent) {
+    windowDepth++;
   }
-  return '' + windowDepth_ + '-' + Math.round(Math.random() * 1000000);
+  return '' + windowDepth + '-' + Math.round(Math.random() * 1000000);
 }
 
 /**

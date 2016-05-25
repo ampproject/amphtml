@@ -2,9 +2,27 @@
 <body style="background-color: red">
 Iframe with Inersection
 <script>
+// Default values for non-3P iframe.
+var sentinel = 'amp';
+var ampWindow = parent;
+
+// Detect 3P sentinel in the location.hash.
+var hashMatch = location.hash.match(/amp-3p-sentinel=((\d+)-\d+)/);
+if (hashMatch) {
+  sentinel = hashMatch[1];
+  // Depth is measured from window.top.
+  var depth = Number(hashMatch[2]);
+  var ancestors = [];
+  for (var win = window; win != win.top; win = win.parent) {
+    // Add window keeping the top-most one at the front.
+    ancestors.unshift(win.parent);
+  }
+  ampWindow = ancestors[depth];
+}
+
 function sendPostMessage() {
-  parent./*OK*/postMessage({
-    sentinel: 'amp',
+  ampWindow./*OK*/postMessage({
+    sentinel: sentinel,
     type: 'send-intersections'
   }, '*');
 }
