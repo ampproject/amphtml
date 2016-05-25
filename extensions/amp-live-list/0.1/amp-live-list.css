@@ -22,6 +22,10 @@ amp-live-list > [update] {
   z-index: 1000 !important;
 }
 
+amp-live-list > [items] > [data-tombstone] {
+  display: none;
+}
+
 amp-live-list > .-amp-hidden[update] {
   display: none;
 }

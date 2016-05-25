@@ -55,6 +55,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
+      'build-system/server.js',
       'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-full.js',

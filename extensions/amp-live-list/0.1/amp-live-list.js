@@ -93,7 +93,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.CONTAINER || layout == Layout.FIXED_HEIGHT;
   }
 
   /** @override */
@@ -115,6 +115,16 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private @const {!LiveListManager} */
     this.manager_ = installLiveListManager(this.win);
 
+    /** @private @const {!Element} */
+    this.updateSlot_ = user.assert(
+       this.getUpdateSlot_(this.element),
+       'amp-live-list must have an "update" slot.');
+
+    /** @private @const {!Element} */
+    this.itemsSlot_ = user.assert(
+        this.getItemsSlot_(this.element),
+        'amp-live-list must have an "items" slot.');
+
     /** @private @const {string} */
     this.liveListId_ = user.assert(this.element.getAttribute('id'),
         'amp-live-list must have an id.');
@@ -130,9 +140,14 @@ export class AmpLiveList extends AMP.BaseElement {
         `data-max-items-per-page attribute with numeric value. ` +
         `Found ${maxItems}`);
 
+    const actualCount = ([].slice.call(this.itemsSlot_.children)
+        .filter(child => !child.hasAttribute('data-tombstone'))).length;
+
     /** @private @const {number} */
-    this.maxItemsPerPage_ = getNumberMaxOrDefault(maxItems,
-        LiveListManager.getMinDataMaxItemsPerPage());
+    this.maxItemsPerPage_ = Math.max(
+        getNumberMaxOrDefault(maxItems,
+            LiveListManager.getMinDataMaxItemsPerPage()),
+        actualCount);
 
     /** @private {number} */
     this.updateTime_ = 0;
@@ -148,13 +163,8 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private @const {!Array<!Element>} */
     this.pendingItemsReplace_ = [];
 
-    this.updateSlot_ = user.assert(
-       this.getUpdateSlot_(this.element),
-       'amp-live-list must have an "update" slot.');
-
-    this.itemsSlot_ = user.assert(
-        this.getItemsSlot_(this.element),
-        'amp-live-list must have an "items" slot.');
+    /** @private @const {!Array<!Element>} */
+    this.pendingItemsTombstone_ = [];
 
     this.updateSlot_.classList.add('-amp-hidden');
     this.eachChildElement_(this.itemsSlot_, item => {
@@ -178,6 +188,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
     this.preparePendingItemsInsert_(mutateItems.insert);
     this.preparePendingItemsReplace_(mutateItems.replace);
+    this.preparePendingItemsTombstone_(mutateItems.tombstone);
 
     // We prefer user interaction if we have pending items to insert at the
     // top of the component.
@@ -185,7 +196,8 @@ export class AmpLiveList extends AMP.BaseElement {
       this.deferMutate(() => {
         this.updateSlot_.classList.remove('-amp-hidden');
       });
-    } else if (this.pendingItemsReplace_.length > 0) {
+    } else if (this.pendingItemsReplace_.length > 0 ||
+        this.pendingItemsTombstone_.length > 0) {
       this.updateAction_();
     }
 
@@ -204,8 +216,6 @@ export class AmpLiveList extends AMP.BaseElement {
   updateAction_() {
     const hasNewInsert = this.pendingItemsInsert_.length > 0;
 
-    // TODO(erwinm): do in place update as well as sorting,
-    // correct insertion, tombstoning etc.
     let promise = this.mutateElement(() => {
 
       if (hasNewInsert) {
@@ -224,8 +234,15 @@ export class AmpLiveList extends AMP.BaseElement {
         this.pendingItemsReplace_.length = 0;
       }
 
+      if (this.pendingItemsTombstone_.length > 0) {
+        this.tombstone_(this.itemsSlot_, this.pendingItemsTombstone_);
+        this.pendingItemsTombstone_.length = 0;
+      }
+
       // Always hide update slot after mutation operation.
       this.updateSlot_.classList.add('-amp-hidden');
+
+      // TODO(erwinm, #3332) compensate scroll position here.
     });
 
     if (hasNewInsert) {
@@ -269,10 +286,33 @@ export class AmpLiveList extends AMP.BaseElement {
       const liveElement = parent.querySelector(`#${orphanId}`);
       // Don't bother updating if live element is tombstoned or
       // if we can't find it.
-      if (!liveElement || liveElement.hasAttribute('data-tombstone')) {
+      if (!liveElement) {
         return;
       }
       parent.replaceChild(orphan, liveElement);
+    });
+  }
+
+  /**
+   * Empties out the current child's subtree. If no counterpart
+   * element is found in the live DOM, do nothing.
+   *
+   * @param {!Element} parent
+   * @param {!Array<!Element>} orphans
+   * @private
+   */
+  tombstone_(parent, orphans) {
+    orphans.forEach(orphan => {
+      const orphanId = orphan.getAttribute('id');
+      const liveElement = parent.querySelector(`#${orphanId}`);
+      if (!liveElement) {
+        return;
+      }
+      // We have default styles that apply `display: none` on data-tombstone
+      // attribute.
+      liveElement.setAttribute('data-tombstone', '');
+      // This will empty out its subtree
+      liveElement.textContent = '';
     });
   }
 
@@ -318,6 +358,17 @@ export class AmpLiveList extends AMP.BaseElement {
         this.pendingItemsReplace_[hasPendingCounterpart] = elem;
       }
     });
+  }
+
+  /**
+   * Transfers the items from the server that is marked to be tombstone
+   * into the pending queue.
+   *
+   * @param {!Array<!Element>} items
+   * @private
+   */
+  preparePendingItemsTombstone_(items) {
+    this.pendingItemsTombstone_.push.apply(this.pendingItemsTombstone_, items);
   }
 
   /**
@@ -375,6 +426,9 @@ export class AmpLiveList extends AMP.BaseElement {
           this.updateTime_ = updateTime;
         }
         replace.push(orphan);
+      } else if (this.isChildTombstone_(child)) {
+        this.knownItems_[id] = -1;
+        tombstone.push(child);
       }
     }
 
@@ -390,6 +444,12 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   isChildNew_(elem) {
     const id = elem.getAttribute('id');
+
+    // Even if its an item we haven't seen before but it has a tombstone
+    // attribute, don't treat it as a new child.
+    if (elem.hasAttribute('data-tombstone')) {
+      return false;
+    }
     return !(id in this.knownItems_);
   }
 
@@ -407,18 +467,31 @@ export class AmpLiveList extends AMP.BaseElement {
     if (!elem.hasAttribute('data-update-time')) {
       return false;
     }
+    // It can't be a child update if it has data-tombstone
+    if (elem.hasAttribute('data-tombstone')) {
+      return false;
+    }
     const id = elem.getAttribute('id');
     const updateTime = this.getUpdateTime_(elem);
-    return id in this.knownItems_ && updateTime > this.knownItems_[id];
+    // Known items with -1 value are previously tombstoned items which
+    // means they can no longer be updated.
+    return id in this.knownItems_ && this.knownItems_[id] != -1 &&
+        updateTime > this.knownItems_[id];
   }
 
   /**
    * Predicate to check if the child passed in is tombstoning, determined
    * by data-tombstone attribute.
+   *
+   * @param {!Element} elem
+   * @return {boolean}
    * @private
    */
-  isChildTombstone_(unusedChild) {
-    return false;
+  isChildTombstone_(elem) {
+    const id = elem.getAttribute('id');
+    // If the previously seen element has been marked with -1, that means
+    // it was already tombstoned, and no action should be needed.
+    return elem.hasAttribute('data-tombstone') && this.knownItems_[id] != -1;
   }
 
   /**
