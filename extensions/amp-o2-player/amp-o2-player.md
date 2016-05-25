@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-o2player"></a> `amp-o2player`
+# <a name="amp-o2-player"></a> `amp-o2-player`
 
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>An <code>amp-o2player</code> component displays the AOL O2Player.</td>
+    <td>An <code>amp-o2-player</code> component displays the AOL O2Player.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -27,11 +27,11 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-o2player" src="https://cdn.ampproject.org/v0/amp-o2player-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-o2-player" src="https://cdn.ampproject.org/v0/amp-o2-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-o2player">amp-o2player.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/o2player.amp.html">o2player.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-o2-player">amp-o2-player.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/o2-player.amp.html">o2-player.amp.html</a></td>
   </tr>
 </table>
 
@@ -42,14 +42,14 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 Example:
 
 ```html
-<amp-o2player
+<amp-o2-player
     data-pid="12345"
     data-bcid="5678"
     data-bid="54321"
     data-vid="98765"
     layout="responsive"
     width="480" height="270">
-</amp-o2player>
+</amp-o2-player>
 ```
 
 ## Attributes
@@ -76,8 +76,8 @@ The O2Player macros.
 
 ## Validation errors
 
-The following lists validation errors specific to the `amp-o2player` tag
-(see also `amp-o2player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2player/0.1/validator-amp-o2player.protoascii)):
+The following lists validation errors specific to the `amp-o2-player` tag
+(see also `amp-o2-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/0.1/validator-amp-o2-player.protoascii)):
 
 <table>
   <tr>
@@ -86,7 +86,7 @@ The following lists validation errors specific to the `amp-o2player` tag
   </tr>
   <tr>
     <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-o2player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+    <td>Error thrown when required <code>amp-o2-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
     <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>

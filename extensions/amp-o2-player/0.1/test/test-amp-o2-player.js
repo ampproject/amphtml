@@ -18,17 +18,17 @@ import {
     createIframePromise,
     doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-o2player');
+require('../amp-o2-player');
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describe('amp-o2player', () => {
+describe('amp-o2-player', () => {
 
   function getO2player(attributes, opt_responsive) {
     return createIframePromise(true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
-      const o2 = iframe.doc.createElement('amp-o2player');
+      const o2 = iframe.doc.createElement('amp-o2-player');
       for (const key in attributes) {
         o2.setAttribute(key, attributes[key]);
       }
@@ -52,7 +52,7 @@ describe('amp-o2player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          '//delivery.vidible.tv/htmlembed/pid=123/456.html');
+          'https://delivery.vidible.tv/htmlembed/pid=123/456.html');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });
@@ -82,7 +82,7 @@ describe('amp-o2player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          '//delivery.vidible.tv/htmlembed/123.html');
+          'https://delivery.vidible.tv/htmlembed/123.html');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });
@@ -97,7 +97,7 @@ describe('amp-o2player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          '//delivery.vidible.tv/htmlembed/123.html?m.test=test');
+          'https://delivery.vidible.tv/htmlembed/123.html?m.test=test');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });
@@ -112,7 +112,7 @@ describe('amp-o2player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-          '//delivery.dev.vidible.tv/htmlembed/123.html');
+          'https://delivery.dev.vidible.tv/htmlembed/123.html');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });

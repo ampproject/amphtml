@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 
-tags: {  # amp-o2player
+tags: {  # amp-o2-player
   tag_name: "script"
-  spec_name: "amp-o2player extension .js script"
+  spec_name: "amp-o2-player extension .js script"
   mandatory_parent: "head"
   attrs: {
     name: "async"
@@ -26,13 +26,13 @@ tags: {  # amp-o2player
   attrs: {
     name: "custom-element"
     mandatory: true
-    value: "amp-o2player"
+    value: "amp-o2-player"
     dispatch_key: true
   }
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-o2player-(latest|0\\.1).js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-o2-player-(latest|0\\.1).js"
   }
   attrs: {
     name: "type"
@@ -44,18 +44,18 @@ tags: {  # amp-o2player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
 }
-tags: {  # <amp-o2player>
-  tag_name: "amp-o2player"
+tags: {  # <amp-o2-player>
+  tag_name: "amp-o2-player"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires_tag: "amp-o2player extension .js script"
+  also_requires_tag: "amp-o2-player extension .js script"
   attrs: { name: "data-pid" mandatory: true }
   attrs: { name: "data-bcid" mandatory: true }
   # If data-embed is missing, the default value is "default".
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
