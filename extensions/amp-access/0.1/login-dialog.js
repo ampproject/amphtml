@@ -17,6 +17,7 @@
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
@@ -181,13 +182,13 @@ class WebLoginDialog {
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
       dev.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
-      this.dialog_ = this.win.open(loginUrl, '_blank', options);
+      this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = Promise.resolve();
       }
     } else {
       dev.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
-      this.dialog_ = this.win.open('', '_blank', options);
+      this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = this.urlOrPromise.then(url => {
           const loginUrl = buildLoginUrl(url, returnUrl);

@@ -355,6 +355,12 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
+    message: 'Use dom.openWindowDialog',
+    whitelist: [
+      'src/dom.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

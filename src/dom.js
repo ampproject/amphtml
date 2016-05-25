@@ -15,6 +15,7 @@
  */
 
 import {dashToCamelCase} from './string';
+import {dev} from './log';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -401,4 +402,29 @@ export function hasNextNodeInDocumentOrder(element) {
     }
   } while (currentElement = currentElement.parentNode);
   return false;
+}
+
+
+/**
+ * @param {!Window} win
+ * @param {string} url
+ * @param {string} target
+ * @param {string=} opt_features
+ * @return {?Window}
+ */
+export function openWindowDialog(win, url, target, opt_features) {
+  // Try first with the specified target.
+  let res = null;
+  try {
+    res = win.open(url, target, opt_features);
+  } catch (e) {
+    dev.error('dom', 'Failed to open url on target: ', target, e);
+    res = null;
+  }
+
+  // Then try with `_top` target.
+  if (!res && target != '_top') {
+    res = win.open(url, '_top');
+  }
+  return res;
 }
