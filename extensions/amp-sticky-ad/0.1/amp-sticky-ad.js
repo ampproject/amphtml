@@ -40,15 +40,21 @@ class AmpStickyAd extends AMP.BaseElement {
     }
 
     this.element.classList.add('-amp-sticky-ad-layout');
-
     const children = this.getRealChildren();
     user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
+
     /** @const @private {!Element} */
     this.ad_ = children[0];
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
+
+    /** @private @const {!Window} */
+    this.win_ = this.getWin();
+
+    /** @private @const {!Document} */
+    this.document_ = this.win_.document;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -85,6 +91,18 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
+   * The function that add border-bottom to the body
+   * to compensate the bottom space that was taken by sticky ad.
+   * So that no content would be blocked by sticky ad unit.
+   * @param {number} borderBottom
+   * @private
+   */
+  addBorderBottom(borderBottom) {
+    this.win_.document.body.style.borderBottom =
+        `${borderBottom}px solid transparent`;
+  }
+
+  /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
    * there is at least one more viewport available.
@@ -104,6 +122,9 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         toggle(this.element, true);
         this.viewport_.addToFixedLayer(this.element);
+        const borderBottom = this.element.offsetHeight;
+        // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
+        this.addBorderBottom(borderBottom);
         this.scheduleLayout(this.ad_);
         this.removeOnScrollListener_();
       });
