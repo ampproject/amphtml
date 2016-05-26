@@ -489,7 +489,7 @@ describe('DOM', () => {
 
     beforeEach(() => {
       windowApi = {
-        open: () => {throw new Error('not mocked');}
+        open: () => {throw new Error('not mocked');},
       };
       windowMock = sandbox.mock(windowApi);
     });
