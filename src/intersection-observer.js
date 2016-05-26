@@ -126,7 +126,6 @@ export class IntersectionObserver extends Observable {
     // guarantees that the receiver gets an initial intersection change
     // record.
     listenFor(this.iframe_, 'send-intersections', (data, source, origin) => {
-      console.log('registering intersection', source, origin);
       // This message might be from any window within the iframe, we need
       // to keep track of which windows want to be sent updates.
       if (!this.clientWindows_.some(entry => entry.win == source)) {
