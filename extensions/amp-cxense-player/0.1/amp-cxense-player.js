@@ -123,9 +123,6 @@ class AmpCxense extends AMP.BaseElement {
               })
             .then(() => this.playerReadyPromise_)
             .then(ret => {
-              if (self.placeholder_) {
-                setStyles(this.placeholder_, {display: 'none'});
-              }
               self.loading_(false);
               setStyles(self.iframe_, {display: ''});
               self.applyFillContent(self.iframe_);
@@ -231,9 +228,6 @@ class AmpCxense extends AMP.BaseElement {
 
         this.loadingContainer_.classList.add('-amp-loading-container');
         this.loadingContainer_.classList.add('amp-hidden');
-
-        this.loadingElement_.classList
-                .add('amp-cxense-default-placeholder');
 
         this.element.appendChild(this.loadingElement_);
         this.applyFillContent(this.loadingContainer_);
