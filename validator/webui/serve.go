@@ -39,6 +39,10 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("X-Requested-By") != "validator webui" {
+		http.Error(w, "Bad request.", http.StatusBadRequest)
+		return
+	}
 	param := r.FormValue("url")
 	u, err := url.Parse(param)
 	if param == "" || err != nil || (u.Scheme != "http" && u.Scheme != "https") {

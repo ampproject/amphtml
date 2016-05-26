@@ -465,6 +465,7 @@ describe('DOM', () => {
       const sibling = document.createElement('div');
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
       parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
       parent.appendChild(sibling);
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
     });

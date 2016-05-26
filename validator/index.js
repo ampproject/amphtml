@@ -376,6 +376,11 @@ function serve(port, validatorScript) {
         // internet. It presents the results as JSON.
         //
         if (request.url.startsWith('/fetch?')) {
+          if (request.headers['x-requested-by'] !== 'validator webui') {
+            response.writeHead(400, {'Content-Type': 'text/plain'});
+            response.end('Bad request.');
+            return;
+          }
           const parsedUrl = url.parse(request.url, true);
           const urlToFetch = parsedUrl['query']['url'];
           if (!urlToFetch.startsWith('https://') &&

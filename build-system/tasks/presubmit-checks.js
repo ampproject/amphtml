@@ -55,8 +55,10 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
+      'build-system/server.js',
       'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
+      'validator/validator-full.js',
       'validator/validator-in-browser.js',
       'validator/validator.js',
     ]
@@ -285,6 +287,7 @@ var forbiddenTerms = {
     whitelist: [
       'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
+      'validator/validator-full.js',
       'validator/validator.js',
     ]
   },
@@ -330,11 +333,12 @@ var forbiddenTerms = {
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
-      'validator/validator.js',
+      'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'examples/viewer-integr.js',
+      'validator/validator-full.js',
+      'validator/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {

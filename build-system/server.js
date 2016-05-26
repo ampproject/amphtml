@@ -24,11 +24,12 @@ var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var fs = BBPromise.promisifyAll(require('fs'));
+var jsdom = require('jsdom');
 var path = require('path');
-var url = require('url');
 var request = require('request');
 var serveIndex = require('serve-index');
 var serveStatic = require('serve-static');
+var url = require('url');
 
 var args = Array.prototype.slice.call(process.argv, 2, 4);
 var paths = args[0];
@@ -102,6 +103,76 @@ app.use('/examples.build/live-list.amp.max.html', function(req, res) {
         res.end(file);
   });
 });
+
+var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
+var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
+var liveListFile = fs.readFileSync(liveListUpdateFullPath);
+var liveListCtr = 0;
+var itemCtr = 2;
+var liveListDoc = null;
+var doctype = '<!doctype html>\n';
+app.use(liveListUpdateFile, function(req, res) {
+  if (!liveListDoc) {
+    liveListDoc = jsdom.jsdom(liveListFile);
+  }
+  var action = Math.floor(Math.random() * 3);
+  var liveList = liveListDoc.querySelector('#my-live-list');
+  var item1 = liveList.querySelector('#list-item-1');
+  res.setHeader('Content-Type', 'text/html');
+  res.statusCode = 200;
+  if (liveListCtr != 0) {
+    if (Math.random() < .8) {
+      // Always run a replace on the first item
+      liveListReplace(item1);
+
+      if (Math.random() < .5) {
+        liveListTombstone(liveList);
+      }
+
+      if (Math.random() < .8) {
+        liveListInsert(liveList, item1);
+      }
+    } else {
+      // Sometimes we want an empty response to simulate no changes.
+      res.end(`${doctype}<html></html>`);
+      return;
+    }
+  }
+  var outerHTML = liveListDoc.documentElement./*OK*/outerHTML;
+  res.end(`${doctype}${outerHTML}`);
+  liveListCtr++;
+});
+
+function liveListReplace(item) {
+  item.setAttribute('data-update-time', Date.now());
+  var itemContents = item.querySelectorAll('.content');
+  itemContents[0].textContent = Math.floor(Math.random() * 10);
+  itemContents[1].textContent = Math.floor(Math.random() * 10);
+}
+
+function liveListInsert(liveList, node) {
+  var iterCount = Math.floor(Math.random() * 2) + 1;
+  console.log(`inserting ${iterCount} item(s)`);
+  for (var i = 0; i < iterCount; i++) {
+    var child = node.cloneNode(true);
+    child.setAttribute('id', `list-item-${itemCtr++}`);
+    child.setAttribute('data-sort-time', Date.now());
+    liveList.querySelector('[items]').appendChild(child);
+  }
+}
+
+function liveListTombstone(liveList) {
+  var tombstoneId = Math.floor(Math.random() * itemCtr);
+  console.log(`trying to tombstone #list-item-${tombstoneId}`);
+  // We can tombstone any list item except item-1 since we always do a
+  // replace example on item-1.
+  if (tombstoneId != 1) {
+    var item = liveList.querySelector(`#list-item-${tombstoneId}`);
+    if (item) {
+      item.setAttribute('data-tombstone', '');
+    }
+  }
+}
 
 // Proxy with unminified JS.
 // Example:

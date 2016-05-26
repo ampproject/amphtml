@@ -77,12 +77,12 @@ parse_srcset.parseSrcset = function(srcset) {
   //                           capturing comma.
   const imageCandidateRegex = new RegExp(
       '\\s*' +
-      '(?:,\\s*)?' +
-      '([^,\\s]\\S*[^,\\s])' +
-      '\\s*' +
-      '([\\d]+.?[\\d]*[w|x])?' +
-      '\\s*' +
-      '(?:(,)\\s*)?',
+          '(?:,\\s*)?' +
+          '([^,\\s]\\S*[^,\\s])' +
+          '\\s*' +
+          '([\\d]+.?[\\d]*[w|x])?' +
+          '\\s*' +
+          '(?:(,)\\s*)?',
       'g');
   let remainingSrcset = srcset;
   /** @type {!goog.structs.Set<string>} */
@@ -106,8 +106,7 @@ parse_srcset.parseSrcset = function(srcset) {
       };
     }
     seenWidthOrPixelDensity.add(widthOrPixelDensity);
-    srcsetImages.push(
-        {url: url, widthOrPixelDensity: widthOrPixelDensity});
+    srcsetImages.push({url: url, widthOrPixelDensity: widthOrPixelDensity});
     remainingSrcset = srcset.substr(imageCandidateRegex.lastIndex);
     // If no more srcset, break.
     if (srcset.length <= imageCandidateRegex.lastIndex) {

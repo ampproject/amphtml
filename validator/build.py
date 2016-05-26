@@ -292,7 +292,7 @@ def CompileValidatorMinified(out_dir):
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js'],
+                'validator-in-browser.js', 'validator.js', 'validator-full.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -359,9 +359,22 @@ def CompileValidatorTestMinified(out_dir):
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator_test.js'],
+                'validator-in-browser.js', 'validator.js', 'validator-full.js',
+                'validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
+def CompileValidatorLightTestMinified(out_dir):
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
+                'validator-in-browser.js', 'validator.js', 'validator-light.js',
+                'validator-light_test.js'],
+      closure_entry_points=['amp.validator.ValidatorTest'],
+      output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -411,6 +424,7 @@ def GenerateTestRunner(out_dir):
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
+             require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
              require('./parse-srcset_test_minified');
@@ -430,7 +444,6 @@ def RunTests(out_dir, nodejs_cmd):
 
 
 def CreateWebuiAppengineDist(out_dir):
-  """Generates the directory from which to deploy the Appengine WebUI."""
   logging.info('entering ...')
   try:
     tempdir = tempfile.mkdtemp()
@@ -473,6 +486,7 @@ def Main():
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunIndexTest(nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
+  CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')

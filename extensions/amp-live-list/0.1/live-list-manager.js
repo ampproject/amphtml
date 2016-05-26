@@ -16,6 +16,7 @@
 
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
+import {getMode} from '../../../src/mode';
 import {getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
@@ -62,6 +63,16 @@ export class LiveListManager {
       // Switch out the poller interval if we can find a lower one and
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
+
+      // For testing purposes only, we speed up the interval of the update.
+      // This should NEVER be allowed in production.
+      const isUpdateExample = this.win.location.pathname == '/examples.build/' +
+          'live-list-update.amp.max.html' ||
+          this.win.location.pathname == '/examples/live-list-update.amp.html';
+      if (getMode().localDev && isUpdateExample) {
+        this.interval_ = 5000;
+      }
+
       this.poller_ = new Poller(this.win, this.interval_, this.work_);
 
       if (this.viewer_.isVisible()) {

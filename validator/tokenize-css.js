@@ -115,13 +115,17 @@ parse_css.tokenize = function(strIn, line, col, errors) {
  * @param {number} last
  * @return {boolean}
  */
-function between(num, first, last) { return num >= first && num <= last; }
+function between(num, first, last) {
+  return num >= first && num <= last;
+}
 
 /**
  * @param {number} code
  * @return {boolean}
  */
-function digit(code) { return between(code, /* '0' */ 0x30, /* '9' */ 0x39); }
+function digit(code) {
+  return between(code, /* '0' */ 0x30, /* '9' */ 0x39);
+}
 
 /**
  * @param {number} code
@@ -152,13 +156,17 @@ function lowerCaseLetter(code) {
  * @param {number} code
  * @return {boolean}
  */
-function letter(code) { return upperCaseLetter(code) || lowerCaseLetter(code); }
+function letter(code) {
+  return upperCaseLetter(code) || lowerCaseLetter(code);
+}
 
 /**
  * @param {number} code
  * @return {boolean}
  */
-function nonAscii(code) { return code >= 0x80; }
+function nonAscii(code) {
+  return code >= 0x80;
+}
 
 /**
  * @param {number} code
@@ -181,8 +189,8 @@ function nameChar(code) {
  * @return {boolean}
  */
 function nonPrintable(code) {
-  return between(code, 0, 8) || code === 0xb ||
-      between(code, 0xe, 0x1f) || code === 0x7f;
+  return between(code, 0, 8) || code === 0xb || between(code, 0xe, 0x1f) ||
+      code === 0x7f;
 }
 
 /**
@@ -218,8 +226,7 @@ function preprocess(str) {
       code = /* '\n' */ 0xa;
       i++;
     }
-    if (code === /* '\r' */ 0xd || code === 0xc)
-    code = /* '\n' */ 0xa;
+    if (code === /* '\r' */ 0xd || code === 0xc) code = /* '\n' */ 0xa;
     if (code === 0x0) {
       code = 0xfffd;
     }
@@ -310,8 +317,9 @@ class Tokenizer {
         this.tokens_.push(token);
       }
       iterationCount++;
-      goog.asserts.assert(iterationCount <= this.codepoints_.length * 2,
-                          'Internal Error: infinite-looping');
+      goog.asserts.assert(
+          iterationCount <= this.codepoints_.length * 2,
+          'Internal Error: infinite-looping');
     }
     const eofToken = new parse_css.EOFToken();
     eofToken.line = currentLine;
@@ -412,7 +420,7 @@ class Tokenizer {
           this.areAValidEscape(this.next(1), this.next(2))) {
         let type = null;
         if (this.wouldStartAnIdentifier(
-            this.next(1), this.next(2), this.next(3))) {
+                this.next(1), this.next(2), this.next(3))) {
           type = 'id';
         }
         const token = new parse_css.HashToken(/*val=*/this.consumeAName());
@@ -444,7 +452,7 @@ class Tokenizer {
         return mark.addPositionTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '+' */ 0x2b) {
-      if (this./*OK*/startsWithANumber()) {
+      if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.addPositionTo(this.consumeANumericToken());
       } else {
@@ -453,21 +461,21 @@ class Tokenizer {
     } else if (this.code_ === /* ',' */ 0x2c) {
       return mark.addPositionTo(new parse_css.CommaToken());
     } else if (this.code_ === /* '-' */ 0x2d) {
-      if (this./*OK*/startsWithANumber()) {
+      if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.addPositionTo(this.consumeANumericToken());
-      } else if (this.next(1) === /* '-' */ 0x2d &&
-          this.next(2) === /* '>' */ 0x3e) {
+      } else if (
+          this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
         return mark.addPositionTo(new parse_css.CDCToken());
-      } else if (this./*OK*/startsWithAnIdentifier()) {
+      } else if (this./*OK*/ startsWithAnIdentifier()) {
         this.reconsume();
         return mark.addPositionTo(this.consumeAnIdentlikeToken());
       } else {
         return mark.addPositionTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '.' */ 0x2e) {
-      if (this./*OK*/startsWithANumber()) {
+      if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
         return mark.addPositionTo(this.consumeANumericToken());
       } else {
@@ -486,7 +494,8 @@ class Tokenizer {
         return mark.addPositionTo(new parse_css.DelimToken(this.code_));
       }
     } else if (this.code_ === /* '@' */ 0x40) {
-      if (this.wouldStartAnIdentifier(this.next(1), this.next(2), this.next(3))) {
+      if (this.wouldStartAnIdentifier(
+              this.next(1), this.next(2), this.next(3))) {
         return mark.addPositionTo(
             new parse_css.AtKeywordToken(this.consumeAName()));
       } else {
@@ -495,7 +504,7 @@ class Tokenizer {
     } else if (this.code_ === /* '[' */ 0x5b) {
       return mark.addPositionTo(new parse_css.OpenSquareToken());
     } else if (this.code_ === /* '\' */ 0x5c) {
-      if (this./*OK*/startsWithAValidEscape()) {
+      if (this./*OK*/ startsWithAValidEscape()) {
         this.reconsume();
         return mark.addPositionTo(this.consumeAnIdentlikeToken());
       } else {
@@ -503,8 +512,8 @@ class Tokenizer {
         // the current codepoint is 0x5c (\) and the next codepoint is a
         // newline (\n).
         return mark.addPositionTo(new parse_css.ErrorToken(
-            amp.validator.ValidationError.Code.
-                CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+            amp.validator.ValidationError.Code
+                .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
             ['style']));
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
@@ -567,7 +576,8 @@ class Tokenizer {
           // For example "h1 { color: red; } \* " would emit this parse error
           // at the end of the string.
           const error = new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT,
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_UNTERMINATED_COMMENT,
               ['style']);
           mark.addPositionTo(error);
           this.errors_.push(error);
@@ -620,9 +630,9 @@ class Tokenizer {
       }
       if (this.next() === /* '"' */ 0x22 || this.next() === /* ''' */ 0x27) {
         return new parse_css.FunctionToken(name);
-      } else if (whitespace(this.next()) &&
-          (this.next(2) === /* '"' */ 0x22 ||
-          this.next(2) === /* ''' */ 0x27)) {
+      } else if (
+          whitespace(this.next()) && (this.next(2) === /* '"' */ 0x22 ||
+                                      this.next(2) === /* ''' */ 0x27)) {
         return new parse_css.FunctionToken(name);
       } else {
         return this.consumeAURLToken();
@@ -700,13 +710,14 @@ class Tokenizer {
           return new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         }
-      } else if (this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
+      } else if (
+          this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
         return new parse_css.ErrorToken(
             amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       } else if (this.code_ === /* '\' */ 0x5c) {
-        if (this./*OK*/startsWithAValidEscape()) {
+        if (this./*OK*/ startsWithAValidEscape()) {
           token.value += stringFromCode(this.consumeEscape());
         } else {
           this.consumeTheRemnantsOfABadURL();
@@ -777,7 +788,7 @@ class Tokenizer {
   /**
    * Returns true if the next two codepoints are the start of an escape token.
    * @return {boolean} */
-  /*OK*/startsWithAValidEscape() {
+  /*OK*/ startsWithAValidEscape() {
     return this.areAValidEscape(this.code_, this.next());
   }
 
@@ -791,8 +802,7 @@ class Tokenizer {
    */
   wouldStartAnIdentifier(c1, c2, c3) {
     if (c1 === /* '-' */ 0x2d) {
-      return nameStartChar(c2) ||
-          c2 === /* '-' */ 0x2d ||
+      return nameStartChar(c2) || c2 === /* '-' */ 0x2d ||
           this.areAValidEscape(c2, c3);
     } else if (nameStartChar(c1)) {
       return true;
@@ -807,7 +817,7 @@ class Tokenizer {
    * Returns true if the next three codepoints are the start of an identifier.
    * @return {boolean}
    */
-  /*OK*/startsWithAnIdentifier() {
+  /*OK*/ startsWithAnIdentifier() {
     return this.wouldStartAnIdentifier(this.code_, this.next(1), this.next(2));
   }
 
@@ -844,7 +854,7 @@ class Tokenizer {
    * Returns true if the next three codepoints are the start of a number.
    * @return {boolean}
    */
-  /*OK*/startsWithANumber() {
+  /*OK*/ startsWithANumber() {
     return this.wouldStartANumber(this.code_, this.next(1), this.next(2));
   }
 
@@ -855,7 +865,7 @@ class Tokenizer {
       this.consume();
       if (nameChar(this.code_)) {
         result += stringFromCode(this.code_);
-      } else if (this./*OK*/startsWithAValidEscape()) {
+      } else if (this./*OK*/ startsWithAValidEscape()) {
         result += stringFromCode(this.consumeEscape());
       } else {
         this.reconsume();
@@ -906,7 +916,8 @@ class Tokenizer {
         this.consume();
         repr += stringFromCode(this.code_);  // 0-9
       }
-    } else if ((c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
+    } else if (
+        (c1 === /* 'E' */ 0x45 || c1 === /* 'e' */ 0x65) &&
         (c2 === /* '+' */ 0x2b || c2 === /* '-' */ 0x2d) && digit(c3)) {
       this.consume();
       repr += stringFromCode(this.code_);  // E or e
@@ -943,7 +954,7 @@ class Tokenizer {
       this.consume();
       if (this.code_ === /* '-' */ 0x2d || this.eof()) {
         return;
-      } else if (this./*OK*/startsWithAValidEscape()) {
+      } else if (this./*OK*/ startsWithAValidEscape()) {
         this.consumeEscape();
       }
     }
@@ -1065,12 +1076,8 @@ parse_css.Token = class {
   toSource() { return '' + this; }
 
   /** @return {!Object} */
-  toJSON () {
-    return {
-      'tokenType': this.tokenType,
-      'line': this.line,
-      'col': this.col
-    };
+  toJSON() {
+    return {'tokenType': this.tokenType, 'line': this.line, 'col': this.col};
   }
 };
 
@@ -1321,9 +1328,7 @@ parse_css.StringValuedToken = class extends parse_css.Token {
    * @param {string} str
    * @return {boolean}
    */
-  ASCIIMatch(str) {
-    return this.value.toLowerCase() === str.toLowerCase();
-  }
+  ASCIIMatch(str) { return this.value.toLowerCase() === str.toLowerCase(); }
 
   /** @inheritDoc */
   toJSON() {
@@ -1346,9 +1351,7 @@ parse_css.IdentToken = class extends parse_css.StringValuedToken {
   }
 
   /** @inheritDoc */
-  toSource() {
-    return escapeIdent(this.value);
-  }
+  toSource() { return escapeIdent(this.value); }
 };
 
 parse_css.FunctionToken = class extends parse_css.StringValuedToken {
@@ -1366,9 +1369,7 @@ parse_css.FunctionToken = class extends parse_css.StringValuedToken {
   }
 
   /** @inheritDoc */
-  toSource() {
-    return escapeIdent(this.value) + '(';
-  }
+  toSource() { return escapeIdent(this.value) + '('; }
 };
 
 parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {
@@ -1384,9 +1385,7 @@ parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {
   }
 
   /** @inheritDoc */
-  toSource() {
-    return '@' + escapeIdent(this.value);
-  }
+  toSource() { return '@' + escapeIdent(this.value); }
 };
 
 parse_css.HashToken = class extends parse_css.StringValuedToken {
@@ -1447,9 +1446,7 @@ parse_css.URLToken = class extends parse_css.StringValuedToken {
   }
 
   /** @return {string} */
-  toSource() {
-    return 'url("' + escapeString(this.value) + '")';
-  }
+  toSource() { return 'url("' + escapeString(this.value) + '")'; }
 };
 
 parse_css.NumberToken = class extends parse_css.Token {
@@ -1474,9 +1471,7 @@ parse_css.NumberToken = class extends parse_css.Token {
   }
 
   /** @return {string} */
-  toSource() {
-    return this.repr;
-  }
+  toSource() { return this.repr; }
 };
 
 parse_css.PercentageToken = class extends parse_css.Token {
@@ -1498,9 +1493,7 @@ parse_css.PercentageToken = class extends parse_css.Token {
   }
 
   /** @inheritDoc */
-  toSource() {
-    return this.repr + '%';
-  }
+  toSource() { return this.repr + '%'; }
 };
 
 parse_css.DimensionToken = class extends parse_css.Token {
@@ -1555,13 +1548,12 @@ function escapeIdent(string) {
     goog.asserts.assert(
         code !== 0x0,
         'Internal Error: Invalid character. The input contains U+0000.');
-    if (between(code, 0x1, 0x1f) || code === 0x7f ||
-        (i === 0 && digit(code)) ||
+    if (between(code, 0x1, 0x1f) || code === 0x7f || (i === 0 && digit(code)) ||
         (i === 1 && digit(code) && firstcode === /* '-' */ 0x2d)) {
       result += '\\' + code.toString(16) + ' ';
-    } else if (code >= 0x80 || code === /* '-' */ 0x2d ||
-               code === /* '_' */ 0x5f ||
-               digit(code) || letter(code)) {
+    } else if (
+        code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
+        digit(code) || letter(code)) {
       result += string[i];
     } else {
       result += '\\' + string[i];
