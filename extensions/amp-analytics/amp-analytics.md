@@ -113,6 +113,12 @@ Type attribute value: `colanalytics`
 
 Adds support for ColAnalytics. Additionally, need the value for `id`.
 
+### Clicky Web Analytics
+
+Type attribute value: `clicky`
+
+Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
+
 ### comScore
 
 Type attribute value: `comscore`
