@@ -80,7 +80,7 @@ function tests(name) {
         expect(fetches).to.have.length(3);
         expect(fetches[0].href).to.equal(
             'http://ads.localhost:' + location.port +
-            '/dist.3p/current/frame.max.html');
+            '/base/dist.3p/current/frame.max.html');
         expect(fetches[1].href).to.equal(
             'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
         expect(fetches[2].href).to.equal(

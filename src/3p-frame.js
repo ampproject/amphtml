@@ -193,10 +193,11 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  if (getMode().localDev) {
+  if (getMode().localDev || parentWindow.AMP_TEST) {
+    const prefix = parentWindow.AMP_TEST ? '/base' : '';
     return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
-        '/dist.3p/current' +
+        prefix + '/dist.3p/current' +
         (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
