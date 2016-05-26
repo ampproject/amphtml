@@ -18,7 +18,6 @@ import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {listenFor, postMessageToWindows} from './iframe-helper';
-import {parseUrl} from './url';
 import {timer} from './timer';
 
 /**

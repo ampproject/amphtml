@@ -123,7 +123,8 @@ export function getIframe(parentWindow, element, opt_type) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  iframe.setAttribute('data-amp-3p-sentinel', attributes._context.amp3pSentinel);
+  iframe.setAttribute(
+      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
   return iframe;
 }
 
@@ -279,7 +280,7 @@ export function generateSentinel(parentWindow) {
   for (let win = parentWindow; win != window.top; win = win.parent) {
     windowDepth++;
   }
-  return '' + windowDepth + '-' + getRandom(parentWindow);
+  return String(windowDepth) + '-' + getRandom(parentWindow);
 }
 
 /**

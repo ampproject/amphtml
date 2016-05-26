@@ -92,7 +92,7 @@ describe('iframe-helper', function() {
       testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
       unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          (data, source) => {
+          () => {
             calls++;
             resolve();
           }, true /* opt_is3P */);
@@ -118,7 +118,7 @@ describe('iframe-helper', function() {
       testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
       testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
       unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          (data, source) => {
+          () => {
             calls++;
             resolve();
           }, true  /* opt_is3P */, true /* opt_includingNestedWindows */);
