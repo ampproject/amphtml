@@ -214,6 +214,15 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
  * @visibleForTesting
  */
 export function getSubDomain(win) {
+  return 'd-' + getRandom(win);
+}
+
+/**
+ * Generates a random non-negative integer.
+ * @param {!Window} win
+ * @return {string}
+ */
+function getRandom(win) {
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.
@@ -224,7 +233,7 @@ export function getSubDomain(win) {
     // Fall back to Math.random.
     rand = String(win.Math.random()).substr(2) + '0';
   }
-  return 'd-' + rand;
+  return rand;
 }
 
 /**
@@ -270,7 +279,7 @@ export function generateSentinel(parentWindow) {
   for (let win = parentWindow; win != window.top; win = win.parent) {
     windowDepth++;
   }
-  return '' + windowDepth + '-' + Math.round(Math.random() * 1000000);
+  return '' + windowDepth + '-' + getRandom(parentWindow);
 }
 
 /**
