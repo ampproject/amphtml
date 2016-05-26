@@ -76,7 +76,10 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data && /^amp/.test(event.data.sentinel)) {
+        if (event.data &&
+            // Either non-3P or 3P variant of the sentinel.
+            (/^amp/.test(event.data.sentinel) ||
+             /^\d+-\d+$/.test(event.data.sentinel))) {
           messages.push(event.data);
         }
       })
