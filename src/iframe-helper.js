@@ -343,8 +343,10 @@ export function postMessageToWindows(iframe, targets, type, object, opt_is3P) {
     // Serialize ourselves because that is much faster in Chrome.
     object = 'amp-' + JSON.stringify(object);
   }
-  targets.forEach(
-      target => target.win./*OK*/postMessage(object, target.origin));
+  for (let i = 0; i < targets.length; i++) {
+    const target = targets[i];
+    target.win./*OK*/postMessage(object, target.origin);
+  }
 }
 
 /**
