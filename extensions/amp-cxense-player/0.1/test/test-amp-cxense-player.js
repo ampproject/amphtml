@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-const ELEMENT_NAME = 'amp-cxense-player';
 
-// require('../' + ELEMENT_NAME); // <-- why does this fail? :/ all the other kids are doing it.
-require('../amp-cxense-player'); // but this doesn't fail
-
+import '../amp-cxense-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describe(ELEMENT_NAME, function() {
+describe('amp-cxense-player', function() {
     // you should'nt use an arrow-function here, mocha is screwing up the context
     // https://github.com/mochajs/mocha/issues/2018
     // same goes with individual it() tests
@@ -41,7 +38,7 @@ describe(ELEMENT_NAME, function() {
     doc = doc || document;
     attributes = Object.assign({}, DEFAULT_ATTRIBUTES, attributes);
 
-    const node = doc.createElement(ELEMENT_NAME);
+    const node = doc.createElement('amp-cxense-player');
 
     for (const key in attributes) {
       node.setAttribute(key, attributes[key]);
@@ -57,44 +54,47 @@ describe(ELEMENT_NAME, function() {
   }
 
   it('renders', () => {
-    return createWidget({})
-            .then(function(implementation_) {
-              expect(
-                    document.querySelector('#'
-                        + implementation_.element.getAttribute('id')
-                        + '>iframe')
-                ).to.be.ok;
-            });
+    return createWidget({
+      'data-color': 'hotpink',
+    }).then(function(implementation_) {
+      expect(
+                document.querySelector('#'
+                    + implementation_.element.getAttribute('id')
+                    + '>iframe')
+            ).to.be.ok;
+    });
   });
 
   it('renders responsively', () => {
-    return createWidget({})
-            .then(function(implementation_) {
-              expect(
-                    implementation_.iframe_.className
-                ).to.match(/-amp-fill-content/);
-            });
+    return createWidget({
+      'data-locale': 'fr',
+    }).then(function(implementation_) {
+      expect(
+                implementation_.iframe_.className
+            ).to.match(/-amp-fill-content/);
+    });
   });
 
 
   it('pauses on request', () => {
-    return createWidget({})
-            .then(function(implementation_) {
-              expect(
-                    implementation_.pauseCallback()
-                ).to.be.true;
-            });
+    return createWidget({
+      'data-seek': '10',
+    }).then(function(implementation_) {
+      expect(
+                implementation_.pauseCallback()
+            ).to.be.true;
+    });
   });
 
   it('removes target div after unlayoutCallback', () => {
-    return createWidget({})
-            .then(function(implementation_) {
-              implementation_.unlayoutCallback();
-              expect(
-                    document.getElementById('#'
-                        + implementation_.element.getAttribute('id')
-                        + '>iframe')
-                ).to.be.null;
-            });
+    return createWidget({
+    }).then(function(implementation_) {
+      implementation_.unlayoutCallback();
+      expect(
+                document.getElementById('#'
+                    + implementation_.element.getAttribute('id')
+                    + '>iframe')
+            ).to.be.null;
+    });
   });
 });

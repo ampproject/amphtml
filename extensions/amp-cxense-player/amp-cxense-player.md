@@ -47,6 +47,7 @@ Example:
     data-locale="fr"
     data-color="orange"
     data-ad-tag="https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator="
+    data-poster="http://i.imgur.com/WLLeLjK.jpg"
     layout="responsive"
     width="480" height="480">
 </amp-cxense-player>
@@ -54,9 +55,14 @@ Example:
 
 ## Attributes
 
+**data-poster**
+
+A poster URL to be used as a placeholder while the widget is loading.
+Future work will involve ability to detect each item or playlist thumbnail without the need of the poster attribute
+
 **data-***
 
-All `data-*` attributes will be will plumbed through to the widgets configs just like any other cxense widget.
+All other `data-*` attributes will be will plumbed through to the widgets configs just like any other cxense widget.
 
 ### For example
 

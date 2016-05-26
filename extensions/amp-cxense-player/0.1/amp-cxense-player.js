@@ -15,18 +15,20 @@
  */
 
 import {CSS} from '../../../build/amp-cxense-player-0.1.css';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
+import {createLoaderElement} from '../../../src/loader';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 
 const cxDefaults = {
   apiHost: 'https://api.widget.cx',
-  embedHost: 'https://embed.widget.cx',
+  distEmbedHost: 'https://embed.widget.cx',
+  debugEmbedHost: 'https://stage-embed.widget.cx',
   distEmbedApp: '/app/player/m4/dist/',
   debugEmbedApp: '/app/player/m4/debug/',
-  // can't access the window.top.location.href from the iframe to enable sharing the top url
+    // can't access the window.top.location.href from the iframe to enable sharing the top url
   attrs: {
     'share.enable': false,
   },
@@ -46,14 +48,32 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @override */
+    renderOutsideViewport() {
+      return false;
+    }
+
+    /** @override */
     buildCallback() {
       this.element.classList.add('amp-cxense-player');
 
-      /** @private @const {object} */
+        /** @private @const {object} */
       this.cxDefaults_ = JSON.parse(JSON.stringify(cxDefaults));
+        /** @private @const {object} */
+      this.attrs_ = this.getDataAttributes_();
+
+      this.cxDefaults_.embedHost = this.attrs_.debug
+            ? this.cxDefaults_.debugEmbedHost : this.cxDefaults_.distEmbedHost;
+      this.cxDefaults_.embedApp = this.attrs_.debug
+            ? this.cxDefaults_.debugEmbedApp : this.cxDefaults_.distEmbedApp;
+
+        /** @private @const {number} */
+      this.width_ = getLengthNumeral(this.element.getAttribute('width'));
+        /** @private @const {number} */
+      this.height_ = getLengthNumeral(this.element.getAttribute('height'));
 
       if (!this.getPlaceholder()) {
-        this.buildWidgetPlaceholder_();
+        this.buildImagePoster_();
+        this.loading_(true);
       }
     }
 
@@ -66,21 +86,51 @@ class AmpCxense extends AMP.BaseElement {
 
       this.iframe_.setAttribute('frameborder', '0');
       this.iframe_.setAttribute('allowfullscreen', 'true');
-      this.iframe_.width = this.element.getAttribute('width');
-      this.iframe_.height = this.element.getAttribute('height');
+
+      this.iframe_.width = this.width_;
+      this.iframe_.height = this.height_;
+
       this.iframe_.src = this.getIframeSrc_();
       setStyles(this.iframe_, {display: 'none'});
-
       this.element.appendChild(this.iframe_);
 
-      return loadPromise(this.iframe_).then(ret => {
-        if (self.placeholder_) {
-          setStyles(this.placeholder_, {display: 'none'});
-        }
-        setStyles(self.iframe_, {display: ''});
-        self.applyFillContent(self.iframe_);
-        return ret;
+        /** @private {boolean} */
+      this.mpfReady_ = false;
+
+        /** @private @const {!Promise} */
+      this.playerReadyPromise_ = new Promise(resolve => {
+            /** @private @const {function()} */
+        this.playerReadyResolver_ = iframe => {
+          self.mpfReady = true;
+          resolve(iframe);
+        };
       });
+
+      this.handleFrameMessages_ = this.handleFrameMessages_.bind(this);
+      this.getWin().addEventListener('message', this.handleFrameMessages_);
+
+      return loadPromise(this.iframe_)
+              // todo: remove this timeout after OVP release
+              // that has the frame postMessage support
+              // for a more accurate loading time
+              // this resolves whether mpf.ready fires or not after 2s
+              .then(() => {
+                setTimeout(() => {
+                  if (!self.mpfReady_) {
+                    self.playerReadyResolver_(self.iframe_);
+                  }
+                }, 2000);
+              })
+            .then(() => this.playerReadyPromise_)
+            .then(ret => {
+              if (self.placeholder_) {
+                setStyles(this.placeholder_, {display: 'none'});
+              }
+              self.loading_(false);
+              setStyles(self.iframe_, {display: ''});
+              self.applyFillContent(self.iframe_);
+              return ret;
+            });
     }
 
     /** @override */
@@ -91,28 +141,47 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     unlayoutCallback() {
+      this.getWin().removeEventListener('message', this.handleFrameMessages_);
       this.iframe_.setAttribute('src', 'about:blank');
       this.iframe_.parentNode.removeChild(this.iframe_);
       return true;
     }
 
     /** @private */
+    handleFrameMessages_(event) {
+      if (event.origin != this.cxDefaults_.embedHost
+            || event.source != this.iframe_.contentWindow) {
+        return;
+      }
+      let data;
+      if (!event.data || event.data.indexOf('{') != 0) {
+        return;  // Doesn't look like JSON.
+      }
+      try {
+        data = JSON.parse(event.data);
+      } catch (unused) {
+        return; // We only process valid JSON.
+      }
+        // we only need this event for now
+      if (data.type == 'mpf.ready') {
+        this.playerReadyResolver_(this.iframe_);
+      }
+    }
+
+    /** @private */
     getIframeSrc_() {
       const attrs = this.getDataAttributes_();
       return addParamsToUrl(this.cxDefaults_.embedHost
-            + (attrs.debug
-                ? this.cxDefaults_.debugEmbedApp
-                : this.cxDefaults_.distEmbedApp
-              )
+            + this.cxDefaults_.embedApp
             , attrs);
     }
 
     /** @private */
     getDataAttributes_() {
       return extend(
-          this.cxDefaults_.attrs,
-          getDataParamsFromAttributes(this.element, null, 'data-')
-      );
+            this.cxDefaults_.attrs,
+            getDataParamsFromAttributes(this.element, null, 'data-')
+        );
     }
 
     /** @private */
@@ -127,21 +196,50 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @private */
-    buildWidgetPlaceholder_() {
-      const doc = this.getDoc_();
+    buildImagePoster_() {
+      const src = this.element.getAttribute('poster')
+            || this.element.getAttribute('data-poster');
 
-      this.placeholder_ = doc.createElement('div');
-      this.placeholder_.className = 'amp-cxense-player-placeholder';
+      if (!src) {
+        return;
+      }
 
-      const spinner = doc.createElement('div');
-      spinner.className = 'amp-cxense-player-loader';
-      spinner.appendChild(doc.createElement('div'));
-      spinner.appendChild(doc.createElement('div'));
-      spinner.appendChild(doc.createElement('div'));
+      const imgPlaceholder = this.getDoc_().createElement('img');
+      setStyles(imgPlaceholder, {
+        'object-fit': 'cover',
+        'visibility': 'hidden',
+      });
+      imgPlaceholder.src = src;
+      imgPlaceholder.width = this.width_;
+      imgPlaceholder.height = this.height_;
+      this.element.appendChild(imgPlaceholder);
+      this.applyFillContent(imgPlaceholder);
+      loadPromise(imgPlaceholder)
+            .then(() => {
+              setStyles(imgPlaceholder, {
+                'visibility': '',
+              });
+            });
+    }
 
-      this.placeholder_.appendChild(spinner);
-      this.element.appendChild(this.placeholder_);
-      this.applyFillContent(this.placeholder_);
+    loading_(state) {
+      if (!this.loadingElement_) {
+            /** @private @const {Element} */
+        this.loadingContainer_ = this.getDoc_().createElement('div');
+            /** @private @const {Element} */
+        this.loadingElement_ = createLoaderElement(this.getDoc_());
+
+        this.loadingContainer_.classList.add('-amp-loading-container');
+        this.loadingContainer_.classList.add('amp-hidden');
+
+        this.loadingElement_.classList
+                .add('amp-cxense-default-placeholder');
+
+        this.element.appendChild(this.loadingElement_);
+        this.applyFillContent(this.loadingContainer_);
+      }
+      this.loadingContainer_.classList.toggle('amp-hidden', !state);
+      this.loadingElement_.classList.toggle('amp-active', state);
     }
 
     /** @private */

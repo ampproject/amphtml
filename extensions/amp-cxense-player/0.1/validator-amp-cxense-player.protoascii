@@ -54,7 +54,8 @@ tags: {  # <amp-cxense-player>
   disallowed_ancestor: "amp-sidebar"
   also_requires_tag: "amp-cxense-player extension .js script"
 
-  attrs: { }
+  # If data-poster is missing, no poster will be shown till the API endpoint is added.
+  attrs: { name: "data-poster" }
 
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-cxense-player.html"
