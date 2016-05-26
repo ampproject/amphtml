@@ -15,6 +15,7 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
+import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
@@ -51,9 +52,9 @@ export class PinWidget {
     const log = el.getAttribute('data-pin-log');
     if (href) {
       if (shouldPop) {
-        window.open(href, '_pinit', POP);
+        openWindowDialog(window, href, '_pinit', POP);
       } else {
-        window.open(`${href}?amp=1&guid=${Util.guid}`, '_blank');
+        openWindowDialog(window, `${href}?amp=1&guid=${Util.guid}`, '_blank');
       }
     }
     if (log) {
