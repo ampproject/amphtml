@@ -23,9 +23,10 @@ const http = require('http');
 const https = require('https');
 const path = require('path');
 const program = require('commander');
-const vm = require('vm');
+const querystring = require('querystring');
 const url = require('url');
 const util = require('util');
+const vm = require('vm');
 
 /**
  * Convenience function to detect whether an argument is a URL. If not,
@@ -333,7 +334,7 @@ function serve(port, validatorScript) {
     validatorScript = '/validator.js';
   }
   http.createServer((request, response) => {
-        if (request.method == 'GET') {
+        if (request.method === 'GET') {
           //
           // Handle '/'.
           //
@@ -363,7 +364,7 @@ function serve(port, validatorScript) {
           //
           // Handle '/amp_favicon.png'
           //
-          if (request.url == '/amp_favicon.png') {
+          if (request.url === '/amp_favicon.png') {
             const contents = fs.readFileSync(
                 path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
             response.writeHead(200, {'Content-Type': 'image/png'});
@@ -379,7 +380,7 @@ function serve(port, validatorScript) {
           if (path.resolve(node_modules_path)
                   .startsWith(path.resolve(__dirname)) &&
               ['.js', '.html',
-               '.css'].indexOf(path.extname(node_modules_path)) != -1) {
+               '.css'].indexOf(path.extname(node_modules_path)) !== -1) {
             try {
               const contents = fs.readFileSync(node_modules_path, 'utf-8');
               response.writeHead(
@@ -399,34 +400,34 @@ function serve(port, validatorScript) {
         // Handle /fetch?, a request to fetch an arbitrary doc from the
         // internet. It presents the results as JSON.
         //
-        if (request.method == 'POST' && request.url.startsWith('/fetch?')) {
+        if (request.method === 'POST' && request.url == '/fetch') {
           if (request.headers['x-requested-by'] !== 'validator webui') {
             response.writeHead(400, {'Content-Type': 'text/plain'});
             response.end('Bad request.');
             return;
           }
-          const parsedUrl = url.parse(request.url, true);
-          const urlToFetch = parsedUrl['query']['url'];
-          if (!urlToFetch.startsWith('https://') &&
-              !urlToFetch.startsWith('http://')) {
-            response.writeHead(400, {'Content-Type': 'text/plain'});
-            response.end('Bad request.');
-            return;
-          }
-          readFromUrl(urlToFetch)
-              .then((contents) => {
-                response.writeHead(200, {'Content-Type': 'application/json'});
+          readFromReadable('client request', request)
+              .then((formData) => {
+                const parsedForm = querystring.parse(formData);
+                const urlToFetch = parsedForm['url'];
+                if (urlToFetch && !urlToFetch.startsWith('https://') &&
+                    !urlToFetch.startsWith('http://')) {
+                  throw {code: 400, message: 'Bad request.'};
+                }
+                return urlToFetch;
+              }).then(readFromUrl).then((contents) => {
+                response.writeHead(
+                    200, {'Content-Type': 'application/json'});
                 response.end(JSON.stringify({'Contents': contents}));
-              })
-              .catch((error) => {
-                response.writeHead(502, {'Content-Type': 'text/plain'});
-                response.end('Bad gateway (' + error.message + ').');
+              }).catch((error) => {
+                const code = error.code || 502;
+                response.writeHead(code, {'Content-Type': 'text/plain'});
+                response.end(error.message);
               });
           return;
         }
         response.writeHead(400, {'Content-Type': 'text/plain'});
         response.end('Bad request.');
-        return;
       })
       .listen(port);
   console.log('Serving at http://127.0.0.1:' + port + '/');

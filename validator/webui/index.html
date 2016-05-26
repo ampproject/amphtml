@@ -467,9 +467,10 @@
                   editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
                 }
               };
-              xmlHttp.open('POST', '/fetch?url=' + encodeURIComponent(urlToFetch), true);
+              xmlHttp.open('POST', '/fetch', true);
               xmlHttp.setRequestHeader('X-Requested-By', 'validator webui');
-              xmlHttp.send();
+              xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+              xmlHttp.send('url=' + encodeURIComponent(urlToFetch));
             }
           });
 
