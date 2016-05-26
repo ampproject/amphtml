@@ -458,6 +458,23 @@ describe('DOM', () => {
     });
   });
 
+  describe('getDataParamsFromAttributes with custom attribute prefix', () => {
+    it('should return key-value for data-foo- attributes', () => {
+      const element = document.createElement('element');
+      element.setAttribute('attr1', '1');
+      element.setAttribute('data-foo-hello', '2');
+      element.setAttribute('data-foo-from-the-other-side', '3');
+      const params = dom.getDataParamsFromAttributes(
+          element,
+          null,
+          'data-foo-'
+      );
+      expect(params.hello).to.be.equal('2');
+      expect(params.fromTheOtherSide).to.be.equal('3');
+      expect(params.attr1).to.be.undefined;
+    });
+  });
+
   describe('hasNextNodeInDocumentOrder', () => {
     it('should return true when the element has a nextSibling', () => {
       const element = document.createElement('div');
