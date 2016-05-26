@@ -115,11 +115,11 @@ describe('AccessServerAdapter', () => {
       responseDoc.appendChild(responseAccessData);
 
       targetElement1 = document.createElement('div');
-      targetElement1.setAttribute('i-amp-access-id', 'a1');
+      targetElement1.setAttribute('i-amp-access-id', '1/1');
       document.body.appendChild(targetElement1);
 
       targetElement2 = document.createElement('div');
-      targetElement2.setAttribute('i-amp-access-id', 'a2');
+      targetElement2.setAttribute('i-amp-access-id', '1/2');
       document.body.appendChild(targetElement2);
     });
 
@@ -266,12 +266,12 @@ describe('AccessServerAdapter', () => {
 
       it('should replace sections', () => {
         const responseElement1 = document.createElement('div');
-        responseElement1.setAttribute('i-amp-access-id', 'a1');
+        responseElement1.setAttribute('i-amp-access-id', '1/1');
         responseElement1.textContent = 'a1';
         responseDoc.appendChild(responseElement1);
 
         const responseElement2 = document.createElement('div');
-        responseElement2.setAttribute('i-amp-access-id', 'a2');
+        responseElement2.setAttribute('i-amp-access-id', '1/2');
         responseElement2.textContent = 'a2';
         responseDoc.appendChild(responseElement2);
 
@@ -281,9 +281,9 @@ describe('AccessServerAdapter', () => {
         responseDoc.appendChild(unknownResponseElement3);
 
         return adapter.replaceSections_(responseDoc).then(() => {
-          expect(document.querySelector('[i-amp-access-id=a1]').textContent)
+          expect(document.querySelector('[i-amp-access-id="1/1"]').textContent)
               .to.equal('a1');
-          expect(document.querySelector('[i-amp-access-id=a2]').textContent)
+          expect(document.querySelector('[i-amp-access-id="1/2"]').textContent)
               .to.equal('a2');
           expect(document.querySelector('[i-amp-access-id=a3]')).to.be.null;
         });
