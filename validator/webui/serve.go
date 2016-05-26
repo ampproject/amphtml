@@ -39,7 +39,8 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("X-Requested-By") != "validator webui" {
+	if r.Method != "POST" ||
+		r.Header.Get("X-Requested-By") != "validator webui" {
 		http.Error(w, "Bad request.", http.StatusBadRequest)
 		return
 	}

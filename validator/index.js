@@ -333,49 +333,73 @@ function serve(port, validatorScript) {
     validatorScript = '/validator.js';
   }
   http.createServer((request, response) => {
-        if (request.method !== 'GET') {
-          return;
-        }
-        //
-        // Handle '/'.
-        //
-        if (request.url === '/') {
-          response.writeHead(200, {'Content-Type': 'text/html'});
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'webui/index.html'), 'utf-8');
-          if ('https://cdn.ampproject.org/v0/validator.js' == validatorScript) {
-            response.end(contents);
+        if (request.method == 'GET') {
+          //
+          // Handle '/'.
+          //
+          if (request.url === '/') {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            const contents = fs.readFileSync(
+                path.join(__dirname, 'webui/index.html'), 'utf-8');
+            if ('https://cdn.ampproject.org/v0/validator.js' ==
+                validatorScript) {
+              response.end(contents);
+              return;
+            }
+            response.end(contents.replace(
+                new RegExp(
+                    'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
+                validatorScript));
             return;
           }
-          response.end(contents.replace(
-              new RegExp(
-                  'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
-              validatorScript));
+          //
+          // Handle '/validator.js'.
+          //
+          if (request.url === '/validator.js') {
+            response.writeHead(200, {'Content-Type': 'text/javascript'});
+            response.end(validatorScriptContents);
+            return;
+          }
+          //
+          // Handle '/amp_favicon.png'
+          //
+          if (request.url == '/amp_favicon.png') {
+            const contents = fs.readFileSync(
+                path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
+            response.writeHead(200, {'Content-Type': 'image/png'});
+            response.end(contents, 'binary');
+            return;
+          }
+          // Look up any other resources relative to node_modules.
+          const relative_path = request.url.substr(1);  // Strip leading '/'.
+          const node_modules_path =
+              path.join(__dirname, 'node_modules', relative_path);
+
+          // Only serve .js .html .css below node_modules.
+          if (path.resolve(node_modules_path)
+                  .startsWith(path.resolve(__dirname)) &&
+              ['.js', '.html',
+               '.css'].indexOf(path.extname(node_modules_path)) != -1) {
+            try {
+              const contents = fs.readFileSync(node_modules_path, 'utf-8');
+              response.writeHead(
+                  200,
+                  {'Content-Type': extToMime(path.extname(node_modules_path))});
+              response.end(contents);
+              return;
+            } catch (error) {
+              // Fall through for 404 below.
+            }
+          }
+          response.writeHead(404, {'Content-Type': 'text/plain'});
+          response.end('Not found.');
           return;
         }
         //
-        // Handle '/validator.js'.
-        //
-        if (request.url === '/validator.js') {
-          response.writeHead(200, {'Content-Type': 'text/javascript'});
-          response.end(validatorScriptContents);
-          return;
-        }
-        //
-        // Handle '/amp_favicon.png'
-        //
-        if (request.url == '/amp_favicon.png') {
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
-          response.writeHead(200, {'Content-Type': 'image/png'});
-          response.end(contents, 'binary');
-          return;
-        }
-        //
-        // Handle fetch?, a request to fetch an arbitrary doc from the
+        // Handle /fetch?, a request to fetch an arbitrary doc from the
         // internet. It presents the results as JSON.
         //
-        if (request.url.startsWith('/fetch?')) {
+        if (request.method == 'POST' && request.url.startsWith('/fetch?')) {
           if (request.headers['x-requested-by'] !== 'validator webui') {
             response.writeHead(400, {'Content-Type': 'text/plain'});
             response.end('Bad request.');
@@ -400,28 +424,9 @@ function serve(port, validatorScript) {
               });
           return;
         }
-        // Look up any other resources relative to node_modules.
-        const relative_path = request.url.substr(1);  // Strip leading '/'.
-        const node_modules_path =
-            path.join(__dirname, 'node_modules', relative_path);
-
-        // Only serve .js .html .css below node_modules.
-        if (path.resolve(node_modules_path)
-                .startsWith(path.resolve(__dirname)) &&
-            ['.js', '.html', '.css'].indexOf(path.extname(node_modules_path)) !=
-                -1) {
-          try {
-            const contents = fs.readFileSync(node_modules_path, 'utf-8');
-            response.writeHead(
-                200,
-                {'Content-Type': extToMime(path.extname(node_modules_path))});
-            response.end(contents);
-          } catch (error) {
-            // Fall through for 404 below.
-          }
-        }
-        response.writeHead(404, {'Content-Type': 'text/plain'});
-        response.end('Not found.');
+        response.writeHead(400, {'Content-Type': 'text/plain'});
+        response.end('Bad request.');
+        return;
       })
       .listen(port);
   console.log('Serving at http://127.0.0.1:' + port + '/');
