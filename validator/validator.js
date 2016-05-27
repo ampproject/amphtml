@@ -2689,10 +2689,12 @@ class ParsedValidatorRules {
     /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
      */
     this.formatByCode_ = new goog.structs.Map();
-    for (let i = 0; i < rules.errorFormats.length; ++i) {
-      const errorFormat = rules.errorFormats[i];
-      goog.asserts.assert(errorFormat !== null);
-      this.formatByCode_.set(errorFormat.code, errorFormat.format);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      for (let i = 0; i < rules.errorFormats.length; ++i) {
+        const errorFormat = rules.errorFormats[i];
+        goog.asserts.assert(errorFormat !== null);
+        this.formatByCode_.set(errorFormat.code, errorFormat.format);
+      }
     }
   }
 
