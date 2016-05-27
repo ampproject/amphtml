@@ -178,7 +178,11 @@ describe('test-insert-extension', () => {
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
           'amp-ad', true);
-      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+      if (window.ampTestRuntimeConfig.useCompiledJs) {
+        expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+      } else {
+        expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
+      }
     });
 
     it('with local mode normal pathname', () => {
