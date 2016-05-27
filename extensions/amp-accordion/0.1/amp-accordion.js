@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
+import {removeFragment} from '../../../src/url';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -30,14 +31,26 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
-    /** @const @private */
-    this.id_ = this.element.id;
+    /** @const @private {string} */
+    this.id_ = this.getSessionStorageKey();
 
+    /** @const @private {!Object|undefined} */
+    this.currentState_ = null;
     this.element.setAttribute('role', 'tablist');
+
+    // sessionStorage key: special created id for this element, this.id_.
+    // sessionStorage value: string that can convert to this.currentState_ obj.
+    // TODO: add test for setting and reading sessionStorage.
+    try {
+      this.currentState_ =
+        JSON.parse(this.getWin()./*OK*/sessionStorage.getItem(this.id_));
+    } catch (e) {
+      console./*OK*/error(e.message, e.stack);
+    }
+    if (!this.currentState_) {
+      this.currentState_ = Object.create(null);
+    }
     const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
-    const accordionSession_ = sessionStorage.getItem(this.id_);
-    console.log(accordionSession_);
-    var iter_ = 0;
     this.sections_.forEach((section, index) => {
       user.assert(
           section.tagName.toLowerCase() == 'section',
@@ -56,27 +69,30 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'tab');
       content.classList.add('-amp-accordion-content');
       content.setAttribute('role', 'tabpanel');
-      if (!accordionSession_) {
-        content.setAttribute(
-            'aria-expanded', section.hasAttribute('expanded').toString());
-      } else {
-        if (accordionSession_[iter_] == '1') {
-          section.setAttribute('expanded', '');
-          content.setAttribute('aria-expanded', 'true');
-        } else {
-          section.removeAttribute('expanded');
-          content.setAttribute('aria-expanded', 'false');
-        }
-        iter_++;
-      }
       let contentId = content.getAttribute('id');
       if (!contentId) {
         contentId = this.element.id + '_AMP_content_' + index;
         content.setAttribute('id', contentId);
       }
+      if (this.currentState_[contentId]) {
+        section.setAttribute('expanded', '');
+        content.setAttribute('aria-expanded', 'true');
+      } else if (this.currentState_[contentId] == false) {
+        section.removeAttribute('expanded');
+        content.setAttribute('aria-expanded', 'false');
+      } else {
+        content.setAttribute(
+            'aria-expanded', section.hasAttribute('expanded').toString());
+      }
       header.setAttribute('aria-controls', contentId);
       header.addEventListener('click', boundOnHeaderClick_);
     });
+  }
+
+  getSessionStorageKey() {
+    const id_ = this.element.id;
+    const url = removeFragment(this.getWin().location.href);
+    return `amp-${id_}-${url}`;
   }
 
   /**
@@ -89,7 +105,9 @@ class AmpAccordion extends AMP.BaseElement {
     const section = event.currentTarget.parentNode;
     const sectionComponents_ = section.children;
     const content = sectionComponents_[1];
-    var setPromise = this.mutateElement(() => {
+    const contentId = content.getAttribute('id');
+    const isSectionClosedAfterClick = section.hasAttribute('expanded');
+    this.mutateElement(() => {
       if (section.hasAttribute('expanded')) {
         section.removeAttribute('expanded');
         content.setAttribute('aria-expanded', 'false');
@@ -98,20 +116,15 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('aria-expanded', 'true');
       }
     }, content);
-    // TODO(zhouyx): ask if there's way to get index of currentTarget
-    // element directly without iterating all section.
-    var tempSession_ = '';
-    setPromise.then(() => {
-      this.sections_.forEach((section, index) => {
-        const contentIter = section.children[1];
-        if (contentIter.getAttribute('aria-expanded') == 'true') {
-          tempSession_ += '1';
-        } else {
-          tempSession_ += '0';
-        }
-      });
-      sessionStorage.setItem(this.id_, tempSession_);
-    });
+    this.currentState_[contentId] = !isSectionClosedAfterClick;
+    // sessionStorage key: special created id for this element, this.id_.
+    // sessionStorage value: string that can convert to this.currentState_ obj.
+    try {
+      this.getWin()./*OK*/sessionStorage.setItem(
+          this.id_, JSON.stringify(this.currentState_));
+    } catch (e) {
+      console./*OK*/error(e.message, e.stack);
+    }
   }
 }
 
