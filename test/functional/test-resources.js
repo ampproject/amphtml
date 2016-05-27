@@ -2609,6 +2609,7 @@ describe('Resources.add', () => {
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
 
       const newChild = createElementWithResource(3)[0];
+      newChild.nextSibling = true;
       const newResource = newChild['__AMP__RESOURCE'];
       const child1BuildSpy = sandbox.spy();
       child1.nextSibling = child2;
@@ -2623,7 +2624,8 @@ describe('Resources.add', () => {
       resources.buildReadyResources_();
       expect(child1BuildSpy.called).to.be.true;
       expect(child2.build.called).to.be.false;
-      expect(resources.pendingBuildResources_.length).to.be.equal(2);
+      expect(newChild.build.called).to.be.true;
+      expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
 
       child2.parentNode = parent;
@@ -2631,8 +2633,8 @@ describe('Resources.add', () => {
       resources.buildReadyResources_();
       expect(child1BuildSpy.calledTwice).to.be.false;
       expect(child2.build.called).to.be.true;
-      expect(newChild.build.called).to.be.false;
-      expect(resources.pendingBuildResources_.length).to.be.equal(1);
+      expect(newChild.build.calledTwice).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
     it('should build everything pending when document is ready', () => {
