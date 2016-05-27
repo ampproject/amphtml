@@ -78,7 +78,7 @@ Alternatively pressing the escape key on the keyboard will also close the lightb
 
 Example:
 ```html
-<div class="hamburger" on='tap:sidebar1.toggle'></button>
+<button class="hamburger" on='tap:sidebar1.toggle'></button>
 <button on='tap:sidebar1'>Open</button>
 <button on='tap:sidebar1.open'>Open</button>
 <button on='tap:sidebar1.close'>x</button>
