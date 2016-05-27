@@ -758,6 +758,19 @@ describe('amp-live-list', () => {
     expect(liveList.pendingItemsInsert_).to.have.length(0);
   });
 
+  it('should be able to toggle the `disabled` attribute', () => {
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+    expect(elem.hasAttribute('disabled')).to.be.false;
+    expect(liveList.isEnabled()).to.be.true;
+    liveList.toggle(false);
+    expect(elem.hasAttribute('disabled')).to.be.true;
+    expect(liveList.isEnabled()).to.be.false;
+    liveList.toggle(true);
+    expect(elem.hasAttribute('disabled')).to.be.false;
+    expect(liveList.isEnabled()).to.be.true;
+  });
+
   describe('#getNumberMaxOrDefault', () => {
 
     it('should return correct value', () => {
