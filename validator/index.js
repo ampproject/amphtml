@@ -97,7 +97,7 @@ function readFromUrl(url) {
   return new Promise(function(resolve, reject) {
            const clientModule = url.startsWith('http://') ? http : https;
            const req = clientModule.request(url, (response) => {
-             if (response.statusCode != 200) {
+             if (response.statusCode !== 200) {
                // https://nodejs.org/api/http.html says: "[...] However, if
                // you add a 'response' event handler, then you must consume
                // the data from the response object, either by calling
@@ -342,7 +342,7 @@ function serve(port, validatorScript) {
             response.writeHead(200, {'Content-Type': 'text/html'});
             const contents = fs.readFileSync(
                 path.join(__dirname, 'webui/index.html'), 'utf-8');
-            if ('https://cdn.ampproject.org/v0/validator.js' ==
+            if ('https://cdn.ampproject.org/v0/validator.js' ===
                 validatorScript) {
               response.end(contents);
               return;
@@ -400,7 +400,7 @@ function serve(port, validatorScript) {
         // Handle /fetch?, a request to fetch an arbitrary doc from the
         // internet. It presents the results as JSON.
         //
-        if (request.method === 'POST' && request.url == '/fetch') {
+        if (request.method === 'POST' && request.url === '/fetch') {
           if (request.headers['x-requested-by'] !== 'validator webui') {
             response.writeHead(400, {'Content-Type': 'text/plain'});
             response.end('Bad request.');
@@ -415,11 +415,13 @@ function serve(port, validatorScript) {
                   throw {code: 400, message: 'Bad request.'};
                 }
                 return urlToFetch;
-              }).then(readFromUrl).then((contents) => {
-                response.writeHead(
-                    200, {'Content-Type': 'application/json'});
+              })
+              .then(readFromUrl)
+              .then((contents) => {
+                response.writeHead(200, {'Content-Type': 'application/json'});
                 response.end(JSON.stringify({'Contents': contents}));
-              }).catch((error) => {
+              })
+              .catch((error) => {
                 const code = error.code || 502;
                 response.writeHead(code, {'Content-Type': 'text/plain'});
                 response.end(error.message);
@@ -478,7 +480,7 @@ function main() {
   program.command('* <fileOrUrlOrMinus...>')
       .description('Validates list of files or urls (default).')
       .action((fileOrUrlOrMinus) => {
-        if (fileOrUrlOrMinus.length == 0) {
+        if (fileOrUrlOrMinus.length === 0) {
           program.outputHelp();
           process.exit(1);
         }
@@ -526,7 +528,7 @@ function main() {
       .action((options) => { serve(options.port, program.validator_js); });
 
   program.parse(process.argv);
-  if (program.args == 0) {
+  if (program.args === 0) {
     program.outputHelp();
     process.exit(1);
   }
