@@ -198,7 +198,7 @@ export class FixedLayer {
           fe.element.style.top = 'auto';
         });
         this.fixedElements_.forEach(fe => {
-          autoTopMap[fe.id] = fe.element.offsetTop;
+          autoTopMap[fe.id] = fe.element./*OK*/offsetTop;
         });
 
         // 2. Reset style top.
@@ -247,7 +247,7 @@ export class FixedLayer {
           // or not the `top` was actually set in CSS, this method compares
           // `offsetTop` with `style.top = 'auto'` and without.
           let top = styles.getPropertyValue('top');
-          const currentOffsetTop = element.offsetTop;
+          const currentOffsetTop = element./*OK*/offsetTop;
           const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
           if ((top == 'auto' || isImplicitAuto) &&
                   top != '0px' &&
