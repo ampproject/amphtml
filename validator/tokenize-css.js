@@ -56,7 +56,7 @@ goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
-
+goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.ValidationError');
 
 /**
@@ -293,19 +293,24 @@ class Tokenizer {
     this.code_;
 
     // Line number information.
-    this.lineByPos_ = [];
-    this.colByPos_ = [];
-    let currentLine = line;
-    let currentCol = col;
-    for (let i = 0; i < this.codepoints_.length; ++i) {
-      this.lineByPos_[i] = currentLine;
-      this.colByPos_[i] = currentCol;
-      if (newline(this.codepoints_[i])) {
-        ++currentLine;
-        currentCol = 0;
-      } else {
-        ++currentCol;
+    const eofToken = new parse_css.EOFToken();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      this.lineByPos_ = [];
+      this.colByPos_ = [];
+      let currentLine = line;
+      let currentCol = col;
+      for (let i = 0; i < this.codepoints_.length; ++i) {
+        this.lineByPos_[i] = currentLine;
+        this.colByPos_[i] = currentCol;
+        if (newline(this.codepoints_[i])) {
+          ++currentLine;
+          currentCol = 0;
+        } else {
+          ++currentCol;
+        }
       }
+      eofToken.line = currentLine;
+      eofToken.col = currentCol;
     }
 
     let iterationCount = 0;
@@ -321,9 +326,6 @@ class Tokenizer {
           iterationCount <= this.codepoints_.length * 2,
           'Internal Error: infinite-looping');
     }
-    const eofToken = new parse_css.EOFToken();
-    eofToken.line = currentLine;
-    eofToken.col = currentCol;
     this.tokens_.push(eofToken);
   }
 
@@ -508,13 +510,17 @@ class Tokenizer {
         this.reconsume();
         return mark.addPositionTo(this.consumeAnIdentlikeToken());
       } else {
-        // This condition happens if we are in consumeAToken (this method),
-        // the current codepoint is 0x5c (\) and the next codepoint is a
-        // newline (\n).
-        return mark.addPositionTo(new parse_css.ErrorToken(
-            amp.validator.ValidationError.Code
-                .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
-            ['style']));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          // This condition happens if we are in consumeAToken (this method),
+          // the current codepoint is 0x5c (\) and the next codepoint is a
+          // newline (\n).
+          return mark.addPositionTo(new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+              ['style']));
+        } else {
+          return new parse_css.ErrorToken();
+        }
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
       return mark.addPositionTo(new parse_css.CloseSquareToken());
@@ -573,14 +579,18 @@ class Tokenizer {
           this.consume();
           break;
         } else if (this.eof()) {
-          // For example "h1 { color: red; } \* " would emit this parse error
-          // at the end of the string.
-          const error = new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code
-                  .CSS_SYNTAX_UNTERMINATED_COMMENT,
-              ['style']);
-          mark.addPositionTo(error);
-          this.errors_.push(error);
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            // For example "h1 { color: red; } \* " would emit this parse error
+            // at the end of the string.
+            const error = new parse_css.ErrorToken(
+                amp.validator.ValidationError.Code
+                    .CSS_SYNTAX_UNTERMINATED_COMMENT,
+                ['style']);
+            mark.addPositionTo(error);
+            this.errors_.push(error);
+          } else {
+            this.errors_ = [new parse_css.ErrorToken()];
+          }
           return;
         }
       }
@@ -663,9 +673,13 @@ class Tokenizer {
         return new parse_css.StringToken(string);
       } else if (newline(this.code_)) {
         this.reconsume();
-        return new parse_css.ErrorToken(
-            amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
-            ['style']);
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
+              ['style']);
+        } else {
+          return new parse_css.ErrorToken();
+        }
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this.eof(this.next())) {
           continue;
@@ -707,22 +721,36 @@ class Tokenizer {
           return token;
         } else {
           this.consumeTheRemnantsOfABadURL();
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            return new parse_css.ErrorToken(
+                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
+                ['style']);
+          } else {
+            return new parse_css.ErrorToken();
+          }
         }
       } else if (
           this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
           this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
         this.consumeTheRemnantsOfABadURL();
-        return new parse_css.ErrorToken(
-            amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
+        } else {
+          return new parse_css.ErrorToken();
+        }
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this./*OK*/ startsWithAValidEscape()) {
           token.value += stringFromCode(this.consumeEscape());
         } else {
           this.consumeTheRemnantsOfABadURL();
-          return new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            return new parse_css.ErrorToken(
+                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
+                ['style']);
+          } else {
+            return new parse_css.ErrorToken();
+          }
         }
       } else {
         token.value += stringFromCode(this.code_);
@@ -973,10 +1001,12 @@ class MarkedPosition {
    * @param {!Tokenizer} tokenizer
    */
   constructor(tokenizer) {
-    /** @type {number} line number */
-    this.line = tokenizer.getLine();
-    /** @type {number} line */
-    this.col = tokenizer.getCol();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** @type {number} line number */
+      this.line = tokenizer.getLine();
+      /** @type {number} line */
+      this.col = tokenizer.getCol();
+    }
   }
 
   /**
@@ -985,8 +1015,10 @@ class MarkedPosition {
    * @return {!parse_css.Token}
    */
   addPositionTo(token) {
-    token.line = this.line;
-    token.col = this.col;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      token.line = this.line;
+      token.col = this.col;
+    }
     return token;
   }
 }
@@ -1055,10 +1087,12 @@ parse_css.TokenType = {
  */
 parse_css.Token = class {
   constructor() {
-    /** @type {number} */
-    this.line = 1;
-    /** @type {number} */
-    this.col = 0;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** @type {number} */
+      this.line = 1;
+      /** @type {number} */
+      this.col = 0;
+    }
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.UNKNOWN;
   }
@@ -1068,8 +1102,10 @@ parse_css.Token = class {
    * @param {!parse_css.Token} other
    */
   copyStartPositionTo(other) {
-    other.line = this.line;
-    other.col = this.col;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      other.line = this.line;
+      other.col = this.col;
+    }
   }
 
   /** @return {!string} */
@@ -1077,7 +1113,11 @@ parse_css.Token = class {
 
   /** @return {!Object} */
   toJSON() {
-    return {'tokenType': this.tokenType, 'line': this.line, 'col': this.col};
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return {'tokenType': this.tokenType, 'line': this.line, 'col': this.col};
+    } else {
+      return {'tokenType': this.tokenType};
+    }
   }
 };
 
@@ -1088,15 +1128,17 @@ parse_css.Token = class {
  */
 parse_css.ErrorToken = class extends parse_css.Token {
   /**
-   * @param {!amp.validator.ValidationError.Code} code
-   * @param {!Array<!string>} params
+   * @param {amp.validator.ValidationError.Code=} opt_code
+   * @param {Array<!string>=} opt_params
    */
-  constructor(code, params) {
+  constructor(opt_code, opt_params) {
     super();
-    /** @type {!amp.validator.ValidationError.Code} */
-    this.code = code;
-    /** @export {!Array<!string>} */
-    this.params = params;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** @type {!amp.validator.ValidationError.Code} */
+      this.code = opt_code || amp.validator.ValidationError.Code.UNKNOWN_CODE;
+      /** @export {!Array<!string>} */
+      this.params = opt_params || [];
+    }
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.ERROR;
   }
@@ -1104,8 +1146,10 @@ parse_css.ErrorToken = class extends parse_css.Token {
   /** @inheritDoc */
   toJSON() {
     const json = super.toJSON();
-    json['code'] = this.code;
-    json['params'] = this.params;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      json['code'] = this.code;
+      json['params'] = this.params;
+    }
     return json;
   }
 };
