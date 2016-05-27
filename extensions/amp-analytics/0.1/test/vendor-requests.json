@@ -25,9 +25,9 @@
   },
   "clicky": {
     "base": "https://in.getclicky.com/in.php?site_id=$site_id&",
-    "baseSuffix": "mime=_content_type_&x=_random_",
-    "pageview": "https://in.getclicky.com/in.php?site_id=$site_id&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&mime=_content_type_&x=_random_",
-    "interval": "https://in.getclicky.com/in.php?site_id=$site_id&type=ping&mime=_content_type_&x=_random_"
+    "baseSuffix": "mime=$contentType&x=_random_",
+    "pageview": "https://in.getclicky.com/in.php?site_id=$site_id&res=_screen_width_x_screen_height_&lang=_browser_language_&secure=1&type=pageview&href=_canonical_path_&title=_title_&mime=$contentType&x=_random_",
+    "interval": "https://in.getclicky.com/in.php?site_id=$site_id&type=ping&mime=$contentType&x=_random_"
   },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",

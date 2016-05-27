@@ -207,10 +207,10 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'base': 'https://in.getclicky.com/in.php?' +
-        'site_id=${site_id}&',
+        'site_id=${site_id}',
       'baseSuffix': '&mime=${contentType}&' +
         'x=${random}',
-      'pageview': '${base}' +
+      'pageview': '${base}&' +
         'res=${screenWidth}x${screenHeight}&' +
         'lang=${browserLanguage}&' +
         'secure=1&' +
@@ -218,9 +218,9 @@ export const ANALYTICS_CONFIG = {
         'href=${canonicalPath}&' +
         'title=${title}' +
         '${baseSuffix}',
-      'interval': '${base}' +
+      'interval': '${base}&' +
         'type=ping' +
-        '{baseSuffix}',
+        '${baseSuffix}',
     },
     'triggers': {
       'defaultPageview': {
