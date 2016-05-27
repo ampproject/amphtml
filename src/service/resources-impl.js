@@ -141,6 +141,9 @@ export class Resources {
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
 
+    /** @private {boolean} */
+    this.isCurrentlyBuildingPendingResources_ = false;
+
     /** @private {number} */
     this.scrollHeight_ = 0;
 
@@ -407,15 +410,22 @@ export class Resources {
    * @private
    */
   buildReadyResources_() {
+    // Avoid cases where elements add more elements inside of them
+    // and cause an infinite loop of building - see #3354 for details.
+    if (this.isCurrentlyBuildingPendingResources_) {
+      return;
+    }
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
+        this.isCurrentlyBuildingPendingResources_ = true;
         resource.build();
         // Resource is built remove it from the pending list and step back
         // one in the index to account for the removed item.
         this.pendingBuildResources_.splice(i--, 1);
       }
     }
+    this.isCurrentlyBuildingPendingResources_ = false;
   }
 
   /**
