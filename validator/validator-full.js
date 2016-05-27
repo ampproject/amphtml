@@ -286,6 +286,21 @@ amp.validator.maxSpecificity = function(validationResult) {
 };
 
 /**
+ * Applies the format to render the params in the provided error.
+ * @param {!string} format
+ * @param {!amp.validator.ValidationError} error
+ * @return {!string}
+ */
+function applyFormat(format, error) {
+  let message = format;
+  for (let param = 1; param <= error.params.length; ++param) {
+    message =
+        message.replace(new RegExp('%' + param, 'g'), error.params[param - 1]);
+  }
+  return message.replace(new RegExp('%%', 'g'), '%');
+}
+
+/**
  * Renders the error message for a single error, regardless of whether
  * or not it has an associated format.
  * @param {!amp.validator.ValidationError} error

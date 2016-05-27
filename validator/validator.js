@@ -2927,21 +2927,6 @@ amp.validator.validateString = function(inputDocContents) {
 };
 
 /**
- * Applies the format to render the params in the provided error.
- * @param {!string} format
- * @param {!amp.validator.ValidationError} error
- * @return {!string}
- */
-function applyFormat(format, error) {
-  let message = format;
-  for (let param = 1; param <= error.params.length; ++param) {
-    message =
-        message.replace(new RegExp('%' + param, 'g'), error.params[param - 1]);
-  }
-  return message.replace(new RegExp('%%', 'g'), '%');
-}
-
-/**
  * Convenience function which informs caller if given ValidationError is
  * severity warning.
  * @param {!amp.validator.ValidationError} error
