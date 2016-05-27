@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "amp-html",
   "version": "0.1.0",
   "description": "Fastish HTML",
