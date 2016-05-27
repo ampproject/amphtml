@@ -25,7 +25,7 @@ export function widespace(global, data) {
     return;
   }
 
-  const url = 'http://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + data.sid;
+  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + data.sid;
 
   writeScript(global, url);
 }
