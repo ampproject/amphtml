@@ -21,6 +21,7 @@ import {
   installVisibilityService,
 } from '../../extensions/amp-analytics/0.1/visibility-impl';
 import {installResourcesService} from '../../src/service/resources-impl';
+import {layoutRectLtwh} from '../../src/layout-rect';
 import {visibilityFor} from '../../src/visibility';
 import * as sinon from 'sinon';
 
@@ -35,12 +36,14 @@ describe('Visibility (tag: amp-analytics)', () => {
   let callbackStub;
 
   const INTERSECTION_0P = {
-    intersectionRect: {width: 0, height: 0},
-    boundingClientRect: {height: 100, width: 100},
+    intersectionRect: layoutRectLtwh(0, 0, 0, 0),
+    boundingClientRect: layoutRectLtwh(100, 100, 100, 100),
+    rootBounds: layoutRectLtwh(0, 0, 100, 100),
   };
   const INTERSECTION_50P = {
-    intersectionRect: {width: 50, height: 100},
-    boundingClientRect: {height: 100, width: 100},
+    intersectionRect: layoutRectLtwh(50, 0, 50, 100),
+    boundingClientRect: layoutRectLtwh(50, 0, 100, 100),
+    rootBounds: layoutRectLtwh(0, 0, 100, 100),
   };
 
   beforeEach(() => {
@@ -94,8 +97,9 @@ describe('Visibility (tag: amp-analytics)', () => {
 
   it('fires for non-trivial config', () => {
     listen({
-      intersectionRect: {height: 100, width: 49},
-      boundingClientRect: {height: 100, width: 100},
+      intersectionRect: layoutRectLtwh(0, 0, 49, 100),
+      boundingClientRect: layoutRectLtwh(0, 0, 49, 100),
+      rootBounds: layoutRectLtwh(0, 0, 100, 100),
     }, {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
     verifyChange(INTERSECTION_50P, 1);

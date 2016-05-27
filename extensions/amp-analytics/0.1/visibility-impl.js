@@ -16,23 +16,34 @@
 
 import {dev} from '../../../src/log';
 import {getService} from '../../../src/service';
+import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesFor} from '../../../src/resources';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
+import {viewerFor} from '../../../src/viewer';
+import {VisibilityState} from '../../../src/service/viewer-impl';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
 
 // Variables that are passed to the callback.
 const MAX_CONTINUOUS_TIME = 'maxContinuousTime';
-const TOTAL_TIME = 'totalVisibleTime';
+const TOTAL_VISIBLE_TIME = 'totalVisibleTime';
 const FIRST_SEEN_TIME = 'firstSeenTime';
 const LAST_SEEN_TIME = 'lastSeenTime';
 const FIRST_VISIBLE_TIME = 'fistVisibleTime';
 const LAST_VISIBLE_TIME = 'lastVisibleTime';
 const MIN_VISIBLE = 'minVisiblePercentage';
 const MAX_VISIBLE = 'maxVisiblePercentage';
+const ELEMENT_X = 'elementX';
+const ELEMENT_Y = 'elementY';
+const ELEMENT_WIDTH = 'elementWidth';
+const ELEMENT_HEIGHT = 'elementHeight';
+const TOTAL_TIME = 'totalTime';
+const LOAD_TIME_VISIBILITY = 'loadTimeVisibility';
+const BACKGROUNDED = 'backgrounded';
+const BACKGROUNDED_AT_START = 'backgroundedAtStart';
 
 // Variables that are not exposed outside this class.
 const CONTINUOUS_TIME = 'cT';
@@ -169,8 +180,14 @@ export class Visibility {
     /** @private @const {function} */
     this.boundScrollListener_ = this.scrollListener_.bind(this);
 
+    /** @private @const {function} */
+    this.boundVisibilityListener_ = this.visibilityListener_.bind(this);
+
     /** @private {boolean} */
     this.scrollListenerRegistered_ = false;
+
+    /** @private {boolean} */
+    this.visibilityListenerRegistered_ = false;
 
     /** @private {!Resources} */
     this.resourcesService_ = resourcesFor(this.win_);
@@ -183,11 +200,29 @@ export class Visibility {
 
     /** @private {boolean} */
     this.scheduledLoadedPromises_ = false;
+
+    /** @private {Viewer} */
+    this.viewer_ = viewerFor(this.win_);
+
+    /** @private {boolean} */
+    this.backgroundedAtStart_ = !this.viewer_.isVisible();
+
+    /** @private {boolean} */
+    this.backgrounded_ = this.backgroundedAtStart_;
+  }
+
+  /** @private */
+  registerForVisibilityEvents_() {
+    if (!this.visibilityListenerRegistered_) {
+      this.viewer_.onVisibilityChanged(this.boundVisibilityListener_);
+      this.visibilityListenerRegistered_ = true;
+      this.visibilityListener_();
+    }
   }
 
   /** @private */
   registerForViewportEvents_() {
-    if (!this.scrollListenerRegistered__) {
+    if (!this.scrollListenerRegistered_) {
       const viewport = viewportFor(this.win_);
 
       // Currently unlistens are not being used. In the event that no resources
@@ -196,7 +231,6 @@ export class Visibility {
       viewport.onChanged(this.boundScrollListener_);
       this.scrollListenerRegistered_ = true;
     }
-
   }
 
   /**
@@ -210,6 +244,7 @@ export class Visibility {
     const resId = res.getId();
 
     this.registerForViewportEvents_();
+    this.registerForVisibilityEvents_();
 
     this.listeners_[resId] = (this.listeners_[resId] || []);
     this.listeners_[resId].push({
@@ -223,6 +258,16 @@ export class Visibility {
       this.scheduledRunId_ = timer.delay(() => {
         this.scrollListener_();
       }, LISTENER_INITIAL_RUN_DELAY_);
+    }
+  }
+
+  /** @private */
+  visibilityListener_() {
+    // viewer.getVisibilityState works when the page is loaded inside a viewer.
+    const state = this.viewer_.getVisibilityState();
+    if (state == VisibilityState.HIDDEN || state == VisibilityState.PAUSED ||
+        state == VisibilityState.INACTIVE) {
+      this.backgrounded_ = true;
     }
   }
 
@@ -252,10 +297,8 @@ export class Visibility {
       for (let c = listeners.length - 1; c >= 0; c--) {
         if (this.updateCounters_(visible, listeners[c])) {
 
-          // Remove the state that need not be public and call callback.
-          delete listeners[c]['state'][CONTINUOUS_TIME];
-          delete listeners[c]['state'][LAST_UPDATE];
-          delete listeners[c]['state'][IN_VIEWPORT];
+          this.prepareStateForCallback_(listeners[c]['state'],
+              change.rootBounds, br, ir);
           listeners[c].callback(listeners[c]['state']);
           listeners.splice(c, 1);
         }
@@ -316,7 +359,7 @@ export class Visibility {
           state[CONTINUOUS_TIME] + timeSinceLastUpdate);
 
       state[LAST_UPDATE] = -1;
-      state[TOTAL_TIME] += timeSinceLastUpdate;
+      state[TOTAL_VISIBLE_TIME] += timeSinceLastUpdate;
       state[CONTINUOUS_TIME] = 0;  // Clear only after max is calculated above.
       state[LAST_VISIBLE_TIME] = Date.now() - state[TIME_LOADED];
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
@@ -335,7 +378,7 @@ export class Visibility {
         ? config[CONTINUOUS_TIME_MIN] - state[CONTINUOUS_TIME]
         : Infinity;
     const waitForTotalTime = config[TOTAL_TIME_MIN]
-        ? config[TOTAL_TIME_MIN] - state[TOTAL_TIME]
+        ? config[TOTAL_TIME_MIN] - state[TOTAL_VISIBLE_TIME]
         : Infinity;
 
     // Wait for minimum of (previous timeToWait, positive values of
@@ -346,9 +389,9 @@ export class Visibility {
     listener['state'] = state;
     return state[IN_VIEWPORT] &&
         (config[TOTAL_TIME_MIN] === undefined ||
-         state[TOTAL_TIME] >= config[TOTAL_TIME_MIN]) &&
+         state[TOTAL_VISIBLE_TIME] >= config[TOTAL_TIME_MIN]) &&
         (config[TOTAL_TIME_MAX] === undefined ||
-         state[TOTAL_TIME] <= config[TOTAL_TIME_MAX]) &&
+         state[TOTAL_VISIBLE_TIME] <= config[TOTAL_TIME_MAX]) &&
         (config[CONTINUOUS_TIME_MIN] === undefined ||
          state[CONTINUOUS_TIME] >= config[CONTINUOUS_TIME_MIN]) &&
         (config[CONTINUOUS_TIME_MAX] === undefined ||
@@ -378,7 +421,8 @@ export class Visibility {
   /** @private */
   setState_(s, visible, sinceLast) {
     s[LAST_UPDATE] = Date.now();
-    s[TOTAL_TIME] = s[TOTAL_TIME] !== undefined ? s[TOTAL_TIME] + sinceLast : 0;
+    s[TOTAL_VISIBLE_TIME] = s[TOTAL_VISIBLE_TIME] !== undefined
+        ? s[TOTAL_VISIBLE_TIME] + sinceLast : 0;
     s[CONTINUOUS_TIME] = s[CONTINUOUS_TIME] !== undefined
         ? s[CONTINUOUS_TIME] + sinceLast : 0;
     s[MAX_CONTINUOUS_TIME] = s[MAX_CONTINUOUS_TIME] !== undefined
@@ -386,6 +430,48 @@ export class Visibility {
     s[MIN_VISIBLE] = s[MIN_VISIBLE] ? Math.min(s[MIN_VISIBLE], visible) : 101;
     s[MAX_VISIBLE] = s[MAX_VISIBLE] ? Math.max(s[MAX_VISIBLE], visible) : -1;
     s[LAST_VISIBLE_TIME] = Date.now() - s[TIME_LOADED];
+  }
+
+  /**
+   * Sets variable values for callback. Cleans up existing values.
+   * @param {Object<string, *>} state The state object to populate
+   * @param {!LayoutRect} rb Bounds of Root object. (the viewport in this case)
+   * @param {!LayoutRect} br The bounding rectangle for the element
+   * @param {!LayoutRect} ir The intersection between element and the viewport
+   * @private
+   */
+  prepareStateForCallback_(state, rb, br, ir) {
+    const perf = this.win_.performance;
+    state[ELEMENT_X] = rb.left + br.left;
+    state[ELEMENT_Y] = rb.top + br.top;
+    state[ELEMENT_WIDTH] = br.width;
+    state[ELEMENT_HEIGHT] = br.height;
+    state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
+        ? Date.now() - perf.timing.domInteractive
+        : '';
+    const intersection = rectIntersection(
+        {top: 0, height: rb.height, left: 0, width: rb.width},
+        {top: ir.top, left: ir.left, width: br.width, height: br.height});
+    state[LOAD_TIME_VISIBILITY] = intersection != null
+        ? Math.round(intersection.width * intersection.height * 10000
+              / (br.width * br.height)) / 100
+        : 0;
+    state[MIN_VISIBLE] = Math.round(state[MIN_VISIBLE] * 100) / 100;
+    state[MAX_VISIBLE] = Math.round(state[MAX_VISIBLE] * 100) / 100;
+    state[BACKGROUNDED] = this.backgrounded_ ? '1' : '0';
+    state[BACKGROUNDED_AT_START] = this.backgroundedAtStart_ ? '1' : '0';
+
+    // Remove the state that need not be public and call callback.
+    delete state[CONTINUOUS_TIME];
+    delete state[LAST_UPDATE];
+    delete state[IN_VIEWPORT];
+    delete state[TIME_LOADED];
+
+    for (const k in state) {
+      if (state.hasOwnProperty(k)) {
+        state[k] = String(state[k]);
+      }
+    }
   }
 }
 
