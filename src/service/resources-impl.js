@@ -415,17 +415,46 @@ export class Resources {
     if (this.isCurrentlyBuildingPendingResources_) {
       return;
     }
-    this.isCurrentlyBuildingPendingResources_ = true;
+    try {
+      this.isCurrentlyBuildingPendingResources_ = true;
+      this.buildReadyResourcesUnsafe_();
+    } finally {
+      this.isCurrentlyBuildingPendingResources_ = false;
+    }
+  }
+
+  /** @private */
+  buildReadyResourcesUnsafe_() {
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
-      if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
-        resource.build();
-        // Resource is built remove it from the pending list and step back
-        // one in the index to account for the removed item.
+      try {
+        if (this.buildResourceIfReady_(resource)) {
+          // Resource is built remove it from the pending list.
+          this.pendingBuildResources_.splice(i--, 1);
+        }
+      } catch (e) {
+        // If any of this fails remove the resource from pending.
+        dev.error(TAG_, 'build resource failed:', resource.debugid, e);
         this.pendingBuildResources_.splice(i--, 1);
       }
     }
-    this.isCurrentlyBuildingPendingResources_ = false;
+  }
+
+  /**
+   * Builds a resource if it's ready.
+   * @param {!Resource} resource
+   * @return {boolean} Whether the resource is ready.
+   * @private
+   */
+  buildResourceIfReady_(resource) {
+    if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
+      try {
+        resource.build();
+      } finally {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
