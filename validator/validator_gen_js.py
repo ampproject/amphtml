@@ -194,6 +194,9 @@ def PrintEnumFor(enum_desc, out):
   out.append('')
 
 
+SKIP_FIELDS = ['error_formats', 'spec_url']
+
+
 def PrintObject(descriptor, msg, this_id, out):
   """Prints an object, by recursively constructing it.
 
@@ -215,12 +218,14 @@ def PrintObject(descriptor, msg, this_id, out):
   out.append('  var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
   next_id = this_id + 1
   for (field_desc, field_val) in msg.ListFields():
+    if field_desc.name in SKIP_FIELDS:
+      out.append('  if (amp.validator.GENERATE_DETAILED_ERRORS) {')
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.append('  o_%d.%s.push(o_%d);' % (
+          out.append('    o_%d.%s.push(o_%d);' % (
               this_id, UnderscoreToCamelCase(field_desc.name), field_id))
       else:
         field_id = next_id
@@ -231,6 +236,8 @@ def PrintObject(descriptor, msg, this_id, out):
       out.append('  o_%d.%s = %s;' % (
           this_id, UnderscoreToCamelCase(field_desc.name),
           ValueToString(descriptor, field_desc, field_val)))
+    if field_desc.name in SKIP_FIELDS:
+      out.append('  }')
   return next_id
 
 
@@ -267,6 +274,10 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.append('')
   for name in all_names:
     out.append("goog.provide('%s');" % name)
+  out.append("goog.provide('amp.validator.GENERATE_DETAILED_ERRORS');")
+  out.append('')
+  out.append('/** @define {boolean} */')
+  out.append('amp.validator.GENERATE_DETAILED_ERRORS = true;')
   out.append('')
 
   for name in all_names:
