@@ -185,6 +185,28 @@ export class FixedLayer {
     let hasTransferables = false;
     return this.vsync_.runPromise({
       measure: state => {
+        const autoTopMap = {};
+
+        // Notice that this code intentionally breaks vsync contract.
+        // Unfortunately, there's no way to reliably test whether or not
+        // `top` has been set to a non-auto value on all platforms. To work
+        // this around, this code compares `offsetTop` values with and without
+        // `style.top = auto`.
+
+        // 1. Set all style top to `auto` and calculate the auto-offset.
+        this.fixedElements_.forEach(fe => {
+          fe.element.style.top = 'auto';
+        });
+        this.fixedElements_.forEach(fe => {
+          autoTopMap[fe.id] = fe.element.offsetTop;
+        });
+
+        // 2. Reset style top.
+        this.fixedElements_.forEach(fe => {
+          fe.element.style.top = '';
+        });
+
+        // 3. Calculated fixed info.
         this.fixedElements_.forEach(fe => {
           const element = fe.element;
           const styles = this.doc.defaultView./*OK*/getComputedStyle(
@@ -203,15 +225,38 @@ export class FixedLayer {
           }
 
           const position = styles.getPropertyValue('position');
-          const top = styles.getPropertyValue('top');
-          const bottom = styles.getPropertyValue('bottom');
-          const opacity = parseFloat(styles.getPropertyValue('opacity'));
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
               position == 'fixed' &&
               element./*OK*/offsetWidth > 0 &&
               element./*OK*/offsetHeight > 0);
+          if (!isFixed) {
+            state[fe.id] = {
+              fixed: false,
+              transferrable: false,
+              top: '',
+              zIndex: '',
+            };
+            return;
+          }
+
+          // Calculate top, assuming that it could implicitly be `auto`.
+          // `getComputedStyle().top` will return `auto` in Safari and the
+          // actual calculated value in all other browsers. To find out whether
+          // or not the `top` was actually set in CSS, this method compares
+          // `offsetTop` with `style.top = 'auto'` and without.
+          let top = styles.getPropertyValue('top');
+          const currentOffsetTop = element.offsetTop;
+          const isImplicitAuto = currentOffsetTop == autoTopMap[fe.id];
+          if ((top == 'auto' || isImplicitAuto) &&
+                  top != '0px' &&
+                  currentOffsetTop != 0) {
+            top = '';
+          }
+
+          const bottom = styles.getPropertyValue('bottom');
+          const opacity = parseFloat(styles.getPropertyValue('opacity'));
           // Transferability requires element to be fixed and top or bottom to
           // be styled with `0`. Also, do not transfer transparent
           // elements - that's a lot of work for no benefit.  Additionally,
@@ -344,27 +389,24 @@ export class FixedLayer {
   mutateFixedElement_(fe, index, state) {
     const element = fe.element;
     const oldFixed = fe.fixedNow;
-    if (oldFixed == state.fixed) {
-      return;
-    }
 
     fe.fixedNow = state.fixed;
     if (state.fixed) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
-      if (state.top) {
-        element.style.top = `calc(${state.top} + ${this.paddingTop_}px)`;
-      }
+      element.style.top = state.top ?
+          `calc(${state.top} + ${this.paddingTop_}px)` :
+          '';
 
       // Move element to the fixed layer.
-      if (this.transfer_) {
+      if (!oldFixed && this.transfer_) {
         if (state.transferrable) {
           this.transferToFixedLayer_(fe, index, state);
         } else {
           this.returnFromFixedLayer_(fe);
         }
       }
-    } else {
+    } else if (oldFixed) {
       // Reset `top` which was assigned above.
       if (element.style.top) {
         element.style.top = '';
