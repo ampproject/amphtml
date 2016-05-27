@@ -415,10 +415,10 @@ export class Resources {
     if (this.isCurrentlyBuildingPendingResources_) {
       return;
     }
+    this.isCurrentlyBuildingPendingResources_ = true;
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
-        this.isCurrentlyBuildingPendingResources_ = true;
         resource.build();
         // Resource is built remove it from the pending list and step back
         // one in the index to account for the removed item.
