@@ -427,34 +427,14 @@ export class Resources {
   buildReadyResourcesUnsafe_() {
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
-      try {
-        if (this.buildResourceIfReady_(resource)) {
-          // Resource is built remove it from the pending list.
-          this.pendingBuildResources_.splice(i--, 1);
-        }
-      } catch (e) {
-        // If any of this fails remove the resource from pending.
-        dev.error(TAG_, 'build resource failed:', resource.debugid, e);
+      if (this.documentReady_ ||
+          hasNextNodeInDocumentOrder(resource.element)) {
+        // Remove resource before build to remove it from the pending list
+        // in either case the build succeeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
-      }
-    }
-  }
-
-  /**
-   * Builds a resource if it's ready.
-   * @param {!Resource} resource
-   * @return {boolean} Whether the resource is ready.
-   * @private
-   */
-  buildResourceIfReady_(resource) {
-    if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
-      try {
         resource.build();
-      } finally {
-        return true;
       }
     }
-    return false;
   }
 
   /**

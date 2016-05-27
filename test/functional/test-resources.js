@@ -2635,19 +2635,6 @@ describe('Resources.add', () => {
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
     });
 
-    it('should remove elements if failed to build', () => {
-      resources.documentReady_ = true;
-      resources.pendingBuildResources_ = [parentResource, resource1, resource2];
-      resources.buildResourceIfReady_ = () => {
-        throw new Error('build-resource-if-ready-error');
-      };
-      resources.buildReadyResources_();
-      expect(child1.build.called).to.be.false;
-      expect(child2.build.called).to.be.false;
-      expect(parent.build.called).to.be.false;
-      expect(resources.pendingBuildResources_.length).to.be.equal(0);
-    });
-
     it('should build everything pending when document is ready', () => {
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [parentResource, resource1, resource2];
