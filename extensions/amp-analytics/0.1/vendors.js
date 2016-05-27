@@ -231,10 +231,10 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 60,
-          'maxTimerLength': 600
+          'maxTimerLength': 600,
         },
-        'request': 'interval'
-      }
+        'request': 'interval',
+      },
     },
     'transport': {
       'beacon': false,
