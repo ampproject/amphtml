@@ -1,0 +1,48 @@
+<!doctype html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <title>JWPlayer AMP Example</title>
+    <link rel="canonical" href="amps.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <style amp-custom>
+
+    </style>
+</head>
+<body>
+    <h2>Subscribe to our weekly Newsletter</h2>
+
+    <amp-form action="/form/echo-json/post">
+        <amp-field value="DOCUMENT_REFERRER">
+            <input type="hidden" name="referral">
+        </amp-field>
+        <amp-field>
+            <label>Your name</label>
+            <input type="text" name="name" required>
+        </amp-field>
+        <amp-field>
+            <label>Your email</label>
+            <input type="email" name="email" required>
+        </amp-field>
+        <amp-field>
+            <input type="submit" value="Subscribe">
+        </amp-field>
+
+        <template success type="amp-mustache">
+            <h1 class="title">Thanks {{name}}</h1>
+            <p class="description">Your email {{email}} is now subscribed!</p>
+        </template>
+
+        <template error type="amp-mustache">
+            <h1 class="title">An error occured!</h1>
+            <p class="description">{{message}}</p>
+        </template>
+    </amp-form>
+
+</body>
+</html>
