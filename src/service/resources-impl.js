@@ -395,7 +395,7 @@ export class Resources {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!resource.element.isBuilt()) {
+      } else if (!element.isBuilt()) {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
@@ -425,12 +425,15 @@ export class Resources {
 
   /** @private */
   buildReadyResourcesUnsafe_() {
+    // This will loop over all current pending resources and those that
+    // get added by other resources build-cycle, this will make sure all
+    // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
       if (this.documentReady_ ||
           hasNextNodeInDocumentOrder(resource.element)) {
         // Remove resource before build to remove it from the pending list
-        // in either case the build succeeed or throws an error.
+        // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
         resource.build();
       }
