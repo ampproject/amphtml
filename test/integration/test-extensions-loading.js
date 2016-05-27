@@ -19,7 +19,19 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe';
 
-describe('multiple variants extension loading', () => {
+// Checks if an amp element gets upgraded.
+// Works for all amp elements used in this test.
+function checkElementUpgrade(element) {
+  expect(element).to.have.class('-amp-element');
+  expect(element).to.have.class('-amp-layout-responsive');
+  expect(element).to.have.class('-amp-layout-size-defined');
+  expect(element).to.not.have.class('-amp-notbuilt');
+  expect(element).to.not.have.class('amp-notbuilt');
+  expect(element).to.not.have.class('amp-unresolved');
+  expect(element).to.not.have.class('-amp-unresolved');
+}
+
+describe('test extensions loading in multiple orders', () => {
   let fixture;
   it('one extension, extension loads first, all scripts in header', () => {
     return createFixtureIframe(
@@ -29,12 +41,8 @@ describe('multiple variants extension loading', () => {
           expect(ampFitText).to.have.length(1);
           return expectBodyToBecomeVisible(fixture.win);
         }).then(() => {
-          // check amp-fit-text get upgraded
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText[0]).to.have.class('-amp-element');
-          expect(ampFitText[0]).to.have.class('-amp-layout-responsive');
-          expect(ampFitText[0]).to.have.class('-amp-layout-size-defined');
-          expect(ampFitText[0]).to.have.class('-amp-layout');
+          checkElementUpgrade(ampFitText[0]);
           expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
               .to.have.length(1);
         });
@@ -46,17 +54,76 @@ describe('multiple variants extension loading', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          expect(ampFitText[0]).to.not.have.class('-amp-element');
           return expectBodyToBecomeVisible(fixture.win);
         }).then(() => {
-          // check amp-fit-text get upgraded
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText[0]).to.have.class('-amp-element');
-          expect(ampFitText[0]).to.have.class('-amp-layout-responsive');
-          expect(ampFitText[0]).to.have.class('-amp-layout-size-defined');
-          expect(ampFitText[0]).to.have.class('-amp-layout');
+          checkElementUpgrade(ampFitText[0]);
           expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
               .to.have.length(1);
+        });
+  });
+
+  it('one extension, extension loads first, all scripts in footer', () => {
+    return createFixtureIframe(
+        'test/fixtures/script-load-extension-footer-v0-footer.html').then(f => {
+          fixture = f;
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          expect(ampFitText).to.have.length(1);
+          return expectBodyToBecomeVisible(fixture.win);
+        }).then(() => {
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          checkElementUpgrade(ampFitText[0]);
+          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+              .to.have.length(1);
+        });
+  });
+
+  it('one extension, v0 loads first, all scripts in footer', () => {
+    return createFixtureIframe(
+        'test/fixtures/script-load-v0-footer-extension-footer.html').then(f => {
+          fixture = f;
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          expect(ampFitText).to.have.length(1);
+          return expectBodyToBecomeVisible(fixture.win);
+        }).then(() => {
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          checkElementUpgrade(ampFitText[0]);
+          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+              .to.have.length(1);
+        });
+  });
+
+  it('one extension, v0 in header, extension script in footer', () => {
+    return createFixtureIframe(
+        'test/fixtures/script-load-v0-head-extension-footer.html').then(f => {
+          fixture = f;
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          expect(ampFitText).to.have.length(1);
+          return expectBodyToBecomeVisible(fixture.win);
+        }).then(() => {
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          checkElementUpgrade(ampFitText[0]);
+          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+              .to.have.length(1);
+        });
+  });
+
+  it('two extensions, one of extension scripts and v0 in header', () => {
+    return createFixtureIframe(
+        'test/fixtures/script-load-extensions.html').then(f => {
+          fixture = f;
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          const ampIframe = fixture.doc.querySelectorAll('amp-iframe');
+          expect(ampFitText).to.have.length(1);
+          expect(ampIframe).to.have.length(1);
+          return expectBodyToBecomeVisible(fixture.win);
+        }).then(() => {
+          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
+          checkElementUpgrade(ampFitText[0]);
+          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+              .to.have.length(1);
+          const ampIframe = fixture.doc.querySelectorAll('amp-iframe');
+          checkElementUpgrade(ampIframe[0]);
         });
   });
 });
