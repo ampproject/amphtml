@@ -395,7 +395,7 @@ export class Resources {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else {
+      } else if (!resource.element.isBuilt()) {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();

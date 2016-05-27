@@ -2565,6 +2565,8 @@ describe('Resources.add', () => {
   });
 
   it('should add element to pending build when document is not ready', () => {
+    child1.isBuilt = () => false;
+    child2.isBuilt = () => false;
     resources.buildReadyResources_ = sandbox.spy();
     resources.documentReady_ = false;
     resources.add(child1);
