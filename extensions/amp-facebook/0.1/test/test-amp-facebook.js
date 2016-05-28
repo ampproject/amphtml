@@ -20,6 +20,7 @@ import {
 } from '../../../../testing/iframe';
 require('../amp-facebook');
 import {adopt} from '../../../../src/runtime';
+import {facebook} from '../../../../3p/facebook';
 
 adopt(window);
 
@@ -29,7 +30,7 @@ describe('amp-facebook', function() {
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
 
-  function getFBPost(href, opt_embedAs, opt_noFakeResources) {
+  function getAmpFacebook(href, opt_embedAs, opt_noFakeResources) {
     return createIframePromise().then(iframe => {
       if (!opt_noFakeResources) {
         doNotLoadExternalResourcesInTest(iframe.win);
@@ -37,7 +38,7 @@ describe('amp-facebook', function() {
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'https://foo.bar/baz');
-      iframe.addElement(link);
+      iframe.doc.head.appendChild(link);
 
       const ampFB = iframe.doc.createElement('amp-facebook');
       ampFB.setAttribute('data-href', href);
@@ -50,43 +51,69 @@ describe('amp-facebook', function() {
     });
   }
 
-  it('renders fb-post', () => {
-    return getFBPost(fbPostHref).then(ampFB => {
+  it('renders iframe in amp-facebook', () => {
+    return getAmpFacebook(fbPostHref).then(ampFB => {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
-      iframe.triggerLoad();
-
-      const fbPost = iframe.getElementsByClassName('fb-post')[0];
-      expect(fbPost).not.to.be.null;
     });
   });
 
-  it('renders fb-post as video', () => {
-    return getFBPost(fbVideoHref, 'video').then(ampFB => {
+  it('renders iframe in amp-facebook with video', () => {
+    return getAmpFacebook(fbVideoHref, 'video').then(ampFB => {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
-      iframe.triggerLoad();
-
-      const fbVideo = iframe.getElementsByClassName('fb-video')[0];
-      expect(fbVideo).not.to.be.null;
     });
   });
 
+  it('adds fb-post element correctly', () => {
+    return createIframePromise().then(iframe => {
+      const div = document.createElement('div');
+      div.setAttribute('id', 'c');
+      iframe.doc.body.appendChild(div);
+
+      facebook(iframe.win, {
+        href: fbPostHref,
+        width: 111,
+        height: 222,
+      });
+      const fbPost = iframe.doc.body.getElementsByClassName('fb-post')[0];
+      expect(fbPost).not.to.be.undefined;
+      expect(fbPost.getAttribute('data-href')).to.equal(fbPostHref);
+    });
+  });
+
+  it('adds fb-video element correctly', () => {
+    return createIframePromise().then(iframe => {
+      const div = document.createElement('div');
+      div.setAttribute('id', 'c');
+      iframe.doc.body.appendChild(div);
+
+      facebook(iframe.win, {
+        href: fbVideoHref,
+        width: 111,
+        height: 222,
+        embedAs: 'video',
+      });
+      const fbVideo = iframe.doc.body.getElementsByClassName('fb-video')[0];
+      expect(fbVideo).not.to.be.undefined;
+      expect(fbVideo.getAttribute('data-href')).to.equal(fbVideoHref);
+    });
+  });
   it('resizes facebook posts', () => {
+
     const iframeSrc = 'http://ads.localhost:' + location.port +
         '/base/test/fixtures/served/iframe.html';
-    return getFBPost(fbPostHref, undefined,
+    return getAmpFacebook(fbPostHref, undefined,
         /* opt_noFakeResources */ true).then(ampFB => {
           return new Promise((resolve, unusedReject) => {
             const iframe = ampFB.firstChild;
             impl = ampFB.implementation_;
-            impl.layoutCallback();
             impl.changeHeight = newHeight => {
               expect(newHeight).to.equal(666);
               resolve(iframe);
