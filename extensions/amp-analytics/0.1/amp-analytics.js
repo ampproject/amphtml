@@ -421,7 +421,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplate_(template, trigger, event, opt_iterations) {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     if (opt_iterations < 0) {
-      return '';
+      return template;
     }
 
     // Replace placeholders with URI encoded values.

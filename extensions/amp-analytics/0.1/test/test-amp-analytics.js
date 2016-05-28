@@ -763,16 +763,16 @@ describe('amp-analytics', function() {
     it('expands nested vars', () => {
       const analytics = getAnalyticsTag(trivialConfig);
       const actual = analytics.expandTemplate_('${1}', vars);
-      expect(actual).to.equal('12');
+      expect(actual).to.equal('123%252524%25257B4%25257D');
     });
 
     it('limits the recursion to n', () => {
       const analytics = getAnalyticsTag(trivialConfig);
       let actual = analytics.expandTemplate_('${1}', vars, {}, 3);
-      expect(actual).to.equal('123');
+      expect(actual).to.equal('1234%25252524%2525257B1%2525257D');
 
       actual = analytics.expandTemplate_('${1}', vars, {}, 5);
-      expect(actual).to.equal('12341');
+      expect(actual).to.equal('123412%252525252524%25252525257B3%25252525257D');
     });
   });
 
