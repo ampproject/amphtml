@@ -141,6 +141,9 @@ export class Resources {
     /** @private {?Array<!Resource>} */
     this.pendingBuildResources_ = [];
 
+    /** @private {boolean} */
+    this.isCurrentlyBuildingPendingResources_ = false;
+
     /** @private {number} */
     this.scrollHeight_ = 0;
 
@@ -392,7 +395,7 @@ export class Resources {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else {
+      } else if (!element.isBuilt()) {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
@@ -407,13 +410,32 @@ export class Resources {
    * @private
    */
   buildReadyResources_() {
+    // Avoid cases where elements add more elements inside of them
+    // and cause an infinite loop of building - see #3354 for details.
+    if (this.isCurrentlyBuildingPendingResources_) {
+      return;
+    }
+    try {
+      this.isCurrentlyBuildingPendingResources_ = true;
+      this.buildReadyResourcesUnsafe_();
+    } finally {
+      this.isCurrentlyBuildingPendingResources_ = false;
+    }
+  }
+
+  /** @private */
+  buildReadyResourcesUnsafe_() {
+    // This will loop over all current pending resources and those that
+    // get added by other resources build-cycle, this will make sure all
+    // elements get a chance to be built.
     for (let i = 0; i < this.pendingBuildResources_.length; i++) {
       const resource = this.pendingBuildResources_[i];
-      if (this.documentReady_ || hasNextNodeInDocumentOrder(resource.element)) {
-        resource.build();
-        // Resource is built remove it from the pending list and step back
-        // one in the index to account for the removed item.
+      if (this.documentReady_ ||
+          hasNextNodeInDocumentOrder(resource.element)) {
+        // Remove resource before build to remove it from the pending list
+        // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
+        resource.build();
       }
     }
   }
