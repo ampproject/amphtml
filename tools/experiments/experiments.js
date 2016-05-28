@@ -86,6 +86,11 @@ const EXPERIMENTS = [
     name: 'AMP carousel using horizontal scroll',
     spec: '',
   },
+  {
+    id: 'document-submit',
+    name: 'Global document form submit handler',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
 ];
 
 

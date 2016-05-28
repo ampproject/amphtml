@@ -325,6 +325,7 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
+  buildExample('forms.amp.html');
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
