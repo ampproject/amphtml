@@ -93,7 +93,8 @@ function isAmpExtensionScriptRequired(win, element, extension) {
  * @visibleForTesting
  * @param {string} path Location path of the window
  * @param {string} extension
- * @param {bool=} isTest
+ * @param {boolean=} isTest
+ * @param {boolean=} isUsingCompiledJs
  * @return {string}
  */
 export function calculateExtensionScriptUrl(path, extension, isTest,
