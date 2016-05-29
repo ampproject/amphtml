@@ -2565,6 +2565,8 @@ describe('Resources.add', () => {
   });
 
   it('should add element to pending build when document is not ready', () => {
+    child1.isBuilt = () => false;
+    child2.isBuilt = () => false;
     resources.buildReadyResources_ = sandbox.spy();
     resources.documentReady_ = false;
     resources.add(child1);
@@ -2600,11 +2602,54 @@ describe('Resources.add', () => {
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
     });
 
+    it('should not try to build resources already being built', () => {
+      resources.documentReady_ = false;
+      resources.pendingBuildResources_ = [resource1, resource2];
+      resources.buildReadyResources_();
+      expect(child1.build.called).to.be.false;
+      expect(child2.build.called).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(2);
+
+      const newChild = createElementWithResource(3)[0];
+      newChild.nextSibling = true;
+      const newResource = newChild['__AMP__RESOURCE'];
+      const child1BuildSpy = sandbox.spy();
+      child1.nextSibling = child2;
+      child1.build = () => {
+        // Simulate parent elements adding children elements to simulate
+        // the infinite loop of building pending resources and make sure
+        // that we're handling it well.
+        child1BuildSpy();
+        resources.pendingBuildResources_.push(newResource);
+        resources.buildReadyResources_();
+      };
+      resources.buildReadyResources_();
+      expect(child1BuildSpy.called).to.be.true;
+      expect(child2.build.called).to.be.false;
+      expect(newChild.build.called).to.be.true;
+      expect(resources.pendingBuildResources_.length).to.be.equal(1);
+      expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
+
+      child2.parentNode = parent;
+      parent.nextSibling = true;
+      resources.buildReadyResources_();
+      expect(child1BuildSpy.calledTwice).to.be.false;
+      expect(child2.build.called).to.be.true;
+      expect(newChild.build.calledTwice).to.be.false;
+      expect(resources.pendingBuildResources_.length).to.be.equal(0);
+    });
+
     it('should build everything pending when document is ready', () => {
       resources.documentReady_ = true;
       resources.pendingBuildResources_ = [parentResource, resource1, resource2];
+      const child1BuildSpy = sandbox.spy();
+      child1.build = () => {
+        // Emulate an error happening during an element build.
+        child1BuildSpy();
+        throw new Error('child1-build-error');
+      };
       resources.buildReadyResources_();
-      expect(child1.build.called).to.be.true;
+      expect(child1BuildSpy.called).to.be.true;
       expect(child2.build.called).to.be.true;
       expect(parent.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);

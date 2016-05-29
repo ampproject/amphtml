@@ -72,7 +72,7 @@ import {colombia} from '../ads/colombia';
 import {sharethrough} from '../ads/sharethrough';
 import {eplanning} from '../ads/eplanning';
 import {microad} from '../ads/microad';
-
+import {yahoojp} from '../ads/yahoojp';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -131,7 +131,7 @@ register('colombia', colombia);
 register('sharethrough', sharethrough);
 register('eplanning', eplanning);
 register('microad', microad);
-
+register('yahoojp', yahoojp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

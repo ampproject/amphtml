@@ -72,6 +72,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     window.beforeLoad = function(win) {
       // Flag as being a test window.
       win.AMP_TEST = true;
+      win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }

@@ -67,7 +67,8 @@ amp.validator.validateInBrowser = function(doc) {
  * Validates a URL input, logging to the console the result.
  * Careful when modifying this; it's called from
  * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js
- * and https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
+ * and
+ * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
  * @param {!string=} opt_errorCategoryFilter

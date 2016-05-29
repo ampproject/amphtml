@@ -16,6 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
 
 import {Util} from './util';
 
@@ -48,7 +49,8 @@ export class FollowButton {
    */
   handleClick(event) {
     event.preventDefault();
-    window.open(this.href, 'pin' + new Date().getTime(), POP_FOLLOW);
+    openWindowDialog(window, this.href, 'pin' + new Date().getTime(),
+        POP_FOLLOW);
     Util.log(`&type=button_follow&href=${this.href}`);
   }
 

@@ -24,8 +24,7 @@ limitations under the License.
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
     <td>
-      <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>
-       or <code>AMP.toggleExperiment('amp-social-share')</code> (if #development=1 is enabled)
+      Stable
     </td>
   </tr>
   <tr>
@@ -122,4 +121,4 @@ The following example will create a share button through whatsapp, by setting `d
 ```
 
 ##### Var Substitution
-You can use the [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. For exmaple, the above example will substitute `TITEL` with the page title and `CANONICAL_URL` with the document canonical URL.
+You can use the [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. For exmaple, the above example will substitute `TITLE` with the page title and `CANONICAL_URL` with the document canonical URL.

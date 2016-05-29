@@ -19,6 +19,7 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
+import {platform} from '../src/platform';
 
 adopt(window);
 
@@ -76,7 +77,12 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta');
+  const cleanupTagNames = ['link', 'meta'];
+  if (!platform.isSafari()) {
+    // TODO(#3315): Removing test iframes break tests on Safari.
+    cleanupTagNames.push('iframe');
+  }
+  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];

@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-amp-sticky-ad {
-  position: fixed !important;
-  text-align:center;
-  bottom: 0 !important;
-  left: 0;
-  width: 100%;
-  /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
-  max-height: 100px !important;
-  box-sizing: border-box;
-}
-
-.-amp-sticky-ad-layout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.-amp-sticky-ad-layout > amp-ad {
-  display: block;
+import {writeScript, validateDataExists, checkData} from '../3p/3p';
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function yahoojp(global, data) {
+  checkData(data, ['yadsid']);
+  validateDataExists(data, ['yadsid']);
+  global.yahoojpParam = data;
+  writeScript(global, 'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js');
 }

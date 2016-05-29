@@ -25,7 +25,7 @@ min_validator_revision_required: 135
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 219
+spec_file_revision: 223
 
 # Validator extensions.
 # =====================
@@ -535,11 +535,11 @@ tags: {  # Special custom 'author' spreadsheet.
 }
 tags: {
   tag_name: "style"
-  spec_name: "head > style : boilerplate - old variant"
-  mandatory_alternatives: "head > style : boilerplate"
+  spec_name: "head > style[amp-boilerplate] - old variant"
+  mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "head"
-  deprecation: "head > style : boilerplate"
+  deprecation: "head > style[amp-boilerplate]"
   deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
@@ -548,11 +548,11 @@ tags: {
 }
 tags: {
   tag_name: "style"
-  spec_name: "noscript > style : boilerplate - old variant"
-  mandatory_alternatives: "noscript > style : boilerplate"
+  spec_name: "noscript > style[amp-boilerplate] - old variant"
+  mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "noscript"
-  deprecation: "noscript > style : boilerplate"
+  deprecation: "noscript > style[amp-boilerplate]"
   deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
@@ -561,11 +561,11 @@ tags: {
 }
 tags: {
   tag_name: "style"
-  spec_name: "head > style : boilerplate"
-  mandatory_alternatives: "head > style : boilerplate"
+  spec_name: "head > style[amp-boilerplate]"
+  mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "head"
-  also_requires_tag: "noscript > style : boilerplate"
+  also_requires_tag: "noscript > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -575,17 +575,17 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}"
+    cdata_regex: "\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
   tag_name: "style"
-  spec_name: "noscript > style : boilerplate"
-  mandatory_alternatives: "noscript > style : boilerplate"
+  spec_name: "noscript > style[amp-boilerplate]"
+  mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
   mandatory_parent: "noscript"
-  also_requires_tag: "head > style : boilerplate"
+  also_requires_tag: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -593,7 +593,7 @@ tags: {
     dispatch_key: true
   }
   cdata {
-    mandatory_cdata: "body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}"
+    cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
@@ -707,6 +707,7 @@ attr_lists: {
       allowed_protocol: "ftp"
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
+      allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
       allowed_protocol: "viber"
@@ -802,6 +803,7 @@ tags: {
       allowed_protocol: "mailto"
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
+      allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
       allowed_protocol: "viber"

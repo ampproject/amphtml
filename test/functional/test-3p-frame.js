@@ -166,9 +166,19 @@ describe('3p-frame', () => {
     });
   });
 
-  it('should pick the right bootstrap url (test default)', () => {
+  it('should pick the right bootstrap url for local-dev mode', () => {
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should pick the right bootstrap url for testing mode', () => {
+    const win = {
+      AMP_TEST: true,
+      location: window.location,
+      document: window.document,
+    };
+    expect(getBootstrapBaseUrl(win)).to.equal(
+        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
