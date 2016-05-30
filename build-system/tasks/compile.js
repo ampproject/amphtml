@@ -123,7 +123,7 @@ function compile(entryModuleFilename, outputDir,
       '!extensions/amp-access/0.1/amp-login-done.js',
       'builtins/**.js',
       'third_party/caja/html-sanitizer.js',
-      'third_party/closure-library/sha384-generated.js',
+      'third_party/closure-library/*-generated.js',
       'third_party/mustache/**/*.js',
       'node_modules/promise-pjs/promise.js',
       'node_modules/document-register-element/build/' +
