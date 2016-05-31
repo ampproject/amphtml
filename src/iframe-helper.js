@@ -262,6 +262,8 @@ export function listenFor(
   let unlisten;
   let listener = function(data, source, origin) {
     // Exclude nested frames if necessary.
+    // Note that the source was already verified to be either the contentWindow
+    // of the iframe itself or a descendant window within it.
     if (!opt_includingNestedWindows && source != iframe.contentWindow) {
       return;
     }
