@@ -277,7 +277,7 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  */
 export function generateSentinel(parentWindow) {
   let windowDepth = 0;
-  for (let win = parentWindow; win != window.top; win = win.parent) {
+  for (let win = parentWindow; win && win != win.parent; win = win.parent) {
     windowDepth++;
   }
   return String(windowDepth) + '-' + getRandom(parentWindow);

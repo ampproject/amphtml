@@ -13,7 +13,7 @@ if (hashMatch) {
   // Depth is measured from window.top.
   var depth = Number(hashMatch[2]);
   var ancestors = [];
-  for (var win = window; win != win.top; win = win.parent) {
+  for (var win = window; win && win != win.parent; win = win.parent) {
     // Add window keeping the top-most one at the front.
     ancestors.unshift(win.parent);
   }

@@ -149,7 +149,7 @@ function getListenForEvents(parentWin, sentinel, origin, triggerWin) {
  * @return {boolean}
  */
 function isDescendantWindow(ancestor, descendant) {
-  for (let win = descendant; win && win != win.top; win = win.parent) {
+  for (let win = descendant; win && win != win.parent; win = win.parent) {
     if (win == ancestor) {
       return true;
     }
