@@ -106,4 +106,7 @@
     "pageload": "https://$host/pl?i=$id&ct=_dom_interactive_time_&rt=_page_download_time_&pt=_page_load_time_&p=$pageUrl&c=$channel&t=$type&s=$section&_t=amp&_r=_random_",
     "ping": "https://$host/u?i=$id&u=_client_id_&p=$pageUrl&uActive=true&isPing=yes&c=$channel&t=$type&s=$section&_t=amp&_r=_random_",
   },
+  "oewa": {
+    "pageview": "$url?s=$s&amp=$amp&cp=$cp&hn=_canonical_host_&path=_canonical_path_"
+  },
 }
