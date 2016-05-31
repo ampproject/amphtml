@@ -17,9 +17,17 @@
 /**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
+ *
+ * Notice that it's critical that `overflow-x: hidden` is only set on `html`
+ * and not `body`. Otherwise, adding `overflow-x: hidden` forces `overflow-y`
+ * to be computed to `auto` on both the `body` and `html` elements so they both
+ * potentially get a scrolling box. See #3108 for more details.
  */
-html, body {
+html {
   overflow-x: hidden !important;
+}
+html, body {
+  height: auto !important;
 }
 
 /**
@@ -77,6 +85,12 @@ body {
   right: 0;
 }
 
+.-amp-layout-flex-item {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+}
+
 .-amp-layout-size-defined {
   overflow: hidden !important;
 }
@@ -87,7 +101,8 @@ i-amp-sizer {
 
 .-amp-fill-content {
   display: block;
-  width: 100%;
+  min-width: 100%;     /* These lines are a work around to this issue in iOS: */
+  max-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198         */
   height: 100%;
   margin: auto;
 }
@@ -196,6 +211,14 @@ i-amp-scroll-container {
   left: 0;
   right: 0;
   bottom: 0;
+  display: block;
+}
+
+/**
+ * Overflow:auto will be set with delay due to iOS bug where iframe is not
+ * rendered.
+ */
+i-amp-scroll-container.amp-active {
   overflow: auto;
 }
 
@@ -306,7 +329,8 @@ template {
 }
 
 amp-pixel {
-  position: absolute !important;
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
   top: 0 !important;
   width: 1px !important;
   height: 1px !important; /* Only things with height are ever loaded. */
@@ -337,6 +361,7 @@ amp-ad iframe {
  */
 amp-instagram {
   padding: 48px 8px !important;
+  background-color: white;
 }
 
 
@@ -344,7 +369,8 @@ amp-instagram {
  * Analytics tags should never be visible. keep them hidden.
  */
 amp-analytics {
-  position: absolute !important;
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
   top: 0 !important;
   width: 1px !important;
   height: 1px !important;

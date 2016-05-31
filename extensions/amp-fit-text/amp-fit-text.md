@@ -14,12 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-fit-text"></a> `amp-fit-text`
+# <a name="amp-fit-text"></a> `amp-fit-text`
 
-The `amp-fit-text` component can expand or shrink its font size to fit the
-content within the space given to it.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Expands or shrinks its font size to fit the content within the space given to it.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel/">image_galleries_with_amp-carousel.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-#### Behavior
+## Behavior
 
 The `amp-fit-text` component expects its content to be text or other inline
 content, but it can also contain non-inline content. For the given content
@@ -43,7 +63,7 @@ For example:
 ```
 
 
-#### Attributes
+## Attributes
 
 **min-font-size**
 
@@ -54,8 +74,12 @@ The minimum font size as an integer that the `amp-fit-text` can use.
 The maximum font size as an integer that the `amp-fit-text` can use.
 
 
-#### Styling
+## Styling
 
 The `amp-fit-text` component can be styled with standard CSS. In particular,
 it's possible to use `text-align`, `font-weight`, `color` and many other CSS
 properties with the main exception of `font-size`.
+
+## Validation
+
+See [amp-fit-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/0.1/validator-amp-fit-text.protoascii) in the AMP validator specification.

@@ -1,0 +1,14 @@
+URL: http://codepen.io/anon/pen/KVZNGp
+License: The MIT License
+License File: https://gist.githubusercontent.com/anonymous/920164b2cafcdade77a2/raw/97801f67daefc7cde3523d9c35ef73f6a43759f5/script.js
+
+Description:
+Online SVGs of popular logos
+
+Local Modifications:
+Created a derived css file from the index.html, contained in
+amp-social-share-svgs.css. To be imported into the ampproject to provide in-line
+svg icons through css.
+
+Gist created verbatim from source for referencing files:
+https://gist.github.com/anonymous/920164b2cafcdade77a2

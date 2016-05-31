@@ -14,17 +14,33 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
+import {endsWith} from './string';
+import {user} from './log';
 
-const a = document.createElement('a');
+// Cached a-tag to avoid memory allocation during URL parsing.
+const a = window.document.createElement('a');
+
+// We cached all parsed URLs. As of now there are no use cases
+// of AMP docs that would ever parse an actual large number of URLs,
+// but we often parse the same one over and over again.
+const cache = Object.create(null);
+
+/** @private @const Matches amp_js_* paramters in query string. */
+const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {string} url
  * @return {!Location}
  */
 export function parseUrl(url) {
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
   a.href = url;
   const info = {
     href: a.href,
@@ -34,30 +50,53 @@ export function parseUrl(url) {
     port: a.port == '0' ? '' : a.port,
     pathname: a.pathname,
     search: a.search,
-    hash: a.hash
+    hash: a.hash,
   };
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
   info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
-  assert(info.origin, 'Origin must exist');
+  user.assert(info.origin, 'Origin must exist');
+  // Freeze during testing to avoid accidental mutation.
+  cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
   return info;
 }
 
+/**
+ * Appends the string just before the fragment part (or optionally
+ * to the front of the query string) of the URL.
+ * @param {string} url
+ * @param {string} paramString
+ * @param {boolean=} opt_addToFront
+ * @return {string}
+ */
+function appendParamStringToUrl(url, paramString, opt_addToFront) {
+  if (!paramString) {
+    return url;
+  }
+  const mainAndFragment = url.split('#', 2);
+  const mainAndQuery = mainAndFragment[0].split('?', 2);
+
+  let newUrl = mainAndQuery[0] + (
+      mainAndQuery[1]
+          ? (opt_addToFront
+              ? `?${paramString}&${mainAndQuery[1]}`
+              : `?${mainAndQuery[1]}&${paramString}`)
+          : `?${paramString}`);
+  newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
+  return newUrl;
+}
 /**
  * Appends a query string field and value to a url. `key` and `value`
  * will be ran through `encodeURIComponent` before appending.
  * @param {string} url
  * @param {string} key
  * @param {string} value
+ * @param {boolean=} opt_addToFront
  * @return {string}
  */
-export function addParamToUrl(url, key, value) {
-  // TODO(erwinm, #1376) improve perf possibly by just doing a string
-  // scan instead of having to create an element for the parsing.
-  const urlObj = parseUrl(url);
+export function addParamToUrl(url, key, value, opt_addToFront) {
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  const search = urlObj.search ? `${urlObj.search}&${field}` : `?${field}`;
-  return urlObj.origin + urlObj.pathname + search + urlObj.hash;
+  return appendParamStringToUrl(url, field, opt_addToFront);
 }
 
 /**
@@ -68,26 +107,30 @@ export function addParamToUrl(url, key, value) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return Object.keys(params).reduce((url, key) => {
-    return addParamToUrl(url, key, params[key]);
-  }, url);
+  const paramsString = Object.keys(params)
+      .reduce((paramsString, key) => {
+        return paramsString +
+            `&${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
+      }, '');
+  return appendParamStringToUrl(url, paramsString.substring(1));
 }
 
 /**
- * Asserts that a given url is HTTPS or protocol relative.
+ * Asserts that a given url is HTTPS or protocol relative. It's a user-level
+ * assert.
+ *
  * Provides an exception for localhost.
- * @param {string} urlString
- * @param {!Element} elementContext Element where the url was found.
+ *
+ * @param {?string|undefined} urlString
+ * @param {!Element|string} elementContext Element where the url was found.
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
+  user.assert(urlString != null, '%s source must be available', elementContext);
   const url = parseUrl(urlString);
-  assert(
+  user.assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' ||
-          url.hostname.lastIndexOf('.localhost') ==
-          // Poor person's endsWith
-          url.hostname.length - '.localhost'.length,
+      url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
       '%s source must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
@@ -101,7 +144,7 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  assert(/^(http\:|https\:)/i.test(urlString),
+  user.assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;
@@ -195,6 +238,22 @@ export function isProxyOrigin(url) {
 }
 
 /**
+ * Removes parameters that start with amp js parameter pattern and returns the new
+ * search string.
+ * @param {string} urlSearch
+ * @return {string}
+ */
+function removeAmpJsParams(urlSearch) {
+  if (!urlSearch || urlSearch == '?') {
+    return '';
+  }
+  const search = urlSearch
+      .replace(AMP_JS_PARAMS_REGEX, '')
+      .replace(/^[?&]/, '');  // Removes first ? or &.
+  return search ? '?' + search : '';
+}
+
+/**
  * Returns the source URL of an AMP document for documents served
  * on a proxy origin or directly.
  * @param {string|!Location} url URL of an AMP document.
@@ -216,16 +275,17 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  assert(prefix == 'c' || prefix == 'v',
+  user.assert(prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + decodeURIComponent(path[3])
       : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
-  assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
+  user.assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
-  return origin + path.join('/') + (url.search || '') + (url.hash || '');
+  return origin + path.join('/') + removeAmpJsParams(url.search) +
+      (url.hash || '');
 }
 
 /**

@@ -18,7 +18,7 @@
  * @fileoverview Factory for amp-user-notification
  */
 
-import {getElementService} from './custom-element';
+import {getElementService} from './element-service';
 
 
 /**

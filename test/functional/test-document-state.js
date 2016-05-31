@@ -14,145 +14,20 @@
  * limitations under the License.
  */
 
-import {DocumentState, isDocumentReady, onDocumentReady, whenDocumentReady} from
-    '../../src/document-state';
-import {timer} from '../../src/timer';
+import {DocumentState} from '../../src/document-state';
 import * as sinon from 'sinon';
-
-
-describe('documentReady', () => {
-
-  let testDoc;
-  let eventListeners;
-
-  beforeEach(() => {
-    eventListeners = {};
-    testDoc = {
-      readyState: 'loading',
-      addEventListener: (eventType, handler) => {
-        eventListeners[eventType] = handler;
-      },
-      removeEventListener: (eventType, handler) => {
-        if (eventListeners[eventType] == handler) {
-          delete eventListeners[eventType];
-        }
-      }
-    };
-  });
-
-  it('should interprete readyState correctly', () => {
-    expect(isDocumentReady(testDoc)).to.equal(false);
-
-    testDoc.readyState = 'interactive';
-    expect(isDocumentReady(testDoc)).to.equal(true);
-
-    testDoc.readyState = 'complete';
-    expect(isDocumentReady(testDoc)).to.equal(true);
-  });
-
-  it('should call callback immediately when ready', () => {
-    testDoc.readyState = 'complete';
-    const callback = sinon.spy();
-    onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(1);
-  });
-
-  it('should wait to call callback until ready', () => {
-    testDoc.readyState = 'loading';
-    const callback = sinon.spy();
-    onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(0);
-    expect(eventListeners['readystatechange']).to.not.equal(undefined);
-
-    // Complete
-    testDoc.readyState = 'complete';
-    eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(1);
-    expect(eventListeners['readystatechange']).to.equal(undefined);
-  });
-
-  it('should wait to call callback for several loading events', () => {
-    testDoc.readyState = 'loading';
-    const callback = sinon.spy();
-    onDocumentReady(testDoc, callback);
-    expect(callback.callCount).to.equal(0);
-    expect(eventListeners['readystatechange']).to.not.equal(undefined);
-
-    // Still loading
-    eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(0);
-    expect(eventListeners['readystatechange']).to.not.equal(undefined);
-
-    // Complete
-    testDoc.readyState = 'complete';
-    eventListeners['readystatechange']();
-    expect(callback.callCount).to.equal(1);
-    expect(eventListeners['readystatechange']).to.equal(undefined);
-  });
-
-  describe('whenDocumentReady', () => {
-
-    it('should call callback immediately when ready', () => {
-      testDoc.readyState = 'complete';
-      const spy = sinon.spy();
-      const spy2 = sinon.spy();
-      const spy3 = sinon.spy();
-
-      whenDocumentReady(testDoc).then(spy).then(spy2);
-
-      whenDocumentReady(testDoc).then(spy3);
-
-      expect(spy.callCount).to.equal(0);
-      expect(spy2.callCount).to.equal(0);
-      expect(spy3.callCount).to.equal(0);
-
-      return timer.promise().then(() => {
-        expect(spy.callCount).to.equal(1);
-        expect(spy2.callCount).to.equal(1);
-        expect(spy3.callCount).to.equal(1);
-      });
-    });
-
-    it('should not call callback', () => {
-      const spy = sinon.spy();
-      whenDocumentReady(testDoc).then(spy);
-      expect(spy.callCount).to.equal(0);
-      return timer.promise().then(() => {
-        expect(spy.callCount).to.equal(0);
-      });
-    });
-
-    it('should wait to call callback until ready', () => {
-      testDoc.readyState = 'loading';
-      const callback = sinon.spy();
-      whenDocumentReady(testDoc).then(callback);
-
-      return timer.promise().then(() => {
-        expect(callback.callCount).to.equal(0);
-        expect(eventListeners['readystatechange']).to.not.equal(undefined);
-
-        // Complete
-        testDoc.readyState = 'complete';
-        eventListeners['readystatechange']();
-
-        return timer.promise().then(() => {
-          expect(callback.callCount).to.equal(1);
-          expect(eventListeners['readystatechange']).to.equal(undefined);
-        });
-      });
-    });
-  });
-});
 
 
 describe('DocumentState', () => {
 
+  let sandbox;
   let eventListeners;
   let testDoc;
   let windowApi;
   let docState;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     eventListeners = {};
     testDoc = {
       readyState: 'complete',
@@ -165,10 +40,14 @@ describe('DocumentState', () => {
         if (eventListeners[eventType] == handler) {
           delete eventListeners[eventType];
         }
-      }
+      },
     };
     windowApi = {document: testDoc};
     docState = new DocumentState(windowApi);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('resolve non-vendor properties', () => {
@@ -183,7 +62,7 @@ describe('DocumentState', () => {
       webkitHidden: false,
       webkitVisibilityState: 'visible',
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal('webkitHidden');
@@ -194,7 +73,7 @@ describe('DocumentState', () => {
   it('resolve no properties', () => {
     const otherDoc = {
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal(null);
@@ -205,7 +84,7 @@ describe('DocumentState', () => {
   it('should default hidden and visibilityState if unknown', () => {
     const otherDoc = {
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.isHidden()).to.equal(false);
@@ -213,7 +92,7 @@ describe('DocumentState', () => {
   });
 
   it('should fire visibility change', () => {
-    const callback = sinon.spy();
+    const callback = sandbox.spy();
     docState.onVisibilityChanged(callback);
 
     expect(docState.isHidden()).to.equal(false);

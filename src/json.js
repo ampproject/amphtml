@@ -19,6 +19,8 @@
  * {@link http://json.org/}.
  */
 
+import {isObject} from './types';
+
 
 /**
  * JSON scalar. It's either string, number or boolean.
@@ -46,3 +48,52 @@ let JSONArrayDef;
  * @typedef {!JSONScalarDef|!JSONObjectDef|!JSONArrayDef}
  */
 let JSONValueDef;
+
+
+/**
+ * Recreates objects with prototype-less copies.
+ * @param {!JSONObjectDef} obj
+ * @return {!JSONObjectDef}
+ */
+export function recreateNonProtoObject(obj) {
+  const copy = Object.create(null);
+  for (const k in obj) {
+    if (!obj.hasOwnProperty(k)) {
+      continue;
+    }
+    const v = obj[k];
+    copy[k] = isObject(v) ? recreateNonProtoObject(v) : v;
+  }
+  return copy;
+}
+
+
+/**
+ * Returns a value from an object for a field-based expression. The expression
+ * is a simple nested dot-notation of fields, such as `field1.field2`. If any
+ * field in a chain does not exist or is not an object, the returned value will
+ * be `undefined`.
+ *
+ * @param {!JSONObjectDef} obj
+ * @param {string} expr
+ * @return {?JSONValueDef|undefined}
+ */
+export function getValueForExpr(obj, expr) {
+  const parts = expr.split('.');
+  let value = obj;
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    if (!part) {
+      value = undefined;
+      break;
+    }
+    if (!isObject(value) ||
+            value[part] === undefined ||
+            value.hasOwnProperty && !value.hasOwnProperty(part)) {
+      value = undefined;
+      break;
+    }
+    value = value[part];
+  }
+  return value;
+}

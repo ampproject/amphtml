@@ -24,6 +24,7 @@ describe('the framerate service', () => {
   let lastRafCallback;
   let call = 0;
   let visible;
+  let csiOn;
   let performance;
   let viewer;
   let sandbox;
@@ -34,20 +35,24 @@ describe('the framerate service', () => {
     clock = sandbox.useFakeTimers();
     lastRafCallback = null;
     visible = true;
+    csiOn = true;
     performance = {
-      tickDelta: sinon.spy(),
-      flush: sinon.spy()
+      tickDelta: sandbox.spy(),
+      flush: sandbox.spy(),
     };
     viewer = {
       isVisible: () => {
         return visible;
       },
-      onVisibilityChanged: sinon.spy()
+      isPerformanceTrackingOn() {
+        return csiOn;
+      },
+      onVisibilityChanged: sandbox.spy(),
     };
     win = {
       services: {
         performance: {obj: performance},
-        viewer: {obj: viewer}
+        viewer: {obj: viewer},
       },
       requestAnimationFrame: cb => {
         lastRafCallback = cb;
@@ -58,7 +63,7 @@ describe('the framerate service', () => {
           return;
         }
         expect(index).to.equal(call - 1);
-      }
+      },
     };
   });
 
@@ -91,7 +96,7 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(1);
     expect(performance.flush.callCount).to.equal(1);
     expect(performance.tickDelta.args[0][0]).to.equal('fps');
-    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][1]).to.within(44, 45);
     expect(fr.frameCount_).to.equal(0);
 
     // Second round
@@ -113,7 +118,7 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(2);
     expect(performance.tickDelta.args[1][0]).to.equal('fps');
-    expect(performance.tickDelta.args[1][1]).to.within(9, 10);
+    expect(performance.tickDelta.args[1][1]).to.within(50, 51);
   });
 
   it('does nothing with an invisible window', () => {
@@ -148,9 +153,9 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(1);
     expect(performance.tickDelta.args[0][0]).to.equal('fps');
-    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][1]).to.within(44, 45);
     expect(performance.tickDelta.args[1][0]).to.equal('fal');
-    expect(performance.tickDelta.args[1][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[1][1]).to.within(44, 45);
     // Second round
     fr.collect();
     for (let i = 0; i < 50; i++) {
@@ -163,5 +168,30 @@ describe('the framerate service', () => {
     expect(performance.flush.callCount).to.equal(2);
     expect(performance.tickDelta.args[2][0]).to.equal('fps');
     expect(performance.tickDelta.args[3][0]).to.equal('fal');
+  });
+
+  it('respects viewer csi flag', () => {
+    csiOn = false;
+
+    fr = installFramerateService(win);
+    expect(viewer.onVisibilityChanged.callCount).to.equal(1);
+    expect(fr.isActive_).to.be.false;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+    visible = true;
+    viewer.onVisibilityChanged.args[0][0]();
+    expect(fr.isActive_).to.be.false;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+    viewer.onVisibilityChanged.args[0][0](false);
+    expect(fr.isActive_).to.be.false;
+    expect(fr.requestedFrame_).to.be.null;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+
+    csiOn = true;
+    fr.collect();
+    viewer.onVisibilityChanged.args[0][0](false);
+    expect(fr.requestedFrame_).to.not.be.null;
   });
 });

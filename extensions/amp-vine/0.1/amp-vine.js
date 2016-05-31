@@ -17,6 +17,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
 
@@ -35,13 +36,13 @@ class AmpVine extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const vineid = AMP.assert(this.element.getAttribute('data-vineid'),
+    const vineid = user.assert(this.element.getAttribute('data-vineid'),
       'The data-vineid attribute is required for <amp-vine> %s',
       this.element);
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
 
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.src = 'https://vine.co/v/' +
       encodeURIComponent(vineid) + '/embed/simple';
@@ -59,14 +60,10 @@ class AmpVine extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
     }
-
-    // No need to do layout later - user action will be expect to resume
-    // the playback
-    return false;
   }
 }
 

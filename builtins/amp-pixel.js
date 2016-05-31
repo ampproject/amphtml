@@ -17,9 +17,9 @@
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
 import {urlReplacementsFor} from '../src/url-replacements';
-import {assert} from '../src/asserts';
 import {registerElement} from '../src/custom-element';
-
+import {toggle} from '../src/style';
+import {user} from '../src/log';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -28,6 +28,13 @@ import {registerElement} from '../src/custom-element';
  */
 export function installPixel(win) {
   class AmpPixel extends BaseElement {
+
+    /** @override */
+    getPriority() {
+      // Loads after other content.
+      return 1;
+    }
+
     /** @override */
     isLayoutSupported(layout) {
       return layout == Layout.FIXED;
@@ -44,6 +51,9 @@ export function installPixel(win) {
 
     /** @override */
     layoutCallback() {
+      // Now that we are rendered, stop rendering the element to reduce
+      // resource consumption.
+      toggle(this.element, false);
       const src = this.element.getAttribute('src');
       return urlReplacementsFor(this.getWin()).expand(this.assertSource(src))
           .then(src => {
@@ -58,7 +68,7 @@ export function installPixel(win) {
     }
 
     assertSource(src) {
-      assert(
+      user.assert(
           /^(https\:\/\/|\/\/)/i.test(src),
           'The <amp-pixel> src attribute must start with ' +
           '"https://" or "//". Invalid value: ' + src);

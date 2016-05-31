@@ -14,11 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-pinterest”></a> `amp-pinterest`
+# <a name=”amp-pinterest”></a> `amp-pinterest`
 
-Displays a Pinterest widget or Pin It button.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a Pinterest widget or Pin It button.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/pinterest.amp.html">pinterest.amp.html</a></td>
+  </tr>
+</table>
 
-### Examples:
+## Examples:
 
 Pin It button: `data-do="buttonPin"`
 
@@ -103,3 +124,6 @@ When building the Embedded Pin widget, `data-url` is required and must contain t
     data-do="embedPin"
     data-url="https://www.pinterest.com/pin/99360735500167749/"
 
+## Validation
+
+See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/0.1/validator-amp-pinterest.protoascii) in the AMP validator specification.

@@ -1,5 +1,5 @@
 application: amp-error-reporting
-version: 4
+version: 8
 runtime: go
 api_version: go1
 

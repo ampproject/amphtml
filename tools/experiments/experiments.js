@@ -16,11 +16,11 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {assert} from '../../src/asserts';
+import {dev} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-state';
+import {onDocumentReady} from '../../src/document-ready';
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -48,30 +48,43 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'DEVELOPING.md#amp-dev-channel-experimental',
+        'README.md#amp-dev-channel',
   },
-
-  // AMP Access
   {
-    id: 'amp-access',
-    name: 'AMP Access',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access-spec.md',
+    id: 'alp',
+    name: 'Activates support for measuring incoming clicks.',
+    spec: 'https://github.com/ampproject/amphtml/issues/2934',
   },
-
-  // AMP Access Analytics
   {
-    id: 'amp-access-analytics',
-    name: 'AMP Access Analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/1556',
+    id: 'amp-fx-flying-carpet',
+    name: 'AMP Flying Carpet',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
   },
-
-  // Dynamic CSS Classes
   {
-    id: 'dynamic-css-classes',
-    name: 'Dynamic CSS Classes',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
+    id: 'amp-analytics-viewability',
+    name: 'Viewability APIs for amp-analytics',
+    spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
+  },
+  {
+    id: 'amp-sticky-ad',
+    name: 'AMP Sticky Ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/2472',
+  },
+  {
+    id: 'amp-live-list',
+    name: 'AMP Live List/Blog',
+    spec: 'https://github.com/ampproject/amphtml/issues/2762',
+  },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+  },
+  {
+    id: 'amp-carouscroll',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
   },
 ];
 
@@ -215,10 +228,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = assert(document.getElementById('popup-container'));
-  const messageElement = assert(document.getElementById('popup-message'));
-  const confirmButton = assert(document.getElementById('popup-button-ok'));
-  const cancelButton = assert(document.getElementById('popup-button-cancel'));
+  const container = dev.assert(document.getElementById('popup-container'));
+  const messageElement = dev.assert(document.getElementById('popup-message'));
+  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
+  const cancelButton = dev.assert(
+      document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');

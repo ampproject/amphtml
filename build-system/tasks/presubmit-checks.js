@@ -41,13 +41,13 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'sinon\\.(spy|stub|mock)\\(\\w[^)]*\\)': {
+  'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
-  'sinon\\.useFakeTimers': {
+  'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   'console\\.\\w+\\(': {
@@ -55,10 +55,20 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
-      'validator/validator.js',
+      'build-system/server.js',
+      'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
+      'validator/validator-full.js',
       'validator/validator-in-browser.js',
+      'validator/validator.js',
     ]
+  },
+  'iframePing': {
+    message: 'This is only available in vendor config for ' +
+        'temporary workarounds.',
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
   },
   // Service factories that should only be installed once.
   'installActionService': {
@@ -76,19 +86,40 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
     ],
   },
+  'installActivityService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/activity-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js'
+    ]
+  },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installPerformanceService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/service/performance-impl.js',
     ],
   },
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
+    ],
+  },
+  'installUrlReplacementsService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
@@ -127,22 +158,30 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'installXhrService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/xhr-impl.js',
+    ],
+  },
   'sendMessage': {
     message: privateServiceFactory,
     whitelist: [
       'src/service/viewer-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
+      'extensions/amp-access/0.1/login-dialog.js',
     ],
   },
   // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'builtins/amp-ad.js',
+      'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -150,7 +189,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -158,13 +197,13 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cookies.js',
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -173,7 +212,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -184,8 +223,10 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'src/3p-frame.js',
       'src/experiments.js',
       'src/service/storage-impl.js',
+      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -212,8 +253,8 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
@@ -221,22 +262,42 @@ var forbiddenTerms = {
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
+  'getAccessReaderId': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/service/url-replacements-impl.js',
+    ]
+  },
+  'getAuthdataField': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/service/url-replacements-impl.js',
+    ]
+  },
   'debugger': '',
 
   // ES6. These are only the most commonly used.
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
-  'Promise\\.all': es6polyfill,
-  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
-      'validator/validator.js'
+      'validator/validator-full.js',
+      'validator/validator.js',
     ]
   },
-  '\\.endsWith': es6polyfill,
+  '\\.endsWith': {
+    message: es6polyfill,
+    whitelist: [
+      // .endsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
+    ],
+  },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
   // No destructuring allowed since we dont ship with Array polyfills.
@@ -255,7 +316,29 @@ var forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
+      'src/error.js',
+    ],
+  },
+  '(doc[^.]*)\\.contains': {
+    message: 'Use dom.documentContains API.',
+    whitelist: [
+      'src/dom.js',
+    ],
+  },
+  '\\sdocument(?![a-zA-Z0-9_])': {
+    message: 'Use `window.document` or similar to access document, the global' +
+      '`document` is forbidden',
+    whitelist: [
+      'build-system/server.js',
+      'examples/viewer-integr.js',
+      'testing/iframe.js',
+      'testing/screenshots/make-screenshot.js',
+      'tools/experiments/experiments.js',
+      'validator/validator-full.js',
+      'validator/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -264,6 +347,18 @@ var forbiddenTerms = {
       'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
       'src/3p-frame.js',
       'src/service/viewer-impl.js',
+    ],
+  },
+  'setTimeout.*throw': {
+    message: 'Use dev.error or user.error instead.',
+    whitelist: [
+      'src/log.js',
+    ],
+  },
+  '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
+    message: 'Use dom.openWindowDialog',
+    whitelist: [
+      'src/dom.js',
     ],
   },
 };
@@ -335,6 +430,21 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
+  '\\.changeSize(?!_)': bannedTermsHelpString,
+  'insertAmpExtensionScript': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/insert-extension.js',
+      'src/element-stub.js',
+    ],
+  },
+  'reject\\(\\)': {
+    message: 'Always supply a reason in rejections. ' +
+        'error.cancellation() may be applicable.',
+    whitelist: [
+      'extensions/amp-access/0.1/access-expr-impl.js',
+    ],
+  }
 };
 
 // Terms that must appear in a source file.
@@ -359,6 +469,15 @@ function isInTestFolder(path) {
   return path.startsWith('test/') || folder == 'test';
 }
 
+function stripComments(contents) {
+  // Multi-line comments
+  contents = contents.replace(/\/\*(?!.*\*\/)(.|\n)*?\*\//g, '');
+  // Single line comments with only leading whitespace
+  contents = contents.replace(/\n\s*\/\/.*/g, '');
+  // Single line comments following a space, semi-colon, or closing brace
+  return contents.replace(/( |\}|;)\s*\/\/.*/g, '$1');
+}
+
 /**
  * Logs any issues found in the contents of file based on terms (regex
  * patterns), and provides any possible fix information for matched terms if
@@ -372,7 +491,7 @@ function isInTestFolder(path) {
  */
 function matchTerms(file, terms) {
   var pathname = file.path;
-  var contents = file.contents.toString();
+  var contents = stripComments(file.contents.toString());
   var relative = file.relative;
   return Object.keys(terms).map(function(term) {
     var fix;

@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
-    '../../testing/iframe.js';
+import {
+  createFixtureIframe,
+  pollForLayout,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe.js';
 
 describe('released components: ', function() {
   runTest.call(this, false);
@@ -27,8 +30,10 @@ describe('released components with polyfills: ', function() {
 
 function runTest(shouldKillPolyfillableApis) {
   describe('Rendering of released components', function() {
+    this.timeout(5000);
     let fixture;
     beforeEach(() => {
+      this.timeout(3100);
       return createFixtureIframe('test/fixtures/released.html', 3000, win => {
         if (shouldKillPolyfillableApis) {
           win.Promise = undefined;
@@ -46,7 +51,7 @@ function runTest(shouldKillPolyfillableApis) {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {
         expect(fixture.doc.querySelectorAll('.-amp-element'))
-            .to.have.length(15);
+            .to.have.length(16);
         expect(fixture.doc.querySelectorAll('.-amp-layout'))
             .to.have.length(13);
         expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);

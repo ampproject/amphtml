@@ -14,12 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-list"></a> `amp-list`
+# <a name="amp-list"></a> `amp-list`
 
-The `amp-list` fetches the dynamic content from a CORS JSON endpoint and renders it
-using a supplied template.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Fetches dynamic content from a CORS JSON endpoint and renders it
+using a supplied template.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-#### Usage
+## Usage
 
 The `amp-list` defines data source using the following attributes:
 
@@ -72,7 +93,7 @@ The `amp-list` supports the following layouts: `fixed`, `fixed-height`,
 `responsive`, `fill`. See [AMP HTML Layout System](../../spec/amp-html-layout.md)
 for details.
 
-#### Substitutions
+## Substitutions
 
 The `amp-list` allows all standard URL variable substitutions.
 See [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
@@ -83,7 +104,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
-#### Behavior
+## Behavior
 
 The loading is triggered using normal AMP rules depending on how far the element is from
 the current viewport.
@@ -96,3 +117,7 @@ that AMP Runtime can resize it.
 
 By default, `amp-list` adds `list` ARIA role to the list element and `listitem` role to item
 elements rendered via the template.
+
+## Validation
+
+See [amp-list rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii) in the AMP validator specification.

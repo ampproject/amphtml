@@ -14,35 +14,65 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-install-serviceworker"></a> `amp-install-serviceworker`
+# <a name="amp-install-serviceworker"></a> `amp-install-serviceworker`
 
-The `amp-install-serviceworker` component allows installing a [ServiceWorker](http://www.html5rocks.com/en/tutorials/service-worker/introduction/) for the current page.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Installs a <a href="https://developers.google.com/web/fundamentals/primers/service-worker/">ServiceWorker</a> for the current page.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>NODISPLAY</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
 
-The idea here is that this ServiceWorker runs whenever the AMP file is served from the origin where you publish the AMP file. The ServiceWorker will not be loaded when the document is loaded from an AMP cache.
+## Behavior
+
+Registers the ServiceWorker given by the `src` attribute if the AMP document is loaded from the same origin as the given ServiceWorker URL. If the `data-iframe-src` is set, loads that URL as an iframe when the AMP document is served from an AMP cache. This allows ServiceWorker installation from the AMP cache, so that the ServiceWorker is installed by the time users visit the origin site.
+
+This ServiceWorker runs whenever the AMP file is served from the origin where you publish the AMP file. The ServiceWorker will not be loaded when the document is loaded from an AMP cache.
 
 See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of-the-service-worker-8369841dc962) for how ServiceWorkers can help with making the AMP experience awesome with ServiceWorkers.
 
-### Example
+Example
 
 ```html
 
   <amp-install-serviceworker
       src="https://www.your-domain.com/serviceworker.js"
-      layout="nodisplay"
+      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
+      layout="nodisplay">
   </amp-install-serviceworker>
 
 ```
 
-### Behavior
+## Attributes
 
-Registers the ServiceWorker given by the `src` attribute. If the current origin is different from the origin of the ServiceWorker, this custom element does nothing (Emits warning in development mode).
-
-### Attributes
-
-#### `src`
+### `src`
 
 URL of the ServiceWorker to register.
 
-#### `layout`
+### `data-iframe-src` (optional)
+
+URL of a HTML document that install a ServiceWorker.
+
+### `layout`
 
 Must have the value `nodisplay`.
+
+## Validation
+
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

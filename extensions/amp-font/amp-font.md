@@ -14,12 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="`amp-font`"></a> `amp-font`
+# <a name="`amp-font`"></a> `amp-font`
 
-The `amp-font` extension can trigger and monitor the loading of custom fonts on AMP pages.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Trigger and monitor the loading of custom fonts on AMP pages.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>NODISPLAY</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/font.amp.html">font.amp.html</a></td>
+  </tr>
+</table>
 
-
-####Behavior
+## Behavior
 
 The `amp-font` extension should be used for controlling timeouts on font loading.
 
@@ -52,7 +72,7 @@ Using these classes authors can guard whether a font is displayed and get the fo
 
 The `amp-font` extension accepts the `layout` value:  `nodisplay`
 
-####Attributes
+## Attributes
 
 **font-family**
 
@@ -81,3 +101,7 @@ CSS class that would be removed from the `document.documentElement` and `documen
 **font-weight, font-style, font-variant**
 
 The attributes above should all behave like they do on standard elements.
+
+## Validation
+
+See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii) in the AMP validator specification.

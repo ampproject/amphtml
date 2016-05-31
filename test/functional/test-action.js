@@ -14,110 +14,239 @@
  * limitations under the License.
  */
 
-import {ActionService} from '../../src/service/action-impl';
+import {ActionService, parseActionMap} from '../../src/service/action-impl';
 import * as sinon from 'sinon';
 
 
 describe('ActionService parseAction', () => {
+  function parseAction(s) {
+    const actionMap = parseActionMap(s);
+    if (actionMap == null) {
+      return null;
+    }
+    const keys = Object.keys(actionMap);
+    expect(keys).to.have.length(1);
+    return actionMap[keys[0]];
+  }
 
-  let sandbox;
-  let action;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
-  });
-
-  afterEach(() => {
-    action = null;
-    sandbox.restore();
-    sandbox = null;
-  });
-
-
-  it('should fail parse without event', () => {
-    const a = action.parseAction_('target1.method1');
-    expect(a).to.equal(null);
+  it('should parse full form', () => {
+    const a = parseAction('event1:target1.method1');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
   });
 
   it('should parse with default method', () => {
-    const a = action.parseAction_('event1:target1');
+    const a = parseAction('event1:target1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('activate');
   });
 
-  it('should parse full form', () => {
-    const a = action.parseAction_('event1:target1.method1');
+  it('should parse with numeric target', () => {
+    const a = parseAction('event1:1234.method1');
     expect(a.event).to.equal('event1');
-    expect(a.target).to.equal('target1');
+    expect(a.target).to.equal('1234');
     expect(a.method).to.equal('method1');
   });
 
   it('should parse with lots of whitespace', () => {
-    const a = action.parseAction_('  event1  :  target1  .  method1  ');
+    const a = parseAction('  event1  :  target1  .  method1  ');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
+  it('should parse with an arg', () => {
+    const a = parseAction('event1:target1.method1(key1=value1)');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+  });
+
+  it('should parse with multiple args', () => {
+    const a = parseAction('event1:target1.method1(key1=value1, key2 = value2)');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key2']).to.equal('value2');
+  });
+
+  it('should parse with multiple args with whitespace', () => {
+    const a = parseAction(
+        'event1:target1.method1  (  key1 =  value1  ,  key2 = value2  ) ');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key2']).to.equal('value2');
+  });
+
+  it('should parse with no args', () => {
+    const a = parseAction('event1:target1.method1()');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args).to.be.null;
+  });
+
+  it('should parse with no args with whitespace', () => {
+    const a = parseAction('event1:target1.method1 (  ) ');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args).to.be.null;
+  });
+
+  it('should parse with double-quoted args', () => {
+    const a = parseAction(
+        'event1:target1.method1(key1=value1, key2 = "value (2)\'")');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key2']).to.equal('value (2)\'');
+  });
+
+  it('should parse with single-quoted args', () => {
+    const a = parseAction(
+        'event1:target1.method1(key1=value1, key2 = \'value (2)"\')');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+    expect(a.args['key2']).to.equal('value (2)"');
+  });
+
+  it('should parse with args with trailing comma', () => {
+    const a = parseAction(
+        'event1:target1.method1(key1=value1, )');
+    expect(a.event).to.equal('event1');
+    expect(a.target).to.equal('target1');
+    expect(a.method).to.equal('method1');
+    expect(a.args['key1']).to.equal('value1');
+    expect(Object.keys(a.args)).to.have.length(1);
+  });
+
+  it('should parse with boolean args', () => {
+    expect(parseAction('e:t.m(k=true)').args['k']).to.equal(true);
+    expect(parseAction('e:t.m(k=false)').args['k']).to.equal(false);
+  });
+
+  it('should parse with numeric args', () => {
+    expect(parseAction('e:t.m(k=123)').args['k']).to.equal(123);
+    expect(parseAction('e:t.m(k=1.23)').args['k']).to.equal(1.23);
+    expect(parseAction('e:t.m(k=.123)').args['k']).to.equal(.123);
+  });
+
+  it('should parse with term semicolon', () => {
+    expect(parseAction('e:t.m(k=1); ').args['k']).to.equal(1);
+  });
+
+  it('should parse with args as a proto-less object', () => {
+    expect(parseAction('e:t.m(k=1)').args.__proto__).to.be.undefined;
+  });
+
+  it('should interprete key always as string', () => {
+    expect(parseAction('true:t.m').event).to.equal('true');
+    expect(parseAction('e:true.m').target).to.equal('true');
+    expect(parseAction('e:t.true').method).to.equal('true');
+    expect(parseAction('e:t.m(true=1)').args['true']).to.equal(1);
+    expect(parseAction('e:t.m(01=1)').args['01']).to.equal(1);
+  });
+
   it('should parse empty to null', () => {
-    const a = action.parseAction_('');
+    const a = parseAction('');
     expect(a).to.equal(null);
   });
 
-  it('should parse without target to null', () => {
-    expect(action.parseAction_('event1:')).to.equal(null);
-    expect(action.parseAction_('.method1')).to.equal(null);
-    expect(action.parseAction_('event1:.method1')).to.equal(null);
+  it('should fail parse without event', () => {
+    expect(() => {
+      parseAction('target1.method1');
+    }).to.throw(/expected \[\:\]/);
   });
 
-  it('should parse with period in event or method', () => {
-    const a = action.parseAction_('event.1:target1.method.1');
-    expect(a.event).to.equal('event.1');
-    expect(a.target).to.equal('target1');
-    expect(a.method).to.equal('method.1');
+  it('should fail parse without target', () => {
+    expect(() => {
+      parseAction('event1:');
+    }).to.throw(/Invalid action/);
+    expect(() => {
+      parseAction('.method1');
+    }).to.throw(/Invalid action/);
+    expect(() => {
+      parseAction('event1:.method1');
+    }).to.throw(/Invalid action/);
+  });
+
+  it('should fail parse with period in event or method', () => {
+    expect(() => {
+      parseAction('event.1:target1.method');
+    }).to.throw(/Invalid action/);
+    expect(() => {
+      parseAction('event:target1.method.1');
+    }).to.throw(/Invalid action/);
+  });
+
+  it('should fail parse with invalid args', () => {
+    // No args allowed without explicit action.
+    expect(() => {
+      parseAction('event:target1()');
+    }).to.throw(/Invalid action/);
+    // Missing parens
+    expect(() => {
+      parseAction('event:target1.method(');
+    }).to.throw(/Invalid action/);
+    expect(() => {
+      parseAction('event:target1.method(key = value');
+    }).to.throw(/Invalid action/);
+    // No arg value.
+    expect(() => {
+      parseAction('event:target1.method(key)');
+    }).to.throw(/Invalid action/);
+    expect(() => {
+      parseAction('event:target1.method(key=)');
+    }).to.throw(/Invalid action/);
+    // Missing quote
+    expect(() => {
+      parseAction('event:target1.method(key = "value)');
+    }).to.throw(/Invalid action/);
+    // Broken quotes.
+    expect(() => {
+      parseAction('event:target1.method(key = "value"")');
+    }).to.throw(/Invalid action/);
+    // Missing comma.
+    expect(() => {
+      parseAction('event:target1.method(key = value key2 = value2)');
+    }).to.throw(/Invalid action/);
   });
 });
 
 
 describe('Action parseActionMap', () => {
 
-  let sandbox;
-  let action;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
-  });
-
-  afterEach(() => {
-    action = null;
-    sandbox.restore();
-    sandbox = null;
-  });
-
   it('should parse with a single action', () => {
-    const m = action.parseActionMap_('event1:action1');
+    const m = parseActionMap('event1:action1');
     expect(m['event1'].target).to.equal('action1');
   });
 
   it('should parse with two actions', () => {
-    const m = action.parseActionMap_('event1:action1; event2: action2');
+    const m = parseActionMap('event1:action1; event2: action2');
     expect(m['event1'].target).to.equal('action1');
     expect(m['event2'].target).to.equal('action2');
   });
 
   it('should parse with dupe actions by overriding with last', () => {
-    const m = action.parseActionMap_('event1:action1; event1: action2');
+    const m = parseActionMap('event1:action1; event1: action2');
     // Currently, we overwrite the events.
     expect(m['event1'].target).to.equal('action2');
   });
 
   it('should parse empty forms to null', () => {
-    expect(action.parseActionMap_('')).to.equal(null);
-    expect(action.parseActionMap_('  ')).to.equal(null);
-    expect(action.parseActionMap_(';;;')).to.equal(null);
+    expect(parseActionMap('')).to.equal(null);
+    expect(parseActionMap('  ')).to.equal(null);
+    expect(parseActionMap(';;;')).to.equal(null);
   });
 });
 
@@ -133,9 +262,7 @@ describe('Action findAction', () => {
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should create action map in getActionMap_', () => {
@@ -194,7 +321,7 @@ describe('Action method', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     action = new ActionService(window);
-    onEnqueue = sinon.spy();
+    onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -212,32 +339,46 @@ describe('Action method', () => {
 
   afterEach(() => {
     document.body.removeChild(parent);
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
   it('should invoke on the AMP element', () => {
-    action.invoke_(execElement, 'method1', 'source1', 'event1');
+    action.invoke_(execElement, 'method1', /* args */ null,
+        'source1', 'event1');
     expect(onEnqueue.callCount).to.equal(1);
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
     expect(inv.event).to.equal('event1');
+    expect(inv.args).to.be.null;
+  });
+
+  it('should invoke on the AMP element with args', () => {
+    action.invoke_(execElement, 'method1', {'key1': 11},
+        'source1', 'event1');
+    expect(onEnqueue.callCount).to.equal(1);
+    const inv = onEnqueue.getCall(0).args[0];
+    expect(inv.target).to.equal(execElement);
+    expect(inv.method).to.equal('method1');
+    expect(inv.source).to.equal('source1');
+    expect(inv.event).to.equal('event1');
+    expect(inv.args['key1']).to.equal(11);
   });
 
   it('should not allow invoke on non-AMP element', () => {
     expect(() => {
-      action.invoke_({tagName: 'img'}, 'method1', 'source1', 'event1');
+      action.invoke_({tagName: 'img'}, 'method1', /* args */ null,
+          'source1', 'event1');
     }).to.throw(/Target must be an AMP element/);
     expect(onEnqueue.callCount).to.equal(0);
   });
 
   it('should not allow invoke on unresolved AMP element', () => {
     expect(() => {
-      action.invoke_({tagName: 'amp-img'}, 'method1', 'source1', 'event1');
+      action.invoke_({tagName: 'amp-img'}, 'method1', /* args */ null,
+          'source1', 'event1');
     }).to.throw(/Unrecognized AMP element/);
     expect(onEnqueue.callCount).to.equal(0);
   });
@@ -252,11 +393,12 @@ describe('Action method', () => {
   });
 
   it('should execute method', () => {
-    action.execute(execElement, 'method1', child, null);
+    action.execute(execElement, 'method1', {'key1': 11}, child, null);
     expect(onEnqueue.callCount).to.equal(1);
     const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
+    expect(inv.args['key1']).to.equal(11);
     expect(inv.source).to.equal(child);
   });
 });
@@ -278,10 +420,7 @@ describe('Action interceptor', () => {
   });
 
   afterEach(() => {
-    action = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function getQueue() {
@@ -294,8 +433,8 @@ describe('Action interceptor', () => {
   });
 
   it('should queue actions', () => {
-    action.invoke_(target, 'method1', 'source1', 'event1');
-    action.invoke_(target, 'method2', 'source2', 'event2');
+    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1');
+    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
 
     const queue = getQueue();
     expect(Array.isArray(queue)).to.be.true;
@@ -315,13 +454,13 @@ describe('Action interceptor', () => {
   });
 
   it('should dequeue actions after handler set', () => {
-    action.invoke_(target, 'method1', 'source1', 'event1');
-    action.invoke_(target, 'method2', 'source2', 'event2');
+    action.invoke_(target, 'method1', /* args */ null, 'source1', 'event1');
+    action.invoke_(target, 'method2', /* args */ null, 'source2', 'event2');
 
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getQueue()).to.have.length(2);
 
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     action.installActionHandler(target, handler);
     expect(Array.isArray(getQueue())).to.be.false;
     expect(handler.callCount).to.equal(0);
@@ -341,7 +480,7 @@ describe('Action interceptor', () => {
     expect(inv1.source).to.equal('source2');
     expect(inv1.event).to.equal('event2');
 
-    action.invoke_(target, 'method3', 'source3', 'event3');
+    action.invoke_(target, 'method3', /* args */ null, 'source3', 'event3');
     expect(Array.isArray(getQueue())).to.be.false;
     expect(handler.callCount).to.equal(3);
     const inv2 = handler.getCall(2).args[0];
@@ -369,9 +508,7 @@ describe('Action common handler', () => {
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should execute actions registered', () => {
@@ -380,11 +517,11 @@ describe('Action common handler', () => {
     action.addGlobalMethodHandler('action1', action1);
     action.addGlobalMethodHandler('action2', action2);
 
-    action.invoke_(target, 'action1', 'source1', 'event1');
+    action.invoke_(target, 'action1', /* args */ null, 'source1', 'event1');
     expect(action1.callCount).to.equal(1);
     expect(action2.callCount).to.equal(0);
 
-    action.invoke_(target, 'action2', 'source2', 'event2');
+    action.invoke_(target, 'action2', /* args */ null, 'source2', 'event2');
     expect(action2.callCount).to.equal(1);
     expect(action1.callCount).to.equal(1);
 

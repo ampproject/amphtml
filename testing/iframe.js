@@ -57,6 +57,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
+    const messages = [];
     let html = __html__[fixture];
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
@@ -71,9 +72,15 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     window.beforeLoad = function(win) {
       // Flag as being a test window.
       win.AMP_TEST = true;
+      win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
+      win.addEventListener('message', (event) => {
+        if (event.data && /^amp/.test(event.data.sentinel)) {
+          messages.push(event.data);
+        }
+      })
       // Function that returns a promise for when the given event fired at
       // least count times.
       let awaitEvent = (eventName, count) => {
@@ -99,9 +106,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        throw new Error('Error in frame: ' + message + '\n' +
+        reject(new Error('Error in frame: ' + message + '\n' +
             file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack'));
+            (error ? error.stack : 'no stack')));
       };
       let errors = [];
       win.console.error = function() {
@@ -109,6 +116,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
+      let setTimeout = win.setTimeout;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -123,7 +131,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
           doc: win.document,
           iframe: iframe,
           awaitEvent: awaitEvent,
-          errors: errors
+          errors: errors,
+          messages: messages,
         });
       };
     };
@@ -133,11 +142,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
-      throw event.error;
+      reject(event.error);
     };
     iframe.height = initialIframeHeight;
     iframe.width = 500;
-    if ('scrdoc' in iframe) {
+    if ('srcdoc' in iframe) {
       iframe.srcdoc = html;
       document.body.appendChild(iframe);
     } else {
@@ -175,7 +184,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<script src="/base/build/polyfills.js"></script>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
@@ -199,9 +207,15 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
             element.build(true);
+            if (!element.getPlaceholder()) {
+              const placeholder = element.createPlaceholder();
+              if (placeholder) {
+                element.appendChild(placeholder);
+              }
+            }
             if (element.layoutCount_ == 0) {
               if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback();
+                opt_beforeLayoutCallback(element);
               }
               return element.layoutCallback().then(() => {
                 return element;
@@ -307,6 +321,53 @@ export function expectBodyToBecomeVisible(win) {
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
   });
+}
+
+/**
+ * For the given iframe, makes the creation of iframes and images
+ * create elements that do not actually load their underlying
+ * resources.
+ * Calling `triggerLoad` makes the respective resource appear loaded.
+ * Calling `triggerError` on the respective resources makes them
+ * appear in error state.
+ * @param {!Window} win
+ */
+export function doNotLoadExternalResourcesInTest(win) {
+  const createElement = win.document.createElement;
+  win.document.createElement = function(tagName) {
+    const element = createElement.apply(this, arguments);
+    tagName = tagName.toLowerCase();
+    if (tagName == 'iframe' || tagName == 'img') {
+      // Make get/set write to a fake property instead of
+      // triggering invocation.
+      Object.defineProperty(element, 'src', {
+        set: function(val) {
+          this.fakeSrc = val;
+        },
+        get: function() {
+          return this.fakeSrc;
+        }
+      });
+      // Triggers a load event on the element in the next micro task.
+      element.triggerLoad = function() {
+        const e = new Event('load');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      // Triggers an error event on the element in the next micro task.
+      element.triggerError = function() {
+        const e = new Event('error');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      if (tagName == 'iframe') {
+        element.srcdoc = '<h1>Fake iframe</h1>';
+      }
+    }
+    return element;
+  };
 }
 
 /**

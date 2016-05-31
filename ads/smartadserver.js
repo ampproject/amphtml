@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../src/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -37,7 +37,7 @@ export function smartadserver(global, data) {
         'pageId': data.page,
         'formatId': data.format,
         'target': data.target,
-        'tagId': data.tag
+        'tagId': data.tag,
       });
     });
   });

@@ -22,32 +22,40 @@
  */
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
 goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandler}
  * @private
  */
-class LoggingHandler {
+class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   constructor() {
+    super();
     this.log = [];
   }
 
+  /** @override */
   startDoc() { this.log.push('startDoc()'); }
 
+  /** @override */
   cdata(text) { this.log.push('cdata("' + text + '")'); }
 
+  /** @override */
   pcdata(text) { this.log.push('pcdata("' + text + '")'); }
 
+  /** @override */
   rcdata(text) { this.log.push('rcdata("' + text + '")'); }
 
+  /** @override */
   endDoc() { this.log.push('endDoc()'); }
 
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push('startTag(' + tagName + ',[' + attrs + '])');
   }
 
+  /** @override */
   endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
 }
 
@@ -56,16 +64,18 @@ describe('HtmlParser', () => {
     const handler = new LoggingHandler();
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, 'hello world');
-    expect(handler.log).toEqual(
-        ['startDoc()', 'pcdata("hello world")', 'endDoc()']);
+    expect(handler.log).toEqual([
+      'startDoc()', 'pcdata("hello world")', 'endDoc()'
+    ]);
   });
 
   it('parses image tag', () => {
     const handler = new LoggingHandler();
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<img src="hello.gif">');
-    expect(handler.log).toEqual(
-        ['startDoc()', 'startTag(img,[src,hello.gif])', 'endDoc()']);
+    expect(handler.log).toEqual([
+      'startDoc()', 'startTag(img,[src,hello.gif])', 'endDoc()'
+    ]);
   });
 
   it('parses tags inside tags', () => {
@@ -74,7 +84,8 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<div><span>hello world</span></div>');
     expect(handler.log).toEqual([
       'startDoc()', 'startTag(div,[])', 'startTag(span,[])',
-      'pcdata("hello world")', 'endTag(span)', 'endTag(div)', 'endDoc()']);
+      'pcdata("hello world")', 'endTag(span)', 'endTag(div)', 'endDoc()'
+    ]);
   });
 
   it('parses tag with multiple attrs', () => {
@@ -82,7 +93,8 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<img src="hello.gif" width="400px">');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(img,[src,hello.gif,width,400px])', 'endDoc()']);
+      'startDoc()', 'startTag(img,[src,hello.gif,width,400px])', 'endDoc()'
+    ]);
   });
 
   it('parses tag with boolean attr', () => {
@@ -90,8 +102,8 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(input,[type,checkbox,checked,checked])',
-      'endDoc()']);
+      'startDoc()', 'startTag(input,[type,checkbox,checked,])', 'endDoc()'
+    ]);
   });
 
   it('parses unclosed tag', () => {
@@ -99,7 +111,8 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<span>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(span,[])', 'endDoc()']);
+      'startDoc()', 'startTag(span,[])', 'endDoc()'
+    ]);
   });
 
   it('parses style tag', () => {
@@ -108,7 +121,8 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<span style="background-color: black;"></span>');
     expect(handler.log).toEqual([
       'startDoc()', 'startTag(span,[style,background-color: black;])',
-      'endTag(span)', 'endDoc()']);
+      'endTag(span)', 'endDoc()'
+    ]);
   });
 
   it('parses cdata', () => {
@@ -117,7 +131,8 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<script><![CDATA[alert("hey");]]><\/script>');
     expect(handler.log).toEqual([
       'startDoc()', 'startTag(script,[])', 'cdata("<![CDATA[alert("hey");]]>")',
-      'endTag(script)', 'endDoc()']);
+      'endTag(script)', 'endDoc()'
+    ]);
   });
 
   it('parses several tags on the same level', () => {
@@ -126,7 +141,8 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<img><p>hello<img><div/></p>');
     expect(handler.log).toEqual([
       'startDoc()', 'startTag(img,[])', 'startTag(p,[])', 'pcdata("hello")',
-      'startTag(img,[])', 'startTag(div,[])', 'endTag(p)', 'endDoc()']);
+      'startTag(img,[])', 'startTag(div,[])', 'endTag(p)', 'endDoc()'
+    ]);
   });
 
   it('will not hold state between two parse calls', () => {
@@ -135,8 +151,9 @@ describe('HtmlParser', () => {
     parser.parse(handler, '<div/>');
     parser.parse(handler, '<div/>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(div,[])', 'endDoc()',
-      'startDoc()', 'startTag(div,[])', 'endDoc()']);
+      'startDoc()', 'startTag(div,[])', 'endDoc()', 'startDoc()',
+      'startTag(div,[])', 'endDoc()'
+    ]);
   });
 
   it('skips over comments', () => {
@@ -144,19 +161,21 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<div><!-- this is a comment --></div>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(div,[])', 'endTag(div)', 'endDoc()' ]);
+      'startDoc()', 'startTag(div,[])', 'endTag(div)', 'endDoc()'
+    ]);
   });
 
   it('processes unknown or custom tags', () => {
     const handler = new LoggingHandler();
     const parser = new amp.htmlparser.HtmlParser();
-    parser.parse(handler,
-                 '<a-tag><more-tags>' +
-                     '<custom foo="Hello">world.</more-tags></a-tag>');
+    parser.parse(
+        handler, '<a-tag><more-tags>' +
+            '<custom foo="Hello">world.</more-tags></a-tag>');
     expect(handler.log).toEqual([
       'startDoc()', 'startTag(a-tag,[])', 'startTag(more-tags,[])',
       'startTag(custom,[foo,Hello])', 'pcdata("world.")', 'endTag(more-tags)',
-      'endTag(a-tag)', 'endDoc()']);
+      'endTag(a-tag)', 'endDoc()'
+    ]);
   });
 
   it('parses oddly formatted attributes', () => {
@@ -165,52 +184,76 @@ describe('HtmlParser', () => {
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<a href="foo.html""></a>');
     expect(handler.log).toEqual([
-        'startDoc()', 'startTag(a,[href,foo.html,","])',
-        'endTag(a)', 'endDoc()' ]);
+      'startDoc()', 'startTag(a,[href,foo.html,",])', 'endTag(a)', 'endDoc()'
+    ]);
   });
 });
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandlerWithLocation}
  * @private
  */
-class LoggingHandlerWithLocation {
+class LoggingHandlerWithLocation extends
+    amp.htmlparser.HtmlSaxHandlerWithLocation {
   constructor() {
+    super();
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
     /** @type {!Array<!string>} */
     this.log = [];
   }
-  setDocLocator (locator) {
+
+  /** @override */
+  setDocLocator(locator) {
     this.locator = locator;
     this.log = [];
   }
+
+  /** @override */
   startDoc() {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startDoc()');
   }
+
+  /** @override */
   cdata(text) {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': cdata("' + text + '")');
   }
+
+  /** @override */
   pcdata(text) {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': pcdata("' + text + '")');
   }
+
+  /** @override */
   rcdata(text) {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': rcdata("' + text + '")');
   }
+
+  /** @override */
   endDoc() {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endDoc()');
   }
+
+  /** @override */
   startTag(tagName, attrs) {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startTag(' + tagName + ',[' + attrs + '])');
   }
+
+  /** @override */
   endTag(tagName) {
-    this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
+    this.log.push(
+        ':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endTag(' + tagName + ')');
   }
 }
@@ -220,26 +263,19 @@ describe('HtmlParser with location', () => {
   it('reports line and column', () => {
     const handler = new LoggingHandlerWithLocation();
     const parser = new amp.htmlparser.HtmlParser();
-    parser.parse(handler,
-                 '<html>\n' +
-                 '  <body>\n' +
-                 '    <div style=foo>Oh hi!</div>\n' +
-                 '  </body>\n' +
-                 '</html>');
+    parser.parse(
+        handler, '<html>\n' +
+            '  <body>\n' +
+            '    <div style=foo>Oh hi!</div>\n' +
+            '  </body>\n' +
+            '</html>');
     expect(handler.log).toEqual([
-      ':1:0: startDoc()',
-      ':1:0: startTag(html,[])',
-      ':1:5: pcdata("\n  ")',
-      ':2:2: startTag(body,[])',
-      ':2:7: pcdata("\n    ")',
-      ':3:4: startTag(div,[style,foo])',
-      ':3:18: pcdata("Oh hi!")',
-      ':3:25: endTag(div)',
-      ':3:30: pcdata("\n  ")',
-      ':4:2: endTag(body)',
-      ':4:8: pcdata("\n")',
-      ':5:0: endTag(html)',
-      ':5:6: endDoc()']);
+      ':1:0: startDoc()', ':1:0: startTag(html,[])', ':1:5: pcdata("\n  ")',
+      ':2:2: startTag(body,[])', ':2:7: pcdata("\n    ")',
+      ':3:4: startTag(div,[style,foo])', ':3:18: pcdata("Oh hi!")',
+      ':3:25: endTag(div)', ':3:30: pcdata("\n  ")', ':4:2: endTag(body)',
+      ':4:8: pcdata("\n")', ':5:0: endTag(html)', ':5:6: endDoc()'
+    ]);
   });
 
   it('does not insert closing events as html5 standard would suggest', () => {
@@ -254,16 +290,16 @@ describe('HtmlParser with location', () => {
     // the div closes the p whereas the a-custom remains inside.
     const handler = new LoggingHandlerWithLocation();
     const parser = new amp.htmlparser.HtmlParser();
-    parser.parse(handler,
-                 '<html>\n' +
-                 '  <body>\n' +
-                 '    <p>\n' +
-                 '      <a-custom>\n' +
-                 '        <div style=foo>Oh hi!</div>\n' +
-                 '      </a-custom>\n' +
-                 '    </p>\n' +
-                 '  </body>\n' +
-                 '</html>');
+    parser.parse(
+        handler, '<html>\n' +
+            '  <body>\n' +
+            '    <p>\n' +
+            '      <a-custom>\n' +
+            '        <div style=foo>Oh hi!</div>\n' +
+            '      </a-custom>\n' +
+            '    </p>\n' +
+            '  </body>\n' +
+            '</html>');
     expect(handler.log).toEqual([
       ':1:0: startDoc()',
       ':1:0: startTag(html,[])',
@@ -285,7 +321,8 @@ describe('HtmlParser with location', () => {
       ':8:2: endTag(body)',
       ':8:8: pcdata("\n")',
       ':9:0: endTag(html)',
-      ':9:6: endDoc()' ]);
+      ':9:6: endDoc()'
+    ]);
   });
 
   // This covers a bugfix for http://b/26381818; the key of this test is
@@ -293,32 +330,28 @@ describe('HtmlParser with location', () => {
   it('tracks line and column past complex cdata sections', () => {
     const handler = new LoggingHandlerWithLocation();
     const parser = new amp.htmlparser.HtmlParser();
-    parser.parse(handler,
-                 '<html>\n' +
-                 '<body>\n' +
-                 '<script type="application/json">\n' +
-                 '{\n' +
-                 '"vars": {\n' +
-                 '"account": "UA-XXXX-Y"\n' +
-                 '},\n' +
-                 '"triggers": {\n' +
-                 '"default pageview": {\n' +
-                 '"on": "visible"\n' +
-                 '}\n' +
-                 '}\n' +
-                 '}\n' +
-                 '</script>\n' +
-                 '<amp-analytics></amp-analytics>\n' +
-                 '</body>\n' +
-                 '</html>');
+    parser.parse(
+        handler, '<html>\n' +
+            '<body>\n' +
+            '<script type="application/json">\n' +
+            '{\n' +
+            '"vars": {\n' +
+            '"account": "UA-XXXX-Y"\n' +
+            '},\n' +
+            '"triggers": {\n' +
+            '"default pageview": {\n' +
+            '"on": "visible"\n' +
+            '}\n' +
+            '}\n' +
+            '}\n' +
+            '</script>\n' +
+            '<amp-analytics></amp-analytics>\n' +
+            '</body>\n' +
+            '</html>');
     expect(handler.log).toEqual([
-      ':1:0: startDoc()',
-      ':1:0: startTag(html,[])',
-      ':1:5: pcdata("\n")',
-      ':2:0: startTag(body,[])',
-      ':2:5: pcdata("\n")',
-      ':3:0: startTag(script,[type,application/json])',
-      ':3:0: cdata("\n' +
+      ':1:0: startDoc()', ':1:0: startTag(html,[])', ':1:5: pcdata("\n")',
+      ':2:0: startTag(body,[])', ':2:5: pcdata("\n")',
+      ':3:0: startTag(script,[type,application/json])', ':3:0: cdata("\n' +
           '{\n' +
           '"vars": {\n' +
           '"account": "UA-XXXX-Y"\n' +
@@ -330,15 +363,11 @@ describe('HtmlParser with location', () => {
           '}\n' +
           '}\n' +
           '")',
-      ':14:0: endTag(script)',
-      ':14:8: pcdata("\n")',
-      ':15:0: startTag(amp-analytics,[])',
-      ':15:15: endTag(amp-analytics)',
-      ':15:30: pcdata("\n")',
-      ':16:0: endTag(body)',
-      ':16:6: pcdata("\n")',
-      ':17:0: endTag(html)',
-      ':17:6: endDoc()']);
+      ':14:0: endTag(script)', ':14:8: pcdata("\n")',
+      ':15:0: startTag(amp-analytics,[])', ':15:15: endTag(amp-analytics)',
+      ':15:30: pcdata("\n")', ':16:0: endTag(body)', ':16:6: pcdata("\n")',
+      ':17:0: endTag(html)', ':17:6: endDoc()'
+    ]);
   });
 
   it('Supports Turkish UTF8 İ character in body', () => {
@@ -349,42 +378,27 @@ describe('HtmlParser with location', () => {
     const handler = new LoggingHandlerWithLocation();
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(
-        handler,
-        '<!doctype html>\n' +
-        '<html amp lang="tr">\n' +
-        '<head>\n' +
-        '<meta charset="utf-8">\n' +
-        '<title></title>\n' +
-        '<script async src="https://cdn.ampproject.org/v0.js"></script>\n' +
-        '</head>\n' +
-        '<body>İ</body>\n' +
-        '</html>');
+        handler, '<!doctype html>\n' +
+            '<html amp lang="tr">\n' +
+            '<head>\n' +
+            '<meta charset="utf-8">\n' +
+            '<title></title>\n' +
+            '<script async src="https://cdn.ampproject.org/v0.js"></script>\n' +
+            '</head>\n' +
+            '<body>İ</body>\n' +
+            '</html>');
     expect(handler.log).toEqual([
-      ':1:0: startDoc()',
-      ':1:0: startTag(!doctype,[html,html])',
-      ':1:14: pcdata("\n")',
-      ':2:0: startTag(html,[amp,amp,lang,tr])',
-      ':2:19: pcdata("\n")',
-      ':3:0: startTag(head,[])',
-      ':3:5: pcdata("\n")',
-      ':4:0: startTag(meta,[charset,utf-8])',
-      ':4:21: pcdata("\n")',
-      ':5:0: startTag(title,[])',
-      ':5:0: rcdata("")',
-      ':5:7: endTag(title)',
-      ':5:14: pcdata("\n")',
-      ':6:0: startTag(script,[async,async,src,'+
+      ':1:0: startDoc()', ':1:0: startTag(!doctype,[html,])',
+      ':1:14: pcdata("\n")', ':2:0: startTag(html,[amp,,lang,tr])',
+      ':2:19: pcdata("\n")', ':3:0: startTag(head,[])', ':3:5: pcdata("\n")',
+      ':4:0: startTag(meta,[charset,utf-8])', ':4:21: pcdata("\n")',
+      ':5:0: startTag(title,[])', ':5:0: rcdata("")', ':5:7: endTag(title)',
+      ':5:14: pcdata("\n")', ':6:0: startTag(script,[async,,src,' +
           'https://cdn.ampproject.org/v0.js])',
-      ':6:0: cdata("")',
-      ':6:53: endTag(script)',
-      ':6:61: pcdata("\n")',
-      ':7:0: endTag(head)',
-      ':7:6: pcdata("\n")',
-      ':8:0: startTag(body,[])',
-      ':8:5: pcdata("İ")',
-      ':8:7: endTag(body)',
-      ':8:13: pcdata("\n")',
-      ':9:0: endTag(html)',
-      ':9:6: endDoc()' ]);
+      ':6:0: cdata("")', ':6:53: endTag(script)', ':6:61: pcdata("\n")',
+      ':7:0: endTag(head)', ':7:6: pcdata("\n")', ':8:0: startTag(body,[])',
+      ':8:5: pcdata("İ")', ':8:7: endTag(body)', ':8:13: pcdata("\n")',
+      ':9:0: endTag(html)', ':9:6: endDoc()'
+    ]);
   });
 });

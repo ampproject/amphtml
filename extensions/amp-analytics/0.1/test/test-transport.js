@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {sendRequest, Transport} from '../transport';
+import {sendRequest, sendRequestUsingIframe, Transport} from '../transport';
 import {adopt} from '../../../../src/runtime';
+import {loadPromise} from '../../../../src/event-helper';
 import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('transport', () => {
+describe('amp-analytics.transport', () => {
 
   let sandbox;
   beforeEach(() => {
@@ -50,7 +51,7 @@ describe('transport', () => {
   it('prefers beacon over xhrpost and image', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 0, 0);
   });
@@ -58,7 +59,7 @@ describe('transport', () => {
   it('prefers xhrpost over image', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: false, xhrpost: true, image: true
+      beacon: false, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 0);
   });
@@ -66,7 +67,7 @@ describe('transport', () => {
   it('reluctantly uses image if nothing else is enabled', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      image: true
+      image: true,
     });
     assertCallCounts(0, 0, 1);
   });
@@ -74,7 +75,7 @@ describe('transport', () => {
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 0);
   });
@@ -82,7 +83,7 @@ describe('transport', () => {
   it('falls back to image when beacon not found and xhr disabled', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: false, image: true
+      beacon: true, xhrpost: false, image: true,
     });
     assertCallCounts(1, 0, 1);
   });
@@ -90,7 +91,7 @@ describe('transport', () => {
   it('falls back to image when beacon and xhr are not available', () => {
     setupStubs(false, false);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 1);
   });
@@ -106,7 +107,40 @@ describe('transport', () => {
   it('asserts that urls are https', () => {
     expect(() => {
       sendRequest(window, 'http://example.com/test');
-    }).to.throw(Error);
+    }).to.throw(/https/);
+  });
+
+  describe('sendRequestUsingIframe', () => {
+    const url = 'http://iframe.localhost:9876/base/test/' +
+        'fixtures/served/iframe.html';
+    it('should create and delete an iframe', () => {
+      const clock = sandbox.useFakeTimers();
+      const iframe = sendRequestUsingIframe(window, url);
+      expect(document.body.lastChild).to.equal(iframe);
+      expect(iframe.src).to.equal(url);
+      expect(iframe.getAttribute('sandbox')).to.equal(
+          'allow-scripts allow-same-origin');
+      return loadPromise(iframe).then(() => {
+        clock.tick(4900);
+        expect(document.body.lastChild).to.equal(iframe);
+        clock.tick(100);
+        expect(document.body.lastChild).to.not.equal(iframe);
+      });
+    });
+
+    it('iframe asserts that urls are https', () => {
+      expect(() => {
+        sendRequestUsingIframe(window, 'http://example.com/test');
+      }).to.throw(/https/);
+    });
+
+    it('forbids same origin', () => {
+      expect(() => {
+        sendRequestUsingIframe(window, 'http://localhost:9876/base/');
+      }).to.throw(
+          /Origin of iframe request must not be equal to the document origin./
+      );
+    });
   });
 });
 

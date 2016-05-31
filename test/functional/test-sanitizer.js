@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {resolveUrlAttr, sanitizeFormattingHtml, sanitizeHtml} from
-    '../../src/sanitizer';
+import {
+  resolveUrlAttr,
+  sanitizeFormattingHtml,
+  sanitizeHtml,
+} from '../../src/sanitizer';
 
 
 describe('sanitizeHtml', () => {

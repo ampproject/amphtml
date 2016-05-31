@@ -19,8 +19,7 @@ import {assertHttpsUrl} from '../src/url';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {setStyles} from '../src/style';
-
+import {getMode} from '../src/mode';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -36,11 +35,31 @@ export function installVideo(win) {
     }
 
     /** @override */
-    layoutCallback() {
+    buildCallback() {
+      /** @private @const {!HTMLVideoElement} */
+      this.video_ = this.element.ownerDocument.createElement('video');
       const width = this.element.getAttribute('width');
       const height = this.element.getAttribute('height');
-      const video = document.createElement('video');
-      if (!video.play) {
+
+      this.video_.width = getLengthNumeral(width);
+      this.video_.height = getLengthNumeral(height);
+
+      const posterAttr = this.element.getAttribute('poster');
+      if (!posterAttr && getMode().development) {
+        console/*OK*/.error(
+            'No "poster" attribute has been provided for amp-video.');
+      }
+
+      // Disable video preload in prerender mode.
+      this.video_.setAttribute('preload', 'none');
+      this.propagateAttributes(['poster'], this.video_);
+      this.applyFillContent(this.video_, true);
+      this.element.appendChild(this.video_);
+    }
+
+    /** @override */
+    layoutCallback() {
+      if (!this.isVideoSupported_()) {
         this.toggleFallback(true);
         return Promise.resolve();
       }
@@ -49,35 +68,40 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'controls', 'autoplay', 'muted', 'loop', 'poster'],
-          video);
-      video.width = getLengthNumeral(width);
-      video.height = getLengthNumeral(height);
-      this.applyFillContent(video, true);
+          ['src', 'controls', 'autoplay', 'muted', 'loop'],
+          this.video_);
+
+      if (this.element.hasAttribute('preload')) {
+        this.video_.setAttribute(
+            'preload', this.element.getAttribute('preload'));
+      } else {
+        this.video_.removeAttribute('preload');
+      }
+
       this.getRealChildNodes().forEach(child => {
+        // Skip the video we already added to the element.
+        if (this.video_ === child) {
+          return;
+        }
         if (child.getAttribute && child.getAttribute('src')) {
           assertHttpsUrl(child.getAttribute('src'), child);
         }
-        video.appendChild(child);
+        this.video_.appendChild(child);
       });
-      this.element.appendChild(video);
 
-      /** @private {?HTMLVideoElement} */
-      this.video_ = video;
-      setStyles(video, {visibility: 'hidden'});
-      return loadPromise(video).then(() => {
-        setStyles(video, {visibility: ''});
-      });
+      return loadPromise(this.video_);
     }
 
     /** @override */
-    documentInactiveCallback() {
+    pauseCallback() {
       if (this.video_) {
         this.video_.pause();
       }
-      // No need to do layout later - user action will be expect to resume
-      // the playback.
-      return false;
+    }
+
+    /** @private */
+    isVideoSupported_() {
+      return !!this.video_.play;
     }
   }
 

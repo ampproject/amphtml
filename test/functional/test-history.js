@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {History, HistoryBindingNatural_, HistoryBindingVirtual_} from
-    '../../src/service/history-impl';
+import {
+  History,
+  HistoryBindingNatural_,
+  HistoryBindingVirtual_,
+} from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
@@ -38,7 +41,7 @@ describe('History', () => {
         onStackIndexUpdated = callback;
       },
       push: () => {},
-      pop(unusedStackIndex) {}
+      pop(unusedStackIndex) {},
     };
     bindingMock = sandbox.mock(binding);
 
@@ -47,12 +50,8 @@ describe('History', () => {
 
   afterEach(() => {
     bindingMock.verify();
-    bindingMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -62,7 +61,7 @@ describe('History', () => {
   });
 
   it('should push new state', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     return history.push(onPop).then(unusedHistoryId => {
@@ -74,7 +73,7 @@ describe('History', () => {
   });
 
   it('should pop previously pushed state', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     bindingMock.expects('pop').withExactArgs(11)
@@ -94,7 +93,7 @@ describe('History', () => {
   });
 
   it('should return and call callback when history popped', () => {
-    const onPop = sinon.spy();
+    const onPop = sandbox.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
     return history.push(onPop).then(unusedHistoryId => {
@@ -120,17 +119,14 @@ describe('HistoryBindingNatural', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    onStackIndexUpdated = sinon.spy();
+    onStackIndexUpdated = sandbox.spy();
     history = new HistoryBindingNatural_(window);
     history.setOnStackIndexUpdated(onStackIndexUpdated);
   });
 
   afterEach(() => {
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -177,7 +173,7 @@ describe('HistoryBindingNatural', () => {
   // This prevents IE11/Edge from coercing undefined to become the new url
   it('should not pass in `url` argument to original replace state if ' +
     'parameter is undefined', () => {
-    const replaceStateSpy = sinon.spy();
+    const replaceStateSpy = sandbox.spy();
     const windowStub = {
       history: {
         replaceState: replaceStateSpy,
@@ -262,7 +258,7 @@ describe('HistoryBindingVirtual', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    onStackIndexUpdated = sinon.spy();
+    onStackIndexUpdated = sandbox.spy();
     viewerHistoryPoppedHandler = undefined;
     const viewer = {
       onHistoryPoppedEvent: handler => {
@@ -270,7 +266,7 @@ describe('HistoryBindingVirtual', () => {
         return () => {};
       },
       postPushHistory: unusedStackIndex => {},
-      postPopHistory: unusedStackIndex => {}
+      postPopHistory: unusedStackIndex => {},
     };
     viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(viewer);
@@ -279,12 +275,8 @@ describe('HistoryBindingVirtual', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    viewerMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {

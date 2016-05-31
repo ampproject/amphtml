@@ -1,6 +1,7 @@
 .DS_Store
 .g4ignore
 build
+.amp-build
 c
 dist
 dist.3p
@@ -10,3 +11,6 @@ examples.min
 node_modules
 npm-debug.log
 .idea
+.tm_properties
+.settings
+build-system/runner/TESTS-TestSuites.xml

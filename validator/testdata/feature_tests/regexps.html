@@ -24,8 +24,8 @@
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html" />
   <meta name="viewport" content="width=device-width,minimum-scale=1">
-  <style>invalid body {opacity: 0}</style>
-  <noscript><style>body {opacity: 1}</style></noscript>
+  <style>invalid body</style>
+  <noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 
   <!--
@@ -52,9 +52,9 @@
   <link rel="accessibility">
   <link rel="accessibility alternate">
   <link rel="accessibility alternate archives">
-  <link rel="foo">
-  <link rel="accessibility foo">
-  <link rel="foo accessibility">
+  <link rel="import">
+  <link rel="accessibility subresource">
+  <link rel="manifest accessibility">
 
   <!--
   name blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)($|\\s)"
@@ -72,18 +72,11 @@
   autoplay value_regex: "^$|desktop|tablet|mobile"
   The first two examples are valid, the latter three examples are invalid.
   -->
-  <amp-audio src="" layout="fixed" autoplay="">
-  <amp-audio src="" layout="fixed" autoplay="desktop">
-  <amp-audio src="" layout="fixed" autoplay="invalid">
-  <amp-audio src="" layout="fixed" autoplay="desktopfoo">
-  <amp-audio src="" layout="fixed" autoplay="foodesktop">
+  <amp-audio src="https://exmaple.com/audio" layout="fixed" autoplay="">
+  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktop">
+  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="invalid">
+  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktopfoo">
+  <amp-audio src="https://example.com/audio" layout="fixed" autoplay="foodesktop">
 
-  <!--
-  href blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
-  The first example is valid, the latter two examples are invalid.
-  -->
-  <a href="https://example.com/article/about/javascript:alert.html">
-  <a href="javascript:alert">
-  <a href=" javascript:alert">
 </body>
 </html>

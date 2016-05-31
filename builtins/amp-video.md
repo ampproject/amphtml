@@ -14,13 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-video"></a> `amp-video`
+# <a name="amp-video"></a> `amp-video`
 
-A replacement for the HTML5 `video` tag. Like all embedded external resources in a AMP file, the video is lazily loaded only when the `amp-video` element is in or near the viewport.
+<table>
+   <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-video">amp-video.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+</table>
 
-The `amp-video` component is only to be used for direct HTML5 video file embeds.
-
-#### Behavior
+## Behavior
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. It can be controlled much the same way as a standard HTML5 `video` tag.
 
@@ -44,7 +59,7 @@ For example:
 </amp-video>
 ```
 
-#### Attributes
+## Attributes
 
 **src**
 
@@ -72,3 +87,7 @@ If present, will automatically loop the video back to the start upon reaching th
 **muted**
 
 If present, will mute the audio by default.
+
+## Validation
+
+See [amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.

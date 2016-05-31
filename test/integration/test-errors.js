@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, poll, expectBodyToBecomeVisible} from
-    '../../testing/iframe.js';
+import {
+  createFixtureIframe,
+  poll,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe.js';
 
 describe('error page', () => {
   let fixture;

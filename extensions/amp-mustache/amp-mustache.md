@@ -14,21 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-mustache"></a> `amp-mustache`
+# <a name="amp-mustache"></a> `amp-mustache`
 
-The `amp-mustache` allows rendering of [Mustache.js](https://github.com/janl/mustache.js/) templates.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
 
-#### Syntax
+## Syntax
 
 Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/)
 for more details. Some of the core Mustache tags are:
 
-- `{{variable}}` - variable tag. It outputs the the HTML-escaped value of a variable;
-- `{{#section}}{{/section}}` - section tag. It can test existance of a variable and iterate over it if
+- \{\{variable\}\} - variable tag. It outputs the the HTML-escaped value of a variable;
+- \{\{#section\}\}\{\{/section\}\} - section tag. It can test existance of a variable and iterate over it if
 it's an array;
-- `{{^section}}{{/section}}` - inverted tag. It can test non-existance of a variable.
+- \{\{^section\}\}\{\{/section\}\} - inverted tag. It can test non-existance of a variable.
 
-#### Usage
+## Usage
 
 The `amp-mustache` template has to be defined and used according to the
 [AMP Template Spec](../../spec/amp-html-templates.md).
@@ -50,7 +63,7 @@ Then, the Mustache templates can be defined in the `template` tags like this:
 How templates are discovered, when they are rendered, how data is provided - all decided by the
 target AMP element that uses this template to render its content.
 
-#### Restrictions
+## Restrictions
 
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
@@ -63,3 +76,7 @@ formatting tags such as `<b>`, `<i>`, and so on.
 Notice also that because the body of the template has to be specified within the `template` element, it is
 impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache
 `{{{var}}}` has to be used for these cases.
+
+## Validation
+
+See [amp-mustache rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/0.1/validator-amp-mustache.protoascii) in the AMP validator specification.

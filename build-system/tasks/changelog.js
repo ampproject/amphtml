@@ -36,10 +36,51 @@ var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
-var isCanary = argv.type == 'canary';
-var branch = isCanary ? 'canary' : 'release';
+var branch = argv.branch || 'canary';
 var isDryrun = argv.dryrun;
 
+const pullOptions = {
+  url: 'https://api.github.com/repos/ampproject/amphtml/pulls',
+  headers: {
+    'User-Agent': 'amp-changelog-gulp-task',
+  },
+};
+
+if (GITHUB_ACCESS_TOKEN) {
+  pullOptions.qs = {
+    access_token: GITHUB_ACCESS_TOKEN
+  }
+}
+
+/**
+ * @typedef {{
+ *  logs: !Array<!LogMetadataDef>,
+ *  tag: (string|undefined),
+ *  changelog: (string|undefined)
+ * }}
+ */
+var GitMetadataDef;
+
+/**
+ * @typedef {{
+ *   title: string,
+ *   sha: string,
+ *   pr: (PrMetadata|undefined)
+ * }}
+ */
+var LogMetadataDef;
+
+/**
+ * @typedef {{
+ *   id: number,
+ *   title: string,
+ *   body: string,
+ *   merge_commit_sha: string,
+ *   url: string,
+ *   filenames: !Array<string>
+ * }}
+ */
+var PrMetadataDef;
 
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
@@ -55,18 +96,20 @@ function changelog() {
   return getGitMetadata();
 }
 
+/**
+ * @return {!Promise}
+ */
 function getGitMetadata() {
   if (!argv.version) {
     throw new Error('no version value passed in. See --version flag option.');
   }
 
-  var gitMetadata = {};
-  return getLastGitTag()
-      .then(onGitTagSuccess.bind(null, gitMetadata))
+  var gitMetadata = { logs: [], tag: undefined };
+  return getLastGitTag(gitMetadata)
       .then(getGitLog)
-      .then(onGitLogSuccess.bind(null, gitMetadata))
-      .then(fetchGithubMetadata)
-      .then(buildChangelog.bind(null, gitMetadata))
+      .then(getGithubPullRequestsMetadata)
+      .then(getGithubFilesMetadata)
+      .then(buildChangelog)
       .then(function(gitMetadata) {
         util.log(util.colors.blue('\n' + gitMetadata.changelog));
         if (isDryrun) {
@@ -79,6 +122,12 @@ function getGitMetadata() {
       .catch(errHandler);
 }
 
+/**
+ * @param {string} version
+ * @param {string} changelog
+ * @param {string} sha
+ * @return {!Promise}
+ */
 function submitReleaseNotes(version, changelog, sha) {
   var name = String(version);
   var options = {
@@ -95,7 +144,7 @@ function submitReleaseNotes(version, changelog, sha) {
       'name': name,
       'body': changelog,
       'draft': true,
-      'prerelease': isCanary
+      'prerelease': true
     }
   };
 
@@ -110,101 +159,259 @@ function submitReleaseNotes(version, changelog, sha) {
   });
 }
 
+/**
+ * @return {!Promise<string>}
+ */
 function getCurrentSha() {
   return gitExec({ args: 'rev-parse HEAD' }).then(function(sha) {
     return sha.trim();
   });
 }
 
-function buildChangelog(gitMetadata, githubMetadata) {
-  var titles = githubMetadata
-      .filter(function(data) {
-        return !data.filenames.every(function(filename) {
+/**
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!GitMetadataDef}
+ */
+function buildChangelog(gitMetadata) {
+  var changelog = `## Version: ${argv.version}\n\n`;
+  // Append all titles
+  changelog += gitMetadata.logs.filter(function(log) {
+        var pr = log.pr;
+        if (!pr) {
+          return true;
+        }
+        return !pr.filenames.every(function(filename) {
           return config.changelogIgnoreFileTypes.test(filename);
         });
       })
-      .map(function(data) {
-        return '  - ' + data.title.trim();
+      .map(function(log) {
+        var pr = log.pr;
+        if (!pr) {
+          return '  - ' + log.title;
+        }
+        return `  - ${pr.title.trim()} (#${pr.id})`;
       }).join('\n');
-  gitMetadata.changelog = titles;
+  changelog += '\n\n## Breakdown by component\n\n';
+  var sections = buildSections(gitMetadata);
+
+  Object.keys(sections).sort().forEach(function(section) {
+    changelog += `### ${section}\n\n`;
+    var uniqueItems = sections[section].filter(function(title, idx) {
+      return sections[section].indexOf(title) == idx;
+    });
+    changelog += uniqueItems.join('');
+    changelog += '\n';
+  });
+
+  gitMetadata.changelog = changelog;
   return gitMetadata;
 }
 
 /**
- * Get the latest git tag from either a normal release or from a canary release.
- * @return {!Promise<string>}
+ * @param {!GitMetadata} gitMetadata
+ * @return {!Object<string, string>}
  */
-function getLastGitTag() {
-  var options = {
-    args: 'describe --abbrev=0 --tags'
-  };
-  var canaryGrep = isCanary ? 'grep canary$' : 'grep -v canary$';
-  return exec(`git describe --abbrev=0 --tags ${branch}`)
-      .then(function(tag) {
-        return tag.replace('\n', '');
-      });
+function buildSections(gitMetadata) {
+  var sections = {};
+  gitMetadata.logs.forEach(function(log) {
+    var pr = log.pr;
+    if (!pr) {
+      return;
+    }
+    var hasNonDocChange = !pr.filenames.every(function(filename) {
+      return config.changelogIgnoreFileTypes.test(filename);
+    });
+    var listItem = `  - ${pr.title.trim()}\n`;
+
+    if (hasNonDocChange) {
+      changelog += listItem;
+    }
+
+    pr.filenames.forEach(function(filename) {
+      var section;
+      var body = '';
+      var path = filename.split('/');
+      var isExtensionChange = path[0] == 'extensions';
+      var isBuiltinChange = path[0] == 'builtins';
+      var isAdsChange = path[0] == 'ads';
+      // TODO: figure out how to break down validator changes since
+      // it is usually a big PR with a number of commits, and the commit
+      // message is what is useful for a changelog.
+      var isValidatorChange = path[0] == 'validator';
+
+      if (isExtensionChange) {
+        section = path[1];
+      } else if (isBuiltinChange && isJs(path[1])) {
+        // builtins files dont have a nested per component folder.
+        section = path[1].replace(/\.js$/, '');
+      } else if (isAdsChange && isJs(path[1])) {
+        section = 'ads';
+      } else if (isValidatorChange) {
+        section = 'validator';
+      }
+
+      if (section) {
+        if (!sections[section]) {
+          sections[section] = [];
+        }
+        // if its the validator section, read the body of the PR
+        // and format it correctly under the bullet list.
+        if (section == 'validator') {
+          body = `\n    ${pr.body.split('\n').join('\n    ')}`;
+        }
+        sections[section].push(listItem + body);
+      }
+    });
+  });
+  return sections;
 }
 
 /**
- * @param {string} tag
- * @return {!Promise<string>}
+ * Get the latest git tag from either a normal release or from a canary release.
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!Promise<GitMetadataDef>}
  */
-function getGitLog(tag) {
+function getLastGitTag(gitMetadata) {
   var options = {
-    args: 'log ' + branch + '...' + tag + ' --pretty=format:%s --merges'
+    args: `describe --abbrev=0 --first-parent --tags ${branch}`
   };
-  return gitExec(options).then(function(log) {
-    if (!log) {
-      throw new Error('No log found "git log ' + branch +
+  return gitExec(options).then(function(tag) {
+    if (!tag) {
+      throw new Error('Could not find latest ' + branch + ' tag.');
+    }
+    gitMetadata.tag = tag.trim();
+    util.log(util.colors.green('Current latest tag: ' + gitMetadata.tag));
+    return gitMetadata;
+  });
+}
+
+/**
+ * Runs `git log ${branch}...{tag} --pretty=oneline --first-parent`
+ * @param {string} tag
+ * @return {!Promise<GitMetadataDef>}
+ */
+function getGitLog(gitMetadata) {
+  var options = {
+    args: `log ${branch}...${gitMetadata.tag} --pretty=oneline --first-parent`
+  };
+  return gitExec(options).then(function(logs) {
+    if (!logs) {
+      throw new Error('No logs found "git log ' + branch +
           '...' + tag + '".\nIs it possible that there is no delta?\n' +
           'Make sure to fetch and rebase (or reset --hard) the latest ' +
           'from remote upstream.');
     }
-    return log;
+    const commits = logs.split('\n').filter(log => !!log.length);
+    gitMetadata.logs = commits.map(log => {
+      const words = log.split(' ');
+      return { sha: words.shift(), title: words.join(' ') };
+    });
+    return gitMetadata;
   });
 }
 
-function fetchGithubMetadata(ids) {
-  var options = {
-    url: 'https://api.github.com/repos/ampproject/amphtml/pulls/',
-    headers: {
-      'User-Agent': 'amp-changelog-gulp-task'
-    }
-  };
-
-  if (GITHUB_ACCESS_TOKEN) {
-    options.qs = {
-      access_token: GITHUB_ACCESS_TOKEN
-    }
-  }
-
-  // NOTE: (erwinm) not sure if theres a better way to do this, we're
-  // doing n + 1 fetches here since we can't batch things up.
-  var requests = ids.map(function(id) {
-    var prOption = extend({}, options);
-    prOption.url += id;
-
-    return getPullRequestTitle(prOption).then(function(title) {
-      var filesOption = extend({}, prOption);
-      filesOption.url += '/files';
-      return getPullRequestFiles(title, filesOption);
+/**
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!Promise<!GitMetadataDef>}
+ */
+function getGithubPullRequestsMetadata(gitMetadata) {
+  // (erwinm): Github seems to only return data for the first 3 pages
+  // from my manual testing.
+  return BBPromise.all([
+      getClosedPullRequests(1),
+      getClosedPullRequests(2),
+      getClosedPullRequests(3),
+  ])
+  .then(requests => [].concat.apply([], requests))
+  .then(prs => {
+    gitMetadata.prs = prs;
+    const githubPrRequest = gitMetadata.logs.map(log => {
+      const pr = prs.filter(pr => pr.merge_commit_sha == log.sha)[0];
+      if (pr) {
+        log.pr = buildPrMetadata(pr);
+      } else if (isPrIdInTitle(log.title)) {
+        const id = getPrIdFromCommit(log.title);
+        const prOptions = extend({}, pullOptions);
+        prOptions.url += `/${id}`;
+        const fileOptions = extend({}, prOptions);
+        fileOptions.url += '/files';
+        // If we couldn't find the matching pull request from 3 pages
+        // of closed pull request try and fetch it through the id
+        // if we can retrieve it from the commit message (only available
+        // through github merge).
+        return getPullRequest(prOptions, log);
+      }
+      return BBPromise.resolve();
+    });
+    return BBPromise.all(githubPrRequest).then(() => {
+      return gitMetadata;
     });
   });
-
-  return BBPromise/*OK*/.all(requests);
 }
 
-function getPullRequestTitle(prOption) {
-  return request(prOption).then(function(res) {
-    var body = JSON.parse(res.body);
-    assert(typeof body.url == 'string', 'should have url string. ' + res.body);
-    var url = body.url.split('/');
-    var pr = url[url.length - 1];
-    return body.title + ' (#' + pr + ')';
+/**
+ * We either fetch the pulls/${id}/files but if we have no PrMetadata yet,
+ * we will try and also fetch pulls/${id} first before fetching
+ * pulls/${id}/files.
+ *
+ * @param {!GitMetadataDef}
+ * @return {!Promise<!GitMetadataDef>}
+ */
+function getGithubFilesMetadata(gitMetadata) {
+  const githubFileRequests = gitMetadata.logs.map(log => {
+    if (log.pr) {
+      const fileOptions = extend({}, pullOptions);
+      fileOptions.url = `${log.pr.url}/files`;
+      return getPullRequestFiles(fileOptions, log.pr);
+    }
+    return BBPromise.resolve();
+  });
+  return BBPromise.all(githubFileRequests).then(() => {
+    return gitMetadata;
   });
 }
 
-function getPullRequestFiles(title, filesOption) {
+/**
+ * Fetches pulls?page=${opt_page}
+ *
+ * @param {number=} opt_page
+ * @return {!Promise<!Array<!PrMetadataDef>}
+ */
+function getClosedPullRequests(opt_page) {
+  opt_page = opt_page || 1;
+  var options = extend({}, pullOptions);
+  options.qs = {
+    state: 'closed',
+    page: opt_page,
+    access_token: GITHUB_ACCESS_TOKEN,
+  };
+  return request(options).then(res => {
+    const prs = JSON.parse(res.body);
+    assert(Array.isArray(prs), `prs must be an array.`);
+    return prs;
+  });
+}
+
+/**
+ * @param {Object<string, string>} prOption
+ * @param {!LogMetadataDef} log
+ * @return {!Promise<PrMetadataDef>}
+ */
+function getPullRequest(prOption, log) {
+  return request(prOption).then(function(res) {
+    var pr = JSON.parse(res.body);
+    assert(typeof pr == 'object', 'Pull Requests Metadata must be an object');
+    log.pr = buildPrMetadata(pr);
+    return log.pr;
+  });
+}
+
+/**
+ * @param {!Object<string, string>} filesOption
+ * @param {!PrMetadataDef} pr
+ * @return {!Promise<PrMetadataDef>}
+ */
+function getPullRequestFiles(filesOption, pr) {
   return request(filesOption).then(function(res) {
     var body = JSON.parse(res.body);
 
@@ -214,38 +421,9 @@ function getPullRequestFiles(title, filesOption) {
       return file.filename;
     });
 
-    return {
-      title: title,
-      filenames: filenames
-    };
+    pr.filenames = filenames;
+    return pr;
   });
-}
-
-function onGitTagSuccess(gitMetadata, tag) {
-  if (!tag) {
-    throw new Error('Could not find latest ' + branch + ' tag.');
-  }
-
-  gitMetadata.tag = tag;
-  util.log(util.colors.green('Current latest tag: ' + tag));
-  return tag;
-}
-
-function onGitLogSuccess(gitMetadata, logs) {
-  var commits = logs.split('\n');
-  assert(typeof logs == 'string', 'git log should be a string.\n' + logs);
-  return commits
-    .filter(function(commit) {
-      // filter non Pull request merges
-      return commit.indexOf('Merge pull') == 0;
-    })
-    .map(function(commit) {
-      // We only need the PR id
-      var id = commit.split(' ')[3].slice(1);
-      var value = parseInt(id, 10);
-      assert(value > 0, 'Should be an integer greater than 0. ' + value);
-      return id;
-    });
 }
 
 function errHandler(err) {
@@ -254,7 +432,50 @@ function errHandler(err) {
     msg = err.message;
   }
   util.log(util.colors.red(msg));
-  return err;
+}
+
+/**
+ * Check if the string starts with "Merge pull request #"
+ * @param {string} str
+ * @return {boolean}
+ */
+function isPrIdInTitle(str) {
+  return str.indexOf('Merge pull request #') == 0;
+}
+
+/**
+ * @param {string} commit
+ * @return {number}
+ */
+function getPrIdFromCommit(commit) {
+  // We only need the PR id
+  var id = commit.split(' ')[3].slice(1);
+  var value = parseInt(id, 10);
+  assert(value > 0, 'Should be an integer greater than 0. ' + value);
+  return id;
+}
+
+/**
+ * Checks if string ends with ".js"
+ * @param {string} str
+ * @return {boolean}
+ */
+function isJs(str) {
+  return str./*OK*/endsWith('.js');
+}
+
+/**
+ * @param {!JSONValue} pr
+ * @return {!PrMetadata}
+ */
+function buildPrMetadata(pr) {
+  return {
+    id: pr.number,
+    title: pr.title,
+    body: pr.body,
+    merge_commit_sha: pr.merge_commit_sha,
+    url: pr._links.self.href,
+  };
 }
 
 gulp.task('changelog', 'Create github release draft', changelog, {

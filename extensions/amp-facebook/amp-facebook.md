@@ -14,11 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-facebook"></a> `amp-facebook`
+# <a name="amp-facebook"></a> `amp-facebook`
 
-**Status: Component landed, but does not validate.**
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a Facebook Post or Video. </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-facebook">amp-facebook.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/facebook.amp.html">facebook.amp.html</a></td>
+  </tr>
+</table>
 
-Displays a Facebook Post or Video. 
+## Examples
 
 Example - Embedding a post:
 ```html
@@ -37,8 +58,7 @@ Example - Embedding a video:
 </amp-facebook>
 ```
 
-
-#### Attributes
+## Attributes
 
 **data-href**
 
@@ -51,3 +71,7 @@ Either `post` or `video` (default: `post`).
 Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embed the player of the video ignoring the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
 
 Checkout the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+
+## Validation
+
+See [amp-facebook rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii) in the AMP validator specification.

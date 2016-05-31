@@ -16,9 +16,10 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../../../../build/all/v0/amp-image-lightbox-0.1.max');
-import {ImageViewer}
-    from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
+require('../amp-image-lightbox');
+import {
+  ImageViewer,
+} from '../amp-image-lightbox';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
 import * as sinon from 'sinon';
@@ -48,7 +49,6 @@ describe('amp-image-lightbox component', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should render correctly', () => {
@@ -77,22 +77,26 @@ describe('amp-image-lightbox component', () => {
   it('should activate all steps', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
-      const requestFullOverlay = sinon.spy();
+      const requestFullOverlay = sandbox.spy();
       impl.requestFullOverlay = requestFullOverlay;
-      const viewportOnChanged = sinon.spy();
-      const disableTouchZoom = sinon.spy();
+      const viewportOnChanged = sandbox.spy();
+      const disableTouchZoom = sandbox.spy();
+      const hideFixedLayer = sandbox.spy();
+      const showFixedLayer = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom
+        disableTouchZoom: disableTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
-      const historyPush = sinon.spy();
+      const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
         return {push: () => {
           historyPush();
           return Promise.resolve(11);
         }};
       };
-      const enter = sinon.spy();
+      const enter = sandbox.spy();
       impl.enter_ = enter;
 
       const ampImage = document.createElement('amp-img');
@@ -106,6 +110,8 @@ describe('amp-image-lightbox component', () => {
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
       expect(disableTouchZoom.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -114,19 +120,23 @@ describe('amp-image-lightbox component', () => {
       const impl = lightbox.implementation_;
       impl.active_ = true;
       impl.historyId_ = 11;
-      const cancelFullOverlay = sinon.spy();
+      const cancelFullOverlay = sandbox.spy();
       impl.cancelFullOverlay = cancelFullOverlay;
-      const viewportOnChangedUnsubscribed = sinon.spy();
+      const viewportOnChangedUnsubscribed = sandbox.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-      const restoreOriginalTouchZoom = sinon.spy();
+      const restoreOriginalTouchZoom = sandbox.spy();
+      const hideFixedLayer = sandbox.spy();
+      const showFixedLayer = sandbox.spy();
       impl.getViewport = () => {return {
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
-      const historyPop = sinon.spy();
+      const historyPop = sandbox.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
       };
-      const exit = sinon.spy();
+      const exit = sandbox.spy();
       impl.exit_ = exit;
 
       const ampImage = document.createElement('amp-img');
@@ -140,6 +150,8 @@ describe('amp-image-lightbox component', () => {
       expect(cancelFullOverlay.callCount).to.equal(1);
       expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -147,22 +159,24 @@ describe('amp-image-lightbox component', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
       const setupCloseSpy = sandbox.spy(impl, 'close');
-      const viewportOnChanged = sinon.spy();
-      const disableTouchZoom = sinon.spy();
-      const restoreOriginalTouchZoom = sinon.spy();
+      const viewportOnChanged = sandbox.spy();
+      const disableTouchZoom = sandbox.spy();
+      const restoreOriginalTouchZoom = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
         disableTouchZoom: disableTouchZoom,
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: () => {},
+        showFixedLayer: () => {},
       };};
-      const historyPush = sinon.spy();
+      const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
         return {push: () => {
           historyPush();
           return Promise.resolve(11);
         }};
       };
-      const enter = sinon.spy();
+      const enter = sandbox.spy();
       impl.enter_ = enter;
 
       const ampImage = document.createElement('amp-img');
@@ -190,7 +204,10 @@ describe('amp-image-lightbox image viewer', () => {
     clock = sandbox.useFakeTimers();
 
     lightbox = {
-      getDpr: () => 1
+      getDpr: () => 1,
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -201,10 +218,7 @@ describe('amp-image-lightbox image viewer', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -226,7 +240,7 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
 
     imageViewer.init(sourceElement, null);
@@ -246,11 +260,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: false,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -267,11 +281,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: true,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -367,7 +381,10 @@ describe('amp-image-lightbox image viewer gestures', () => {
     lightbox = {
       getDpr: () => 1,
       close: () => {},
-      toggleViewMode: () => {}
+      toggleViewMode: () => {},
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -385,9 +402,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should have initial bounds', () => {
@@ -457,7 +472,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   });
 
   it('should zoom release', () => {
-    const updateSrc = sinon.spy();
+    const updateSrc = sandbox.spy();
     imageViewer.updateSrc_ = updateSrc;
     imageViewer.onZoomInc_(10, 10, -10, -10);
     return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {

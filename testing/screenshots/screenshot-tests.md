@@ -52,7 +52,7 @@ you are installing on Mac OSX Yosemite and up, you may need to do
 
 This task creates "golden" screenshots. You decide which pages you want to be screenshotted.
 You can screenshot any URL, but it makes sense to only do screenshots of pages that are
-using local builds (not from CDN) because then you can actually troubleshoot and fix issues.
+using local builds (not from Google AMP Cache) because then you can actually troubleshoot and fix issues.
 
 Just as with any test, it's best to test against smaller and targeted things, not
 `everything.amp.html`.

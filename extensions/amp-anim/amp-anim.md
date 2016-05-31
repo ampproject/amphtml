@@ -14,11 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-anim"></a> `amp-anim`
+# <a name="amp-anim"></a> `amp-anim`
 
-A runtime-managed animated image - most typically a GIF.
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>A runtime-managed animated image, typically a GIF.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-anim">amp-anim.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-#### Behavior
+## Behavior
 
 The `amp-anim` component is very similar to the `amp-image` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
 
@@ -29,7 +50,7 @@ The `amp-anim` component can also have an optional placeholder child, to display
   </amp-img>
 </amp-anim>
 ```
-#### Attributes
+## Attributes
 
 **src**
 
@@ -50,7 +71,7 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
 
 
-#### Styling
+## Styling
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
@@ -59,3 +80,6 @@ amp-anim {
   background-color: grey;
 }
 ```
+## Validation
+
+See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii) in the AMP validator specification.

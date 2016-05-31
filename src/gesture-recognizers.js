@@ -361,7 +361,7 @@ class SwipeRecognizer extends GestureRecognizer {
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
       velocityX: this.horiz_ ? this.velocityX_ : 0,
-      velocityY: this.vert_ ? this.velocityY_ : 0
+      velocityY: this.vert_ ? this.velocityY_ : 0,
     }, event);
   }
 
@@ -592,7 +592,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
       deltaX: this.lastX_ - this.startX_,
       deltaY: this.lastY_ - this.startY_,
       velocityX: this.velocityX_,
-      velocityY: this.velocityY_
+      velocityY: this.velocityY_,
     }, event);
   }
 
@@ -791,7 +791,7 @@ export class PinchRecognizer extends GestureRecognizer {
       deltaX: deltaX * 0.5,
       deltaY: deltaY * 0.5,
       velocityX: this.velocityX_ * 0.5,
-      velocityY: this.velocityY_ * 0.5
+      velocityY: this.velocityY_ * 0.5,
     }, event);
   }
 

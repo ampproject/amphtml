@@ -30,6 +30,7 @@ describe('amp-pixel', () => {
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      expect(p.style.display).to.equal('');
       return iframe.addElement(p);
     });
   }
@@ -38,6 +39,7 @@ describe('amp-pixel', () => {
     return getPixel(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
         ).then(p => {
+          expect(p.style.display).to.equal('none');
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');

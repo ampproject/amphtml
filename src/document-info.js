@@ -15,8 +15,8 @@
  */
 
 import {getService} from './service';
-import {assert} from './asserts';
-import {parseUrl} from './url';
+import {parseUrl, getSourceUrl} from './url';
+import {user} from './log';
 
 /**
  * @param {!Window} win
@@ -24,15 +24,17 @@ import {parseUrl} from './url';
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
  *       for concurrent page views of a user.
+ *     -  sourceUrl: the source url of an amp document.
  */
 export function documentInfoFor(win) {
   return getService(win, 'documentInfo', () => {
     return {
-      canonicalUrl: parseUrl(assert(
+      canonicalUrl: parseUrl(user.assert(
           win.document.querySelector('link[rel=canonical]'),
               'AMP files are required to have a <link rel=canonical> tag.')
               .href).href,
       pageViewId: getPageViewId(win),
+      sourceUrl: getSourceUrl(win.location.href),
     };
   });
 }

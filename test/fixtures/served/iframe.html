@@ -11,7 +11,8 @@ window.addEventListener('message', function(event) {
       parent./*OK*/postMessage({
         sentinel: sentinel,
         type: 'embed-size',
-        height: event.data.height
+        height: event.data.height,
+        width: event.data.width,
       }, '*');
     }
   }

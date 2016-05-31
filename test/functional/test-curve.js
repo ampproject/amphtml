@@ -15,6 +15,7 @@
  */
 
 import {Curves, bezierCurve, getCurve} from '../../src/curve';
+import * as sinon from 'sinon';
 
 describe('Curve', () => {
 
@@ -26,7 +27,6 @@ describe('Curve', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('bezierCurve', () => {

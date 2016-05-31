@@ -18,6 +18,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
+import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
 
 
@@ -42,13 +43,13 @@ class AmpLightbox extends AMP.BaseElement {
       top: 0,
       left: 0,
       bottom: 0,
-      right: 0
+      right: 0,
     });
 
     const children = this.getRealChildren();
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
     children.forEach(child => {
@@ -79,17 +80,20 @@ class AmpLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
     this.requestFullOverlay();
     this.getViewport().resetTouchZoom();
-    this.element.style.display = '';
-    this.element.style.opacity = 0;
+    this.getViewport().hideFixedLayer();
 
-    // TODO(dvoytenko): use new animations support instead.
-    this.element.style.transition = 'opacity 0.1s ease-in';
-    requestAnimationFrame(() => {
-      this.element.style.opacity = '';
+    this.mutateElement(() => {
+      this.element.style.display = '';
+      this.element.style.opacity = 0;
+      // TODO(dvoytenko): use new animations support instead.
+      this.element.style.transition = 'opacity 0.1s ease-in';
+      vsyncFor(this.getWin()).mutate(() => {
+        this.element.style.opacity = '';
+      });
+    }).then(() => {
+      this.updateInViewport(this.container_, true);
+      this.scheduleLayout(this.container_);
     });
-
-    this.scheduleLayout(this.container_);
-    this.updateInViewport(this.container_, true);
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
@@ -109,6 +113,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   close() {
     this.cancelFullOverlay();
+    this.getViewport().showFixedLayer();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -116,6 +121,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.getWin().document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
+    this.schedulePause(this.container_);
   }
 
   getHistory_() {

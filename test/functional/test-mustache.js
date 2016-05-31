@@ -60,8 +60,8 @@ describe('Mustache', () => {
         '0': '0',
         '1': '1',
         'length': 2,
-        'x': []
-      }
+        'x': [],
+      },
     };
     expect(mustache.render(
         '{{#t}}{{x.pop}}X{{x.pop}}{{/t}}' +

@@ -140,8 +140,9 @@
 
     var allViewers = [];
 
-    function Viewer(containerId, id, visible) {
+    function Viewer(containerId, id, url, visible) {
       this.id = id;
+      this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
       this.viewportType_ = 'natural';  // "natural" or "virtual"
@@ -154,6 +155,7 @@
       this.header = document.querySelector('header');
       this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
+      this.iframe.setAttribute('id', 'AMP_DOC_' + this.id);
       // TODO(dvoytenko): Set to the final value when crbug/577330 is fixed:
       // this.iframe.setAttribute('sandbox',
       //     'allow-popups allow-scripts allow-forms allow-pointer-lock' +
@@ -194,11 +196,12 @@
         paddingTop: this.header./*OK*/offsetHeight,
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
-        viewerorigin: parseUrl(window.location.href).origin
+        viewerorigin: parseUrl(window.location.href).origin,
+        csi: 0
       };
       log('Params:' + JSON.stringify(params));
 
-      var inputUrl = './article-access.amp.max.html#' + paramsStr(params);
+      var inputUrl = this.url + '#' + paramsStr(params);
       if (window.location.hash && window.location.hash.length > 1) {
         inputUrl += '&' + window.location.hash.substring(1);
       }
@@ -227,6 +230,7 @@
 
 
     Viewer.prototype.awaitHandshake_ = function() {
+      var targetId = this.iframe.id;
       var target = this.iframe.contentWindow;
       var targetOrigin = this.frameOrigin_;
       var listener = function(event) {
@@ -240,7 +244,7 @@
           target./*OK*/postMessage('amp-handshake-response', targetOrigin);
 
           this.messaging_ = new ViewerMessaging(target, targetOrigin,
-              this.processRequest_.bind(this));
+              this.processRequest_.bind(this), targetId);
           this.sendRequest_('visibilitychange', {
             state: this.visibilityState_,
             prerenderSize: this.prerenderSize
@@ -278,6 +282,12 @@
 
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
+
+      this.iframe.contentWindow.onbeforeunload = (function() {
+        this.container.style.paddingTop = '120px';
+        this.container.textContent =
+            'Unload of the AMP iframe is not allowed!';
+      }).bind(this);
     };
 
 
@@ -341,6 +351,7 @@
       }
       this.stackIndex_ = stackIndex;
       window.history.pushState({}, '');
+      return Promise.resolve();
     };
 
 
@@ -352,6 +363,7 @@
       }
       this.stackIndex_ = stackIndex;
       window.history.go(-1);
+      return Promise.resolve();
     };
 
 
@@ -403,6 +415,9 @@
       }
       if (type == 'broadcast') {
         return this.broadcast_(data);
+      }
+      if (type == 'setFlushParams') {
+        return;
       }
       return Promise.reject('request not supported: ' + type);
     };
@@ -457,13 +472,25 @@
 
 
     function loadAmpDoc() {
-      new Viewer('container1', '1', true).start();
+      new Viewer(
+          'container1',
+          '1',
+          './everything.amp.max.html',
+          true).start();
       addShowContainer('1');
 
-      new Viewer('container2', '2', false).start();
+      new Viewer(
+          'container2',
+          '2',
+          './article-access.amp.max.html',
+          false).start();
       addShowContainer('2');
 
-      new Viewer('container3', '3', false).start();
+      new Viewer(
+          'container3',
+          '3',
+          './article-access.amp.max.html',
+          false).start();
       addShowContainer('3');
 
       showContainer('1');

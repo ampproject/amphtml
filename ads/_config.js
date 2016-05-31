@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,44 @@
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPrefetch = {
-  doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
+  doubleclick: [
+    'https://www.googletagservices.com/tag/js/gpt.js',
+    'https://securepubads.g.doubleclick.net/static/glade.js',
+  ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  aduptech: 'https://s.d.adup-tech.com/jsapi',
+  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
+  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
+  'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
+  sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
+  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+  imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
+  sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
+  gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  'weborama-display': [
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
+  ],
+  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  adstir: 'https://js.ad-stir.com/js/adstir_async.js',
+  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
+  eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
+  appnexus: 'https://acdn.adnxs.com/ast/ast.js',
+  microad: 'https://j.microad.net/js/camp.js',
+  yahoojp: [
+    'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
+    'https://yads.c.yimg.jp/js/yads.js',
+  ],
 };
 
 /**
@@ -37,17 +70,97 @@ export const adPrefetch = {
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPreconnect = {
+  adblade: [
+    'https://staticd.cdn.adblade.com',
+    'https://static.adblade.com',
+  ],
+  industrybrains: [
+    'https://staticd.cdn.industrybrains.com',
+    'https://static.industrybrains.com',
+  ],
+  adition: 'https://imagesrv.adition.com',
   adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
-  taboola: 'https://cdn.taboola.com',
+  aduptech: 'https://s.d.adup-tech.com',
+  taboola: [
+    'https://cdn.taboola.com',
+    'https://trc.taboola.com',
+    'https://images.taboola.com',
+  ],
+  teads: [
+    'https://cdn.teads.tv',
+    'https://cdn2.teads.tv',
+    'https://a.teads.tv',
+    'https://t.teads.tv',
+  ],
+  criteo: [
+    'https://cas.criteo.com',
+  ],
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
+  'mantis-display': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://res.cloudinary.com',
+    'https://resize.mantisadnetwork.com',
+  ],
+  'mantis-recommend': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://resize.mantisadnetwork.com',
+  ],
   dotandads: 'https://bal.ad.dotandad.com',
   widespace: 'https://engine.widespace.com',
+  improvedigital: 'https://ad.360yield.com/',
+  openx: [
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
+  ],
+  yieldmo: [
+    'https://static.yieldmo.com',
+    'https://s.yieldmo.com',
+    'https://ads.yieldmo.com',
+  ],
+  triplelift: [
+    'https://ib.3lift.com',
+    'https://dynamic.3lift.com',
+    'https://img.3lift.com',
+    'https://eb2.3lift.com',
+  ],
+  revcontent: [
+    'https://trends.revcontent.com',
+    'https://cdn.revcontent.com',
+    'https://img.revcontent.com',
+  ],
+  rubicon: [
+    'https://ads.rubiconproject.com',
+    'https://optimized-by.rubiconproject.com',
+  ],
+  sortable: [
+    'https://tags-cdn.deployads.com',
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
+  ],
+  imobile: 'https://spad.i-mobile.co.jp',
+  webediads: [
+    'https://eu1.wbdds.com',
+  ],
+  gmossp: 'https://cdn.gmossp-sp.jp',
+  yieldbot: 'https://i.yldbt.com',
+  adstir: 'https://ad.ad-stir.com',
+  appnexus: 'https://ib.adnxs.com',
+  microad: [
+    'https://s-rtb.send.microad.jp',
+    'https://cache.send.microad.jp',
+  ],
+  yahoojp: [
+    'https://s.yimg.jp',
+    'https://yads.yahoo.co.jp',
+  ],
 };
 
 /**

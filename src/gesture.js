@@ -15,8 +15,8 @@
  */
 
 import {Observable} from './observable';
-import {assert} from './asserts';
 import {Pass} from './pass';
+import {dev} from './log';
 import {timer} from './timer';
 
 const PROP_ = '__AMP_Gestures';
@@ -350,7 +350,7 @@ export class Gestures {
    * @private
    */
   signalEmit_(recognizer, data, event) {
-    assert(this.eventing_ == recognizer,
+    dev.assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {

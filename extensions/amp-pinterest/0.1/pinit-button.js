@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {openWindowDialog} from '../../../src/dom';
+import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
 import {Util} from './util';
@@ -39,11 +41,11 @@ export class PinItButton {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    AMP.assert(rootElement.getAttribute('data-url'),
+    user.assert(rootElement.getAttribute('data-url'),
       'The data-url attribute is required for Pin It buttons');
-    AMP.assert(rootElement.getAttribute('data-media'),
+    user.assert(rootElement.getAttribute('data-media'),
       'The data-media attribute is required for Pin It buttons');
-    AMP.assert(rootElement.getAttribute('data-description'),
+    user.assert(rootElement.getAttribute('data-description'),
       'The data-description attribute is required for Pin It buttons');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);
@@ -61,7 +63,7 @@ export class PinItButton {
    */
   handleClick(event) {
     event.preventDefault();
-    window.open(this.href, '_pinit', POP);
+    openWindowDialog(window, this.href, '_pinit', POP);
     Util.log('&type=button_pinit');
   }
 
@@ -103,9 +105,9 @@ export class PinItButton {
    */
   renderCount(count, heightClass) {
     Util.log('&type=pidget&button_count=1');
-    return Util.make({'span': {
+    return Util.make(this.element.ownerDocument, {'span': {
       class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
-      textContent: this.formatPinCount(count)
+      textContent: this.formatPinCount(count),
     }});
   }
 
@@ -119,12 +121,12 @@ export class PinItButton {
       shape: this.round ? '-round' : '-rect',
       height: this.tall ? '-tall' : '',
       lang: this.lang === 'ja' ? '-ja' : '-en',
-      color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray'
+      color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
     };
 
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
-      '-amp-fill-content'
+      '-amp-fill-content',
     ];
 
     let countBubble = '';
@@ -136,9 +138,9 @@ export class PinItButton {
       }
     }
 
-    const pinitButton = Util.make({'a': {
+    const pinitButton = Util.make(this.element.ownerDocument, {'a': {
       class: clazz.join(' '),
-      href: this.href
+      href: this.href,
     }});
 
     if (countBubble) {
@@ -162,7 +164,7 @@ export class PinItButton {
       `guid=${Util.guid}`,
       `url=${this.url}`,
       `media=${this.media}`,
-      `description=${this.description}`
+      `description=${this.description}`,
     ].join('&');
     this.href = `https://www.pinterest.com/pin/create/button/?${query}`;
 

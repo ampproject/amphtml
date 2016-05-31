@@ -1,5 +1,5 @@
 FAIL
-feature_tests/javascript_xss.html:27:0 The attribute 'href' in tag 'a' is set to the invalid value 'javascript:alert('boo')'.
-feature_tests/javascript_xss.html:28:0 The attribute 'href' in tag 'a' is set to the invalid value 'JavaScript:alert('boo')'.
-feature_tests/javascript_xss.html:29:0 The attribute 'href' in tag 'a' is set to the invalid value 'vbscript:bar'.
-feature_tests/javascript_xss.html:30:0 The attribute 'href' in tag 'a' is set to the invalid value 'data:baz'.
+feature_tests/javascript_xss.html:27:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:28:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:29:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/javascript_xss.html:30:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]

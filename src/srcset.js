@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 
 
 /**
@@ -30,23 +30,47 @@ let SrcsetSourceDef;
 
 
 /**
+ * Extracts `srcset` and fallbacks to `src` if not available.
+ * @param {!Element} element
+ * @return {!Srcset}
+ */
+export function srcsetFromElement(element) {
+  const srcsetAttr = element.getAttribute('srcset');
+  if (srcsetAttr) {
+    return parseSrcset(srcsetAttr);
+  }
+  // We can't push `src` via `parseSrcset` because URLs in `src` are not always
+  // RFC compliant and can't be easily parsed as an `srcset`. For instance,
+  // they sometimes contain space characters.
+  const srcAttr = user.assert(element.getAttribute('src'),
+      'Either non-empty "srcset" or "src" attribute must be specified: %s',
+      element);
+  return new Srcset([{url: srcAttr, width: undefined, dpr: 1}]);
+}
+
+
+/**
  * Parses the text representation of srcset into Srcset object.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
+ * @param {!Element=} opt_element
  * @return {!Srcset}
  */
-export function parseSrcset(s) {
+export function parseSrcset(s, opt_element) {
   // General grammar: (URL [NUM[w|x]],)*
   // Example 1: "image1.png 100w, image2.png 50w"
   // Example 2: "image1.png 2x, image2.png"
   // Example 3: "image1,100w.png 100w, image2.png 50w"
   const sSources = s.match(
-      /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
-  assert(sSources.length > 0, 'srcset has to have at least one source');
+      /\s*(?:[\S]*)(?:\s+(?:-?(?:\d+(?:\.(?:\d+)?)?|\.\d+)[a-zA-Z]))?(?:\s*,)?/g
+  );
+  user.assert(sSources.length > 0,
+      'srcset has to have at least one source: %s',
+      opt_element);
   const sources = [];
-  sSources.forEach(sSource => {
-    sSource = sSource.trim();
+  for (let i = 0; i < sSources.length; i++) {
+    let sSource = sSources[i].trim();
     if (sSource.substr(-1) == ',') {
       sSource = sSource.substr(0, sSource.length - 1).trim();
     }
@@ -54,24 +78,24 @@ export function parseSrcset(s) {
     if (parts.length == 0 ||
           parts.length == 1 && !parts[0] ||
           parts.length == 2 && !parts[0] && !parts[1]) {
-      return;
+      continue;
     }
-    const url = parts[0].trim();
+    const url = parts[0];
     if (parts.length == 1 || parts.length == 2 && !parts[1]) {
       // If no "w" or "x" specified, we assume it's "1x".
-      sources.push({url: url, dpr: 1});
+      sources.push({url: url, width: undefined, dpr: 1});
     } else {
-      const spec = parts[1].trim().toLowerCase();
+      const spec = parts[1].toLowerCase();
       const lastChar = spec.substring(spec.length - 1);
       if (lastChar == 'w') {
-        sources.push({url: url, width: parseFloat(spec)});
+        sources.push({url: url, width: parseFloat(spec), dpr: undefined});
       } else if (lastChar == 'x') {
-        sources.push({url: url, dpr: parseFloat(spec)});
+        sources.push({url: url, width: undefined, dpr: parseFloat(spec)});
       }
     }
-  });
+  }
   return new Srcset(sources);
-};
+}
 
 
 /**
@@ -91,33 +115,29 @@ export class Srcset {
    * @param {!Array<!SrcsetSourceDef>} sources
    */
   constructor(sources) {
-    assert(sources.length > 0, 'Srcset must have at least one source');
+    user.assert(sources.length > 0, 'Srcset must have at least one source');
     /** @private @const {!Array<!SrcsetSourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
     let hasWidth = false;
     let hasDpr = false;
-    this.sources_.forEach(source => {
-      assert((source.width || source.dpr) && (!source.width || !source.dpr),
+    for (let i = 0; i < this.sources_.length; i++) {
+      const source = this.sources_[i];
+      user.assert(
+          (source.width || source.dpr) && (!source.width || !source.dpr),
           'Either dpr or width must be specified');
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
-    });
-    assert(!hasWidth || !hasDpr,
+    }
+    user.assert(!hasWidth || !hasDpr,
         'Srcset cannot have both width and dpr sources');
 
     // Source and assert duplicates.
     if (hasWidth) {
-      this.sources_.sort((s1, s2) => {
-        assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
-        return s2.width - s1.width;
-      });
+      this.sources_.sort(sortByWidth);
     } else {
-      this.sources_.sort((s1, s2) => {
-        assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
-        return s2.dpr - s1.dpr;
-      });
+      this.sources_.sort(sortByDpr);
     }
 
     /** @private @const {boolean} */
@@ -156,8 +176,8 @@ export class Srcset {
    * @return {!SrcsetSourceDef}
    */
   select(width, dpr) {
-    assert(width, 'width=%s', width);
-    assert(dpr, 'dpr=%s', dpr);
+    dev.assert(width, 'width=%s', width);
+    dev.assert(dpr, 'dpr=%s', dpr);
     let index = -1;
     if (this.widthBased_) {
       index = this.selectByWidth_(width, dpr);
@@ -258,4 +278,14 @@ export class Srcset {
     }
     return res.join(', ');
   }
+}
+
+function sortByWidth(s1, s2) {
+  user.assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
+  return s2.width - s1.width;
+}
+
+function sortByDpr(s1, s2) {
+  user.assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
+  return s2.dpr - s1.dpr;
 }

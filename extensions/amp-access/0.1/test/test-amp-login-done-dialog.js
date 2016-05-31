@@ -38,12 +38,12 @@ describe('LoginDoneDialog', () => {
     windowApi = {
       close: () => {},
       navigator: {
-        language: 'fr-FR'
+        language: 'fr-FR',
       },
       location: {
         hash: '#result1',
         search: '',
-        replace: sandbox.spy()
+        replace: sandbox.spy(),
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -74,8 +74,8 @@ describe('LoginDoneDialog', () => {
             return null;
           }
           return {};
-        }
-      }
+        },
+      },
     };
     windowMock = sandbox.mock(windowApi);
     openerMock = sandbox.mock(windowApi.opener);
@@ -85,7 +85,6 @@ describe('LoginDoneDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {
@@ -93,8 +92,8 @@ describe('LoginDoneDialog', () => {
       origin: 'http://localhost:8000',
       data: {
         sentinel: 'amp',
-        type: 'result-ack'
-      }
+        type: 'result-ack',
+      },
     });
   }
 
@@ -268,15 +267,34 @@ describe('LoginDoneDialog', () => {
       expect(dialog.postbackError_.callCount).to.equal(1);
     });
 
-    it('should configure error mode', () => {
+    it('should configure error mode for "postback"', () => {
       dialog.postbackError_(new Error());
 
-      expect(windowApi.document.documentElement).to.have.class(
-          'amp-postback-error');
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('postback');
       expect(closeButton.onclick).to.exist;
 
       windowMock.expects('close').once();
       closeButton.onclick();
+    });
+
+    it('should configure error mode for "close"', () => {
+      dialog.postbackError_(new Error());
+
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('postback');
+      windowMock.expects('close').once();
+      closeButton.onclick();
+
+      clock.tick(3000);
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('close');
     });
   });
 });

@@ -14,18 +14,38 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout, poll} from
-    '../../testing/iframe';
-import {timer} from
-    '../../src/timer';
+import {
+  createFixtureIframe,
+  pollForLayout,
+  poll,
+} from '../../testing/iframe';
 
 describe('Rendering of one ad', () => {
   let fixture;
+  let beforeHref;
+
+  function replaceUrl(win) {
+    // TODO(#2402) Support glade as well.
+    const path = '/test/fixtures/doubleclick.html?google_glade=0';
+    // We pass down the parent URL. So we change that, which we
+    // can. We just need to change it back after the test.
+    beforeHref = win.parent.location.href;
+    win.parent.history.replaceState(null, null, path);
+  }
+
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/doubleclick.html', 3000)
-      .then(f => {
-        fixture = f;
-      });
+    replaceParentHref = false;
+    return createFixtureIframe('test/fixtures/doubleclick.html', 3000, win => {
+      replaceUrl(win);
+    }).then(f => {
+      fixture = f;
+    });
+  });
+
+  afterEach(() => {
+    if (beforeHref) {
+      fixture.win.parent.history.replaceState(null, null, beforeHref);
+    }
   });
 
   it('should create an iframe loaded', function() {
@@ -33,15 +53,18 @@ describe('Rendering of one ad', () => {
     let iframe;
     let ampAd;
     const isEdge = navigator.userAgent.match(/Edge/);
-    return pollForLayout(fixture.win, 1, 5500).then(function() {
+    return pollForLayout(fixture.win, 1, 5500).then(() => {
+      return poll('frame to be in DOM', () => {
+        return fixture.doc.querySelector('iframe');
+      });
+    }).then(iframeElement => {
+      iframe = iframeElement;
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-      iframe = fixture.doc.querySelector('iframe');
       ampAd = iframe.parentElement;
-      expect(iframe.src).to.contain('categoryExclusion');
+      expect(iframe.src).to.contain('categoryExclusions');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
       expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
-      return timer.promise(10);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
@@ -50,15 +73,32 @@ describe('Rendering of one ad', () => {
     }).then(unusedCanvas => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
     }).then(context => {
-      expect(context.data.tagForChildDirectedTreatment).to.be.false;
-      expect(context.data.categoryExclusion).to.be.equal('health');
+      expect(context.hidden).to.be.false;
+      // In some browsers the referrer is empty. But in Chrome it works, so
+      // we always check there.
+      if (context.referrer !== '' ||
+          (navigator.userAgent.match(/Chrome/) && !isEdge)) {
+        expect(context.referrer).to.contain('http://localhost:' + location.port);
+      }
+      expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.initialIntersection).to.be.defined;
+      expect(context.initialIntersection.rootBounds).to.be.defined;
+      expect(context.data.tagForChildDirectedTreatment).to.equal(0);
+      expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
           {sport: ['rugby', 'cricket']});
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
+      }, undefined,  /* timeout */ 5000);
+    }).then(() => {
+      return poll('render-start message received', () => {
+        return fixture.messages.filter(message => {
+          return message.type == 'render-start';
+        }).length;
       });
-    }).then(unusedCanvas => {
+    }).then(() => {
+      expect(iframe.style.visibility).to.equal('');
       const win = iframe.contentWindow;
       return poll('GPT loaded', () => {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();
@@ -66,7 +106,7 @@ describe('Rendering of one ad', () => {
     }).then(pubads => {
       const canvas = iframe.contentWindow.document.querySelector('#c');
       expect(pubads.get('page_url')).to.equal(
-          'http://localhost:9876/doubleclick.html');
+          'https://www.example.com/doubleclick.html');
       const slot = canvas.slot;
       expect(slot).to.not.be.null;
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
@@ -77,14 +117,21 @@ describe('Rendering of one ad', () => {
             return canvas.querySelector(
                 '[id="google_ads_iframe_/4119129/mobile_ad_banner_0"]');
           }, null, 5000);
-    }).then(unusedAdIframe => {
+    }).then(() => {
+      expect(iframe.contentWindow.context.hidden).to.be.false;
+      return new Promise(resolve => {
+        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
+        fixture.win.AMP.viewer.visibilityState_ = 'hidden';
+        fixture.win.AMP.viewer.onVisibilityChange_();
+      });
+    }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
       if (isEdge) { // TODO(cramforce): Get this to pass in Edge
         return;
       }
       return poll('Creative id transmitted. Ad fully rendered.', () => {
-        return ampAd.getAttribute('creative-id');
+        return ampAd.creativeId;
       }, null, 15000);
     }).then(creativeId => {
       if (isEdge) { // TODO(cramforce): Get this to pass in Edge

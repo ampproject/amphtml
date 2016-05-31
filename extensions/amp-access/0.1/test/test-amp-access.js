@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import {AccessService} from '../../../../build/all/v0/amp-access-0.1.max';
+import {AccessClientAdapter} from '../amp-access-client';
+import {AccessOtherAdapter} from '../amp-access-other';
+import {AccessServerAdapter} from '../amp-access-server';
+import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
-import {installCidService} from '../../../../src/service/cid-impl';
+import {installCidService,} from
+    '../../../../extensions/amp-analytics/0.1/cid-impl';
+import {installPerformanceService,} from
+    '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
-
 
 describe('AccessService', () => {
 
@@ -31,6 +37,7 @@ describe('AccessService', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     element = document.createElement('script');
     element.setAttribute('id', 'amp-access');
@@ -44,7 +51,7 @@ describe('AccessService', () => {
       document.body.removeChild(element);
     }
     sandbox.restore();
-    sandbox = null;
+    toggleExperiment(window, 'amp-access-server', false);
   });
 
   it('should disable service when no config', () => {
@@ -52,7 +59,6 @@ describe('AccessService', () => {
     const service = new AccessService(window);
     expect(service.isEnabled()).to.be.false;
     expect(service.accessElement_).to.be.undefined;
-    expect(service.config_).to.be.undefined;
   });
 
   it('should fail if config is malformed', () => {
@@ -61,47 +67,20 @@ describe('AccessService', () => {
     }).to.throw(Error);
   });
 
-  it('should fail if config authorization is missing or malformed', () => {
+  it('should default to "client" and fail if authorization is missing', () => {
     const config = {};
     element.textContent = JSON.stringify(config);
     expect(() => {
       new AccessService(window);
     }).to.throw(/"authorization" URL must be specified/);
-
-    config['authorization'] = 'http://acme.com/a';
-    element.textContent = JSON.stringify(config);
-    expect(() => {
-      new AccessService(window);
-    }).to.throw(/https\:/);
   });
 
-  it('should fail if config pingback is missing or malformed', () => {
-    const config = {
-      'authorization': 'https://acme.com/a'
-    };
-    element.textContent = JSON.stringify(config);
-    expect(() => {
-      new AccessService(window);
-    }).to.throw(/"pingback" URL must be specified/);
-
-    config['pingback'] = 'http://acme.com/p';
-    element.textContent = JSON.stringify(config);
-    expect(() => {
-      new AccessService(window);
-    }).to.throw(/https\:/);
-  });
-
-  it('should fail if config login is missing or malformed', () => {
+  it('should fail if config login is malformed', () => {
     const config = {
       'authorization': 'https://acme.com/a',
-      'pingback': 'https://acme.com/p'
+      'pingback': 'https://acme.com/p',
+      'login': 'http://acme.com/l',
     };
-    element.textContent = JSON.stringify(config);
-    expect(() => {
-      new AccessService(window);
-    }).to.throw(/"login" URL must be specified/);
-
-    config['login'] = 'http://acme.com/l';
     element.textContent = JSON.stringify(config);
     expect(() => {
       new AccessService(window);
@@ -112,45 +91,71 @@ describe('AccessService', () => {
     const config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     const service = new AccessService(window);
     expect(service.isEnabled()).to.be.true;
     expect(service.accessElement_).to.equal(element);
-    expect(service.config_.authorization).to.equal('https://acme.com/a');
-    expect(service.config_.pingback).to.equal('https://acme.com/p');
-    expect(service.config_.login).to.equal('https://acme.com/l');
+    expect(service.type_).to.equal('client');
+    expect(service.loginConfig_).to.deep.equal({'': 'https://acme.com/l'});
+    expect(service.adapter_).to.be.instanceOf(AccessClientAdapter);
+    expect(service.adapter_.authorizationUrl_).to.equal('https://acme.com/a');
   });
 
-  it('should default type to "client"', () => {
+  it('should parse multiple login URLs', () => {
     const config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': {
+        'login1': 'https://acme.com/l1',
+        'login2': 'https://acme.com/l2',
+      },
     };
     element.textContent = JSON.stringify(config);
     const service = new AccessService(window);
-    expect(service.config_.type).to.equal('client');
+    expect(service.isEnabled()).to.be.true;
+    expect(service.loginConfig_).to.deep.equal({
+      'login1': 'https://acme.com/l1',
+      'login2': 'https://acme.com/l2',
+    });
   });
 
   it('should parse type', () => {
     const config = {
-      'type': 'client',
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).config_.type).to.equal('client');
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'client';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessClientAdapter);
 
     config['type'] = 'server';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).config_.type).to.equal('server');
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'server';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerAdapter);
 
     config['type'] = 'other';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).config_.type).to.equal('other');
+    expect(new AccessService(window).type_).to.equal('other');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessOtherAdapter);
   });
 
   it('should fail if type is unknown', () => {
@@ -158,7 +163,7 @@ describe('AccessService', () => {
       'type': 'unknown',
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -166,29 +171,13 @@ describe('AccessService', () => {
     }).to.throw(/Unknown access type/);
   });
 
-  it('should NOT start when experiment is off or disabled', () => {
-    document.body.removeChild(element);
-    const service = new AccessService(window);
-    service.startInternal_ = sandbox.spy();
-    expect(service.isEnabled()).to.be.false;
-    expect(service.isExperimentOn_).to.be.false;
-
-    service.start_();
-    expect(service.startInternal_.callCount).to.equal(0);
-
-    service.isExperimentOn_ = true;
-    service.start_();
-    expect(service.startInternal_.callCount).to.equal(0);
-  });
-
-  it('should start when experiment is on and enabled', () => {
+  it('should start when enabled', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
     service.startInternal_ = sandbox.spy();
     service.start_();
     expect(service.startInternal_.callCount).to.equal(1);
@@ -198,19 +187,19 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
-    service.buildLoginUrl_ = sandbox.spy();
+    service.buildLoginUrls_ = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
 
     service.startInternal_();
-    expect(service.buildLoginUrl_.callCount).to.equal(1);
+    expect(service.buildLoginUrls_.callCount).to.equal(1);
     expect(service.runAuthorization_.callCount).to.equal(1);
     expect(service.scheduleView_.callCount).to.equal(1);
+    expect(service.scheduleView_.firstCall.args[0]).to.equal(2000);
     expect(service.listenToBroadcasts_.callCount).to.equal(1);
   });
 
@@ -218,28 +207,43 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
     expect(service.pubOrigin_).to.exist;
     expect(service.pubOrigin_).to.match(/^http.*/);
+  });
+
+  it('should initialize authorization fallback response', () => {
+    element.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+      'authorizationFallbackResponse': {'error': true},
+    });
+    const service = new AccessService(window);
+    expect(service.authorizationFallbackResponse_).to.deep.equal(
+        {'error': true});
   });
 });
 
 
-describe('AccessService authorization', () => {
+describe('AccessService adapter context', () => {
 
   let sandbox;
-  let configElement, elementOn, elementOff;
-  let xhrMock;
-  let cidMock;
+  let clock;
+  let configElement;
+  let service;
+  let context;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -247,7 +251,87 @@ describe('AccessService authorization', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+
+    service = new AccessService(window);
+    service.readerIdPromise_ = Promise.resolve('reader1');
+    context = service.adapter_.context_;
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    sandbox.restore();
+  });
+
+  it('should resolve URL without auth response and no authdata vars', () => {
+    return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ false).then(url => {
+          expect(url).to.equal('?rid=reader1&type=');
+        });
+  });
+
+  it('should resolve URL without auth response and with authdata vars', () => {
+    return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ true).then(url => {
+          expect(url).to.equal('?rid=reader1&type=');
+        });
+  });
+
+  it('should resolve URL with auth response and no authdata vars', () => {
+    service.setAuthResponse_({child: {type: 'premium'}});
+    return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ false).then(url => {
+          expect(url).to.equal('?rid=reader1&type=');
+        });
+  });
+
+  it('should resolve URL with auth response and with authdata vars', () => {
+    service.setAuthResponse_({child: {type: 'premium'}});
+    return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type)',
+        /* useAuthData */ true).then(url => {
+          expect(url).to.equal('?rid=reader1&type=premium');
+        });
+  });
+
+  it('should resolve URL with unknown authdata var', () => {
+    service.setAuthResponse_({child: {type: 'premium'}});
+    return context.buildUrl('?rid=READER_ID&type=AUTHDATA(child.type2)',
+        /* useAuthData */ true).then(url => {
+          expect(url).to.equal('?rid=reader1&type=');
+        });
+  });
+});
+
+
+describe('AccessService authorization', () => {
+
+  let sandbox;
+  let clock;
+  let configElement, elementOn, elementOff, elementError;
+  let cidMock;
+  let analyticsMock;
+  let adapterMock;
+  let performanceMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    clock.tick(0);
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+    installPerformanceService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -260,8 +344,20 @@ describe('AccessService authorization', () => {
     elementOff.setAttribute('amp-access', 'NOT access');
     document.body.appendChild(elementOff);
 
+    elementError = document.createElement('div');
+    elementError.setAttribute('amp-access', 'error');
+    elementError.setAttribute('amp-access-hide', '');
+    document.body.appendChild(elementError);
+
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
+
+    const adapter = {
+      getConfig: () => {},
+      isAuthorizationEnabled: () => true,
+      authorize: () => {},
+    };
+    service.adapter_ = adapter;
+    adapterMock = sandbox.mock(adapter);
 
     sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
@@ -275,14 +371,21 @@ describe('AccessService authorization', () => {
       mutatePromise: callback => {
         callback();
         return Promise.resolve();
-      }
+      },
     };
-    xhrMock = sandbox.mock(service.xhr_);
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
+
+    const analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
+    performanceMock = sandbox.mock(service.performance_);
   });
 
   afterEach(() => {
@@ -295,8 +398,13 @@ describe('AccessService authorization', () => {
     if (elementOff.parentElement) {
       elementOff.parentElement.removeChild(elementOff);
     }
+    if (elementError.parentElement) {
+      elementError.parentElement.removeChild(elementError);
+    }
+    adapterMock.verify();
+    analyticsMock.verify();
+    performanceMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectGetReaderId(result) {
@@ -308,20 +416,43 @@ describe('AccessService authorization', () => {
         .once();
   }
 
+  it('should short-circuit authorization flow when disabled', () => {
+    adapterMock.expects('isAuthorizationEnabled')
+        .withExactArgs()
+        .returns(false)
+        .once();
+    adapterMock.expects('authorize').never();
+    cidMock.expects('get').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).not.to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    }).then(() => {
+      expect(service.lastAuthorizationPromise_).to.equal(
+          service.firstAuthorizationPromise_);
+      expect(service.authResponse_).to.be.null;
+    });
+  });
+
   it('should run authorization flow', () => {
     expectGetReaderId('reader1');
-    xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true
-        })
+    adapterMock.expects('authorize')
+        .withExactArgs()
         .returns(Promise.resolve({access: true}))
         .once();
-    service.buildLoginUrl_ = sandbox.spy();
+    service.buildLoginUrls_ = sandbox.spy();
+    expect(service.lastAuthorizationPromise_).to.equal(
+        service.firstAuthorizationPromise_);
     const promise = service.runAuthorization_();
+    const lastPromise = service.lastAuthorizationPromise_;
+    expect(lastPromise).to.not.equal(service.firstAuthorizationPromise_);
     expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
-    expect(service.buildLoginUrl_.callCount).to.equal(0);
+    expect(service.buildLoginUrls_.callCount).to.equal(0);
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(document.documentElement).not.to.have.class('amp-access-error');
@@ -329,17 +460,16 @@ describe('AccessService authorization', () => {
       expect(elementOff).to.have.attribute('amp-access-hide');
       expect(service.authResponse_).to.exist;
       expect(service.authResponse_.access).to.be.true;
-      expect(service.buildLoginUrl_.callCount).to.equal(1);
+      expect(service.buildLoginUrls_.callCount).to.equal(1);
+      // Last authorization promise stays unchanged.
+      expect(service.lastAuthorizationPromise_).to.equal(lastPromise);
     });
   });
 
   it('should recover from authorization failure', () => {
     expectGetReaderId('reader1');
-    xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true
-        })
+    adapterMock.expects('authorize')
+        .withExactArgs()
         .returns(Promise.reject('intentional'))
         .once();
     const promise = service.runAuthorization_();
@@ -353,29 +483,101 @@ describe('AccessService authorization', () => {
     });
   });
 
+  it('should NOT resolve last promise until first success', () => {
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.reject('intentional'))
+        .once();
+    const promise = service.runAuthorization_();
+    let lastResolved = false;
+    service.lastAuthorizationPromise_.then(() => {
+      lastResolved = true;
+    });
+    expect(service.lastAuthorizationPromise_).to.not.equal(promise);
+    expect(service.lastAuthorizationPromise_).to.not.equal(
+        service.firstAuthorizationPromise_);
+    return promise.then(() => {
+      // Skip microtask.
+    }).then(() => {
+      // The authorization promise succeeded, but not the last promise.
+      expect(lastResolved).to.be.false;
+      // Resolve the first promise.
+      service.firstAuthorizationResolver_();
+      return service.lastAuthorizationPromise_;
+    }).then(() => {
+      // After first promise has been resolved, the last promised is resolved
+      // as well.
+      expect(lastResolved).to.be.true;
+    });
+  });
+
+  it('should use fallback on authorization failure when available', () => {
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.reject('intentional'))
+        .once();
+    service.authorizationFallbackResponse_ = {'error': true};
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(elementOn).to.have.attribute('amp-access-hide');
+      expect(elementOff).not.to.have.attribute('amp-access-hide');
+      expect(elementError).not.to.have.attribute('amp-access-hide');
+    });
+  });
+
+  it('should NOT fallback on authorization failure when disabled', () => {
+    expectGetReaderId('reader1');
+    adapterMock.expects('authorize')
+        .withExactArgs()
+        .returns(Promise.reject('intentional'))
+        .once();
+    service.authorizationFallbackResponse_ = {'error': true};
+    const promise = service.runAuthorization_(/* disableFallback */ true);
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).to.have.class('amp-access-error');
+    });
+  });
+
   it('should resolve first-authorization promise after success', () => {
     expectGetReaderId('reader1');
-    xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true
-        })
+    adapterMock.expects('authorize')
+        .withExactArgs()
         .returns(Promise.resolve({access: true}))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .once();
+    performanceMock.expects('tick')
+        .withExactArgs('aaa')
+        .once();
+    performanceMock.expects('tickSinceVisible')
+        .withExactArgs('aaav')
+        .once();
+    expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
-      expect(service.firstAuthorizationPromise_).to.exist;
-      return service.firstAuthorizationPromise_;
+      return service.whenFirstAuthorized();
     });
   });
 
   it('should NOT resolve first-authorization promise after failure', () => {
     expectGetReaderId('reader1');
-    xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1', {
-          credentials: 'include',
-          requireAmpResponseSourceOrigin: true
-        })
+    adapterMock.expects('authorize')
+        .withExactArgs()
         .returns(Promise.reject('intentional'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-failed')
         .once();
     return service.runAuthorization_().then(() => {
       expect(service.firstAuthorizationPromise_).to.exist;
@@ -426,6 +628,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -433,7 +636,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -447,7 +650,6 @@ describe('AccessService applyAuthorizationToElement_', () => {
     document.body.appendChild(elementOff);
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
@@ -458,7 +660,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
       mutatePromise: callback => {
         callback();
         return Promise.resolve();
-      }
+      },
     };
     templatesMock = sandbox.mock(service.templates_);
   });
@@ -474,7 +676,6 @@ describe('AccessService applyAuthorizationToElement_', () => {
       elementOff.parentElement.removeChild(elementOff);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   function createTemplate() {
@@ -561,8 +762,10 @@ describe('AccessService pingback', () => {
   let sandbox;
   let clock;
   let configElement;
-  let xhrMock;
+  let adapterMock;
   let cidMock;
+  let analytics;
+  let analyticsMock;
   let visibilityChanged;
   let scrolled;
 
@@ -572,31 +775,41 @@ describe('AccessService pingback', () => {
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
     configElement.setAttribute('type', 'application/json');
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
-      'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(type)',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(child.type)',
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
-    xhrMock = sandbox.mock(service.xhr_);
+    const adapter = {
+      pingback: () => {},
+    };
+    service.adapter_ = adapter;
+    adapterMock = sandbox.mock(adapter);
 
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
+    analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
     this.docState_ = {
-      onReady: callback => callback()
+      onReady: callback => callback(),
     };
 
     visibilityChanged = new Observable();
@@ -609,7 +822,7 @@ describe('AccessService pingback', () => {
 
     scrolled = new Observable();
     service.viewport_ = {
-      onScroll: callback => scrolled.add(callback)
+      onScroll: callback => scrolled.add(callback),
     };
 
     // Emulate first authorization complete.
@@ -620,8 +833,9 @@ describe('AccessService pingback', () => {
     if (configElement.parentElement) {
       configElement.parentElement.removeChild(configElement);
     }
+    adapterMock.verify();
+    analyticsMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectGetReaderId(result) {
@@ -635,7 +849,10 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after timeout', () => {
     service.reportViewToServer_ = sandbox.spy();
-    const p = service.reportWhenViewed_();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
+    const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       clock.tick(2001);
       return p;
@@ -648,7 +865,10 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after scroll', () => {
     service.reportViewToServer_ = sandbox.spy();
-    const p = service.reportWhenViewed_();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
+    const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       scrolled.fire();
       return p;
@@ -661,7 +881,10 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after click', () => {
     service.reportViewToServer_ = sandbox.spy();
-    const p = service.reportWhenViewed_();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
+    const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       let clickEvent;
       if (document.createEvent) {
@@ -680,29 +903,61 @@ describe('AccessService pingback', () => {
     });
   });
 
-  it('should wait for authorization completion', () => {
+  it('should wait for first authorization completion', () => {
     expect(service.firstAuthorizationPromise_).to.exist;
     let firstAuthorizationResolver;
     service.firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
+    const triggerEventStub = sandbox.stub(analytics, 'triggerEvent');
+    const triggerStart = 1;  // First event is "access-authorization-received".
     service.reportViewToServer_ = sandbox.spy();
-    service.reportWhenViewed_();
+    service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       clock.tick(2001);
       return Promise.resolve();
-    }).then(() => {}, () => {}).then(() => {
+    }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
+      expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
       return service.firstAuthorizationPromise_;
-    }).then(() => {}, () => {}).then(() => {
+    }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
+      expect(triggerEventStub.getCall(triggerStart).args[0])
+          .to.equal('access-viewed');
+    });
+  });
+
+  it('should wait for last authorization completion', () => {
+    expect(service.lastAuthorizationPromise_).to.exist;
+    let lastAuthorizationResolver;
+    service.lastAuthorizationPromise_ = new Promise(resolve => {
+      lastAuthorizationResolver = resolve;
+    });
+    const triggerEventStub = sandbox.stub(analytics, 'triggerEvent');
+    const triggerStart = 1;  // First event is "access-authorization-received".
+    service.reportViewToServer_ = sandbox.spy();
+    service.reportWhenViewed_(/* timeToView */ 2000);
+    return Promise.resolve().then(() => {
+      clock.tick(2001);
+      return Promise.resolve();
+    }).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(0);
+      expect(triggerEventStub.callCount).to.equal(triggerStart);
+      lastAuthorizationResolver();
+      return service.lastAuthorizationPromise_;
+    }).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
+      expect(triggerEventStub.getCall(triggerStart).args[0])
+          .to.equal('access-viewed');
     });
   });
 
   it('should cancel "viewed" signal after click', () => {
     service.reportViewToServer_ = sandbox.spy();
-    const p = service.reportWhenViewed_();
+    const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       service.viewer_.isVisible = () => false;
       visibilityChanged.fire();
@@ -715,13 +970,17 @@ describe('AccessService pingback', () => {
   });
 
   it('should schedule "viewed" monitoring only once', () => {
-    service.whenViewed_ = () => Promise.resolve();
+    const timeToView = 2000;
+    service.whenViewed_ = ttv => {
+      expect(ttv).to.equal(timeToView);
+      return Promise.resolve();
+    };
     service.reportViewToServer_ = sandbox.spy();
-    const p1 = service.reportWhenViewed_();
-    const p2 = service.reportWhenViewed_();
+    const p1 = service.reportWhenViewed_(timeToView);
+    const p2 = service.reportWhenViewed_(timeToView);
     expect(p2).to.equal(p1);
     return p1.then(() => {
-      const p3 = service.reportWhenViewed_();
+      const p3 = service.reportWhenViewed_(timeToView);
       expect(p3).to.equal(p1);
       return p3;
     }).then(() => {
@@ -732,7 +991,7 @@ describe('AccessService pingback', () => {
   it('should re-schedule "viewed" monitoring after visibility change', () => {
     service.reportViewToServer_ = sandbox.spy();
 
-    service.scheduleView_();
+    service.scheduleView_(/* timeToView */ 2000);
 
     // 1. First attempt fails due to document becoming invisible.
     const p1 = service.reportViewPromise_;
@@ -764,19 +1023,28 @@ describe('AccessService pingback', () => {
     });
   });
 
+  it('should re-start "viewed" monitoring when directly requested', () => {
+    service.lastAuthorizationPromise_ = Promise.resolve();
+    const whenViewedSpy = sandbox.stub(service, 'whenViewed_', () => {
+      return Promise.resolve();
+    });
+    service.scheduleView_(/* timeToView */ 0);
+    return Promise.resolve().then(() => {
+      expect(whenViewedSpy.callCount).to.equal(1);
+      service.scheduleView_(/* timeToView */ 0);
+    }).then(() => {
+      expect(whenViewedSpy.callCount).to.equal(2);
+    });
+  });
+
   it('should send POST pingback', () => {
     expectGetReaderId('reader1');
-    xhrMock.expects('sendSignal')
-        .withExactArgs('https://acme.com/p?rid=reader1&type=',
-            sinon.match(init => {
-              return (init.method == 'POST' &&
-                  init.credentials == 'include' &&
-                  init.requireAmpResponseSourceOrigin == true &&
-                  init.body == '' &&
-                  init.headers['Content-Type'] ==
-                      'application/x-www-form-urlencoded');
-            }))
+    adapterMock.expects('pingback')
+        .withExactArgs()
         .returns(Promise.resolve())
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
         .once();
     return service.reportViewToServer_().then(() => {
       return 'SUCCESS';
@@ -787,26 +1055,31 @@ describe('AccessService pingback', () => {
     });
   });
 
-  it('should resolve AUTH vars in POST pingback', () => {
+  it('should NOT send analytics event if postback failed', () => {
     expectGetReaderId('reader1');
-    service.setAuthResponse_({type: 'premium'});
-    xhrMock.expects('sendSignal')
-        .withArgs('https://acme.com/p?rid=reader1&type=premium')
-        .returns(Promise.resolve())
+    adapterMock.expects('pingback')
+        .withExactArgs()
+        .returns(Promise.reject('intentional'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-failed')
         .once();
     return service.reportViewToServer_().then(() => {
       return 'SUCCESS';
     }, error => {
       return 'ERROR ' + error;
     }).then(result => {
-      expect(result).to.equal('SUCCESS');
+      expect(result).to.match(/ERROR/);
     });
   });
 
   it('should broadcast "viewed" signal to other documents', () => {
     service.reportViewToServer_ = sandbox.stub().returns(Promise.resolve());
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
-    const p = service.reportWhenViewed_();
+    const p = service.reportWhenViewed_(/* timeToView */ 2000);
     return Promise.resolve().then(() => {
       clock.tick(2001);
       return p;
@@ -815,7 +1088,7 @@ describe('AccessService pingback', () => {
       expect(broadcastStub.callCount).to.equal(1);
       expect(broadcastStub.firstCall.args[0]).to.deep.equal({
         'type': 'amp-access-reauthorize',
-        'origin': service.pubOrigin_
+        'origin': service.pubOrigin_,
       });
     });
   });
@@ -825,15 +1098,19 @@ describe('AccessService pingback', () => {
 describe('AccessService login', () => {
 
   let sandbox;
+  let clock;
   let configElement;
   let cidMock;
+  let analyticsMock;
   let serviceMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -841,24 +1118,29 @@ describe('AccessService login', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
+    const analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
     service.openLoginDialog_ = () => {};
     serviceMock = sandbox.mock(service);
 
-    service.loginUrl_ = 'https://acme.com/l?rid=R';
+    service.loginUrlMap_[''] = 'https://acme.com/l?rid=R';
   });
 
   afterEach(() => {
@@ -866,7 +1148,24 @@ describe('AccessService login', () => {
       configElement.parentElement.removeChild(configElement);
     }
     sandbox.restore();
-    sandbox = null;
+  });
+
+  it('should intercept global action to login', () => {
+    serviceMock.expects('login')
+        .withExactArgs('')
+        .once();
+    const event = {preventDefault: sandbox.spy()};
+    service.handleAction_({method: 'login', event: event});
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
+  it('should intercept global action to login-other', () => {
+    serviceMock.expects('login')
+        .withExactArgs('other')
+        .once();
+    const event = {preventDefault: sandbox.spy()};
+    service.handleAction_({method: 'login-other', event: event});
+    expect(event.preventDefault.callCount).to.equal(1);
   });
 
   it('should build login url', () => {
@@ -876,54 +1175,108 @@ describe('AccessService login', () => {
             sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
-    return service.buildLoginUrl_().then(url => {
+    return service.buildLoginUrls_().then(urls => {
+      const url = urls[0].url;
       expect(url).to.equal('https://acme.com/l?rid=reader1');
-      expect(service.loginUrl_).to.equal(url);
+      expect(service.loginUrlMap_['']).to.equal(url);
+    });
+  });
+
+  it('should build multiple login url', () => {
+    service.loginConfig_ = {
+      'login1': 'https://acme.com/l1?rid=READER_ID',
+      'login2': 'https://acme.com/l2?rid=READER_ID',
+    };
+    cidMock.expects('get')
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .atLeast(1);
+    return service.buildLoginUrls_().then(urls => {
+      expect(urls).to.have.length(2);
+      let l1, l2;
+      if (urls[0].type == 'login1') {
+        l1 = 0;
+        l2 = 1;
+      } else {
+        l1 = 1;
+        l2 = 0;
+      }
+      expect(urls[l1]).to.deep.equal({
+        'type': 'login1',
+        'url': 'https://acme.com/l1?rid=reader1',
+      });
+      expect(urls[l2]).to.deep.equal({
+        'type': 'login2',
+        'url': 'https://acme.com/l2?rid=reader1',
+      });
+      expect(service.loginUrlMap_['login1']).to
+          .equal('https://acme.com/l1?rid=reader1');
+      expect(service.loginUrlMap_['login2']).to
+          .equal('https://acme.com/l2?rid=reader1');
     });
   });
 
   it('should build login url with RETURN_URL', () => {
-    service.config_.login = 'https://acme.com/l?rid=READER_ID&ret=RETURN_URL';
+    service.loginConfig_[''] =
+        'https://acme.com/l?rid=READER_ID&ret=RETURN_URL';
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
             sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
-    return service.buildLoginUrl_().then(url => {
+    return service.buildLoginUrls_().then(urls => {
+      const url = urls[0].url;
       expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
-      expect(service.loginUrl_).to.equal(url);
+      expect(service.loginUrlMap_['']).to.equal(url);
     });
   });
 
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
-    service.openLoginDialog_.returns(Promise.resolve());
-    service.login();
+    service.openLoginDialog_.returns(new Promise(() => {}));
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    service.login('');
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0])
         .to.equal('https://acme.com/l?rid=R');
   });
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
-    service.loginUrl_ = null;
-    expect(() => service.login()).to.throw(/Login URL is not ready/);
+    service.loginUrlMap_[''] = null;
+    expect(() => service.login('')).to.throw(/Login URL is not ready/);
   });
 
   it('should succeed login with success=true', () => {
-    service.runAuthorization_ = sandbox.spy();
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
     const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
-    return service.login().then(() => {
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_.callCount).to.equal(1);
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(authorizationStub.calledWithExactly(
+          /* disableFallback */ true)).to.be.true;
+      expect(viewStub.callCount).to.equal(1);
+      expect(viewStub.calledWithExactly(/* timeToView */ 0)).to.be.true;
       expect(broadcastStub.callCount).to.equal(1);
       expect(broadcastStub.firstCall.args[0]).to.deep.equal({
         'type': 'amp-access-reauthorize',
-        'origin': service.pubOrigin_
+        'origin': service.pubOrigin_,
       });
     });
   });
@@ -934,21 +1287,45 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=no'))
         .once();
-    return service.login().then(() => {
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
     });
   });
 
-  it('should fail login with empty response', () => {
-    service.runAuthorization_ = sandbox.spy();
+  it('should fail login with empty response, but re-authorize', () => {
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
-    return service.login().then(() => {
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_.callCount).to.equal(0);
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(authorizationStub.calledWithExactly(
+          /* disableFallback */ true)).to.be.true;
+      expect(viewStub.callCount).to.equal(1);
+      expect(viewStub.calledWithExactly(/* timeToView */ 0)).to.be.true;
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_,
+      });
     });
   });
 
@@ -958,65 +1335,120 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.reject('abort'))
         .once();
-    return service.login().then(() => 'SUCCESS', () => 'ERROR').then(result => {
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-failed')
+        .once();
+    return service.login('').then(() => 'S', () => 'ERROR').then(result => {
       expect(result).to.equal('ERROR');
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
     });
   });
 
-  it('should run login only once at a time', () => {
-    service.runAuthorization_ = sandbox.spy();
+  it('should succeed login with success=true with multiple logins', () => {
+    service.loginConfig_ = {
+      'login1': 'https://acme.com/l1?rid=READER_ID',
+      'login2': 'https://acme.com/l2?rid=READER_ID',
+    };
+    service.loginUrlMap_ = {
+      'login1': 'https://acme.com/l1?rid=R',
+      'login2': 'https://acme.com/l2?rid=R',
+    };
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
-        .withExactArgs('https://acme.com/l?rid=R')
-        .returns(new Promise(() => {}))
+        .withExactArgs('https://acme.com/l2?rid=R')
+        .returns(Promise.resolve('#success=true'))
         .once();
-    const p1 = service.login();
-    const p2 = service.login();
-    expect(p1).to.equal(service.loginPromise_);
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-success')
+        .once();
+    return service.login('login2').then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_,
+      });
+    });
+  });
+
+  it('should block login for 1 second', () => {
+    let p1Reject;
+    const p1Promise = new Promise((unusedResolve, reject) => {
+      p1Reject = reject;
+    });
+    service.runAuthorization_ = sandbox.spy();
+    const openLoginDialogStub = sandbox.stub(service, 'openLoginDialog_');
+    openLoginDialogStub.onCall(0).returns(p1Promise);
+    openLoginDialogStub.onCall(1).returns(new Promise(() => {}));
+    openLoginDialogStub.onCall(2).throws();
+    const p1 = service.login('');
+
+    // The immediate second attempt is blocked.
+    const p2 = service.login('');
+    expect(service.loginPromise_).to.equal(p1);
     expect(p2).to.equal(p1);
+
+    // The delayed third attempt succeeds after 1 second.
+    clock.tick(1001);
+    const p3 = service.login('');
+    expect(service.loginPromise_).to.equal(p3);
+    expect(p3).to.not.equal(p1);
+
+    // Rejecting the first login attempt does not reject the current promise.
+    p1Reject();
+    return p1Promise.then(() => 'SUCCESS', () => 'ERROR').then(res => {
+      expect(res).to.equal('ERROR');
+      expect(service.loginPromise_).to.equal(p3);
+    });
   });
 });
 
 
-describe('AccessService type=other', () => {
+describe('AccessService analytics', () => {
 
   let sandbox;
   let configElement;
-  let xhrMock;
-  let cidMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
     configElement.setAttribute('type', 'application/json');
-    configElement.textContent = JSON.stringify({'type': 'other'});
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID',
+    });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
-
-    service.vsync_ = {
-      mutate: callback => {
-        callback();
-      },
-      mutatePromise: callback => {
-        callback();
-        return Promise.resolve();
-      }
+    service.enabled_ = true;
+    service.getReaderId_ = () => {
+      return Promise.resolve('reader1');
     };
-    xhrMock = sandbox.mock(service.xhr_);
-    const cid = {
-      get: () => {}
-    };
-    cidMock = sandbox.mock(cid);
-    service.cid_ = Promise.resolve(cid);
+    service.setAuthResponse_({views: 3, child: {type: 'premium'}, zero: 0});
   });
 
   afterEach(() => {
@@ -1024,30 +1456,72 @@ describe('AccessService type=other', () => {
       configElement.parentElement.removeChild(configElement);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
-  it('should short-circuit authorization flow', () => {
-    cidMock.expects('get').never();
-    xhrMock.expects('fetchJson').never();
-    const promise = service.runAuthorization_();
-    expect(document.documentElement).not.to.have.class('amp-access-loading');
-    expect(document.documentElement).not.to.have.class('amp-access-error');
-    return promise.then(() => {
-      expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(document.documentElement).not.to.have.class('amp-access-error');
-      expect(service.firstAuthorizationPromise_).to.exist;
-      return service.firstAuthorizationPromise_;
+  it('should return null when not enabled', () => {
+    service.enabled_ = false;
+    expect(service.getAccessReaderId()).to.be.null;
+    expect(service.getAuthdataField('views')).to.be.null;
+  });
+
+  it('should return reader id', () => {
+    return service.getAccessReaderId().then(readerId => {
+      expect(readerId).to.equal('reader1');
     });
   });
 
-  it('should short-circuit pingback flow', () => {
-    cidMock.expects('get').never();
-    xhrMock.expects('fetchJson').never();
-    return service.reportViewToServer_();
+  it('should return authdata', () => {
+    service.firstAuthorizationResolver_();
+    return Promise.all([
+      service.getAuthdataField('views'),
+      service.getAuthdataField('child.type'),
+      service.getAuthdataField('other'),
+      service.getAuthdataField('child.other'),
+      service.getAuthdataField('zero'),
+    ]).then(res => {
+      expect(res[0]).to.equal(3);
+      expect(res[1]).to.equal('premium');
+      expect(res[2]).to.be.null;
+      expect(res[3]).to.be.null;
+      expect(res[4]).to.equal(0);
+    });
   });
 
-  it('should short-circuit login flow', () => {
-    expect(() => service.login()).to.throw(/Login URL is not configured/);
+  it('should wait the first authorization for authdata', () => {
+    let viewsValue;
+    const promise = service.getAuthdataField('views').then(res => {
+      viewsValue = res;
+    });
+    return Promise.resolve().then(() => {
+      expect(viewsValue).to.be.undefined;
+      // Resolve the authorization.
+      service.firstAuthorizationResolver_();
+      return promise;
+    }).then(() => {
+      expect(viewsValue).to.equal(3);
+    });
+  });
+
+  it('should wait the latest authorization for authdata if started', () => {
+    let resolver;
+    service.lastAuthorizationPromise_ = new Promise(resolve => {
+      resolver = resolve;
+    });
+    let viewsValue;
+    const promise = service.getAuthdataField('views').then(res => {
+      viewsValue = res;
+    });
+    return Promise.resolve().then(() => {
+      expect(viewsValue).to.be.undefined;
+      // Resolve the first authorization.
+      service.firstAuthorizationResolver_();
+    }).then(() => {
+      expect(viewsValue).to.be.undefined;
+      // Resolve the second authorization.
+      resolver();
+      return promise;
+    }).then(() => {
+      expect(viewsValue).to.equal(3);
+    });
   });
 });

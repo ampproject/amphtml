@@ -24,26 +24,27 @@ var commonTestPaths = [
   {
     pattern: 'dist/**/*.js',
     included: false,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.tools/**/*.js',
     included: false,
-  },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'examples/**/*',
     included: false,
-    served: true
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.3p/**/*',
     included: false,
-    served: true
-  }
+    nocache: false,
+    watched: true,
+  },
 ]
 
 var testPaths = commonTestPaths.concat([
@@ -116,6 +117,7 @@ var karma = {
 
 /** @const  */
 module.exports = {
+  commonTestPaths: commonTestPaths,
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
   karma: karma,
@@ -141,6 +143,7 @@ module.exports = {
     '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
+    '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
   ],

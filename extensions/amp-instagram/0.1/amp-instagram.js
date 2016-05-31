@@ -36,12 +36,67 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
+import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
   preconnectCallback(onLayout) {
-    this.preconnect.url('https://instagram.com', onLayout);
+    // See
+    // https://instagram.com/developer/embedding/?hl=en
+    this.preconnect.url('https://www.instagram.com', onLayout);
+    // Host instagram used for image serving. While the host name is
+    // funky this appears to be stable in the post-domain sharding era.
+    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net', onLayout);
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    return false;
+  }
+
+  /** @override */
+  buildCallback() {
+    /**
+     * @private {?Element}
+     */
+    this.iframe_ = null;
+    /**
+     * @private {?Promise}
+     */
+    this.iframePromise_ = null;
+    /**
+     * @private @const
+     */
+    this.shortcode_ = user.assert(
+        (this.element.getAttribute('data-shortcode') ||
+        this.element.getAttribute('shortcode')),
+        'The data-shortcode attribute is required for <amp-instagram> %s',
+        this.element);
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.getWin().document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    const image = this.getWin().document.createElement('amp-img');
+    // This will redirect to the image URL. By experimentation this is
+    // always the same URL that is actually used inside of the embed.
+    image.setAttribute('src', 'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) + '/media/?size=l');
+    image.setAttribute('layout', 'fill');
+    // This makes the non-iframe image appear in the exact same spot
+    // where it will be inside of the iframe.
+    setStyles(image, {
+      'top': '48px',
+      'bottom': '48px',
+      'left': '8px',
+      'right': '8px',
+    });
+    placeholder.appendChild(image);
+    return placeholder;
   }
 
   /** @override */
@@ -51,25 +106,41 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const shortcode = AMP.assert(
-        (this.element.getAttribute('data-shortcode') ||
-        this.element.getAttribute('shortcode')),
-        'The data-shortcode attribute is required for <amp-instagram> %s',
-        this.element);
-    // See
-    // https://instagram.com/developer/embedding/?hl=en
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
-    iframe.src = 'https://instagram.com/p/' +
-        encodeURIComponent(shortcode) + '/embed/?v=4';
+    iframe.src = 'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) + '/embed/?v=4';
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
+    iframe.width = this.element.getAttribute('width');
+    iframe.height = this.element.getAttribute('height');
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    setStyles(iframe, {
+      'opacity': 0,
+    });
+    return this.iframePromise_ = loadPromise(iframe).then(() => {
+      this.getVsync().mutate(() => {
+        setStyles(iframe, {
+          'opacity': 1,
+        });
+      });
+    });
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+      this.iframePromise_ = null;
+    }
+    return true;  // Call layoutCallback again.
   }
 };
 

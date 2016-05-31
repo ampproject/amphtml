@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dashToCamelCase,expandTemplate} from '../../src/string';
+import {dashToCamelCase, expandTemplate, endsWith} from '../../src/string';
 
 describe('dashToCamelCase', () => {
   it('should transform dashes to camel case.', () => {
@@ -22,6 +22,22 @@ describe('dashToCamelCase', () => {
     expect(dashToCamelCase('foo-bar')).to.equal('fooBar');
     expect(dashToCamelCase('foo-bar-baz')).to.equal('fooBarBaz');
     expect(dashToCamelCase('-foo')).to.equal('Foo');
+  });
+});
+
+describe('endsWith', () => {
+  it('should determine whether string ends with.', () => {
+    expect(endsWith('a', 'a')).to.be.true;
+    expect(endsWith('b', 'a')).to.be.false;
+    expect(endsWith('ab', 'a')).to.be.false;
+    expect(endsWith('aba', 'a')).to.be.true;
+    expect(endsWith('aba', 'aba')).to.be.true;
+    expect(endsWith('Xaba', 'aba')).to.be.true;
+    expect(endsWith('Xaba', '')).to.be.true;
+    expect(endsWith('', 'a')).to.be.false;
+    expect(endsWith('aa', 'aaa')).to.be.false;
+    expect(endsWith('aa', 'aaaa')).to.be.false;
+    expect(endsWith('', '')).to.be.true;
   });
 });
 
@@ -38,7 +54,7 @@ describe('expandTemplate', () => {
     'totoxy': '${toxy}',
     'loop1': '${loop2}',
     'loop2': '${loop1}',
-    'loop': '${loop}'
+    'loop': '${loop}',
   };
 
   function testGetter(key) {

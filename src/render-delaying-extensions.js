@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
 import {getServicePromise} from './service';
-import {all} from './promise';
 import {timer} from './timer';
 
 /**
@@ -25,7 +25,8 @@ import {timer} from './timer';
  * @const {!Array<string>}
  */
 const EXTENSIONS = [
-  'amp-dynamic-css-classes'
+  'amp-accordion',
+  'amp-dynamic-css-classes',
 ];
 
 /**
@@ -40,14 +41,21 @@ const LOAD_TIMEOUT = 3000;
  * delay unhiding the body (to avoid Flash of Unstyled Content), and returns
  * a promise that will resolve when they have loaded or reject after a timeout.
  * @param {!Window} win
- * @return {?Promise}
+ * @return {!Promise|undefined}
  */
 export function waitForExtensions(win) {
   const extensions = includedExtensions(win);
-
-  if (extensions.length) {
-    return timer.timeoutPromise(LOAD_TIMEOUT, all(extensions));
-  }
+  const promises = extensions.map(extension => {
+    return timer.timeoutPromise(
+      LOAD_TIMEOUT,
+      getServicePromise(win, extension),
+      `Render timeout waiting for ${extension} to load.`
+    );
+  });
+  // Only return a waiting promise if there are promises to wait for.
+  return promises.length ?
+    Promise.all(promises) :
+    undefined;
 }
 
 /**
@@ -56,11 +64,10 @@ export function waitForExtensions(win) {
  * @return {!Array<string>}
  */
 export function includedExtensions(win) {
-  const document = win.document;
+  const doc = win.document;
+  dev.assert(doc.body);
 
   return EXTENSIONS.filter(extension => {
-    return document.querySelector(`[custom-element="${extension}"]`);
-  }).map(extension => {
-    return getServicePromise(win, extension);
+    return doc.querySelector(`[custom-element="${extension}"]`);
   });
 }

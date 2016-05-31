@@ -56,7 +56,7 @@ describe('amp-dynamic-css-classes', () => {
         expect(referrers).to.include.members([
           'c.google.com',
           'b.c.google.com',
-          'a.b.c.google.com'
+          'a.b.c.google.com',
         ]);
         expect(referrers.length).to.equal(5);
       });

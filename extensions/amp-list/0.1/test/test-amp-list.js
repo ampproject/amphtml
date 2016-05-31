@@ -16,8 +16,7 @@
 
 import {AmpList} from '../amp-list';
 import {templatesFor} from '../../../../src/template';
-import {xhrFor} from '../../../../src/xhr';
-import * as promise from '../../../../src/promise';
+import {installXhrService} from '../../../../src/service/xhr-impl';
 import * as sinon from 'sinon';
 
 
@@ -38,7 +37,7 @@ describe('amp-list component', () => {
     templates = templatesFor(window);
     templatesMock = sandbox.mock(templates);
 
-    xhr = xhrFor(window);
+    xhr = installXhrService(window);
     xhrMock = sandbox.mock(xhr);
 
     element = document.createElement('div');
@@ -57,15 +56,11 @@ describe('amp-list component', () => {
     xhrMock.verify();
     listMock.verify();
     sandbox.restore();
-    templatesMock = null;
-    xhrMock = null;
-    listMock = null;
-    sandbox = null;
   });
 
   it('should load and render', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     const newHeight = 127;
     const itemElement = document.createElement('div');
@@ -82,11 +77,11 @@ describe('amp-list component', () => {
     listMock.expects('getVsync').returns({
       measure: func => {
         measureFunc = func;
-      }
+      },
     }).once();
     listMock.expects('attemptChangeHeight').withExactArgs(newHeight);
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
         expect(measureFunc).to.exist;
         measureFunc();
@@ -96,7 +91,7 @@ describe('amp-list component', () => {
 
   it('should set accessibility roles', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     const itemElement = document.createElement('div');
     const xhrPromise = Promise.resolve({items: items});
@@ -108,7 +103,7 @@ describe('amp-list component', () => {
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.element.getAttribute('role')).to.equal('list');
         expect(itemElement.getAttribute('role')).to.equal('listitem');
       });
@@ -117,7 +112,7 @@ describe('amp-list component', () => {
 
   it('should preserve accessibility roles', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     element.setAttribute('role', 'list1');
     const itemElement = document.createElement('div');
@@ -131,7 +126,7 @@ describe('amp-list component', () => {
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.element.getAttribute('role')).to.equal('list1');
         expect(itemElement.getAttribute('role')).to.equal('listitem1');
       });

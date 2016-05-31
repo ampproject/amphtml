@@ -1,10 +1,9 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads).
+See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./integration-guide.md)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack.
-
 
 ## Constraints
 A summary of constraints placed on external resources such as ads in AMP HTML:
@@ -19,7 +18,6 @@ Reasons include:
   - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
 - The AMP runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case it would unload ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
 - The AMP runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
-
 
 ## The iframe sandbox
 
@@ -40,19 +38,27 @@ We will provide the following information to the ad:
   - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
+- `window.context.startTime` contains the time at which processing of the amp-ad element started.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
 ### Methods available to the ad.
 
-- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
 - `window.context.reportRenderedEntityIdentifier` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
+### Exceptions to iframe sandbox methods and information
+Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
+
 ### Ad viewability
+
+#### Position in viewport
 
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
+
+When a listener is registered, it will be called 2x in short order. Once with the position of the ad when its iframe was created and then again with the current position.
 
 Example usage:
 
@@ -79,6 +85,20 @@ Example usage:
   unlisten();
 ```
 
+##### Initial position
+
+The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
+
+#### Page visibility
+
+AMP documents may be practically invisible without the visibility being reflected by the [page visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API). This is primarily the case when a document is swiped away or being prerendered.
+
+Whether a document is actually being visible can be queried using:
+
+`window.context.hidden` which is true if the page is not visible as per page visibility API or because the AMP viewer currently does not show it.
+
+Additionally one can observe the `amp:visibilitychange` on the `window` object to be notified about changes in visibility.
+
 ### Ad resizing
 
 Ads can call the special API
@@ -88,41 +108,38 @@ Once the request is processed the AMP runtime will try to accommodate this reque
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
-Ads can observe wehther resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+Ads can observe whether resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
 
 Example
 ```javascript
-var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
+var unlisten = window.context.onResizeSuccess(function(requestedHeight, requestedWidth) {
   // Hide any overflow elements that were shown.
-  // The requestedHeight argument may be used to check which height change the request corresponds to.
+  // The requestedHeight and requestedWidth arguments may be used to check which size change the request corresponds to.
 });
 
-var unlisten = window.context.onResizeDenied(function(requestedHeight) {
+var unlisten = window.context.onResizeDenied(function(requestedHeight, requestedWidth) {
   // Show the overflow element and send a window.context.requestResize(width, height) when the overflow element is clicked.
-  // You may use the requestedHeight to check which height change the request corresponds to.
+  // You may use the requestedHeight and requestedWidth to check which size change the request corresponds to.
 });
 ```
 
-
-Here are some factors that affect how fast the resize will be executed:
+Here are some factors that affect whether the resize will be executed:
 
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
-
 
 ### Optimizing ad performance
 
 #### JS reuse across iframes
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames.
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/master/src/3p.js) for function signature.
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
-
 
 ### Ad markup
 Ads are loaded using a the <amp-ad> tag given the type of the ad network and name value pairs of configuration. This is an example for the A9 network:
@@ -161,4 +178,7 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 ### 1st party cookies
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
+
 file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
+
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.

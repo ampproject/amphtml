@@ -67,7 +67,7 @@ function whenMessagingLoaded(callback) {
         var messaging = new ViewerMessaging(window.parent, viewerOrigin,
             function(type, payload, awaitResponse) {
               return viewer.receiveMessage(type, payload, awaitResponse);
-            });
+            }, window.location.href);
         viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
           return messaging.sendRequest(type, payload, awaitResponse);
         }, viewerOrigin);

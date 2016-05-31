@@ -266,7 +266,7 @@ export const Curves = {
   /**
    * ease-in-out
    */
-  EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0)
+  EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0),
 };
 
 
@@ -278,7 +278,7 @@ const NAME_MAP = {
   'ease': Curves.EASE,
   'ease-in': Curves.EASE_IN,
   'ease-out': Curves.EASE_OUT,
-  'ease-in-out': Curves.EASE_IN_OUT
+  'ease-in-out': Curves.EASE_IN_OUT,
 };
 
 

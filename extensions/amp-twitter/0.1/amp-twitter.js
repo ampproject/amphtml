@@ -17,7 +17,7 @@
 
 import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/iframe-helper';
+import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 
 
@@ -26,8 +26,11 @@ class AmpTwitter extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', onLayout);
+    // All images
+    this.preconnect.url('https://pbs.twimg.com', onLayout);
     // Hosts the script that renders tweets.
-    this.preconnect.prefetch('https://platform.twitter.com/widgets.js');
+    this.preconnect.prefetch(
+        'https://platform.twitter.com/widgets.js', 'script');
     prefetchBootstrap(this.getWin());
   }
 
@@ -37,14 +40,21 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /** @override */
+  firstLayoutCompleted() {
+    // Do not hide placeholder
+  }
+
+  /** @override */
   layoutCallback() {
     // TODO(malteubl): Preconnect to twitter.
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'twitter');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', data => {
+    listenFor(iframe, 'embed-size', data => {
+      // We only get the message if and when there is a tweet to display,
+      // so hide the placeholder.
+      this.togglePlaceholder(false);
       iframe.height = data.height;
       iframe.width = data.width;
       const amp = iframe.parentElement;
@@ -52,6 +62,7 @@ class AmpTwitter extends AMP.BaseElement {
       amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
+    this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
 };

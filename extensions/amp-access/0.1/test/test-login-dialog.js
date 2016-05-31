@@ -22,44 +22,168 @@ const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
     encodeURIComponent('http://localhost:8000/test-login-dialog'));
 
 
-describe('LoginDialog', () => {
+describe('ViewerLoginDialog', () => {
 
   let sandbox;
-  let clock;
+  let viewer;
   let windowApi;
-  let windowMock;
-  let dialog;
-  let dialogUrl;
-  let dialogMock;
-  let messageListener;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    messageListener = undefined;
+    viewer = {
+      getParam: param => {
+        if (param == 'dialog') {
+          return '1';
+        }
+        return null;
+      },
+      sendMessage: () => {},
+    };
+
     windowApi = {
+      services: {
+        'viewer': {obj: viewer},
+      },
+      screen: {width: 1000, height: 1000},
+      open: () => {
+        throw new Error('Not allowed');
+      },
+      addEventListener: () => {
+        throw new Error('Not allowed');
+      },
+      setTimeout: () => {
+        throw new Error('Not allowed');
+      },
+      setInterval: () => {
+        throw new Error('Not allowed');
+      },
+    };
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should delegate to viewer with url', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    return openLoginDialog(windowApi, 'http://acme.com/login').then(res => {
+      expect(res).to.equal('#success=yes');
+      expect(stub.callCount).to.equal(1);
+      expect(stub.firstCall.args[0]).to.equal('openDialog');
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?return=RETURN_URL',
+      });
+      expect(stub.firstCall.args[2]).to.be.true;
+    });
+  });
+
+  it('should delegate to viewer with url promise', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const urlPromise = Promise.resolve('http://acme.com/login');
+    return openLoginDialog(windowApi, urlPromise).then(res => {
+      expect(res).to.equal('#success=yes');
+      expect(stub.callCount).to.equal(1);
+      expect(stub.firstCall.args[0]).to.equal('openDialog');
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?return=RETURN_URL',
+      });
+      expect(stub.firstCall.args[2]).to.be.true;
+    });
+  });
+
+  it('should fail when url promise fails', () => {
+    sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const urlPromise = Promise.reject('expected');
+    return openLoginDialog(windowApi, urlPromise).then(() => {
+      throw new Error('must not be here');
+    }, reason => {
+      expect(reason).to.equal('expected');
+    });
+  });
+
+  it('should fail when viewer fails', () => {
+    sandbox.stub(viewer, 'sendMessage',
+        () => Promise.reject('expected'));
+    return openLoginDialog(windowApi, 'http://acme.com/login').then(() => {
+      throw new Error('must not be here');
+    }, reason => {
+      expect(reason).to.equal('expected');
+    });
+  });
+
+  it('should have correct URL with other parameters', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const url = 'http://acme.com/login?a=b';
+    return openLoginDialog(windowApi, url).then(() => {
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?a=b&return=RETURN_URL',
+      });
+    });
+  });
+
+  it('should allow alternative form of return URL', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const url = 'http://acme.com/login?a=b&ret1=RETURN_URL';
+    return openLoginDialog(windowApi, url).then(() => {
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?a=b&ret1=RETURN_URL',
+      });
+    });
+  });
+});
+
+
+describe('WebLoginDialog', () => {
+
+  let sandbox;
+  let clock;
+  let viewer;
+  let windowApi;
+  let windowMock;
+  let dialog;
+  let dialogUrl;
+  let dialogMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+
+    viewer = {
+      getParam: () => null,
+      getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
+    };
+    const windowObj = {
+      services: {
+        'viewer': {obj: viewer},
+      },
       open: () => {},
       location: {
         protocol: 'http:',
         host: 'localhost:8000',
-        href: 'http://localhost:8000/test-login-dialog'
       },
       screen: {width: 1000, height: 1000},
       addEventListener: (type, callback) => {
         if (type == 'message') {
-          messageListener = callback;
+          windowObj.messageListener = callback;
         }
       },
       removeEventListener: (type, callback) => {
-        if (type == 'message' && messageListener == callback) {
-          messageListener = undefined;
+        if (type == 'message' && windowObj.messageListener == callback) {
+          windowObj.messageListener = undefined;
         }
       },
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       setInterval: (callback, t) => window.setInterval(callback, t),
-      clearInterval: intervalId => window.clearInterval(intervalId)
+      clearInterval: intervalId => window.clearInterval(intervalId),
     };
+    windowApi = windowObj;
     windowMock = sandbox.mock(windowApi);
 
     dialogUrl = null;
@@ -68,31 +192,31 @@ describe('LoginDialog', () => {
       location: {
         replace: url => {
           dialogUrl = url;
-        }
+        },
       },
-      postMessage: () => {}
+      postMessage: () => {},
     };
     dialogMock = sandbox.mock(dialog);
   });
 
   afterEach(() => {
+    windowMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {
-    messageListener({
+    windowApi.messageListener({
       origin: 'http://localhost:8000',
       data: {
         sentinel: 'amp',
         type: 'result',
-        result: '#success=true'
-      }
+        result: '#success=true',
+      },
     });
   }
 
   it('should call window.open in the same microtask with url', () => {
-    windowApi.open = sandbox.spy();
+    sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, 'http://acme.com/login');
     expect(windowApi.open.callCount).to.equal(1);
     expect(windowApi.open.firstCall.args[0]).to.match(
@@ -100,39 +224,42 @@ describe('LoginDialog', () => {
   });
 
   it('should call window.open in the same microtask with promise', () => {
-    windowApi.open = sandbox.spy();
+    sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, Promise.resolve('http://acme.com/login'));
     expect(windowApi.open.callCount).to.equal(1);
     expect(windowApi.open.firstCall.args[0]).to.equal('');
   });
 
   it('should yield error if window.open fails', () => {
-    windowMock.expects('open').once().throws('OPEN ERROR');
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().throws('OPEN ERROR');
     return openLoginDialog(windowApi, 'http://acme.com/login')
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/OPEN ERROR/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
   it('should yield error if window.open returns null', () => {
-    windowMock.expects('open').once().returns(null);
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(windowApi, 'http://acme.com/login')
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to open dialog/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
   it('should yield error if window.open returns null with promise', () => {
-    windowMock.expects('open').once().returns(null);
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(windowApi, Promise.resolve('http://acme.com/login'))
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to open dialog/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -146,7 +273,7 @@ describe('LoginDialog', () => {
         })
         .then(result => {
           expect(result).to.equal('#success=true');
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -155,7 +282,8 @@ describe('LoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?return=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     dialogMock.expects('postMessage')
@@ -181,7 +309,8 @@ describe('LoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     const promise = openLoginDialog(windowApi, 'http://acme.com/login?a=1');
@@ -200,7 +329,8 @@ describe('LoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     const promise = openLoginDialog(windowApi,
@@ -213,6 +343,26 @@ describe('LoginDialog', () => {
         .then(result => {
           expect(result).to.equal('#success=true');
         });
+  });
+
+  it('should override return URL', () => {
+    viewer.getResolvedViewerUrl = () => 'http://acme.com/viewer1';
+    windowMock.expects('open')
+        .withArgs(
+            'http://acme.com/login?a=1&ret1=' +
+            encodeURIComponent('http://localhost:8000/extensions' +
+                '/amp-access/0.1/amp-login-done.html?url=' +
+                encodeURIComponent('http://acme.com/viewer1')))
+        .returns(dialog)
+        .once();
+    const promise = openLoginDialog(windowApi,
+        'http://acme.com/login?a=1&ret1=RETURN_URL');
+    return Promise.resolve().then(() => {
+      succeed();
+      return promise;
+    }).then(result => {
+      expect(result).to.equal('#success=true');
+    });
   });
 
   it('should respond with empty string when dialog is closed', () => {
@@ -256,7 +406,7 @@ describe('LoginDialog', () => {
         })
         .then(result => {
           expect(result).to.equal('#success=true');
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -273,7 +423,7 @@ describe('LoginDialog', () => {
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to resolve url/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 });

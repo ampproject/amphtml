@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 
@@ -38,18 +39,18 @@ class AmpFitText extends AMP.BaseElement {
   buildCallback() {
 
     /** @private @const */
-    this.content_ = document.createElement('div');
+    this.content_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.content_);
     this.content_.classList.add('-amp-fit-text-content');
     st.setStyles(this.content_, {zIndex: 2});
 
     /** @private @const */
-    this.contentWrapper_ = document.createElement('div');
+    this.contentWrapper_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
     this.content_.appendChild(this.contentWrapper_);
 
     /** @private @const */
-    this.measurer_ = document.createElement('div');
+    this.measurer_ = this.element.ownerDocument.createElement('div');
     // Note that "measurer" cannot be styled with "bottom:0".
     st.setStyles(this.measurer_, {
       position: 'absolute',
@@ -58,7 +59,7 @@ class AmpFitText extends AMP.BaseElement {
       right: 0,
       zIndex: 1,
       visibility: 'hidden',
-      lineHeight: `${LINE_HEIGHT_EM_}em`
+      lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
     this.getRealChildNodes().forEach(node => {
@@ -146,9 +147,9 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   content.classList.toggle('-amp-fit-text-content-overflown', overflown);
   st.setStyles(content, {
     lineClamp: overflown ? numberOfLines : '',
-    maxHeight: overflown ? st.px(lineHeight * numberOfLines) : ''
+    maxHeight: overflown ? st.px(lineHeight * numberOfLines) : '',
   });
 };
 
 
-AMP.registerElement('amp-fit-text', AmpFitText, $CSS$);
+AMP.registerElement('amp-fit-text', AmpFitText, CSS);

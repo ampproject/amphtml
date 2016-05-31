@@ -19,6 +19,14 @@ var minimist = require('minimist');
 var argv = minimist(process.argv.slice(2));
 var isCanary = argv.type === 'canary';
 
+var config = {
+  'canary': isCanary,
+};
+
 exports.getTemplate = function() {
-  return `window.AMP_CONFIG={canary:${isCanary}};/*AMP_CONFIG*/`;
+  var configStr = JSON.stringify(config);
+  // If window.AMP_CONFIG already exists don't clobber it.
+  // This can be useful for testing where we need to setup experiments before
+  // the main binary has loaded (setting up builtins for example).
+  return `window.AMP_CONFIG||(window.AMP_CONFIG=${configStr});/*AMP_CONFIG*/`;
 };

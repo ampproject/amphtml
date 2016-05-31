@@ -26,6 +26,20 @@ export function dashToCamelCase(name) {
 }
 
 /**
+ * Polyfill for String.prototype. endsWith.
+ * @param {string} string
+ * @param {string} suffix
+ * @return {boolean}
+ */
+export function endsWith(string, suffix) {
+  if (suffix.length > string.length) {
+    return false;
+  }
+  const index = string.length - suffix.length;
+  return string.indexOf(suffix, index) == index;
+}
+
+/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value

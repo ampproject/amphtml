@@ -57,13 +57,14 @@ function filter(str) {
 
 /**
  * Create a DOM element with attributes
+ * @param {!Document}
  * @param {Object} data - the string to filter
  * @returns {DOMElement}
  */
-function make(data) {
+function make(doc, data) {
   let el = false, tag, attr;
   for (tag in data) {
-    el = document.createElement(tag);
+    el = doc.createElement(tag);
     for (attr in data[tag]) {
       if (typeof data[tag][attr] === 'string') {
         set(el, attr, data[tag][attr]);
@@ -93,5 +94,5 @@ export const Util = {
   guid: guid,
   log: log,
   make: make,
-  set: set
+  set: set,
 };

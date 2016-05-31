@@ -17,7 +17,9 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
+import {platform} from '../src/platform';
 
 adopt(window);
 
@@ -75,20 +77,16 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta');
+  const cleanupTagNames = ['link', 'meta'];
+  if (!platform.isSafari()) {
+    // TODO(#3315): Removing test iframes break tests on Safari.
+    cleanupTagNames.push('iframe');
+  }
+  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
-      if (element.tagName == 'iframe') {
-        setTimeout(() => {
-          // Wait a bit until removing iframes. The reason is that Safari has
-          // a race where this sometimes runs too early and the test
-          // is actually still running
-          element.parentNode.removeChild(element);
-        }, 5000);
-      } else {
-        element.parentNode.removeChild(element);
-      }
+      removeElement(element);
     } catch (e) {
       // This sometimes fails for unknown reasons.
       console./*OK*/log(e);
@@ -98,12 +96,14 @@ afterEach(() => {
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
+  window.context = undefined;
+  if (sandboxes.length > 0) {
+    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
+    throw new Error('You forgot to restore your sandbox!');
+  }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
-  }
-  if (sandboxes.length > 0) {
-    throw new Error('You forgot to restore your sandbox!');
   }
 });
 
@@ -191,3 +191,4 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
   );
 });
 
+sinon = null;

@@ -17,9 +17,12 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
+
+const CANCELLED = 'CANCELLED';
 
 
 /**
@@ -35,6 +38,9 @@ const globalExponentialBackoff = exponentialBackoff(1.5);
 export function reportError(error, opt_associatedElement) {
   if (!window.console) {
     return;
+  }
+  if (!error) {
+    error = new Error('no error supplied');
   }
   if (error.reported) {
     return;
@@ -69,33 +75,22 @@ export function reportError(error, opt_associatedElement) {
 }
 
 /**
+ * Returns an error for a cancellation of a promise.
+ * @param {string} message
+ * @return {!Error}
+ */
+export function cancellation() {
+  return new Error(CANCELLED);
+}
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
-}
-
-/**
- * Signature designed, so it can work with window.onerror
- * @param {string|undefined} message
- * @param {string|undefined} filename
- * @param {string|undefined} line
- * @param {string|undefined} col
- * @param {!Error|undefined} error
- */
-function reportErrorToServer(message, filename, line, col, error) {
-  // Make an attempt to unhide the body.
-  if (this && this.document) {
-    makeBodyVisible(this.document);
-  }
-  const mode = getMode();
-  if (mode.isLocalDev || mode.development || mode.test) {
-    return;
-  }
-  const url = getErrorReportUrl(message, filename, line, col, error);
-  globalExponentialBackoff(() => {
-    new Image().src = url;
+  win.addEventListener('unhandledrejection', event => {
+    reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
 
@@ -106,11 +101,41 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
+ * @this {!Window|undefined}
+ */
+function reportErrorToServer(message, filename, line, col, error) {
+  // Make an attempt to unhide the body.
+  if (this && this.document) {
+    makeBodyVisible(this.document);
+  }
+  const mode = getMode();
+  if (mode.localDev || mode.development || mode.test) {
+    return;
+  }
+  const url = getErrorReportUrl(message, filename, line, col, error);
+  globalExponentialBackoff(() => {
+    if (url) {
+      new Image().src = url;
+    }
+  });
+}
+
+/**
+ * Signature designed, so it can work with window.onerror
+ * @param {string|undefined} message
+ * @param {string|undefined} filename
+ * @param {string|undefined} line
+ * @param {string|undefined} col
+ * @param {!Error|undefined} error
+ * @return {string|undefined} The URL
  * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
+    return;
+  }
+  if (message == CANCELLED) {
     return;
   }
   if (!message) {
@@ -123,16 +148,41 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(message);
+      '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
+      '&a=' + (isUserErrorMessage(message) ? 1 : 0);
+  if (window.context && window.context.location) {
+    url += '&3p=1';
+  }
+  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+    url += '&ca=1';
+  }
+  if (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) {
+    url += '&or=' + encodeURIComponent(window.location.ancestorOrigins[0]);
+  }
+  if (window.viewerState) {
+    url += '&vs=' + encodeURIComponent(window.viewerState);
+  }
+  // Is embedded?
+  if (window.parent && window.parent != window) {
+    url += '&iem=1';
+  }
+
+  if (window.AMP.viewer) {
+    const resolvedViewerUrl = window.AMP.viewer.getResolvedViewerUrl();
+    const messagingOrigin = window.AMP.viewer.maybeGetMessagingOrigin();
+    if (resolvedViewerUrl) {
+      url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
+    }
+    if (messagingOrigin) {
+      url += `&mso=${encodeURIComponent(messagingOrigin)}`;
+    }
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
-    // We may want to consider not reporting asserts but for now
-    // this should be helpful.
-    url += '&a=' + (error.fromAssert ? 1 : 0) +
-        '&el=' + encodeURIComponent(tagName) +
+    url += '&el=' + encodeURIComponent(tagName) +
         '&s=' + encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {
@@ -140,6 +190,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
+  url += '&r=' + encodeURIComponent(document.referrer);
 
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);

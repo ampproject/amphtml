@@ -14,21 +14,47 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
  
-### <a name="amp-vine"></a> `amp-vine`
- 
-Displays a Vine simple embed
+# <a name="amp-vine"></a> `amp-vine`
 
-Example:
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a Vine simple embed.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-vine" src="https://cdn.ampproject.org/v0/amp-vine-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-vine/">amp-vine.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vine.amp.html">vine.amp.html</a></td>
+  </tr>
+</table>
+
+## Example
+
+A Vine simple embed has equal width and height:
+
 ```html
 <amp-vine width="400" height="400"
   data-vineid="MdKjXez002d">
 </amp-vine>
 ```
 
-A Vine simple embed has equal width and height.
-
-#### Attributes
+## Attributes
 
 **data-vineid**
 
 The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is the vineID.
+
+## Validation
+
+See [amp-vine rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/0.1/validator-amp-vine.protoascii) in the AMP validator specification.

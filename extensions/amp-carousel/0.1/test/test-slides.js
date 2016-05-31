@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
-
+import {Animation} from '../../../../src/animation';
 
 describe('Slides functional', () => {
 
@@ -26,7 +26,15 @@ describe('Slides functional', () => {
   let element;
   let slide0, slide1, slide2;
   let slides;
-  let prepareCallback, switchCallback;
+  let prepareCallback, switchCallback, resetCallback;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function setupElements() {
     element = document.createElement('div');
@@ -52,13 +60,55 @@ describe('Slides functional', () => {
   }
 
   function setupSpies() {
-    slides.prepareSlide_ = prepareCallback = sinon.spy();
-    slides.commitSwitch_ = switchCallback = sinon.spy();
+    slides.prepareSlide_ = prepareCallback = sandbox.spy();
+    slides.commitSwitch_ = switchCallback = sandbox.spy();
+    slides.resetSlide_ = resetCallback = sandbox.spy();
   }
 
   function teardownElements() {
     document.body.removeChild(element);
   }
+
+  describe('Slides hint', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+    });
+    afterEach(() => {
+      teardownElements();
+    });
+    it('should hint when not in mouse mode', () => {
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.true;
+    });
+
+    it('should not hint when in mouse mode', () => {
+      slides.showControls_ = true;
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+    });
+  });
 
   describe('Slides gestures', () => {
 
@@ -149,8 +199,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in neg direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -161,7 +211,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: -32});
       expect(slides.swipeState_.pos).to.equal(0.1);
@@ -172,8 +222,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in pos direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 1;
       slides.swipeState_ = {
         currentIndex: 1,
@@ -184,7 +234,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(-0.1);
@@ -195,8 +245,8 @@ describe('Slides functional', () => {
     });
 
     it('should stay in-bounds on swipe', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -207,7 +257,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(0);
@@ -234,8 +284,8 @@ describe('Slides functional', () => {
     });
 
     it.skip('should go next after threshold', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -246,7 +296,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -259,14 +309,16 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
     it('should not go past first item with a negative value when not ' +
        ' looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -277,20 +329,24 @@ describe('Slides functional', () => {
         min: 0,
         max: 0,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 
     it('should go past first item with a negative value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -301,7 +357,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -315,8 +371,8 @@ describe('Slides functional', () => {
     it('should not go past last item with a positive value when ' +
        'not looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -327,7 +383,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 0,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -339,8 +395,8 @@ describe('Slides functional', () => {
 
     it('should go past last item with a positive value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -351,7 +407,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -359,12 +415,14 @@ describe('Slides functional', () => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.firstCall.args[0]).to.equal(slide2);
         expect(switchCallback.firstCall.args[1]).to.equal(slide0);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(1);
       });
     });
 
     it('should go next before threshold but with velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -375,7 +433,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: -0.5});
@@ -388,12 +446,14 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
     it('should bounce back before threshold and no velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -404,7 +464,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -415,12 +475,16 @@ describe('Slides functional', () => {
         expect(nextTr.lastCall.args[0]).to.equal(0);
         expect(prevTr.lastCall.args[0]).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 
     it('should bounce back before threshold and opposite velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -431,7 +495,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0.5});
@@ -451,6 +515,7 @@ describe('Slides functional', () => {
     let setupAutoplaySpy;
     let goSpy;
     let isInViewportStub;
+    let tryCancelAutoplayTimeoutSpy;
 
     function autoplaySetup(delay = '', inViewport = true) {
       clock = sandbox.useFakeTimers();
@@ -463,6 +528,8 @@ describe('Slides functional', () => {
       setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
       tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');
       goSpy = sandbox.spy(AmpSlides.prototype, 'go');
+      tryCancelAutoplayTimeoutSpy = sandbox
+          .spy(AmpSlides.prototype, 'tryCancelAutoplayTimeout_');
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
@@ -474,14 +541,8 @@ describe('Slides functional', () => {
           .returns(inViewport);
     }
 
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
       teardownElements();
-      sandbox.restore();
-      sandbox = null;
     });
 
     it('should call setupAutoplay_', () => {
@@ -503,7 +564,7 @@ describe('Slides functional', () => {
 
         slides.viewportCallback(true);
         expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(2);
       });
 
       it('should call `go` after 5000ms(default)', () => {
@@ -521,11 +582,17 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(5000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
       });
 
       it('should call `go` after 2000ms (set by user)', () => {
         autoplaySetup(2000);
 
+        expect(slides.isAutoplayRequested_).to.be.true;
         expect(tryAutoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
@@ -538,6 +605,71 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+        expect(slides.isAutoplayRequested_).to.be.true;
+      });
+
+      it('should cancel autoplay on swipe start', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(1);
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        // user interaction
+        slides.onSwipeStart_({});
+
+        expect(slides.isAutoplayRequested_).to.be.false;
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(2);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+      });
+
+      it('should cancel autoplay on user interaction', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(2000);
+
+        // autoplay call
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
+
+        // user interaction
+        slides.interactionNext(1, false);
+        expect(slides.isAutoplayRequested_).to.be.false;
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
       });
     });
 
@@ -620,5 +752,188 @@ describe('Slides functional', () => {
       expect(index).to.equal(4);
       expect(slides[index]).to.equal('e');
     });
+  });
+
+  describe('scheduling slides and updating viewport', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+
+      Animation.animate = () => {
+        return {
+          thenAlways: cb => cb(),
+        };
+      };
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should update viewport before scheduling slides', () => {
+      slides.goCallback(1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, false)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, true)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, true)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, false)).to.be.true;
+    });
+  });
+
+  describe('Navigating slides', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should hide slides that are not the current one', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+    });
+
+    it('should preload slides in direction of navigation', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ true);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide1)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide0)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
+    });
+  });
+});
+
+describe('empty Slides functional', () => {
+
+  let element;
+  let slides;
+
+  function setupElements() {
+    element = document.createElement('div');
+    element.setAttribute('type', 'slides');
+    element.style.width = '320px';
+    element.style.height = '200px';
+    document.body.appendChild(element);
+
+    element.getRealChildren = () => [];
+    return element;
+  }
+
+  function setupSlides() {
+    slides = new AmpSlides(element);
+    return slides;
+  }
+
+  function teardownElements() {
+    document.body.removeChild(element);
+  }
+
+  beforeEach(() => {
+    setupElements();
+    setupSlides();
+  });
+
+  afterEach(() => {
+    teardownElements();
+  });
+
+  it('should throw an assert error on buildCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+  });
+
+  it('should not throw an error on layoutCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.layoutCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on viewportCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.viewportCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on goCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.goCallback();
+    }).to.not.throw();
+  });
+
+  it('should not have any controls', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(slides.hasNext()).to.be.false;
+    expect(slides.hasPrev()).to.be.false;
   });
 });

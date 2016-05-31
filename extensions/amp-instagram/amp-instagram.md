@@ -14,9 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-instagram"></a> `amp-instagram`
+# <a name="amp-instagram"></a> `amp-instagram`
 
-Displays an instagram embed.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays an instagram embed.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-instagram">amp-instagram.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/instagram.amp.html">instagram.amp.html</a></td>
+  </tr>
+</table>
+
+## Behavior
+
+The `width` and `height` attributes are special for the instagram embed.
+These should be the actual width and height of the instagram image.
+The system automatically adds space for the "chrome" that instagram adds around the image.
+
+Many instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
 
 Example:
 ```html
@@ -28,18 +57,23 @@ Example:
 </amp-instagram>
 ```
 
-The `width` and `height` attributes are special for the instagram embed.
-These should be the actual width and height of the instagram image.
-The system automatically adds space for the "chrome" that instagram adds around the image.
-
-Many instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work. If the instagram is not square you will need to enter the actual dimensions of the image.
+If the instagram is not square you will need to enter the actual dimensions of the image.
 
 When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
 
-#### Attributes
+## Attributes
+
+<!---
+`src` attribute hasn't been documented. Should it be?
+Also, can the tag include both data-shortcode and src or are they mutually exclusive?
+-->
 
 **data-shortcode**
 
 The instagram data-shortcode found in every instagram photo URL.
 
 E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
+
+## Validation
+
+See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii) in the AMP validator specification.

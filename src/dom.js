@@ -14,6 +14,95 @@
  * limitations under the License.
  */
 
+import {dashToCamelCase} from './string';
+import {dev} from './log';
+
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * callback is executed.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @param {function()} callback
+ */
+export function waitForChild(parent, checkFunc, callback) {
+  if (checkFunc(parent)) {
+    callback();
+    return;
+  }
+  const win = parent.ownerDocument.defaultView;
+  if (win.MutationObserver) {
+    const observer = new win.MutationObserver(() => {
+      if (checkFunc(parent)) {
+        observer.disconnect();
+        callback();
+      }
+    });
+    observer.observe(parent, {childList: true});
+  } else {
+    const interval = win.setInterval(() => {
+      if (checkFunc(parent)) {
+        win.clearInterval(interval);
+        callback();
+      }
+    }, /* milliseconds */ 5);
+  }
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @param {function()} callback
+ */
+export function waitForBody(doc, callback) {
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function waitForBodyPromise(doc) {
+  return new Promise(resolve => {
+    waitForBody(doc, resolve);
+  });
+}
+
+
+/**
+ * Whether the element is currently contained in the DOM. Polyfills
+ * `document.contains()` method when necessary. Notice that according to spec
+ * `document.contains` is inclusionary.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function documentContains(doc, element) {
+  if (!doc.contains) {
+    return documentContainsPolyfillInternal_(doc, element);
+  }
+  return doc.contains(element);
+}
+
+
+/**
+ * Polyfill for `document.contains()` method.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ * @private Visible for testing only.
+ */
+export function documentContainsPolyfillInternal_(doc, element) {
+  // Per spec, "contains" method is inclusionary
+  // i.e. `node.contains(node) == true`. However, we still need to test
+  // equality to the document itself.
+  return element == doc || doc.documentElement.contains(element);
+}
+
 
 /**
  * Removes the element.
@@ -78,6 +167,9 @@ export function closest(element, callback) {
  * @return {?Element}
  */
 export function closestByTag(element, tagName) {
+  if (element.closest) {
+    return element.closest(tagName);
+  }
   tagName = tagName.toUpperCase();
   return closest(element, el => {
     return el.tagName == tagName;
@@ -93,7 +185,7 @@ export function closestByTag(element, tagName) {
  */
 export function elementByTag(element, tagName) {
   const elements = element.getElementsByTagName(tagName);
-  return elements.length > 0 ? elements[0] : null;
+  return elements[0] || null;
 }
 
 
@@ -104,10 +196,10 @@ export function elementByTag(element, tagName) {
  * @return {?Element}
  */
 export function childElement(parent, callback) {
-  const children = parent.children;
-  for (let i = 0; i < children.length; i++) {
-    if (callback(children[i])) {
-      return children[i];
+  for (let child = parent.firstElementChild; child;
+      child = child.nextElementSibling) {
+    if (callback(child)) {
+      return child;
     }
   }
   return null;
@@ -115,22 +207,137 @@ export function childElement(parent, callback) {
 
 
 /**
- * Finds the first child element that has the specified attribute, optionally
- * with a value.
+ * Finds all child elements that satisfies the callback.
  * @param {!Element} parent
- * @param {string} attr
- * @param {string=} opt_value
+ * @param {function(!Element):boolean} callback
+ * @return {!Array.<!Element>}
+ */
+export function childElements(parent, callback) {
+  const children = [];
+  for (let child = parent.firstElementChild; child;
+       child = child.nextElementSibling) {
+    if (callback(child)) {
+      children.push(child);
+    }
+  }
+  return children;
+}
+
+
+/**
+ * Finds the last child element that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
  * @return {?Element}
  */
-export function childElementByAttr(parent, attr, opt_value) {
-  return childElement(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
+export function lastChildElement(parent, callback) {
+  for (let child = parent.lastElementChild; child;
+       child = child.previousElementSibling) {
+    if (callback(child)) {
+      return child;
     }
-    if (opt_value !== undefined && el.getAttribute(attr) != opt_value) {
-      return false;
+  }
+  return null;
+}
+
+/**
+ * Finds all child nodes that satisfies the callback.
+ * These nodes can include Text, Comment and other child nodes.
+ * @param {!Node} parent
+ * @param {function(!Node):boolean} callback
+ * @return {!Array<!Node>}
+ */
+export function childNodes(parent, callback) {
+  const nodes = [];
+  for (let child = parent.firstChild; child;
+       child = child.nextSibling) {
+    if (callback(child)) {
+      nodes.push(child);
     }
+  }
+  return nodes;
+}
+
+/**
+ * @type {boolean|undefined}
+ * @visiblefortesting
+ */
+let scopeSelectorSupported;
+
+/**
+ * @param {boolean|undefined} val
+ * @visiblefortesting
+ */
+export function setScopeSelectorSupportedForTesting(val) {
+  scopeSelectorSupported = val;
+}
+
+/**
+ * @param {!Element} parent
+ * @return {boolean}
+ */
+function isScopeSelectorSupported(parent) {
+  try {
+    parent.ownerDocument.querySelector(':scope');
     return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Finds the first child element that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {?Element}
+ */
+export function childElementByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > [' + attr + ']');
+  }
+  return childElement(parent, el => {
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds the last child element that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {?Element}
+ */
+export function lastChildElementByAttr(parent, attr) {
+  return lastChildElement(parent, el => {
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds all child elements that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {!Array.<!Element>}
+ */
+export function childElementsByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
+    // Convert NodeList into Array.<Element>.
+    const children = [];
+    for (let i = 0; i < nodeList.length; i++) {
+      children.push(nodeList[i]);
+    }
+    return children;
+  }
+  return childElements(parent, el => {
+    return el.hasAttribute(attr);
   });
 }
 
@@ -142,8 +349,89 @@ export function childElementByAttr(parent, attr, opt_value) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > ' + tagName);
+  }
   tagName = tagName.toUpperCase();
   return childElement(parent, el => {
     return el.tagName == tagName;
   });
+}
+
+
+/**
+ * Returns element data-param- attributes as url parameters key-value pairs.
+ * e.g. data-param-some-attr=value -> {someAttr: value}.
+ * @param {!Element} element
+ * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ *    name, get passed the camel-case parameter name.
+ * @return {!Object<string, string>}
+ */
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const attributes = element.attributes;
+  const params = Object.create(null);
+  for (let i = 0; i < attributes.length; i++) {
+    const attr = attributes[i];
+    const matches = attr.name.match(/^data-param-(.+)/);
+    if (matches) {
+      const param = dashToCamelCase(matches[1]);
+      params[computeParamNameFunc(param)] = attr.value;
+    }
+  }
+  return params;
+}
+
+
+/**
+ * Whether the element have a next node in the document order.
+ * This means either:
+ *  a. The element itself has a nextSibling.
+ *  b. Any of the element ancestors has a nextSibling.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function hasNextNodeInDocumentOrder(element) {
+  let currentElement = element;
+  do {
+    if (currentElement.nextSibling) {
+      return true;
+    }
+  } while (currentElement = currentElement.parentNode);
+  return false;
+}
+
+
+/**
+ * This method wraps around window's open method. It first tries to execute
+ * `open` call with the provided target and if it fails, it retries the call
+ * with the `_top` target. This is necessary given that in some embedding
+ * scenarios, such as iOS' WKWebView, navigation to `_blank` and other targets
+ * is blocked by default.
+ *
+ * @param {!Window} win
+ * @param {string} url
+ * @param {string} target
+ * @param {string=} opt_features
+ * @return {?Window}
+ */
+export function openWindowDialog(win, url, target, opt_features) {
+  // Try first with the specified target. If we're inside the WKWebView or
+  // a similar environments, this method is expected to fail by default for
+  // all targets except `_top`.
+  let res;
+  try {
+    res = win.open(url, target, opt_features);
+  } catch (e) {
+    dev.error('dom', 'Failed to open url on target: ', target, e);
+  }
+
+  // Then try with `_top` target.
+  if (!res && target != '_top') {
+    res = win.open(url, '_top');
+  }
+  return res;
 }

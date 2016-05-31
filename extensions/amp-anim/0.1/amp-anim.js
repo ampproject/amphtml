@@ -16,7 +16,7 @@
 
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {parseSrcset} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/srcset';
 import * as st from '../../../src/style';
 
 class AmpAnim extends AMP.BaseElement {
@@ -46,8 +46,7 @@ class AmpAnim extends AMP.BaseElement {
     this.element.appendChild(this.img_);
 
     /** @private @const {!Srcset} */
-    this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-        this.element.getAttribute('src'));
+    this.srcset_ = srcsetFromElement(this.element);
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
@@ -78,7 +77,7 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = '';
     return true;
@@ -105,7 +104,13 @@ class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_);
+    this.loadPromise_ = loadPromise(this.img_)
+        .catch(error => {
+          if (!this.img_.getAttribute('src')) {
+            return;
+          }
+          throw error;
+        });
     return this.loadPromise_;
   }
 };

@@ -14,11 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-carousel"></a> `amp-carousel`
+# <a name="amp-carousel"></a> `amp-carousel`
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis. It is meant to be highly flexible and performant.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-carousel">amp-carousel.html</a><br /><a href="https://ampbyexample.com/advanced/image_galleries_with_amp-carousel">image_galleries_with_amp-carousel.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-#### Behavior
+## Behavior
 
 Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
 
@@ -35,7 +56,7 @@ The carousel advances between items if the user swipes, uses arrow keys, clicks 
 
 Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
 
-#### Attributes
+## Attributes
 
 **controls**
 
@@ -47,7 +68,7 @@ unless only a single child is present.
 **type**
 - `carousel` (default) - All slides are shown and are scrollable horizontally.
   Be aware that `type=carousel` does not currently support `layout=responsive`.
-- `slides` - Shows a single slide at a time.
+- `slides` - Shows a single slide at a time. Supports `layout=responsive`.
 
 **loop** (type=slides only)
 
@@ -67,7 +88,7 @@ when `autoplay` is specified and will use the value of the `delay`
 attribute if present (minimum of 1000 ms, an error will be thrown if its any lower).
 The value of `delay` must be numeric representation in milliseconds, ex. `delay=5000`.
 
-#### Styling
+## Styling
 - You may use the `amp-carousel` element selector to style it freely.
 - `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
 You may override this with your own svg or image like so:
@@ -99,3 +120,6 @@ You may override this with your own svg or image like so:
   background-color: rgba(255, 0, 0, .5);
 }
 ```
+## Validation
+
+See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii) in the AMP validator specification.
