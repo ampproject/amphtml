@@ -30,3 +30,8 @@ limitations under the License.
 ### Required parameter
 
 - `data-sid`
+
+
+## Configuration
+
+For configuration details please contact integrations@widespace.com
