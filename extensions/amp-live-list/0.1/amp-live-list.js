@@ -166,7 +166,7 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private @const {!Array<!Element>} */
     this.pendingItemsTombstone_ = [];
 
-    this.updateSlot_.classList.add('-amp-hidden');
+    this.updateSlot_.classList.add('amp-hidden');
     this.eachChildElement_(this.itemsSlot_, item => {
       item.classList.add(classes.ITEM);
     });
@@ -194,7 +194,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // top of the component.
     if (this.pendingItemsInsert_.length > 0) {
       this.deferMutate(() => {
-        this.updateSlot_.classList.remove('-amp-hidden');
+        this.updateSlot_.classList.remove('amp-hidden');
       });
     } else if (this.pendingItemsReplace_.length > 0 ||
         this.pendingItemsTombstone_.length > 0) {
@@ -240,7 +240,7 @@ export class AmpLiveList extends AMP.BaseElement {
       }
 
       // Always hide update slot after mutation operation.
-      this.updateSlot_.classList.add('-amp-hidden');
+      this.updateSlot_.classList.add('amp-hidden');
 
       // TODO(erwinm, #3332) compensate scroll position here.
     });
