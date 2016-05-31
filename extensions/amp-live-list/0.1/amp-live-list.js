@@ -66,6 +66,20 @@ export class LiveListInterface {
    * @return {number}
    */
   getInterval() {}
+
+  /**
+   * Sets or removes the `disabled` property on the amp-live-list component.
+   *
+   * @param {boolean} value
+   */
+  toggle(unusedValue) {}
+
+  /**
+   * Identifies if the amp-live-list component is able to receive updates.
+   *
+   * @return {boolean}
+   */
+  isEnabled() {}
 }
 
 
@@ -177,6 +191,20 @@ export class AmpLiveList extends AMP.BaseElement {
 
     /** @private @const {function(!Element, !Element): number} */
     this.comparator_ = this.sortByDataSortTime_.bind(this);
+  }
+
+  /** @override */
+  isEnabled() {
+    return !this.element.hasAttribute('disabled');
+  }
+
+  /** @override */
+  toggle(value) {
+    if (value) {
+      this.element.removeAttribute('disabled');
+    } else {
+      this.element.setAttribute('disabled', '');
+    }
   }
 
   /** @override */
