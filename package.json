@@ -88,7 +88,7 @@
     "request": "2.69.0",
     "rimraf": "2.5.1",
     "serve-index": "1.7.2",
-    "serve-static": "1.9.1",
+    "serve-static": "1.10.3",
     "sinon": "1.17.3",
     "sinon-chai": "2.8.0",
     "text-table": "0.2.0",
