@@ -108,6 +108,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Teads](../ads/teads.md)
 - [Webediads](../ads/webediads.md)
 - [Weborama](../ads/weborama.md)
+- [Widespace](../ads/widespace.md)
 - [Yieldbot](../ads/yieldbot.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [YahooJP](../ads/yahoojp.md)
