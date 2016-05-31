@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  createFixtureIframe,
-  expectBodyToBecomeVisible,
-} from '../../testing/iframe';
+import {createFixtureIframe} from '../../testing/iframe';
 
 // Checks if an amp element gets upgraded.
 // Works for all amp elements used in this test.
@@ -39,7 +36,7 @@ describe('test extensions loading in multiple orders', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
@@ -54,7 +51,7 @@ describe('test extensions loading in multiple orders', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
@@ -69,7 +66,7 @@ describe('test extensions loading in multiple orders', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
@@ -84,7 +81,7 @@ describe('test extensions loading in multiple orders', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
@@ -99,7 +96,7 @@ describe('test extensions loading in multiple orders', () => {
           fixture = f;
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           expect(ampFitText).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
@@ -116,7 +113,7 @@ describe('test extensions loading in multiple orders', () => {
           const ampIframe = fixture.doc.querySelectorAll('amp-iframe');
           expect(ampFitText).to.have.length(1);
           expect(ampIframe).to.have.length(1);
-          return expectBodyToBecomeVisible(fixture.win);
+          return fixture.awaitEvent('amp:load:start', 1);
         }).then(() => {
           const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
           checkElementUpgrade(ampFitText[0]);
