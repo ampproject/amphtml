@@ -183,6 +183,8 @@ export class FontLoader {
       // Use larger font-size to better detect font load.
       fontSize: '40px',
       fontVariant: this.fontConfig_.variant,
+      fontWeight: this.fontConfig_.weight,
+      fontStyle: this.fontConfig_.style,
       left: '-999px',
       lineHeight: 'normal',
       margin: 0,
