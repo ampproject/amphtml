@@ -421,6 +421,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   expandTemplate_(template, trigger, event, opt_iterations) {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     if (opt_iterations < 0) {
+      user.error('Maximum depth reached while expanding variables. Please ' +
+          'ensure that the variables are not recursive.');
       return template;
     }
 
