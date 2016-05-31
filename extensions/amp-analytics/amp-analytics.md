@@ -87,7 +87,7 @@ Here's an example of usage of `type` for a provider called XYZ:
 
 Type attribute value: `adobeanalytics`
 
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
 
 ### AT Internet
 
