@@ -290,6 +290,26 @@ export class Viewport {
   }
 
   /**
+   * Instruct the viewport to enter lightbox mode.
+   */
+  enterLightboxMode() {
+    this.viewer_.requestFullOverlay();
+    this.disableTouchZoom();
+    this.hideFixedLayer();
+    this.vsync_.mutate(() => this.binding_.updateLightboxMode(true));
+  }
+
+  /**
+   * Instruct the viewport to enter lightbox mode.
+   */
+  leaveLightboxMode() {
+    this.viewer_.cancelFullOverlay();
+    this.showFixedLayer();
+    this.restoreOriginalTouchZoom();
+    this.vsync_.mutate(() => this.binding_.updateLightboxMode(false));
+  }
+
+  /**
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
@@ -548,6 +568,13 @@ class ViewportBindingDef {
   updatePaddingTop(unusedPaddingTop) {}
 
   /**
+   * Updates the viewport whether it's currently in the lightbox or a normal
+   * mode.
+   * @param {boolean} unusedLightboxMode
+   */
+  updateLightboxMode(unusedLightboxMode) {}
+
+  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */
@@ -658,6 +685,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
+  updateLightboxMode(unusedLightboxMode) {
+    // The layout is always accurate.
   }
 
   /** @override */
@@ -887,6 +919,16 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
+  updateLightboxMode(lightboxMode) {
+    // This code will no longer be needed with the newer iOS viewport
+    // implementation.
+    onDocumentReady(this.win.document, () => {
+      this.win.document.body.style.borderTopStyle =
+          lightboxMode ? 'none' : 'solid';
+    });
+  }
+
+  /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
   }
@@ -1088,6 +1130,11 @@ export class ViewportBindingVirtual_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
+  updateLightboxMode(unusedLightboxMode) {
+    // The layout is always accurate.
   }
 
   /** @override */

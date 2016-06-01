@@ -77,17 +77,13 @@ describe('amp-image-lightbox component', () => {
   it('should activate all steps', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
-      const requestFullOverlay = sandbox.spy();
-      impl.requestFullOverlay = requestFullOverlay;
       const viewportOnChanged = sandbox.spy();
-      const disableTouchZoom = sandbox.spy();
-      const hideFixedLayer = sandbox.spy();
-      const showFixedLayer = sandbox.spy();
+      const enterLightboxMode = sandbox.spy();
+      const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom,
-        hideFixedLayer: hideFixedLayer,
-        showFixedLayer: showFixedLayer,
+        enterLightboxMode: enterLightboxMode,
+        leaveLightboxMode: leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
@@ -103,15 +99,13 @@ describe('amp-image-lightbox component', () => {
       ampImage.setAttribute('src', 'data:');
       impl.activate({source: ampImage});
 
-      expect(requestFullOverlay.callCount).to.equal(1);
       expect(viewportOnChanged.callCount).to.equal(1);
       expect(impl.unlistenViewport_).to.not.equal(null);
       expect(historyPush.callCount).to.equal(1);
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
-      expect(disableTouchZoom.callCount).to.equal(1);
-      expect(hideFixedLayer.callCount).to.equal(1);
-      expect(showFixedLayer.callCount).to.equal(0);
+      expect(enterLightboxMode.callCount).to.equal(1);
+      expect(leaveLightboxMode.callCount).to.equal(0);
     });
   });
 
@@ -120,17 +114,13 @@ describe('amp-image-lightbox component', () => {
       const impl = lightbox.implementation_;
       impl.active_ = true;
       impl.historyId_ = 11;
-      const cancelFullOverlay = sandbox.spy();
-      impl.cancelFullOverlay = cancelFullOverlay;
       const viewportOnChangedUnsubscribed = sandbox.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-      const restoreOriginalTouchZoom = sandbox.spy();
-      const hideFixedLayer = sandbox.spy();
-      const showFixedLayer = sandbox.spy();
+      const enterLightboxMode = sandbox.spy();
+      const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
-        hideFixedLayer: hideFixedLayer,
-        showFixedLayer: showFixedLayer,
+        enterLightboxMode: enterLightboxMode,
+        leaveLightboxMode: leaveLightboxMode,
       };};
       const historyPop = sandbox.spy();
       impl.getHistory_ = () => {
@@ -147,11 +137,9 @@ describe('amp-image-lightbox component', () => {
       expect(exit.callCount).to.equal(1);
       expect(viewportOnChangedUnsubscribed.callCount).to.equal(1);
       expect(impl.unlistenViewport_).to.equal(null);
-      expect(cancelFullOverlay.callCount).to.equal(1);
-      expect(restoreOriginalTouchZoom.callCount).to.equal(1);
+      expect(leaveLightboxMode.callCount).to.equal(1);
+      expect(enterLightboxMode.callCount).to.equal(0);
       expect(historyPop.callCount).to.equal(1);
-      expect(showFixedLayer.callCount).to.equal(1);
-      expect(hideFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -160,14 +148,12 @@ describe('amp-image-lightbox component', () => {
       const impl = lightbox.implementation_;
       const setupCloseSpy = sandbox.spy(impl, 'close');
       const viewportOnChanged = sandbox.spy();
-      const disableTouchZoom = sandbox.spy();
-      const restoreOriginalTouchZoom = sandbox.spy();
+      const enterLightboxMode = sandbox.spy();
+      const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom,
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
-        hideFixedLayer: () => {},
-        showFixedLayer: () => {},
+        enterLightboxMode: enterLightboxMode,
+        leaveLightboxMode: leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
