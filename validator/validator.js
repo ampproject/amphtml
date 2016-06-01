@@ -2686,10 +2686,10 @@ class ParsedValidatorRules {
       }
       if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
     }
-    /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
-     */
-    this.formatByCode_ = new goog.structs.Map();
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
+       */
+      this.formatByCode_ = new goog.structs.Map();
       for (let i = 0; i < rules.errorFormats.length; ++i) {
         const errorFormat = rules.errorFormats[i];
         goog.asserts.assert(errorFormat !== null);
