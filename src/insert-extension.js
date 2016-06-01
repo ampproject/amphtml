@@ -60,7 +60,7 @@ function createAmpExtensionScript(win, extension) {
   ampExtensionScript.setAttribute('data-script', extension);
   const pathStr = win.location.pathname;
   const scriptSrc = calculateExtensionScriptUrl(pathStr, extension,
-      win.AMP_TEST, window.ampTestRuntimeConfig.useCompiledJs);
+      win.AMP_TEST);
   ampExtensionScript.src = scriptSrc;
   return ampExtensionScript;
 };
@@ -93,15 +93,13 @@ function isAmpExtensionScriptRequired(win, element, extension) {
  * @visibleForTesting
  * @param {string} path Location path of the window
  * @param {string} extension
- * @param {boolean=} isTest
- * @param {boolean=} isUsingCompiledJs
+ * @param {bool=} isTest
  * @return {string}
  */
-export function calculateExtensionScriptUrl(path, extension, isTest,
-  isUsingCompiledJs) {
+export function calculateExtensionScriptUrl(path, extension, isTest) {
   if (getMode().localDev) {
     if (isTest) {
-      if (isUsingCompiledJs) {
+      if (window.ampTestRuntimeConfig.useCompiledJs) {
         return `/base/dist/v0/${extension}-0.1.js`;
       }
       return `/base/dist/v0/${extension}-0.1.max.js`;
