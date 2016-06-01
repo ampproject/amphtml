@@ -739,6 +739,27 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
+  
+  'oewa': {
+    'vars': {
+      'amp': '1'
+    },
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?s=${s}' +
+        '&amp=${amp}' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}'
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    }
+  }
+  
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
@@ -747,3 +768,5 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
   ['triggers']['pageLoad']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
