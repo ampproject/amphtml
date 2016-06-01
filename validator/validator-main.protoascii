@@ -25,7 +25,7 @@ min_validator_revision_required: 135
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 223
+spec_file_revision: 221
 
 # Validator extensions.
 # =====================
@@ -535,11 +535,11 @@ tags: {  # Special custom 'author' spreadsheet.
 }
 tags: {
   tag_name: "style"
-  spec_name: "head > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
+  spec_name: "head > style : boilerplate - old variant"
+  mandatory_alternatives: "head > style : boilerplate"
   unique: true
   mandatory_parent: "head"
-  deprecation: "head > style[amp-boilerplate]"
+  deprecation: "head > style : boilerplate"
   deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
@@ -548,11 +548,11 @@ tags: {
 }
 tags: {
   tag_name: "style"
-  spec_name: "noscript > style[amp-boilerplate] - old variant"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
+  spec_name: "noscript > style : boilerplate - old variant"
+  mandatory_alternatives: "noscript > style : boilerplate"
   unique: true
   mandatory_parent: "noscript"
-  deprecation: "noscript > style[amp-boilerplate]"
+  deprecation: "noscript > style : boilerplate"
   deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
@@ -561,11 +561,11 @@ tags: {
 }
 tags: {
   tag_name: "style"
-  spec_name: "head > style[amp-boilerplate]"
-  mandatory_alternatives: "head > style[amp-boilerplate]"
+  spec_name: "head > style : boilerplate"
+  mandatory_alternatives: "head > style : boilerplate"
   unique: true
   mandatory_parent: "head"
-  also_requires_tag: "noscript > style[amp-boilerplate]"
+  also_requires_tag: "noscript > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -581,11 +581,11 @@ tags: {
 }
 tags: {
   tag_name: "style"
-  spec_name: "noscript > style[amp-boilerplate]"
-  mandatory_alternatives: "noscript > style[amp-boilerplate]"
+  spec_name: "noscript > style : boilerplate"
+  mandatory_alternatives: "noscript > style : boilerplate"
   unique: true
   mandatory_parent: "noscript"
-  also_requires_tag: "head > style[amp-boilerplate]"
+  also_requires_tag: "head > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
