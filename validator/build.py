@@ -263,7 +263,8 @@ def CompileValidatorMinified(out_dir):
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-full.js'],
+                'validator-in-browser.js', 'validator.js', 'validator-full.js',
+                'htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -331,7 +332,7 @@ def CompileValidatorTestMinified(out_dir):
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js', 'validator-full.js',
-                'validator_test.js'],
+                'htmlparser-interface.js', 'validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
@@ -343,6 +344,7 @@ def CompileValidatorLightTestMinified(out_dir):
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js', 'validator-light.js',
+                'htmlparser-interface.js', 'dom-walker.js',
                 'validator-light_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
@@ -351,7 +353,8 @@ def CompileValidatorLightTestMinified(out_dir):
 
 def CompileHtmlparserTestMinified(out_dir):
   logging.info('entering ...')
-  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser_test.js'],
+  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser-interface.js',
+                               'htmlparser_test.js'],
                      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
                      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
