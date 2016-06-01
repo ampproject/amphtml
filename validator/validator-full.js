@@ -498,9 +498,9 @@ amp.validator.categorizeError = function(error) {
            amp.validator.ValidationError.Code
                .MANDATORY_CDATA_MISSING_OR_INCORRECT &&
        (goog.string./*OK*/ startsWith(
-            error.params[0], 'head > style : boilerplate') ||
+            error.params[0], 'head > style[amp-boilerplate]') ||
         goog.string./*OK*/ startsWith(
-            error.params[0], 'noscript > style : boilerplate')))) {
+            error.params[0], 'noscript > style[amp-boilerplate]')))) {
     return amp.validator.ErrorCategory.Code
         .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }
