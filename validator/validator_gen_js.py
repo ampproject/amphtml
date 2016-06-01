@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
+
 """Generates validator-generated.js.
 
 This script reads validator.protoascii and reflects over its contents
@@ -84,7 +85,7 @@ def FieldTypeFor(descriptor, field_desc):
           lambda: field_desc.enum_type.full_name),
       descriptor.FieldDescriptor.TYPE_MESSAGE: (
           lambda: field_desc.message_type.full_name),
-  }[field_desc.type]()
+      }[field_desc.type]()
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     return '!Array<!%s>' % element_type
   else:
@@ -132,18 +133,11 @@ def ValueToString(descriptor, field_desc, value):
   """
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if value:
-      return '[%s]' % ', '.join([NonRepeatedValueToString(
-          descriptor, field_desc, s) for s in value])
+      return '[%s]' % ', '.join([NonRepeatedValueToString(descriptor,
+                                                          field_desc, s)
+                                 for s in value])
     return '[]'
   return NonRepeatedValueToString(descriptor, field_desc, value)
-
-# For the validator-light version, skip these fields. This works by
-# putting them inside a conditional with
-# amp.validator.GENERATE_DETAILED_ERRORS. The Closure compiler will then
-# leave them out via dead code elimination.
-SKIP_FIELDS_FOR_LIGHT = ['error_formats', 'spec_url', 'validator_revision',
-                         'spec_file_revision', 'template_spec_url',
-                         'min_validator_revision_required', 'deprecation_url']
 
 
 def PrintClassFor(descriptor, msg_desc, out):
@@ -169,18 +163,14 @@ def PrintClassFor(descriptor, msg_desc, out):
   out.append(' */')
   out.append('%s = function() {' % msg_desc.full_name)
   for field in msg_desc.fields:
-    if field.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  if (amp.validator.GENERATE_DETAILED_ERRORS) {')
     if field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
       if is_exported:
         out.append('  /** @export {%s} */' % FieldTypeFor(descriptor, field))
-      out.append('  this.%s = [];' % UnderscoreToCamelCase(field.name))
+      out.append('  this.%s = [];'  % UnderscoreToCamelCase(field.name))
     else:
       if is_exported:
         out.append('  /** @export {?%s} */' % FieldTypeFor(descriptor, field))
       out.append('  this.%s = null;' % UnderscoreToCamelCase(field.name))
-    if field.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  }')
   out.append('};')
   out.append('')
 
@@ -198,10 +188,13 @@ def PrintEnumFor(enum_desc, out):
   out.append(' * @export')
   out.append(' */')
   out.append('%s = {' % enum_desc.full_name)
-  out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in
-                         enum_desc.values]))
+  out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name)
+                         for v in enum_desc.values]))
   out.append('};')
   out.append('')
+
+
+SKIP_FIELDS = ['error_formats', 'spec_url']
 
 
 def PrintObject(descriptor, msg, this_id, out):
@@ -225,26 +218,25 @@ def PrintObject(descriptor, msg, this_id, out):
   out.append('  var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
   next_id = this_id + 1
   for (field_desc, field_val) in msg.ListFields():
-    if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
+    if field_desc.name in SKIP_FIELDS:
       out.append('  if (amp.validator.GENERATE_DETAILED_ERRORS) {')
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.append('    o_%d.%s.push(o_%d);' %
-                     (this_id, UnderscoreToCamelCase(field_desc.name),
-                      field_id))
+          out.append('    o_%d.%s.push(o_%d);' % (
+              this_id, UnderscoreToCamelCase(field_desc.name), field_id))
       else:
         field_id = next_id
         next_id = PrintObject(descriptor, field_val, field_id, out)
-        out.append('  o_%d.%s = o_%d;' %
-                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+        out.append('  o_%d.%s = o_%d;' % (
+            this_id, UnderscoreToCamelCase(field_desc.name), field_id))
     else:
-      out.append('  o_%d.%s = %s;' %
-                 (this_id, UnderscoreToCamelCase(field_desc.name),
-                  ValueToString(descriptor, field_desc, field_val)))
-    if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
+      out.append('  o_%d.%s = %s;' % (
+          this_id, UnderscoreToCamelCase(field_desc.name),
+          ValueToString(descriptor, field_desc, field_val)))
+    if field_desc.name in SKIP_FIELDS:
       out.append('  }')
   return next_id
 
@@ -277,7 +269,7 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   all_names.sort()
 
   out.append('//')
-  out.append('// Generated by %s - do not edit.' % os.path.basename(__file__))
+  out.append('// Generated by %s - do not edit.'  % os.path.basename(__file__))
   out.append('//')
   out.append('')
   for name in all_names:
