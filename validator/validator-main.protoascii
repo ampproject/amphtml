@@ -25,7 +25,7 @@ min_validator_revision_required: 135
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 223
+spec_file_revision: 224
 
 # Validator extensions.
 # =====================
@@ -540,11 +540,11 @@ tags: {
   unique: true
   mandatory_parent: "head"
   deprecation: "head > style[amp-boilerplate]"
-  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   tag_name: "style"
@@ -553,11 +553,11 @@ tags: {
   unique: true
   mandatory_parent: "noscript"
   deprecation: "noscript > style[amp-boilerplate]"
-  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   tag_name: "style"
@@ -577,7 +577,7 @@ tags: {
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
     cdata_regex: "\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
   tag_name: "style"
@@ -595,7 +595,7 @@ tags: {
   cdata {
     cdata_regex: "\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 
 # 4.3 Sections
@@ -2050,7 +2050,7 @@ tags: {
   mandatory: true
   unique: true
   mandatory_parent: "head"
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
