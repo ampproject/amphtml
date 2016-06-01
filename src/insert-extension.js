@@ -59,7 +59,7 @@ function createAmpExtensionScript(win, extension) {
   ampExtensionScript.setAttribute('custom-element', extension);
   ampExtensionScript.setAttribute('data-script', extension);
   const pathStr = win.location.pathname;
-  const useCompiledJs = window.ampTestRuntimeConfig &&
+  const useCompiledJs = win.AMP_TEST && window.ampTestRuntimeConfig &&
       window.ampTestRuntimeConfig.useCompiledJs;
   const scriptSrc = calculateExtensionScriptUrl(pathStr, extension,
       win.AMP_TEST, useCompiledJs);
