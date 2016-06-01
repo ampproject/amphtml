@@ -51,6 +51,7 @@ goog.provide('parse_css.StringToken');
 goog.provide('parse_css.StringValuedToken');
 goog.provide('parse_css.SubstringMatchToken');
 goog.provide('parse_css.SuffixMatchToken');
+goog.provide('parse_css.TRIVIAL_ERROR_TOKEN');
 goog.provide('parse_css.Token');
 goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
@@ -317,7 +318,13 @@ class Tokenizer {
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
       if (token instanceof parse_css.ErrorToken) {
-        this.errors_.push(token);
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          this.errors_.push(token);
+        } else {
+          this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          this.tokens_ = [];
+          return;
+        }
       } else {
         this.tokens_.push(token);
       }
@@ -519,7 +526,7 @@ class Tokenizer {
                   .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
               ['style']));
         } else {
-          return new parse_css.ErrorToken();
+          return parse_css.TRIVIAL_ERROR_TOKEN;
         }
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
@@ -589,7 +596,7 @@ class Tokenizer {
             mark.addPositionTo(error);
             this.errors_.push(error);
           } else {
-            this.errors_ = [new parse_css.ErrorToken()];
+            this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           }
           return;
         }
@@ -678,7 +685,7 @@ class Tokenizer {
               amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
               ['style']);
         } else {
-          return new parse_css.ErrorToken();
+          return parse_css.TRIVIAL_ERROR_TOKEN;
         }
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this.eof(this.next())) {
@@ -726,7 +733,7 @@ class Tokenizer {
                 amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
                 ['style']);
           } else {
-            return new parse_css.ErrorToken();
+            return parse_css.TRIVIAL_ERROR_TOKEN;
           }
         }
       } else if (
@@ -737,7 +744,7 @@ class Tokenizer {
           return new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
         } else {
-          return new parse_css.ErrorToken();
+          return parse_css.TRIVIAL_ERROR_TOKEN;
         }
       } else if (this.code_ === /* '\' */ 0x5c) {
         if (this./*OK*/ startsWithAValidEscape()) {
@@ -749,7 +756,7 @@ class Tokenizer {
                 amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
                 ['style']);
           } else {
-            return new parse_css.ErrorToken();
+            return parse_css.TRIVIAL_ERROR_TOKEN;
           }
         }
       } else {
@@ -1153,6 +1160,11 @@ parse_css.ErrorToken = class extends parse_css.Token {
     return json;
   }
 };
+
+/**
+ * @type {!parse_css.ErrorToken}
+ */
+parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken();
 
 parse_css.WhitespaceToken = class extends parse_css.Token {
   constructor() {

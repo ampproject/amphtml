@@ -685,33 +685,39 @@ class CdataMatcher {
       const tokenList = parse_css.tokenize(
           cdata, this.getLineCol().getLine(), this.getLineCol().getCol(),
           cssErrors);
+      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
       /** @type {!Object<string,parse_css.BlockType>} */
       const atRuleParsingSpec = computeAtRuleParsingSpec(cdataSpec.cssSpec);
       /** @type {!parse_css.Stylesheet} */
       const sheet = parse_css.parseAStylesheet(
           tokenList, atRuleParsingSpec,
           computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
+      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
 
       // We extract the urls from the stylesheet. As a side-effect, this can
       // generate errors for url(…) functions with invalid parameters.
       /** @type {!Array<!parse_css.ParsedCssUrl>} */
       const parsedUrls = [];
       parse_css.extractUrls(sheet, parsedUrls, cssErrors);
-
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        for (const errorToken of cssErrors) {
-          // Override the first parameter with the name of this style tag.
-          let params = errorToken.params;
-          // Override the first parameter with the name of this style tag.
-          params[0] = getTagSpecName(this.tagSpec_);
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR, errorToken.code,
-              new LineCol(errorToken.line, errorToken.col), params,
-              /* url */ '', validationResult);
-        }
-      } else if (cssErrors.length > 0) {
+      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
+      }
+      for (const errorToken of cssErrors) {
+        // Override the first parameter with the name of this style tag.
+        let params = errorToken.params;
+        // Override the first parameter with the name of this style tag.
+        params[0] = getTagSpecName(this.tagSpec_);
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+            new LineCol(errorToken.line, errorToken.col), params,
+            /* url */ '', validationResult);
       }
       const parsedFontUrlSpec =
           new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);

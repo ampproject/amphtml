@@ -33,11 +33,12 @@ goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
-
+goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.ValidationError.Code');
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
+goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
 goog.require('parse_css.Token');
 goog.require('parse_css.TokenType');
 
@@ -486,16 +487,24 @@ class Canonicalizer {
             !(tokenStream.current() instanceof parse_css.AtKeywordToken),
         'Internal Error: parseAQualifiedRule precondition not met');
 
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && errors.length > 0) {
+      return;
+    }
+
     const rule = new parse_css.QualifiedRule();
     tokenStream.current().copyStartPositionTo(rule);
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
       if (tokenStream.current() instanceof parse_css.EOFToken) {
-        errors.push(createParseErrorTokenAt(
-            rule, amp.validator.ValidationError.Code
-                      .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
-            ['style']));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          errors.push(createParseErrorTokenAt(
+              rule, amp.validator.ValidationError.Code
+                        .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
+              ['style']));
+        } else {
+          errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        }
         return;
       }
       if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
@@ -520,6 +529,10 @@ class Canonicalizer {
    * @return {!Array<!parse_css.Declaration>}
    */
   parseAListOfDeclarations(tokenList, errors) {
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && errors.length > 0) {
+      return [];
+    }
+
     /** @type {!Array<!parse_css.Declaration>} */
     const decls = [];
     const tokenStream = new parse_css.TokenStream(tokenList);
@@ -534,14 +547,23 @@ class Canonicalizer {
         // The CSS3 Parsing spec allows for AT rules inside lists of
         // declarations, but our grammar does not so we deviate a tiny bit here.
         // We consume an AT rule, but drop it and instead push an error token.
-        const atRule = this.parseAnAtRule(tokenStream, errors);
-        errors.push(createParseErrorTokenAt(
-            atRule,
-            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
-            ['style', atRule.name]));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          const atRule = this.parseAnAtRule(tokenStream, errors);
+          errors.push(createParseErrorTokenAt(
+              atRule,
+              amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+              ['style', atRule.name]));
+        } else {
+          errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          return [];
+        }
       } else if (tokenStream.current() instanceof parse_css.IdentToken) {
         this.parseADeclaration(tokenStream, decls, errors);
       } else {
+        if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+          errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          return [];
+        }
         errors.push(createParseErrorTokenAt(
             tokenStream.current(),
             amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
@@ -570,6 +592,10 @@ class Canonicalizer {
         tokenStream.current(), parse_css.IdentToken,
         'Internal Error: parseADeclaration precondition not met');
 
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && errors.length > 0) {
+      return;
+    }
+
     const startToken =
         /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     const decl = new parse_css.Declaration(startToken.value);
@@ -581,6 +607,10 @@ class Canonicalizer {
 
     tokenStream.consume();
     if (!(tokenStream.current() instanceof parse_css.ColonToken)) {
+      if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+        errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+        return;
+      }
       errors.push(createParseErrorTokenAt(
           startToken,
           amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
@@ -888,6 +918,9 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
     goog.asserts.assert(
         declaration.value[declaration.value.length - 1].tokenType ===
         parse_css.TokenType.EOF_TOKEN);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS && this.errors.length > 0) {
+      return;
+    }
     for (let ii = 0; ii < declaration.value.length - 1;) {
       const token = declaration.value[ii];
       if (token.tokenType === parse_css.TokenType.URL) {
@@ -903,11 +936,15 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
         const parsedUrl = new parse_css.ParsedCssUrl();
         ii = parseUrlFunction(declaration.value, ii, parsedUrl);
         if (ii === -1) {
-          const error = new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-              /* params */['style']);
-          token.copyStartPositionTo(error);
-          this.errors.push(error);
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            const error = new parse_css.ErrorToken(
+                amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
+                /* params */['style']);
+            token.copyStartPositionTo(error);
+            this.errors.push(error);
+          } else {
+            this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
+          }
           return;
         }
         parsedUrl.atRuleScope = this.atRuleScope;
