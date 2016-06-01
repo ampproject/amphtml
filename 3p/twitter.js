@@ -68,7 +68,7 @@ export function twitter(global, data) {
       }
     });
 
-    twttr.widgets.createTweet(data.tweetid, tweet, data).then(el => {
+    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(el => {
       if (el) {
         // Not a deleted tweet
         twitterWidgetSandbox = el;
