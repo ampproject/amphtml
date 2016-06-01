@@ -47,6 +47,9 @@ goog.require('parse_css.tokenize');
 goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
 
+/** @define {boolean} */
+var GENERATE_DETAILED_ERRORS = true;
+
 /**
  * Determines if |n| is an integer.
  * @param {number} n
@@ -212,34 +215,45 @@ class ChildTagMatcher {
     }
     const tagName = context.getTagStack().getCurrent();
     const childTags = this.parentSpec_.childTags;
+    this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
       if (names.indexOf(tagName) == -1) {
-        const allowedNames = '[\'' + names.join('\', \'') + '\']';
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
-            context.getDocLocator(),
-            /* params */
-            [tagName, getTagSpecName(this.parentSpec_), allowedNames],
-            this.parentSpec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          const allowedNames = '[\'' + names.join('\', \'') + '\']';
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
+              context.getDocLocator(),
+              /* params */
+              [tagName, getTagSpecName(this.parentSpec_), allowedNames],
+              this.parentSpec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
     }
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        this.numChildTagsSeen_ == 0) {
+        (this.numChildTagsSeen_ - 1) == 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(tagName) == -1) {
-        const allowedNames = '[\'' + names.join('\', \'') + '\']';
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME,
-            context.getDocLocator(),
-            /* params */
-            [tagName, getTagSpecName(this.parentSpec_), allowedNames],
-            this.parentSpec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          const allowedNames = '[\'' + names.join('\', \'') + '\']';
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .DISALLOWED_FIRST_CHILD_TAG_NAME,
+              context.getDocLocator(),
+              /* params */
+              [tagName, getTagSpecName(this.parentSpec_), allowedNames],
+              this.parentSpec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
     }
-    this.numChildTagsSeen_++;
   }
 
   /**
@@ -254,16 +268,21 @@ class ChildTagMatcher {
     if (expected === null || expected === this.numChildTagsSeen_) {
       return;
     }
-    context.addError(
-        amp.validator.ValidationError.Severity.ERROR,
-        amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
-        this.lineCol_,
-        /* params */
-        [
-          getTagSpecName(this.parentSpec_), expected.toString(),
-          this.numChildTagsSeen_.toString()
-        ],
-        this.parentSpec_.specUrl, result);
+    if (GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
+          this.lineCol_,
+          /* params */
+          [
+            getTagSpecName(this.parentSpec_), expected.toString(),
+            this.numChildTagsSeen_.toString()
+          ],
+          this.parentSpec_.specUrl, result);
+    } else {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
   }
 }
 
@@ -491,12 +510,16 @@ class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
   /** @inheritDoc */
   visitAtRule(atRule) {
     if (!isAtRuleValid(this.cssSpec, atRule.name)) {
-      this.context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
-          new LineCol(atRule.line, atRule.col),
-          /* params */[getTagSpecName(this.tagSpec), atRule.name],
-          /* url */ '', this.result);
+      if (GENERATE_DETAILED_ERRORS) {
+        this.context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+            new LineCol(atRule.line, atRule.col),
+            /* params */[getTagSpecName(this.tagSpec), atRule.name],
+            /* url */ '', this.result);
+      } else {
+        this.result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       this.errorsSeen = true;
     }
   }
@@ -586,13 +609,17 @@ class CdataMatcher {
     if (cdataSpec.maxBytes !== null) {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
-            context.getDocLocator(),
-            /* params */
-            [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
-            cdataSpec.maxBytesSpecUrl, validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+              cdataSpec.maxBytesSpecUrl, validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         // We return early if the byte length is violated as parsing
         // really long stylesheets is slow and not worth our time.
         return;
@@ -608,13 +635,17 @@ class CdataMatcher {
     // Mandatory CDATA exact match
     if (cdataSpec.mandatoryCdata !== null) {
       if (cdataSpec.mandatoryCdata !== cdata) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code
-                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
-            validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(this.tagSpec_)],
+              this.tagSpec_.specUrl, validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        }
       }
       // We return early if the cdata has an exact match rule. The
       // spec shouldn't have an exact match rule that doesn't validate.
@@ -622,13 +653,17 @@ class CdataMatcher {
     } else if (cdataSpec.cdataRegex !== null) {
       const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
       if (!cdataRegex.test(cdata)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code
-                .MANDATORY_CDATA_MISSING_OR_INCORRECT,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(this.tagSpec_)], this.tagSpec_.specUrl,
-            validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .MANDATORY_CDATA_MISSING_OR_INCORRECT,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(this.tagSpec_)],
+              this.tagSpec_.specUrl, validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
     } else if (cdataSpec.cssSpec !== null) {
@@ -651,15 +686,20 @@ class CdataMatcher {
       const parsedUrls = [];
       parse_css.extractUrls(sheet, parsedUrls, cssErrors);
 
-      for (const errorToken of cssErrors) {
-        // Override the first parameter with the name of this style tag.
-        let params = errorToken.params;
-        // Override the first parameter with the name of this style tag.
-        params[0] = getTagSpecName(this.tagSpec_);
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
-            new LineCol(errorToken.line, errorToken.col), params, /* url */ '',
-            validationResult);
+      if (GENERATE_DETAILED_ERRORS) {
+        for (const errorToken of cssErrors) {
+          // Override the first parameter with the name of this style tag.
+          let params = errorToken.params;
+          // Override the first parameter with the name of this style tag.
+          params[0] = getTagSpecName(this.tagSpec_);
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+              new LineCol(errorToken.line, errorToken.col), params,
+              /* url */ '', validationResult);
+        }
+      } else if (cssErrors.length > 0) {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
       }
       const parsedFontUrlSpec =
           new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
@@ -686,12 +726,18 @@ class CdataMatcher {
     for (const blacklist of cdataSpec.blacklistedCdataRegex) {
       const blacklistRegex = new RegExp(blacklist.regex, 'i');
       if (blacklistRegex.test(cdata)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(this.tagSpec_), blacklist.errorMessage],
-            this.tagSpec_.specUrl, validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
+              this.tagSpec_.specUrl, validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
     }
   }
@@ -898,7 +944,7 @@ class ParsedUrlSpec {
 
   /**
    * @param
-   * {!ParsedUrlSpec.AttrErrorAdapter_|!ParsedUrlSpec.StylesheetErrorAdapter_}
+   * {ParsedUrlSpec.AttrErrorAdapter_|ParsedUrlSpec.StylesheetErrorAdapter_}
    * adapter
    * @param {!Context} context
    * @param {!string} url
@@ -908,24 +954,40 @@ class ParsedUrlSpec {
   validateUrlAndProtocol(adapter, context, url, tagSpec, result) {
     if (url === '' &&
         (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
-      adapter.missingUrl(context, tagSpec, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        adapter.missingUrl(context, tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     let uri;
     try {
       uri = goog.Uri.parse(url);
     } catch (ex) {
-      adapter.invalidUrl(context, url, tagSpec, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        adapter.invalidUrl(context, url, tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     if (uri.hasScheme() &&
         !this.allowedProtocols_.contains(uri.getScheme().toLowerCase())) {
-      adapter.invalidUrlProtocol(
-          context, uri.getScheme().toLowerCase(), tagSpec, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        adapter.invalidUrlProtocol(
+            context, uri.getScheme().toLowerCase(), tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     if (!this.spec_.allowRelative && !uri.hasScheme()) {
-      adapter.disallowedRelativeUrl(context, url, tagSpec, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        adapter.disallowedRelativeUrl(context, url, tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
   }
@@ -1232,12 +1294,17 @@ class ParsedAttrSpec {
       if ((this.spec_.value == '') && (attrValue == attrName)) {
         return;
       }
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(tagSpec), attrValue],
-          tagSpec.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
     } else if (
         this.spec_.valueRegex !== null || this.spec_.valueRegexCasei !== null) {
       var valueRegex;
@@ -1247,12 +1314,17 @@ class ParsedAttrSpec {
         valueRegex = new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
       }
       if (!valueRegex.test(attrValue)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
-            tagSpec.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+              tagSpec.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
     } else if (this.spec_.valueUrl !== null) {
       this.validateAttrValueUrl(context, attrName, attrValue, tagSpec, result);
@@ -1279,22 +1351,30 @@ class ParsedAttrSpec {
     } else {
       let srcset = goog.string.trim(attrValue);
       if (srcset == '') {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MISSING_URL,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
-            result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MISSING_URL,
+              context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
+              result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
       /** @type {!parse_srcset.SrcsetParsingResult} */
       const parseResult = parse_srcset.parseSrcset(srcset);
       if (!parseResult.success) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, parseResult.errorCode,
-            context.getDocLocator(),
-            /* params */[attrName, getTagSpecName(tagSpec), attrValue],
-            tagSpec.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              parseResult.errorCode, context.getDocLocator(),
+              /* params */[attrName, getTagSpecName(tagSpec), attrValue],
+              tagSpec.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
       if (parseResult.srcsetImages !== null) {
@@ -1304,12 +1384,16 @@ class ParsedAttrSpec {
       }
     }
     if (maybeUris.length === 0) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.MISSING_URL,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
-          result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MISSING_URL,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(tagSpec)], tagSpec.specUrl,
+            result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     maybeUris = sortAndUniquify(maybeUris);
@@ -1348,47 +1432,69 @@ class ParsedAttrSpec {
     for (const name of names) {
       const value = properties.get(name);
       if (!this.valuePropertyByName_.containsKey(name)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code
-                .DISALLOWED_PROPERTY_IN_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */[name, attrName, getTagSpecName(tagSpec)],
-            tagSpec.specUrl, result);
-        continue;
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .DISALLOWED_PROPERTY_IN_ATTR_VALUE,
+              context.getDocLocator(),
+              /* params */[name, attrName, getTagSpecName(tagSpec)],
+              tagSpec.specUrl, result);
+          continue;
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
       const propertySpec = this.valuePropertyByName_.get(name);
       if (propertySpec.value !== null) {
         if (propertySpec.value != value.toLowerCase()) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code
-                  .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
-              context.getDocLocator(),
-              /* params */[name, attrName, getTagSpecName(tagSpec), value],
-              tagSpec.specUrl, result);
+          if (GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code
+                    .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+                context.getDocLocator(),
+                /* params */[name, attrName, getTagSpecName(tagSpec), value],
+                tagSpec.specUrl, result);
+          } else {
+            result.status = amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
         }
       } else if (propertySpec.valueDouble !== null) {
         if (parseFloat(value) != propertySpec.valueDouble) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code
-                  .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
-              context.getDocLocator(),
-              /* params */[name, attrName, getTagSpecName(tagSpec), value],
-              tagSpec.specUrl, result);
+          if (GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code
+                    .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+                context.getDocLocator(),
+                /* params */[name, attrName, getTagSpecName(tagSpec), value],
+                tagSpec.specUrl, result);
+          } else {
+            result.status = amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
         }
       }
     }
     const notSeen = subtractDiff(this.mandatoryValuePropertyNames_, names);
-    for (const name of notSeen) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code
-              .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */[name, attrName, getTagSpecName(tagSpec)],
-          tagSpec.specUrl, result);
+    if (GENERATE_DETAILED_ERRORS) {
+      for (const name of notSeen) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code
+                .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[name, attrName, getTagSpecName(tagSpec)],
+            tagSpec.specUrl, result);
+      }
+    } else {
+      if (notSeen.length > 0) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
     }
   }
 }
@@ -1880,34 +1986,46 @@ class ParsedTagSpec {
     const inputLayout = parseLayout(layoutAttr);
     if (layoutAttr !== undefined &&
         inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */['layout', getTagSpecName(this.spec_), layoutAttr],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */['layout', getTagSpecName(this.spec_), layoutAttr],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     const inputWidth =
         new amp.validator.CssLengthAndUnit(widthAttr, /* allowAuto */ true);
     if (!inputWidth.isValid) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */['width', getTagSpecName(this.spec_), widthAttr],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */['width', getTagSpecName(this.spec_), widthAttr],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     const inputHeight =
         new amp.validator.CssLengthAndUnit(heightAttr, /* allowAuto */ true);
     if (!inputHeight.isValid) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */['height', getTagSpecName(this.spec_), heightAttr],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */['height', getTagSpecName(this.spec_), heightAttr],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
 
@@ -1920,25 +2038,33 @@ class ParsedTagSpec {
 
     // height="auto" is only allowed if the layout is FLEX_ITEM.
     if (height.isAuto && layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */['height', getTagSpecName(this.spec_), heightAttr],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */['height', getTagSpecName(this.spec_), heightAttr],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
 
     // Does the tag support the computed layout?
     if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
-      const code = layoutAttr === undefined ?
-          amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
-          amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR, code,
-          context.getDocLocator(),
-          /* params */[layout, getTagSpecName(this.spec_)], this.spec_.specUrl,
-          result);
+      if (GENERATE_DETAILED_ERRORS) {
+        const code = layoutAttr === undefined ?
+            amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
+            amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, code,
+            context.getDocLocator(),
+            /* params */[layout, getTagSpecName(this.spec_)],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     // Check other constraints imposed by the particular layouts.
@@ -1946,70 +2072,95 @@ class ParsedTagSpec {
          layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT ||
          layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
         !height.isSet) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          context.getDocLocator(),
-          /* params */['height', getTagSpecName(this.spec_)],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+            context.getDocLocator(),
+            /* params */['height', getTagSpecName(this.spec_)],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT && width.isSet &&
         !width.isAuto) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
-          context.getDocLocator(),
-          /* params */
-          [
-            widthAttr, 'width', getTagSpecName(this.spec_), 'FIXED_HEIGHT',
-            'auto'
-          ],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+            context.getDocLocator(),
+            /* params */
+            [
+              widthAttr, 'width', getTagSpecName(this.spec_), 'FIXED_HEIGHT',
+              'auto'
+            ],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     if (layout === amp.validator.AmpLayout.Layout.FIXED ||
         layout === amp.validator.AmpLayout.Layout.RESPONSIVE) {
       if (!width.isSet) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-            context.getDocLocator(),
-            /* params */['width', getTagSpecName(this.spec_)],
-            this.spec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+              context.getDocLocator(),
+              /* params */['width', getTagSpecName(this.spec_)],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       } else if (width.isAuto) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            context.getDocLocator(),
-            /* params */['width', getTagSpecName(this.spec_), 'auto'],
-            this.spec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              context.getDocLocator(),
+              /* params */['width', getTagSpecName(this.spec_), 'auto'],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
     }
     if (layout === amp.validator.AmpLayout.Layout.RESPONSIVE &&
         width.unit !== height.unit) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code
-              .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
-          context.getDocLocator(),
-          /* params */[getTagSpecName(this.spec_), width.unit, height.unit],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code
+                .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(this.spec_), width.unit, height.unit],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     if (heightsAttr !== undefined &&
         layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
-      const code = layoutAttr === undefined ?
-          amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
-          amp.validator.ValidationError.Code
-              .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR, code,
-          context.getDocLocator(),
-          /* params */['heights', getTagSpecName(this.spec_), layout],
-          this.spec_.specUrl, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        const code = layoutAttr === undefined ?
+            amp.validator.ValidationError.Code
+                .ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+            amp.validator.ValidationError.Code
+                .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR, code,
+            context.getDocLocator(),
+            /* params */['heights', getTagSpecName(this.spec_), layout],
+            this.spec_.specUrl, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
   }
@@ -2044,20 +2195,24 @@ class ParsedTagSpec {
 
     // At this point, it's an error either way, but we try to give a
     // more specific error in the case of Mustache template characters.
-    if (attrName.indexOf('{{') != -1) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(this.spec_)],
-          this.templateSpecUrl_, result);
+    if (GENERATE_DETAILED_ERRORS) {
+      if (attrName.indexOf('{{') != -1) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(this.spec_)],
+            this.templateSpecUrl_, result);
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(this.spec_)],
+            this.spec_.specUrl, result);
+      }
     } else {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(this.spec_)],
-          this.spec_.specUrl, result);
+      result.status = amp.validator.ValidationResult.Status.FAIL;
     }
   }
 
@@ -2070,19 +2225,27 @@ class ParsedTagSpec {
    */
   validateAttrValueBelowTemplateTag(context, attrName, attrValue, result) {
     if (ParsedTagSpec.valueHasUnescapedTemplateSyntax(attrValue)) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-          this.templateSpecUrl_, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(this.spec_), attrValue],
+            this.templateSpecUrl_, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
     } else if (ParsedTagSpec.valueHasPartialsTemplateSyntax(attrValue)) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
-          context.getDocLocator(),
-          /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-          this.templateSpecUrl_, result);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+            context.getDocLocator(),
+            /* params */[attrName, getTagSpecName(this.spec_), attrValue],
+            this.templateSpecUrl_, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
     }
   }
 
@@ -2139,16 +2302,18 @@ class ParsedTagSpec {
         }
       }
       if (parsedSpec.getSpec().deprecation !== null) {
-        context.addError(
-            amp.validator.ValidationError.Severity.WARNING,
-            amp.validator.ValidationError.Code.DEPRECATED_ATTR,
-            context.getDocLocator(),
-            /* params */
-            [
-              attrName, getTagSpecName(this.spec_),
-              parsedSpec.getSpec().deprecation
-            ],
-            parsedSpec.getSpec().deprecationUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.WARNING,
+              amp.validator.ValidationError.Code.DEPRECATED_ATTR,
+              context.getDocLocator(),
+              /* params */
+              [
+                attrName, getTagSpecName(this.spec_),
+                parsedSpec.getSpec().deprecation
+              ],
+              parsedSpec.getSpec().deprecationUrl, result);
+        }
         // Deprecation is only a warning, so we don't return.
       }
       if (!hasTemplateAncestor ||
@@ -2163,12 +2328,16 @@ class ParsedTagSpec {
         const blacklistedValueRegex =
             new RegExp(parsedSpec.getSpec().blacklistedValueRegex, 'i');
         if (blacklistedValueRegex.test(attrValue)) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-              context.getDocLocator(),
-              /* params */[attrName, getTagSpecName(this.spec_), attrValue],
-              this.spec_.specUrl, result);
+          if (GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+                context.getDocLocator(),
+                /* params */[attrName, getTagSpecName(this.spec_), attrValue],
+                this.spec_.specUrl, result);
+          } else {
+            result.status = amp.validator.ValidationResult.Status.FAIL;
+          }
           return;
         }
       }
@@ -2180,13 +2349,17 @@ class ParsedTagSpec {
       // we check whether we already saw another alternative
       if (parsedSpec.getSpec().mandatoryOneof &&
           mandatoryOneofsSeen.contains(parsedSpec.getSpec().mandatoryOneof)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
-            context.getDocLocator(),
-            /* params */
-            [getTagSpecName(this.spec_), parsedSpec.getSpec().mandatoryOneof],
-            this.spec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
+              context.getDocLocator(),
+              /* params */
+              [getTagSpecName(this.spec_), parsedSpec.getSpec().mandatoryOneof],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
       mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
@@ -2202,12 +2375,16 @@ class ParsedTagSpec {
     // alternatives were present, we report that an attribute is missing.
     for (const mandatoryOneof of this.mandatoryOneofs_) {
       if (!mandatoryOneofsSeen.contains(mandatoryOneof)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(this.spec_), mandatoryOneof],
-            this.spec_.specUrl, result);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(this.spec_), mandatoryOneof],
+              this.spec_.specUrl, result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+        }
       }
     }
     for (const triggerSpec of parsedTriggerSpecs) {
@@ -2217,29 +2394,39 @@ class ParsedTagSpec {
           continue;
         }
         if (!attrspecsValidated.contains(parsedSpec.getId())) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
-              context.getDocLocator(),
-              /* params */
-              [
-                parsedSpec.getSpec().name, getTagSpecName(this.spec_),
-                triggerSpec.getAttrName()
-              ],
-              this.spec_.specUrl, result);
+          if (GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  parsedSpec.getSpec().name, getTagSpecName(this.spec_),
+                  triggerSpec.getAttrName()
+                ],
+                this.spec_.specUrl, result);
+          } else {
+            result.status = amp.validator.ValidationResult.Status.FAIL;
+          }
         }
       }
     }
     mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
     const diffs = subtractDiff(this.mandatoryAttrIds_, mandatoryAttrsSeen);
-    for (const diff of diffs) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          context.getDocLocator(),
-          /* params */
-          [this.attrsById_[diff].getSpec().name, getTagSpecName(this.spec_)],
-          this.spec_.specUrl, result);
+    if (GENERATE_DETAILED_ERRORS) {
+      for (const diff of diffs) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+            context.getDocLocator(),
+            /* params */
+            [this.attrsById_[diff].getSpec().name, getTagSpecName(this.spec_)],
+            this.spec_.specUrl, result);
+      }
+    } else {
+      if (diffs.length > 0) {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
     }
   }
 
@@ -2252,18 +2439,22 @@ class ParsedTagSpec {
   validateParentTag(context, validationResult) {
     if (this.spec_.mandatoryParent !== null &&
         this.spec_.mandatoryParent !== context.getTagStack().getParent()) {
-      // Output a parent/child error using CSS Child Selector syntax which is
-      // both succinct and should be well understood by web developers.
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
-          context.getDocLocator(),
-          /* params */
-          [
-            getTagSpecName(this.spec_), context.getTagStack().getParent(),
-            this.spec_.mandatoryParent
-          ],
-          this.spec_.specUrl, validationResult);
+      if (GENERATE_DETAILED_ERRORS) {
+        // Output a parent/child error using CSS Child Selector syntax which is
+        // both succinct and should be well understood by web developers.
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
+            context.getDocLocator(),
+            /* params */
+            [
+              getTagSpecName(this.spec_), context.getTagStack().getParent(),
+              this.spec_.mandatoryParent
+            ],
+            this.spec_.specUrl, validationResult);
+      } else {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      }
     }
   }
 
@@ -2276,37 +2467,45 @@ class ParsedTagSpec {
     if (this.spec_.mandatoryAncestor !== null) {
       const mandatoryAncestor = this.spec_.mandatoryAncestor;
       if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
-        if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code
-                  .MANDATORY_TAG_ANCESTOR_WITH_HINT,
-              context.getDocLocator(),
-              /* params */
-              [
-                this.spec_.tagName, mandatoryAncestor,
-                this.spec_.mandatoryAncestorSuggestedAlternative
-              ],
-              this.spec_.specUrl, validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code
+                    .MANDATORY_TAG_ANCESTOR_WITH_HINT,
+                context.getDocLocator(),
+                /* params */
+                [
+                  this.spec_.tagName, mandatoryAncestor,
+                  this.spec_.mandatoryAncestorSuggestedAlternative
+                ],
+                this.spec_.specUrl, validationResult);
+          } else {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
+                context.getDocLocator(),
+                /* params */[this.spec_.tagName, mandatoryAncestor],
+                this.spec_.specUrl, validationResult);
+          }
         } else {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
-              context.getDocLocator(),
-              /* params */[this.spec_.tagName, mandatoryAncestor],
-              this.spec_.specUrl, validationResult);
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         }
         return;
       }
     }
     for (const disallowedAncestor of this.spec_.disallowedAncestor) {
       if (context.getTagStack().hasAncestor(disallowedAncestor)) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
-            context.getDocLocator(),
-            /* params */[this.spec_.tagName, disallowedAncestor],
-            this.spec_.specUrl, validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+              context.getDocLocator(),
+              /* params */[this.spec_.tagName, disallowedAncestor],
+              this.spec_.specUrl, validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
     }
@@ -2501,11 +2700,15 @@ class ParsedValidatorRules {
   validateTag(context, tagName, encounteredAttrs, validationResult) {
     const tagSpecDispatch = this.tagSpecByTagName_.get(tagName);
     if (tagSpecDispatch === undefined) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.DISALLOWED_TAG,
-          context.getDocLocator(),
-          /* params */[tagName], /* specUrl */ '', validationResult);
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_TAG,
+            context.getDocLocator(),
+            /* params */[tagName], /* specUrl */ '', validationResult);
+      } else {
+        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+      }
       return;
     }
     // At this point, we have dispatch keys, tagspecs, or both.
@@ -2548,11 +2751,15 @@ class ParsedValidatorRules {
       if (!tagSpecDispatch.hasTagSpecs()) {
         // TODO(gregable): Determine a good way to source a specUrl in these
         // instances.
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
-            context.getDocLocator(),
-            /* params */[tagName], /* specUrl */ '', validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+              context.getDocLocator(),
+              /* params */[tagName], /* specUrl */ '', validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
     }
@@ -2615,18 +2822,22 @@ class ParsedValidatorRules {
     }
     // This is the successful branch of the code: locally the tagspec matches.
     resultForBestAttempt.status = resultForAttempt.status;
-    resultForBestAttempt.errors = resultForAttempt.errors;
+    if (GENERATE_DETAILED_ERRORS) {
+      resultForBestAttempt.errors = resultForAttempt.errors;
+    }
 
     const spec = parsedSpec.getSpec();
 
     if (spec.deprecation !== null) {
-      context.addError(
-          amp.validator.ValidationError.Severity.WARNING,
-          amp.validator.ValidationError.Code.DEPRECATED_TAG,
-          context.getDocLocator(),
-          /* params */[getTagSpecName(spec), spec.deprecation],
-          spec.deprecationUrl, resultForBestAttempt);
-      // Deprecation is only a warning, so we don't return.
+      if (GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.WARNING,
+            amp.validator.ValidationError.Code.DEPRECATED_TAG,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(spec), spec.deprecation],
+            spec.deprecationUrl, resultForBestAttempt);
+        // Deprecation is only a warning, so we don't return.
+      }
     }
 
     if (parsedSpec.shouldRecordTagspecValidated()) {
@@ -2634,12 +2845,17 @@ class ParsedValidatorRules {
       // If a duplicate tag is encountered for a spec that's supposed
       // to be unique, we've found an error that we must report.
       if (spec.unique && !isUnique) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec)], spec.specUrl,
-            resultForBestAttempt);
+        if (GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              resultForBestAttempt);
+        } else {
+          resultForBestAttempt.status =
+              amp.validator.ValidationResult.Status.FAIL;
+        }
         return;
       }
     }
@@ -2663,12 +2879,18 @@ class ParsedValidatorRules {
   maybeEmitMandatoryTagValidationErrors(context, validationResult) {
     for (const tagspecId of this.mandatoryTagSpecs_) {
       if (!context.getTagspecsValidated().contains(tagspecId)) {
-        const spec = this.tagSpecById_[tagspecId].getSpec();
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec)], spec.specUrl, validationResult);
+        if (GENERATE_DETAILED_ERRORS) {
+          const spec = this.tagSpecById_[tagspecId].getSpec();
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
+              context.getDocLocator(),
+              /* params */[getTagSpecName(spec)], spec.specUrl,
+              validationResult);
+        } else {
+          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
       }
     }
   }
@@ -2686,17 +2908,24 @@ class ParsedValidatorRules {
       const spec = this.tagSpecById_[tagspecId];
       for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().contains(alsoRequiresTagspecId)) {
-          const alsoRequiresTagspec = this.tagSpecById_[alsoRequiresTagspecId];
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
-              context.getDocLocator(),
-              /* params */
-              [
-                getTagSpecName(alsoRequiresTagspec.getSpec()),
-                getTagSpecName(spec.getSpec())
-              ],
-              spec.getSpec().specUrl, validationResult);
+          if (GENERATE_DETAILED_ERRORS) {
+            const alsoRequiresTagspec =
+                this.tagSpecById_[alsoRequiresTagspecId];
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  getTagSpecName(alsoRequiresTagspec.getSpec()),
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
         }
       }
     }
@@ -2718,18 +2947,26 @@ class ParsedValidatorRules {
       if (spec.mandatoryAlternatives !== null) {
         const alternative = spec.mandatoryAlternatives;
         if (!satisfied.contains(alternative)) {
-          missing.push(alternative);
-          specUrlsByMissing[alternative] = spec.specUrl;
+          if (GENERATE_DETAILED_ERRORS) {
+            missing.push(alternative);
+            specUrlsByMissing[alternative] = spec.specUrl;
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
         }
       }
     }
-    for (const tagMissing of sortAndUniquify(missing)) {
-      context.addError(
-          amp.validator.ValidationError.Severity.ERROR,
-          amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-          context.getDocLocator(),
-          /* params */[tagMissing], /* specUrl */ specUrlsByMissing[tagMissing],
-          validationResult);
+    if (GENERATE_DETAILED_ERRORS) {
+      for (const tagMissing of sortAndUniquify(missing)) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
+            context.getDocLocator(),
+            /* params */[tagMissing],
+            /* specUrl */ specUrlsByMissing[tagMissing], validationResult);
+      }
     }
   }
 
