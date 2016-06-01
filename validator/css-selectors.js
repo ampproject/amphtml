@@ -33,10 +33,11 @@ goog.provide('parse_css.parseAnAttrSelector');
 goog.provide('parse_css.parseAnIdSelector');
 goog.provide('parse_css.parseSelectors');
 goog.provide('parse_css.traverseSelectors');
-
+goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
+goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
 goog.require('parse_css.Token');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractAFunction');
@@ -358,7 +359,11 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   // Now parse the attribute name. This part is mandatory.
   if (!(tokenStream.current() instanceof parse_css.IdentToken)) {
-    return newInvalidAttrSelectorError(start);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return newInvalidAttrSelectorError(start);
+    } else {
+      return parse_css.TRIVIAL_ERROR_TOKEN;
+    }
   }
   const ident = goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.IdentToken);
@@ -413,7 +418,11 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       value = str.value;
       tokenStream.consume();
     } else {
-      return newInvalidAttrSelectorError(start);
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return newInvalidAttrSelectorError(start);
+      } else {
+        return parse_css.TRIVIAL_ERROR_TOKEN;
+      }
     }
   }
   if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
@@ -422,7 +431,11 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   // The attribute selector must in any case terminate with a close square
   // token.
   if (!(tokenStream.current() instanceof parse_css.CloseSquareToken)) {
-    return newInvalidAttrSelectorError(start);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      return newInvalidAttrSelectorError(start);
+    } else {
+      return parse_css.TRIVIAL_ERROR_TOKEN;
+    }
   }
   tokenStream.consume();
   const selector = new parse_css.AttrSelector(
@@ -510,12 +523,14 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     name = funcToken.value;
     func = parse_css.extractAFunction(tokenStream);
     tokenStream.consume();
-  } else {
+  } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
     const error = new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         ['style']);
     firstColon.copyStartPositionTo(error);
     return error;
+  } else {
+    return parse_css.TRIVIAL_ERROR_TOKEN;
   }
   const selector = new parse_css.PseudoSelector(isClass, name, func);
   firstColon.copyStartPositionTo(selector);
@@ -665,12 +680,16 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          const error = new parse_css.ErrorToken(
-              amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
-              ['style']);
-          error.line = tokenStream.current().line;
-          error.col = tokenStream.current().col;
-          return error;
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            const error = new parse_css.ErrorToken(
+                amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
+                ['style']);
+            error.line = tokenStream.current().line;
+            error.col = tokenStream.current().col;
+            return error;
+          } else {
+            return parse_css.TRIVIAL_ERROR_TOKEN;
+          }
         }
         // If no type selector is given then the universal selector is implied.
         typeSelector = new parse_css.TypeSelector(
@@ -800,12 +819,16 @@ function isSimpleSelectorSequenceStart(token) {
  */
 parse_css.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-        ['style']);
-    error.line = tokenStream.current().line;
-    error.col = tokenStream.current().col;
-    return error;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+          ['style']);
+      error.line = tokenStream.current().line;
+      error.col = tokenStream.current().col;
+      return error;
+    } else {
+      return parse_css.TRIVIAL_ERROR_TOKEN;
+    }
   }
   let left = parse_css.parseASimpleSelectorSequence(tokenStream);
   if (left instanceof parse_css.ErrorToken) {
@@ -891,11 +914,15 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
  */
 parse_css.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-        ['style']);
-    tokenStream.current().copyStartPositionTo(error);
-    return error;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+          ['style']);
+      tokenStream.current().copyStartPositionTo(error);
+      return error;
+    } else {
+      return parse_css.TRIVIAL_ERROR_TOKEN;
+    }
   }
   const start = tokenStream.current();
   const elements = [parse_css.parseASelector(tokenStream)];
@@ -920,12 +947,16 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     // We're about to claim success and return a selector,
     // but before we do, we check that no unparsed input remains.
     if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-      const error = new parse_css.ErrorToken(
-          amp.validator.ValidationError.Code
-              .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
-          ['style']);
-      tokenStream.current().copyStartPositionTo(error);
-      return error;
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        const error = new parse_css.ErrorToken(
+            amp.validator.ValidationError.Code
+                .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+            ['style']);
+        tokenStream.current().copyStartPositionTo(error);
+        return error;
+      } else {
+        return parse_css.TRIVIAL_ERROR_TOKEN;
+      }
     }
     if (elements.length == 1) {
       return elements[0];
