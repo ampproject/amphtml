@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@ import {twitter} from '../../../../3p/twitter';
 
 adopt(window);
 
-describe('amp-twitter', function() {
-  this.timeout(5000);
+describe('amp-twitter', () => {
   const tweetId = '585110598171631616';
 
   function getAmpTwitter(tweetid) {
