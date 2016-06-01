@@ -16,7 +16,9 @@
  */
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
 goog.provide('amp.validator.isSeverityWarning');
+goog.provide('amp.validator.validateNode');
 goog.provide('amp.validator.validateString');
+goog.require('amp.domwalker.DomWalker');
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
@@ -3172,6 +3174,26 @@ amp.validator.validateString = function(inputDocContents) {
   const handler = new ValidationHandler();
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);
+
+  // TODO: This returns SUCCESS even if there are errors. Should be fixed.
+  return handler.Result();
+};
+
+/**
+ * Validates a document stored below a DOM node.
+ * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
+ * progress.
+ *
+ * @param {!Document} rootDoc
+ * @return {!amp.validator.ValidationResult} Validation Result (status and
+ *     errors)
+ * @export
+ */
+amp.validator.validateNode = function(rootDoc) {
+
+  const handler = new ValidationHandler();
+  const visitor = new amp.domwalker.DomWalker();
+  visitor.walktree(handler, rootDoc);
 
   // TODO: This returns SUCCESS even if there are errors. Should be fixed.
   return handler.Result();
