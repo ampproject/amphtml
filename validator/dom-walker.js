@@ -202,7 +202,7 @@ amp.domwalker.DomWalker = class {
           handler.endTag(calls[i][1]);
           break;
         default:
-          console.error(calls[i][0]);
+          console/*OK*/.error(calls[i][0]);
           break;
       }
     }

@@ -128,7 +128,7 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
  * @return {!amp.validator.ValidationResult} Validation Result
  */
 function validateString(inputDocContents) {
-  goog.asserts.assertString(inputDocContents, 'Input document is not a string');
+  goog.asserts.assertString(inputDocContents, 'Input doc is not a string');
 
   const handler = new amp.validator.ValidationHandler();
   const parser = new amp.htmlparser.HtmlParser();
