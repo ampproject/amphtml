@@ -19,10 +19,10 @@ import {
   isValidPercentage_,
   isVisibilitySpecValid,
   installVisibilityService,
-} from '../../extensions/amp-analytics/0.1/visibility-impl';
-import {installResourcesService} from '../../src/service/resources-impl';
-import {layoutRectLtwh} from '../../src/layout-rect';
-import {visibilityFor} from '../../src/visibility';
+} from '../visibility-impl';
+import {installResourcesService} from '../../../../src/service/resources-impl';
+import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {visibilityFor} from '../../../../src/visibility';
 import * as sinon from 'sinon';
 
 
@@ -35,16 +35,12 @@ describe('Visibility (tag: amp-analytics)', () => {
   let getIntersectionStub;
   let callbackStub;
 
-  const INTERSECTION_0P = {
-    intersectionRect: layoutRectLtwh(0, 0, 0, 0),
-    boundingClientRect: layoutRectLtwh(100, 100, 100, 100),
-    rootBounds: layoutRectLtwh(0, 0, 100, 100),
-  };
-  const INTERSECTION_50P = {
-    intersectionRect: layoutRectLtwh(50, 0, 50, 100),
-    boundingClientRect: layoutRectLtwh(50, 0, 100, 100),
-    rootBounds: layoutRectLtwh(0, 0, 100, 100),
-  };
+  const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
+      [0, 0, 100, 100]);
+  const INTERSECTION_1P = makeIntersectionEntry([99, 99, 100, 100],
+      [0, 0, 100, 100]);
+  const INTERSECTION_50P = makeIntersectionEntry([50, 0, 100, 100],
+      [0, 0, 100, 100]);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -76,18 +72,34 @@ describe('Visibility (tag: amp-analytics)', () => {
     sandbox.restore();
   });
 
+  function makeIntersectionEntry(boundingClientRect, rootBounds) {
+    boundingClientRect = layoutRectLtwh.apply(window, boundingClientRect);
+    rootBounds = layoutRectLtwh.apply(window, rootBounds);
+    return {
+      intersectionRect: rectIntersection(boundingClientRect, rootBounds),
+      boundingClientRect,
+      rootBounds,
+    };
+  }
+
   function listen(intersectionChange, config, expectedCalls) {
     getIntersectionStub.returns(intersectionChange);
     config['selector'] = '#abc';
+    sandbox.clock.tick(0);
     visibility.listenOnce(config, callbackStub);
     sandbox.clock.tick(20);
     expect(callbackStub.callCount).to.equal(expectedCalls);
   }
 
-  function verifyChange(intersectionChange, expectedCalls) {
+  function verifyChange(intersectionChange, expectedCalls, opt_expectedVars) {
     getIntersectionStub.returns(intersectionChange);
     visibility.scrollListener_();
     expect(callbackStub.callCount).to.equal(expectedCalls);
+    if (opt_expectedVars) {
+      for (let c = 0; c < opt_expectedVars.length; c++) {
+        sinon.assert.calledWith(callbackStub.getCall(c), opt_expectedVars[c]);
+      }
+    }
   }
 
   it('fires for trivial config', () => {
@@ -96,13 +108,20 @@ describe('Visibility (tag: amp-analytics)', () => {
   });
 
   it('fires for non-trivial config', () => {
-    listen({
-      intersectionRect: layoutRectLtwh(0, 0, 49, 100),
-      boundingClientRect: layoutRectLtwh(0, 0, 49, 100),
-      rootBounds: layoutRectLtwh(0, 0, 100, 100),
-    }, {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
+    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+          {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
-    verifyChange(INTERSECTION_50P, 1);
+    verifyChange(INTERSECTION_50P, 1, [sinon.match({
+      backgrounded: '0',
+      backgroundedAtStart: '0',
+      elementX: '50',
+      elementY: '0',
+      elementWidth: '100',
+      elementHeight: '100',
+      totalTime: sinon.match(value => {
+        return !isNaN(Number(value));
+      }),
+    })]);
   });
 
   it('fires only once', () => {
@@ -122,6 +141,9 @@ describe('Visibility (tag: amp-analytics)', () => {
 
     sandbox.clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
+    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
+      totalVisibleTime: '1000',
+    }));
   });
 
   it('fires with just continuousTimeMin condition', () => {
@@ -135,13 +157,24 @@ describe('Visibility (tag: amp-analytics)', () => {
   });
 
   it('fires with totalTimeMin=1k and visiblePercentageMin=0', () => {
-    listen(INTERSECTION_0P, {totalTimeMin: 1000, visiblePercentageMin: 0}, 0);
+    listen(INTERSECTION_0P, {totalTimeMin: 1000, visiblePercentageMin: 1}, 0);
 
+    verifyChange(INTERSECTION_1P, 0);
     sandbox.clock.tick(1000);
     verifyChange(INTERSECTION_50P, 0);
 
     sandbox.clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
+    // There is a 20ms offset in some timedurations because of initial
+    // timeout in the listenOnce logic.
+    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
+      maxContinuousTime: '1000',
+      totalVisibleTime: '1000',
+      firstSeenTime: '20',
+      fistVisibleTime: '1020',
+      lastSeenTime: '2020',
+      lastVisibleTime: '2020',
+    }));
   });
 
   it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
@@ -170,6 +203,12 @@ describe('Visibility (tag: amp-analytics)', () => {
     expect(callbackStub.callCount).to.equal(0);
     sandbox.clock.tick(900);
     expect(callbackStub.callCount).to.equal(1);
+    sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
+      maxContinuousTime: '1000',
+      minVisiblePercentage: '50',
+      maxVisiblePercentage: '50',
+      totalVisibleTime: '1999',
+    }));
   });
 
   describe('isVisibilitySpecValid', () => {

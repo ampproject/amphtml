@@ -20,7 +20,7 @@ import {
   Resources,
   TaskQueue_,
 } from '../../src/service/resources-impl';
-import {VisibilityState} from '../../src/service/viewer-impl';
+import {VisibilityState} from '../../src/visibility-state';
 import {dev} from '../../src/log';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';

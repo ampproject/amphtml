@@ -86,9 +86,6 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
-    whitelist: [
-      'extensions/amp-analytics/0.1/visibility-impl.js->src/service/viewer-impl.js'
-    ],
   },
   {
     filesMatching: 'extensions/**/*.js',

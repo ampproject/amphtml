@@ -22,7 +22,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
 import {viewerFor} from '../../../src/viewer';
-import {VisibilityState} from '../../../src/service/viewer-impl';
+import {VisibilityState} from '../../../src/visibility-state';
 
 /** @const {number} */
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
@@ -247,11 +247,9 @@ export class Visibility {
     this.registerForVisibilityEvents_();
 
     this.listeners_[resId] = (this.listeners_[resId] || []);
-    this.listeners_[resId].push({
-      config: config,
-      callback: callback,
-      state: {[TIME_LOADED]: Date.now()},
-    });
+    const state = {};
+    state[TIME_LOADED] = Date.now();
+    this.listeners_[resId].push({config, callback, state});
     this.resources_.push(res);
 
     if (this.scheduledRunId_ == null) {
@@ -263,7 +261,6 @@ export class Visibility {
 
   /** @private */
   visibilityListener_() {
-    // viewer.getVisibilityState works when the page is loaded inside a viewer.
     const state = this.viewer_.getVisibilityState();
     if (state == VisibilityState.HIDDEN || state == VisibilityState.PAUSED ||
         state == VisibilityState.INACTIVE) {
@@ -449,9 +446,13 @@ export class Visibility {
     state[TOTAL_TIME] = perf && perf.timing && perf.timing.domInteractive
         ? Date.now() - perf.timing.domInteractive
         : '';
-    const intersection = rectIntersection(
-        {top: 0, height: rb.height, left: 0, width: rb.width},
-        {top: ir.top, left: ir.left, width: br.width, height: br.height});
+
+    // Calculate the amount element visible at the time page was loaded. To do
+    // this, assume that the page is scrolled all the way to top.
+    const viewportRect = {top: 0, height: rb.height, left: 0, width: rb.width};
+    const elementRect = {top: ir.top, left: ir.left, width: br.width,
+      height: br.height};
+    const intersection = rectIntersection(viewportRect, elementRect);
     state[LOAD_TIME_VISIBILITY] = intersection != null
         ? Math.round(intersection.width * intersection.height * 10000
               / (br.width * br.height)) / 100
