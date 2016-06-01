@@ -197,6 +197,17 @@ export class Viewport {
   }
 
   /**
+   * Sets the body border-bottom to the specified value.
+   * @param {number} borderBottom
+   */
+  setBorderBottom(borderBottom){
+    onDocumentReady(this.win_.document, () => {
+      this.win_.document.body.style.borderBottom =
+          `${borderBottom}px solid transparent`;
+    });
+  }
+
+  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */

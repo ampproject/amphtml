@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {toggle} from '../../../src/style';
 
 /** @const */
@@ -49,12 +48,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
-
-    /** @private @const {!Window} */
-    this.win_ = this.getWin();
-
-    /** @private @const {!Document} */
-    this.document_ = this.win_.document;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -91,18 +84,6 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
-   * The function that add border-bottom to the body
-   * to compensate the bottom space that was taken by sticky ad.
-   * So that no content would be blocked by sticky ad unit.
-   * @param {number} borderBottom
-   * @private
-   */
-  addBorderBottom(borderBottom) {
-    this.win_.document.body.style.borderBottom =
-        `${borderBottom}px solid transparent`;
-  }
-
-  /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
    * there is at least one more viewport available.
@@ -122,9 +103,11 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         toggle(this.element, true);
         this.viewport_.addToFixedLayer(this.element);
-        const borderBottom = this.element.offsetHeight;
+        // Add border-bottom to the body to compensate space that was taken
+        // by sticky ad, so no content would be blocked by sticky ad unit.
+        const borderBottom = this.element./*OK*/offsetHeight;
+        this.viewport_.setBorderBottom(borderBottom);
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
-        this.addBorderBottom(borderBottom);
         this.scheduleLayout(this.ad_);
         this.removeOnScrollListener_();
       });
