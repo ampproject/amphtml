@@ -61,13 +61,13 @@ export function twitter(global, data) {
     delete data.height;
 
     let twitterWidgetSandbox;
-    twttr.events.bind('resize', (event) => {
+    twttr.events.bind('resize', event => {
       if (twitterWidgetSandbox === event.target) {
         resize(event.target);
       }
     });
 
-    twttr.widgets.createTweet(data.tweetid, tweet, data).then((el) => {
+    twttr.widgets.createTweet(data.tweetid, tweet, data).then(el => {
       if (el) {
         // Not a deleted tweet
         twitterWidgetSandbox = el;
