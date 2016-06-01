@@ -197,13 +197,13 @@ export class Viewport {
   }
 
   /**
-   * Sets the body border-bottom to the specified value.
-   * @param {number} borderBottom
+   * Sets the body padding bottom to the specified value.
+   * @param {number} paddingBottom
    */
-  setBorderBottom(borderBottom){
+  updatePaddingBottom(paddingBottom) {
     onDocumentReady(this.win_.document, () => {
       this.win_.document.body.style.borderBottom =
-          `${borderBottom}px solid transparent`;
+          `${paddingBottom}px solid transparent`;
     });
   }
 

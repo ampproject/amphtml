@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
 /** @const */
@@ -103,13 +104,19 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         toggle(this.element, true);
         this.viewport_.addToFixedLayer(this.element);
+        this.scheduleLayout(this.ad_);
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
-        this.viewport_.setBorderBottom(borderBottom);
+        this.viewport_.updatePaddingBottom(borderBottom);
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
-        this.scheduleLayout(this.ad_);
         this.removeOnScrollListener_();
+        timer.delay(() => {
+          // Unfortunately we don't really have a good way to measure how long it
+          // takes to load an ad, so we'll just pretend it takes 1 second for
+          // now.
+          this.element.classList.add('-amp-sticky-ad-load');
+        }, 1000);
       });
     }
   }
