@@ -116,7 +116,23 @@ amp.validator.ValidationResult.prototype.mergeFrom = function(other) {
   if (other.status !== amp.validator.ValidationResult.Status.UNKNOWN) {
     this.status = other.status;
   }
-  Array.prototype.push.apply(this.errors, other.errors);
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    Array.prototype.push.apply(this.errors, other.errors);
+  }
+};
+
+/**
+ * Copyies results from another ValidationResult.
+ * @param {!amp.validator.ValidationResult} other
+ */
+amp.validator.ValidationResult.prototype.copyFrom = function(other) {
+  goog.asserts.assert(this.status !== null);
+  goog.asserts.assert(other.status !== null);
+  this.status = other.status;
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    this.errors = [];
+    Array.prototype.push.apply(this.errors, other.errors);
+  }
 };
 
 /**
@@ -2792,17 +2808,20 @@ class ParsedValidatorRules {
 
     if (resultForAttempt.status ===
         amp.validator.ValidationResult.Status.FAIL) {
+      if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+        resultForBestAttempt.status =
+            amp.validator.ValidationResult.Status.FAIL;
+        return;
+      }
       // If this is the first attempt, always use it.
       if (resultForBestAttempt.errors.length == 0) {
-        resultForBestAttempt.status = resultForAttempt.status;
-        resultForBestAttempt.errors = resultForAttempt.errors;
+        resultForBestAttempt.copyFrom(resultForAttempt);
         return;
       }
 
       // Prefer the attempt with the fewest errors.
       if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
-        resultForBestAttempt.status = resultForAttempt.status;
-        resultForBestAttempt.errors = resultForAttempt.errors;
+        resultForBestAttempt.copyFrom(resultForAttempt);
         return;
       }
       if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
@@ -2812,22 +2831,17 @@ class ParsedValidatorRules {
       // If the same number of errors, prefer the most specific error.
       if (amp.validator.maxSpecificity(resultForAttempt) >
           amp.validator.maxSpecificity(resultForBestAttempt)) {
-        resultForBestAttempt.status = resultForAttempt.status;
-        resultForBestAttempt.errors = resultForAttempt.errors;
+        resultForBestAttempt.copyFrom(resultForAttempt);
       }
 
       return;
     }
     // This is the successful branch of the code: locally the tagspec matches.
-    resultForBestAttempt.status = resultForAttempt.status;
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      resultForBestAttempt.errors = resultForAttempt.errors;
-    }
+    resultForBestAttempt.copyFrom(resultForAttempt);
 
     const spec = parsedSpec.getSpec();
-
-    if (spec.deprecation !== null) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      if (spec.deprecation !== null) {
         context.addError(
             amp.validator.ValidationError.Severity.WARNING,
             amp.validator.ValidationError.Code.DEPRECATED_TAG,
