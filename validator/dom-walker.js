@@ -143,9 +143,12 @@ amp.domwalker.DomWalker = class {
     }
 
     handler.startDoc();
+
     // Apparently the !doctype 'tag' is not considered an element in the DOM,
     // so we can't see it naively. Unsure if there is a better approach here.
-    handler.startTag('!doctype', [rootDoc.doctype.name, '']);
+    if (rootDoc.doctype !== null) {
+      handler.startTag('!doctype', [rootDoc.doctype.name, '']);
+    }
 
     // The approach here is to walk the DOM, generating handler calls which
     // we store but don't actually run. Then we make all of the handler calls

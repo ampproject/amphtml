@@ -15,11 +15,8 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
+goog.provide('amp.validator.ValidationHandler');
 goog.provide('amp.validator.isSeverityWarning');
-goog.provide('amp.validator.validateNode');
-goog.provide('amp.validator.validateString');
-goog.require('amp.domwalker.DomWalker');
-goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
@@ -34,7 +31,6 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
-goog.require('amp.validator.maxSpecificity');
 goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
@@ -2617,6 +2613,164 @@ class TagSpecDispatch {
 }
 
 /**
+ * A higher number means |code| is more specific, meaning more
+ * helpful. Used by maxSpecificity below.
+ * @param {!amp.validator.ValidationError.Code} code
+ * @return {number}
+ */
+function specificity(code) {
+  switch (code) {
+    case amp.validator.ValidationError.Code.UNKNOWN_CODE:
+      return 0;
+    case amp.validator.ValidationError.Code
+        .MANDATORY_CDATA_MISSING_OR_INCORRECT:
+      return 1;
+    case amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST:
+      return 2;
+    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
+      return 3;
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
+      return 4;
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR:
+      return 5;
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT:
+      return 6;
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
+      return 7;
+    case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
+      return 8;
+    case amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING:
+      return 9;
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
+      return 10;
+    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
+      return 11;
+    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
+      return 12;
+    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
+      return 13;
+    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
+      return 14;
+    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
+      return 15;
+    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+      return 16;
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG_OLD_VARIANT:
+      return 17;
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+      return 18;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+      return 19;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+      return 20;
+    case amp.validator.ValidationError.Code
+        .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
+      return 21;
+    case amp.validator.ValidationError.Code
+        .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
+      return 22;
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+      return 23;
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
+      return 24;
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+      return 25;
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+      return 26;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 27;
+    case amp.validator.ValidationError.Code
+        .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
+      return 28;
+    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
+      return 29;
+    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
+      return 30;
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+      return 31;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
+      return 32;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
+      return 33;
+    case amp.validator.ValidationError.Code.DUPLICATE_DIMENSION:
+      return 34;
+    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
+      return 35;
+    case amp.validator.ValidationError.Code.MISSING_URL:
+      return 36;
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+      return 37;
+    case amp.validator.ValidationError.Code.INVALID_URL:
+      return 38;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+      return 39;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+      return 40;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+      return 41;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 42;
+    case amp.validator.ValidationError.Code
+        .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
+      return 43;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
+      return 44;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+      return 45;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+      return 46;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+      return 47;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 48;
+    case amp.validator.ValidationError.Code
+        .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
+      return 49;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
+      return 50;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+      return 51;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+      return 52;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+      return 53;
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
+      return 54;
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+      return 55;
+    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+      return 56;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+      return 57;
+    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+      return 100;
+    case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
+      return 101;
+    case amp.validator.ValidationError.Code.DEPRECATED_TAG:
+      return 102;
+    default:
+      goog.asserts.fail('Unrecognized Code: ' + code);
+  }
+}
+
+/**
+ * A helper function which allows us to compare two candidate results
+ * in validateTag to report the results which have the most specific errors.
+ * @param {!amp.validator.ValidationResult} validationResult
+ * @return {number} maximum value of specificity found in all errors.
+ */
+amp.validator.maxSpecificity = function(validationResult) {
+  let max = 0;
+  for (const error of validationResult.errors) {
+    goog.asserts.assert(error.code != null);
+    const thisSpecificity = specificity(error.code);
+    max = Math.max(thisSpecificity, max);
+  }
+  return max;
+};
+
+
+/**
  * This wrapper class provides access to the validation rules.
  * @private
  */
@@ -3021,9 +3175,9 @@ function byteLength(utf8Str) {
 
 /**
  * Validation Handler which accepts callbacks from HTML Parser
- * @private
  */
-class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
+amp.validator.ValidationHandler =
+    class extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   /** Creates a new handler. */
   constructor() {
     super();
@@ -3159,44 +3313,6 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
     this.context_.getCdataMatcher().match(
         text, this.context_, this.validationResult_);
   }
-}
-
-/**
- * Validates an document input as a string.
- * @param {string} inputDocContents
- * @return {!amp.validator.ValidationResult} Validation Result (status and
- *     errors)
- * @export
- */
-amp.validator.validateString = function(inputDocContents) {
-  goog.asserts.assertString(inputDocContents, 'Input document is not a string');
-
-  const handler = new ValidationHandler();
-  const parser = new amp.htmlparser.HtmlParser();
-  parser.parse(handler, inputDocContents);
-
-  // TODO: This returns SUCCESS even if there are errors. Should be fixed.
-  return handler.Result();
-};
-
-/**
- * Validates a document stored below a DOM node.
- * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
- * progress.
- *
- * @param {!Document} rootDoc
- * @return {!amp.validator.ValidationResult} Validation Result (status and
- *     errors)
- * @export
- */
-amp.validator.validateNode = function(rootDoc) {
-
-  const handler = new ValidationHandler();
-  const visitor = new amp.domwalker.DomWalker();
-  visitor.walktree(handler, rootDoc);
-
-  // TODO: This returns SUCCESS even if there are errors. Should be fixed.
-  return handler.Result();
 };
 
 /**

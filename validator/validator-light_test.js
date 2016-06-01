@@ -15,8 +15,9 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.ValidatorTest');
+goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.validator.CssLengthAndUnit');
-goog.require('amp.validator.validateString');
+goog.require('amp.validator.ValidationHandler');
 
 /**
  * Returns the absolute path for a given test file, that is, a file
@@ -120,12 +121,28 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
 };
 
 /**
+ * Essentially a copy of amp.validator.validateString, which the
+ * validator-light does not include. Testing domwalker.js will be done
+ * in a different manner.
+ * @param {string} inputDocContents
+ * @return {!amp.validator.ValidationResult} Validation Result
+ */
+function validateString(inputDocContents) {
+  goog.asserts.assertString(inputDocContents, 'Input document is not a string');
+
+  const handler = new amp.validator.ValidationHandler();
+  const parser = new amp.htmlparser.HtmlParser();
+  parser.parse(handler, inputDocContents);
+
+  return handler.Result();
+}
+
+/**
  * Runs the test, by executing the AMP Validator, then comparing its output
  * against the golden file content.
  */
 ValidatorTestCase.prototype.run = function() {
-  const observed =
-      amp.validator.validateString(this.ampHtmlFileContents).status;
+  const observed = validateString(this.ampHtmlFileContents).status;
   if (observed === this.expectedOutput) {
     return;
   }
