@@ -24,11 +24,6 @@ describe('Types', () => {
       expect(types.toArray(undefined).length).to.equal(0);
     });
 
-    it('should return empty array if non-array-like is passed', () => {
-      expect(types.toArray({}).length).to.equal(0);
-      expect(types.toArray(document.createElement('p')).length).to.equal(0);
-    });
-
     it('should convert NodeList to array', () => {
       const parent = document.createElement('div');
       parent.appendChild(document.createElement('p'));
