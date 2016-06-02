@@ -719,9 +719,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
 
     // Prepare to enter in lightbox
-    this.requestFullOverlay();
-    this.getViewport().disableTouchZoom();
-    this.getViewport().hideFixedLayer();
+    this.getViewport().enterLightboxMode();
 
     this.enter_();
 
@@ -764,9 +762,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       this.unlistenViewport_ = null;
     }
 
-    this.cancelFullOverlay();
-    this.getViewport().showFixedLayer();
-    this.getViewport().restoreOriginalTouchZoom();
+    this.getViewport().leaveLightboxMode();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }

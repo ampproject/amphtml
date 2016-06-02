@@ -688,6 +688,8 @@ export class BaseElement {
   /**
    * Requests full overlay mode from the viewer.
    * @protected
+   * @deprecated Use `Viewport.enterLightboxMode`.
+   * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   requestFullOverlay() {
     viewerFor(this.getWin()).requestFullOverlay();
@@ -696,6 +698,8 @@ export class BaseElement {
   /**
    * Requests to cancel full overlay mode from the viewer.
    * @protected
+   * @deprecated Use `Viewport.leaveLightboxMode`.
+   * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   cancelFullOverlay() {
     viewerFor(this.getWin()).cancelFullOverlay();
