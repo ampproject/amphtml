@@ -1100,9 +1100,6 @@ export class ViewportBindingNaturalIosScrollEmbed_
   constructor(win) {
     super(win);
 
-    // TODO
-    this.onScroll();
-
     this.onResize(() => this.onResized_());
   }
 
