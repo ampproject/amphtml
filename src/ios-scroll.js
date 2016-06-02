@@ -394,7 +394,9 @@ export class SyntheticScroll {
 
     if (Math.abs(delta) > 0.3) {
       if (this.scrollTo_(this.target_ - delta)) {
-        this.autoScrolling_ = requestAnimationFrame(this.boundAutoScroll);
+        this.autoScrolling_ = this.win_.requestAnimationFrame(
+          this.boundAutoScroll
+        );
         return;
       }
     } else {
@@ -538,7 +540,9 @@ export class SyntheticScroll {
       const multiplier = 1.1;
       this.amplitude_ = multiplier * this.velocity_;
       this.target_ = Math.round(this.offset_ + this.amplitude_);
-      this.autoScrolling_ = requestAnimationFrame(this.boundAutoScroll);
+      this.autoScrolling_ = this.win_.requestAnimationFrame(
+        this.boundAutoScroll
+      );
     } else {
       this.scrollStopped_();
     }
