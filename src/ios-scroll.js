@@ -204,6 +204,8 @@ export class SyntheticScroll {
   addFixedElement(element) {
     const style = element.style;
     this.fixedElementStyles_.push(style);
+    // Promote the element to it's own GPU rendering layer. This allows us to
+    // scroll the element in unison with the doc.
     style.transform = `translate3d(0, 0, 0)`;
   }
 
