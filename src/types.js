@@ -45,9 +45,8 @@ export function toArray(arrayLike) {
   if (!arrayLike) {
     return [];
   }
-  const length = arrayLike.length;
-  const array = new Array(length);
-  for (let i = 0; i < array.length; i++) {
+  const array = new Array(arrayLike.length);
+  for (let i = 0; i < arrayLike.length; i++) {
     array[i] = arrayLike[i];
   }
   return array;
