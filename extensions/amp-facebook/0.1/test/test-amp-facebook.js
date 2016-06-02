@@ -124,6 +124,7 @@ describe('amp-facebook', function() {
                 type: 'requestHeight',
                 is3p: true,
                 height: 666,
+                amp3pSentinel: iframe.getAttribute('data-amp-3p-sentinel'),
               }, '*');
             };
             iframe.src = iframeSrc;

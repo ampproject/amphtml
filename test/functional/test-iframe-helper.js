@@ -16,10 +16,13 @@
 import * as IframeHelper from '../../src/iframe-helper';
 import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
+import {generateSentinel} from '../../src/3p-frame.js';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/base/test/fixtures/served/iframe-intersection.html';
+  const nestedIframeSrc = 'http://iframe.localhost:' + location.port +
+      '/base/test/fixtures/served/iframe-intersection-outer.html';
 
   let testIframe;
   let sandbox;
@@ -60,7 +63,7 @@ describe('iframe-helper', function() {
     }).to.throw('cannot register events on an attached iframe');
   });
 
-  it('should listen to iframe messages', () => {
+  it('should listen to iframe messages from non-3P frame', () => {
     let unlisten;
     let calls = 0;
     return new Promise(resolve => {
@@ -69,6 +72,56 @@ describe('iframe-helper', function() {
             calls++;
             resolve();
           });
+      insert(testIframe);
+    }).then(() => {
+      const total = calls;
+      unlisten();
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
+    });
+  });
+
+  it('should listen to iframe messages from 3P frame', () => {
+    let unlisten;
+    let calls = 0;
+    return new Promise(resolve => {
+      const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
+      testIframe.src = iframeSrc + '#amp-3p-sentinel=' + sentinel;
+      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+          () => {
+            calls++;
+            resolve();
+          }, true /* opt_is3P */);
+      insert(testIframe);
+    }).then(() => {
+      const total = calls;
+      unlisten();
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
+    });
+  });
+
+  it('should listen to iframe messages from nested 3P frame', () => {
+    let unlisten;
+    let calls = 0;
+    return new Promise(resolve => {
+      const sentinel = generateSentinel(testIframe.ownerDocument.defaultView);
+      // Note that we're using a different document here which will load the
+      // usual iframe-intersection.html within a nested iframe.
+      testIframe.src = nestedIframeSrc + '#amp-3p-sentinel=' + sentinel;
+      testIframe.setAttribute('data-amp-3p-sentinel', sentinel);
+      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+          () => {
+            calls++;
+            resolve();
+          }, true  /* opt_is3P */, true /* opt_includingNestedWindows */);
       insert(testIframe);
     }).then(() => {
       const total = calls;
