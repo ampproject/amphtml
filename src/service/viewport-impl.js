@@ -1226,6 +1226,11 @@ export class ViewportBindingNaturalIosScrollEmbed_
       Math.round(rect.height)
     );
   }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
+    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
 }
 
 
