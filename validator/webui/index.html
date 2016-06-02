@@ -485,7 +485,7 @@
           }
           // If #url=<url> was provided, load it, otherwise, start with the
           // minimum valid AMP document.
-          if (params.hasOwnProperty('url')) {
+          if (params.hasOwnProperty('url') && params['url']) {
             input.value = params['url']
             button.fire('click');
           } else {
