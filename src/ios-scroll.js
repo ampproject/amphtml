@@ -319,7 +319,7 @@ export class SyntheticScroll {
     // the scroll.
     // We remove the transform when there is no offset so that the body may be
     // sync'd with our synthetic scroll position.
-    this.scrollStyle_.style.transform = y ? `translate3d(0, ${-y}px, 0)` : '';
+    this.scrollStyle_.transform = y ? `translate3d(0, ${-y}px, 0)` : '';
 
     // Because the scroller now (usually) has a transform, it is now a
     // "positioned" ancestor.  Thus, fixed elements are fixed based on it and
