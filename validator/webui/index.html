@@ -407,6 +407,12 @@
               if (params.hasOwnProperty('errno')) {
                 var errno = parseInt(params['errno']);
                 listbox.selectAndFocusError(errno);
+
+                // We don't want this param to be sticky, e.g. if a user
+                // types into the editor we don't want to go back to this
+                // old error after revalidation.
+                delete params['errno'];
+                setLocationHashParams(params);
               }
             }, e.detail.validationDelayMs);
           });
