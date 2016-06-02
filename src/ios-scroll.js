@@ -105,7 +105,7 @@ export class SyntheticScroll {
      * The maximum value that we may scroll the scroller to.
      * @private {number}
      */
-    this.max_ = Math.round(scrollHeight - this.win_./*OK*/innerHeight);
+    this.max_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight);
 
     /**
      * The current scroll offset from the body's own scrollTop. After synthetic
@@ -272,7 +272,7 @@ export class SyntheticScroll {
    */
   getScrollTop() {
     const delta = this.bodyScrolled_ ?
-        -this.scrollMoveEl_./*OK*/getBoundingClientRect().top  :
+        -this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top  :
         0;
     return this.scrollTop_ + this.offset_ + delta;
   }
@@ -284,10 +284,10 @@ export class SyntheticScroll {
    * @param {number} scrollHeight
    */
   resize(scrollTop, scrollHeight) {
-    var delta = this.scrollMoveEl_./*OK*/getBoundingClientRect().top;
+    var delta = this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
     this.scrollTop_ = scrollTop + delta;
     this.min_ = -this.scrollTop_;
-    this.max_ = Math.round(scrollHeight - this.win_./*OK*/innerHeight) - delta;
+    this.max_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight) - delta;
   }
 
   /**
@@ -420,7 +420,7 @@ export class SyntheticScroll {
       // The doc has scrolled natively, causing our synthetic scroll to be out
       // of sync with the real scrollTop. We must calculate the difference
       // and adjust.
-      const delta = -this.scrollMoveEl_./*OK*/getBoundingClientRect().top;
+      const delta = -this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
       this.scrollTop_ += delta;
       this.min_ -= delta;
       this.max_ -= delta;
@@ -447,7 +447,7 @@ export class SyntheticScroll {
     // Suppress this body scrolled event, we expect it.
     this.bodyScrolled_ = null;
     this.scrollMoveEl_.style.transform = 'translateY(' + this.scrollTop_ + 'px)';
-    this.scrollMoveEl_./*OK*/scrollIntoView(true);
+    this.scrollMoveEl_./*REVIEW*/scrollIntoView(true);
 
     this.setIframeInteractionAllowed_(true);
   }
