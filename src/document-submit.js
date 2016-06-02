@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+/**
+ * @type {?SubmitHandler} Store the global handler for form submits.
+ */
+let submitHandler_;
 
 /**
  * @param {!Window} window
@@ -26,17 +29,8 @@ export function installGlobalSubmitListener(window) {
 /**
  * @param {!Window} window
  */
-export function uninstallGlobalSubmitListener(window) {
-  submitHandlerFor(window).cleanup();
-}
-
-/**
- * @param {!Window} window
- */
 function submitHandlerFor(window) {
-  return getService(window, 'submithandler', () => {
-    return new SubmitHandler(window);
-  });
+  return submitHandler_ || (submitHandler_ = new SubmitHandler(window));
 }
 
 /**
@@ -89,9 +83,11 @@ export function onDocumentFormSubmit_(e) {
   }
 
   const form = e.target;
-  if (!form) {
+  if (!form || form.tagName != 'FORM') {
     return;
   }
+
+  if (form.hasAttribute())
 
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since
@@ -108,4 +104,4 @@ export function onDocumentFormSubmit_(e) {
 
   form.classList.add('amp-form-valid');
   form.classList.remove('amp-form-invalid');
-};
+}

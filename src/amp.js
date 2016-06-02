@@ -59,7 +59,7 @@ try {
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
-      if (isExperimentOn(window, 'document-submit')) {
+      if (isExperimentOn(window, 'form-submit')) {
         installGlobalSubmitListener(window);
       }
 

@@ -87,7 +87,7 @@ const EXPERIMENTS = [
     spec: '',
   },
   {
-    id: 'document-submit',
+    id: 'form-submit',
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
