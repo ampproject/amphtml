@@ -482,7 +482,7 @@ export class SyntheticScroll {
       cancelAnimationFrame(this.autoScrolling_);
       this.autoScrolling_ = 0;
     } else {
-      this.scrollStarted_();
+      this.scrollStarted_(event);
     }
 
     this.velocity_ = 0;
