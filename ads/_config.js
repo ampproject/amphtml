@@ -61,6 +61,7 @@ export const adPrefetch = {
     'https://yads.c.yimg.jp/js/yads.js',
   ],
   nend: 'https://js1.nend.net/js/amp.js',
+  adcrops: 'https://js.adcrops.net/amp.js',
 };
 
 /**
@@ -168,6 +169,12 @@ export const adPreconnect = {
     'https://js1.nend.net',
     'https://output.nend.net',
     'https://img1.nend.net',
+  ],
+  adcrops: [
+    'https://js.adcrops.net',
+    'https://t.adcrops.net',
+    'https://i.adcrops.net',
+    'https://b.adcrops.net',
   ],
 };
 
