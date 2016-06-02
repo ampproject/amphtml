@@ -22,7 +22,7 @@ import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
 import {viewerFor} from '../../src/viewer';
 import {resourcesFor} from '../../src/resources';
-import {VisibilityState} from '../../src/service/viewer-impl';
+import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 
 describe('Viewer Visibility State', () => {

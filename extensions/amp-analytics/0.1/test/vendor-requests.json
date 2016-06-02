@@ -75,6 +75,12 @@
   "infonline": {
     "pageview": "$url?st=$st&sv=$sv&ap=$ap&co=$co&cp=$cp&host=_canonical_host_&path=_canonical_path_"
   },
+  "oewa": {
+    "pageview": "$url?s=$s&amp=1&cp=$cp&host=_canonical_host_&path=_canonical_path_"
+  },
+  "oewadirect": {
+    "pageview": "https://$s.oewabox.at/j0=,,,r=_canonical_url_;+,amp=1+cp=$cp+ssl=1+hn=_canonical_host_;;;?lt=_page_view_id_&x=_screen_width_x_screen_height_x24&c=_client_id_"
+  },
   "simplereach": {
     "host": "https://edge.simplereach.com",
     "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",

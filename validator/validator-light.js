@@ -20,14 +20,24 @@
 // will validate, but they won't produce error messages etc.
 // Testing is done via validator-light_test.js.
 
-goog.provide('amp.validator.maxSpecificity');
+goog.provide('amp.validator.validateNode');
+goog.require('amp.domwalker.DomWalker');
+goog.require('amp.validator.ValidationHandler');
 
 /**
- * A helper function which allows us to compare two candidate results
- * in validateTag to report the results which have the most specific errors.
- * @param {!amp.validator.ValidationResult} validationResult
- * @return {number} maximum value of specificity found in all errors.
+ * Validates a document stored below a DOM node.
+ * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
+ * progress.
+ *
+ * @param {!Document} rootDoc
+ * @return {!amp.validator.ValidationResult} Validation Result (status and
+ *     errors)
+ * @export
  */
-amp.validator.maxSpecificity = function(validationResult) {
-  return 0;
+amp.validator.validateNode = function(rootDoc) {
+  const handler = new amp.validator.ValidationHandler();
+  const visitor = new amp.domwalker.DomWalker();
+  visitor.walktree(handler, rootDoc);
+
+  return handler.Result();
 };
