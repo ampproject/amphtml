@@ -332,9 +332,14 @@ export class SyntheticScroll {
       fixeds[i].transform = `translate3d(0, ${fixedOffset}px, 0)`;
     }
 
-    if (y === 0 || scrollEventDelta > SCROLL_EVENT_DELTA) {
+    if (scrollEventDelta > SCROLL_EVENT_DELTA) {
       this.lastScrollEventOffset_ = y;
-      this.scrollObservable_.fire();
+      // The only time we scroll to 0 is when we're synchronizing the scrollTop
+      // and synthetic scroll. In that case, the body's own scroll event will
+      // fire.
+      if (y !== 0) {
+        this.scrollObservable_.fire();
+      }
     }
 
     return true;
@@ -547,5 +552,6 @@ export class SyntheticScroll {
    */
   bodyScroll_() {
     this.bodyScrolled_ = this.bodyScrolled_ === null ? false : true;
+    this.scrollObservable_.fire();
   }
 }
