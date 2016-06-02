@@ -405,6 +405,8 @@
       }
       if (type == 'sendCsi') {
         log('[CSI] sendCsi.');
+      }
+      if(type == 'scroll') {
         return;
       }
       return Promise.reject('request not supported: ' + type);

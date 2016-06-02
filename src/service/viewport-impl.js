@@ -143,6 +143,10 @@ export class Viewport {
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    this.onScroll(() => {
+      this.viewer_.postScroll(this.getScrollTop());
+    });
   }
 
   /** For testing. */

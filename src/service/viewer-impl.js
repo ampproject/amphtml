@@ -704,6 +704,15 @@ export class Viewer {
   }
 
   /**
+   * Triggers "scroll" event for the viewer.
+   * @param {number} scrollTop
+   */
+  postScroll(scrollTop) {
+    this.sendMessageUnreliable_(
+        'scroll', {scrollTop: scrollTop}, false);
+  }
+
+  /**
    * Requests full overlay mode from the viewer. Returns a promise that yields
    * when the viewer has switched to full overlay mode.
    * @return {!Promise}
