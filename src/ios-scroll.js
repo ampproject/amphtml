@@ -99,13 +99,13 @@ export class SyntheticScroll {
      * scrollTop and our synthetic scroll offset.
      * @private {number}
      */
-    this.min_ = -scrollTop;
+    this.minScrollTop_ = -scrollTop;
 
     /**
      * The maximum value that we may scroll the scroller to.
      * @private {number}
      */
-    this.max_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight);
+    this.maxScrollTop_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight);
 
     /**
      * The current scroll offset from the body's own scrollTop. After synthetic
@@ -286,8 +286,8 @@ export class SyntheticScroll {
   resize(scrollTop, scrollHeight) {
     var delta = this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
     this.scrollTop_ = scrollTop + delta;
-    this.min_ = -this.scrollTop_;
-    this.max_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight) - delta;
+    this.minScrollTop_ = -this.scrollTop_;
+    this.maxScrollTop_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight) - delta;
   }
 
   /**
@@ -308,7 +308,7 @@ export class SyntheticScroll {
    * @private
    */
   scrollTo_(yPos) {
-    const y = Math.min(Math.max(yPos, this.min_), this.max_);
+    const y = Math.min(Math.max(yPos, this.minScrollTop_), this.maxScrollTop_);
     if (y === this.offset_) {
       return false;
     }
@@ -422,8 +422,8 @@ export class SyntheticScroll {
       // and adjust.
       const delta = -this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
       this.scrollTop_ += delta;
-      this.min_ -= delta;
-      this.max_ -= delta;
+      this.minScrollTop_ -= delta;
+      this.maxScrollTop_ -= delta;
       this.bodyScrolled_ = false;
     }
 
@@ -441,8 +441,8 @@ export class SyntheticScroll {
     // wouldn't be able to natively scroll up because Safari thinks
     // they're "at" the top of the doc).
     this.scrollTop_ += this.offset_;
-    this.min_ -= offset;
-    this.max_ -= offset;
+    this.minScrollTop_ -= offset;
+    this.maxScrollTop_ -= offset;
     this.scrollTo_(0);
     // Suppress this body scrolled event, we expect it.
     this.bodyScrolled_ = null;
