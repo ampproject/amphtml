@@ -204,8 +204,10 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
         (isMinified ? '-min/frame' : '/frame.max') +
         '.html';
   }
-  return 'https://' + getSubDomain(parentWindow) +
+  let val = 'https://' + getSubDomain(parentWindow) +
       '.ampproject.net/$internalRuntimeVersion$/frame.html';
+  console.log('this is the path', val);
+  return val;
 }
 
 /**

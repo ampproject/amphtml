@@ -71,11 +71,11 @@ function cleanupBuildDir() {
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   if (argv.fortesting) {
-    fs.copySync('build-system/env/process-dev.js',
-        'build/fake-module/src/process.js');
+    fs.copySync('build-system/env/env-prod-fortesting.js',
+        'build/fake-module/src/env.js');
   } else {
-    fs.copySync('build-system/env/process-prod.js',
-        'build/fake-module/src/process.js');
+    fs.copySync('build-system/env/env-prod.js',
+        'build/fake-module/src/env.js');
   }
 }
 exports.cleanupBuildDir = cleanupBuildDir;
@@ -145,8 +145,8 @@ function compile(entryModuleFilename, outputDir,
       '!**_test.js',
       '!**/test-*.js',
       '!**/*.extern.js',
-      '!src/process.js',
-      'build/fake-module/src/process.js'
+      '!src/env.js',
+      'build/fake-module/src/env.js'
     ];
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load

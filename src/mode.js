@@ -15,7 +15,7 @@
  */
 
 
-import {process} from './process';
+import {env} from './env';
 
 
 /**
@@ -44,10 +44,9 @@ const version = '$internalRuntimeVersion$';
  */
 let fullVersion = '';
 
-/* global process: false */
-export const isMinified = process.env.NODE_ENV == 'production';
+export const isMinified = env.PROD;
 
-export const isLocalDev = process.env.NODE_ENV != 'production' &&
+export const isLocalDev = (env.FOR_TESTING && !env.PROD) &&
     !!(location.hostname == 'localhost' ||
     (location.ancestorOrigins && location.ancestorOrigins[0] &&
         location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
