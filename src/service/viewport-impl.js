@@ -883,39 +883,18 @@ export class ViewportBindingNaturalIosEmbed_ {
     // this is needed.
     this.scrollPosEl_ = this.win.document.createElement('div');
     this.scrollPosEl_.id = '-amp-scrollpos';
-    setStyles(this.scrollPosEl_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
     documentBody.appendChild(this.scrollPosEl_);
 
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
     this.scrollMoveEl_ = this.win.document.createElement('div');
     this.scrollMoveEl_.id = '-amp-scrollmove';
-    setStyles(this.scrollMoveEl_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
     documentBody.appendChild(this.scrollMoveEl_);
 
     // Insert endPos element into DOM. See {@link getScrollHeight} for why
     // this is needed.
     this.endPosEl_ = this.win.document.createElement('div');
     this.endPosEl_.id = '-amp-endpos';
-    setStyles(this.endPosEl_, {
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
     // TODO(dvoytenko): not only it should be at the bottom at setup time,
     // but it must always be at the bottom. Consider using BODY "childList"
     // mutations to track this. For now, however, this is ok since we don't
