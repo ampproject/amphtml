@@ -1233,6 +1233,12 @@ export class ViewportBindingNaturalIosScrollEmbed_
   updatePaddingTop(paddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
   }
+
+  /** @override */
+  updateLightboxMode(unusedLightboxMode) {
+    // The layout is always accurate.
+  }
+
 }
 
 
