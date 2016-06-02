@@ -36,6 +36,7 @@
   <link rel="import" href="@polymer/paper-toolbar/paper-toolbar.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
   <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+  <script src="webui.js"></script>
   <script src="codemirror/lib/codemirror.js"></script>
   <script src="codemirror/addon/selection/selection-pointer.js"></script>
   <script src="codemirror/mode/css/css.js"></script>
@@ -461,6 +462,7 @@
                 urlToFetch = 'https://' + urlToFetch;
                 input.value = urlToFetch;
               }
+              setLocationHashParams({'url': urlToFetch});
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -475,16 +477,9 @@
           });
 
           // Interprets the parameters after the '#' in the URL.
-          var paramStrings = window.location.hash.substr(1).split('&');
-          var params = {};
-          for (var ii = 0; ii < paramStrings.length; ii++) {
-            var keyValue = paramStrings[ii].split('=');
-            if (keyValue[0].length > 0) {
-              params[keyValue[0]] = keyValue[1];
-            }
-          }
           // If #url=<url> was provided, load it, otherwise, start with the
           // minimum valid AMP document.
+          var params = getLocationHashParams();
           if (params.hasOwnProperty('url') && params['url']) {
             input.value = params['url']
             button.fire('click');
