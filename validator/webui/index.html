@@ -192,10 +192,27 @@
         height: 200px;
         overflow-y: scroll;
       }
+      paper-item.iron-selected,
+      paper-item.iron-selected:hover {
+        background-color: #e6e6e6;
+      }
+      paper-item:hover {
+        background-color: #eee;
+      }
+      paper-item {
+        border-bottom: 1px solid #c1c2c3;
+        padding: 4px 8px;
+        transition-duration: 0.28s;
+        transition-property: background-color;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      paper-item:first-of-type {
+        border-top: 1px solid #c1c2c3;
+      }
     </style>
     <template>
-      <paper-listbox on-iron-select="handleSelect" selected="{{selectedError}}">
-        <template is="dom-repeat" items='{{errors}}' as="e">
+      <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
+        <template id="listboxItems" is="dom-repeat" items='{{errors}}' as="e">
           <paper-item>
             <template is="dom-if" if="{{e.isError}}">
               <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
@@ -231,6 +248,11 @@
             type: Number,
             value: -1  // don't select anything by default.
           }
+        },
+        selectAndFocusError: function(index) {
+          this.$.listbox.selected = index;
+          this.$.listboxItems.render();
+          this.$.listbox.selectedItem.scrollIntoView();
         },
         handleSelect: function(e) {
           var error = this.errors[this.selectedError];
@@ -448,6 +470,11 @@
                   div.appendChild(document.createTextNode('.'));
                 }
                 lineWidgets.push(editor.addLineWidget(error.line - 1, div));
+              }
+              var params = getLocationHashParams();
+              if (params.hasOwnProperty('errno')) {
+                var errno = parseInt(params['errno']);
+                listbox.selectAndFocusError(errno);
               }
             }, e.detail.validationDelayMs);
           });
