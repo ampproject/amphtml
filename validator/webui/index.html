@@ -26,7 +26,6 @@
   <link rel="import" href="@polymer/iron-icon/iron-icon.html">
   <link rel="import" href="@polymer/iron-icons/communication-icons.html">
   <link rel="import" href="@polymer/iron-icons/iron-icons.html">
-  <link rel="import" href="@polymer/iron-resizable-behavior/iron-resizable-behavior.html">
   <link rel="import" href="@polymer/paper-button/paper-button.html">
   <link rel="import" href="@polymer/paper-input/paper-input.html">
   <link rel="import" href="@polymer/paper-item/paper-item.html">
@@ -172,7 +171,9 @@
         selectAndFocusError: function(index) {
           this.$.listbox.selected = index;
           this.$.listboxItems.render();
-          this.$.listbox.selectedItem.scrollIntoView();
+          if (this.$.listbox.selectedItem) {
+            this.$.listbox.selectedItem.scrollIntoView();
+          }
         },
         handleSelect: function(e) {
           var error = this.errors[this.selectedError];
