@@ -1180,6 +1180,8 @@ export class ViewportBindingNaturalIosScrollEmbed_
       this.getScrollTop_(),
       this.getScrollHeight()
     );
+
+    this.scroller.onScroll(() => this.scrollObservable_.fire());
   }
 
   /**
@@ -1212,11 +1214,6 @@ export class ViewportBindingNaturalIosScrollEmbed_
     return -rect.top;
   }
 
-  /** @override */
-  setScrollTop(scrollTop) {
-    this.scroller.setScrollTop(scrollTop);
-  }
-
   getLayoutRect(el) {
     const rect = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(
@@ -1225,6 +1222,11 @@ export class ViewportBindingNaturalIosScrollEmbed_
       Math.round(rect.width),
       Math.round(rect.height)
     );
+  }
+
+  /** @override */
+  setScrollTop(scrollTop) {
+    this.scroller.setScrollTop(scrollTop);
   }
 
   /** @override */

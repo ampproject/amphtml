@@ -22,6 +22,15 @@
  */
 const SCROLL_INTENTION_ELAPSED_CUTOFF = (1000 / 60) * 3;
 
+
+/**
+ * The number of pixels necessary to fire a scroll event. A scroll event will
+ * always fire at the end of a scroll, but only after this many pixels have
+ * changed during the scroll.
+ * @const @private {number}
+ */
+const SCROLL_EVENT_DELTA = 2.1;
+
 /**
  * Manages scrolling of embedded AMP document in iOS, since iOS doesn't
  * natively scroll embedded documents well. This "synthetic" scrolling keeps
@@ -106,6 +115,13 @@ export class SyntheticScroll {
     this.offset_ = 0;
 
     /**
+     * The scroll offset that last fired a scroll event. Used to prevent
+     * hundreds of scroll events for fractional scrolls.
+     * @private {number}
+     */
+    this.lastScrollEventOffset_ = 0;
+
+    /**
      * Records the y position of the last touch event, and is used to
      * determine how much movement happened in the current touch event.
      * @private {number}
@@ -158,9 +174,12 @@ export class SyntheticScroll {
 
     /**
      * The synthetic momentum scroll, bound to this context.
-     * @private
+     * @private @const
      */
     this.boundAutoScroll_ = this.autoScroll_.bind(this);
+
+    /** @private @const {!Observable} */
+    this.scrollObservable_ = new Observable();
 
     // We listen on the document level so that, even if the HTML or BODY has
     // padding, margin, etc, the touch event will still cause scrolling.
@@ -270,6 +289,16 @@ export class SyntheticScroll {
   }
 
   /**
+   * Registers the handler for scroll events.
+   *
+   * @param {!function()} handler
+   * @return {!Unlisten}
+   */
+  onScroll(handler) {
+    return this.scrollObservable_.add(handler);
+  }
+
+  /**
    * Synthetically scrolls the document to position ypos. This does not change
    * the body's scrollTop.
    *
@@ -281,6 +310,7 @@ export class SyntheticScroll {
     if (y === this.offset_) {
       return false;
     }
+    const scrollEventDelta = Math.abs(this.lastScrollEventOffset_ - y);
     this.offset_ = y;
 
     // "Scroll" by moving the scroller element in the opposite direction of
@@ -299,6 +329,12 @@ export class SyntheticScroll {
     for (let i = 0; i < fixeds.length; i++) {
       fixeds[i].transform = `translate3d(0, ${fixedOffset}px, 0)`;
     }
+
+    if (y === 0 || scrollEventDelta > SCROLL_EVENT_DELTA) {
+      this.lastScrollEventOffset_ = y;
+      this.scrollObservable_.fire();
+    }
+
     return true;
   }
 
