@@ -37,18 +37,22 @@ export function isArray(value) {
 
 /**
  * Converts an array-like object to an array.
- * @param {?HTMLCollection|?NodeList|*} arrayLike
+ * @param {?IArrayLike<*>|string} arrayLike
  * @return {!Array.<*>}
  */
 export function toArray(arrayLike) {
   if (!arrayLike) {
     return [];
   }
-  const array = [];
-  for (let i = 0; i < arrayLike.length; i++) {
-    array.push(arrayLike[i]);
+  const length = arrayLike.length;
+  if (length > 0) {
+    const array = new Array(length);
+    for (let i = 0; i < length; i++) {
+      array[i] = arrayLike[i];
+    }
+    return array;
   }
-  return array;
+  return [];
 }
 
 /**

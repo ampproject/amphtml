@@ -19,9 +19,14 @@ import * as types from '../../src/types';
 describe('Types', () => {
   describe('toArray', () => {
 
-    it('should return empty array if null passed', () => {
+    it('should return empty array if null is passed', () => {
       expect(types.toArray(null).length).to.equal(0);
       expect(types.toArray(undefined).length).to.equal(0);
+    });
+
+    it('should return empty array if non-array-like is passed', () => {
+      expect(types.toArray({}).length).to.equal(0);
+      expect(types.toArray(document.createElement('p')).length).to.equal(0);
     });
 
     it('should convert NodeList to array', () => {
@@ -58,5 +63,5 @@ describe('Types', () => {
       expect(arr.length).to.equal(4);
       expect(Array.isArray(arr)).to.be.true;
     });
-  })
+  });
 });
