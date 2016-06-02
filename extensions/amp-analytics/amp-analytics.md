@@ -214,6 +214,13 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
+## Segment
+
+Type attribute value: `segment`
+
+Adds support for segment page views and events.
+To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
+
 ### SOASTA mPulse
 
 Type attribute value: `mpulse`

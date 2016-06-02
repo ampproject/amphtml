@@ -445,6 +445,31 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End SimpleReach Example -->
 
+<!-- Segment analytics tracking -->
+<amp-analytics type="segment">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "p74lml96co",
+    "name": "Page name"
+  },
+  "extraUrlParams": {
+    "properties.author.name": "John"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "event": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
 <!-- Snowplow Analytics tracking -->
 <amp-analytics type="snowplow" id="snowplow">
 <script type="application/json">
@@ -651,4 +676,3 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
     </amp-anim>
 </body>
 </html>
-
