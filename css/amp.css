@@ -201,15 +201,23 @@ i-amp-sizer {
 }
 
 /**
+ * Wraps the body's children to make the page scrollable.
+ */
+i-amp-container {
+  display: block;
+}
+
+
+/**
  * Helper elements to control scrolling in iOS
  */
-#-amp-scrollpos, #-amp-scrollmove, #-amp-endpos {
+#-amp-startpos, #-amp-scrollmove, #-amp-endpos {
   width: 0;
   height: 0;
   visibility: hidden;
 }
 
-#-amp-scrollpos, #-amp-scrollmove {
+#-amp-startpos, #-amp-scrollmove {
   position: absolute;
   top: 0;
   left: 0;

@@ -814,10 +814,13 @@ export class ViewportBindingNaturalIosEmbed_ {
     this.win = win;
 
     /** @private {?Element} */
-    this.scrollPosEl_ = null;
+    this.startPosEl_ = null;
 
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
+
+    /** @private {?Element} */
+    this.endPosEl_ = null;
 
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
@@ -879,11 +882,11 @@ export class ViewportBindingNaturalIosEmbed_ {
       bottom: 0,
     });
 
-    // Insert scrollPos element into DOM. See {@link onScrolled_} for why
+    // Insert startPos element into DOM. See {@link onScrolled_} for why
     // this is needed.
-    this.scrollPosEl_ = this.win.document.createElement('div');
-    this.scrollPosEl_.id = '-amp-scrollpos';
-    documentBody.appendChild(this.scrollPosEl_);
+    this.startPosEl_ = this.win.document.createElement('div');
+    this.startPosEl_.id = '-amp-startpos';
+    documentBody.appendChild(this.startPosEl_);
 
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
@@ -980,7 +983,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return 0;
     }
     return Math.round(this.endPosEl_./*OK*/getBoundingClientRect().top -
-        this.scrollPosEl_./*OK*/getBoundingClientRect().top);
+        this.startPosEl_./*OK*/getBoundingClientRect().top);
   }
 
   /** @override */
@@ -1017,11 +1020,11 @@ export class ViewportBindingNaturalIosEmbed_ {
     // document./*OK*/scrollingElement will point to document.documentElement.
     // This already works correctly in Chrome with "scroll-top-left-interop"
     // flag turned on "chrome://flags/#scroll-top-left-interop".
-    if (!this.scrollPosEl_) {
+    if (!this.startPosEl_) {
       return;
     }
     this.adjustScrollPos_(event);
-    const rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
+    const rect = this.startPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
       this.pos_.y = -rect.top;
@@ -1043,14 +1046,14 @@ export class ViewportBindingNaturalIosEmbed_ {
    * @private
    */
   adjustScrollPos_(opt_event) {
-    if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
+    if (!this.startPosEl_ || !this.scrollMoveEl_) {
       return;
     }
 
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
+    const scrollTop = -this.startPosEl_./*OK*/getBoundingClientRect().top;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
