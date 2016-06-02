@@ -86,7 +86,7 @@ export function onDocumentFormSubmit_(e) {
   if (!form || form.tagName != 'FORM') {
     return;
   }
-  
+
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since
   // the submit event wouldn't be fired if the form is invalid.
