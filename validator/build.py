@@ -424,8 +424,9 @@ def CreateWebuiAppengineDist(out_dir):
     shutil.copytree('webui', os.path.join(tempdir, 'webui'))
     os.symlink(os.path.abspath('node_modules/codemirror'),
                os.path.join(tempdir, 'webui/codemirror'))
-    os.symlink(os.path.abspath('node_modules/@polymer'),
-               os.path.join(tempdir, 'webui/@polymer'))
+    for d in os.listdir('node_modules/@polymer'):
+      os.symlink(os.path.abspath(os.path.join('node_modules/@polymer', d)),
+                 os.path.join(tempdir, 'webui/@polymer', d))
     os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
                os.path.join(tempdir, 'webui/webcomponents-lite'))
     vulcanized_index_html = subprocess.check_output([
