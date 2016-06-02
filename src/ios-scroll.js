@@ -43,7 +43,7 @@ const SCROLL_EVENT_DELTA = 2.1;
 export class SyntheticScroll {
 
   /**
-   * @param {HTMLBodyElement} body
+   * @param {!HTMLBodyElement} body
    * @param {number} scrollTop the body's current scrollTop
    * @param {number} scrollHeight the body's current scrollHeight
    */
@@ -79,7 +79,7 @@ export class SyntheticScroll {
     /**
      * A helper element that records the last position we scrolled to. This
      * allows us to determine how much the user scrolled natively.
-     * @const @private {Element}
+     * @const @private {!Element}
      */
     this.scrollMoveEl_ = doc.createElement('div');
     this.scrollMoveEl_.id = '-amp-scrollmove';
@@ -410,7 +410,7 @@ export class SyntheticScroll {
    * synthetic scroll momentum). This will be called if the user natively
    * scrolls the document, then continues the scroll outside of the iframe.
    *
-   * @param {TouchEvent} event
+   * @param {!TouchEvent} event
    */
   scrollStarted_(event) {
     if (this.bodyScrolled_) {
@@ -470,7 +470,7 @@ export class SyntheticScroll {
   /**
    * A callback bound to the `touchstart` event on the document.
    *
-   * @param {TouchEvent} event
+   * @param {!TouchEvent} event
    */
   touchstart_(event) {
     // We don't allow zooming
@@ -496,7 +496,7 @@ export class SyntheticScroll {
   /**
    * A callback bound to the `touchmove` event on the document.
    *
-   * @param {TouchEvent} event
+   * @param {!TouchEvent} event
    */
   touchmove_(event) {
     // We don't allow zooming
@@ -520,7 +520,7 @@ export class SyntheticScroll {
   /**
    * A callback bound to the `touchend` event on the document.
    *
-   * @param {TouchEvent} event
+   * @param {!TouchEvent} event
    */
   touchend_(event) {
     // We don't allow zooming
@@ -551,8 +551,6 @@ export class SyntheticScroll {
   /**
    * A callback bound to the `scroll` event on the body. This is used to
    * determine if a native scroll happened.
-   *
-   * @param {TouchEvent} event
    */
   bodyScroll_() {
     this.bodyScrolled_ = this.bodyScrolled_ === null ? false : true;
