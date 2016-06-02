@@ -33,8 +33,8 @@
   <link rel="import" href="@polymer/paper-listbox/paper-listbox.html">
   <link rel="import" href="@polymer/paper-material/paper-material.html">
   <link rel="import" href="@polymer/paper-styles/demo-pages.html">
-  <link rel="import" href="@polymer/paper-toolbar/paper-toolbar.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
+  <link rel="import" href="@polymer/ampproject-toolbar/ampproject-toolbar.html">
   <link rel="stylesheet" href="codemirror/lib/codemirror.css">
   <script src="codemirror/lib/codemirror.js"></script>
   <script src="codemirror/addon/selection/selection-pointer.js"></script>
@@ -273,74 +273,6 @@
           this.$.urlToFetch.validate();
           this.$.validateButton.click();
         }
-      });
-    </script>
-  </dom-module>
-
-  <!-- Toolbar displayed at the top of the page. This doesn't do much but has a
-       lot of styling, so we isolate it to keep the source for other parts of
-       the page easier to read. -->
-  <dom-module id="ampproject-toolbar">
-    <style scope="ampproject-toolbar">
-      paper-toolbar {
-        --paper-toolbar-background: #fbfafb;
-        --paper-toolbar-color: #0379C4;
-        --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; };
-        --width: 100%
-      }
-      .ampproject-left {
-        @apply(--layout-flex);
-        color: #0379C4;
-        padding: 15px 10px 15px 50px;
-        margin: 10px 0;
-        width: auto;
-        text-transform: none;
-        white-space: nowrap;
-        background-image: url('data:image/svg+xml;utf-8,<svg width=\22 14px\22  height=\22 14px\22  viewBox=\22 0 0 14 14\22  version=\22 1.1\22  xmlns=\22 http://www.w3.org/2000/svg\22  xmlns:xlink=\22 http://www.w3.org/1999/xlink\22 ><title>AMP Logo</title><g id=\22 Page-1\22  stroke=\22 none\22  stroke-width=\22 1\22  fill=\22 none\22  fill-rule=\22 evenodd\22 ><g id=\22 AMP-Logo\22  fill=\22 #0379C4\22 ><path d=\22 M8.657817,0.216062 L7.647297,5.589962 L10.085327,5.589962 C10.188787,5.589962 10.256477,5.698322 10.211117,5.791282 L6.230217,13.958532 C6.480467,13.985622 6.734567,13.999972 6.992097,13.999972 C10.853717,13.999972 13.984117,10.869572 13.984117,7.007952 C13.984117,3.720402 11.715067,0.963312 8.657817,0.216062\22  id=\22 Fill-4\22 ></path><path d=\22 M6.425398,8.529948 L3.987158,8.529948 C3.883698,8.529948 3.815938,8.421588 3.861298,8.328628 L7.885808,0.072478 C7.591808,0.034958 7.292138,0.015708 6.987848,0.015848 C3.168228,0.018088 0.028028,3.136308 0.000168,6.955858 C-0.024192,10.303328 2.304078,13.111168 5.429718,13.824608 L6.425398,8.529948 Z\22  id=\22 Fill-1\22 ></path></g></g></svg>');
-        background-repeat: no-repeat;
-        background-size: 40px 40px;
-        background-position: center left;
-      }
-      .ampproject-right {
-        color: #0379C4;
-        margin: 10px 0;
-      }
-      .ampproject-link a:link,
-      .ampproject-link a:visited,
-      .ampproject-link a:hover,
-      .ampproject-link a:active {
-        color: #0379C4;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 300;
-        letter-spacing: 0.04em;
-      }
-      .flex-horizontal {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        margin-bottom: 10px;
-      }
-      .flexchild {
-      }
-    </style>
-    <template>
-      <paper-toolbar>
-        <div class="ampproject-left ampproject-link">
-          <a href="https://www.ampproject.org/"
-             target="_blank">Accelerated Mobile Pages Project</a>
-        </div>
-        <div class="ampproject-right ampproject-link">
-          <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
-             target="_blank">GITHUB</a>
-          &nbsp;&nbsp;&nbsp;
-          <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
-             target="_blank">CHROME EXTENSION</a>
-        </div>
-      </paper-toolbar>
-    </template>
-    <script>
-      Polymer({
-        is: 'ampproject-toolbar'
       });
     </script>
   </dom-module>
