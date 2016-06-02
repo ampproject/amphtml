@@ -354,6 +354,16 @@ function serve(port, validatorScript) {
             return;
           }
           //
+          // Handle '/webui.js'.
+          //
+          if (request.url === '/webui.js') {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            const contents = fs.readFileSync(
+                path.join(__dirname, 'webui/webui.js'), 'utf-8');
+            response.end(contents);
+            return;
+          }
+          //
           // Handle '/validator.js'.
           //
           if (request.url === '/validator.js') {

@@ -36,6 +36,7 @@
   <link rel="import" href="@polymer/paper-toolbar/paper-toolbar.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
   <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+  <script src="webui.js"></script>
   <script src="codemirror/lib/codemirror.js"></script>
   <script src="codemirror/addon/selection/selection-pointer.js"></script>
   <script src="codemirror/mode/css/css.js"></script>
@@ -99,14 +100,23 @@
             showCursorWhenSelecting: true,
             cursorBlinkRate: 300
           });
+          // By default, we delay validation for 300ms to avoid locking up
+          // the UI thread while a user is typing into the editor. However,
+          // when .setEditorValue is called (below), for instance because
+          // a new doc was fetched from the web that needs to be validated,
+          // we set the delay to 0ms and validate immediately.
+          this.nextValidationDelayMs = 300;
           this.editor.on('changes', function() {
-            this.fire('amphtml-editor-changes');
+            this.fire('amphtml-editor-changes',
+                      {'validationDelayMs': this.nextValidationDelayMs});
+            this.nextValidationDelayMs = 300;
           }.bind(this));
         },
         attached: function() {
           this.async(this.notifyResize, 1);
         },
         setEditorValue: function(text) {
+          this.nextValidationDelayMs = 0;  // Validate immediately.
           this.editor.setValue(text);
         },
         getEditorValue: function() {
@@ -381,7 +391,7 @@
           // When the editor contents change, trigger validation (with a delay)
           // and propagate the validation errors into the editor (as line
           // widgets) and the listbox below the editor as clickable errors.
-          editor.addEventListener('amphtml-editor-changes', function() {
+          editor.addEventListener('amphtml-editor-changes', function(e) {
             clearTimeout(validationTimeout);
             validationTimeout = setTimeout(function() {
 
@@ -439,7 +449,7 @@
                 }
                 lineWidgets.push(editor.addLineWidget(error.line - 1, div));
               }
-            }, 300);
+            }, e.detail.validationDelayMs);
           });
 
           // Clicking in the error list at the bottom of the screen moves
@@ -461,6 +471,9 @@
                 urlToFetch = 'https://' + urlToFetch;
                 input.value = urlToFetch;
               }
+              var params = getLocationHashParams();
+              params['url'] = urlToFetch;
+              setLocationHashParams(params);
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -475,16 +488,9 @@
           });
 
           // Interprets the parameters after the '#' in the URL.
-          var paramStrings = window.location.hash.substr(1).split('&');
-          var params = {};
-          for (var ii = 0; ii < paramStrings.length; ii++) {
-            var keyValue = paramStrings[ii].split('=');
-            if (keyValue[0].length > 0) {
-              params[keyValue[0]] = keyValue[1];
-            }
-          }
           // If #url=<url> was provided, load it, otherwise, start with the
           // minimum valid AMP document.
+          var params = getLocationHashParams();
           if (params.hasOwnProperty('url') && params['url']) {
             input.value = params['url']
             button.fire('click');
