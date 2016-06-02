@@ -25,6 +25,9 @@ import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
+import {moveChildren} from '../dom';
+import {SyntheticScroll} from '../ios-scroll';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -120,7 +123,9 @@ export class Viewport {
         this.win_.document,
         this.vsync_,
         this.paddingTop_,
-        this.binding_.requiresFixedLayerTransfer());
+        this.binding_.requiresFixedLayerTransfer(),
+        this.binding_.requiresFixedLayerLookup()
+    );
     onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
 
     /** @private @const (function()) */
@@ -566,6 +571,14 @@ class ViewportBindingDef {
   }
 
   /**
+   * Whether the binding requires fixed elements to be found.
+   * @return {boolean}
+   */
+  requiresFixedLayerLookup() {
+    return false;
+  }
+
+  /**
    * Register a callback for scroll events.
    * @param {function()} unusedCallback
    */
@@ -686,6 +699,11 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
     return false;
   }
 
@@ -846,6 +864,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   requiresFixedLayerTransfer() {
     return true;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
+    return false;
   }
 
   /** @private */
@@ -1069,6 +1092,133 @@ export class ViewportBindingNaturalIosEmbed_ {
 }
 
 
+export class ViewportBindingNaturalIosScrollEmbed_
+    extends ViewportBindingNaturalIosEmbed_ {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    super(win);
+
+    // TODO
+    this.onResize();
+    this.onScroll();
+
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
+    return true;
+  }
+
+  /** @private */
+  setup_() {
+    const doc = this.win.document;
+    const documentElement = doc.documentElement;
+    const body = doc.body;
+
+    // Setup scrolling styles.
+    // html {
+    //   height: 100% !important;
+    //   -webkit-overflow-scrolling: touch;
+    // }
+    // body {
+    //   height: 100% !important;
+    //   overflow-x: hidden;
+    // }
+    setStyles(documentElement, {
+      height: '100% !important',
+      webkitOverflowScrolling: 'touch',
+    });
+    setStyles(body, {
+      height: '100% !important',
+      overflowX: 'hidden',
+    });
+
+    let hasContainer = body.children === 1;
+    if (hasContainer) {
+      for (let child = body.firstChild; child; child = child.nextSibling) {
+        // Does this Text Node contain any non-whitespace chars?
+        if (child.nodeType === /* Text */ 3 && /\S/.test(child.data)) {
+          hasContainer = false;
+          break;
+        }
+      }
+    }
+
+    let container;
+    if (hasContainer) {
+      container = body.firstElementChild;
+    } else {
+      container = doc.createElement('i-amp-container');
+      moveChildren(body, container);
+      body.appendChild(container);
+      // TODO Update any `body > X` CSS selectors to `body > i-amp-container > X`.
+    }
+
+
+    // Insert startPos element into DOM. See {@link getScrollHeight} for why
+    // this is needed.
+    this.startPosEl_ = this.win.document.createElement('div');
+    this.startPosEl_.id = '-amp-startpos';
+    body.appendChild(this.startPosEl_);
+
+    // Insert endPos element into DOM. See {@link getScrollHeight} for why
+    // this is needed.
+    this.endPosEl_ = this.win.document.createElement('div');
+    this.endPosEl_.id = '-amp-endpos';
+    body.appendChild(this.endPosEl_);
+
+    // TODO
+    this.scroller = new SyntheticScroll(
+      container,
+      this.getScrollTop_(),
+      this.getScrollHeight()
+    );
+  }
+
+  /** @override */
+  getScrollLeft() {
+    return 0;
+  }
+
+  /** @override */
+  getScrollTop() {
+    return this.scroller.getScrollTop();
+  }
+
+  /**
+   * Calculates the current scrollTop. Note that this is more expensive than
+   * the public version, but it is sometimes needed.
+   * @return {number}
+   */
+  getScrollTop_() {
+    const rect = this.startPosEl_./*OK*/getBoundingClientRect();
+    return -rect.top;
+  }
+
+  /** @override */
+  setScrollTop(scrollTop) {
+    this.scroller.setScrollTop(scrollTop);
+  }
+
+  getLayoutRect(el) {
+    const rect = el./*OK*/getBoundingClientRect();
+    return layoutRectLtwh(
+      Math.round(rect.left),
+      Math.round(rect.top),
+      Math.round(rect.width),
+      Math.round(rect.height)
+    );
+  }
+}
+
+
 /**
  * Implementation of ViewportBindingDef that assumes a virtual viewport that is
  * sized outside of the AMP runtime (e.g. in a parent window) and passed here
@@ -1114,6 +1264,11 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
     return false;
   }
 
@@ -1294,7 +1449,11 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'virtual') {
     binding = new ViewportBindingVirtual_(window, viewer);
   } else if (viewer.getViewportType() == 'natural-ios-embed') {
-    binding = new ViewportBindingNaturalIosEmbed_(window);
+    if (isExperimentOn(window, 'amp-ios-scroll')) {
+      binding = new ViewportBindingNaturalIosScrollEmbed_(window);
+    } else {
+      binding = new ViewportBindingNaturalIosEmbed_(window);
+    }
   } else {
     binding = new ViewportBindingNatural_(window);
   }
