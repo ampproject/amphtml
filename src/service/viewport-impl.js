@@ -1101,9 +1101,9 @@ export class ViewportBindingNaturalIosScrollEmbed_
     super(win);
 
     // TODO
-    this.onResize();
     this.onScroll();
 
+    this.onResize(() => this.onResized_());
   }
 
   /** @override */
@@ -1177,6 +1177,16 @@ export class ViewportBindingNaturalIosScrollEmbed_
     // TODO
     this.scroller = new SyntheticScroll(
       container,
+      this.getScrollTop_(),
+      this.getScrollHeight()
+    );
+  }
+
+  /**
+   * Alerts the synthetic scroller that the viewport has resized
+   */
+  onResized_() {
+    this.scroller.resize(
       this.getScrollTop_(),
       this.getScrollHeight()
     );
