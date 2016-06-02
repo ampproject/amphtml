@@ -29,12 +29,13 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
 import {installFramerateService} from './framerate-impl';
-import {installViewerService, VisibilityState} from './viewer-impl';
+import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {platformFor} from '../platform';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {isArray} from '../types';
+import {VisibilityState} from '../visibility-state';
 
 
 const TAG_ = 'Resources';
