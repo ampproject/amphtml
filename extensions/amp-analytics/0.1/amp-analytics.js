@@ -48,6 +48,11 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
+  isFixedRequired() {
+    return true;
+  }
+
+  /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
   }

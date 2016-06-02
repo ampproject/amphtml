@@ -993,7 +993,7 @@ export class Resources {
         if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
-        if (r.isDisplayed() && r.overlaps(loadRect)) {
+        if (r.isDisplayed() && (r.isFixed() || r.overlaps(loadRect))) {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
@@ -1008,7 +1008,7 @@ export class Resources {
       // Note that when the document is not visible, neither are any of its
       // elements to reduce CPU cycles.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          r.overlaps(visibleRect));
+          (r.isFixed() || r.overlaps(visibleRect)));
       r.setInViewport(shouldBeInViewport);
     }
 
@@ -1130,8 +1130,9 @@ export class Resources {
    */
   calcTaskScore_(viewportRect, dir, task) {
     const box = task.resource.getLayoutBox();
-    let posPriority = Math.floor((box.top - viewportRect.top) /
-        viewportRect.height);
+    const isFixed = task.resource.isFixed();
+    let posPriority = isFixed ? 0 :
+        Math.floor((box.top - viewportRect.top) / viewportRect.height);
     if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
       posPriority *= 2;
     }
@@ -1591,6 +1592,9 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
+    /** @private {boolean} */
+    this.isFixed_ = false;
+
     /** @private {!LayoutRect} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
@@ -1779,6 +1783,27 @@ export class Resource {
       this.initialLayoutBox_ = box;
     }
     this.layoutBox_ = box;
+
+    // Calculate whether the element is currently is or in `position:fixed`.
+    let isFixed = false;
+    if (this.isDisplayed()) {
+      const win = this.resources_.win;
+      const body = win.document.body;
+      const viewport = this.resources_.viewport_;
+      for (let n = this.element; n && n != body; n = n.offsetParent) {
+        if (n.isFixedRequired && n.isFixedRequired()) {
+          isFixed = true;
+          break;
+        }
+        if (viewport.isDeclaredFixed(n) &&
+                win.getComputedStyle(n).position == 'fixed') {
+          isFixed = true;
+          break;
+        }
+      }
+    }
+    this.isFixed_ = isFixed;
+
     this.element.updateLayoutBox(box);
   }
 
@@ -1831,6 +1856,14 @@ export class Resource {
    */
   isDisplayed() {
     return this.layoutBox_.height > 0 && this.layoutBox_.width > 0;
+  }
+
+  /**
+   * Whether the element is fixed according to the latest measurement.
+   * @return {boolean}
+   */
+  isFixed() {
+    return this.isFixed_;
   }
 
   /**

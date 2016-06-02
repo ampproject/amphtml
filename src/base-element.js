@@ -189,6 +189,16 @@ export class BaseElement {
   }
 
   /**
+   * Intended to be implemented by subclasses. Tests whether the element
+   * requires fixed positioning.
+   * @return {boolean}
+   * @protected
+   */
+  isFixedRequired() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    */
   isInViewport() {

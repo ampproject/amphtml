@@ -83,6 +83,11 @@ class NotificationInterface {
 export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
+  isFixedRequired() {
+    return true;
+  }
+
+  /** @override */
   createdCallback() {
 
     /** @private @const {!Window} */
