@@ -100,14 +100,23 @@
             showCursorWhenSelecting: true,
             cursorBlinkRate: 300
           });
+          // By default, we delay validation for 300ms to avoid locking up
+          // the UI thread while a user is typing into the editor. However,
+          // when .setEditorValue is called (below), for instance because
+          // a new doc was fetched from the web that needs to be validated,
+          // we set the delay to 0ms and validate immediately.
+          this.nextValidationDelayMs = 300;
           this.editor.on('changes', function() {
-            this.fire('amphtml-editor-changes');
+            this.fire('amphtml-editor-changes',
+                      {'validationDelayMs': this.nextValidationDelayMs});
+            this.nextValidationDelayMs = 300;
           }.bind(this));
         },
         attached: function() {
           this.async(this.notifyResize, 1);
         },
         setEditorValue: function(text) {
+          this.nextValidationDelayMs = 0;  // Validate immediately.
           this.editor.setValue(text);
         },
         getEditorValue: function() {
@@ -382,7 +391,7 @@
           // When the editor contents change, trigger validation (with a delay)
           // and propagate the validation errors into the editor (as line
           // widgets) and the listbox below the editor as clickable errors.
-          editor.addEventListener('amphtml-editor-changes', function() {
+          editor.addEventListener('amphtml-editor-changes', function(e) {
             clearTimeout(validationTimeout);
             validationTimeout = setTimeout(function() {
 
@@ -440,7 +449,7 @@
                 }
                 lineWidgets.push(editor.addLineWidget(error.line - 1, div));
               }
-            }, 300);
+            }, e.detail.validationDelayMs);
           });
 
           // Clicking in the error list at the bottom of the screen moves
@@ -462,7 +471,9 @@
                 urlToFetch = 'https://' + urlToFetch;
                 input.value = urlToFetch;
               }
-              setLocationHashParams({'url': urlToFetch});
+              var params = getLocationHashParams();
+              params['url'] = urlToFetch;
+              setLocationHashParams(params);
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
