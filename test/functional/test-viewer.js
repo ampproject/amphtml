@@ -420,6 +420,13 @@ describe('Viewer', () => {
     expect(m.data.title).to.equal('Awesome doc');
   });
 
+  it('should post scroll event', () => {
+    viewer.postScroll(111);
+    const m = viewer.messageQueue_[0];
+    expect(m.eventType).to.equal('scroll');
+    expect(m.data.scrollTop).to.equal(111);
+  });
+
   it('should post request/cancelFullOverlay event', () => {
     viewer.requestFullOverlay();
     viewer.cancelFullOverlay();

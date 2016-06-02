@@ -50,6 +50,7 @@ describe('Viewport', () => {
       },
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
+      postScroll: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {

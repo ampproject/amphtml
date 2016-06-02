@@ -709,7 +709,7 @@ export class Viewer {
    */
   postScroll(scrollTop) {
     this.sendMessageUnreliable_(
-        'scroll', {scrollTop: scrollTop}, false);
+        'scroll', {scrollTop}, false);
   }
 
   /**
