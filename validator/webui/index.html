@@ -474,7 +474,22 @@
             }
           });
 
-          var minimumValidAmp =
+          // Interprets the parameters after the '#' in the URL.
+          var paramStrings = window.location.hash.substr(1).split('&');
+          var params = {};
+          for (var ii = 0; ii < paramStrings.length; ii++) {
+            var keyValue = paramStrings[ii].split('=');
+            if (keyValue[0].length > 0) {
+              params[keyValue[0]] = keyValue[1];
+            }
+          }
+          // If #url=<url> was provided, load it, otherwise, start with the
+          // minimum valid AMP document.
+          if (params.hasOwnProperty('url') && params['url']) {
+            input.value = params['url']
+            button.fire('click');
+          } else {
+            var minimumValidAmp =
               '\x3C!--\n' +
               '     This is the minimum valid AMP HTML document. Just type away\n' +
               '     here and the AMP Validator will re-check your document on the fly.\n' +
@@ -490,7 +505,8 @@
               '\x3C/head>\n' +
               '\x3Cbody>Hello, AMP world.\x3C/body>\n' +
               '\x3C/html>\n';
-          editor.setEditorValue(minimumValidAmp);
+            editor.setEditorValue(minimumValidAmp);
+          }
         }
       });
     </script>
