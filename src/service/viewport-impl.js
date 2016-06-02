@@ -1448,11 +1448,11 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'virtual') {
     binding = new ViewportBindingVirtual_(window, viewer);
   } else if (viewer.getViewportType() == 'natural-ios-embed') {
-    if (isExperimentOn(window, 'amp-ios-scroll')) {
+    // if (isExperimentOn(window, 'amp-ios-scroll')) {
       binding = new ViewportBindingNaturalIosScrollEmbed_(window);
-    } else {
-      binding = new ViewportBindingNaturalIosEmbed_(window);
-    }
+    // } else {
+      // binding = new ViewportBindingNaturalIosEmbed_(window);
+    // }
   } else {
     binding = new ViewportBindingNatural_(window);
   }
