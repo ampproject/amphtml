@@ -22,7 +22,7 @@ import {
   parseQueryString,
   parseUrl,
 } from '../url';
-import {isArray, isObject} from '../types';
+import {isArray, isObject, isFormData} from '../types';
 
 
 /**
@@ -45,7 +45,7 @@ let FetchInitDef;
 const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {!Array<function:boolean>} */
-const allowedBodyTypes_ = [isArray, isObject];
+const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /** @private @const {string} */
 const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
@@ -223,11 +223,11 @@ function setupJson_(init) {
   init.headers = init.headers || {};
   init.headers['Accept'] = 'application/json';
 
-  if (init.method == 'POST') {
+  if (init.method == 'POST' && !isFormData(init.body)) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     dev.assert(
-      allowedBodyTypes_.some(test => test(init.body)),
+      allowedJsonBodyTypes_.some(test => test(init.body)),
       'body must be of type object or array. %s',
       init.body
     );
