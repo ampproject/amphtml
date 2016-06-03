@@ -161,6 +161,10 @@ describe('FontLoader', () => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
         const finalElementsCount = iframe.doc.getElementsByTagName('*').length;
         expect(initialElementsCount).to.be.below(finalElementsCount);
+        const createdContainer = iframe.doc.querySelectorAll('body > div')[1];
+        expect(createdContainer.fontStyle).to.equal('normal');
+        expect(createdContainer.fontWeight).to.equal('400');
+        expect(createdContainer.fontVariant).to.equal('normal');
       }).catch(() => {
         assert.fail('Font load failed');
       });

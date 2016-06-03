@@ -63,7 +63,7 @@ For example:
 
 **src**
 
-Required if no <source> children are present. Must be HTTPS.
+Required if no &lt;source&gt; children are present. Must be HTTPS.
 
 **poster**
 

@@ -14,36 +14,18 @@
  * limitations under the License.
  */
 
-export class AmpCarouscroll extends BaseCarousel {
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
-  }
-  /** @override */
-  buildCarousel() {
-  }
+import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
-  /** @override */
-  layoutCallback() {
-    return Promise.resolve();
-  }
+const nendFields = ['nend_params'];
 
-  /** @override */
-  viewportCallback(inViewport) {
-    if (inViewport) {
-      this.hintControls();
-    }
-  }
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function nend(global, data) {
+  checkData(data, nendFields);
+  validateDataExists(data, nendFields);
 
-  /** @override */
-  setupGestures() {
-  }
-
-  /** @override */
-  hasPrev() {
-  }
-
-  /** @override */
-  hasNext() {
-  }
+  global.nendParam = data;
+  writeScript(global, 'https://js1.nend.net/js/amp.js');
 }

@@ -61,6 +61,8 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('colombia');
     expect(registrations).to.include.key('microad');
     expect(registrations).to.include.key('yahoojp');
+    expect(registrations).to.include.key('chargeads');
+    expect(registrations).to.include.key('nend');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {

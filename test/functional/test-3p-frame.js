@@ -118,6 +118,7 @@ describe('3p-frame', () => {
     expect(docInfo.pageViewId).to.not.be.empty;
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"type":"_ping_"' +
@@ -127,7 +128,9 @@ describe('3p-frame', () => {
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
         '"version":"$internalRuntimeVersion$"}' +
-        ',"hidden":false,"initialIntersection":{"time":1234567888,' +
+        ',"hidden":false' +
+        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
         ',"x":0,"y":0},"boundingClientRect":' +
@@ -166,9 +169,19 @@ describe('3p-frame', () => {
     });
   });
 
-  it('should pick the right bootstrap url (test default)', () => {
+  it('should pick the right bootstrap url for local-dev mode', () => {
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should pick the right bootstrap url for testing mode', () => {
+    const win = {
+      AMP_TEST: true,
+      location: window.location,
+      document: window.document,
+    };
+    expect(getBootstrapBaseUrl(win)).to.equal(
+        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {

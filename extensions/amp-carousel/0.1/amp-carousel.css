@@ -72,3 +72,27 @@ amp-carousel .amp-carousel-button.amp-disabled {
   opacity: 0;
   visibility: hidden;
 }
+
+/* Begin SlideScroll */
+.-amp-slidescroll {
+  overflow: hidden;
+  overflow-x: auto;
+  /*VERTICAL ALIGN - http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/#update*/
+  transform-style: preserve-3d;
+  /*END*/
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.-amp-slide-item {
+  position: relative;
+  top: 50%;
+  /*VERTICAL ALIGN*/
+  transform: translateY(-50%);
+  /*END*/
+}
+
+.-amp-slide-item[show] {
+  display: inline-block !important;
+}
+/* End SlideScroll */

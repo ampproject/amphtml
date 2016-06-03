@@ -19,7 +19,7 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
+import {toggle} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -38,6 +38,8 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
+
+    this.element.classList.add('-amp-sticky-ad-layout');
 
     const children = this.getRealChildren();
     user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
@@ -100,9 +102,7 @@ class AmpStickyAd extends AMP.BaseElement {
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
       this.deferMutate(() => {
-        setStyles(this.element, {
-          'display': 'block',
-        });
+        toggle(this.element, true);
         this.viewport_.addToFixedLayer(this.element);
         this.scheduleLayout(this.ad_);
         this.removeOnScrollListener_();

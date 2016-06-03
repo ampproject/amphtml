@@ -60,6 +60,7 @@ export const adPrefetch = {
     'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
     'https://yads.c.yimg.jp/js/yads.js',
   ],
+  nend: 'https://js1.nend.net/js/amp.js',
 };
 
 /**
@@ -159,6 +160,14 @@ export const adPreconnect = {
   yahoojp: [
     'https://s.yimg.jp',
     'https://yads.yahoo.co.jp',
+  ],
+  chargeads: [
+    'https://www.chargeplatform.com',
+  ],
+  nend: [
+    'https://js1.nend.net',
+    'https://output.nend.net',
+    'https://img1.nend.net',
   ],
 };
 

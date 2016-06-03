@@ -43,6 +43,8 @@ describe('Viewport', () => {
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
       },
+      requestFullOverlay: () => {},
+      cancelFullOverlay: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
@@ -63,6 +65,7 @@ describe('Viewport', () => {
   });
 
   afterEach(() => {
+    viewerMock.verify();
     sandbox.restore();
   });
 
@@ -147,6 +150,37 @@ describe('Viewport', () => {
     viewerViewportHandler();
     bindingMock.verify();
     fixedLayerMock.verify();
+  });
+
+  it('should update viewport when entering lightbox mode', () => {
+    viewport.vsync_ = {mutate: callback => callback()};
+    viewerMock.expects('requestFullOverlay').once();
+    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
+    const hideFixedLayerStub = sandbox.stub(viewport, 'hideFixedLayer');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('updateLightboxMode').withArgs(true).once();
+
+    viewport.enterLightboxMode();
+
+    bindingMock.verify();
+    expect(disableTouchZoomStub.callCount).to.equal(1);
+    expect(hideFixedLayerStub.callCount).to.equal(1);
+  });
+
+  it('should update viewport when leaving lightbox mode', () => {
+    viewport.vsync_ = {mutate: callback => callback()};
+    viewerMock.expects('cancelFullOverlay').once();
+    const restoreOriginalTouchZoomStub = sandbox.stub(viewport,
+        'restoreOriginalTouchZoom');
+    const showFixedLayerStub = sandbox.stub(viewport, 'showFixedLayer');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('updateLightboxMode').withArgs(false).once();
+
+    viewport.leaveLightboxMode();
+
+    bindingMock.verify();
+    expect(restoreOriginalTouchZoomStub.callCount).to.equal(1);
+    expect(showFixedLayerStub.callCount).to.equal(1);
   });
 
   it('should call binding.updateViewerViewport', () => {
@@ -753,6 +787,22 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
         .equal('31px solid transparent');
+  });
+
+  it('should update border in lightbox mode', () => {
+    windowApi.document = {
+      body: {style: {}},
+    };
+    binding.updatePaddingTop(31);
+    expect(windowApi.document.body.style.borderTop).to
+        .equal('31px solid transparent');
+    expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
+
+    binding.updateLightboxMode(true);
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
+
+    binding.updateLightboxMode(false);
+    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
   });
 
   it('should calculate size', () => {

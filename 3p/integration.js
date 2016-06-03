@@ -73,6 +73,8 @@ import {sharethrough} from '../ads/sharethrough';
 import {eplanning} from '../ads/eplanning';
 import {microad} from '../ads/microad';
 import {yahoojp} from '../ads/yahoojp';
+import {chargeads} from '../ads/chargeads';
+import {nend} from '../ads/nend';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -132,6 +134,8 @@ register('sharethrough', sharethrough);
 register('eplanning', eplanning);
 register('microad', microad);
 register('yahoojp', yahoojp);
+register('chargeads', chargeads);
+register('nend', nend);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

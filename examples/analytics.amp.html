@@ -36,7 +36,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
     "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
     "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}"
+    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}"
   },
   "vars": {
     "title": "Example Request"
@@ -146,6 +146,18 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Chartbeat example -->
+
+<!-- Clicky tracking -->
+<amp-analytics type="clicky">
+<script type="application/json">
+{
+  "vars": {
+    "site_id": "12345"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Clicky example -->
 
 <!-- ColAnalytics pageview tracking -->
 <amp-analytics type="colanalytics">
@@ -267,6 +279,35 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Mediametrie example -->
+
+<!-- OEWA example -->
+<amp-analytics type="oewa">
+<script type="application/json">
+{
+  "vars": {
+    "s": "offer",
+    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
+  },
+  "requests": {
+    "url": "https://subdomain.domain.example/amp-analytics-oewa.html"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End OEWA example -->
+
+<!-- OEWADIRECT example -->
+<amp-analytics type="oewadirect">
+<script type="application/json">
+{
+  "vars": {
+    "s": "offer",
+    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End OEWADIRECT example -->
 
 <!-- Parsely tracking -->
 <amp-analytics type="parsely">

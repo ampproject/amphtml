@@ -87,7 +87,7 @@ Here's an example of usage of `type` for a provider called XYZ:
 
 Type attribute value: `adobeanalytics`
 
-Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [marketing.adobe.com](https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html).
 
 ### AT Internet
 
@@ -112,6 +112,12 @@ Adds support for Chartbeat. More details for adding Chartbeat support can be fou
 Type attribute value: `colanalytics`
 
 Adds support for ColAnalytics. Additionally, need the value for `id`.
+
+### Clicky Web Analytics
+
+Type attribute value: `clicky`
+
+Adds support for Clicky Web Analytics. More details for adding Clicky support can be found at [clicky.com](https://clicky.com/help/apps-plugins).
 
 ### comScore
 
@@ -163,6 +169,26 @@ Adds support for Lotame.  More information and configuration details can be foun
 Type attribute value: `mediametrie`
 
 Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
+
+### OEWA
+
+Type attribute value: `oewa`
+
+There is a variation called `oewadirect` wich does not use iframe-ping solution - and has a better client detection, by using AMP CLIENT_ID, this is currently EXPERIMENTAL,
+and as of today (01.07.2015) prohibited by the OEWA - as it does not use `oewa2.js`
+
+Adds support for [OEWA](https://www.oewa.at). Requires a copy of [amp-analytics-oewa.html](http://www.oewa.at/fileadmin/downloads/amp-analytics-oewa.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). The file must be served via HTTPS. Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-oewa.html` needs to be on another subdomain such as `oewa-amp.example.com`.
+
+Additionally, the following variables must be defined:
+
+in vars-section:
+* `s`: offer
+* `cp`: categorypath
+
+in requests-section:
+* `url`: HTTPS location of `amp-analytics-oewa.html`
+
+More details for adding ÖWA, support can be found [here](http://www.oewa.at/basic/implementierung).
 
 ### Parsely
 

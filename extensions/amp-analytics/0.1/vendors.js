@@ -201,6 +201,48 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'clicky': {
+    'vars': {
+      'site_id': '',
+    },
+    'requests': {
+      'base': 'https://in.getclicky.com/in.php?' +
+        'site_id=${site_id}',
+      'baseSuffix': '&mime=${contentType}&' +
+        'x=${random}',
+      'pageview': '${base}&' +
+        'res=${screenWidth}x${screenHeight}&' +
+        'lang=${browserLanguage}&' +
+        'secure=1&' +
+        'type=pageview&' +
+        'href=${canonicalPath}&' +
+        'title=${title}' +
+        '${baseSuffix}',
+      'interval': '${base}&' +
+        'type=ping' +
+        '${baseSuffix}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'interval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 60,
+          'maxTimerLength': 600,
+        },
+        'request': 'interval',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': true,
+      'image': true,
+    },
+  },
+
   'colanalytics': {
     'requests': {
       'host': 'https://ase.clmbtech.com',
@@ -377,6 +419,35 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'oewadirect': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': 'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
+  'oewa': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?s=${s}' +
+        '&amp=1' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
@@ -507,7 +578,6 @@ export const ANALYTICS_CONFIG = {
       },
     },
   },
-
   'simplereach': {
     'vars': {
       'pid': '',
@@ -745,5 +815,8 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
   ['triggers']['pageLoad']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 

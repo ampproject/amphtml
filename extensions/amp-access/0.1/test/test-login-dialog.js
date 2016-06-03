@@ -150,18 +150,16 @@ describe('WebLoginDialog', () => {
   let dialog;
   let dialogUrl;
   let dialogMock;
-  let messageListener;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    messageListener = undefined;
     viewer = {
       getParam: () => null,
       getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
     };
-    windowApi = {
+    const windowObj = {
       services: {
         'viewer': {obj: viewer},
       },
@@ -173,18 +171,19 @@ describe('WebLoginDialog', () => {
       screen: {width: 1000, height: 1000},
       addEventListener: (type, callback) => {
         if (type == 'message') {
-          messageListener = callback;
+          windowObj.messageListener = callback;
         }
       },
       removeEventListener: (type, callback) => {
-        if (type == 'message' && messageListener == callback) {
-          messageListener = undefined;
+        if (type == 'message' && windowObj.messageListener == callback) {
+          windowObj.messageListener = undefined;
         }
       },
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       setInterval: (callback, t) => window.setInterval(callback, t),
       clearInterval: intervalId => window.clearInterval(intervalId),
     };
+    windowApi = windowObj;
     windowMock = sandbox.mock(windowApi);
 
     dialogUrl = null;
@@ -201,11 +200,12 @@ describe('WebLoginDialog', () => {
   });
 
   afterEach(() => {
+    windowMock.verify();
     sandbox.restore();
   });
 
   function succeed() {
-    messageListener({
+    windowApi.messageListener({
       origin: 'http://localhost:8000',
       data: {
         sentinel: 'amp',
@@ -216,7 +216,7 @@ describe('WebLoginDialog', () => {
   }
 
   it('should call window.open in the same microtask with url', () => {
-    windowApi.open = sandbox.spy();
+    sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, 'http://acme.com/login');
     expect(windowApi.open.callCount).to.equal(1);
     expect(windowApi.open.firstCall.args[0]).to.match(
@@ -224,39 +224,42 @@ describe('WebLoginDialog', () => {
   });
 
   it('should call window.open in the same microtask with promise', () => {
-    windowApi.open = sandbox.spy();
+    sandbox.stub(windowApi, 'open', () => dialog);
     openLoginDialog(windowApi, Promise.resolve('http://acme.com/login'));
     expect(windowApi.open.callCount).to.equal(1);
     expect(windowApi.open.firstCall.args[0]).to.equal('');
   });
 
   it('should yield error if window.open fails', () => {
-    windowMock.expects('open').once().throws('OPEN ERROR');
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().throws('OPEN ERROR');
     return openLoginDialog(windowApi, 'http://acme.com/login')
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/OPEN ERROR/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
   it('should yield error if window.open returns null', () => {
-    windowMock.expects('open').once().returns(null);
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(windowApi, 'http://acme.com/login')
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to open dialog/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
   it('should yield error if window.open returns null with promise', () => {
-    windowMock.expects('open').once().returns(null);
+    // Open is called twice due to retry on _top.
+    windowMock.expects('open').twice().returns(null);
     return openLoginDialog(windowApi, Promise.resolve('http://acme.com/login'))
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to open dialog/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -270,7 +273,7 @@ describe('WebLoginDialog', () => {
         })
         .then(result => {
           expect(result).to.equal('#success=true');
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -403,7 +406,7 @@ describe('WebLoginDialog', () => {
         })
         .then(result => {
           expect(result).to.equal('#success=true');
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 
@@ -420,7 +423,7 @@ describe('WebLoginDialog', () => {
         .then(() => 'SUCCESS', error => 'ERROR ' + error)
         .then(result => {
           expect(result).to.match(/failed to resolve url/);
-          expect(messageListener).to.not.exist;
+          expect(windowApi.messageListener).to.not.exist;
         });
   });
 });

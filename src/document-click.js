@@ -18,6 +18,7 @@ import {closestByTag} from './dom';
 import {getService} from './service';
 import {dev} from './log';
 import {historyFor} from './history';
+import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -134,13 +135,13 @@ export function onDocumentElementClick_(e, viewport, history) {
 
   // In case of FTP Links in embedded documents always open then in _blank.
   if (isFTP) {
-    win.open(target.href, '_blank');
+    openWindowDialog(win, target.href, '_blank');
     e.preventDefault();
   }
 
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
   if (isSafariIOS && !isNormalProtocol) {
-    win.open(target.href, '_top');
+    openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
     e.preventDefault();

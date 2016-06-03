@@ -18,7 +18,7 @@ import {
   addParamToUrl,
   parseQueryString,
 } from '../../src/url';
-import {closest} from '../../src/dom';
+import {closest, openWindowDialog} from '../../src/dom';
 
 
 
@@ -133,7 +133,7 @@ function getEventualUrl(a) {
  */
 function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
-  win.open(url, target);
+  openWindowDialog(win, url, target);
 }
 
 /**

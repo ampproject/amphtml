@@ -29,15 +29,17 @@ describe('alp-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    open = sandbox.spy();
     image = undefined;
     win = {
       location: {},
-      open: open,
+      open: () => null,
       Image: function() {
         image = this;
       },
     };
+    open = sandbox.stub(win, 'open', () => {
+      return {};
+    });
     const doc = {
       defaultView: win,
       head: {
@@ -76,6 +78,7 @@ describe('alp-handler', () => {
           'https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%252F' +
           'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
       '_top',
+      undefined,
     ]);
     expect(event.preventDefault.callCount).to.equal(1);
   }
@@ -106,6 +109,7 @@ describe('alp-handler', () => {
           'https%3A%2F%2Ftest.com%3Famp%3D1%26TEST%3Dhttps%253A%252F%252F' +
           'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html',
       '_top',
+      undefined,
     ]);
   });
 
@@ -120,6 +124,7 @@ describe('alp-handler', () => {
           'cdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html' +
           '%2523test%253D1',
       '_top',
+      undefined,
     ]);
   });
 
