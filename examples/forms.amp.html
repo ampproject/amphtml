@@ -8,24 +8,22 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <style amp-custom>
-        form.amp-form-invalid input:invalid {
+        input:invalid {
             background-color: #dc4e41;
         }
 
-        form .invalid-message,
-        /* was invalid but now valid */
-        form.amp-form-invalid:valid .invalid-message,
-        form .now-valid-message {
+        form .valid-message,
+        form .invalid-message
+         {
             display: none;
         }
 
-        form.amp-form-invalid .invalid-message {
+        form:invalid .invalid-message {
             display: block;
             color: #dc4e41;
         }
 
-        /* was invalid but now valid */
-        form.amp-form-invalid:valid .now-valid-message {
+        form:valid .valid-message {
             display: block;
             color: #4CAF50;
         }
@@ -34,16 +32,6 @@
 <body>
 <h2>Subscribe to our weekly Newsletter</h2>
 
-<!--
-     AMP would add a class to reflect the validity state of the form after a
-     user tries to submit (.amp-form-valid, .amp-form-invalid) unlike
-     (:valid, :invalid) pseudo classes which the browser applies them directly
-     with no user interaction.
-
-     This way publishers can control when their success and error messages
-     appear - specially on browsers that doesn't have validation messages
-     reporting built yet.
--->
 <form method="post" action="http://localhost:8000/form/echo-html/post" target="_blank">
     <fieldset>
         <label>
@@ -60,8 +48,8 @@
     <div class="invalid-message">
         There are some input that needs fixing. Please fix them.
     </div>
-    <div class="now-valid-message">
-        Thanks for fixing these! Now you can submit!
+    <div class="valid-message">
+        Everything looks good, you can submit now!
     </div>
 </form>
 </body>

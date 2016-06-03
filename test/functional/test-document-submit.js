@@ -28,6 +28,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     preventDefaultSpy = sandbox.spy();
     tgt = document.createElement('form');
     tgt.action = 'https://www.google.com';
+    tgt.target = '_blank';
     tgt.checkValidity = sandbox.stub();
     evt = {
       target: tgt,
@@ -41,12 +42,37 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   });
 
 
+  it('should check target and action attributes', () => {
+    tgt.removeAttribute('action');
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action attribute is required/);
+
+    tgt.setAttribute('action', 'http://example.com');
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action must start with "https:/);
+
+    tgt.setAttribute('action', 'https://cdn.ampproject.org');
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form action should not be on cdn\.ampproject\.org/);
+
+    tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.removeAttribute('target');
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form target attribute is required/);
+
+    tgt.setAttribute('target', '_self');
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /form target=_self is invalid/);
+
+    tgt.setAttribute('target', '_blank');
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
+  });
+
   it('should do nothing if already prevented', () => {
     evt.defaultPrevented = true;
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(0);
-    expect(tgt.classList.length).to.equal(0);
   });
 
   it('should do nothing of no target', () => {
@@ -54,36 +80,27 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(0);
-    expect(tgt.classList.length).to.equal(0);
   });
 
-  it('should prevent submit and add invalid class', () => {
+  it('should prevent submit', () => {
     tgt.checkValidity = sandbox.stub().returns(false);
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(1);
     expect(tgt.checkValidity.callCount).to.equal(1);
-    expect(tgt.classList.length).to.equal(1);
-    expect(tgt.classList[0]).to.equal('amp-form-invalid');
     sandbox.restore();
     preventDefaultSpy.reset();
     tgt.checkValidity.reset();
 
     tgt.checkValidity = sandbox.stub().returns(false);
-    tgt.classList.add('amp-form-valid');
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(1);
     expect(tgt.checkValidity.callCount).to.equal(1);
-    expect(tgt.classList.length).to.equal(1);
-    expect(tgt.classList[0]).to.equal('amp-form-invalid');
   });
 
-  it('should not prevent default and add valid class', () => {
+  it('should not prevent default', () => {
     tgt.checkValidity = sandbox.stub().returns(true);
-    tgt.classList.add('amp-form-invalid');
     onDocumentFormSubmit_(evt);
     expect(preventDefaultSpy.callCount).to.equal(0);
     expect(tgt.checkValidity.callCount).to.equal(1);
-    expect(tgt.classList.length).to.equal(1);
-    expect(tgt.classList[0]).to.equal('amp-form-valid');
   });
 });

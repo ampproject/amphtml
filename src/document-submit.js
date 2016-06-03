@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-/**
- * @type {?SubmitHandler} Store the global handler for form submits.
- */
-let submitHandler_;
+import {user} from '../src/log';
+import {assertHttpsUrl} from '../src/url';
+
 
 /**
  * @param {!Window} window
  */
 export function installGlobalSubmitListener(window) {
-  submitHandlerFor(window);
+  new SubmitHandler(window)
 }
 
-/**
- * @param {!Window} window
- */
-function submitHandlerFor(window) {
-  return submitHandler_ || (submitHandler_ = new SubmitHandler(window));
-}
 
 /**
  * Intercept any submit on the current document and polyfill validation
@@ -87,6 +80,17 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
+  const action = form.getAttribute('action');
+  user.assert(action, 'form action attribute is required: %s', form);
+  assertHttpsUrl(action, form, 'action');
+  user.assert(!action.startsWith('https://cdn.ampproject.org'),
+      'form action should not be on cdn.ampproject.org: %s', form);
+
+  const target = form.getAttribute('target');
+  user.assert(target, 'form target attribute is required: %s', form);
+  user.assert(target == '_blank' || target == '_top',
+      'form target=%s is invalid can only be _blank or _top: %s', target, form);
+
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since
   // the submit event wouldn't be fired if the form is invalid.
@@ -94,12 +98,7 @@ export function onDocumentFormSubmit_(e) {
   // available per input.validity object. We need to figure out a way of
   // displaying these.
   if (form.checkValidity && !form.checkValidity()) {
-    form.classList.remove('amp-form-valid');
-    form.classList.add('amp-form-invalid');
     e.preventDefault();
     return;
   }
-
-  form.classList.add('amp-form-valid');
-  form.classList.remove('amp-form-invalid');
 }
