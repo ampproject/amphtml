@@ -16,6 +16,7 @@
 
 import {dashToCamelCase} from './string';
 import {dev} from './log';
+import {toArray} from './types';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -328,13 +329,7 @@ export function childElementsByAttr(parent, attr) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
-    // Convert NodeList into Array.<Element>.
-    const children = [];
-    for (let i = 0; i < nodeList.length; i++) {
-      children.push(nodeList[i]);
-    }
-    return children;
+    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
   }
   return childElements(parent, el => {
     return el.hasAttribute(attr);
