@@ -993,6 +993,9 @@ export class Resources {
         if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
+        // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+        // layers. This is currently a short-term fix to the problem that
+        // the fixed elements get incorrect top coord.
         if (r.isDisplayed() && (r.isFixed() || r.overlaps(loadRect))) {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
@@ -1007,6 +1010,9 @@ export class Resources {
       }
       // Note that when the document is not visible, neither are any of its
       // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
           (r.isFixed() || r.overlaps(visibleRect)));
       r.setInViewport(shouldBeInViewport);
@@ -1130,6 +1136,9 @@ export class Resources {
    */
   calcTaskScore_(viewportRect, dir, task) {
     const box = task.resource.getLayoutBox();
+    // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+    // layers. This is currently a short-term fix to the problem that
+    // the fixed elements get incorrect top coord.
     const isFixed = task.resource.isFixed();
     let posPriority = isFixed ? 0 :
         Math.floor((box.top - viewportRect.top) / viewportRect.height);
