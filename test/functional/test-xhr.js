@@ -261,6 +261,12 @@ describe('XHR', function() {
         });
       });
 
+      it('should NOT succeed CORS with invalid credentials', () => {
+        expect(() => {
+          xhr.fetchJson('https://acme.org/', {credentials: null});
+        }).to.throw(/Only credentials=include support: null/);
+      });
+
       it('should expose HTTP headers', () => {
         const url = 'https://httpbin.org/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
