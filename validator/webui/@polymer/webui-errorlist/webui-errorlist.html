@@ -1,0 +1,107 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!-- A custom element for the error list below the editor window. The errors
+     are kept as an array of validation errors, and selection changes will
+     fire an event ('error-selected') with the appropriate error. -->
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<dom-module id="webui-errorlist">
+  <style scope="webui-errorlist">
+    paper-listbox {
+      height: 200px;
+      overflow-y: scroll;
+    }
+    paper-item.iron-selected,
+    paper-item.iron-selected:hover {
+      background-color: #e6e6e6;
+    }
+    paper-item:hover {
+      background-color: #eee;
+    }
+    paper-item {
+      border-bottom: 1px solid #c1c2c3;
+      padding: 4px 8px;
+      transition-duration: 0.28s;
+      transition-property: background-color;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    paper-item {
+      --paper-item: {
+         cursor: pointer;
+       };
+    }
+    paper-item:first-of-type {
+      border-top: 1px solid #c1c2c3;
+    }
+  </style>
+  <template>
+    <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
+      <template id="listboxItems" is="dom-repeat" items='{{errors}}' as="e">
+        <paper-item>
+          <template is="dom-if" if="{{e.isError}}">
+            <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+          </template>
+          <template is="dom-if" if="{{e.isWarning}}">
+            <iron-icon class="ampproject-warning" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+          </template>
+          <paper-item-body two-line>
+            <div>{{e.message}}</div>
+            <div secondary><small>line {{e.line}}, column {{e.col}}</small></div>
+          </paper-item-body>
+        </paper-item>
+      </template>
+    </paper-listbox>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'webui-errorlist',
+      clearErrors: function() {
+        this.splice('errors', 0);
+      },
+      addError: function(error) {
+        this.push('errors', error);
+      },
+      properties: {
+        errors: {
+          type: Array,
+          value: function() { return []; },
+          notify: true
+        },
+        selectedError: {
+          type: Number,
+          value: -1  // don't select anything by default.
+        }
+      },
+      selectAndFocusError: function(index) {
+        this.$.listbox.selected = index;
+        this.$.listboxItems.render();
+        if (this.$.listbox.selectedItem) {
+          this.$.listbox.selectedItem.scrollIntoView();
+        }
+      },
+      handleSelect: function(e) {
+        var error = this.errors[this.selectedError];
+        if (!error) {
+          return;
+        }
+        this.fire('error-selected', {'error': error});
+      },
+    });
+  </script>
+</dom-module>
