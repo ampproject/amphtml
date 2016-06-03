@@ -39,13 +39,13 @@
     "@polymer/paper-styles": "0.0.3",
     "@polymer/paper-toolbar": "0.0.3",
     "@polymer/polymer": "1.2.5-npm-test.2",
-    "codemirror": "5.13.4",
+    "codemirror": "5.15.2",
     "commander": "2.9.0",
     "webcomponents-lite": "0.6.0"
   },
   "devDependencies": {
-    "google-closure-compiler": "20151015.0.0",
-    "google-closure-library": "20151015.0.0",
+    "google-closure-compiler": "20160517.1.0",
+    "google-closure-library": "20160517.0.0",
     "jasmine": "2.3.2",
     "vulcanize": "1.14.8"
   }
