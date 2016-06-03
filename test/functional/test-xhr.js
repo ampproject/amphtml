@@ -111,7 +111,7 @@ describe('XHR', function() {
 
         it('should allow FormData as body', () => {
           const formData = new FormData();
-          sandbox.stub(JSON, 'stringify')
+          sandbox.stub(JSON, 'stringify');
           formData.append('name', 'John Miller');
           formData.append('age', 56);
           const post = xhr.fetchJson.bind(xhr, '/post', {
