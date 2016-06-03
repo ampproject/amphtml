@@ -40,6 +40,19 @@ export function endsWith(string, suffix) {
 }
 
 /**
+ * Polyfill for String.prototype. startsWith.
+ * @param {string} string
+ * @param {string} prefix
+ * @return {boolean}
+ */
+export function startsWith(string, prefix) {
+  if (prefix.length > string.length) {
+    return false;
+  }
+  return string.indexOf(prefix) == 0;
+}
+
+/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value

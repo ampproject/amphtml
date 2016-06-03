@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {startsWith} from '../src/string';
 import {user} from '../src/log';
 import {assertHttpsUrl} from '../src/url';
 
@@ -22,45 +23,8 @@ import {assertHttpsUrl} from '../src/url';
  * @param {!Window} window
  */
 export function installGlobalSubmitListener(window) {
-  new SubmitHandler(window)
-}
-
-
-/**
- * Intercept any submit on the current document and polyfill validation
- * check for the requested form.
- */
-export class SubmitHandler {
-  /**
-   * @param {!Window} window
-   */
-  constructor(window) {
-    /** @private @const {!Window} */
-    this.win = window;
-
-    /** @private @const {!function(!Event)|undefined} */
-    this.boundHandle_ = this.handle_.bind(this);
-    this.win.document.documentElement.addEventListener(
-        'submit', this.boundHandle_, true);
-  }
-
-  /**
-   * Removes all event listeners.
-   */
-  cleanup() {
-    if (this.boundHandle_) {
-      this.win.document.documentElement.removeEventListener(
-          'submit', this.boundHandle_, true);
-    }
-  }
-
-  /**
-   * Intercept any submit on the current document and polyfill validation check.
-   * @param {!Event} e
-   */
-  handle_(e) {
-    onDocumentFormSubmit_(e);
-  }
+  window.document.documentElement.addEventListener(
+      'submit', onDocumentFormSubmit_, true);
 }
 
 
@@ -83,7 +47,7 @@ export function onDocumentFormSubmit_(e) {
   const action = form.getAttribute('action');
   user.assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
-  user.assert(!action.startsWith('https://cdn.ampproject.org'),
+  user.assert(!startsWith(action, 'https://cdn.ampproject.org'),
       'form action should not be on cdn.ampproject.org: %s', form);
 
   const target = form.getAttribute('target');

@@ -126,7 +126,8 @@ export function addParamsToUrl(url, params) {
  * @param {string=} sourceName Used for error messages.
  * @return {string}
  */
-export function assertHttpsUrl(urlString, elementContext, sourceName='source') {
+export function assertHttpsUrl(
+    urlString, elementContext, sourceName = 'source') {
   user.assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
   const url = parseUrl(urlString);
