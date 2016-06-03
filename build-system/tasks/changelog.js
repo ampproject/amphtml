@@ -529,10 +529,87 @@ function buildPrMetadata(pr) {
   };
 }
 
+function changelogUpdate() {
+  if (!GITHUB_ACCESS_TOKEN) {
+    util.log(util.colors.red('Warning! You have not set the ' +
+        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
+    util.log(util.colors.green('See https://help.github.com/articles/' +
+        'creating-an-access-token-for-command-line-use/ ' +
+        'for instructions on how to create a github access token. We only ' +
+        'need `public_repo` scope.'));
+    return;
+  }
+  if (!argv.message) {
+    util.log(util.colors.red('--message flag must be set.'));
+  }
+  return update();
+}
+
+function update() {
+  var url = `https://api.github.com/repos/ampproject/amphtml/releases/tags/` +
+      `${argv.version}`;
+  var tagsOptions = {
+    url: url,
+    method: 'GET',
+    headers: {
+      'User-Agent': 'amp-changelog-gulp-task',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+  };
+
+  var releasesOptions = {
+    url: 'https://api.github.com/repos/ampproject/amphtml/releases/',
+    method: 'PATCH',
+    body: {},
+    json: true,
+    headers: {
+      'User-Agent': 'amp-changelog-gulp-task',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+  };
+
+  if (GITHUB_ACCESS_TOKEN) {
+    tagsOptions.qs = {
+      access_token: GITHUB_ACCESS_TOKEN
+    }
+    releasesOptions.qs = {
+      access_token: GITHUB_ACCESS_TOKEN
+    }
+  }
+
+  return request(tagsOptions).then(res => {
+    var release = JSON.parse(res.body);
+    if (!release.body) {
+      return;
+    }
+    var id = release.id;
+    releasesOptions.url += id;
+    if (argv.suffix) {
+      releasesOptions.body['body'] = release.body + argv.message;
+    } else {
+      releasesOptions.body['body'] = argv.message + release.body;
+    }
+    return request(releasesOptions).then(() => {
+      util.log(util.colors.green('Update Successful.'));
+    })
+    .catch((e) => {
+      util.log(util.colors.red('Update Failed. ' + e.message));
+    });
+  });
+}
+
 gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
+    version: '  The git tag and github release label',
+  }
+});
+
+gulp.task('changelog:update', 'Update github release. Ex. prepend ' +
+    'canary percentage changes to release', changelogUpdate, {
+  options: {
+    dryrun: '  Generate changelog but dont push it out',
     version: '  The git tag and github release label',
   }
 });
