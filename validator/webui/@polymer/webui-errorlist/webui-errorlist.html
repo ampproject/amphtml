@@ -22,36 +22,65 @@
 <link rel="import" href="../iron-icons/iron-icons.html">
 <dom-module id="webui-errorlist">
   <style scope="webui-errorlist">
+    .category {
+      color: #aaa;
+      display: inline-block;
+      float: right;
+    }
+    .filterMessage,
+    .filterMessage:hover {
+      line-height: 16px;
+      min-height: 16px;
+      padding: 4px 0;
+      text-align: center;
+    }
+    #clearFilterButton {
+      background-color: #fff;
+    }
+    .message {
+      display: inline-block;
+    }
     paper-listbox {
-      height: 200px;
+      height: 240px;
       overflow-y: scroll;
     }
-    paper-item.iron-selected,
-    paper-item.iron-selected:hover {
+    paper-item-body {
+      width: 100%;
+    }
+    #listbox paper-item.iron-selected,
+    #listbox paper-item.iron-selected:hover {
       background-color: #e6e6e6;
     }
-    paper-item:hover {
+    #listbox paper-item:hover {
       background-color: #eee;
     }
-    paper-item {
+    #listbox paper-item {
       border-bottom: 1px solid #c1c2c3;
       padding: 4px 8px;
       transition-duration: 0.28s;
       transition-property: background-color;
       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     }
-    paper-item {
+    #listbox paper-item {
       --paper-item: {
          cursor: pointer;
        };
     }
-    paper-item:first-of-type {
+    #listbox paper-item:first-of-type {
       border-top: 1px solid #c1c2c3;
     }
   </style>
   <template>
+    <template is="dom-if" if="{{filter}}">
+      <paper-item class="filterMessage">
+        <paper-item-body>
+          Results filtered to {{filter}}.
+          <paper-button id="clearFilterButton" on-click="clearFilter" raised>Clear filter</paper-button>
+        </paper-item-body>
+      </paper-item>
+    </template>
     <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
-      <template id="listboxItems" is="dom-repeat" items='{{errors}}' as="e">
+      <template id="listboxErrors" is="dom-repeat" items='{{errors}}' as="e" filter="filterErrors">
         <paper-item>
           <template is="dom-if" if="{{e.isError}}">
             <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
@@ -60,7 +89,10 @@
             <iron-icon class="ampproject-warning" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
           </template>
           <paper-item-body two-line>
-            <div>{{e.message}}</div>
+            <div>
+              <div class="message">{{e.message}}</div>
+              <div class="category">{{e.category}}</div>
+            </div>
             <div secondary><small>line {{e.line}}, column {{e.col}}</small></div>
           </paper-item-body>
         </paper-item>
@@ -71,28 +103,24 @@
   <script>
     Polymer({
       is: 'webui-errorlist',
-      clearErrors: function() {
-        this.splice('errors', 0);
-      },
       addError: function(error) {
         this.push('errors', error);
       },
-      properties: {
-        errors: {
-          type: Array,
-          value: function() { return []; },
-          notify: true
-        },
-        selectedError: {
-          type: Number,
-          value: -1  // don't select anything by default.
-        }
+      clearErrors: function() {
+        this.splice('errors', 0);
       },
-      selectAndFocusError: function(index) {
-        this.$.listbox.selected = index;
-        this.$.listboxItems.render();
-        if (this.$.listbox.selectedItem) {
-          this.$.listbox.selectedItem.scrollIntoView();
+      clearFilter: function() {
+        this.filter = undefined;
+        this.$.listboxErrors.render();
+      },
+      filterErrors: function(error) {
+        // If no filter set, return all errors.
+        if (this.filter === undefined) {
+          return error;
+        }
+        // If filter is set, return only matching category.
+        if (this.filter === error.category) {
+          return error;
         }
       },
       handleSelect: function(e) {
@@ -101,6 +129,30 @@
           return;
         }
         this.fire('error-selected', {'error': error});
+      },
+      properties: {
+        errors: {
+          type: Array,
+          value: function() { return []; },
+          notify: true
+        },
+        filter: {
+          type: String,
+        },
+        selectedError: {
+          type: Number,
+          value: -1  // don't select anything by default.
+        }
+      },
+      selectAndFocusError: function(index) {
+        this.$.listbox.selected = index;
+        this.$.listboxErrors.render();
+        if (this.$.listbox.selectedItem) {
+          this.$.listbox.selectedItem.scrollIntoView();
+        }
+      },
+      setFilter: function(filter) {
+        this.filter = filter;
       },
     });
   </script>

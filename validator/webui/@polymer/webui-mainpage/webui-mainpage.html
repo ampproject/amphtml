@@ -82,6 +82,7 @@
               // Polymer icons (https://elements.polymer-project.org/elements/iron-icons?view=demo:demo/index.html&active=iron-icons).
               var error = validationResult.errors[ii];
               error.message = amp.validator.renderErrorMessage(error);
+              error.category = amp.validator.categorizeError(error);
               error.icon = error.severity.toLowerCase();
               error.isError = error.severity === 'ERROR';
               error.isWarning = error.severity === 'WARNING';
@@ -165,11 +166,15 @@
         });
 
         // Interprets the parameters after the '#' in the URL.
+        var params = getLocationHashParams();
         // If #url=<url> was provided, load it, otherwise, start with the
         // minimum valid AMP document.
-        var params = getLocationHashParams();
         if (params.hasOwnProperty('url') && params['url']) {
           this.$.urlForm.setURLAndValidate(params['url']);
+          // If filter=<error_category> was provided, filter error-list.
+          if (params.hasOwnProperty('filter') && params['filter']) {
+            listbox.setFilter(params['filter']);
+          }
         } else {
           var minimumValidAmp =
             '\x3C!--\n' +
