@@ -20,6 +20,7 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
+import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -49,6 +50,9 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
+
+    /** @const @private {!Vsync} */
+    this.vsync_ = vsyncFor(this.getWin());
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -115,7 +119,9 @@ class AmpStickyAd extends AMP.BaseElement {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.
-          this.element.classList.add('-amp-sticky-ad-load');
+          this.vsync_.mutate(() => {
+            this.element.classList.add('-amp-sticky-ad-load');
+          });
         }, 1000);
       });
     }
