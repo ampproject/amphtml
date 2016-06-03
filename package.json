@@ -64,7 +64,7 @@
     "jison": "0.4.15",
     "jsdom": "9.1.0",
     "karma": "0.13.21",
-    "karma-browserify": "5.0.2",
+    "karma-browserify": "5.0.4",
     "karma-chai": "0.1.0",
     "karma-chai-as-promised": "0.1.2",
     "karma-chrome-launcher": "0.2.2",
