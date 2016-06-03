@@ -1790,13 +1790,13 @@ export class Resource {
       const win = this.resources_.win;
       const body = win.document.body;
       const viewport = this.resources_.viewport_;
-      for (let n = this.element; n && n != body; n = n.offsetParent) {
+      for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
         if (n.isFixedRequired && n.isFixedRequired()) {
           isFixed = true;
           break;
         }
         if (viewport.isDeclaredFixed(n) &&
-                win.getComputedStyle(n).position == 'fixed') {
+                win./*OK*/getComputedStyle(n).position == 'fixed') {
           isFixed = true;
           break;
         }

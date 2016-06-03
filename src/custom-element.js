@@ -522,7 +522,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    */
   ElementProto.isFixedRequired = function() {
     return this.implementation_.isFixedRequired();
-  }
+  };
 
   /**
    * Updates the layout box of the element.
