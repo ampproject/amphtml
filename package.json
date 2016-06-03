@@ -28,7 +28,7 @@
     "autoprefixer": "6.1.1",
     "babel-core": "5.8.35",
     "babel-eslint": "4.1.8",
-    "babelify": "6.4.0",
+    "babelify": "7.3.0",
     "bluebird": "3.0.5",
     "body-parser": "1.14.2",
     "brotli-size": "0.0.1",
