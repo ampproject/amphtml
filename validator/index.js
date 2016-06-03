@@ -303,19 +303,14 @@ exports.getInstance = getInstance;
 
 /**
  * Maps from file extension to a mime-type.
- * @param {!string} extension
- * @returns {!string}
+ * @type {!Object<string, string>}
  */
-function extToMime(extension) {
-  if (extension === '.html') {
-    return 'text/html';
-  } else if (extension === '.js') {
-    return 'text/javascript';
-  } else if (extension === '.css') {
-    return 'text/css';
-  }
-  return 'text/plain';
-}
+const extToMime = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.png': 'image/png'
+};
 
 /**
  * Serves a web UI for validation.
@@ -354,6 +349,16 @@ function serve(port, validatorScript) {
             return;
           }
           //
+          // Handle '/webui.js'.
+          //
+          if (request.url === '/webui.js') {
+            response.writeHead(200, {'Content-Type': 'text/html'});
+            const contents = fs.readFileSync(
+                path.join(__dirname, 'webui/webui.js'), 'utf-8');
+            response.end(contents);
+            return;
+          }
+          //
           // Handle '/validator.js'.
           //
           if (request.url === '/validator.js') {
@@ -361,35 +366,24 @@ function serve(port, validatorScript) {
             response.end(validatorScriptContents);
             return;
           }
-          //
-          // Handle '/amp_favicon.png'
-          //
-          if (request.url === '/amp_favicon.png') {
-            const contents = fs.readFileSync(
-                path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
-            response.writeHead(200, {'Content-Type': 'image/png'});
-            response.end(contents, 'binary');
-            return;
-          }
-          // Look up any other resources relative to node_modules.
+          // Look up any other resources relative to node_modules or webui.
           const relative_path = request.url.substr(1);  // Strip leading '/'.
-          const node_modules_path =
-              path.join(__dirname, 'node_modules', relative_path);
+          for (root of ['node_modules', 'webui']) {
+            const abs_path = path.join(__dirname, root, relative_path);
 
-          // Only serve .js .html .css below node_modules.
-          if (path.resolve(node_modules_path)
-                  .startsWith(path.resolve(__dirname)) &&
-              ['.js', '.html',
-               '.css'].indexOf(path.extname(node_modules_path)) !== -1) {
-            try {
-              const contents = fs.readFileSync(node_modules_path, 'utf-8');
-              response.writeHead(
-                  200,
-                  {'Content-Type': extToMime(path.extname(node_modules_path))});
-              response.end(contents);
-              return;
-            } catch (error) {
-              // Fall through for 404 below.
+            // Only serve files with known mime type and only if they're below
+            // the directory that this module is located in.
+            if (path.resolve(abs_path).startsWith(path.resolve(__dirname)) &&
+                extToMime.hasOwnProperty(path.extname(abs_path))) {
+              try {
+                const contents = fs.readFileSync(abs_path, 'binary');
+                response.writeHead(
+                    200, {'Content-Type': extToMime[path.extname(abs_path)]});
+                response.end(contents, 'binary');
+                return;
+              } catch (error) {
+                // May fall through for 404 below.
+              }
             }
           }
           response.writeHead(404, {'Content-Type': 'text/plain'});

@@ -29,9 +29,13 @@ describe('3p messaging', () => {
       testWin = i.win;
       testWin.context = {
         location: window.location,
+        amp3pSentinel: 'test',
       };
       iframe = {
         contentWindow: testWin,
+        getAttribute(attr) {
+          return attr == 'data-amp-3p-sentinel' ? 'test' : undefined;
+        },
       };
     });
   });

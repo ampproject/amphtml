@@ -21,7 +21,6 @@
 var BBPromise = require('bluebird');
 var app = require('connect')();
 var bodyParser = require('body-parser');
-var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var fs = BBPromise.promisifyAll(require('fs'));
 var jsdom = require('jsdom');
@@ -187,8 +186,6 @@ app.use('/max/', function(req, res) {
 app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
-
-app.use(clr());
 
 function setAMPAccessControlHeader(res, path) {
   var curUrl = url.parse(path, true);

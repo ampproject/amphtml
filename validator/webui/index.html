@@ -33,9 +33,10 @@
   <link rel="import" href="@polymer/paper-listbox/paper-listbox.html">
   <link rel="import" href="@polymer/paper-material/paper-material.html">
   <link rel="import" href="@polymer/paper-styles/demo-pages.html">
-  <link rel="import" href="@polymer/paper-toolbar/paper-toolbar.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
+  <link rel="import" href="@polymer/ampproject-toolbar/ampproject-toolbar.html">
   <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+  <script src="webui.js"></script>
   <script src="codemirror/lib/codemirror.js"></script>
   <script src="codemirror/addon/selection/selection-pointer.js"></script>
   <script src="codemirror/mode/css/css.js"></script>
@@ -99,14 +100,23 @@
             showCursorWhenSelecting: true,
             cursorBlinkRate: 300
           });
+          // By default, we delay validation for 300ms to avoid locking up
+          // the UI thread while a user is typing into the editor. However,
+          // when .setEditorValue is called (below), for instance because
+          // a new doc was fetched from the web that needs to be validated,
+          // we set the delay to 0ms and validate immediately.
+          this.nextValidationDelayMs = 300;
           this.editor.on('changes', function() {
-            this.fire('amphtml-editor-changes');
+            this.fire('amphtml-editor-changes',
+                      {'validationDelayMs': this.nextValidationDelayMs});
+            this.nextValidationDelayMs = 300;
           }.bind(this));
         },
         attached: function() {
           this.async(this.notifyResize, 1);
         },
         setEditorValue: function(text) {
+          this.nextValidationDelayMs = 0;  // Validate immediately.
           this.editor.setValue(text);
         },
         getEditorValue: function() {
@@ -182,10 +192,27 @@
         height: 200px;
         overflow-y: scroll;
       }
+      paper-item.iron-selected,
+      paper-item.iron-selected:hover {
+        background-color: #e6e6e6;
+      }
+      paper-item:hover {
+        background-color: #eee;
+      }
+      paper-item {
+        border-bottom: 1px solid #c1c2c3;
+        padding: 4px 8px;
+        transition-duration: 0.28s;
+        transition-property: background-color;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      paper-item:first-of-type {
+        border-top: 1px solid #c1c2c3;
+      }
     </style>
     <template>
-      <paper-listbox on-iron-select="handleSelect" selected="{{selectedError}}">
-        <template is="dom-repeat" items='{{errors}}' as="e">
+      <paper-listbox id="listbox" on-iron-select="handleSelect" selected="{{selectedError}}">
+        <template id="listboxItems" is="dom-repeat" items='{{errors}}' as="e">
           <paper-item>
             <template is="dom-if" if="{{e.isError}}">
               <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
@@ -221,6 +248,11 @@
             type: Number,
             value: -1  // don't select anything by default.
           }
+        },
+        selectAndFocusError: function(index) {
+          this.$.listbox.selected = index;
+          this.$.listboxItems.render();
+          this.$.listbox.selectedItem.scrollIntoView();
         },
         handleSelect: function(e) {
           var error = this.errors[this.selectedError];
@@ -277,74 +309,6 @@
     </script>
   </dom-module>
 
-  <!-- Toolbar displayed at the top of the page. This doesn't do much but has a
-       lot of styling, so we isolate it to keep the source for other parts of
-       the page easier to read. -->
-  <dom-module id="ampproject-toolbar">
-    <style scope="ampproject-toolbar">
-      paper-toolbar {
-        --paper-toolbar-background: #fbfafb;
-        --paper-toolbar-color: #0379C4;
-        --paper-toolbar: { font-family: Roboto, verdana, arial, sans-serif; };
-        --width: 100%
-      }
-      .ampproject-left {
-        @apply(--layout-flex);
-        color: #0379C4;
-        padding: 15px 10px 15px 50px;
-        margin: 10px 0;
-        width: auto;
-        text-transform: none;
-        white-space: nowrap;
-        background-image: url('data:image/svg+xml;utf-8,<svg width=\22 14px\22  height=\22 14px\22  viewBox=\22 0 0 14 14\22  version=\22 1.1\22  xmlns=\22 http://www.w3.org/2000/svg\22  xmlns:xlink=\22 http://www.w3.org/1999/xlink\22 ><title>AMP Logo</title><g id=\22 Page-1\22  stroke=\22 none\22  stroke-width=\22 1\22  fill=\22 none\22  fill-rule=\22 evenodd\22 ><g id=\22 AMP-Logo\22  fill=\22 #0379C4\22 ><path d=\22 M8.657817,0.216062 L7.647297,5.589962 L10.085327,5.589962 C10.188787,5.589962 10.256477,5.698322 10.211117,5.791282 L6.230217,13.958532 C6.480467,13.985622 6.734567,13.999972 6.992097,13.999972 C10.853717,13.999972 13.984117,10.869572 13.984117,7.007952 C13.984117,3.720402 11.715067,0.963312 8.657817,0.216062\22  id=\22 Fill-4\22 ></path><path d=\22 M6.425398,8.529948 L3.987158,8.529948 C3.883698,8.529948 3.815938,8.421588 3.861298,8.328628 L7.885808,0.072478 C7.591808,0.034958 7.292138,0.015708 6.987848,0.015848 C3.168228,0.018088 0.028028,3.136308 0.000168,6.955858 C-0.024192,10.303328 2.304078,13.111168 5.429718,13.824608 L6.425398,8.529948 Z\22  id=\22 Fill-1\22 ></path></g></g></svg>');
-        background-repeat: no-repeat;
-        background-size: 40px 40px;
-        background-position: center left;
-      }
-      .ampproject-right {
-        color: #0379C4;
-        margin: 10px 0;
-      }
-      .ampproject-link a:link,
-      .ampproject-link a:visited,
-      .ampproject-link a:hover,
-      .ampproject-link a:active {
-        color: #0379C4;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 300;
-        letter-spacing: 0.04em;
-      }
-      .flex-horizontal {
-        @apply(--layout-horizontal);
-        @apply(--layout-center);
-        margin-bottom: 10px;
-      }
-      .flexchild {
-      }
-    </style>
-    <template>
-      <paper-toolbar>
-        <div class="ampproject-left ampproject-link">
-          <a href="https://www.ampproject.org/"
-             target="_blank">Accelerated Mobile Pages Project</a>
-        </div>
-        <div class="ampproject-right ampproject-link">
-          <a href="https://github.com/ampproject/amphtml/blob/master/validator/README.md"
-             target="_blank">GITHUB</a>
-          &nbsp;&nbsp;&nbsp;
-          <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
-             target="_blank">CHROME EXTENSION</a>
-        </div>
-      </paper-toolbar>
-    </template>
-    <script>
-      Polymer({
-        is: 'ampproject-toolbar'
-      });
-    </script>
-  </dom-module>
-
   <!-- Below, the main contents of the page, which instantiates the
        custom elements defined above. -->
   <dom-module id="main-page">
@@ -381,7 +345,7 @@
           // When the editor contents change, trigger validation (with a delay)
           // and propagate the validation errors into the editor (as line
           // widgets) and the listbox below the editor as clickable errors.
-          editor.addEventListener('amphtml-editor-changes', function() {
+          editor.addEventListener('amphtml-editor-changes', function(e) {
             clearTimeout(validationTimeout);
             validationTimeout = setTimeout(function() {
 
@@ -439,7 +403,18 @@
                 }
                 lineWidgets.push(editor.addLineWidget(error.line - 1, div));
               }
-            }, 300);
+              var params = getLocationHashParams();
+              if (params.hasOwnProperty('errno')) {
+                var errno = parseInt(params['errno']);
+                listbox.selectAndFocusError(errno);
+
+                // We don't want this param to be sticky, e.g. if a user
+                // types into the editor we don't want to go back to this
+                // old error after revalidation.
+                delete params['errno'];
+                setLocationHashParams(params);
+              }
+            }, e.detail.validationDelayMs);
           });
 
           // Clicking in the error list at the bottom of the screen moves
@@ -461,6 +436,9 @@
                 urlToFetch = 'https://' + urlToFetch;
                 input.value = urlToFetch;
               }
+              var params = getLocationHashParams();
+              params['url'] = urlToFetch;
+              setLocationHashParams(params);
               var xmlHttp = new XMLHttpRequest();
               xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -475,16 +453,9 @@
           });
 
           // Interprets the parameters after the '#' in the URL.
-          var paramStrings = window.location.hash.substr(1).split('&');
-          var params = {};
-          for (var ii = 0; ii < paramStrings.length; ii++) {
-            var keyValue = paramStrings[ii].split('=');
-            if (keyValue[0].length > 0) {
-              params[keyValue[0]] = keyValue[1];
-            }
-          }
           // If #url=<url> was provided, load it, otherwise, start with the
           // minimum valid AMP document.
+          var params = getLocationHashParams();
           if (params.hasOwnProperty('url') && params['url']) {
             input.value = params['url']
             button.fire('click');

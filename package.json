@@ -36,7 +36,6 @@
     "chai": "3.5.0",
     "chai-as-promised": "5.2.0",
     "connect": "3.4.1",
-    "connect-livereload": "0.5.4",
     "cssnano": "3.3.2",
     "del": "2.2.0",
     "eslint": "1.10.3",

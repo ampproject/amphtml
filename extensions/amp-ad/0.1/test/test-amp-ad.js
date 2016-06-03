@@ -120,6 +120,8 @@ function tests(name) {
                 is3p: true,
                 height: 217,
                 width: 114,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
@@ -154,6 +156,8 @@ function tests(name) {
                 type: 'requestHeight',
                 is3p: true,
                 height: 217,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
