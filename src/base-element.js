@@ -194,7 +194,7 @@ export class BaseElement {
    * @return {boolean}
    * @protected
    */
-  isFixedRequired() {
+  isAlwaysFixed() {
     return false;
   }
 

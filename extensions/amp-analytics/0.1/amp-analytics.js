@@ -48,7 +48,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  isFixedRequired() {
+  isAlwaysFixed() {
     return true;
   }
 

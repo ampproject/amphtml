@@ -520,8 +520,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @return {boolean}
    * @private @this {!Element}
    */
-  ElementProto.isFixedRequired = function() {
-    return this.implementation_.isFixedRequired();
+  ElementProto.isAlwaysFixed = function() {
+    return this.implementation_.isAlwaysFixed();
   };
 
   /**

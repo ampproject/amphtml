@@ -1791,7 +1791,7 @@ export class Resource {
       const body = win.document.body;
       const viewport = this.resources_.viewport_;
       for (let n = this.element; n && n != body; n = n./*OK*/offsetParent) {
-        if (n.isFixedRequired && n.isFixedRequired()) {
+        if (n.isAlwaysFixed && n.isAlwaysFixed()) {
           isFixed = true;
           break;
         }

@@ -1611,7 +1611,7 @@ describe('Resources.Resource', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 0, 0)).once();
-    element.isFixedRequired = () => true;
+    element.isAlwaysFixed = () => true;
     resource.measure();
     expect(resource.isFixed()).to.be.false;
   });
@@ -1621,7 +1621,7 @@ describe('Resources.Resource', () => {
     elementMock.expects('getBoundingClientRect').returns(
         layoutRectLtwh(0, 0, 10, 10)).once();
     element.offsetParent = {
-      isFixedRequired: () => true,
+      isAlwaysFixed: () => true,
     };
     resource.measure();
     expect(resource.isFixed()).to.be.true;

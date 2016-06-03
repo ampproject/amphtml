@@ -83,7 +83,7 @@ class NotificationInterface {
 export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
-  isFixedRequired() {
+  isAlwaysFixed() {
     return true;
   }
 
