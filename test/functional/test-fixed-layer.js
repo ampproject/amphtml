@@ -294,6 +294,9 @@ describe('FixedLayer', () => {
           '#other-rule2',
         ],
       });
+      expect(fixedLayer.isDeclaredFixed(element1)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element2)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element3)).to.be.false;
     });
 
     it('should add and remove element directly', () => {

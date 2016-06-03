@@ -50,6 +50,9 @@ describe('Resources', () => {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
         },
+        isFixed() {
+          return false;
+        },
       },
       priority: 0,
     };
@@ -58,6 +61,9 @@ describe('Resources', () => {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
+        },
+        isFixed() {
+          return false;
         },
       },
       priority: 1,
@@ -68,6 +74,9 @@ describe('Resources', () => {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
         },
+        isFixed() {
+          return false;
+        },
       },
       priority: 0,
     };
@@ -76,6 +85,9 @@ describe('Resources', () => {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
+        },
+        isFixed() {
+          return false;
         },
       },
       priority: 1,
@@ -86,6 +98,9 @@ describe('Resources', () => {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
         },
+        isFixed() {
+          return false;
+        },
       },
       priority: 0,
     };
@@ -94,6 +109,33 @@ describe('Resources', () => {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
+        },
+        isFixed() {
+          return false;
+        },
+      },
+      priority: 1,
+    };
+    // Task 7 is fixed with priority 0.
+    const task_vpf_p0 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 600, 300, 50);
+        },
+        isFixed() {
+          return true;
+        },
+      },
+      priority: 0,
+    };
+    // Task 8 is fixed with priority 1.
+    const task_vpf_p1 = {
+      resource: {
+        getLayoutBox() {
+          return layoutRectLtwh(0, 600, 300, 50);
+        },
+        isFixed() {
+          return true;
         },
       },
       priority: 1,
@@ -109,6 +151,10 @@ describe('Resources', () => {
     // +1 for "one viewport away" * 1 because dir is the same
     expect(resources.calcTaskScore_(viewportRect, 0, task_vpd_p0)).to.equal(1);
     expect(resources.calcTaskScore_(viewportRect, 0, task_vpd_p1)).to.equal(11);
+
+    // 0 for fixed.
+    expect(resources.calcTaskScore_(viewportRect, 0, task_vpf_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(viewportRect, 0, task_vpf_p1)).to.equal(10);
   });
 
   it('should calculate correct calcTaskTimeout', () => {
@@ -160,6 +206,7 @@ describe('Resources', () => {
     const resource = {
       getState: () => ResourceState_.READY_FOR_LAYOUT,
       isDisplayed: () => true,
+      isFixed: () => false,
       isInViewport: () => true,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => false,
@@ -178,6 +225,7 @@ describe('Resources', () => {
     const resource = {
       getState: () => ResourceState_.READY_FOR_LAYOUT,
       isDisplayed: () => true,
+      isFixed: () => false,
       isInViewport: () => true,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
@@ -199,6 +247,7 @@ describe('Resources', () => {
     const resource = {
       getState: () => ResourceState_.READY_FOR_LAYOUT,
       isDisplayed: () => true,
+      isFixed: () => false,
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
@@ -213,6 +262,7 @@ describe('Resources', () => {
     const resource = {
       getState: () => ResourceState_.READY_FOR_LAYOUT,
       isDisplayed: () => true,
+      isFixed: () => false,
       isInViewport: () => false,
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
@@ -1426,9 +1476,13 @@ describe('Resources.Resource', () => {
   it('should allow to measure when not upgraded', () => {
     elementMock.expects('isUpgraded').returns(false).atLeast(1);
     resource.resources_ = {
+      win: window,
       viewport_: {
         getLayoutRect() {
           return layoutRectLtwh(0, 100, 300, 100);
+        },
+        isDeclaredFixed() {
+          return false;
         },
       },
     };
@@ -1444,6 +1498,7 @@ describe('Resources.Resource', () => {
         layoutRectLtwh(0, 0, 0, 0)).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
+    expect(resource.isFixed()).to.be.false;
   });
 
   it('should measure and update state', () => {
@@ -1465,6 +1520,7 @@ describe('Resources.Resource', () => {
     expect(resource.getLayoutBox().top).to.equal(12);
     expect(resource.getLayoutBox().width).to.equal(111);
     expect(resource.getLayoutBox().height).to.equal(222);
+    expect(resource.isFixed()).to.be.false;
   });
 
   it('should update initial box only on first measure', () => {
@@ -1549,6 +1605,46 @@ describe('Resources.Resource', () => {
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
+  });
+
+  it('should calculate NOT fixed for non-displayed elements', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('getBoundingClientRect').returns(
+        layoutRectLtwh(0, 0, 0, 0)).once();
+    element.isAlwaysFixed = () => true;
+    resource.measure();
+    expect(resource.isFixed()).to.be.false;
+  });
+
+  it('should calculate fixed for always-fixed parent', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('getBoundingClientRect').returns(
+        layoutRectLtwh(0, 0, 10, 10)).once();
+    element.offsetParent = {
+      isAlwaysFixed: () => true,
+    };
+    resource.measure();
+    expect(resource.isFixed()).to.be.true;
+  });
+
+  it('should calculate fixed for fixed-style parent', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('getBoundingClientRect').returns(
+        layoutRectLtwh(0, 0, 10, 10)).once();
+    const fixedParent = document.createElement('div');
+    fixedParent.style.position = 'fixed';
+    document.body.appendChild(fixedParent);
+    element.offsetParent = fixedParent;
+    viewportMock.expects('isDeclaredFixed')
+        .withExactArgs(element)
+        .returns(false)
+        .once();
+    viewportMock.expects('isDeclaredFixed')
+        .withExactArgs(fixedParent)
+        .returns(true)
+        .once();
+    resource.measure();
+    expect(resource.isFixed()).to.be.true;
   });
 
 
@@ -1889,12 +1985,14 @@ describe('Resources.Resource', () => {
       resource1 = {
         hasOwner: () => false,
         isDisplayed: () => true,
+        isFixed: () => false,
         prerenderAllowed: () => true,
         overlaps: () => true,
       };
       resource2 = {
         hasOwner: () => false,
         isDisplayed: () => true,
+        isFixed: () => false,
         prerenderAllowed: () => true,
         overlaps: () => false,
       };
