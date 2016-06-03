@@ -169,8 +169,7 @@
         // minimum valid AMP document.
         var params = getLocationHashParams();
         if (params.hasOwnProperty('url') && params['url']) {
-          input.value = params['url']
-          button.fire('click');
+          this.$.urlForm.setURLAndValidate(params['url']);
         } else {
           var minimumValidAmp =
             '\x3C!--\n' +
