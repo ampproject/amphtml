@@ -57,6 +57,7 @@ if (GITHUB_ACCESS_TOKEN) {
  *  logs: !Array<!LogMetadataDef>,
  *  tag: (string|undefined),
  *  changelog: (string|undefined)
+ *  baseTag: (string|undefined)
  * }}
  */
 var GitMetadataDef;
@@ -104,11 +105,12 @@ function getGitMetadata() {
     throw new Error('no version value passed in. See --version flag option.');
   }
 
-  var gitMetadata = { logs: [], tag: undefined };
+  var gitMetadata = { logs: [], tag: undefined, baseTag: undefined };
   return getLastGitTag(gitMetadata)
       .then(getGitLog)
       .then(getGithubPullRequestsMetadata)
       .then(getGithubFilesMetadata)
+      .then(getBaseCanaryVersion)
       .then(buildChangelog)
       .then(function(gitMetadata) {
         util.log(util.colors.blue('\n' + gitMetadata.changelog));
@@ -120,6 +122,39 @@ function getGitMetadata() {
         );
       })
       .catch(errHandler);
+}
+
+
+/**
+ * When creating a special `amp-release-*` branch always find its root
+ * canary version so we can add it to the changelog. We do this by
+ * cross referencing the refs/remotes/origin/canary sha to all the
+ * tags' sha and look for the matching once. This should only be done on
+ * none canary branches since this assumes our baseTag should be whatever
+ * is currently in canary.
+ *
+ * To be more accurate we need to query github for list of current
+ * pre-release tags, but this is a cheaper operation than that and will
+ * only be wrong if somebody pushes new changes to canary and had not
+ * tagged it yet during the build/release process.
+ *
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!GitMetadataDef}
+ */
+function getBaseCanaryVersion(gitMetadata) {
+  var command = `git show-ref --tags | ` +
+      `grep $(git show-ref refs/remotes/origin/canary | cut -d ' ' -f 1) | ` +
+      `cut -d '/' -f 3`;
+
+  if (isAmpRelease(argv.branch)) {
+    return exec(command).then((baseCanaryVersion) => {
+      if (baseCanaryVersion) {
+        gitMetadata.baseTag = baseCanaryVersion.trim();
+      }
+      return gitMetadata;
+    });
+  }
+  return gitMetadata;
 }
 
 /**
@@ -174,6 +209,13 @@ function getCurrentSha() {
  */
 function buildChangelog(gitMetadata) {
   var changelog = `## Version: ${argv.version}\n\n`;
+
+  if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
+    changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
+        `(https://github.com/ampproject/amphtml/releases/` +
+        `tag/${gitMetadata.baseTag})\n\n`;
+  }
+
   // Append all titles
   changelog += gitMetadata.logs.filter(function(log) {
         var pr = log.pr;
@@ -296,8 +338,8 @@ function getGitLog(gitMetadata) {
   };
   return gitExec(options).then(function(logs) {
     if (!logs) {
-      throw new Error('No logs found "git log ' + branch +
-          '...' + tag + '".\nIs it possible that there is no delta?\n' +
+      throw new Error('No logs found "git log ' + branch + '...' +
+          gitMetadata.tag + '".\nIs it possible that there is no delta?\n' +
           'Make sure to fetch and rebase (or reset --hard) the latest ' +
           'from remote upstream.');
     }
@@ -462,6 +504,15 @@ function getPrIdFromCommit(commit) {
  */
 function isJs(str) {
   return str./*OK*/endsWith('.js');
+}
+
+/**
+ * Checks if amp-release-* branch
+ * @param {?string|undefined} str
+ * @return {boolean}
+ */
+function isAmpRelease(str) {
+  return !!(str && str.indexOf('amp-release') == 0);
 }
 
 /**
