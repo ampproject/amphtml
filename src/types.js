@@ -60,3 +60,12 @@ export function toArray(arrayLike) {
 export function isObject(value) {
   return toString(value) === '[object Object]';
 }
+
+/**
+ * Determines if value is of FormData type.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isFormData(value) {
+  return toString(value) === '[object FormData]';
+}
