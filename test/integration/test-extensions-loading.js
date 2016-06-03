@@ -17,7 +17,6 @@
 import {createFixtureIframe} from '../../testing/iframe';
 
 // Checks if an amp element gets upgraded.
-// Works for all amp elements used in this test.
 function checkElementUpgrade(element) {
   expect(element).to.have.class('-amp-element');
   expect(element).to.have.class('-amp-layout-responsive');
@@ -28,99 +27,64 @@ function checkElementUpgrade(element) {
   expect(element).to.not.have.class('-amp-unresolved');
 }
 
+/**
+ * Check all elements in the fixture are upgraded correctly.
+ * @param {string} fixtureName
+ * @param {!Array} testElements
+ */
+function testLoadOrderFixture(fixtureName, testElements) {
+  return createFixtureIframe(fixtureName).then(f => {
+    fixture = f;
+    for (let i = 0; i < testElements.length; i++) {
+      expect(fixture.doc.querySelectorAll(testElements[i]))
+          .to.have.length(1);
+    }
+    return fixture.awaitEvent('amp:load:start', 1);
+  }).then(() => {
+    for (let i = 0; i < testElements.length; i++) {
+      const testElement = fixture.doc.querySelectorAll(testElements[i])[0];
+      checkElementUpgrade(testElement);
+      if (testElement.tagName == 'AMP-FIT-TEXT') {
+        expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
+          .to.have.length(1);
+      }
+    }
+  });
+}
+
 describe('test extensions loading in multiple orders', () => {
-  let fixture;
   it('one extension, extension loads first, all scripts in header', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-extension-head-v0-head.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-        });
+    return testLoadOrderFixture(
+        'test/fixtures/script-load-extension-head-v0-head.html',
+        ['amp-fit-text']);
   });
 
   it('one extension, v0 loads first, all scripts in header', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-v0-head-extension-head.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-        });
+    return testLoadOrderFixture(
+        'test/fixtures/script-load-v0-head-extension-head.html',
+        ['amp-fit-text']);
   });
 
   it('one extension, extension loads first, all scripts in footer', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-extension-footer-v0-footer.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-        });
+    return testLoadOrderFixture(
+        'test/fixtures/script-load-extension-footer-v0-footer.html',
+        ['amp-fit-text']);
   });
 
   it('one extension, v0 loads first, all scripts in footer', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-v0-footer-extension-footer.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-        });
+    return testLoadOrderFixture(
+        'test/fixtures/script-load-v0-footer-extension-footer.html',
+        ['amp-fit-text']);
   });
 
   it('one extension, v0 in header, extension script in footer', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-v0-head-extension-footer.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          expect(ampFitText).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-        });
+    return testLoadOrderFixture(
+        'test/fixtures/script-load-v0-head-extension-footer.html',
+        ['amp-fit-text']);
   });
 
   it('two extensions, one of extension scripts and v0 in header', () => {
-    return createFixtureIframe(
-        'test/fixtures/script-load-extensions.html').then(f => {
-          fixture = f;
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          const ampIframe = fixture.doc.querySelectorAll('amp-iframe');
-          expect(ampFitText).to.have.length(1);
-          expect(ampIframe).to.have.length(1);
-          return fixture.awaitEvent('amp:load:start', 1);
-        }).then(() => {
-          const ampFitText = fixture.doc.querySelectorAll('amp-fit-text');
-          checkElementUpgrade(ampFitText[0]);
-          expect(fixture.doc.getElementsByClassName('-amp-fit-text-content'))
-              .to.have.length(1);
-          const ampIframe = fixture.doc.querySelectorAll('amp-iframe');
-          checkElementUpgrade(ampIframe[0]);
-        });
+    return testLoadOrderFixture('test/fixtures/script-load-extensions.html',
+        ['amp-fit-text', 'amp-iframe']);
   });
 });
