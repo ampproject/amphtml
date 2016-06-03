@@ -170,12 +170,7 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
-  adcrops: [
-    'https://js.adcrops.net',
-    'https://t.adcrops.net',
-    'https://i.adcrops.net',
-    'https://b.adcrops.net',
-  ],
+  adcrops: 'https://js.adcrops.net',
 };
 
 /**
