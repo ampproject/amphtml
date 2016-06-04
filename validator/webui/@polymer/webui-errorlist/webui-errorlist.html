@@ -112,6 +112,7 @@
       clearFilter: function() {
         this.filter = undefined;
         this.$.listboxErrors.render();
+        removeParamFromLocationHashParams('filter');
       },
       filterErrors: function(error) {
         // If no filter set, return all errors.

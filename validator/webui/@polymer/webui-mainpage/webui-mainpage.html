@@ -124,8 +124,7 @@
               // We don't want this param to be sticky, e.g. if a user
               // types into the editor we don't want to go back to this
               // old error after revalidation.
-              delete params['errno'];
-              setLocationHashParams(params);
+              removeParamFromLocationHashParams('errno');
             }
           }, e.detail.validationDelayMs);
         });
