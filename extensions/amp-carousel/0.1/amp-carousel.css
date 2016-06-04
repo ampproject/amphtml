@@ -78,10 +78,13 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container {
+  align-items: center;
+  display: flex;
   height: 100% !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   position: relative;
+  text-align: center;
   white-space: nowrap;
   width: 100% !important;
   scroll-snap-type: mandatory;
@@ -90,6 +93,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 .-amp-slide-item {
   display: none;
+  flex: 1 0 100% !important;
   height: 100% !important;
   position: relative;
   scroll-snap-coordinate: 0 0;
@@ -97,7 +101,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slide-item-show {
-  display: inline-block !important;
+  display: block !important;
 }
 
 /* End SlideScroll */

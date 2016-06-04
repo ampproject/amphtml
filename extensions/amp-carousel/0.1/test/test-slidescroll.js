@@ -94,7 +94,6 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
-
       impl.showSlide_(5);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
@@ -111,7 +110,6 @@ describe('SlideScroll', () => {
 
 
       impl.showSlide_(1);
-
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(
@@ -188,6 +186,16 @@ describe('SlideScroll', () => {
       const hideRestOfTheSlidesSpy = sandbox.spy(impl, 'hideRestOfTheSlides_');
 
       impl.showSlide_(1);
+
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(schedulePauseSpy).to.not.have.been.called;
+      expect(schedulePauseSpy.callCount).to.equal(0);
+
+      impl.showSlide_(0);
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
       expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
