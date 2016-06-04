@@ -225,7 +225,6 @@ describe('SlideScroll', () => {
       impl.showSlide_(0);
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0,1]);
-
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
