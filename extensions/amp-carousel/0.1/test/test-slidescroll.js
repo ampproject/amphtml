@@ -214,6 +214,16 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(0);
 
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(schedulePauseSpy).to.not.have.been.called;
+      expect(schedulePauseSpy.callCount).to.equal(0);
+
+      impl.showSlide_(0);
+
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
 
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))

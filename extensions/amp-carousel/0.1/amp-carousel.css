@@ -78,11 +78,13 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container {
+  align-items: center;
   display: flex;
   height: 100% !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   position: relative;
+  text-align: center;
   white-space: nowrap;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
