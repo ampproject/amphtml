@@ -16,9 +16,6 @@
  * limitations under the license.
  */
 
-// When modifying this file, make sure it runs with at least Node.js
-// v0.10.25 and v4.4.2. v0.10.25 is the default version for Ubuntu 14.04 LTS.
-
 'use strict';
 
 var Promise = require('promise');
