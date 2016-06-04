@@ -54,7 +54,7 @@ One or zero immediate child nodes can have the `fallback` attribute. If present,
 
 For example:
 ```html
-<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
+<amp-audio width="400" height="300" src="https://yourhost.com/audios/myaudio.mp3">
   <div fallback>
     <p>Your browser doesn’t support HTML5 audio</p>
   </div>
