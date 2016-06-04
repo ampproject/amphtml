@@ -18,10 +18,8 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
   <title>The AMP Validator</title>
   <meta charset="utf-8"/>
-
   <link rel="shortcut icon" href="/amp_favicon.png">
   <script src="webcomponents-lite/webcomponents-lite.js"></script>
-
   <link rel="import" href="@polymer/paper-styles/demo-pages.html">
   <link rel="import" href="@polymer/webui-mainpage/webui-mainpage.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
@@ -29,11 +27,10 @@
   <script src="https://cdn.ampproject.org/v0/validator.js"></script>
   <style is="custom-style">
     .ampproject-message { background-color: #FFF9C4; }
-
     html, body {
       height: 100%;
       margin: 0px;
-      padding: 0px 5px;
+      padding: 0px 5px !important;
     }
   </style>
   <style scope="iron-icon">
@@ -41,7 +38,6 @@
     .ampproject-error { color: #F44336; }
   </style>
 </head>
-
 <body unresolved>
   <webui-mainpage></webui-mainpage>
 </script>
