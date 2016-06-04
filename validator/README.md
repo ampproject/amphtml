@@ -24,11 +24,8 @@ add `#development=1` to your URL and look for the validation messages in the
 Javascript console. See also
 [our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
 
-For the additional choices listed below, install Node.js version 4.X on your
-system (tested with v4.4.2). E.g.,
-[by downloading](https://nodejs.org/en/download/) or
-[by using a package manager](https://nodejs.org/en/download/package-manager/) or
-[by using NVM](https://github.com/creationix/nvm).
+For the additional choices listed below, install Node.js and npm on your system,
+then run `npm install` in this directory.
 
 ## Using the command-line tool (Beta!)
 
@@ -84,8 +81,9 @@ ampValidator.getInstance((instance) => {
 
 ## Building a Custom Validator
 
-This is only useful for development - e.g. when making changes to validator.js,
-and it's rough aroung the edges. Below are instructions for Linux Ubuntu 14.
+The following is only useful for development - e.g. when making changes to
+validator.js, and it's rough aroung the edges. Below are instructions for Linux
+Ubuntu 14.
 
 Install these packages using apt-get:
 
@@ -95,7 +93,10 @@ Install these packages using apt-get:
 * python-protobuf
 * python2.7
 
-In addition, install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
+Though we've ported `index.js` (the above commands) to Node.js versions
+as ancient as v0.10.25, we develop the validator with a more recent version
+of Node.js. So, in addition to the above,
+install Node.js version 4.X on your system (tested with v4.4.2). E.g.,
   [by downloading](https://nodejs.org/en/download/) or
   [by using a package manager](https://nodejs.org/en/download/package-manager/) or
   [by using NVM](https://github.com/creationix/nvm).

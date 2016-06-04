@@ -16,81 +16,85 @@
  * limitations under the license.
  */
 
+// When modifying this file, make sure it runs with at least Node.js
+// v0.10.25 and v4.4.2. v0.10.25 is the default version for Ubuntu 14.04 LTS.
+
 'use strict';
 
 global.assert = require('assert');
-const fs = require('fs');
+var fs = require('fs');
 global.path = require('path');
 
-const JasmineRunner = require('jasmine');
-const jasmine = new JasmineRunner();
+var JasmineRunner = require('jasmine');
+var jasmine = new JasmineRunner();
 
-const ampValidator = require('./index.js');
+var ampValidator = require('./index.js');
 
-it('deployed validator rejects the empty file', (done) => {
+it('deployed validator rejects the empty file', function(done) {
   // Note: This will fetch and use the validator from
   // 'https://cdn.ampproject.org/v0/validator.js', since only one argument
   // is supplied to validateString.
   ampValidator.getInstance()
-      .then((instance) => {
-        const validationResult = instance.validateString('');
+      .then(function(instance) {
+        var validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
         done();
       })
-      .catch((error) => {
+      .catch(function(error) {
         fail(error);
         done();
       });
 });
 
-it('validator_minified.js was built (run build.py if this fails)', () => {
+it('validator_minified.js was built (run build.py if this fails)', function() {
   expect(fs.statSync('dist/validator_minified.js').isFile()).toBe(true);
 });
 
-it('built validator rejects the empty file', (done) => {
+it('built validator rejects the empty file', function(done) {
   // Note: This will use the validator that was built with build.py.
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
-      .then((instance) => {
-        const validationResult = instance.validateString('');
+      .then(function(instance) {
+        var validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
         done();
       })
-      .catch((error) => {
+      .catch(function(error) {
         fail(error);
         done();
       });
 });
 
-it('accepts the minimum valid AMP file', (done) => {
+it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  const mini =
+  var mini =
       fs.readFileSync('testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
-      .then((instance) => {
-        const validationResult = instance.validateString('');
+      .then(function(instance) {
+        var validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
         done();
       })
-      .catch((error) => {
+      .catch(function(error) {
         fail(error);
         done();
       });
 });
 
-it('rejects a specific file that is known to have errors', (done) => {
+it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
-  const severalErrorsHtml =
+  var severalErrorsHtml =
       fs.readFileSync('testdata/feature_tests/several_errors.html', 'utf-8');
-  const severalErrorsOut =
+  var severalErrorsOut =
       fs.readFileSync('testdata/feature_tests/several_errors.out', 'utf-8');
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
-      .then((instance) => {
-        const validationResult = instance.validateString(severalErrorsHtml);
+      .then(function(instance) {
+        var validationResult = instance.validateString(severalErrorsHtml);
         expect(validationResult.status).toBe('FAIL');
         // Here, we assemble the output from the validationResult that was
         // computed by the validator and compare it with the golden file.
-        let out = 'FAIL\n';
-        for (const error of validationResult.errors) {
+        var out = 'FAIL\n';
+        for (var ii = 0; ii < validationResult.errors.length; ii++) {
+          var error = validationResult.errors[ii];
           out += 'feature_tests/several_errors.html';
           out += ':' + error.line + ':' + error.col + ' ' + error.message;
           if (error.specUrl) {
@@ -101,20 +105,20 @@ it('rejects a specific file that is known to have errors', (done) => {
         expect(out).toBe(severalErrorsOut);
         done();
       })
-      .catch((error) => {
+      .catch(function(error) {
         fail(error);
         done();
       });
 });
 
-it('handles syntax errors in validator file', (done) => {
+it('handles syntax errors in validator file', function(done) {
   // Note: This points the library at a file that's not even Javascript.
   ampValidator.getInstance(/*validatorJs*/ 'dist/validator.protoascii')
-      .then((instance) => {
+      .then(function(instance) {
         fail('We should not get here since this is not a good validator.');
         done();
       })
-      .catch((error) => {
+      .catch(function(error) {
         expect(error.message)
             .toBe(
                 'Could not instantiate validator.js - Unexpected token ILLEGAL');
