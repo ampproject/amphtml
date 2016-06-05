@@ -34,8 +34,8 @@ const vm = require('vm');
  * @param {!string} url
  * @returns {!boolean}
  */
-function isHttpOrHttpsUrl(thisUrl) {
-  return thisUrl.startsWith('http://') || thisUrl.startsWith('https://');
+function isHttpOrHttpsUrl(url) {
+  return url.startsWith('http://') || url.startsWith('https://');
 }
 
 /**
@@ -93,10 +93,10 @@ function readFromStdin() {
  * @param {!string} url
  * @returns {!Promise<!string>}
  */
-function readFromUrl(thisUrl) {
+function readFromUrl(url) {
   return new Promise(function(resolve, reject) {
-           const clientModule = thisUrl.startsWith('http://') ? http : https;
-           const req = clientModule.request(thisUrl, (response) => {
+           const clientModule = url.startsWith('http://') ? http : https;
+           const req = clientModule.request(url, (response) => {
              if (response.statusCode !== 200) {
                // https://nodejs.org/api/http.html says: "[...] However, if
                // you add a 'response' event handler, then you must consume
@@ -106,7 +106,7 @@ function readFromUrl(thisUrl) {
                // method."
                response.resume();
                reject(new Error(
-                   'Unable to fetch ' + thisUrl + ' - HTTP Status ' +
+                   'Unable to fetch ' + url + ' - HTTP Status ' +
                    response.statusCode));
              } else {
                resolve(response);
@@ -114,11 +114,11 @@ function readFromUrl(thisUrl) {
            });
            req.on('error', (error) => {  // E.g., DNS resolution errors.
              reject(
-                 new Error('Unable to fetch ' + thisUrl + ' - ' + error.message));
+                 new Error('Unable to fetch ' + url + ' - ' + error.message));
            });
            req.end();
          })
-      .then(readFromReadable.bind(null, thisUrl));
+      .then(readFromReadable.bind(null, url));
 }
 
 /**
