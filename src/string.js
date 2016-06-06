@@ -49,7 +49,7 @@ export function startsWith(string, prefix) {
   if (prefix.length > string.length) {
     return false;
   }
-  return string.indexOf(prefix) == 0;
+  return string.lastIndexOf(prefix, 0) == 0;
 }
 
 /**
