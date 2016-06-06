@@ -28,6 +28,13 @@ function getLocationHashParams() {
   return params;
 }
 
+// Removes given parameter from window.location.hash.
+function removeParamFromLocationHashParams(param) {
+  var params = getLocationHashParams();
+  delete params[param];
+  setLocationHashParams(params);
+}
+
 // Sets window.location hash based on a dictionary of parameters.
 function setLocationHashParams(params) {
   out = [];
