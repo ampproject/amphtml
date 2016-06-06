@@ -123,18 +123,21 @@ export function addParamsToUrl(url, params) {
  *
  * @param {?string|undefined} urlString
  * @param {!Element|string} elementContext Element where the url was found.
+ * @param {string=} sourceName Used for error messages.
  * @return {string}
  */
-export function assertHttpsUrl(urlString, elementContext) {
-  user.assert(urlString != null, '%s source must be available', elementContext);
+export function assertHttpsUrl(
+    urlString, elementContext, sourceName = 'source') {
+  user.assert(urlString != null, '%s %s must be available',
+      elementContext, sourceName);
   const url = parseUrl(urlString);
   user.assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
-      '%s source must start with ' +
+      '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
-      elementContext, urlString);
+      elementContext, sourceName, urlString);
   return urlString;
 }
 
