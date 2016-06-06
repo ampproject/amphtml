@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, checkData, validateDataExists} from '../3p/3p';
 
 const adcropsFields = ['adcropsjs_params'];
-
 
 /**
  * @param {!Window} global
@@ -27,7 +26,7 @@ export function adcrops(global, data) {
   checkData(data, adcropsFields);
   validateDataExists(data, adcropsFields);
 
-  global.adcropsParam = data;
-  writeScript(global, 'https://js.adcrops.net/amp.js');
-}
+  global.adcropsjs_params = JSON.parse(data.adcropsjs_params);
+  loadScript(global, 'https://js.adcrops.net/adcropsjs.js');
 
+}
