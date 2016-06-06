@@ -179,6 +179,12 @@ it is up to the publisher to update the `pagination` reference point correctly
 based on the number of valid items. Items which have the `data-tombstone`
 attribute for example should not be counted, as they are hidden.
 
+Once the number of valid live items is over the `data-max-items-per-page`
+value, the component will try and remove items that are below the viewport
+until the number the live items is equal or below the `data-max-items-per-page`
+value. The number of items may possibly be over the `data-max-items-per-page`
+value if the item for deletion is not below the viewport.
+
 When a reader is not on page 1 of the document, the `disabled` attribute
 should be applied to all `amp-live-list` components since the component
 will still try to insert new items if it identifies any and has no notion
@@ -214,6 +220,9 @@ Maximum number of child entries. Additional elements are assumed to be on the
 next "page". If the number of children items is greater than the number
 provided on the attribute, the number of children items will be the new
 `data-max-items-per-page`.
+Once the number of live items on an `amp-live-list` is over the
+`data-max-items-per-page` limit items below the viewport will be fully
+removed from the live DOM.
 
 **disabled** (Optional)
 
