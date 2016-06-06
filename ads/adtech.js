@@ -30,8 +30,6 @@ export function adtech(global, data) {
   checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwwidth']);
 
   validateDataExists (data,['atwmn', 'atwdiv']);
-
-  /*eslint "google-camelcase/google-camelcase": 0*/
 	global.atwco = data.atwco;
 	global.atwdiv = data.atwdiv;
 	global.atwheight = data.atwheight;
@@ -43,7 +41,7 @@ export function adtech(global, data) {
 	global.atwplid = data.atwplid;
 	global.atwwidth = data.atwwidth;
 
-  	writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
+  writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
 
    }
 
