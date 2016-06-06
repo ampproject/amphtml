@@ -129,7 +129,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
       });
 
       // Exported for testing.
-      c.slot = slot;
+      global.document.getElementById('c')['slot'] = slot;
       googletag.display('c');
     });
   });
