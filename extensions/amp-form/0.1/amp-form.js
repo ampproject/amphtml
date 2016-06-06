@@ -17,14 +17,16 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 
+/** @type {string} */
+const TAG = 'amp-form';
 
 function installAmpForm(win) {
-  if (isExperimentOn(win, TAG)) {
-    return getService(win, 'amp-form', () => {
-      // TODO: Write the implementation of the service..
-      return {};
-    });
-  }
+  return getService(win, 'amp-form', () => {
+    if (isExperimentOn(win, TAG)) {
+      // TODO: Write the implementation of the service.
+    }
+    return {};
+  });
 }
 
 installAmpForm(AMP.win);
