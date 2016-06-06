@@ -91,6 +91,11 @@ const EXPERIMENTS = [
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
+  {
+    id: 'amp-form',
+    name: 'AMP Form Extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
 ];
 
 
