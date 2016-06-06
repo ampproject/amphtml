@@ -109,6 +109,19 @@ describe('XHR', function() {
           expect(deleteMethod).to.throw();
         });
 
+        it('should allow FormData as body', () => {
+          const formData = new FormData();
+          sandbox.stub(JSON, 'stringify');
+          formData.append('name', 'John Miller');
+          formData.append('age', 56);
+          const post = xhr.fetchJson.bind(xhr, '/post', {
+            method: 'POST',
+            body: formData,
+          });
+          expect(post).to.not.throw();
+          expect(JSON.stringify.called).to.be.false;
+        });
+
         it('should do `GET` as default method', () => {
           xhr.fetchJson('/get?k=v1');
           expect(requests[0].method).to.equal('GET');
@@ -259,6 +272,12 @@ describe('XHR', function() {
           expect(res).to.exist;
           expect(res['cookies'][cookieName]).to.equal('v1');
         });
+      });
+
+      it('should NOT succeed CORS with invalid credentials', () => {
+        expect(() => {
+          xhr.fetchJson('https://acme.org/', {credentials: null});
+        }).to.throw(/Only credentials=include support: null/);
       });
 
       it('should expose HTTP headers', () => {

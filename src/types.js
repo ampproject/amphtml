@@ -36,10 +36,36 @@ export function isArray(value) {
 }
 
 /**
+ * Converts an array-like object to an array.
+ * @param {?IArrayLike<T>|string} arrayLike
+ * @return {!Array<T>}
+ * @template T
+ */
+export function toArray(arrayLike) {
+  if (!arrayLike) {
+    return [];
+  }
+  const array = new Array(arrayLike.length);
+  for (let i = 0; i < arrayLike.length; i++) {
+    array[i] = arrayLike[i];
+  }
+  return array;
+}
+
+/**
  * Determines if value is actually an Object.
  * @param {*} value
  * @return {boolean}
  */
 export function isObject(value) {
   return toString(value) === '[object Object]';
+}
+
+/**
+ * Determines if value is of FormData type.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isFormData(value) {
+  return toString(value) === '[object FormData]';
 }

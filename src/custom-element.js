@@ -516,6 +516,15 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   };
 
   /**
+   * Whether the custom element declares that it has to be fixed.
+   * @return {boolean}
+   * @private @this {!Element}
+   */
+  ElementProto.isAlwaysFixed = function() {
+    return this.implementation_.isAlwaysFixed();
+  };
+
+  /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
    * @param {!LayoutRect} layoutBox

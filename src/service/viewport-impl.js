@@ -257,6 +257,16 @@ export class Viewport {
   }
 
   /**
+   * Whether the element is declared as fixed in any of the user's stylesheets.
+   * Will include any matches, not necessarily currently fixed elements.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isDeclaredFixed(element) {
+    return this.fixedLayer_.isDeclaredFixed(element);
+  }
+
+  /**
    * Scrolls element into view much like Element. scrollIntoView does but
    * in the AMP/Viewer environment.
    * @param {!Element} element

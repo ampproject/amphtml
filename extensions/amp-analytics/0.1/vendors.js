@@ -201,6 +201,48 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'clicky': {
+    'vars': {
+      'site_id': '',
+    },
+    'requests': {
+      'base': 'https://in.getclicky.com/in.php?' +
+        'site_id=${site_id}',
+      'baseSuffix': '&mime=${contentType}&' +
+        'x=${random}',
+      'pageview': '${base}&' +
+        'res=${screenWidth}x${screenHeight}&' +
+        'lang=${browserLanguage}&' +
+        'secure=1&' +
+        'type=pageview&' +
+        'href=${canonicalPath}&' +
+        'title=${title}' +
+        '${baseSuffix}',
+      'interval': '${base}&' +
+        'type=ping' +
+        '${baseSuffix}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'interval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 60,
+          'maxTimerLength': 600,
+        },
+        'request': 'interval',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': true,
+      'image': true,
+    },
+  },
+
   'colanalytics': {
     'requests': {
       'host': 'https://ase.clmbtech.com',

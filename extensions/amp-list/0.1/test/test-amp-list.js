@@ -69,7 +69,7 @@ describe('amp-list component', () => {
     const renderPromise = Promise.resolve([itemElement]);
     let measureFunc;
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -97,7 +97,7 @@ describe('amp-list component', () => {
     const xhrPromise = Promise.resolve({items: items});
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -120,7 +120,7 @@ describe('amp-list component', () => {
     const xhrPromise = Promise.resolve({items: items});
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)

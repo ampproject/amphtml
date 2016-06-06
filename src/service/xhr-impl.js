@@ -22,7 +22,7 @@ import {
   parseQueryString,
   parseUrl,
 } from '../url';
-import {isArray, isObject} from '../types';
+import {isArray, isObject, isFormData} from '../types';
 
 
 /**
@@ -45,7 +45,7 @@ let FetchInitDef;
 const allowedMethods_ = ['GET', 'POST'];
 
 /** @private @const {!Array<function:boolean>} */
-const allowedBodyTypes_ = [isArray, isObject];
+const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /** @private @const {string} */
 const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
@@ -77,6 +77,13 @@ class Xhr {
    * @private
    */
   fetch_(input, opt_init) {
+    dev.assert(typeof input == 'string', 'Only URL supported: %s', input);
+    if (opt_init && opt_init.credentials !== undefined) {
+      // In particular, Firefox does not tolerate `null` values for
+      // `credentials`.
+      dev.assert(opt_init.credentials == 'include',
+          'Only credentials=include support: %s', opt_init.credentials);
+    }
     // Fallback to xhr polyfill since `fetch` api does not support
     // responseType = 'document'. We do this so we dont have to do any parsing
     // and document construction on the UI thread which would be expensive.
@@ -223,11 +230,11 @@ function setupJson_(init) {
   init.headers = init.headers || {};
   init.headers['Accept'] = 'application/json';
 
-  if (init.method == 'POST') {
+  if (init.method == 'POST' && !isFormData(init.body)) {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
     dev.assert(
-      allowedBodyTypes_.some(test => test(init.body)),
+      allowedJsonBodyTypes_.some(test => test(init.body)),
       'body must be of type object or array. %s',
       init.body
     );
@@ -252,11 +259,7 @@ function setupJson_(init) {
  * @private Visible for testing
  */
 export function fetchPolyfill(input, opt_init) {
-  dev.assert(typeof input == 'string', 'Only URL supported: %s', input);
   const init = opt_init || {};
-  dev.assert(!init.credentials || init.credentials == 'include',
-      'Only credentials=include support: %s', init.credentials);
-
   return new Promise(function(resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
 
