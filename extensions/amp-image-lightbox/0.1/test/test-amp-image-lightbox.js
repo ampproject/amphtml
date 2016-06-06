@@ -118,10 +118,9 @@ describe('amp-image-lightbox component', () => {
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
       const enterLightboxMode = sandbox.spy();
       const leaveLightboxMode = sandbox.spy();
-      impl.getViewport = () => {return {
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
-      };};
+      impl.getViewport = () => {
+        return {enterLightboxMode, leaveLightboxMode};
+      };
       const historyPop = sandbox.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};

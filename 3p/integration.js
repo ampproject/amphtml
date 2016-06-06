@@ -276,17 +276,11 @@ function triggerNoContentAvailable() {
 }
 
 function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 /**

@@ -44,10 +44,7 @@ describe('amp-sidebar', () => {
       ampSidebar.setAttribute('id', 'sidebar1');
       ampSidebar.setAttribute('layout', 'nodisplay');
       return iframe.addElement(ampSidebar).then(() => {
-        return Promise.resolve({
-          iframe: iframe,
-          ampSidebar: ampSidebar,
-        });
+        return Promise.resolve({iframe, ampSidebar});
       });
     });
   }
