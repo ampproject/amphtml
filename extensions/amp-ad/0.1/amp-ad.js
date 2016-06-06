@@ -347,7 +347,7 @@ class AmpAd extends AMP.BaseElement {
       postMessage(
           this.iframe_,
           'embed-size-denied',
-          {requestedHeight: requestedHeight, requestedWidth: requestedWidth},
+          {requestedHeight, requestedWidth},
           targetOrigin,
           /* opt_is3P */ true);
     }

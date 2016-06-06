@@ -400,10 +400,7 @@ export class UserNotificationManager {
       resolve = r;
     });
 
-    return this.deferRegistry_[id] = {
-      promise: promise,
-      resolve: resolve,
-    };
+    return this.deferRegistry_[id] = {promise, resolve};
   }
 }
 

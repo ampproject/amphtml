@@ -563,9 +563,7 @@ describe('ViewportBindingNatural', () => {
     documentElement = {
       style: {},
     };
-    windowApi.document = {
-      documentElement: documentElement,
-    };
+    windowApi.document = {documentElement};
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNatural_(windowApi);
   });
