@@ -26,7 +26,6 @@ export function adcrops(global, data) {
   checkData(data, adcropsFields);
   validateDataExists(data, adcropsFields);
 
-  global.adcropsjs_params = JSON.parse(data.adcropsjs_params);
-  loadScript(global, 'https://js.adcrops.net/adcropsjs.js');
-
+  global.adcropsParam = data;
+  loadScript(global, 'https://js.adcrops.net/amp.js');
 }
