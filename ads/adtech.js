@@ -27,7 +27,7 @@ export function adtech(global, data) {
 
  } else {
 
-  checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwwidth']);
+  checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwsizes','atwwidth']);
 
   validateDataExists (data,['atwmn', 'atwdiv']);
 	global.atwco = data.atwco;
@@ -39,6 +39,7 @@ export function adtech(global, data) {
 	global.atwnetid = data.atwnetid;
 	global.atwothat = data.atwothat;
 	global.atwplid = data.atwplid;
+	global.atwsizes = data.atwsizes;
 	global.atwwidth = data.atwwidth;
 
   writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
