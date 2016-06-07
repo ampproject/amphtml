@@ -66,20 +66,24 @@ try to port to earlier versions of NodeJS if sufficient interest exists.
 
 ```js
 'use strict';
-
 const ampValidator = require('amp-validator');
-ampValidator.getInstance((instance) => {
-  const result = instance.validateString('<html>Hello, world</html>');
-  ((result.status === 'PASS') ? console.log : console.error)(result.status);
-  for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-        error.message;
-    if (error.specUrl !== null) {
-      msg += ' (see ' + error.specUrl + ')';
-    }
-    ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-  }
+
+var dataFails = '<html amp>Hello,world</html';
+var ourInstance = ampValidator.getInstance()
+        .then((validator) => {
+        const result = validator.validateString(dataFails);
+        ((result.status === 'PASS') ? console.log : console.error)(result.status);
+        for (const error of result.errors) {
+            let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
+                error.message;
+            if (error.specUrl !== null) {
+                msg += ' (see ' + error.specUrl + ')';
+            }
+            ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+        }
 });
+```
+
 ```
 
 ## Building a Custom Validator
