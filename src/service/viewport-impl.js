@@ -250,7 +250,8 @@ export class Viewport {
       const scrollTop = this.getScrollTop();
       const scrollLeft = this.getScrollLeft();
       const size = this.getSize();
-      this.rect_ = layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+      this.rect_ =
+          layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
     }
     return this.rect_;
   }
