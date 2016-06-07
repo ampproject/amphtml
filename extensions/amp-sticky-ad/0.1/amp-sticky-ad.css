@@ -34,7 +34,7 @@ amp-sticky-ad {
   justify-content: center;
 }
 
-.-amp-sticky-ad-load {
+.amp-sticky-ad-load {
   background-color: rgba(255,255,255,1);
 }
 .-amp-sticky-ad-layout > amp-ad {
