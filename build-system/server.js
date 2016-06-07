@@ -23,6 +23,7 @@ var app = require('connect')();
 var bodyParser = require('body-parser');
 var finalhandler = require('finalhandler');
 var fs = BBPromise.promisifyAll(require('fs'));
+var formidable = require('formidable');
 var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
@@ -66,6 +67,25 @@ app.use('/api/dont-show', function(req, res) {
 app.use('/api/echo/post', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(req.body, null, 2));
+});
+
+app.use('/form/echo-html/post', function(req, res) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'text/html');
+    if (fields['email'] == 'already@subscribed.com') {
+      res.statusCode = 500;
+      res.end(`
+        <h1 style="color:red;">Sorry ${fields['name']}!</h1>
+        <p>The email ${fields['email']} is already subscribed!</p>
+      `);
+    } else {
+      res.end(`
+      <h1>Thanks ${fields['name']}!</h1>
+        <p>Please make sure to confirm your email ${fields['email']}</p>
+      `);
+    }
+  });
 });
 
 // Fetches an AMP document from the AMP proxy and replaces JS

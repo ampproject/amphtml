@@ -176,6 +176,7 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
+        externs: 'build-system/amp.extern.js',
         js_module_root: ['node_modules/', 'build/fake-module/'],
         common_js_entry_module: entryModuleFilename,
         process_common_js_modules: true,
