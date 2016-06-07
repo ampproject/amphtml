@@ -38,11 +38,12 @@ limitations under the License.
 ## Behavior
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child of `<amp-ad>`.
-- The sticky will appear on the bottom of a page.
+- The sticky ad will appear on the bottom of a page.
 - The height of the sticky-ad is whatever its child needs up to its max-height.
 - The max-height of the sticky-ad is 100px, if the height exceeds 100px then the height would be 100px and overflow content will be hidden.
 - The width of the sticky-ad is set to 100% using CSS and cannot be overridden.
 - The sticky-ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
+- There is an intermediate state for sticky-ad, after it is set to visible and before ad is expected to load. Background can be set to transparent to enhance user experience.
 - Swipe to dismiss (TBD)
 
 Example:
@@ -62,3 +63,9 @@ Example:
 **layout**
 
 The only permissible value for the `layout` attribute in `amp-sticky-ad` is `nodisplay`.
+
+## Styling
+
+The `amp-sticky-ad` component can be styled with standard CSS.
+
+- If different styles need to be applied to intermediate state and final state. The intermediate state style can be set through css class `amp-sticky-ad` and final state style can set through css class `amp-sticky-ad-loaded`. For example different `background-color` for these two states.
