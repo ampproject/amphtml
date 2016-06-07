@@ -20,7 +20,7 @@
  * normtime value.
  * @typedef {function(normtime):normtime}
  */
-class CurveDef {};
+let CurveDef;
 
 
 /**
