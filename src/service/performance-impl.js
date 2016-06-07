@@ -43,7 +43,7 @@ export const ENSURE_NON_ZERO = new Date().getTime();
  *   opt_value: (number|undefined)
  * }}
  */
-class TickEventDef {}
+let TickEventDef;
 
 
 /**
