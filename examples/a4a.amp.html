@@ -1,0 +1,74 @@
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+    <title>AMP A4A examples</title>
+    <link rel="canonical" href="http://nonblocking.io/" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <script async custom-element="amp-a4a" src="https://cdn.ampproject.org/v0/amp-a4a-0.1.js"></script>
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+
+    <h2>A4A no forced response</h2>
+    <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241">
+    </amp-a4a>
+
+    <br/>
+
+    <h2>A4A with forced non-AMP Creative</h2>
+    <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241"
+        data-force-mock-response="0">
+    </amp-a4a>
+
+    <br/>
+
+    <h2>A4A with forced AMP Creative</h2>
+    <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241"
+        data-force-mock-response="1">
+    </amp-a4a>
+
+    <br/>
+
+    <h2>A4A with forced AMP Creative, JSON parse failure</h2>
+    <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241"
+        data-force-mock-response="2">
+    </amp-a4a>
+
+    <br/>
+
+    <h2>A4A with forced AMP Creative, No CSS</h2>
+      <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241"
+        data-force-mock-response="3">
+    </amp-a4a>
+
+    <br/>
+
+    <h2>A4A forced non-existent mock</h2>
+      <amp-a4a width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241"
+        data-force-mock-response="999"
+        data-adtest="on">
+    </amp-a4a>
+
+  </body>
+</html>

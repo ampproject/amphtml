@@ -28,6 +28,7 @@ export const adPrefetch = {
   ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
+  // TODO: Remove this once we switch over to the direct request version of adsense.js.
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   aduptech: 'https://s.d.adup-tech.com/jsapi',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -181,4 +182,21 @@ export const clientIdScope = {
   // adNetworkType: 'cidScope' here.
   adsense: 'AMP_ECID_GOOGLE',
   doubleclick: 'AMP_ECID_GOOGLE',
+};
+
+/**
+ * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
+ * If an ad network, {@code ${NETWORK}}, is registered in this object, then the
+ * {@code <amp-ad type="${NETWORK}">} implementation will look up its predicate
+ * here. If there is a predicate and it and returns {@code true}, then
+ * {@code amp-ad} will attempt to render the ad via the A4A pathway (fetch
+ * ad creative via early XHR CORS request; verify that it is validated AMP;
+ * and then render directly in the host page by splicing into the host DOM).
+ * Otherwise, it will attempt to render the ad via the existing "3p iframe"
+ * pathway (delay load into a cross-domain iframe).
+ *
+ * @type {!Object<!string, !function(!Window, !Element): boolean>}
+ */
+export const a4aRegistry = {
+  // Add mappings for specific ad networks here.
 };

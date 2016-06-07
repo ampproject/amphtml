@@ -1,0 +1,7 @@
+{
+  "rules": {
+    // Files in this directory are created by automated processes; line lengths
+    // aren't under our control.
+    "max-len": 0
+  }
+}

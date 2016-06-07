@@ -335,7 +335,7 @@ var forbiddenTerms = {
       'src/dom.js',
     ],
   },
-  '\\sdocument(?![a-zA-Z0-9_])': {
+  '\\sdocument(?![a-zA-Z0-9_:])': {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
@@ -443,6 +443,8 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/insert-extension.js',
       'src/element-stub.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },
   'reject\\(\\)': {
@@ -564,7 +566,8 @@ function hasAnyTerms(file) {
   var is3pFile = /3p|ads/.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
-  if (is3pFile && !isTestFile) {
+  var isImplFile = basename == 'amp-ad-3p-impl.js';
+  if (is3pFile && !isTestFile &&!isImplFile) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

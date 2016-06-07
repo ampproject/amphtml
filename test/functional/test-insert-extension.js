@@ -65,8 +65,7 @@ describe('test-insert-extension', () => {
     return getAnalyticsIframe().then(() => {
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(0);
-      insertAmpExtensionScript(iframe.win, iframe.doc.body
-          .querySelector('#parent').firstElementChild, 'amp-analytics');
+      insertAmpExtensionScript(iframe.win, 'amp-analytics');
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(1);
     });
@@ -77,12 +76,10 @@ describe('test-insert-extension', () => {
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-ad"]')).to.have.length(0);
-      insertAmpExtensionScript(iframe.win,
-          iframe.doc.body.querySelector('#parent').firstElementChild, 'amp-ad');
+      insertAmpExtensionScript(iframe.win, 'amp-ad');
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
-      insertAmpExtensionScript(iframe.win,
-          iframe.doc.body.querySelector('#parent').firstElementChild, 'amp-ad');
+      insertAmpExtensionScript(iframe.win, 'amp-ad');
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
     });
@@ -97,8 +94,7 @@ describe('test-insert-extension', () => {
       iframe.doc.head.appendChild(ampTestScript);
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(1);
-      insertAmpExtensionScript(iframe.win, iframe.doc.body
-          .querySelector('#parent').firstElementChild, 'amp-analytics');
+      insertAmpExtensionScript(iframe.win, 'amp-analytics');
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(1);
     });
@@ -108,10 +104,19 @@ describe('test-insert-extension', () => {
     return getAdIframe('amp-ad').then(() => {
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
           .to.have.length(0);
-      insertAmpExtensionScript(iframe.win, iframe.doc.body
-          .querySelector('#parent').firstElementChild, 'amp-audio');
+      insertAmpExtensionScript(iframe.win, 'amp-audio');
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
           .to.have.length(0);
+    });
+  });
+
+  it('should insert when no element but validation disabled', () => {
+    return getAdIframe('amp-ad').then(() => {
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
+          .to.have.length(0);
+      insertAmpExtensionScript(iframe.win, 'amp-audio', true);
+      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
+          .to.have.length(1);
     });
   });
 
@@ -122,8 +127,7 @@ describe('test-insert-extension', () => {
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
-        insertAmpExtensionScript(iframe.win, iframe.doc.body
-            .querySelector('#parent').firstElementChild, 'amp-embed');
+        insertAmpExtensionScript(iframe.win, 'amp-embed');
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
@@ -137,8 +141,7 @@ describe('test-insert-extension', () => {
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
-        insertAmpExtensionScript(iframe.win, iframe.doc.body
-            .querySelector('#parent').firstElementChild, 'amp-ad');
+        insertAmpExtensionScript(iframe.win, 'amp-ad');
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
@@ -152,8 +155,7 @@ describe('test-insert-extension', () => {
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
-        insertAmpExtensionScript(iframe.win, iframe.doc.body
-            .querySelector('#parent').firstElementChild, 'amp-embed');
+        insertAmpExtensionScript(iframe.win, 'amp-embed');
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
         expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
@@ -166,8 +168,7 @@ describe('test-insert-extension', () => {
     return getAdIframe('amp-ad').then(() => {
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(0);
-      insertAmpExtensionScript(iframe.win,
-          iframe.doc.body.querySelector('#parent').firstElementChild, 'amp-ad');
+      insertAmpExtensionScript(iframe.win, 'amp-ad');
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
       const script = iframe.doc.head.querySelector(

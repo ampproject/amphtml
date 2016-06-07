@@ -34,14 +34,25 @@ export function resetExtensionScriptInsertedOrPresentForTesting() {
 /**
  * Check script info in HTML head and make update if necessary
  * @param {!Window} win
- * @param {!Element} element
  * @param {string} extension
+ * @param {boolean} opt_ignoreElementExistenceCheck if true, will not check and
+ *    require that extension element exist in document
  */
-export function insertAmpExtensionScript(win, element, extension) {
+export function insertAmpExtensionScript(
+    win, extension, opt_ignoreElementExistenceCheck) {
   if (extension == 'amp-embed') {
     extension = 'amp-ad';
   }
-  if (isAmpExtensionScriptRequired(win, element, extension)) {
+  if (!opt_ignoreElementExistenceCheck) {
+    let element = win.document.querySelector(extension);
+    if (!element && extension == 'amp-ad') {
+      element = win.document.querySelector('amp-embed');
+    }
+    if (!element) {
+      return;
+    }
+  }
+  if (isAmpExtensionScriptRequired(win, extension)) {
     const ampExtensionScript = createAmpExtensionScript(win, extension);
     win.document.head.appendChild(ampExtensionScript);
   }
@@ -70,24 +81,17 @@ function createAmpExtensionScript(win, extension) {
 /**
  * Determine the need to add amp extension script to document.
  * @param {!Window} win
- * @param {!Element} element
  * @param {string} extension
  * @return {boolean} Whether the action of adding an ampExtensionScript is required.
  */
-function isAmpExtensionScriptRequired(win, element, extension) {
+function isAmpExtensionScriptRequired(win, extension) {
   if (ampExtensionScriptInsertedOrPresent[extension]) {
     return false;
   }
-  const tag = element.tagName.toLowerCase();
-  if (tag == extension || (tag == 'amp-embed' && extension == 'amp-ad')) {
-    const ampExtensionScriptInHead = win.document.head.querySelector(
-        `[custom-element="${extension}"]`);
-    ampExtensionScriptInsertedOrPresent[extension] = true;
-    if (!ampExtensionScriptInHead) {
-      return true;
-    }
-  }
-  return false;
+  const ampExtensionScriptInHead = win.document.head.querySelector(
+      `[custom-element="${extension}"]`);
+  ampExtensionScriptInsertedOrPresent[extension] = true;
+  return !ampExtensionScriptInHead;
 };
 
 /**

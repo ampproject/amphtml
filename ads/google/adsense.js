@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+import {getAdsenseInfo, adsenseRequestURLForAmpAd} from './utils';
 import {checkData} from '../../3p/3p';
 
 /**
+ * Make an adsense iframe.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsense(global, data) {
+  // Placeholder for experiment framework.
+  if (!global.context.experiment) {
+    adsenseDirectRequest(global, data);
+    return;
+  }
   checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']);
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
@@ -41,7 +48,7 @@ export function adsense(global, data) {
   if (data['adHost']) {
     i.setAttribute('data-ad-host', data['adHost']);
   }
-  if (data['adtest']) {
+  if ('adtest' in data && data['adtest'] != null) {
     i.setAttribute('data-adtest', data['adtest']);
   }
   if (data['tagOrigin']) {
@@ -52,4 +59,56 @@ export function adsense(global, data) {
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
   global.document.getElementById('c').appendChild(i);
   (global.adsbygoogle = global.adsbygoogle || []).push({});
+}
+
+
+/**
+ * Make the ad iframe, with src=<the ad request>
+ * This makes the request directly, rather than using adsbygoogle.js.
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+function adsenseDirectRequest(global, data) {
+  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']);
+  if (global.context.clientId) {
+    // Read by GPT for GA/GPT integration.
+    global.gaGlobal = {
+      vid: global.context.clientId,
+      hid: global.context.pageViewId,
+    };
+  }
+
+  const adsenseInfo = getAdsenseInfo(global.context.master);
+  const slotNumber = adsenseInfo.nextSlotNumber();
+  makeAdsenseAd(global, data, slotNumber, global.context.initialIntersection);
+}
+
+/**
+ * Make an ad request.
+ * @param {!Window} global
+ * @param {!Object} data
+ * @param {number} slotNumber
+ * @param {!IntersectionObserverEntry} change
+ * @return {string}
+ */
+function makeAdsenseAd(global, data, slotNumber, change) {
+  const iframe = global.document.createElement('iframe');
+  const id = `google_ads_frame${slotNumber}`;
+  iframe.name = id;
+  iframe.id = id;
+
+  const slot = change.boundingClientRect;
+  // iframe.ampLocation = parseUrl(src);
+  iframe.width = slot.width;
+  iframe.height = slot.height;
+  iframe.style.border = 'none';
+  iframe.setAttribute('scrolling', 'no');
+  iframe.onload = function() {
+    // Chrome does not reflect the iframe readystate.
+    this.readyState = 'complete';
+  };
+
+  iframe.src = adsenseRequestURLForAmpAd(slotNumber, global, data, change);
+
+  global.document.getElementById('c').appendChild(iframe);
 }
