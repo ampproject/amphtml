@@ -18,6 +18,8 @@ import {ElementStub} from '../../src/element-stub';
 import {createIframePromise} from '../../testing/iframe';
 import {resetExtensionScriptInsertedOrPresentForTesting,}
     from '../../src/insert-extension';
+require('../../extensions/amp-ad/0.1/amp-ad');
+require('../../extensions/amp-analytics/0.1/amp-analytics');
 
 describe('test-element-stub', () => {
 
