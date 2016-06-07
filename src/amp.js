@@ -20,6 +20,7 @@ import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
 import {installGlobalClickListener} from './document-click';
+import {installGlobalSubmitListener} from './document-submit';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
@@ -30,6 +31,7 @@ import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {isExperimentOn} from './experiments';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -57,6 +59,9 @@ try {
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
+      if (isExperimentOn(window, 'form-submit')) {
+        installGlobalSubmitListener(window);
+      }
 
       maybeValidate(window);
       makeBodyVisible(document, /* waitForExtensions */ true);

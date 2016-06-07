@@ -65,6 +65,7 @@ function buildExtensions(options) {
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
+  buildExtension('amp-form', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
@@ -325,6 +326,7 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
+  buildExample('forms.amp.html');
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
