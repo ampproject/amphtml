@@ -66,14 +66,13 @@ try to port to earlier versions of NodeJS if sufficient interest exists.
 
 ```js
 'use strict';
-
 const ampValidator = require('amp-validator');
-ampValidator.getInstance((instance) => {
-  const result = instance.validateString('<html>Hello, world</html>');
+
+ampValidator.getInstance().then((validator) => {
+  const result = validator.validateString('<html>Hello, world.</html>');
   ((result.status === 'PASS') ? console.log : console.error)(result.status);
   for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-        error.message;
+    let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
     if (error.specUrl !== null) {
       msg += ' (see ' + error.specUrl + ')';
     }

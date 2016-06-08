@@ -289,6 +289,8 @@ var forbiddenTerms = {
       'validator/tokenize-css.js',
       'validator/validator-full.js',
       'validator/validator.js',
+      // exports.startsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
     ]
   },
   '\\.endsWith': {

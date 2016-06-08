@@ -122,8 +122,12 @@ describe('Rendering of one ad with ad script', () => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
         iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
-        fixture.win.AMP.viewer.visibilityState_ = 'hidden';
-        fixture.win.AMP.viewer.onVisibilityChange_();
+        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
+          state: 'hidden',
+        });
+        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
+          state: 'visible',
+        });
       });
     }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('320');

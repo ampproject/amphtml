@@ -27,7 +27,7 @@ import * as st from './style';
  * @typedef {function(normtime, boolean):RESULT}
  * @template RESULT
  */
-class TransitionDef {}
+let TransitionDef;
 
 
 export const NOOP = function(unusedTime) {return null;};

@@ -27,6 +27,17 @@ import * as sinon from 'sinon';
 
 describe('Viewer Visibility State', () => {
 
+  // This test only works with uncompiled JS, because it stubs out
+  // private properties.
+  let origUseCompiledJs;
+  beforeEach(() => {
+    origUseCompiledJs = window.ampTestRuntimeConfig.useCompiledJs;
+    window.ampTestRuntimeConfig.useCompiledJs = false;
+  });
+  afterEach(() => {
+    window.ampTestRuntimeConfig.useCompiledJs = origUseCompiledJs;
+  });
+
   let sandbox;
 
   function noop() {}
