@@ -289,7 +289,7 @@ export class FixedLayer {
           state[fe.id] = {
             fixed: isFixed,
             transferrable: isTransferrable,
-            top: top,
+            top,
             zIndex: styles.getPropertyValue('z-index'),
           };
         });
@@ -350,7 +350,7 @@ export class FixedLayer {
       element[DECLARED_FIXED_PROP] = true;
       fe = {
         id: fixedId,
-        element: element,
+        element,
         selectors: [selector],
       };
       this.fixedElements_.push(fe);

@@ -42,10 +42,10 @@ let LayoutRectDef;
  */
 export function layoutRectLtwh(left, top, width, height) {
   return {
-    left: left,
-    top: top,
-    width: width,
-    height: height,
+    left,
+    top,
+    width,
+    height,
     bottom: top + height,
     right: left + width,
   };

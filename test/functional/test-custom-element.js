@@ -1471,7 +1471,7 @@ describe('CustomElement Overflow Element', () => {
         Object: {
           create: proto => Object.create(proto),
         },
-        HTMLElement: HTMLElement,
+        HTMLElement,
         setInterval: callback => {
           intervalCallback = callback;
         },

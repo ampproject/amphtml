@@ -216,8 +216,8 @@ export function sanitizeFormattingHtml(html) {
           return null;
         }
         return {
-          'tagName': tagName,
-          'attribs': [],
+          tagName,
+          attribs: [],
         };
       }
   );

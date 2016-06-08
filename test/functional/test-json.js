@@ -60,7 +60,7 @@ describe('json', () => {
 
     it('should shortcircuit if a parent in chain is not an object', () => {
       const child = {str: 'A'};
-      const obj = {child: child, nonobj: 'B'};
+      const obj = {child, nonobj: 'B'};
       expect(getValueForExpr(obj, 'child.str')).to.equal('A');
       expect(getValueForExpr(obj, 'nonobj')).to.equal('B');
       expect(getValueForExpr(obj, 'nonobj.str')).to.be.undefined;

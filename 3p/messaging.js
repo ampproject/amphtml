@@ -45,7 +45,7 @@ const listeners = [];
  */
 export function listenParent(win, type, callback) {
   const listener = {
-    type: type,
+    type,
     cb: callback,
   };
   listeners.push(listener);

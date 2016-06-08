@@ -140,10 +140,10 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
 ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
       eventType, payload, awaitResponse) {
   var message = {
-    sentinel: sentinel,
-    requestId: requestId,
+    sentinel,
+    requestId,
     type: eventType,
-    payload: payload,
+    payload,
     rsvp: awaitResponse
   };
   this.target_./*OK*/postMessage(message, this.targetOrigin_);

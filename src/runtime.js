@@ -67,8 +67,8 @@ export function adopt(global) {
     const register = function() {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
-        name: name,
-        implementationClass: implementationClass,
+        name,
+        implementationClass,
         css: opt_css,
       });
       // Resolve this extension's Service Promise.

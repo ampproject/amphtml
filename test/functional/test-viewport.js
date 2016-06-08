@@ -730,7 +730,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       },
       createElement: tagName => {
         return {
-          tagName: tagName,
+          tagName,
           id: '',
           style: {},
           scrollIntoView: sandbox.spy(),

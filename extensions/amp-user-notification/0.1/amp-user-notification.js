@@ -158,7 +158,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.urlReplacements_.expand(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
-        ampUserId: ampUserId,
+        ampUserId,
       });
     });
   }

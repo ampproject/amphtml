@@ -82,8 +82,8 @@ describe('amp-image-lightbox component', () => {
       const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
+        enterLightboxMode,
+        leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
@@ -151,8 +151,8 @@ describe('amp-image-lightbox component', () => {
       const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
+        enterLightboxMode,
+        leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {

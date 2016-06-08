@@ -91,7 +91,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   if (!windowEvents) {
     windowEvents = {
       frame: iframe,
-      origin: origin,
+      origin,
       events: Object.create(null),
     };
     listenSentinel.push(windowEvents);

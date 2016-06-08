@@ -239,7 +239,7 @@ describe('3p-frame', () => {
 
   it('should make sub domains (crypto)', () => {
     const fakeWin = {
-      document: document,
+      document,
       crypto: {
         getRandomValues: function(arg) {
           arg[0] = 123;
@@ -252,7 +252,7 @@ describe('3p-frame', () => {
 
   it('should make sub domains (fallback)', () => {
     const fakeWin = {
-      document: document,
+      document,
       Math: {
         random: function() {
           return 0.567;

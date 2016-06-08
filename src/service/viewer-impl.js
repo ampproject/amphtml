@@ -750,8 +750,8 @@ export class Viewer {
    */
   postDocumentReady(width, height) {
     this.sendMessageUnreliable_('documentLoaded', {
-      width: width,
-      height: height,
+      width,
+      height,
       title: this.win.document.title,
     }, false);
   }
