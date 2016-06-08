@@ -419,12 +419,23 @@ describe('amp-live-list', () => {
 
       liveList.update(fromServer1);
 
+      // Sort order should be 5, 3, 4
       expect(liveList.pendingItemsInsert_[0].getAttribute('id'))
-          .to.equal('unique-id-num-4');
+          .to.equal('unique-id-num-5');
       expect(liveList.pendingItemsInsert_[1].getAttribute('id'))
           .to.equal('unique-id-num-3');
       expect(liveList.pendingItemsInsert_[2].getAttribute('id'))
-          .to.equal('unique-id-num-5');
+          .to.equal('unique-id-num-4');
+      return liveList.updateAction_().then(() => {
+        // Insertion order should be 4, 3, 5
+        expect(liveList.itemsSlot_.children[0].getAttribute('id'))
+            .to.equal('unique-id-num-4');
+        expect(liveList.itemsSlot_.children[1].getAttribute('id'))
+            .to.equal('unique-id-num-3');
+        expect(liveList.itemsSlot_.children[2].getAttribute('id'))
+            .to.equal('unique-id-num-5');
+        expect(liveList.itemsSlot_.children.length).to.equal(3);
+      });
     });
   });
 

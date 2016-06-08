@@ -615,14 +615,15 @@ export class AmpLiveList extends AMP.BaseElement {
   }
 
   /**
+   * Sort from oldest to newest time.
+   *
    * @param {!Element} a
    * @param {!Element} b
    * @return {time}
    * @private
    */
   sortByDataSortTime_(a, b) {
-    // Sort from newest to oldest so we don't have to reverse
-    return this.getSortTime_(b) - this.getSortTime_(a);
+    return this.getSortTime_(a) - this.getSortTime_(b);
   }
 
   /**
