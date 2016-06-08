@@ -49,7 +49,6 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {!Array<!Element>} */
     this.slideWrappers_ = [];
 
-    this.element.appendChild(this.slidesContainer_);
     this.slides_.forEach(slide => {
       this.setAsOwner(slide);
       const slideWrapper = this.win_.document.createElement('div');
@@ -130,31 +129,30 @@ export class AmpSlideScroll extends BaseCarousel {
       return;
     }
     const showIndexArr = [];
-    let newScrollLeft;
     if (newindex == noOfSlides - 1) {
       // Last slide.
       showIndexArr.push(noOfSlides - 1, noOfSlides - 2);
     } else if (newindex === 0) {
       // First slide.
       showIndexArr.push(0, 1);
-      newScrollLeft = 0;
     } else {
       showIndexArr.push(newindex - 1, newindex, newindex + 1);
-    }
-
-    if (newScrollLeft == null) {
-      newScrollLeft = this.slideWidth_;
     }
     if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], false);
     }
     this.updateInViewport(this.slides_[newindex], true);
-    this.slideIndex_ = newindex;
     showIndexArr.forEach(showIndex => {
       this.slideWrappers_[showIndex].setAttribute('show', '');
       this.scheduleLayout(this.slides_[showIndex]);
     });
+    // A max of 3 slides are displayed at a time - we show the first slide
+    // (which is at scrollLeft 0) when slide 0 is requested - for all other
+    // instances we show the second slide (middle slide at
+    // scrollLeft = slide's width).
+    const newScrollLeft = (newindex === 0) ? 0 : this.slideWidth_;
     this.slidesContainer_./*REVIEW*/scrollLeft = newScrollLeft;
+    this.slideIndex_ = newindex;
     this.hideRestOfTheSlides_(newindex);
     this.setControlsState();
   }
