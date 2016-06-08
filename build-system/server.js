@@ -21,19 +21,12 @@
 var BBPromise = require('bluebird');
 var app = require('connect')();
 var bodyParser = require('body-parser');
-var finalhandler = require('finalhandler');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
-var serveIndex = require('serve-index');
-var serveStatic = require('serve-static');
 var url = require('url');
-
-var args = Array.prototype.slice.call(process.argv, 2, 4);
-var paths = args[0];
-var port = args[1];
 
 app.use(bodyParser.json());
 
@@ -207,32 +200,10 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
-function setAMPAccessControlHeader(res, path) {
-  var curUrl = url.parse(path, true);
-  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        'http://localhost:' + port);
-  }
-}
-
-paths.split(',').forEach(function(pth) {
-  // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth),
-        {setHeaders: setAMPAccessControlHeader}));
-  // Serve directory listings
-  app.use(serveIndex(path.join(process.cwd(), pth),
-    {'icons':true,'view':'details'}));
+app.use('/examples.build/analytics.config.json', function (req, res, next) {
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      'http://' + req.headers.host);
+  next();
 });
 
-// 404 everything else
-app.use(function notFound(req, res) {
-  var done = finalhandler(req,res);
-  var err = new Error('File Not Found');
-  err.status = 404;
-  done(err);
-});
-
-app.listen(port, function() {
-  console./*OK*/log('serving %s at http://localhost:%s', paths, port);
-});
-
+exports.app = app;

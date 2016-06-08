@@ -16,28 +16,43 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
-var gls = require('gulp-live-server');
-var path = require('path');
 var util = require('gulp-util');
+var webserver = require('gulp-webserver');
+var app = require('../server').app;
 
 var port = argv.port || process.env.PORT || 8000;
+var useHttps = (argv.https != undefined);
 
 /**
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var serverScript = path.join(__dirname, '../server.js')
-  var server = gls.new([serverScript, (argv.path || '/'), port]);
-  server.start();
-  util.log(util.colors.yellow(
-    'Run `gulp build` then go to http://localhost:' + port + '/examples.build/article.amp.max.html'
+  gulp.src(process.cwd())
+      .pipe(webserver({
+        port,
+        livereload: true,
+        directoryListing: true,
+        https: useHttps,
+        middleware: [ app ]
+      }));
+
+  util.log(util.colors.yellow('Run `gulp build` then go to '
+      + getHost() + '/examples.build/article.amp.max.html'
   ));
 }
 
-gulp.task('serve', 'Serves content in root dir over http://localhost:' +
-  port + '/', serve, {
-    options: {
-      'port': '  Specifies alternative port to use instead of default (8000)'
+gulp.task(
+    'serve',
+    'Serves content in root dir over ' + getHost() + '/',
+    serve,
+    {
+      options: {
+        'port': '  Specifies alternative port (default: 8000)',
+        'https': '  Use HTTPS server (default: false)'
+      }
     }
-  }
 );
+
+function getHost() {
+  return (useHttps ? 'https' : 'http') + '://localhost:' + port;
+}
