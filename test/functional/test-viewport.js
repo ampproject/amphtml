@@ -297,15 +297,6 @@ describe('Viewport', () => {
     bindingMock.expects('getScrollHeight').withArgs().returns(117).once();
     expect(viewport.getScrollHeight()).to.equal(117);
   });
-
-  it('should update border on body bottom', () => {
-    windowApi.document = {
-      body: {style: {}},
-    };
-    viewport.updatePaddingBottom(31);
-    expect(windowApi.document.body.style.borderBottom).to
-        .equal('31px solid transparent');
-  });
 });
 
 
