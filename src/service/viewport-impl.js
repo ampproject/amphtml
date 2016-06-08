@@ -88,6 +88,9 @@ export class Viewport {
     /** @private {?number} */
     this.lastMeasureScrollTop_ = null;
 
+    /** @private {boolean} */
+    this.duringAnimationFrame_ = false;
+
     /** @private {?number} */
     this./*OK*/scrollLeft_ = null;
 
@@ -145,7 +148,13 @@ export class Viewport {
     this.binding_.onResize(this.resize_.bind(this));
 
     this.onScroll(() => {
-      this.viewer_.postScroll(this.getScrollTop());
+      if (!this.duringAnimationFrame_) {
+        this.duringAnimationFrame_ = true;
+        this.vsync_.measure(() => {
+          this.duringAnimationFrame_ = false;
+          this.viewer_.postScroll(this.binding_.getScrollTop());
+        });
+      }
     });
   }
 
