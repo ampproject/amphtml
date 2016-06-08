@@ -366,7 +366,7 @@ class AnimationPlayer {
  *   curve: ?Curve
  * }}
  */
-class SegmentDef {}
+let SegmentDef;
 
 
 /**
@@ -379,4 +379,4 @@ class SegmentDef {}
  *   completed: boolean
  * }}
  */
-class SegmentRuntimeDef {}
+let SegmentRuntimeDef;

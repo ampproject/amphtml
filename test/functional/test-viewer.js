@@ -458,7 +458,7 @@ describe('Viewer', () => {
 
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
-      delivered.push({eventType: eventType, data: data});
+      delivered.push({eventType, data});
     }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
@@ -510,7 +510,7 @@ describe('Viewer', () => {
     it('should post broadcast event', () => {
       const delivered = [];
       viewer.setMessageDeliverer((eventType, data) => {
-        delivered.push({eventType: eventType, data: data});
+        delivered.push({eventType, data});
       }, 'https://acme.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);

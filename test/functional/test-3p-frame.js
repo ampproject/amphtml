@@ -233,10 +233,7 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (Math)', () => {
-    const fakeWin = {
-      document: document,
-      Math: Math,
-    };
+    const fakeWin = {document, Math};
     expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
   });
 

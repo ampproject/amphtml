@@ -60,7 +60,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
   var requestId = ++this.requestIdCounter_;
   if (awaitResponse) {
     var promise = new Promise(function(resolve, reject) {
-      this.waitingForResponse_[requestId] = {resolve: resolve, reject: reject};
+      this.waitingForResponse_[requestId] = {resolve, reject};
     }.bind(this));
     this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
         true);
