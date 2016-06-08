@@ -418,6 +418,27 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
+  
+  'nielsen': {
+    'vars': {
+        'appid': '',
+        'assetName": '',
+        'segA': 'NA',
+        'segB': 'NA',
+        'segC': 'NA'
+      },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
 
   'oewadirect': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
@@ -517,28 +538,7 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-  'nielsen': {
-    'vars': {
-        'sdkVrsn': 'bj.5.0.0',
-        'appid': '',
-        'assetName": '',
-        'segA': 'NA',
-        'segB': 'NA',
-        'segC': 'NA'
-      },
-      'triggers': {
-        'pageview': {
-          'on': 'visible',
-          'request': 'pageview'
-        }
-      },
-      'transport': {
-        'beacon': false,
-        'xhrpost': false,
-        'image': true
-      }
-    }
-  },
+
   'adobeanalytics': {
     'transport': {'xhrpost': false, 'beacon': false, 'image': true},
     'vars': {
