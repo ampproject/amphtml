@@ -42,6 +42,16 @@ When the same `var` is defined in multiple locations, the value is picked in the
 
 The remainder of this doc lists and describes the variables supported in `amp-analytics`.
 
+| Table of Content  |
+|---|
+| [Device and Browser](#device-and-browser) |
+| [Interaction](#interaction) |
+| [Miscellaneous](#miscellaneous) |
+| [Page and content](#page-and-content) |
+| [Performance](#performance) |
+| [Visibility](#visibility-variables) |
+
+
 ## Page and content
 
 ### ampdocHost
@@ -360,4 +370,76 @@ Example value: `6`
 Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
+
+## Visibility Variables
+
+### backgrounded
+
+A binary variable with possible values of 1 and 0 to indicate that the page/tab was sent to background at any point before the hit was sent. 1 indicates that the page was backgrounded while 0 indicates that the page has always been in the forground.
+
+### backgroundedAtStart
+
+A binary variable with possible values of 1 and 0 to indicate that the page/tab backgrounded at the time when the page was loaded. 1 indicates that the page was loaded in the background while 0 indicates otherwise.
+
+### continuousVisibleTime
+
+Provides the maximum amount of continuous time an element has met the `visibilitySpec` conditions at the time this ping is sent. Note that a ping with a continuousTimeMin=1000 and totalTimeMin=5000 that is visible for 1000ms, then not visible, then visible
+for 2000ms, then not, then visible for 1000ms, then not, then visible for 1020ms
+will report 2000 for this number as that is the max continuous visible time,
+even if it is not the current continuous visible time (1020 in this example).
+
+### elementHeight
+
+Provides the height of the element specified by `visibilitySpec`.
+
+### elementWidth
+
+Provides the width of the element specified by `visibilitySpec`.
+
+### elementX
+
+Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+
+### elementY
+
+Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+
+### firstSeenTime
+
+Provides the time when at least 1px of the element is on the screen for the first time since javascript load.
+
+### firstVisibleTime
+
+Provides the time when the element met visibility conditions for the first time since
+javascript load.
+
+### lastSeenTime
+
+Provides the time when at least 1px of the element is on the screen for the last time since javascript load.
+
+### lastVisibleTime
+
+Provides the time when the element met visibility conditions for the last time since
+javascript load.
+
+### loadTimeVisibility
+
+Provides the percentage of element visible in the viewport at load time. This variable assumes that the page is scrolled to top.
+
+### maxVisiblePercentage
+
+Provides the maximum visible percentage over the time that `visibilitySpec` conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 100. A ping with visiblePercentageMax=50 undergoing the same transitions would report somewhere between 0 and 50 since any time where the element was 100% on the page would not be counted.
+
+### minVisiblePercentage
+
+Provides the minimum visible percentage over the time that visibilitySpec conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 0. A ping with visiblePercentageMin=50 condition undergoing the same transitions would report somewhere between 50 and 100.
+
+### totalTime
+
+Provides the total time from the time page was loaded to the time a ping was sent out. The value is calculated from the time document became interactive.
+
+### totalVisibleTime
+
+Provides the total time for which the element has met the visiblitySpec conditions at time this ping is sent.
+
 

@@ -319,13 +319,25 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
 
 #### Page visible trigger (`"on": "visible"`)
-Use this configuration to fire a request when the page becomes visible. No further configuration is required.
+Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. Configuration properties supported in `visibilitySpec` are:
+  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply.
+  - `continuousTimeMin` and `continuousTimeMax` These conditions keep track of the amount of time (any part of) an element has been in the viewport and fire when the time is between the minimum and maximum configured time. The time is expressed in milliseconds.
+  - `totalTimeMin` and `totalTimeMax` These conditions keep track of total time for which any part of an element is on screen and fire when the time is between minimum and maximum. The time is expressed in milliseconds.
+  - `visiblePercentageMin` and `visiblePercentageMax` These conditions keep track of the amount of element visible in vieweport at any given time. They get triggered when the percentage of element visible is between min and max (if specified). Valid values are 0-100 (lower bound is not inclusive while the upper bound is).
+
+In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
 ```javascript
 "triggers": {
   "defaultPageview": {
     "on": "visible",
-    "request": "pageview"
+    "request": "pageview",
+    "visibilitySpec": {
+      "selector": "#anim-id",
+      "visiblePercentageMin": 20,
+      "totalTimeMin": 500,
+      "continuousTimeMin": 200
+    }
   }
 }
 ```
@@ -348,7 +360,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
     ```
 
 #### Scroll trigger (`"on": "scroll"`)
-Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
+Use this configuration to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
 
