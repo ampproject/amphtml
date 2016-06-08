@@ -386,7 +386,7 @@ export class SyntheticScroll {
   touch_(event, opt_end) {
     let touch;
     if (opt_end) {
-      touch = e.changedTouches[0];
+      touch = event.changedTouches[0];
       //  If this is a single-finger scroll, this will be the finger we are
       //  tracking. If this is a multi-finger scroll, this may be the finger
       //  or it may be one of the other fingers we are not tracking.
@@ -398,7 +398,7 @@ export class SyntheticScroll {
       return;
     }
 
-    const touches = e.touches;
+    const touches = event.touches;
 
     // If we're not tracking a touch yet, just grab the first and track it.
     if (!this.touchId_) {
@@ -457,7 +457,7 @@ export class SyntheticScroll {
       // Only continue autoscrolling if we are not at the bounds of the doc.
       if (this.scrollTo_(this.target_ - delta)) {
         this.autoScrolling_ = this.win_.requestAnimationFrame(
-          this.boundAutoScroll
+          this.boundAutoScroll_
         );
         return;
       }
@@ -574,7 +574,7 @@ export class SyntheticScroll {
   setIframeInteractionAllowed_(allowed) {
     const value = allowed ? '' : 'none';
     const iframes = this.iframeStyles_;
-    for (let i = 0; i < styles.length; i++) {
+    for (let i = 0; i < iframes.length; i++) {
       iframes[i].pointerEvents = value;
     }
   }
@@ -673,7 +673,7 @@ export class SyntheticScroll {
       this.amplitude_ = multiplier * this.velocity_;
       this.target_ = Math.round(this.offset_ + this.amplitude_);
       this.autoScrolling_ = this.win_.requestAnimationFrame(
-        this.boundAutoScroll
+        this.boundAutoScroll_
       );
     } else {
       this.scrollStopped_();
