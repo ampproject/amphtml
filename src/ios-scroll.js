@@ -48,9 +48,8 @@ export class SyntheticScroll {
    * @param {number} scrollTop the body's current scrollTop
    * @param {number} scrollHeight the body's current scrollHeight
    */
-  constructor(scrollEl, scrollTop, scrollHeight) {
-    const doc = scrollEl.ownerDocument;
-    const body = doc.body;
+  constructor(body, scrollTop, scrollHeight) {
+    const doc = body.ownerDocument;
 
     /**
      * @const @private {!Window}
@@ -58,10 +57,9 @@ export class SyntheticScroll {
     this.win_ = doc.defaultView;
 
     /**
-     * We store the style reference directly to speed things up.
-     * @const @private {!CSSStyleDeclaration}
-     **/
-    this.scrollStyle_ = scrollEl.style;
+     * @const @private {!HTMLBodyElement}
+     */
+    this.body_ = body;
 
     /**
      * We track the iframes on the page so we may disable direct interaction
@@ -219,7 +217,7 @@ export class SyntheticScroll {
     body.addEventListener('scroll', this.bodyScroll_.bind(this));
 
     // Promote the scroller to it's own GPU rendering layer.
-    this.scrollStyle_.willChange = 'transform';
+    body.style.willChange = 'transform';
   }
 
   /**
@@ -357,7 +355,7 @@ export class SyntheticScroll {
 
     // "Scroll" by moving the scroller element in the opposite direction of
     // the scroll.
-    this.scrollStyle_.transform = y ? `translate3d(0, ${-y}px, 0)` : '';
+    this.body_.style.transform = y ? `translate3d(0, ${-y}px, 0)` : '';
 
     const fixeds = this.fixedElementStyles_;
     const translation = `translate3d(0, ${y}px, 0)`;
@@ -496,8 +494,7 @@ export class SyntheticScroll {
     // Make the entire body visible so that we may transform its box to scroll.
     // Without this, we'd be scrolling the body but no content would be visible
     // outside the overflow cropping.
-    this.scrollStyle_.overflowY = 'visible';
-    this.scrollStyle_.overflowX = 'visible';
+    this.body_.classList.add('-amp-scrolling');
     // Now that we're entirely visible, we must translate the body into our
     // current scroll position.
     this.scrollTo_(this.scrollTop_, true);
@@ -521,8 +518,7 @@ export class SyntheticScroll {
     // Go back to native scroll mode, so that iframes can cause native
     // scrolling.
     this.scrollTo_(0, true);
-    this.scrollStyle_.overflowY = 'auto';
-    this.scrollStyle_.overflowX = 'hidden';
+    this.body_.classList.remove('-amp-scrolling');
 
     // Suppress this body scrolled event, we expect it.
     // TODO move this into it's own method with setScrollTop's.
