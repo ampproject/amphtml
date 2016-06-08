@@ -1120,14 +1120,6 @@ export class ViewportBindingNaturalIosScrollEmbed_
     const body = doc.body;
 
     // Setup scrolling styles.
-    // html {
-    //   height: 100% !important;
-    //   -webkit-overflow-scrolling: touch;
-    // }
-    // body {
-    //   height: 100% !important;
-    //   overflow-x: hidden;
-    // }
     setStyles(documentElement, {
       height: '100% !important',
       webkitOverflowScrolling: 'touch',
@@ -1135,29 +1127,11 @@ export class ViewportBindingNaturalIosScrollEmbed_
     setStyles(body, {
       height: '100% !important',
       overflowX: 'hidden',
+      overflowY: 'auto',
+      // Necessary so that absolutely positioned elements remained positioned
+      // relative to the body.
+      position: 'relative',
     });
-
-    let hasContainer = body.children === 1;
-    if (hasContainer) {
-      for (let child = body.firstChild; child; child = child.nextSibling) {
-        // Does this Text Node contain any non-whitespace chars?
-        if (child.nodeType === /* Text */ 3 && /\S/.test(child.data)) {
-          hasContainer = false;
-          break;
-        }
-      }
-    }
-
-    let container;
-    if (hasContainer) {
-      container = body.firstElementChild;
-    } else {
-      container = doc.createElement('i-amp-container');
-      moveChildren(body, container);
-      body.appendChild(container);
-      // TODO Update any `body > X` CSS selectors to `body > i-amp-container > X`.
-    }
-
 
     // Insert startPos element into DOM. See {@link getScrollHeight} for why
     // this is needed.
@@ -1171,9 +1145,8 @@ export class ViewportBindingNaturalIosScrollEmbed_
     this.endPosEl_.id = '-amp-endpos';
     body.appendChild(this.endPosEl_);
 
-    // TODO
     this.scroller = new SyntheticScroll(
-      container,
+      body,
       this.getScrollTop_(),
       this.getScrollHeight()
     );

@@ -200,13 +200,6 @@ i-amp-sizer {
   content: attr(error-message);
 }
 
-/**
- * Wraps the body's children to make the page scrollable.
- */
-i-amp-container {
-  display: block;
-}
-
 
 /**
  * Helper elements to control scrolling in iOS
