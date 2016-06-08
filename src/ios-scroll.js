@@ -99,7 +99,7 @@ export class SyntheticScroll {
      * scrollTop and our synthetic scroll offset.
      * @private {number}
      */
-    this.minScrollTop_ = -scrollTop;
+    this.minScrollTop_ = 0;
 
     /**
      * The maximum value that we may scroll the scroller to.
@@ -120,6 +120,13 @@ export class SyntheticScroll {
      * @private {number}
      */
     this.lastScrollEventOffset_ = 0;
+
+    /**
+     * The identifier for the finger touch we are currently tracking. We need
+     * to track a single finger to properly calculate the ypos-deltas.
+     * @private {number}
+     */
+    this.touchId_ = 0;
 
     /**
      * Records the y position of the last touch event, and is used to
@@ -162,6 +169,12 @@ export class SyntheticScroll {
     this.autoScrolling_ = 0;
 
     /**
+     * Used to determine if the page is currently synthetic scrolling.
+     * @private {boolean}
+     */
+    this.scrolling_ = false;
+
+    /**
      * Used to determine if the user has native scrolled (due to an iframe).
      * To account for our own scrolling of the body element (synchronizing the
      * scrollTop and our synthetic scrolling), this value may be null meaning
@@ -173,10 +186,23 @@ export class SyntheticScroll {
     this.bodyScrolled_ = false;
 
     /**
+     * A cached promise to perform microtasks. I've opted to directly use a
+     * promise instead of the timer utility to avoid the cancel logic and the
+     * associated function allocation, we know when it's has been canceled.
+     */
+    this.promise_ = Promise.resolve();
+
+    /**
      * The synthetic momentum scroll, bound to this context.
      * @private @const
      */
-    this.boundAutoScroll_ = this.autoScroll_.bind(this);
+    this.boundAutoScroll_ = () => this.autoScroll_();
+
+    /**
+     * The synthetic momentum scroll, bound to this context.
+     * @private @const
+     */
+    this.boundForceRedrawMicrotask_ = () => this.forceRedrawMicrotask_();
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -259,12 +285,20 @@ export class SyntheticScroll {
 
   /**
    * Scrolls the document to position ypos.
+   * TODO kill momentum
    *
    * @param {number} ypos
    */
   setScrollTop(ypos) {
-    this.scrollTo_(ypos);
-    this.scrollStopped_();
+    const y = Math.min(Math.max(yPos, this.minScrollTop_), this.maxScrollTop_);
+    this.lastScrollEventOffset_ = y;
+    this.scrollTop_ = y;
+
+    // TODO move this into it's own method with scrollStopped_'s.
+    // Suppress this body scrolled event, we expect it.
+    this.bodyScrolled_ = null;
+    this.scrollMoveEl_.style.transform = 'translateY(' + this.scrollTop_ + 'px)';
+    this.scrollMoveEl_./*REVIEW*/scrollIntoView(true);
   }
 
   /**
@@ -274,11 +308,14 @@ export class SyntheticScroll {
     const delta = this.bodyScrolled_ ?
         -this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top  :
         0;
-    return this.scrollTop_ + this.offset_ + delta;
+    // offset will be truthy if we are scrolling. Else, scrollTop
+    // will be the current scrollTop.
+    return (this.offset_ || this.scrollTop_) + delta;
   }
 
   /**
    * Resize the scroll element. Usually triggered after an orientation change.
+   * TODO kill momentum
    *
    * @param {number} scrollTop
    * @param {number} scrollHeight
@@ -286,8 +323,7 @@ export class SyntheticScroll {
   resize(scrollTop, scrollHeight) {
     var delta = this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
     this.scrollTop_ = scrollTop + delta;
-    this.minScrollTop_ = -this.scrollTop_;
-    this.maxScrollTop_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight) - delta;
+    this.maxScrollTop_ = Math.round(scrollHeight - this.win_./*REVIEW*/innerHeight);
   }
 
   /**
@@ -305,9 +341,12 @@ export class SyntheticScroll {
    * the body's scrollTop.
    *
    * @param {number} ypos
+   * @param {boolean} opt_suppressScrollEvent Whether to suppress scroll events
+   *     and updating the associated throttle. This is used during
+   *     synchronization to prevent double scroll events.
    * @private
    */
-  scrollTo_(yPos) {
+  scrollTo_(yPos, opt_suppressScrollEvent) {
     const y = Math.min(Math.max(yPos, this.minScrollTop_), this.maxScrollTop_);
     if (y === this.offset_) {
       return false;
@@ -317,44 +356,65 @@ export class SyntheticScroll {
 
     // "Scroll" by moving the scroller element in the opposite direction of
     // the scroll.
-    // We remove the transform when there is no offset so that the body may be
-    // sync'd with our synthetic scroll position.
     this.scrollStyle_.transform = y ? `translate3d(0, ${-y}px, 0)` : '';
 
-    // Because the scroller now (usually) has a transform, it is now a
-    // "positioned" ancestor.  Thus, fixed elements are fixed based on it and
-    // will move. So, we need to scroll them in the same direction as the
-    // scroll.  When there is no offset, the scroller will not have a transform
-    // so we don't need additional offsetting.
-    const fixedOffset = y === 0 ? 0 : y + this.scrollTop_;
     const fixeds = this.fixedElementStyles_;
+    const translation = `translate3d(0, ${y}px, 0)`;
     for (let i = 0; i < fixeds.length; i++) {
-      fixeds[i].transform = `translate3d(0, ${fixedOffset}px, 0)`;
+      fixeds[i].transform = translation;
     }
 
-    if (scrollEventDelta > SCROLL_EVENT_DELTA) {
+    // The only time we scroll to 0 is when we're synchronizing the scrollTop
+    // and synthetic scroll. In that case, the body's own scroll event will
+    // fire.
+    if (!opt_suppressScrollEvent && scrollEventDelta > SCROLL_EVENT_DELTA) {
       this.lastScrollEventOffset_ = y;
-      // The only time we scroll to 0 is when we're synchronizing the scrollTop
-      // and synthetic scroll. In that case, the body's own scroll event will
-      // fire.
-      if (y !== 0) {
-        this.scrollObservable_.fire();
-      }
+      this.scrollObservable_.fire();
     }
 
     return true;
   }
 
   /**
-   * Determines the y position of a touch event relative to the screen.
+   * Finds the touch event we are currently tracking.
    *
    * @param {!TouchEvent} event
-   * @return {number}
+   * @return {boolean} opt_end Whether we only care about the touchend touch.
+   * @return {?Touch}
    */
-  eventY_(event) {
-    // Surprisingly, `touchend` does not provide a Touch inside `touches`,
-    // but every `TouchEvent` will provide one inside `changedTouches`.
-    return event.changedTouches[0].screenY;
+  touch_(event, opt_end) {
+    let touch;
+    if (opt_end) {
+      touch = e.changedTouches[0];
+      //  If this is a single-finger scroll, this will be the finger we are
+      //  tracking. If this is a multi-finger scroll, this may be the finger
+      //  or it may be one of the other fingers we are not tracking.
+      if (touch.identifier === this.touchId_) {
+          this.touchId_ = 0;
+          return touch;
+      }
+
+      return;
+    }
+
+    const touches = e.touches;
+
+    // If we're not tracking a touch yet, just grab the first and track it.
+    if (!this.touchId_) {
+      touch = touches[0];
+      this.touchId_ = touch.identifier;
+      return touch;
+    }
+
+    // This loop is guaranteed to find the touch we're tracking since it must
+    // be in this array until a touchEnd event (which would have stopped us
+    // from tracking it).
+    for (let i = 0; i < touches.length; i++) {
+      touch = touches[i];
+      if (touch.identifier === this.touchId_) {
+        return touch;
+      }
+    }
   }
 
   /**
@@ -393,6 +453,7 @@ export class SyntheticScroll {
     const delta = this.amplitude_ * Math.exp(-elapsed / duration);
 
     if (Math.abs(delta) > 0.3) {
+      // Only continue autoscrolling if we are not at the bounds of the doc.
       if (this.scrollTo_(this.target_ - delta)) {
         this.autoScrolling_ = this.win_.requestAnimationFrame(
           this.boundAutoScroll
@@ -410,24 +471,35 @@ export class SyntheticScroll {
    * synthetic scroll momentum). This will be called if the user natively
    * scrolls the document, then continues the scroll outside of the iframe.
    *
-   * @param {!TouchEvent} event
+   * @param {?TouchEvent} event
    */
   scrollStarted_(event) {
+    this.scrolling_ = true;
+
     if (this.bodyScrolled_) {
       // If the user is still scrolling natively, this will stop it and start
       // the synthetic scrolling.
-      event.preventDefault();
-      event.stopPropagation();
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
 
       // The doc has scrolled natively, causing our synthetic scroll to be out
       // of sync with the real scrollTop. We must calculate the difference
       // and adjust.
-      const delta = -this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
-      this.scrollTop_ += delta;
-      this.minScrollTop_ -= delta;
-      this.maxScrollTop_ -= delta;
+      const delta = this.scrollMoveEl_./*REVIEW*/getBoundingClientRect().top;
+      this.scrollTop_ -= delta;
       this.bodyScrolled_ = false;
     }
+
+    // Make the entire body visible so that we may transform its box to scroll.
+    // Without this, we'd be scrolling the body but no content would be visible
+    // outside the overflow cropping.
+    this.scrollStyle_.overflowY = 'visible';
+    this.scrollStyle_.overflowX = 'visible';
+    // Now that we're entirely visible, we must translate the body into our
+    // current scroll position.
+    this.scrollTo_(this.scrollTop_, true);
 
     this.setIframeInteractionAllowed_(false);
   }
@@ -438,20 +510,59 @@ export class SyntheticScroll {
    * the momentum.
    */
   scrollStopped_() {
+    this.scrolling_ = false;
+
     // To allow native scrolling on iframes, we must adjust the doc's real
     // scrollTop to match where we syntheticly scrolled (else, the user
     // wouldn't be able to natively scroll up because Safari thinks
     // they're "at" the top of the doc).
-    this.scrollTop_ += this.offset_;
-    this.minScrollTop_ -= offset;
-    this.maxScrollTop_ -= offset;
-    this.scrollTo_(0);
+    this.scrollTop_ = this.offset_;
+    // Go back to native scroll mode, so that iframes can cause native
+    // scrolling.
+    this.scrollTo_(0, true);
+    this.scrollStyle_.overflowY = 'auto';
+    this.scrollStyle_.overflowX = 'hidden';
+
     // Suppress this body scrolled event, we expect it.
+    // TODO move this into it's own method with setScrollTop's.
     this.bodyScrolled_ = null;
     this.scrollMoveEl_.style.transform = 'translateY(' + this.scrollTop_ + 'px)';
     this.scrollMoveEl_./*REVIEW*/scrollIntoView(true);
 
+    this.forcePositionFixedRedraw_();
     this.setIframeInteractionAllowed_(true);
+  }
+
+  /**
+   * Part one of two to force a repaint. This removes any transform from the
+   * elements (which would normally force a repaint, but Safari can't scroll
+   * and repaint a fixed element in the same tick for some unknown reason).
+   * We fix this by dirtying the elements again in the next tick.
+   * This is an ugly hack. :sadpanda:
+   */
+  forcePositionFixedRedraw_() {
+    const fixeds = this.fixedElementStyles_;
+    for (let i = 0; i < fixeds.length; i++) {
+      fixeds[i].transform = '';
+    }
+    this.promise_.then(this.boundForceRedrawMicrotask_);
+  }
+
+  /**
+   * Part two of the force repaint hack. This "dirties" the elements, forcing
+   * the repaint.
+   */
+  forceRedrawMicrotask_() {
+    // If we are currently scrolling, the repaint hack would move the fixed
+    // position elements.
+    if (this.scrolling_) {
+      return;
+    }
+
+    const fixeds = this.fixedElementStyles_;
+    for (let i = 0; i < fixeds.length; i++) {
+      fixeds[i].transform = 'translate3d(0, 0, 0)';
+    }
   }
 
   /**
@@ -461,9 +572,9 @@ export class SyntheticScroll {
    */
   setIframeInteractionAllowed_(allowed) {
     const value = allowed ? '' : 'none';
-    const styles = this.iframeStyles_;
+    const iframes = this.iframeStyles_;
     for (let i = 0; i < styles.length; i++) {
-      styles[i].pointerEvents = value;
+      iframes[i].pointerEvents = value;
     }
   }
 
@@ -473,24 +584,27 @@ export class SyntheticScroll {
    * @param {!TouchEvent} event
    */
   touchstart_(event) {
-    // We don't allow zooming
-    if (event.touches.length > 1) {
-      event.preventDefault();
-      event.stopPropagation();
+    // We're already tracking a finger, no need to track another.
+    if (this.touchId_) {
       return;
     }
 
-    if (this.autoScrolling_) {
-      cancelAnimationFrame(this.autoScrolling_);
-      this.autoScrolling_ = 0;
-    } else {
+    // Only start the scroll if the body scrolled to avoid a bug with
+    // repainting fixed position elements. We'll start scrolling on the
+    // first touchmove event otherwise.
+    if (this.bodyScrolled_) {
       this.scrollStarted_(event);
+    }
+
+    if (this.autoScrolling_) {
+      this.win_.cancelAnimationFrame(this.autoScrolling_);
+      this.autoScrolling_ = 0;
     }
 
     this.velocity_ = 0;
     this.amplitude_ = 0;
     this.timestamp_ = Date.now();
-    this.reference_ = this.eventY_(event);
+    this.reference_ = this.touch_(event).screenY;
   }
 
   /**
@@ -499,14 +613,11 @@ export class SyntheticScroll {
    * @param {!TouchEvent} event
    */
   touchmove_(event) {
-    // We don't allow zooming
-    if (event.touches.length > 1) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
+    if (!this.scrolling_) {
+      this.scrollStarted_();
     }
 
-    const y = this.eventY_(event);
+    const y = this.touch_(event).screenY;
     const delta = this.reference_ - y;
     this.track_(delta);
     this.reference_ = y;
@@ -523,16 +634,36 @@ export class SyntheticScroll {
    * @param {!TouchEvent} event
    */
   touchend_(event) {
-    // We don't allow zooming
-    if (event.touches.length > 1) {
-      event.preventDefault();
-      event.stopPropagation();
+    const touch = this.touch_(event, true);
+    if (event.touches.length > 0) {
+      // The finger we're tracking was removed, but there are still fingers
+      // on the screen. Start tracking a new one.
+      if (touch) {
+        reference = this.touch_(event).screenY;
+      }
+
+      // We are still scrolling...
+      return;
+    }
+
+    // When lifting multiple fingers simultaneously, Safari will send multiple
+    // events with the next finger as removed but no fingers touching the
+    // screen. Wait until we get the touchend event corresponding to the finger
+    // we're tracking
+    if (!touch) {
+      return;
+    }
+
+    // We never actually scrolled, so there's no momentum.
+    if (!this.scrolling_) {
       return;
     }
 
     // Only simulate momentum if we think the user meant to have it.  Ie. if
     // you hang your finger for a few milliseconds, you probably meant to stop
     // the scrolling entirely.
+    // TODO do we need to compensate for multiple finger lifting not having the
+    // right timestamp?
     const elapsed = Date.now() - this.timestamp_;
     if (elapsed < SCROLL_INTENTION_ELAPSED_CUTOFF) {
       // Determine where we should stop the synthetic momentum.
