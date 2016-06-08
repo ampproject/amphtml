@@ -18,7 +18,7 @@
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
-import {getMode, isLocalDev, isMinified} from './mode';
+import {getMode, isMinified, isLocalDev} from './mode';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
@@ -204,10 +204,8 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
         (isMinified ? '-min/frame' : '/frame.max') +
         '.html';
   }
-  let val = 'https://' + getSubDomain(parentWindow) +
+  return 'https://' + getSubDomain(parentWindow) +
       '.ampproject.net/$internalRuntimeVersion$/frame.html';
-  console.log('this is the path', val);
-  return val;
 }
 
 /**

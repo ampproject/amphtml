@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isLocalDev} from './mode';
+import {getMode} from './mode';
 
 /**
  * Keep a list of extension elements whose scripts are included in HTML head.
@@ -101,7 +101,7 @@ function isAmpExtensionScriptRequired(win, element, extension) {
  */
 export function calculateExtensionScriptUrl(path, extension, isTest,
   isUsingCompiledJs) {
-  if (isLocalDev) {
+  if (getMode().localDev) {
     if (isTest) {
       if (isUsingCompiledJs) {
         return `/base/dist/v0/${extension}-0.1.js`;
@@ -119,8 +119,5 @@ export function calculateExtensionScriptUrl(path, extension, isTest,
   const domain = 'https://cdn.ampproject.org/';
   const folderPath = getMode().version == '$internalRuntimeVersion$' ?
       '' : `rtv/${getMode().version}/`;
-
-  let val = `${domain}${folderPath}v0/${extension}-0.1.js`;
-  console.log('this is the insert path', val);
-  return val;
+  return `${domain}${folderPath}v0/${extension}-0.1.js`;
 };

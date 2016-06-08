@@ -16,7 +16,7 @@
 
 import {Poller} from './poller';
 import {addParamToUrl} from '../../../src/url';
-import {getMode} from '../../../src/mode';
+import {isLocalDev} from '../../../src/mode';
 import {getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
@@ -66,7 +66,7 @@ export class LiveListManager {
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
-      if (getMode().localDev && (this.win.location.pathname == '/examples' +
+      if (isLocalDev && (this.win.location.pathname == '/examples' +
             '.build/live-list-update.amp.max.html' ||
             this.win.location.pathname == '/examples.build/live-blog.amp' +
             '.max.html')) {
