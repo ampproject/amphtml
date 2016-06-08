@@ -20,7 +20,6 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
-import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -52,7 +51,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.viewport_ = this.getViewport();
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.getWin());
+    this.vsync_ = this.getVsync();
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
