@@ -120,7 +120,7 @@ class AmpStickyAd extends AMP.BaseElement {
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.
           this.vsync_.mutate(() => {
-            this.element.classList.add('amp-sticky-ad-load');
+            this.element.classList.add('amp-sticky-ad-loaded');
           });
         }, 1000);
       });
