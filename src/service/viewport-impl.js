@@ -1171,6 +1171,9 @@ export class ViewportBindingNaturalIosScrollEmbed_
 
   /** @override */
   getScrollTop() {
+    if (!this.scroller) {
+      return 0;
+    }
     return this.scroller.getScrollTop();
   }
 
@@ -1196,6 +1199,9 @@ export class ViewportBindingNaturalIosScrollEmbed_
 
   /** @override */
   setScrollTop(scrollTop) {
+    if (!this.scroller) {
+      return;
+    }
     this.scroller.setScrollTop(scrollTop);
   }
 
