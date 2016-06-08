@@ -422,7 +422,7 @@ export const ANALYTICS_CONFIG = {
   'nielsen': {
     'vars': {
         'appid': '',
-        'assetName": '',
+        'assetName': '',
         'segA': 'NA',
         'segB': 'NA',
         'segC': 'NA'
