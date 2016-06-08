@@ -67,7 +67,7 @@ export class Viewport {
 
     /**
      * Used to cache the rect of the viewport.
-     * @private {!LayoutRect}
+     * @private {?LayoutRect}
      */
     this.rect_ = null;
 
