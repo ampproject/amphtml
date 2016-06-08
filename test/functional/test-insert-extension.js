@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import {
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
+} from '../../testing/iframe';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetExtensionScriptInsertedOrPresentForTesting,
     calculateExtensionScriptUrl, insertAmpExtensionScript,}
@@ -31,6 +34,7 @@ describe('test-insert-extension', () => {
 
   function getAdIframe(name) {
     return createIframePromise().then(f => {
+      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
       testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
