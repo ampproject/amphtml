@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Observable} from './observable';
 
 /**
  * The elapsed time cutoff that determines if a user intended to stop the
