@@ -978,7 +978,7 @@ describe('amp-live-list', () => {
       // Notice that id1's previous sibling is id3 and not id2
       // as id2 has been deleted from the live DOM to make room for new items.
       expect(liveList.itemsSlot_.lastElementChild
-          .previousElementSibling.getAttribute('id')).to.equal('id3');
+          .previousElementSibling.getAttribute('id')).to.equal('id4');
     });
   });
 
