@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createIframePromise} from '../../../../testing/iframe';
 import {AmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 
@@ -63,30 +64,32 @@ describe('amp-form', () => {
   });
 
   it('should call fetchJson with the xhr action and form data', () => {
-    const form = document.createElement('form');
-    const nameInput = document.createElement('input');
-    nameInput.setAttribute('name', 'name');
-    nameInput.setAttribute('value', 'John Miller');
-    form.appendChild(nameInput);
-    form.setAttribute('action-xhr', 'https://example.com');
-    const ampForm = new AmpForm(form);
-    ampForm.xhr_.fetchJson = sandbox.spy();
-    const event = {
-      target: form,
-      preventDefault: sandbox.spy(),
-      defaultPrevented: false,
-    };
-    ampForm.handleSubmit_(event);
-    expect(event.preventDefault.called).to.be.true;
-    expect(ampForm.xhr_.fetchJson.called).to.be.true;
-    expect(ampForm.xhr_.fetchJson.calledWith('https://example.com')).to.be.true;
+    createIframePromise().then(iframe => {
+      const form = iframe.doc.createElement('form');
+      const nameInput = iframe.doc.createElement('input');
+      nameInput.setAttribute('name', 'name');
+      nameInput.setAttribute('value', 'John Miller');
+      form.appendChild(nameInput);
+      form.setAttribute('action-xhr', 'https://example.com');
+      const ampForm = new AmpForm(form);
+      ampForm.xhr_.fetchJson = sandbox.spy();
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault.called).to.be.true;
+      expect(ampForm.xhr_.fetchJson.called).to.be.true;
+      expect(ampForm.xhr_.fetchJson.calledWith('https://example.com')).to.be.true;
 
-    const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
-    const config = xhrCall.args[1];
-    expect(config.body.get('name')).to.be.equal('John Miller');
-    expect(config.method).to.equal('GET');
-    expect(config.credentials).to.equal('include');
-    expect(config.requireAmpResponseSourceOrigin).to.be.true;
+      const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
+      const config = xhrCall.args[1];
+      expect(config.body.get('name')).to.be.equal('John Miller');
+      expect(config.method).to.equal('GET');
+      expect(config.credentials).to.equal('include');
+      expect(config.requireAmpResponseSourceOrigin).to.be.true;
+    });
   });
 
 });
