@@ -32,7 +32,7 @@ describe('amp-instagram', () => {
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
-      ins.setAttribute('alt', 'Testing')
+      ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
@@ -53,7 +53,7 @@ describe('amp-instagram', () => {
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
     expect(iframe.getAttribute('width')).to.equal('111');
     expect(iframe.getAttribute('height')).to.equal('222');
-    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing')
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   it('renders', () => {
