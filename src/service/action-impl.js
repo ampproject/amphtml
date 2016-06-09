@@ -86,10 +86,14 @@ export class ActionService {
 
   /**
    * @param {!Window} win
+   * @param {!EventTarget} root
    */
-  constructor(win) {
+  constructor(win, root) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!EventTarget} */
+    this.root = root;
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
@@ -110,7 +114,7 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', event => {
+      this.root.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
@@ -199,7 +203,7 @@ export class ActionService {
       return;
     }
 
-    const target = this.win.document.getElementById(action.actionInfo.target);
+    const target = this.root.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
@@ -607,6 +611,17 @@ function isNum(c) {
  */
 export function installActionService(win) {
   return getService(win, 'action', () => {
-    return new ActionService(win);
+    return new ActionService(win, win.document);
+  });
+};
+
+/**
+ * @param {!Window} win
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!ActionService}
+ */
+export function installActionServiceForShadowRoot(win, shadowRoot) {
+  return getService(shadowRoot.AMP, 'action', () => {
+    return new ActionService(win, shadowRoot);
   });
 };
