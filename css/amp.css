@@ -40,6 +40,15 @@ body {
   margin: 0 !important;
 }
 
+body.-amp-scrolling {
+  overflow-y: visible !important;
+  overflow-x: visible !important;
+}
+
+body.-amp-scrolling iframe {
+  pointer-events: none !important;
+}
+
 /** These properties can be overriden by user stylesheets. */
 body {
   /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
@@ -199,6 +208,23 @@ i-amp-sizer {
 .-amp-element-error::before {
   content: attr(error-message);
 }
+
+
+/**
+ * Helper elements to control scrolling in iOS
+ */
+#-amp-startpos, #-amp-scrollmove, #-amp-endpos {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+#-amp-startpos, #-amp-scrollmove {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 
 /**
  * Wraps an element to make the contents scrollable. This is

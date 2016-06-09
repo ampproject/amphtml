@@ -96,6 +96,11 @@ const EXPERIMENTS = [
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
+  {
+    id: 'amp-ios-scroll',
+    name: 'AMP iOS Scroll Service',
+    spec: '',
+  },
 ];
 
 

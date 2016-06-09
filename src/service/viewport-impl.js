@@ -25,6 +25,9 @@ import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
+import {moveChildren} from '../dom';
+import {SyntheticScroll} from '../ios-scroll';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -120,7 +123,9 @@ export class Viewport {
         this.win_.document,
         this.vsync_,
         this.paddingTop_,
-        this.binding_.requiresFixedLayerTransfer());
+        this.binding_.requiresFixedLayerTransfer(),
+        this.binding_.requiresFixedLayerLookup()
+    );
     onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
 
     /** @private @const (function()) */
@@ -566,6 +571,14 @@ class ViewportBindingDef {
   }
 
   /**
+   * Whether the binding requires fixed elements to be found.
+   * @return {boolean}
+   */
+  requiresFixedLayerLookup() {
+    return false;
+  }
+
+  /**
    * Register a callback for scroll events.
    * @param {function()} unusedCallback
    */
@@ -686,6 +699,11 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
     return false;
   }
 
@@ -814,10 +832,13 @@ export class ViewportBindingNaturalIosEmbed_ {
     this.win = win;
 
     /** @private {?Element} */
-    this.scrollPosEl_ = null;
+    this.startPosEl_ = null;
 
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
+
+    /** @private {?Element} */
+    this.endPosEl_ = null;
 
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
@@ -843,6 +864,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   requiresFixedLayerTransfer() {
     return true;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
+    return false;
   }
 
   /** @private */
@@ -879,43 +905,22 @@ export class ViewportBindingNaturalIosEmbed_ {
       bottom: 0,
     });
 
-    // Insert scrollPos element into DOM. See {@link onScrolled_} for why
+    // Insert startPos element into DOM. See {@link onScrolled_} for why
     // this is needed.
-    this.scrollPosEl_ = this.win.document.createElement('div');
-    this.scrollPosEl_.id = '-amp-scrollpos';
-    setStyles(this.scrollPosEl_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
-    documentBody.appendChild(this.scrollPosEl_);
+    this.startPosEl_ = this.win.document.createElement('div');
+    this.startPosEl_.id = '-amp-startpos';
+    documentBody.appendChild(this.startPosEl_);
 
     // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
     // this is needed.
     this.scrollMoveEl_ = this.win.document.createElement('div');
     this.scrollMoveEl_.id = '-amp-scrollmove';
-    setStyles(this.scrollMoveEl_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
     documentBody.appendChild(this.scrollMoveEl_);
 
     // Insert endPos element into DOM. See {@link getScrollHeight} for why
     // this is needed.
     this.endPosEl_ = this.win.document.createElement('div');
     this.endPosEl_.id = '-amp-endpos';
-    setStyles(this.endPosEl_, {
-      width: 0,
-      height: 0,
-      visibility: 'hidden',
-    });
     // TODO(dvoytenko): not only it should be at the bottom at setup time,
     // but it must always be at the bottom. Consider using BODY "childList"
     // mutations to track this. For now, however, this is ok since we don't
@@ -1001,7 +1006,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return 0;
     }
     return Math.round(this.endPosEl_./*OK*/getBoundingClientRect().top -
-        this.scrollPosEl_./*OK*/getBoundingClientRect().top);
+        this.startPosEl_./*OK*/getBoundingClientRect().top);
   }
 
   /** @override */
@@ -1038,11 +1043,11 @@ export class ViewportBindingNaturalIosEmbed_ {
     // document./*OK*/scrollingElement will point to document.documentElement.
     // This already works correctly in Chrome with "scroll-top-left-interop"
     // flag turned on "chrome://flags/#scroll-top-left-interop".
-    if (!this.scrollPosEl_) {
+    if (!this.startPosEl_) {
       return;
     }
     this.adjustScrollPos_(event);
-    const rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
+    const rect = this.startPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
       this.pos_.y = -rect.top;
@@ -1064,14 +1069,14 @@ export class ViewportBindingNaturalIosEmbed_ {
    * @private
    */
   adjustScrollPos_(opt_event) {
-    if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
+    if (!this.startPosEl_ || !this.scrollMoveEl_) {
       return;
     }
 
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
+    const scrollTop = -this.startPosEl_./*OK*/getBoundingClientRect().top;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
@@ -1084,6 +1089,132 @@ export class ViewportBindingNaturalIosEmbed_ {
     // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
     // this case.
   }
+}
+
+
+export class ViewportBindingNaturalIosScrollEmbed_
+    extends ViewportBindingNaturalIosEmbed_ {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    super(win);
+
+    this.onResize(() => this.onResized_());
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
+    return true;
+  }
+
+  /** @private */
+  setup_() {
+    const doc = this.win.document;
+    const documentElement = doc.documentElement;
+    const body = doc.body;
+
+    // Setup scrolling styles.
+    setStyles(documentElement, {
+      height: '100% !important',
+      webkitOverflowScrolling: 'touch',
+    });
+    setStyles(body, {
+      height: '100% !important',
+      overflowX: 'hidden',
+      overflowY: 'auto',
+      // Necessary so that absolutely positioned elements remained positioned
+      // relative to the body.
+      position: 'relative',
+    });
+
+    // Insert startPos element into DOM. See {@link getScrollHeight} for why
+    // this is needed.
+    this.startPosEl_ = this.win.document.createElement('div');
+    this.startPosEl_.id = '-amp-startpos';
+    body.appendChild(this.startPosEl_);
+
+    // Insert endPos element into DOM. See {@link getScrollHeight} for why
+    // this is needed.
+    this.endPosEl_ = this.win.document.createElement('div');
+    this.endPosEl_.id = '-amp-endpos';
+    body.appendChild(this.endPosEl_);
+
+    this.scroller = new SyntheticScroll(
+      body,
+      this.getScrollTop_(),
+      this.getScrollHeight()
+    );
+
+    this.scroller.onScroll(() => this.scrollObservable_.fire());
+  }
+
+  /**
+   * Alerts the synthetic scroller that the viewport has resized
+   */
+  onResized_() {
+    this.scroller.resize(
+      this.getScrollTop_(),
+      this.getScrollHeight()
+    );
+  }
+
+  /** @override */
+  getScrollLeft() {
+    return 0;
+  }
+
+  /** @override */
+  getScrollTop() {
+    if (!this.scroller) {
+      return 0;
+    }
+    return this.scroller.getScrollTop();
+  }
+
+  /**
+   * Calculates the current scrollTop. Note that this is more expensive than
+   * the public version, but it is sometimes needed.
+   * @return {number}
+   */
+  getScrollTop_() {
+    const rect = this.startPosEl_./*OK*/getBoundingClientRect();
+    return -rect.top;
+  }
+
+  getLayoutRect(el) {
+    const rect = el./*OK*/getBoundingClientRect();
+    return layoutRectLtwh(
+      Math.round(rect.left),
+      Math.round(rect.top),
+      Math.round(rect.width),
+      Math.round(rect.height)
+    );
+  }
+
+  /** @override */
+  setScrollTop(scrollTop) {
+    if (!this.scroller) {
+      return;
+    }
+    this.scroller.setScrollTop(scrollTop);
+  }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
+    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
+  updateLightboxMode(unusedLightboxMode) {
+    // The layout is always accurate.
+  }
+
 }
 
 
@@ -1132,6 +1263,11 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   requiresFixedLayerTransfer() {
+    return false;
+  }
+
+  /** @override */
+  requiresFixedLayerLookup() {
     return false;
   }
 
@@ -1312,7 +1448,11 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'virtual') {
     binding = new ViewportBindingVirtual_(window, viewer);
   } else if (viewer.getViewportType() == 'natural-ios-embed') {
-    binding = new ViewportBindingNaturalIosEmbed_(window);
+    // if (isExperimentOn(window, 'amp-ios-scroll')) {
+      binding = new ViewportBindingNaturalIosScrollEmbed_(window);
+    // } else {
+      // binding = new ViewportBindingNaturalIosEmbed_(window);
+    // }
   } else {
     binding = new ViewportBindingNatural_(window);
   }
