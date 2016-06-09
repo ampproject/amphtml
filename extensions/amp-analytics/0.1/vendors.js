@@ -418,26 +418,26 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
-  
+
   'nielsen': {
     'vars': {
       'appid': '',
       'assetName': '',
       'segA': 'NA',
       'segB': 'NA',
-      'segC': 'NA'
+      'segC': 'NA',
     },
     'triggers': {
       'pageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'oewadirect': {
