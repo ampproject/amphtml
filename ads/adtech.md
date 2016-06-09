@@ -41,8 +41,8 @@ For semantics of configuration, please see ad network documentation.
 * `data-atwMOAT` - set this var to '1' to enable MOAT
 * `data-atwHtNmAT` - override ad host name
 * `data-atwNetId` - network ID
-* `data-atwWidth` - ad width
-* `data-atwHeight`- ad height
+* `data-atwWidth` - ad width (note: if smaller than the amp-ad width, the ad may not show)
+* `data-atwHeight`- ad height (note: if smaller than the amp-ad height, the ad may not show)
 * `data-atwSizes` - this overrides atwWidth/atwHeight; use this to create a comma-separated list of possible ad sizes
 
 ### Direct URL Call:
