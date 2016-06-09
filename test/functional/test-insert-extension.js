@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import {
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
+} from '../../testing/iframe';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetExtensionScriptInsertedOrPresentForTesting,
     calculateExtensionScriptUrl, insertAmpExtensionScript,}
     from '../../src/insert-extension';
+import '../../extensions/amp-ad/0.1/amp-ad';
+import '../../extensions/amp-analytics/0.1/amp-analytics';
 
 
 describe('test-insert-extension', () => {
@@ -31,6 +36,7 @@ describe('test-insert-extension', () => {
 
   function getAdIframe(name) {
     return createIframePromise().then(f => {
+      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
       testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');

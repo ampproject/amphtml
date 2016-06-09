@@ -19,7 +19,7 @@
  * This type signifies a callback that can be called to remove the listener.
  * @typedef {function()}
  */
-class UnlistenDef {}
+let UnlistenDef;
 
 
 /**

@@ -66,6 +66,8 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
 function cleanupBuildDir() {
   fs.mkdirsSync('build/cc');
   rimraf.sync('build/fake-module');
+  rimraf.sync('build/patched-module');
+  fs.mkdirsSync('build/patched-module/document-register-element/build');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
 }
@@ -97,6 +99,7 @@ function compile(entryModuleFilename, outputDir,
     }
     wrapper += '\n//# sourceMappingURL=' +
         outputFilename + '.map\n';
+    patchRegisterElement();
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
@@ -126,7 +129,7 @@ function compile(entryModuleFilename, outputDir,
       'third_party/closure-library/sha384-generated.js',
       'third_party/mustache/**/*.js',
       'node_modules/promise-pjs/promise.js',
-      'node_modules/document-register-element/build/' +
+      'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
       'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
@@ -150,14 +153,15 @@ function compile(entryModuleFilename, outputDir,
         '!src/polyfills/**/*.js'
       );
       unneededFiles.push(
-        'build/fake-module/src/polyfills.js',
-        'build/fake-module/src/polyfills/promise.js',
-        'build/fake-module/src/polyfills/math-sign.js'
-      );
+          'build/fake-module/src/polyfills.js',
+          'build/fake-module/src/polyfills/promise.js',
+          'build/fake-module/src/polyfills/math-sign.js');
     }
     unneededFiles.forEach(function(fake) {
       if (!fs.existsSync(fake)) {
-        fs.writeFileSync(fake, '// Not needed in closure compiler\n');
+        fs.writeFileSync(fake,
+            '// Not needed in closure compiler\n' +
+            'export function deadCode() {}');
       }
     });
     /*eslint "google-camelcase/google-camelcase": 0*/
@@ -170,15 +174,19 @@ function compile(entryModuleFilename, outputDir,
       continueWithWarnings: true,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
-        // Custom compilation level. Trying to land this in the core
-        // compiler.
-        compilation_level: 'SIMPLE_PLUS_OPTIMIZATIONS',
+        compilation_level: 'SIMPLE_OPTIMIZATIONS',
+        // Turns on more optimizations.
+        assume_function_wrapper: true,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
         externs: 'build-system/amp.extern.js',
-        js_module_root: ['node_modules/', 'build/fake-module/'],
-        common_js_entry_module: entryModuleFilename,
+        js_module_root: [
+          'node_modules/',
+          'build/patched-module/',
+          'build/fake-module/',
+        ],
+        entry_point: entryModuleFilename,
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -208,3 +216,20 @@ function compile(entryModuleFilename, outputDir,
     });
   });
 };
+
+function patchRegisterElement() {
+  // Copies document-register-element into a new file that has an export.
+  // This works around a bug in closure compiler, where without the
+  // export this module does not generate a goog.provide which fails
+  // compilation.
+  // Details https://github.com/google/closure-compiler/issues/1831
+  const patchedName = 'build/patched-module/document-register-element' +
+      '/build/document-register-element.max.js';
+  if (!fs.existsSync(patchedName)) {
+      fs.writeFileSync(patchedName,
+          fs.readFileSync(
+              'node_modules/document-register-element/build/' +
+              'document-register-element.max.js') +
+          '\n\nexport function deadCode() {}\n');
+    }
+}
