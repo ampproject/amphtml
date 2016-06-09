@@ -21,7 +21,7 @@ var webserver = require('gulp-webserver');
 var app = require('../server').app;
 
 var port = argv.port || process.env.PORT || 8000;
-var useHttps = (argv.https != undefined);
+var useHttps = argv.https != undefined;
 
 /**
  * Starts a simple http server at the repository root
@@ -30,10 +30,9 @@ function serve() {
   gulp.src(process.cwd())
       .pipe(webserver({
         port,
-        livereload: true,
         directoryListing: true,
         https: useHttps,
-        middleware: [ app ]
+        middleware: [app]
       }));
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
