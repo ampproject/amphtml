@@ -108,7 +108,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {?string} */
     this.ampUserId_ = null;
 
-    /** @private {function} */
+    /** @private {function()} */
     this.dialogResolve_ = null;
 
     /** @private {!Promise} */
@@ -198,7 +198,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /**
    * Success handler for `getShowEndpoint_`.
-   * @param {!PostResponseMetadataDef}
+   * @param {!PostResponseMetadataDef} data
    * @return {!Promise<boolean>}
    * @private
    */

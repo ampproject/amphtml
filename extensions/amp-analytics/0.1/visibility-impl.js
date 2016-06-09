@@ -162,7 +162,7 @@ let VisibilityListenerDef;
  */
 export class Visibility {
 
-  /** @param {!Window} */
+  /** @param {!Window} win */
   constructor(win) {
     this.win_ = win;
 
@@ -177,10 +177,10 @@ export class Visibility {
     /** @private {Array<!Resource>} */
     this.resources_ = [];
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundScrollListener_ = this.scrollListener_.bind(this);
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundVisibilityListener_ = this.visibilityListener_.bind(this);
 
     /** @private {boolean} */

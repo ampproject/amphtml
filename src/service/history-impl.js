@@ -59,7 +59,7 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise>, resolve:!Function,reject:!Function}} */
+    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));

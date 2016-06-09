@@ -57,7 +57,7 @@ function filter(str) {
 
 /**
  * Create a DOM element with attributes
- * @param {!Document}
+ * @param {!Document} doc
  * @param {Object} data - the string to filter
  * @returns {DOMElement}
  */
