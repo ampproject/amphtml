@@ -34,6 +34,7 @@ describe('amp-accordion', () => {
 
   function getAmpAccordion() {
     return createIframePromise().then(iframe => {
+      iframe.win.sessionStorage.clear();
       const ampAccordion = iframe.doc.createElement('amp-accordion');
       ampAccordion.implementation_.mutateElement = fn => fn();
       for (let i = 0; i < 3; i++) {
