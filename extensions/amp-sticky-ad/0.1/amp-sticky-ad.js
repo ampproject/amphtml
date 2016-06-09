@@ -20,7 +20,7 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
-import {vsyncFor} from '../../../src/vsync';
+import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -51,8 +51,11 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
-    /** @const @private {!Vsync} */
+    /** @private @const {!Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private @const {!Function|null}*/
+    this.bindedHorizontalScroll_ = null;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -61,6 +64,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
   }
+
 
   /** @override */
   layoutCallback() {
@@ -88,6 +92,14 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  removeOnHorizontalListener_() {
+    if (this.bindedOnHorizontalScroll_) {
+      this.element.removeEventListener('scroll',
+          this.bindedOnHorizontalScroll_);
+      this.bindedOnHorizontalScroll_ = null;
+    }
+  }
+
   /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
@@ -95,12 +107,10 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   displayAfterScroll_() {
-    console.log('left right scroll');
     const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
     const scrollHeight = this.viewport_.getScrollHeight();
     this.viewportWidth_ = this.viewport_.getSize().width;
-    //const viewportWidth = this.viewport_.getSize().width;
     if (scrollHeight < viewportHeight * 2) {
       this.removeOnScrollListener_();
       return;
@@ -126,72 +136,57 @@ class AmpStickyAd extends AMP.BaseElement {
             this.element.classList.add('amp-sticky-ad-loaded');
           });
         }, 1000);
-        var stickyAdScrollBox = {
-          scrollTimeout: null,
-          element: this.element,
-          poisitioningInProgress: null
+        this.scrollTimeout_ = null;
+        this.positioningInProgress_ = null;
+
+        if (!this.bindedHorizontalScroll_) {
+          this.bindedOnHorizontalScroll_ = this.onHorizontalScroll_.bind(this);
         }
-        this.element.addEventListener('scroll', () => {
-          this.horizontalScroll(stickyAdScrollBox);
-        });
+        this.element.addEventListener('scroll', this.bindedOnHorizontalScroll_);
       });
     }
   }
 
-  horizontalScroll(scrollBox) {
-    if (scrollBox.scrollTimeout) {
-      window.clearTimeout(scrollBox.scrollTimeout);
+  onHorizontalScroll_() {
+    if (this.scrollTimeout) {
+      window.clearTimeout(this.scrollTimeout);
     }
-    if(scrollBox.element.scrollLeft > this.viewportWidth_ * 0.4) {
-      console.log('delete ad');
-      this.vsync_.mutate(() => {
+    if (this.element.scrollLeft > this.viewportWidth_ * 0.4) {
+      this.deferMutate(() => {
         toggle(this.element, false);
+        this.removeOnHorizontalListener_();
+        // TODO: update bodyBorder back to 0.
+        return;
       });
-      // TODO: Delete symbol
-      // TODO: update bodyBorder back to 0
-      // TODO: removeEventListner here;
-      // TODO: removeonscroll listener;
+      // TODO: UX? Delete icon?
     }
-    scrollBox.scrollTimeout = window.setTimeout(function() {
-      if (scrollBox.element.scrollLeft != 0) {
-        centerElement(scrollBox);
+    this.scrollTimeout = window.setTimeout(() => {
+      if (this.element.scrollLeft != 0) {
+        this.deferMutate(() => {
+          this.centerElement();
+        });
       }
     }, 150);
   }
-}
 
-function centerElement(scrollBox) {
-  if (scrollBox.positionInProgress) {
-    return;
-  }
-  scrollBox.poisitioningInProgress = true;
-  scrollBox.element.style.overflowX = 'hidden';
-  let centerPromise = new Promise(function(resolve, reject) {
-    animateScroll(scrollBox.element, scrollBox.element.scrollLeft, 90, 30);
-    window.setTimeout(function() {
-      resolve();
-    }, 100);
-  });
-  centerPromise.then(function() {
-    scrollBox.positionInProgress = false;
-    scrollBox.element.style.overflowX = 'scroll';
-  });
-}
-
-function animateScroll(element, start, duration, timeSlot) {
-  if (duration < timeSlot*2) {
-    setTimeout(function() {
-      element.scrollLeft = 0;
-    }, duration);
-  } else {
-    let slot = duration / timeSlot;
-    let distSlot = start/slot;
-    start -= distSlot;
-    duration -= timeSlot;
-    element.scrollLeft = start;
-    setTimeout(function() {
-      animateScroll(element, start, duration, timeSlot);
-    }, timeSlot);
+  centerElement() {
+    if (this.positionInProgress) {
+      return;
+    }
+    this.poisitioningInProgress = true;
+    this.vsync_.mutatePromise(() => {
+      setStyles(this.element, {
+        'overflowX': 'hidden',
+      });
+      this.element.scrollLeft = 0;
+    }).then(() => {
+      this.vsync_.mutate(() => {
+        setStyles(this.element, {
+          'overflowX': 'scroll',
+        });
+        this.positionInProgress_ = false;
+      });
+    });
   }
 }
 
