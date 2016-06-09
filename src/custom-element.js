@@ -70,7 +70,7 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {

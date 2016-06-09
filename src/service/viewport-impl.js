@@ -66,6 +66,12 @@ export class Viewport {
     this.viewer_ = viewer;
 
     /**
+     * Used to cache the rect of the viewport.
+     * @private {?LayoutRect}
+     */
+    this.rect_ = null;
+
+    /**
      * Used to cache the size of the viewport. Also used as last known size,
      * so users should call getSize early on to get a value. The timing should
      * be chosen to avoid extra style recalcs.
@@ -240,10 +246,14 @@ export class Viewport {
    * @return {!LayoutRect}
    */
   getRect() {
-    const scrollTop = this.getScrollTop();
-    const scrollLeft = this.getScrollLeft();
-    const size = this.getSize();
-    return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+    if (this.rect_ == null) {
+      const scrollTop = this.getScrollTop();
+      const scrollLeft = this.getScrollLeft();
+      const size = this.getSize();
+      this.rect_ =
+          layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+    }
+    return this.rect_;
   }
 
   /**
@@ -477,6 +487,7 @@ export class Viewport {
 
   /** @private */
   scroll_() {
+    this.rect_ = null;
     this.scrollCount_++;
     this.scrollLeft_ = this.binding_.getScrollLeft();
     const newScrollTop = this.binding_.getScrollTop();
@@ -527,6 +538,7 @@ export class Viewport {
 
   /** @private */
   resize_() {
+    this.rect_ = null;
     const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();

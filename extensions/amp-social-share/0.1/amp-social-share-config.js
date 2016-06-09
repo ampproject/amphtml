@@ -16,7 +16,7 @@
 
 /**
  * Get social share configurations by supported type.
- * @param  {!string}
+ * @param  {!string} type
  * @return {!Object}
  */
 export function getSocialConfig(type) {

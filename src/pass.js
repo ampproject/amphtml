@@ -45,6 +45,9 @@ export class Pass {
 
     /** @private {boolean} */
     this.running_ = false;
+
+    /** @private @const */
+    this.boundPass_ = () => this.pass_();
   }
 
   /**
@@ -75,31 +78,34 @@ export class Pass {
       // execution.
       delay = 10;
     }
+
     const nextTime = timer.now() + delay;
-    // Schedule anew if nothing is scheduled currently of if the new time is
+    // Schedule anew if nothing is scheduled currently or if the new time is
     // sooner then previously requested.
-    if (this.scheduled_ == -1 || nextTime - this.nextTime_ < -10) {
-      if (this.scheduled_ != -1) {
-        timer.cancel(this.scheduled_);
-      }
+    if (!this.isPending() || nextTime - this.nextTime_ < -10) {
+      this.cancel();
       this.nextTime_ = nextTime;
-      this.scheduled_ = timer.delay(() => {
-        this.scheduled_ = -1;
-        this.nextTime_ = 0;
-        this.running_ = true;
-        this.handler_();
-        this.running_ = false;
-      }, delay);
+      this.scheduled_ = timer.delay(this.boundPass_, delay);
+
       return true;
     }
+
     return false;
+  }
+
+  pass_() {
+    this.scheduled_ = -1;
+    this.nextTime_ = 0;
+    this.running_ = true;
+    this.handler_();
+    this.running_ = false;
   }
 
   /**
    * Cancels the pending pass if any.
    */
   cancel() {
-    if (this.scheduled_ != -1) {
+    if (this.isPending()) {
       timer.cancel(this.scheduled_);
       this.scheduled_ = -1;
     }

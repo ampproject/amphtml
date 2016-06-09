@@ -97,7 +97,7 @@ export function loadScript(win, url, cb) {
  * This is a lightweight helper, because we cannot guarantee that
  * Promises are available inside the 3p frame.
  * @param {!Window} win
- * @param {function} fn
+ * @param {function()} fn
  */
 export function nextTick(win, fn) {
   const P = win.Promise;

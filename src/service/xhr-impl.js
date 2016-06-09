@@ -44,7 +44,7 @@ let FetchInitDef;
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
-/** @private @const {!Array<function:boolean>} */
+/** @private @const {!Array<function():boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /** @private @const {string} */

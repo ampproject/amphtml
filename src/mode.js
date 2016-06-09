@@ -19,7 +19,7 @@
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined)
+ *   filter: (string|undefined),
  *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),

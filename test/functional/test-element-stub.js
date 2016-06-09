@@ -15,7 +15,10 @@
  */
 
 import {ElementStub} from '../../src/element-stub';
-import {createIframePromise} from '../../testing/iframe';
+import {
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
+} from '../../testing/iframe';
 import {resetExtensionScriptInsertedOrPresentForTesting,}
     from '../../src/insert-extension';
 import '../../extensions/amp-ad/0.1/amp-ad';
@@ -31,6 +34,7 @@ describe('test-element-stub', () => {
 
   function getElementStubIframe(name) {
     return createIframePromise().then(f => {
+      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
       testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');

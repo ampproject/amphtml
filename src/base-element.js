@@ -623,7 +623,7 @@ export class BaseElement {
    * as soon as possible.
    * When the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   changeHeight(newHeight, opt_callback) {
@@ -641,7 +641,7 @@ export class BaseElement {
    * requested height is greater than 0.)
    * If the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
@@ -660,7 +660,7 @@ export class BaseElement {
   * If the height is successfully updated then the opt_callback is called.
   * @param {number|undefined} newHeight
   * @param {number|undefined} newWidth
-  * @param {function=} opt_callback A callback function.
+  * @param {function()=} opt_callback A callback function.
   * @protected
   */
  attemptChangeSize(newHeight, newWidth, opt_callback) {

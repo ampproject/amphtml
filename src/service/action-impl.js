@@ -94,7 +94,7 @@ export class ActionService {
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
-    /** @param {!Vsync} */
+    /** @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
     // Add core events.
@@ -432,8 +432,8 @@ function assertActionForParser(s, context, condition, opt_message) {
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: string, value: *}} token
- * @param {string} token
+ * @param {!{type: string, value: *}} tok
+ * @param {string} type
  * @param {*=} opt_value
  * @return {!{type: string, value: *}}
  * @private

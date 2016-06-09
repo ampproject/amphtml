@@ -82,6 +82,30 @@ describe('Viewport', () => {
     expect(viewport.getRect().height).to.equal(222);
   });
 
+  it('should cache result for getRect()', () => {
+    assert.strictEqual(viewport.getRect(), viewport.getRect());
+  });
+
+  it('should invalidate getRect() cache after scroll', () => {
+    expect(viewport.getRect().top).to.equal(17);
+
+    // Scroll vertically.
+    viewer.getScrollTop = () => {return 44;};
+    binding.updateViewerViewport(viewer);
+
+    expect(viewport.getRect().top).to.equal(44);
+  });
+
+  it('should invalidate getRect() cache after resize', () => {
+    expect(viewport.getRect().width).to.equal(111);
+
+    // Resize horizontally.
+    viewer.getViewportWidth = () => {return 112;};
+    binding.updateViewerViewport(viewer);
+
+    expect(viewport.getRect().width).to.equal(112);
+  });
+
   it('should not relayout on height resize', () => {
     let changeEvent = null;
     viewport.onChanged(event => {

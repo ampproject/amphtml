@@ -555,7 +555,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    */
   changeSize(element, newHeight, newWidth, opt_callback) {
     this.scheduleChangeSize_(this.getResourceForElement(element), newHeight,
@@ -1226,7 +1226,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback) {
@@ -1728,7 +1728,7 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    */
   changeSize(newHeight, newWidth, opt_callback) {
     this.element./*OK*/changeSize(newHeight, newWidth);
