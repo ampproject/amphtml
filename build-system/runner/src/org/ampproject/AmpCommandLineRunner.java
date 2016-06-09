@@ -17,12 +17,9 @@ package org.ampproject;
 
 
 import com.google.common.collect.ImmutableSet;
-import com.google.javascript.jscomp.AbstractCommandLineRunner.FlagUsageException;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
-import com.google.javascript.jscomp.PropertyRenamingPolicy;
-import com.google.javascript.jscomp.VariableRenamingPolicy;
 
 import java.io.IOException;
 
@@ -31,6 +28,11 @@ import java.io.IOException;
  * Adds a custom pass for Tree shaking `dev.fine` and `dev.assert` calls.
  */
 public class AmpCommandLineRunner extends CommandLineRunner {
+
+  /**
+   * Identifies if the runner only needs to do type checking.
+   */
+  private boolean typecheck_only = false;
 
   /**
    * List of string suffixes to eliminate from the AST.
@@ -43,6 +45,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   }
 
   @Override protected CompilerOptions createOptions() {
+    if (typecheck_only) {
+      return createTypeCheckingOptions();
+    }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
@@ -71,9 +76,31 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     super.setRunOptions(options);
     options.setCodingConvention(new AmpCodingConvention());
   }
+  
+  /**
+   * Create the most basic CompilerOptions instance with type checking turned on.
+   */
+  protected CompilerOptions createTypeCheckingOptions() {
+    CompilerOptions options = super.createOptions();
+    options.setCheckTypes(true);
+    return options;
+  }
+  
+  protected void setTypeCheckOnly(boolean value) {
+    typecheck_only = value;
+  }
 
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
+
+    // Scan for TYPECHECK_ONLY string which we pass in as a --define
+    for (String arg : args) {
+      if (arg.contains("TYPECHECK_ONLY=true")) {
+        runner.setTypeCheckOnly(true);
+        break;
+      }
+    }
+
     if (runner.shouldRunCompiler()) {
       runner.run();
     }
