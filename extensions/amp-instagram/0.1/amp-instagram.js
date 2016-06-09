@@ -115,7 +115,8 @@ class AmpInstagram extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     //Add title to the iframe for better accessibility.
-    iframe.setAttribute('title', 'Instagram: ' + this.element.getAttribute('alt'));
+    iframe.setAttribute('title', 'Instagram: ' + 
+        this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/?v=4';
     this.applyFillContent(iframe);
