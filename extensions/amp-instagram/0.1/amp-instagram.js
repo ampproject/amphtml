@@ -89,7 +89,6 @@ class AmpInstagram extends AMP.BaseElement {
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
 
-    //Push alt to underlying amp-img component
     this.propagateAttributes(['alt'], image);
 
     // This makes the non-iframe image appear in the exact same spot
