@@ -24,6 +24,7 @@
  * <code>
  * <amp-instagram
  *   data-shortcode="fBwFP"
+ *   alt="Fastest page in the west."
  *   width="320"
  *   height="392"
  *   layout="responsive">
@@ -87,6 +88,10 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('src', 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
+
+    //Push alt to underlying amp-img component
+    this.propagateAttributes(['alt'], image);
+
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
@@ -110,6 +115,8 @@ class AmpInstagram extends AMP.BaseElement {
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
+    //title frame for a11y
+    iframe.setAttribute('title', 'Instagram: ' + this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/?v=4';
     this.applyFillContent(iframe);
