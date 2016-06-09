@@ -117,14 +117,14 @@ app.use('/examples.build/live-list.amp.max.html', function(req, res) {
 });
 
 var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
-var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
-var liveListFile = fs.readFileSync(liveListUpdateFullPath);
 var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
 var doctype = '<!doctype html>\n';
 app.use(liveListUpdateFile, function(req, res) {
   if (!liveListDoc) {
+    var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
+    var liveListFile = fs.readFileSync(liveListUpdateFullPath);
     liveListDoc = jsdom.jsdom(liveListFile);
   }
   var action = Math.floor(Math.random() * 3);
