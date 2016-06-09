@@ -60,4 +60,13 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     }
     return !name.endsWith("_") && !name.endsWith("ForTesting");
   }
+
+  /**
+   * {@inheritDoc}
+   * We cannot rename properties we treat as exported, because they may travel
+   * between compilation unit.
+   */
+  @Override public boolean blockRenamingForProperty(String name) {
+    return isExported(name, false);
+  }
 }
