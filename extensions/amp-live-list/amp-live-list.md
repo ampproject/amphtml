@@ -103,7 +103,7 @@ polling interval.
 
 The `update` reference point is shown when new items are received from
 the server, to provide an affordance for users to refresh the page with new items when they are available. It is hidden by default (through an `.amp-hidden`
-class which can be overriden). You may style this reference point as a `fixed` position
+class whose style can be overriden). You may style this reference point as a `fixed` position
 item if you want a floating button on the page like on social media websites, to
 draw the reader's attention to take action. Currently the `update` reference
 point is not shown for either updates (using `data-update-time`) or tombstone
