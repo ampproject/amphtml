@@ -112,6 +112,7 @@ export class Vsync {
 
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
+    // XXX: remove dependency on Viewer
     this.viewer_.onVisibilityChanged(() => {
       if (this.scheduled_) {
         this.forceSchedule_();

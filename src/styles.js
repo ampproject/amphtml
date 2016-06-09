@@ -83,6 +83,23 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
 }
 
 /**
+ */
+export function installStylesForShadowRoot(shadowRoot, cssText, cb, opt_isRuntimeCss, opt_ext) {
+  const style = shadowRoot.ownerDocument.createElement('style');
+  style.textContent = cssText;
+  let afterElement = null;
+  // Make sure that we place style tags after the main runtime CSS. Otherwise
+  // the order is random.
+  if (opt_isRuntimeCss) {
+    style.setAttribute('amp-runtime', '');
+  } else {
+    style.setAttribute('amp-extension', opt_ext || '');
+    afterElement = shadowRoot.querySelector('style[amp-runtime]');
+  }
+  insertAfterOrAtStart(shadowRoot, style, afterElement);
+}
+
+/**
  * Sets the document's body opacity to 1.
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.

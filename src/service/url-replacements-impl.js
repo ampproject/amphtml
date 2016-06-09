@@ -578,3 +578,15 @@ export function installUrlReplacementsService(window) {
     return new UrlReplacements(window);
   });
 };
+
+/**
+ * @param {!Window} window
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!UrlReplacements}
+ */
+export function installUrlReplacementsServiceForShadowRoot(window, shadowRoot) {
+  return getService(shadowRoot.AMP, 'url-replace', () => {
+    // XXX: redo
+    return new UrlReplacements(window);
+  });
+};

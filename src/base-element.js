@@ -16,9 +16,7 @@
 
 import {Layout} from './layout';
 import {preconnectFor} from './preconnect';
-import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
-import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 
 
@@ -172,6 +170,11 @@ export class BaseElement {
     return this.element.ownerDocument.defaultView;
   }
 
+  /** @protected @return {!./service/resources-impl.Resources} */
+  getResources() {
+    return this.element.getResources();
+  }
+
   /** @protected @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.getWin());
@@ -292,7 +295,7 @@ export class BaseElement {
    * @param {!Element} element
    */
   setAsOwner(element) {
-    this.resources_.setOwner(element, this.element);
+    this.getResources().setOwner(element, this.element);
   }
 
   /**
@@ -456,7 +459,7 @@ export class BaseElement {
    * @return {number}
    */
   getMaxDpr() {
-    return this.resources_.getMaxDpr();
+    return this.getResources().getMaxDpr();
   }
 
   /**
@@ -464,7 +467,7 @@ export class BaseElement {
    * @return {number}
    */
   getDpr() {
-    return this.resources_.getDpr();
+    return this.getResources().getDpr();
   }
 
   /**
@@ -575,7 +578,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.getWin());
+    return this.element.getViewport();
   }
 
  /**
@@ -583,7 +586,7 @@ export class BaseElement {
   * @return {!./layout-rect.LayoutRectDef}
   */
   getIntersectionElementLayoutBox() {
-    return this.resources_.getResourceForElement(this.element).getLayoutBox();
+    return this.getResources().getResourceForElement(this.element).getLayoutBox();
   }
 
   /**
@@ -594,7 +597,7 @@ export class BaseElement {
    * @protected
    */
   scheduleLayout(elements) {
-    this.resources_.scheduleLayout(this.element, elements);
+    this.getResources().scheduleLayout(this.element, elements);
   }
 
   /**
@@ -602,7 +605,7 @@ export class BaseElement {
    * @protected
    */
   schedulePause(elements) {
-    this.resources_.schedulePause(this.element, elements);
+    this.getResources().schedulePause(this.element, elements);
   }
 
   /**
@@ -614,7 +617,7 @@ export class BaseElement {
    * @protected
    */
   schedulePreload(elements) {
-    this.resources_.schedulePreload(this.element, elements);
+    this.getResources().schedulePreload(this.element, elements);
   }
 
   /**
@@ -626,7 +629,7 @@ export class BaseElement {
    * @protected
    */
   updateInViewport(elements, inLocalViewport) {
-    this.resources_.updateInViewport(this.element, elements, inLocalViewport);
+    this.getResources().updateInViewport(this.element, elements, inLocalViewport);
   }
 
   /**
@@ -639,7 +642,7 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight, opt_callback) {
-    this.resources_./*OK*/changeSize(
+    this.getResources()./*OK*/changeSize(
         this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
 
@@ -657,7 +660,7 @@ export class BaseElement {
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeSize(
+    this.getResources().attemptChangeSize(
         this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
 
@@ -676,7 +679,7 @@ export class BaseElement {
   * @protected
   */
  attemptChangeSize(newHeight, newWidth, opt_callback) {
-   this.resources_.attemptChangeSize(
+   this.getResources().attemptChangeSize(
        this.element, newHeight, newWidth, opt_callback);
  }
 
@@ -695,7 +698,7 @@ export class BaseElement {
   * @return {!Promise}
   */
   mutateElement(mutator, opt_element) {
-    return this.resources_.mutateElement(opt_element || this.element, mutator);
+    return this.getResources().mutateElement(opt_element || this.element, mutator);
   }
 
   /**
@@ -704,7 +707,7 @@ export class BaseElement {
    * @param {!Function} callback
    */
   deferMutate(callback) {
-    this.resources_.deferMutate(this.element, callback);
+    this.getResources().deferMutate(this.element, callback);
   }
 
   /**

@@ -27,8 +27,8 @@ import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
-import {installVsyncService} from './vsync-impl';
-import {installViewerService} from './viewer-impl';
+import {vsyncFor} from '../vsync';
+import {installViewerService, installViewerServiceForShadowRoot} from './viewer-impl';
 
 
 const TAG_ = 'Viewport';
@@ -103,7 +103,7 @@ export class Viewport {
     this.scrollMeasureTime_ = 0;
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(win);
+    this.vsync_ = vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -1249,11 +1249,11 @@ export function updateViewportMetaString(currentValue, updateParams) {
 
 /**
  * @param {!Window} window
+ * @param {!Viewer} viewer
  * @return {!Viewport}
  * @private
  */
-function createViewport_(window) {
-  const viewer = installViewerService(window);
+function createViewport_(window, viewer) {
   let binding;
   if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
@@ -1270,6 +1270,20 @@ function createViewport_(window) {
  */
 export function installViewportService(window) {
   return getService(window, 'viewport', () => {
-    return createViewport_(window);
+    return createViewport_(window, installViewerService(window));
+  });
+};
+
+
+/**
+ * @param {!Window} window
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Viewport}
+ */
+export function installViewportServiceForShadowRoot(window, shadowRoot) {
+  console.log('AMP: installViewportServiceForShadowRoot');
+  return getService(shadowRoot.AMP, 'viewport', () => {
+    // XXX: redo
+    return createViewport_(window, installViewerServiceForShadowRoot(window, shadowRoot));
   });
 };
