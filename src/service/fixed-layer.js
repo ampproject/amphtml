@@ -578,7 +578,7 @@ export class FixedLayer {
 /**
  * @typedef {{
  *   id: string,
- *   selectors: [],
+ *   selectors: !Array,
  *   element: !Element,
  *   placeholder: ?Element,
  *   fixedNow: boolean,

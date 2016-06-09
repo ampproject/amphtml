@@ -78,7 +78,7 @@ import {nend} from '../ads/nend';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string: boolean>}
+ * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
@@ -296,7 +296,7 @@ function triggerResizeRequest(width, height) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @returns {!function()} A function which removes the event listener that
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
@@ -327,7 +327,7 @@ function updateVisibilityState(global) {
 /**
  * Registers a callback for communicating when a resize request succeeds.
  * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
@@ -339,7 +339,7 @@ function onResizeSuccess(observerCallback) {
 /**
  * Registers a callback for communicating when a resize request is denied.
  * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
