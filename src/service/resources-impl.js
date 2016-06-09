@@ -2063,7 +2063,16 @@ export class Resource {
     }
     dev.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
-    this.element.viewportCallback(inViewport);
+    if (this.viewportCallbackPromise_) {
+      return;
+    }
+    this.viewportCallbackPromise_ = Promise.resolve();
+    this.resources_.schedule_(this, 'viewportCallback', -1, this.getPriority(), () => {
+      const promise = this.viewportCallbackPromise_;
+      this.viewportCallbackPromise_ = null;
+      this.element.viewportCallback(this.isInViewport_);
+      return promise;
+    });
   }
 
   /**
