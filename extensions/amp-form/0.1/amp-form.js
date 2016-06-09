@@ -27,11 +27,11 @@ import {startsWith} from '../../../src/string';
 /** @type {string} */
 const TAG = 'amp-form';
 
-class AmpForm {
+export class AmpForm {
 
   /**
    * Adds functionality to the passed form element and listens to submit event.
-   * @param element {!HTMLFormElement}
+   * @param {!HTMLFormElement} element
    */
   constructor(element) {
     /** @const @private {!Window} */
@@ -46,12 +46,12 @@ class AmpForm {
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
 
-    /** @const @private {string} */
-    this.xhrAction_ = this.form_.getAttribute('data-xhr-action');
+    /** @const @private {?string} */
+    this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
-      assertHttpsUrl(this.xhrAction_, this.form_, 'data-xhr-action');
+      assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
       user.assert(!startsWith(this.xhrAction_, 'https://cdn.ampproject.org'),
-          'form data-xhr-action should not be on cdn.ampproject.org: %s',
+          'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
     this.installSubmitHandler_();
@@ -59,25 +59,33 @@ class AmpForm {
 
   /** @private */
   installSubmitHandler_() {
-    this.form_.addEventListener('submit', e => {
-      if (e.defaultPrevented) {
-        return;
-      }
-      if (this.xhrAction_) {
-        this.xhr_.fetchJson(this.xhrAction_, {
-          body: new FormData(this.form_),
-          method: this.method_,
-        });
-        e.preventDefault();
-      }
-    });
+    this.form_.addEventListener('submit', e => this.handleSubmit_(e));
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  handleSubmit_(e) {
+    if (e.defaultPrevented) {
+      return;
+    }
+    if (this.xhrAction_) {
+      e.preventDefault();
+      this.xhr_.fetchJson(this.xhrAction_, {
+        body: new FormData(this.form_),
+        method: this.method_,
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      });
+    }
   }
 }
 
 
 /**
  * Installs submission handler on all forms in the document.
- * @param win {!Window}
+ * @param {!Window} win
  */
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, () => {
