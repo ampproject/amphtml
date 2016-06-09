@@ -158,7 +158,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.urlReplacements_.expand(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
-        ampUserId: ampUserId,
+        ampUserId,
       });
     });
   }
@@ -400,10 +400,7 @@ export class UserNotificationManager {
       resolve = r;
     });
 
-    return this.deferRegistry_[id] = {
-      promise: promise,
-      resolve: resolve,
-    };
+    return this.deferRegistry_[id] = {promise, resolve};
   }
 }
 

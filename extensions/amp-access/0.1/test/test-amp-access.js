@@ -1155,7 +1155,7 @@ describe('AccessService login', () => {
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login', event: event});
+    service.handleAction_({method: 'login', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
@@ -1164,7 +1164,7 @@ describe('AccessService login', () => {
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login-other', event: event});
+    service.handleAction_({method: 'login-other', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 

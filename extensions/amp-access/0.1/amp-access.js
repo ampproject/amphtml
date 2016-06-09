@@ -813,7 +813,7 @@ export class AccessService {
           this.buildUrl_(this.loginConfig_[k], /* useAuthData */ true)
               .then(url => {
                 this.loginUrlMap_[k] = url;
-                return {type: k, url: url};
+                return {type: k, url};
               }));
     }
     return Promise.all(promises);

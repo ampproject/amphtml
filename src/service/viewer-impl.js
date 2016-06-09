@@ -750,8 +750,8 @@ export class Viewer {
    */
   postDocumentReady(width, height) {
     this.sendMessageUnreliable_('documentLoaded', {
-      width: width,
-      height: height,
+      width,
+      height,
       title: this.win.document.title,
     }, false);
   }
@@ -763,7 +763,7 @@ export class Viewer {
    */
   postDocumentResized(width, height) {
     this.sendMessageUnreliable_(
-        'documentResized', {width: width, height: height}, false);
+        'documentResized', {width, height}, false);
   }
 
   /**
@@ -791,7 +791,7 @@ export class Viewer {
    */
   postPushHistory(stackIndex) {
     return this.sendMessageUnreliable_(
-        'pushHistory', {stackIndex: stackIndex}, true);
+        'pushHistory', {stackIndex}, true);
   }
 
   /**
@@ -801,7 +801,7 @@ export class Viewer {
    */
   postPopHistory(stackIndex) {
     return this.sendMessageUnreliable_(
-        'popHistory', {stackIndex: stackIndex}, true);
+        'popHistory', {stackIndex}, true);
   }
 
   /**
@@ -995,7 +995,7 @@ export class Viewer {
     if (found) {
       found.data = data;
     } else {
-      this.messageQueue_.push({eventType: eventType, data: data});
+      this.messageQueue_.push({eventType, data});
     }
     if (awaitResponse) {
       // TODO(dvoytenko): This is somewhat questionable. What do we return

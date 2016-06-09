@@ -129,7 +129,7 @@ export class IntersectionObserver extends Observable {
       // This message might be from any window within the iframe, we need
       // to keep track of which windows want to be sent updates.
       if (!this.clientWindows_.some(entry => entry.win == source)) {
-        this.clientWindows_.push({win: source, origin: origin});
+        this.clientWindows_.push({win: source, origin});
       }
       this.startSendingIntersectionChanges_();
     }, this.is3p_,

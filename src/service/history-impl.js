@@ -150,7 +150,7 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback: callback, resolve: resolve, reject: reject});
+    this.queue_.push({callback, resolve, reject});
     if (this.queue_.length == 1) {
       this.deque_();
     }
@@ -473,11 +473,7 @@ export class HistoryBindingNatural_ {
           resolve = aResolve;
           reject = aReject;
         }));
-    this.waitingState_ = {
-      promise: promise,
-      resolve: resolve,
-      reject: reject,
-    };
+    this.waitingState_ = {promise, resolve, reject};
     return promise;
   }
 

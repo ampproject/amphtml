@@ -281,7 +281,7 @@ export class ActionService {
     while (n) {
       actionInfo = this.matchActionInfo_(n, actionEventType);
       if (actionInfo) {
-        return {node: n, actionInfo: actionInfo};
+        return {node: n, actionInfo};
       }
       n = n.parentElement;
     }
@@ -394,9 +394,9 @@ export function parseActionMap(s, context) {
       }
 
       const action = {
-        event: event,
-        target: target,
-        method: method,
+        event,
+        target,
+        method,
         args: (args && window.AMP_TEST && Object.freeze) ?
             Object.freeze(args) : args,
         str: s,
@@ -551,7 +551,7 @@ class ParserTokenizer {
       const s = this.str_.substring(newIndex, end);
       const value = hasFraction ? parseFloat(s) : parseInt(s, 10);
       newIndex = end - 1;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // Different separators.
@@ -573,7 +573,7 @@ class ParserTokenizer {
       }
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // A key
@@ -587,7 +587,7 @@ class ParserTokenizer {
     const value = convertValues && (s == 'true' || s == 'false') ?
         s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.LITERAL, value: value, index: newIndex};
+    return {type: TokenType.LITERAL, value, index: newIndex};
   }
 }
 

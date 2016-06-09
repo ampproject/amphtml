@@ -345,11 +345,11 @@ export class AmpSlides extends BaseCarousel {
       maxDelta = 1;
     }
     this.swipeState_ = {
-      containerWidth: containerWidth,
-      prevTr: prevTr,
-      nextTr: nextTr,
-      prevIndex: prevIndex,
-      nextIndex: nextIndex,
+      containerWidth,
+      prevTr,
+      nextTr,
+      prevIndex,
+      nextIndex,
       min: minDelta,
       max: maxDelta,
       pos: 0,

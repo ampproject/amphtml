@@ -1258,10 +1258,10 @@ export class Resources {
       request.callback = opt_callback;
     } else {
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
-        resource: resource,
-        newHeight: newHeight,
-        newWidth: newWidth,
-        force: force,
+        resource,
+        newHeight,
+        newWidth,
+        force,
         callback: opt_callback,
       });
     }
@@ -1358,10 +1358,10 @@ export class Resources {
 
     const task = {
       id: taskId,
-      resource: resource,
+      resource,
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
-      callback: callback,
+      callback,
       scheduleTime: timer.now(),
       startTime: 0,
       promise: null,

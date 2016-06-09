@@ -257,7 +257,7 @@ export class Activity {
     setTimeout(this.boundStopIgnore_, timeToWait);
 
     this.activityHistory_.push({
-      type: type,
+      type,
       time: secondKey,
     });
   }

@@ -476,12 +476,12 @@ export class Viewport {
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
-      relayoutAll: relayoutAll,
+      relayoutAll,
       top: scrollTop,
       left: scrollLeft,
       width: size.width,
       height: size.height,
-      velocity: velocity,
+      velocity,
     });
   }
 
