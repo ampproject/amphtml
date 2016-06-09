@@ -51,11 +51,9 @@ export class Observable {
    * @param {function(TYPE)} handler Observer's instance.
    */
   remove(handler) {
-    for (let i = 0; i < this.handlers_.length; i++) {
-      if (handler == this.handlers_[i]) {
-        this.handlers_.splice(i, 1);
-        break;
-      }
+    const index = this.handlers_.indexOf(handler);
+    if (index > -1) {
+      this.handlers_.splice(index, 1);
     }
   }
 
@@ -64,9 +62,11 @@ export class Observable {
    * @param {TYPE} event
    */
   fire(event) {
-    this.handlers_.forEach(handler => {
+    const handlers = this.handlers_;
+    for (let i = 0; i < handlers.length; i++) {
+      const handler = handlers[i];
       handler(event);
-    });
+    }
   }
 
   /**
