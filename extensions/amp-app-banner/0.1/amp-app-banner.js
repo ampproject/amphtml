@@ -20,6 +20,8 @@ import {user} from '../../../src/log';
 import {platform} from '../../../src/platform';
 import {viewerFor} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
+import {urlReplacementsFor} from '../../../src/url-replacements';
+import {xhrFor} from '../../../src/xhr';
 
 const TAG = 'amp-app-banner';
 
@@ -27,8 +29,11 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback(onLayout) {
-    this.preconnect.url('https://itunes.apple.com', onLayout);
-    this.preconnect.url('https://play.google.com', onLayout);
+    if (platform.isIos()) {
+      this.preconnect.url('https://itunes.apple.com', onLayout);
+    } else if (platform.isAndroid()) {
+      this.preconnect.url('https://play.google.com', onLayout);
+    }
   }
 
   /** @override */
@@ -38,47 +43,117 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Viewer} */
-    const viewer = viewerFor(this.getWin());
-
-    // If non-embedded document and on Safari iOS just use the native app banner
-    // Safari supports if the meta tag is already setup.
-    if (!viewer.isEmbedded() && platform.isSafari() && platform.isIos()) {
-      const meta = this.getWin().document.head.querySelector(
-          'meta[name=apple-itunes-app]');
-      if (meta) {
-        return;
-      }
-    }
-
-    const installLink = this.element.querySelector('a[install-link]');
-    user.assert(installLink, '<a install-link> is required inside %s: %s',
-        TAG, this.element);
-    const openLink = this.element.querySelector('a[open-link]');
-    user.assert(openLink, '<a open-link> is required inside %s: %s',
-        TAG, this.element);
-
-    let installUrl;
-    let deepLinkUrl;
-    if (platform.isIos()) {
-      installUrl = this.element.getAttribute('ios-app-url');
-      deepLinkUrl = this.element.getAttribute('ios-deep-link-url');
-      this.element.classList.add('amp-platform-ios');
-    } else if (platform.isAndroid()) {
-      installUrl = this.element.getAttribute('android-app-url');
-      deepLinkUrl = this.element.getAttribute('android-deep-link-url');
-      this.element.classList.add('amp-platform-android');
-    } else {
-      // TODO: Maybe add support for windows phone links.
+    if (!platform.isIos() && !platform.isAndroid()) {
       setStyles(this.element, {
         'display': 'none',
       });
       return;
     }
-    installLink.setAttribute('href', installUrl);
-    openLink.setAttribute('href', deepLinkUrl);
+
+    /** @private @const {!Viewer} */
+    const viewer = viewerFor(this.getWin());
+
+    /** @private @const {!Xhr} */
+    this.xhr_ = xhrFor(this.getWin());
+
+    /** @const @private {!Element} */
+    this.installLink_ = this.element.querySelector('a[install-link]');
+    user.assert(this.installLink_, '<a install-link> is required inside %s: %s',
+        TAG, this.element);
+
+    /** @const @private {!Element} */
+    this.openLink_ = this.element.querySelector('a[open-link]');
+    user.assert(this.openLink_, '<a open-link> is required inside %s: %s',
+        TAG, this.element);
+
+    if (platform.isIos()) {
+      const meta = this.getWin().document.head.querySelector(
+          'meta[name=apple-itunes-app]');
+      user.assert(meta,
+          '<meta name=apple-itunes-app> in document header is required: %s',
+          this.element);
+
+      // If non-embedded document and on Safari iOS just use the native app
+      // banner Safari supports if the meta tag is already setup.
+      if (!viewer.isEmbedded() && platform.isSafari()) {
+        setStyles(this.element, {
+          'display': 'none',
+        });
+        return;
+      }
+      this.parseIosMetaContent_(meta.getAttribute('content'));
+    }
 
     // TODO: Provide a way to dismiss the banner and persist it.
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (!platform.isAndroid()) {
+      return;
+    }
+
+    const manifestLink = this.getWin().document.head.querySelector(
+        'link[rel=manifest],link[rel=amp-manifest]');
+    user.assert(manifestLink,
+        '<link rel=manifest> in the document head is required: %s',
+        this.element);
+
+    this.xhr_.fetchJson(manifestLink.getAttribute('href')).then(response => {
+      this.parseManifest_(response);
+    }).catch(unusedError => {
+      // TODO: What do we do when we fail to fetch manifest.
+      // Hiding it at this point might jump the page?
+    });
+  }
+
+  /**
+   * @param {!Object} manifestJson
+   * @private
+   */
+  parseManifest_(manifestJson) {
+    const apps = manifestJson['related_applications'];
+    user.assert(apps,
+        'related_applications is missing from manifest.json file: %s',
+        this.element);
+
+    const app = apps.find(app => app['platform'] == 'play');
+    user.assert(app, 'Could not find a platform=play app in manifest: %s',
+        this.element);
+    this.installLink_.setAttribute('href',
+        `https://play.google.com/store/apps/details?id=${app['id']}`);
+    if (app['url']) {
+      this.openLink_.setAttribute('href', app['url']);
+    } else {
+      urlReplacementsFor(this.getWin()).expand('CANONICAL_URL').then(url => {
+        this.openLink_.setAttribute('href', decodeURIComponent(url));
+      });
+    }
+  }
+
+  /**
+   * @param {string} metaContent
+   * @private
+   */
+  parseIosMetaContent_(metaContent) {
+    const parts = metaContent.replace(/\s/,'').split(',');
+    const config = {};
+    parts.forEach(part => {
+      const [key, value] = part.split(':');
+      config[key] = value;
+    });
+
+    const appId = config['app-id'];
+    const openUrl = config['app-argument'];
+    this.installLink_.setAttribute('href',
+        `https://itunes.apple.com/us/app/id${appId}`);
+    if (openUrl) {
+      this.openLink_.setAttribute('href', openUrl);
+    } else {
+      urlReplacementsFor(this.getWin()).expand('CANONICAL_URL').then(url => {
+        this.openLink_.setAttribute('href', decodeURIComponent(url));
+      });
+    }
   }
 }
 
