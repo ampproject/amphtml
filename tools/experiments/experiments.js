@@ -86,6 +86,11 @@ const EXPERIMENTS = [
     name: 'AMP carousel using horizontal scroll',
     spec: '',
   },
+  {
+    id: 'amp-app-banner',
+    name: 'Shows a native app install/open banner.',
+    spec: 'https://github.com/ampproject/amphtml/issues/800',
+  },
 ];
 
 
