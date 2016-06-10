@@ -686,9 +686,8 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body./*OK*/scrollHeight);
-      this.updateScrollHeight_();
+      this.viewer_.postDocumentReady(this.viewport_.getScrollWidth(),
+        this.viewport_.getScrollHeight());
     }
 
     const viewportSize = this.viewport_.getSize();
