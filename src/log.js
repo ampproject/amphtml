@@ -374,7 +374,7 @@ export const user = new Log(window, mode => {
 
 /**
  * AMP development log. Calls to `dev.assert` and `dev.fine` are stripped in
- * the PROD binary.
+ * the PROD binary. However, `dev.assert` result is preserved in either case.
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
