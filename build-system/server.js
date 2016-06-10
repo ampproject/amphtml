@@ -75,8 +75,8 @@ app.use('/form/echo-html/post', function(req, res) {
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, minify) {
-  res.setHeader('Content-Type', 'text/html');
   var url = 'https://cdn.ampproject.org/c' + req.url;
+  var localUrlPrefix = getUrlPrefix(req);
   request(url, function (error, response, body) {
     body = body
         // Unversion URLs.
@@ -86,15 +86,14 @@ function proxyToAmpProxy(req, res, minify) {
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
         .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
         .replace('https://cdn.ampproject.org/v0.max.js',
-            'http://localhost:8000/dist/amp.js')
+            localUrlPrefix + '/dist/amp.js')
         .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
-            'http://localhost:8000/dist/v0/');
+            localUrlPrefix + '/dist/v0/');
     if (minify) {
       body = body.replace(/\.max\.js/g, '.js')
           .replace('/dist/amp.js', '/dist/v0.js');
     }
-    res.statusCode = response.statusCode;
-    res.end(body);
+    res.status(response.statusCode).send(body);
   });
 }
 
@@ -192,9 +191,12 @@ app.use('/min/', function(req, res) {
 });
 
 app.use('/examples.build/analytics.config.json', function (req, res, next) {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      req.protocol + '://' + req.headers.host);
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();
 });
 
 exports.app = app;
+
+function getUrlPrefix(req) {
+  return req.protocol + '://' + req.headers.host;
+}
