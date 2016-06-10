@@ -321,9 +321,9 @@ The `triggers` attribute describes when an analytics request should be sent. It 
 #### Page visible trigger (`"on": "visible"`)
 Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. Configuration properties supported in `visibilitySpec` are:
   - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply.
-  - `continuousTimeMin` and `continuousTimeMax` These conditions keep track of the amount of time (any part of) an element has been in the viewport and fire when the time is between the minimum and maximum configured time. The time is expressed in milliseconds.
-  - `totalTimeMin` and `totalTimeMax` These conditions keep track of total time for which any part of an element is on screen and fire when the time is between minimum and maximum. The time is expressed in milliseconds.
-  - `visiblePercentageMin` and `visiblePercentageMax` These conditions keep track of the amount of element visible in vieweport at any given time. They get triggered when the percentage of element visible is between min and max (if specified). Valid values are 0-100 (lower bound is not inclusive while the upper bound is).
+  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+  - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
 
