@@ -316,19 +316,6 @@ export class Resources {
     });
   }
 
-  /** @private */
-  updateScrollHeight_() {
-    if (!this.win.document.body) {
-      return;
-    }
-    const scrollHeight = this.win.document.body./*OK*/scrollHeight;
-    if (scrollHeight != this./*OK*/scrollHeight_) {
-      this./*OK*/scrollHeight_ = scrollHeight;
-      this.viewer_.postDocumentResized(this.viewport_.getSize().width,
-          scrollHeight);
-    }
-  }
-
   /**
    * Returns the maximum DPR available on this device.
    * @return {number}
@@ -1469,7 +1456,6 @@ export class Resources {
         if (this.visible_) {
           dev.fine(TAG_, 'next pass:', delay);
           this.schedulePass(delay);
-          this.updateScrollHeight_();
         } else {
           dev.fine(TAG_, 'document is not visible: no scheduling');
         }

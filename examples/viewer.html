@@ -298,16 +298,6 @@
     };
 
 
-    Viewer.prototype.documentHeight_ = function(documentHeight) {
-      log('AMP document height:', documentHeight);
-      if (this.viewportType_ == 'virtual') {
-        this.iframe.style.height = Math.max(documentHeight,
-            this.container./*OK*/offsetHeight) + 'px';
-      }
-      return Promise.resolve();
-    };
-
-
     Viewer.prototype.onScroll_ = function() {
       this.sendRequest_('viewport', {
         scrollTop: this.container./*OK*/scrollTop
@@ -397,9 +387,6 @@
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       if (type == 'documentLoaded') {
         return this.documentReady_();
-      }
-      if (type == 'documentResized') {
-        return this.documentHeight_(data.height);
       }
       if (type == 'requestFullOverlay') {
         return this.requestFullOverlay_();
