@@ -92,6 +92,10 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  /**
+   * The function that remove listener to sticky-ad onHorizontal scroll event.
+   * @private
+   */
   removeOnHorizontalListener_() {
     if (this.bindedOnHorizontalScroll_) {
       this.element.removeEventListener('scroll',
@@ -139,6 +143,11 @@ class AmpStickyAd extends AMP.BaseElement {
         this.scrollTimeout_ = null;
         this.positioningInProgress_ = null;
 
+        const dummyElement = global.document.createElement('div');
+        dummyElement.classList.add('-amp-sticky-ad-delete-box');
+        dummyElement.style.minHeight = borderBottom + 'px';
+        this.element.appendChild(dummyElement);
+
         if (!this.bindedHorizontalScroll_) {
           this.bindedOnHorizontalScroll_ = this.onHorizontalScroll_.bind(this);
         }
@@ -147,15 +156,24 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  /**
+   * The listener function that listen on sticky-ad horizontal scroll event.
+   * Dismiss sticky-ad after scroll certain distance, or re-center sticky-ad.
+   * @private
+   */
   onHorizontalScroll_() {
     if (this.scrollTimeout) {
       window.clearTimeout(this.scrollTimeout);
     }
-    if (this.element.scrollLeft > this.viewportWidth_ * 0.4) {
+    if (this.element.scrollLeft > this.viewportWidth_ * 0.35) {
       this.deferMutate(() => {
-        toggle(this.element, false);
+        this.positionInProgress = true;
+        this.element.classList.add('-amp-sticky-ad-delete');
+        timer.delay(() => {
+          toggle(this.element, false);
+          this.viewport_.updatePaddingBottom(0);
+        }, 500);
         this.removeOnHorizontalListener_();
-        // TODO: update bodyBorder back to 0.
         return;
       });
       // TODO: UX? Delete icon?
@@ -169,6 +187,10 @@ class AmpStickyAd extends AMP.BaseElement {
     }, 150);
   }
 
+  /**
+   * Function to re-center sticky-ad.
+   * @private
+   */
   centerElement() {
     if (this.positionInProgress) {
       return;

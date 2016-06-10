@@ -51,8 +51,8 @@ describe('amp-sticky-ad', () => {
       iframe.doc.head.appendChild(link);
       return iframe.addElement(ampStickyAd).then(() => {
         return Promise.resolve({
-          iframe: iframe,
-          ampStickyAd: ampStickyAd,
+          iframe,
+          ampStickyAd,
         });
       });
     });
