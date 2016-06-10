@@ -120,6 +120,8 @@ class AmpViewer {
     this.stylesheets_ = [];
     /** @private @const {!Array<!Element>} */
     this.scripts_ = [];
+    /** @private @const {...} */
+    this.viewer_ = null;
   }
 
   /**
@@ -146,7 +148,10 @@ class AmpViewer {
     log('Shadow root:', this.shadowRoot_);
 
     this.ampReadyPromise_.then(AMP => {
-      AMP.attachShadowRoot(this.shadowRoot_);
+      const amp = AMP.attachShadowRoot(this.shadowRoot_);
+      this.viewer_ = amp.viewer;
+      this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
+          'http://localhost:8000');
     });
 
     // Head
@@ -259,6 +264,12 @@ class AmpViewer {
    */
   resolveUrl_(relativeUrlString) {
     return new URL(relativeUrlString, this.baseUrl_).toString();
+  }
+
+  /**
+   */
+  onMessage_(type, data, rsvp) {
+    log('receieved message:', type, data, rsvp);
   }
 }
 
