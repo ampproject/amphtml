@@ -140,15 +140,59 @@
       margin: 0;
     }
 
+    amp-app-banner {
+      background: #f4f4f4;
+      padding: 15px;
+      box-shadow: 0 -2px 5px 0 #000;
+    }
+
     amp-img {
       background-color: #f4f4f4;
     }
+
+    amp-app-banner amp-img {
+      float: left;
+      margin-right: 15px
+    }
+
+    amp-app-banner h3 {
+      margin: 0;
+    }
+
+    amp-app-banner p {
+      font-size: 14px;
+      margin: 3px 0;
+    }
+
+    amp-app-banner a {
+      padding: 8px;
+      margin-right: 10px;
+    }
+    amp-app-banner .actions {
+      text-align: right;
+      margin-top: 10px;
+      font-size: 14px;
+    }
   </style>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
+  <link rel="amp-manifest" href="manifest.json">
 </head>
 <body>
+  <amp-app-banner>
+    <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+             width="60" height="51"></amp-img>
+    <h3>Medium App</h3>
+    <p>Experience a richer experience on our mobile app!</p>
+    <div class="actions">
+      <a install-link>Get App</a>
+      <a open-link>Open in app</a>
+    </div>
+  </amp-app-banner>
+
   <header>
     <div class="brand-logo">
       PublisherLogo
