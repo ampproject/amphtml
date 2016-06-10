@@ -564,8 +564,9 @@ export class Viewport {
  * ViewportBindingDef is an interface that defines an underlying technology
  * behind the {@link Viewport}.
  * @interface
+ * @visibleForTesting
  */
-class ViewportBindingDef {
+export class ViewportBindingDef {
 
   /**
    * Whether the binding requires fixed elements to be transfered to a
@@ -1099,133 +1100,6 @@ export class ViewportBindingNaturalIosEmbed_ {
 
 
 /**
- * Implementation of ViewportBindingDef that assumes a virtual viewport that is
- * sized outside of the AMP runtime (e.g. in a parent window) and passed here
- * via config and events. Applicable to cases where a parent window expands the
- * iframe to all available height and leaves scrolling to the parent window.
- *
- * Visible for testing.
- *
- * @implements {ViewportBindingDef}
- */
-export class ViewportBindingVirtual_ {
-
-  /**
-   * @param {!Window} win
-   * @param {!Viewer} viewer
-   */
-  constructor(win, viewer) {
-    /** @private @const {!Window} */
-    this.win = win;
-
-    /** @private {number} */
-    this.width_ = viewer.getViewportWidth();
-
-    /** @private {number} */
-    this.height_ = viewer.getViewportHeight();
-
-    /** @private {number} */
-    this./*OK*/scrollTop_ = viewer.getScrollTop();
-
-    /** @private @const {!Observable} */
-    this.scrollObservable_ = new Observable();
-
-    /** @private @const {!Observable} */
-    this.resizeObservable_ = new Observable();
-
-    dev.fine(TAG_, 'initialized virtual viewport');
-  }
-
-  /** @override */
-  cleanup_() {
-    // TODO(dvoytenko): remove listeners
-  }
-
-  /** @override */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
-
-  /** @override */
-  updateViewerViewport(viewer) {
-    if (viewer.getScrollTop() != this./*OK*/scrollTop_) {
-      this./*OK*/scrollTop_ = viewer.getScrollTop();
-      this.scrollObservable_.fire();
-    }
-    if (viewer.getViewportWidth() != this.width_ ||
-            viewer.getViewportHeight() != this.height_) {
-      this.width_ = viewer.getViewportWidth();
-      this.height_ = viewer.getViewportHeight();
-      this.resizeObservable_.fire();
-    }
-  }
-
-  /** @override */
-  updatePaddingTop(paddingTop) {
-    this.win.document.documentElement.style.paddingTop = px(paddingTop);
-  }
-
-  /** @override */
-  updateLightboxMode(unusedLightboxMode) {
-    // The layout is always accurate.
-  }
-
-  /** @override */
-  onScroll(callback) {
-    this.scrollObservable_.add(callback);
-  }
-
-  /** @override */
-  onResize(callback) {
-    this.resizeObservable_.add(callback);
-  }
-
-  /** @override */
-  getSize() {
-    return {width: this.width_, height: this.height_};
-  }
-
-  /** @override */
-  getScrollTop() {
-    return this./*OK*/scrollTop_;
-  }
-
-  /** @override */
-  getScrollLeft() {
-    return 0;
-  }
-
-  /** @override */
-  getScrollWidth() {
-    return this.win.document.documentElement./*OK*/scrollWidth;
-  }
-
-  /** @override */
-  getScrollHeight() {
-    return this.win.document.documentElement./*OK*/scrollHeight;
-  }
-
-  /**
-   * Returns the rect of the element within the document.
-   * @param {!Element} el
-   * @return {!LayoutRect}
-   */
-  getLayoutRect(el) {
-    const b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left),
-        Math.round(b.top),
-        Math.round(b.width),
-        Math.round(b.height));
-  }
-
-  /** @override */
-  setScrollTop(unusedScrollTop) {
-    // TODO(dvoytenko): communicate to the viewer.
-  }
-}
-
-
-/**
  * Parses viewport meta value. It usually looks like:
  * ```
  * width=device-width,initial-scale=1,minimum-scale=1
@@ -1320,9 +1194,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
 function createViewport_(window) {
   const viewer = installViewerService(window);
   let binding;
-  if (viewer.getViewportType() == 'virtual') {
-    binding = new ViewportBindingVirtual_(window, viewer);
-  } else if (viewer.getViewportType() == 'natural-ios-embed') {
+  if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
     binding = new ViewportBindingNatural_(window);
