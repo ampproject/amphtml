@@ -54,7 +54,11 @@ export function parseUrl(url) {
   };
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
+  info.origin = (a.origin && a.origin != 'null')
+      ? a.origin
+      : info.protocol == 'data:' || !info.host
+          ? info.href
+          : info.protocol + '//' + info.host;
   user.assert(info.origin, 'Origin must exist');
   // Freeze during testing to avoid accidental mutation.
   cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
@@ -190,25 +194,6 @@ export function parseQueryString(queryString) {
 
 
 /**
- * Don't use this directly, only exported for testing. The value
- * is available via the origin property of the object returned by
- * parseUrl.
- * @param {string|!Location} url
- * @return {string}
- * @visibleForTesting
- */
-export function getOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrl(url);
-  }
-  if (url.protocol == 'data:' || !url.host) {
-    return url.href;
-  }
-  return url.protocol + '//' + url.host;
-}
-
-
-/**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same
  * string is returned.
  * @param {string} url
@@ -298,7 +283,7 @@ export function getSourceUrl(url) {
  * @return {string} The source origin of the URL.
  */
 export function getSourceOrigin(url) {
-  return getOrigin(getSourceUrl(url));
+  return parseUrl(getSourceUrl(url)).origin;
 }
 
 /**
