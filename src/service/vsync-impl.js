@@ -46,6 +46,7 @@ let VsyncTaskSpecDef;
  * NOTE: If the document is invisible due to prerendering (this includes
  * application level prerendering where the doc is rendered in a hidden
  * iframe or webview), then no frame will be scheduled.
+ * @package Visible for type.
  */
 export class Vsync {
 

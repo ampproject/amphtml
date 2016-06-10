@@ -76,6 +76,7 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function compile(entryModuleFilename, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+    const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     console./*OK*/log('Starting closure compiler for', entryModuleFilename);
@@ -199,7 +200,8 @@ function compile(entryModuleFilename, outputDir,
       }
     };
 
-    if (argv.typecheck_only) {
+    // For now do type check separately
+    if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';

@@ -92,6 +92,7 @@ export const TRUSTED_VIEWER_HOSTS = [
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
  * {@link getParam}, {@link receiveMessage} and {@link setMessageDeliverer}.
+ * @package Visible for type.
  */
 export class Viewer {
 

@@ -29,6 +29,21 @@ const cache = Object.create(null);
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
 /**
+ * @typedef {({
+ *   href: string,
+ *   protocol: string,
+ *   host: string,
+ *   hostname: string,
+ *   port: string,
+ *   pathname: string,
+ *   search: string,
+ *   hash: string,
+ *   origin: string
+ * }|!Location)}
+ */
+export let Location;
+
+/**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
