@@ -135,13 +135,13 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
   });
-  /*compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
     checkTypes: opt_checkTypes,
     watch: watch,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
-  });*/
+  });
   thirdPartyBootstrap(watch, shouldMinify);
 }
 
