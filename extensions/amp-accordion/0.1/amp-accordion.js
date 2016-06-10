@@ -31,8 +31,11 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
+    /** @const @private {!Window} */
+    this.win_ = this.getWin();
+
     /** @const @private {string} */
-    this.id_ = this.getSessionStorageKey();
+    this.id_ = this.getSessionStorageKey_();
 
     /** @const @private {!Object|undefined} */
     this.currentState_ = null;
@@ -42,8 +45,7 @@ class AmpAccordion extends AMP.BaseElement {
     // sessionStorage value: string that can convert to this.currentState_ obj.
     // TODO: add test for setting and reading sessionStorage.
     try {
-      this.currentState_ =
-        JSON.parse(this.getWin()./*OK*/sessionStorage.getItem(this.id_));
+      this.currentState_ = this.getSessionState_();
     } catch (e) {
       console./*OK*/error(e.message, e.stack);
     }
@@ -76,23 +78,30 @@ class AmpAccordion extends AMP.BaseElement {
       }
       if (this.currentState_[contentId]) {
         section.setAttribute('expanded', '');
-        content.setAttribute('aria-expanded', 'true');
       } else if (this.currentState_[contentId] == false) {
         section.removeAttribute('expanded');
-        content.setAttribute('aria-expanded', 'false');
-      } else {
-        content.setAttribute(
-            'aria-expanded', section.hasAttribute('expanded').toString());
       }
+      content.setAttribute(
+          'aria-expanded', section.hasAttribute('expanded').toString());
       header.setAttribute('aria-controls', contentId);
       header.addEventListener('click', boundOnHeaderClick_);
     });
   }
 
-  getSessionStorageKey() {
+  getSessionStorageKey_() {
     const id_ = this.element.id;
-    const url = removeFragment(this.getWin().location.href);
+    const url = removeFragment(this.win_.location.href);
     return `amp-${id_}-${url}`;
+  }
+
+  getSessionState_() {
+    const sessionStr = this.win_./*REVIEW*/sessionStorage.getItem(this.id_);
+    return JSON.parse(sessionStr);
+  }
+
+  setSessionState_() {
+    const sessionStr = JSON.stringify(this.currentState_);
+    this.win_./*REVIEW*/sessionStorage.setItem(this.id_, sessionStr);
   }
 
   /**
@@ -120,8 +129,7 @@ class AmpAccordion extends AMP.BaseElement {
     // sessionStorage key: special created id for this element, this.id_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
     try {
-      this.getWin()./*OK*/sessionStorage.setItem(
-          this.id_, JSON.stringify(this.currentState_));
+      this.setSessionState_();
     } catch (e) {
       console./*OK*/error(e.message, e.stack);
     }

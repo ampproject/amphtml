@@ -40,7 +40,8 @@ describe('amp-accordion', () => {
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
         section.innerHTML = '<h2>Section ' + i +
-            '<span>nested stuff<span></h2><div>Loreum ipsum</div>';
+            '<span>nested stuff<span></h2><div id=\'test' + i +
+            '\'>Loreum ipsum</div>';
         ampAccordion.appendChild(section);
         if (i == 1) {
           section.setAttribute('expanded', '');
@@ -97,6 +98,79 @@ describe('amp-accordion', () => {
       obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(clickEvent.preventDefault.called).to.be.true;
+    });
+  });
+
+  it('get correct session storage key', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const impl = obj.ampAccordion.implementation_;
+      const url = iframe.win.location.href;
+      impl.element.id = '321';
+      const id = impl.getSessionStorageKey_();
+      const correctId = 'amp-321-' + url;
+      expect(id).to.be.equal(correctId);
+    });
+  });
+
+  it('should set sessionStorage on click', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const impl = obj.ampAccordion.implementation_;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEventExpandElement = {
+        currentTarget: headerElements[0],
+        //elementId = currentTarget.getAttribute('id');
+        preventDefault: sandbox.spy(),
+      };
+      const clickEventCollapseElement = {
+        currentTarget: headerElements[1],
+        preventDefault: sandbox.spy(),
+      };
+      expect(Object.keys(impl.currentState_)).to.have.length(0);
+      impl.onHeaderClick_(clickEventExpandElement);
+      expect(Object.keys(impl.currentState_)).to.have.length(1);
+      expect(impl.currentState_['test0']).to.be.true;
+      impl.onHeaderClick_(clickEventCollapseElement);
+      expect(Object.keys(impl.currentState_)).to.have.length(2);
+      expect(impl.currentState_['test0']).to.be.true;
+      expect(impl.currentState_['test1']).to.be.false;
+    });
+  });
+
+  it('should expand element to sessionStorage value', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const impl = obj.ampAccordion.implementation_;
+      let headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
+      impl.getSessionState_ = function() {
+        return {
+          'test0': true,
+        };
+      };
+      impl.buildCallback();
+      headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
+      impl.getSessionState_ = function() {
+        return {
+          'test0': true,
+          'test1': false,
+        };
+      };
+      impl.buildCallback();
+      headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
     });
   });
 });
