@@ -20,8 +20,10 @@ import {user} from '../../../src/log';
 import {platform} from '../../../src/platform';
 import {viewerFor} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {urlReplacementsFor} from '../../../src/url-replacements';
+import {documentInfoFor} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
+import {assertHttpsUrl} from '../../../src/url';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-app-banner';
 
@@ -29,6 +31,11 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback(onLayout) {
+    if (!this.isExperimentOn_) {
+      user.warn(TAG, `Experiment ${TAG} disabled`);
+      return;
+    }
+
     if (platform.isIos()) {
       this.preconnect.url('https://itunes.apple.com', onLayout);
     } else if (platform.isAndroid()) {
@@ -43,6 +50,13 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    /** @private @const {boolean} */
+    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    if (!this.isExperimentOn_) {
+      user.warn(TAG, `Experiment ${TAG} disabled`);
+      return;
+    }
+
     if (!platform.isIos() && !platform.isAndroid()) {
       setStyles(this.element, {
         'display': 'none',
@@ -52,6 +66,9 @@ class AmpAppBanner extends AMP.BaseElement {
 
     /** @private @const {!Viewer} */
     const viewer = viewerFor(this.getWin());
+
+    /** @private @const {!Document} */
+    this.doc_ = this.getWin().document;
 
     /** @private @const {!Xhr} */
     this.xhr_ = xhrFor(this.getWin());
@@ -67,10 +84,10 @@ class AmpAppBanner extends AMP.BaseElement {
         TAG, this.element);
 
     if (platform.isIos()) {
-      const meta = this.getWin().document.head.querySelector(
+      const meta = this.doc_.head.querySelector(
           'meta[name=apple-itunes-app]');
       user.assert(meta,
-          '<meta name=apple-itunes-app> in document header is required: %s',
+          '<meta name=apple-itunes-app> in <head> is required: %s',
           this.element);
 
       // If non-embedded document and on Safari iOS just use the native app
@@ -89,17 +106,25 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (!this.isExperimentOn_) {
+      user.warn(TAG, `Experiment ${TAG} disabled`);
+      return Promise.resolve();
+    }
+
     if (!platform.isAndroid()) {
       return Promise.resolve();
     }
 
-    const manifestLink = this.getWin().document.head.querySelector(
+    const manifestLink = this.doc_.head.querySelector(
         'link[rel=manifest],link[rel=amp-manifest]');
     user.assert(manifestLink,
-        '<link rel=manifest> in the document head is required: %s',
+        '<link rel=manifest> in the <head> is required: %s',
         this.element);
 
-    return this.xhr_.fetchJson(manifestLink.getAttribute('href'))
+    const manifestHref = manifestLink.getAttribute('href');
+    assertHttpsUrl(manifestHref, this.element);
+
+    return this.xhr_.fetchJson(manifestHref)
         .then(response => {
           this.parseManifest_(response);
         }).catch(unusedError => {
@@ -123,13 +148,9 @@ class AmpAppBanner extends AMP.BaseElement {
         this.element);
     this.installLink_.setAttribute('href',
         `https://play.google.com/store/apps/details?id=${app['id']}`);
-    if (app['url']) {
-      this.openLink_.setAttribute('href', app['url']);
-    } else {
-      urlReplacementsFor(this.getWin()).expand('CANONICAL_URL').then(url => {
-        this.openLink_.setAttribute('href', decodeURIComponent(url));
-      });
-    }
+
+    const url = app['url'] || documentInfoFor(this.getWin()).canonicalUrl;
+    this.openLink_.setAttribute('href', url);
   }
 
   /**
@@ -140,21 +161,16 @@ class AmpAppBanner extends AMP.BaseElement {
     const parts = metaContent.replace(/\s/,'').split(',');
     const config = {};
     parts.forEach(part => {
-      const [key, value] = part.split(':');
-      config[key] = value;
+      const keyValuePair = part.split('=');
+      config[keyValuePair[0]] = keyValuePair[1];
     });
 
     const appId = config['app-id'];
     const openUrl = config['app-argument'];
     this.installLink_.setAttribute('href',
         `https://itunes.apple.com/us/app/id${appId}`);
-    if (openUrl) {
-      this.openLink_.setAttribute('href', openUrl);
-    } else {
-      urlReplacementsFor(this.getWin()).expand('CANONICAL_URL').then(url => {
-        this.openLink_.setAttribute('href', decodeURIComponent(url));
-      });
-    }
+    const url = openUrl || documentInfoFor(this.getWin()).canonicalUrl;
+    this.openLink_.setAttribute('href', url);
   }
 }
 
