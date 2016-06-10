@@ -319,7 +319,7 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
 
 #### Page visible trigger (`"on": "visible"`)
-Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. Configuration properties supported in `visibilitySpec` are:
+Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
   - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply.
   - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
   - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.

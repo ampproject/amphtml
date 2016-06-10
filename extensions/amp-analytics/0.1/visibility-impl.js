@@ -28,7 +28,7 @@ import {VisibilityState} from '../../../src/visibility-state';
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
 
 // Variables that are passed to the callback.
-const MAX_CONTINUOUS_TIME = 'maxContinuousTime';
+const MAX_CONTINUOUS_TIME = 'maxContinuousVisibleTime';
 const TOTAL_VISIBLE_TIME = 'totalVisibleTime';
 const FIRST_SEEN_TIME = 'firstSeenTime';
 const LAST_SEEN_TIME = 'lastSeenTime';
