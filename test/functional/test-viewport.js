@@ -50,7 +50,7 @@ describe('Viewport', () => {
       },
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
-      postScroll: () => {},
+      postScroll: sandbox.spy(),
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
@@ -226,6 +226,47 @@ describe('Viewport', () => {
     viewerViewportHandler();
     bindingMock.verify();
   });
+
+  it('should send scroll events', () => {
+    // 0         ->    6     ->      12   ->      16         ->   18
+    // scroll-10    scroll-20    scroll-30   2nd anim frame    scroll-40
+
+    // when there's no scroll
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // scroll to 10
+    viewport.getScrollTop = () => 10;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 20
+    viewport.getScrollTop = () => 20;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 30
+    viewport.getScrollTop = () => 30;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, second animation frame starts
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(1);
+    expect(viewer.postScroll.withArgs(30).calledOnce).to.be.true;
+    // scroll to 40
+    viewport.getScrollTop = () => 40;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(1);
+  });
+
 
   it('should defer scroll events', () => {
     let changeEvent = null;

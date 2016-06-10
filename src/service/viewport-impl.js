@@ -89,7 +89,7 @@ export class Viewport {
     this.lastMeasureScrollTop_ = null;
 
     /** @private {boolean} */
-    this.duringAnimationFrame_ = false;
+    this.scrollAnimationFrameThrottled_ = false;
 
     /** @private {?number} */
     this./*OK*/scrollLeft_ = null;
@@ -147,15 +147,7 @@ export class Viewport {
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
 
-    this.onScroll(() => {
-      if (!this.duringAnimationFrame_) {
-        this.duringAnimationFrame_ = true;
-        this.vsync_.measure(() => {
-          this.duringAnimationFrame_ = false;
-          this.viewer_.postScroll(this.binding_.getScrollTop());
-        });
-      }
-    });
+    this.onScroll(this.sendScrollMessage_.bind(this));
   }
 
   /** For testing. */
@@ -499,7 +491,7 @@ export class Viewport {
     dev.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
-        'top=', scrollLeft,
+        'left=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
@@ -563,6 +555,19 @@ export class Viewport {
     }
   }
 
+  /**
+   * Send scroll message via the viewer per animation frame
+   * @private
+   */
+  sendScrollMessage_() {
+    if (!this.scrollAnimationFrameThrottled_) {
+      this.scrollAnimationFrameThrottled_ = true;
+      this.vsync_.measure(() => {
+        this.scrollAnimationFrameThrottled_ = false;
+        this.viewer_.postScroll(this.getScrollTop());
+      });
+    }
+  }
   /** @private */
   resize_() {
     this.rect_ = null;
