@@ -17,6 +17,7 @@
 // Node.js global
 var process = {};
 process.env;
+process.end.NODE_ENV;
 
 // Exposed to ads.
 window.context = {};

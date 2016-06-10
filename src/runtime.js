@@ -139,12 +139,12 @@ export function adopt(global) {
 
   /**
    * Sets the function to forward tick events to.
-   * @param {funtion(string,?string=,number=)} fn
+   * @param {function(string,?string=,number=)} fn
    * @param {function()=} opt_flush
    * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = () => {};
+  global.AMP.setTickFunction = (fn, opt_flush) => {};
 
   // Execute asynchronously scheduled elements.
   // Extensions are only processed once HEAD is complete.

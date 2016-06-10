@@ -196,7 +196,8 @@ function compile(entryModuleFilename, outputDir,
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
+        warning_level: 'DEFAULT',
+        jscomp_error: 'checkTypes',
       }
     };
 

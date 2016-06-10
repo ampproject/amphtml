@@ -38,7 +38,7 @@ let AnalyticsEventListenerDef;
 
 /**
  * @param {!Window} window Window object to listen on.
- * @param {!JSONObject} config Configuration for instrumentation.
+ * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *          fires.
  */
@@ -122,7 +122,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!JSONObject} config Configuration for instrumentation.
+   * @param {!JSONType} config Configuration for instrumentation.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    */
@@ -209,7 +209,7 @@ export class InstrumentationService {
    * the conditions are met.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
-   * @param {!JSONObject} config Configuration for instrumentation.
+   * @param {!JSONType} config Configuration for instrumentation.
    * @private
    */
   createVisibilityListener_(callback, config) {
@@ -303,7 +303,7 @@ export class InstrumentationService {
   /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONObject} config the config that specifies the boundaries.
+   * @param {!JSONType} config the config that specifies the boundaries.
    * @param {Function} listener
    * @private
    */
@@ -416,7 +416,7 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {JSONObject} timerSpec
+   * @param {JSONType} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
@@ -442,7 +442,7 @@ export class InstrumentationService {
 
   /**
    * @param {!Function} listener
-   * @param {JSONObject} timerSpec
+   * @param {JSONType} timerSpec
    * @private
    */
   createTimerListener_(listener, timerSpec) {

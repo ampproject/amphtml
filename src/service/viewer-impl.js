@@ -142,7 +142,7 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
     this.historyPoppedObservable_ = new Observable();
 
-    /** @private {!Observable<!JSONObject>} */
+    /** @private {!Observable<!JSONType>} */
     this.broadcastObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
@@ -746,7 +746,7 @@ export class Viewer {
 
   /**
    * Triggers "tick" event for the viewer.
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   tick(message) {
     this.sendMessageUnreliable_('tick', message, false);
@@ -761,7 +761,7 @@ export class Viewer {
 
   /**
    * Triggers "setFlushParams" event for the viewer.
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   setFlushParams(message) {
     this.sendMessageUnreliable_('setFlushParams', message, false);
@@ -769,7 +769,7 @@ export class Viewer {
 
   /**
    * Triggers "prerenderComplete" event for the viewer.
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   prerenderComplete(message) {
     this.sendMessageUnreliable_('prerenderComplete', message, false);
@@ -876,7 +876,7 @@ export class Viewer {
    * will attempt to deliver messages when the messaging channel has been
    * established, but it will not fail if the channel is timed out.
    *
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   broadcast(message) {
     this.maybeSendMessage_('broadcast', message);
@@ -884,7 +884,7 @@ export class Viewer {
 
   /**
    * Registers receiver for the broadcast events.
-   * @param {function(!JSONObject)} handler
+   * @param {function(!JSONType)} handler
    * @return {!Unlisten}
    */
   onBroadcast(handler) {

@@ -192,7 +192,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONObject} params
+   * @param {!JSONType} params
    * @private
    */
   setFlushParams_(params) {

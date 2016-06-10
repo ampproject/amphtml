@@ -288,8 +288,15 @@ function dist() {
 function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
-  // We only check types in the main binary for now.
-  compile(false, true, true, /* check types */ true);
+  // Our first passing type checked build.
+  buildAlp({
+    minify: true,
+    checkTypes: true,
+  });
+  // These are not turned on on Travis.
+  if (argv.more) {
+    compile(false, true, true, /* check types */ true);
+  }
 }
 
 /**
