@@ -821,10 +821,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowApi.document.body.style.borderTopStyle).to.be.undefined;
 
     binding.updateLightboxMode(true);
-    expect(windowApi.document.body.style.borderTopStyle).to.equal('none');
+    expect(windowApi.document.body.style.borderStyle).to.equal('none');
 
     binding.updateLightboxMode(false);
-    expect(windowApi.document.body.style.borderTopStyle).to.equal('solid');
+    expect(windowApi.document.body.style.borderStyle).to.equal('solid');
   });
 
   it('should calculate size', () => {

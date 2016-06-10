@@ -197,6 +197,17 @@ export class Viewport {
   }
 
   /**
+   * Sets the body padding bottom to the specified value.
+   * @param {number} paddingBottom
+   */
+  updatePaddingBottom(paddingBottom) {
+    onDocumentReady(this.win_.document, () => {
+      this.win_.document.body.style.borderBottom =
+          `${paddingBottom}px solid transparent`;
+    });
+  }
+
+  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */
@@ -945,7 +956,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
     onDocumentReady(this.win.document, () => {
-      this.win.document.body.style.borderTopStyle =
+      this.win.document.body.style.borderStyle =
           lightboxMode ? 'none' : 'solid';
     });
   }
