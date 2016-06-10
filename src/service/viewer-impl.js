@@ -49,11 +49,6 @@ export const ViewportType = {
   NATURAL: 'natural',
 
   /**
-   * Viewer sets and updates sizing and scrolling.
-   */
-  VIRTUAL: 'virtual',
-
-  /**
    * This is AMP-specific type and doesn't come from viewer. This is the type
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
@@ -130,15 +125,6 @@ export class Viewer {
 
     /** @private {string} */
     this.viewportType_ = ViewportType.NATURAL;
-
-    /** @private {number} */
-    this.viewportWidth_ = 0;
-
-    /** @private {number} */
-    this.viewportHeight_ = 0;
-
-    /** @private {number} */
-    this./*OK*/scrollTop_ = 0;
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -225,18 +211,6 @@ export class Viewer {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
-
-    this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
-        this.viewportWidth_;
-    dev.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
-
-    this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
-        this.viewportHeight_;
-    dev.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
-
-    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
-        this./*OK*/scrollTop_;
-    dev.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
@@ -588,41 +562,12 @@ export class Viewer {
   }
 
   /**
-   * There are two types of viewports: "natural" and "virtual". "Natural" is
-   * the viewport of the AMP document's window. "Virtual" is the viewport
-   * provided by the viewer.
+   * See `ViewportType` enum for the set of allowed values.
    * See {@link Viewport} and {@link ViewportBinding} for more details.
    * @return {!ViewportType}
    */
   getViewportType() {
     return this.viewportType_;
-  }
-
-  /**
-   * Returns the width of the viewport provided by the viewer. This value only
-   * used when viewport type is "virtual."
-   * @return {number}
-   */
-  getViewportWidth() {
-    return this.viewportWidth_;
-  }
-
-  /**
-   * Returns the height of the viewport provided by the viewer. This value only
-   * used when viewport type is "virtual."
-   * @return {number}
-   */
-  getViewportHeight() {
-    return this.viewportHeight_;
-  }
-
-  /**
-   * Returns the scroll position of the viewport provided by the viewer. This
-   * value only used when viewport type is "virtual."
-   * @return {number}
-   */
-  getScrollTop() {
-    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -745,25 +690,11 @@ export class Viewer {
 
   /**
    * Triggers "documentLoaded" event for the viewer.
-   * @param {number} width
-   * @param {number} height
    */
-  postDocumentReady(width, height) {
+  postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
-      width,
-      height,
       title: this.win.document.title,
     }, false);
-  }
-
-  /**
-   * Triggers "documentResized" event for the viewer.
-   * @param {number} width
-   * @param {number} height
-   */
-  postDocumentResized(width, height) {
-    this.sendMessageUnreliable_(
-        'documentResized', {width, height}, false);
   }
 
   /**
@@ -853,17 +784,8 @@ export class Viewer {
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'viewport') {
-      if (data['width'] !== undefined) {
-        this.viewportWidth_ = data['width'];
-      }
-      if (data['height'] !== undefined) {
-        this.viewportHeight_ = data['height'];
-      }
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
-      }
-      if (data['scrollTop'] !== undefined) {
-        this./*OK*/scrollTop_ = data['scrollTop'];
       }
       this.viewportObservable_.fire();
       return undefined;

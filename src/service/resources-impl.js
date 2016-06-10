@@ -145,9 +145,6 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private {number} */
-    this.scrollHeight_ = 0;
-
     /** @private @const {!Viewport} */
     this.viewport_ = installViewportService(this.win);
 
@@ -314,19 +311,6 @@ export class Resources {
     this.vsync_.mutate(() => {
       this.win.document.body.classList.toggle(clazz, on);
     });
-  }
-
-  /** @private */
-  updateScrollHeight_() {
-    if (!this.win.document.body) {
-      return;
-    }
-    const scrollHeight = this.win.document.body./*OK*/scrollHeight;
-    if (scrollHeight != this./*OK*/scrollHeight_) {
-      this./*OK*/scrollHeight_ = scrollHeight;
-      this.viewer_.postDocumentResized(this.viewport_.getSize().width,
-          scrollHeight);
-    }
   }
 
   /**
@@ -686,9 +670,7 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body./*OK*/scrollHeight);
-      this.updateScrollHeight_();
+      this.viewer_.postDocumentReady();
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1469,7 +1451,6 @@ export class Resources {
         if (this.visible_) {
           dev.fine(TAG_, 'next pass:', delay);
           this.schedulePass(delay);
-          this.updateScrollHeight_();
         } else {
           dev.fine(TAG_, 'document is not visible: no scheduling');
         }
