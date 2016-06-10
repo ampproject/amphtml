@@ -57,7 +57,7 @@ const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 /**
  * A service that polyfills Fetch API for use within AMP.
  */
-class Xhr {
+export class Xhr {
 
   /**
    * @param {!Window} win
