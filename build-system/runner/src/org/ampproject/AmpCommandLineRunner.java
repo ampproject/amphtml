@@ -20,6 +20,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
+import com.google.javascript.jscomp.PropertyRenamingPolicy;
+import com.google.javascript.jscomp.VariableRenamingPolicy;
 
 import java.io.IOException;
 
@@ -64,10 +66,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRemoveUnusedPrototypeProperties(false);
     options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
-    // Waiting for upstream change to stop renaming exported properties.
-    // options.setRenamingPolicy(VariableRenamingPolicy.ALL,
-    //    PropertyRenamingPolicy.ALL_UNQUOTED);
-    // options.setDisambiguatePrivateProperties(true);
+    // Property renaming. Relies on AmpCodingConvention to be safe.
+    options.setRenamingPolicy(VariableRenamingPolicy.ALL,
+        PropertyRenamingPolicy.ALL_UNQUOTED);
+    options.setDisambiguatePrivateProperties(true);
     return options;
   }
 
@@ -76,7 +78,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     super.setRunOptions(options);
     options.setCodingConvention(new AmpCodingConvention());
   }
-  
+
   /**
    * Create the most basic CompilerOptions instance with type checking turned on.
    */
@@ -85,7 +87,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setCheckTypes(true);
     return options;
   }
-  
+
   protected void setTypeCheckOnly(boolean value) {
     typecheck_only = value;
   }
