@@ -90,7 +90,7 @@ class AmpAppBanner extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!platform.isAndroid()) {
-      return;
+      return Promise.resolve();
     }
 
     const manifestLink = this.getWin().document.head.querySelector(
@@ -99,12 +99,13 @@ class AmpAppBanner extends AMP.BaseElement {
         '<link rel=manifest> in the document head is required: %s',
         this.element);
 
-    this.xhr_.fetchJson(manifestLink.getAttribute('href')).then(response => {
-      this.parseManifest_(response);
-    }).catch(unusedError => {
-      // TODO: What do we do when we fail to fetch manifest.
-      // Hiding it at this point might jump the page?
-    });
+    return this.xhr_.fetchJson(manifestLink.getAttribute('href'))
+        .then(response => {
+          this.parseManifest_(response);
+        }).catch(unusedError => {
+          // TODO: What do we do when we fail to fetch manifest.
+          // Hiding it at this point might jump the page?
+        });
   }
 
   /**
