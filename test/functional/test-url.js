@@ -19,7 +19,6 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
-  getOrigin,
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
@@ -30,7 +29,7 @@ import {
   resolveRelativeUrlFallback_,
 } from '../../src/url';
 
-describe('url', () => {
+describe('parseUrl', () => {
 
   const currentPort = location.port;
 
@@ -128,6 +127,15 @@ describe('url', () => {
     });
   });
 
+  it('should parse origin https://twitter.com/path#abc', () => {
+    expect(parseUrl('https://twitter.com/path#abc').origin)
+        .to.equal('https://twitter.com');
+  });
+
+  it('should parse origin data:12345', () => {
+    expect(parseUrl('data:12345').origin)
+        .to.equal('data:12345');
+  });
 });
 
 
@@ -265,22 +273,6 @@ describe('removeFragment', () => {
   });
 });
 
-describe('getOrigin', () => {
-  it('should parse https://twitter.com/path#abc', () => {
-    expect(getOrigin(parseUrl('https://twitter.com/path#abc')))
-        .to.equal('https://twitter.com');
-    expect(parseUrl('https://twitter.com/path#abc').origin)
-        .to.equal('https://twitter.com');
-  });
-
-  it('should parse data:12345', () => {
-    expect(getOrigin(parseUrl('data:12345')))
-        .to.equal('data:12345');
-    expect(parseUrl('data:12345').origin)
-        .to.equal('data:12345');
-  });
-});
-
 describe('addParamToUrl', () => {
   let url;
 
@@ -380,7 +372,7 @@ describe('getSourceOrigin/Url', () => {
   function testOrigin(href, sourceHref) {
     it('should return the source origin/url from ' + href, () => {
       expect(getSourceUrl(href)).to.equal(sourceHref);
-      expect(getSourceOrigin(href)).to.equal(getOrigin(sourceHref));
+      expect(getSourceOrigin(href)).to.equal(parseUrl(sourceHref).origin);
     });
   }
 
