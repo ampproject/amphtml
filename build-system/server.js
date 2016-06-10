@@ -50,6 +50,17 @@ app.use('/examples', function(req, res, next) {
   next();
 });
 
+/* XXX: can only do this after updating relative URL resolution.
+app.use('/examples/pwa.html', function(req, res, next) {
+  res.setHeader('Content-Type', 'text/html');
+  res.statusCode = 200;
+  fs.readFileAsync(process.cwd() +
+      '/examples/pwa.html').then((file) => {
+        res.end(file);
+      });
+});
+*/
+
 app.use('/api/show', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({
