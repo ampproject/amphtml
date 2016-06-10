@@ -97,6 +97,14 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(tgt.checkValidity.callCount).to.equal(1);
   });
 
+  it('should not check validity if novalidate provided', () => {
+    tgt.setAttribute('novalidate', '');
+    tgt.checkValidity = sandbox.stub().returns(false);
+    onDocumentFormSubmit_(evt);
+    expect(preventDefaultSpy.callCount).to.equal(0);
+    expect(tgt.checkValidity.callCount).to.equal(0);
+  });
+
   it('should not prevent default', () => {
     tgt.checkValidity = sandbox.stub().returns(true);
     onDocumentFormSubmit_(evt);
