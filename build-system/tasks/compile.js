@@ -164,9 +164,9 @@ function compile(entryModuleFilename, outputDir,
             'export function deadCode() {}');
       }
     });
+
     /*eslint "google-camelcase/google-camelcase": 0*/
-    return gulp.src(srcs)
-    .pipe(closureCompiler({
+    var compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
@@ -197,23 +197,38 @@ function compile(entryModuleFilename, outputDir,
             '|' + sourceMapBase,
         warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
       }
-    }))
-    .on('error', function(err) {
-      console./*OK*/error(err.message);
-      process.exit(1);
-    })
-    .pipe(rename(outputFilename))
-    .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-    .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
-    .pipe(gulp.dest(outputDir))
-    .on('end', function() {
-      console./*OK*/log('Compiled', entryModuleFilename, 'to',
-          outputDir + '/' + outputFilename, 'via', intermediateFilename);
-      gulp.src(intermediateFilename + '.map')
-          .pipe(rename(outputFilename + '.map'))
-          .pipe(gulp.dest(outputDir))
-          .on('end', resolve);
-    });
+    };
+
+    if (argv.typecheck_only) {
+      // Don't modify compilation_level to a lower level since
+      // it won't do strict type checking if its whitespace only.
+      compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
+    }
+
+    var stream = gulp.src(srcs)
+        .pipe(closureCompiler(compilerOptions))
+        .on('error', function(err) {
+          console./*OK*/error(err.message);
+          process.exit(1);
+        });
+
+    // If we're only doing type checking, no need to output the files.
+    if (!argv.typecheck_only) {
+      stream = stream
+        .pipe(rename(outputFilename))
+        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+        .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+        .pipe(gulp.dest(outputDir))
+        .on('end', function() {
+          console./*OK*/log('Compiled', entryModuleFilename, 'to',
+              outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          gulp.src(intermediateFilename + '.map')
+              .pipe(rename(outputFilename + '.map'))
+              .pipe(gulp.dest(outputDir))
+              .on('end', resolve);
+        });
+    }
+    return stream;
   });
 };
 
