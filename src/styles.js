@@ -18,7 +18,7 @@ import {setStyles, setStyle} from './style';
 import {platformFor} from './platform';
 import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
-import {dev} from './log'
+import {dev} from './log';
 
 
 /**
