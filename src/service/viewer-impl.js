@@ -757,16 +757,6 @@ export class Viewer {
   }
 
   /**
-   * Triggers "documentResized" event for the viewer.
-   * @param {number} width
-   * @param {number} height
-   */
-  postDocumentResized(width, height) {
-    this.sendMessageUnreliable_(
-        'documentResized', {width, height}, false);
-  }
-
-  /**
    * Requests full overlay mode from the viewer. Returns a promise that yields
    * when the viewer has switched to full overlay mode.
    * @return {!Promise}

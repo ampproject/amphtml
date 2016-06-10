@@ -424,14 +424,6 @@ describe('Viewer', () => {
     expect(m.data.title).to.equal('Awesome doc');
   });
 
-  it('should post documentResized event', () => {
-    viewer.postDocumentResized(13, 14);
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('documentResized');
-    expect(m.data.width).to.equal(13);
-    expect(m.data.height).to.equal(14);
-  });
-
   it('should post request/cancelFullOverlay event', () => {
     viewer.requestFullOverlay();
     viewer.cancelFullOverlay();
@@ -441,20 +433,17 @@ describe('Viewer', () => {
 
   it('should queue non-dupe events', () => {
     viewer.postDocumentReady(11, 12);
-    viewer.postDocumentResized(13, 14);
-    viewer.postDocumentResized(15, 16);
-    expect(viewer.messageQueue_.length).to.equal(2);
-    expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
-    const m = viewer.messageQueue_[1];
-    expect(m.eventType).to.equal('documentResized');
-    expect(m.data.width).to.equal(15);
-    expect(m.data.height).to.equal(16);
+    viewer.postDocumentReady(13, 14);
+    expect(viewer.messageQueue_.length).to.equal(1);
+    const m = viewer.messageQueue_[0];
+    expect(m.eventType).to.equal('documentLoaded');
+    expect(m.data.width).to.equal(13);
+    expect(m.data.height).to.equal(14);
   });
 
   it('should dequeue events when deliverer set', () => {
     viewer.postDocumentReady(11, 12);
-    viewer.postDocumentResized(13, 14);
-    expect(viewer.messageQueue_.length).to.equal(2);
+    expect(viewer.messageQueue_.length).to.equal(1);
 
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
@@ -462,11 +451,9 @@ describe('Viewer', () => {
     }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
-    expect(delivered.length).to.equal(2);
+    expect(delivered.length).to.equal(1);
     expect(delivered[0].eventType).to.equal('documentLoaded');
     expect(delivered[0].data.width).to.equal(11);
-    expect(delivered[1].eventType).to.equal('documentResized');
-    expect(delivered[1].data.width).to.equal(13);
   });
 
   describe('Messaging not embedded', () => {
