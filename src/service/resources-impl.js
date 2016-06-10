@@ -430,7 +430,7 @@ export class Resources {
    * @package
    */
   setOwner(element, owner) {
-    Resource.setAsOwner(element, owner);
+    Resource.setOwner(element, owner);
   }
 
   /**
