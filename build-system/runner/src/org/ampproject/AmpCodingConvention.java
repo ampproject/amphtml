@@ -16,9 +16,15 @@
 
 package org.ampproject;
 
+import com.google.common.collect.ImmutableList;
 import com.google.javascript.jscomp.CodingConvention;
+import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
 import com.google.javascript.jscomp.ClosureCodingConvention;
+import com.google.javascript.jscomp.newtypes.JSType;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 /**
@@ -33,6 +39,15 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
   /** Decorates a wrapped CodingConvention. */
   public AmpCodingConvention(CodingConvention convention) {
     super(convention);
+  }
+
+  @Override public Collection<AssertionFunctionSpec> getAssertionFunctions() {
+    return ImmutableList.of(
+        new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
+        new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
+        new AssertionFunctionSpec("module$src$log.user.assert", JSType.TRUTHY),
+        new AssertionFunctionSpec("module$src$log.dev.assert", JSType.TRUTHY)
+    );
   }
 
   /**

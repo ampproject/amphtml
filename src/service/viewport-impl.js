@@ -47,6 +47,7 @@ let ViewportChangedEventDef;
  * This object represents the viewport. It tracks scroll position, resize
  * and other events and notifies interesting parties when viewport has changed
  * and how.
+ * @package Visible for type.
  */
 export class Viewport {
 

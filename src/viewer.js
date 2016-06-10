@@ -19,8 +19,9 @@ import {getService} from './service';
 
 /**
  * @param {!Window} window
- * @return {!Viewer}
+ * @return {!./service/viewer-impl.Viewer}
  */
 export function viewerFor(window) {
-  return getService(window, 'viewer');
+  return /** @type {!./service/viewer-impl.Viewer} */ (
+      getService(window, 'viewer'));
 };

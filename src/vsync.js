@@ -19,8 +19,8 @@ import {getService} from './service';
 
 /**
  * @param {!Window} window
- * @return {!Vsync}
+ * @return {!./service/vsync-impl.Vsync}
  */
 export function vsyncFor(window) {
-  return getService(window, 'vsync');
+  return /** @type {!./service/vsync-impl.Vsync} */ (getService(window, 'vsync'));
 };

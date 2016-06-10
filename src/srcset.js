@@ -223,7 +223,7 @@ export class Srcset {
   }
 
   /**
-   * @param {number} width
+   * @param {number} _width
    * @param {number} dpr
    * @return {number}
    * @private

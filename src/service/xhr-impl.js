@@ -32,7 +32,7 @@ import {isArray, isObject, isFormData} from '../types';
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  *
  * @typedef {{
- *   body: (!Object|!Array|undefined),
+ *   body: (!Object|!Array|undefined|string),
  *   credentials: (string|undefined),
  *   headers: (!Object|undefined),
  *   method: (string|undefined),
@@ -44,7 +44,7 @@ let FetchInitDef;
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
-/** @private @const {!Array<function():boolean>} */
+/** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
 /** @private @const {string} */
@@ -56,8 +56,9 @@ const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
+ * @package Visible for type.
  */
-class Xhr {
+export class Xhr {
 
   /**
    * @param {!Window} win
@@ -148,7 +149,7 @@ class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONValue>}
+   * @return {!Promise<!JSONObject>}
    */
   fetchJson(input, opt_init) {
     const init = opt_init || {};
@@ -259,6 +260,7 @@ function setupJson_(init) {
  * @private Visible for testing
  */
 export function fetchPolyfill(input, opt_init) {
+  /** @type {!FetchInitDef} */
   const init = opt_init || {};
   return new Promise(function(resolve, reject) {
     const xhr = createXhrRequest(init.method || 'GET', input);
@@ -313,7 +315,7 @@ export function fetchPolyfill(input, opt_init) {
 /**
  * @param {string} method
  * @param {string} url
- * @return {!XMLHttpRequest}
+ * @return {!XMLHttpRequest|!XDomainRequest}
  * @private
  */
 function createXhrRequest(method, url) {
@@ -401,7 +403,7 @@ export class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSONValue>}
+   * @return {!Promise<!JSONType>}
    */
   json() {
     return this.drainText_().then(JSON.parse);
