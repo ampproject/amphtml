@@ -38,7 +38,7 @@ const DEFAULT_METHOD_ = 'activate';
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONObject,
+ *   args: ?JSONType,
  *   str: string
  * }}
  */
@@ -55,7 +55,7 @@ class ActionInvocation {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -64,7 +64,7 @@ class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONObject} */
+    /** @const {?JSONType} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -141,7 +141,7 @@ export class ActionService {
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -226,7 +226,7 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    * @param {?ActionInfo} actionInfo

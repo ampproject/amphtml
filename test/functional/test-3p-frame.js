@@ -127,7 +127,7 @@ describe('3p-frame', () => {
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
-        '"version":"$internalRuntimeVersion$"}' +
+        '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"hidden":false' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +

@@ -149,7 +149,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!JSONObject>}
+   * @return {!Promise<!JSONType>}
    */
   fetchJson(input, opt_init) {
     const init = opt_init || {};

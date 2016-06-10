@@ -458,7 +458,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONObject}
+ * @return {!JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {

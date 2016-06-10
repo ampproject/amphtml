@@ -196,7 +196,7 @@ function compile(entryModuleFilename, outputDir,
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
+        warning_level: 'DEFAULT',
       }
     };
 
@@ -205,6 +205,7 @@ function compile(entryModuleFilename, outputDir,
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
+      compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
 
     var stream = gulp.src(srcs)

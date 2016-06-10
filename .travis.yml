@@ -27,6 +27,7 @@ before_script:
 script:
   - gulp lint
   - gulp build --fortesting
+  - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit
   # dep-check needs to occur after build since we rely on build to generate

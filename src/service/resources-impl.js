@@ -560,7 +560,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function=} opt_callback A callback function to be called if the
+   * @param {function()=} opt_callback A callback function to be called if the
    *    height is updated.
    * @protected
    */
