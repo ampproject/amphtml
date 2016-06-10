@@ -21,7 +21,7 @@ import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
-describe.only('Viewer', () => {
+describe('Viewer', () => {
 
   let sandbox;
   let windowMock;
