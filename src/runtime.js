@@ -207,4 +207,8 @@ export function prepareAndAttachShadowRoot(global, shadowRoot) {
   // XXX: discover all other extensions and install their CSS
   installCoreServicesShadowRoot(global, shadowRoot);
   attachShadowRoot(global, shadowRoot);
+
+  shadowRoot.AMP.viewer = viewerFor(shadowRoot.AMP);
+
+  return shadowRoot.AMP;
 }
