@@ -37,7 +37,7 @@ const BUILTINS = {
   facebook: {
     shareEndpoint: 'https://www.facebook.com/dialog/share',
     defaultParams: {
-      url: 'CANONICAL_URL',
+      href: 'CANONICAL_URL',
     },
   },
   pinterest: {
