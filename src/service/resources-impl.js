@@ -29,9 +29,9 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
 import {installFramerateService} from './framerate-impl';
-import {installViewerService} from './viewer-impl';
-import {installViewportService} from './viewport-impl';
-import {installVsyncService} from './vsync-impl';
+import {viewerFor} from '../viewer';
+import {viewportFor} from '../viewport';
+import {vsyncFor} from '../vsync';
 import {platformFor} from '../platform';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {isArray} from '../types';
@@ -53,12 +53,12 @@ const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
 export class Resources {
-  constructor(window) {
+  constructor(window, viewer, viewport) {
     /** @const {!Window} */
     this.win = window;
 
     /** @const @private {!Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = viewer;
 
     /** @const @private {!Platform} */
     this.platform_ = platformFor(window);
@@ -146,10 +146,10 @@ export class Resources {
     this.isCurrentlyBuildingPendingResources_ = false;
 
     /** @private @const {!Viewport} */
-    this.viewport_ = installViewportService(this.win);
+    this.viewport_ = viewport;
 
     /** @private @const {!Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -2378,6 +2378,27 @@ let SizeDef;
  */
 export function installResourcesService(win) {
   return getService(win, 'resources', () => {
-    return new Resources(win);
+    return new Resources(
+        win,
+        viewerFor(win),
+        viewportFor(win)
+        );
+  });
+};
+
+/**
+ * @param {!Window} win
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Resources}
+ */
+export function installResourcesServiceForShadowRoot(win, shadowRoot) {
+  console.log('AMP: installResourcesServiceForShadowRoot');
+  return getService(shadowRoot.AMP, 'resources', () => {
+    // XXX: redo
+    return new Resources(
+        win,
+        viewerFor(shadowRoot.AMP),
+        viewportFor(shadowRoot.AMP)
+        );
   });
 };

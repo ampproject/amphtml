@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {installActionService} from './service/action-impl';
+import {installActionService, installActionServiceForShadowRoot} from './service/action-impl';
 import {installFramerateService} from './service/framerate-impl';
 import {installHistoryService} from './service/history-impl';
-import {installResourcesService} from './service/resources-impl';
+import {installResourcesService, installResourcesServiceForShadowRoot} from './service/resources-impl';
 import {installStandardActions} from './service/standard-actions-impl';
-import {installUrlReplacementsService} from './service/url-replacements-impl';
-import {installViewerService} from './service/viewer-impl';
-import {installViewportService} from './service/viewport-impl';
+import {installUrlReplacementsService, installUrlReplacementsServiceForShadowRoot} from './service/url-replacements-impl';
+import {installViewerService, installViewerServiceForShadowRoot} from './service/viewer-impl';
+import {installViewportService, installViewportServiceForShadowRoot} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 
@@ -32,14 +32,37 @@ import {installXhrService} from './service/xhr-impl';
  * @param {!Window} window
  */
 export function installCoreServices(window) {
-  installViewerService(window);
-  installViewportService(window);
-  installHistoryService(window);
-  installVsyncService(window);
-  installActionService(window);
-  installResourcesService(window);
-  installStandardActions(window);
-  installFramerateService(window);
-  installUrlReplacementsService(window);
-  installXhrService(window);
+  // XXX
+  if (!window.AMP_SHADOW) {
+    installViewerService(window);     // DOC
+  }
+  installVsyncService(window);      // SUPER
+  if (!window.AMP_SHADOW) {
+    installViewportService(window);   // DOC
+  }
+  installHistoryService(window);    // SUPER
+  if (!window.AMP_SHADOW) {
+    installActionService(window);     // DOC
+    installResourcesService(window);  // DOC
+    installStandardActions(window);   // DOC
+  }
+  installFramerateService(window);  // SUPER?
+  if (!window.AMP_SHADOW) {
+    installUrlReplacementsService(window);  // DOC
+  }
+  installXhrService(window);        // SUPER
+}
+
+
+/**
+ * @param {!Window} window
+ * @param {!ShadowRoot} shadowRoot
+ */
+export function installCoreServicesShadowRoot(window, shadowRoot) {
+  installViewerServiceForShadowRoot(window, shadowRoot);     // DOC
+  installViewportServiceForShadowRoot(window, shadowRoot);   // DOC
+  installActionServiceForShadowRoot(window, shadowRoot);     // DOC
+  installResourcesServiceForShadowRoot(window, shadowRoot);  // DOC
+  //installStandardActions(window);   // DOC  // XXX
+  installUrlReplacementsServiceForShadowRoot(window, shadowRoot);  // DOC
 }

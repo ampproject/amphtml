@@ -995,3 +995,16 @@ export function installViewerService(window) {
     return new Viewer(window);
   });
 };
+
+/**
+ * @param {!Window} window
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Viewer}
+ */
+export function installViewerServiceForShadowRoot(window, shadowRoot) {
+  console.log('AMP: installViewerServiceForShadowRoot', window, shadowRoot);
+  return getService(shadowRoot.AMP, 'viewer', () => {
+    // XXX: update
+    return new Viewer(window);
+  });
+};
