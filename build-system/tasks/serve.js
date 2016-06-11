@@ -27,9 +27,10 @@ var useHttps = argv.https != undefined;
  * Starts a simple http server at the repository root
  */
 function serve() {
-  gulp.src(process.cwd())
+  var server = gulp.src(process.cwd())
       .pipe(webserver({
         port,
+        host: '0.0.0.0',
         directoryListing: true,
         https: useHttps,
         middleware: [app]
@@ -38,6 +39,7 @@ function serve() {
   util.log(util.colors.yellow('Run `gulp build` then go to '
       + getHost() + '/examples.build/article.amp.max.html'
   ));
+  return server;
 }
 
 gulp.task(
