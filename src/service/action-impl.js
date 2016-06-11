@@ -50,8 +50,9 @@ let ActionInfoDef;
  * @struct
  * @const
  * TODO(dvoytenko): add action arguments here as well.
+ * @package For type.
  */
-class ActionInvocation {
+export class ActionInvocation {
   /**
    * @param {!Element} target
    * @param {string} method
@@ -94,7 +95,7 @@ export class ActionService {
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
-    /** @private {!Vsync} */
+    /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
     // Add core events.
@@ -212,7 +213,7 @@ export class ActionService {
   /**
    * The errors that are a result of action definition.
    * @param {string} s
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    * @param {?Element} target
    * @private
    */
@@ -229,7 +230,7 @@ export class ActionService {
    * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,

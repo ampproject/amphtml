@@ -128,7 +128,7 @@ export function adopt(global) {
 
   /**
    * Registers a new custom element.
-   * @param {GlobalAmp} fn
+   * @param {function(!Object)} fn
    */
   global.AMP.push = function(fn) {
     // Extensions are only processed once HEAD is complete.

@@ -55,7 +55,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
-     * @const @private {!Unlisten}
+     * @const @private {!UnlistenDef}
      */
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());

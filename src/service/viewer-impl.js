@@ -106,7 +106,7 @@ export class Viewer {
     /** @private @const {boolean} */
     this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
-    /** @const {!DocumentState} */
+    /** @const {!../document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */
@@ -447,7 +447,7 @@ export class Viewer {
 
   /**
    * @param {function(boolean)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onRuntimeState(handler) {
     return this.runtimeOnObservable_.add(handler);
@@ -665,7 +665,7 @@ export class Viewer {
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
    * @param {function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
     return this.visibilityObservable_.add(handler);
@@ -674,7 +674,7 @@ export class Viewer {
   /**
    * Adds a "viewport" event listener for viewer events.
    * @param {function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
     return this.viewportObservable_.add(handler);
@@ -683,7 +683,7 @@ export class Viewer {
   /**
    * Adds a "history popped" event listener for viewer events.
    * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onHistoryPoppedEvent(handler) {
     return this.historyPoppedObservable_.add(handler);
@@ -885,7 +885,7 @@ export class Viewer {
   /**
    * Registers receiver for the broadcast events.
    * @param {function(!JSONType)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
     return this.broadcastObservable_.add(handler);
@@ -983,7 +983,7 @@ function getChannelError(opt_reason) {
  *   newStackIndex: number
  * }}
  */
-let ViewerHistoryPoppedEventDef;
+export let ViewerHistoryPoppedEventDef;
 
 
 /**

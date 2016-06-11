@@ -130,13 +130,13 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
-    /** @private {!Object<string, function(!ActionInvocation)>} */
+    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
     this.actionMap_ = this.getWin().Object.create(null);
 
-    /** @protected {!Preconnect} */
+    /** @protected {!./preconnect.Preconnect} */
     this.preconnect = preconnectFor(this.getWin());
 
-    /** @private {!Resources}  */
+    /** @private {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(this.getWin());
   }
 
@@ -160,7 +160,7 @@ export class BaseElement {
     return this.element.ownerDocument.defaultView;
   }
 
-  /** @protected @return {!Vsync} */
+  /** @protected @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.getWin());
   }
@@ -402,7 +402,7 @@ export class BaseElement {
   /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
-   * @param {!ActionInvocation} unusedInvocation
+   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
    */
   activate(unusedInvocation) {
   }
@@ -410,7 +410,7 @@ export class BaseElement {
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
-   * @param {function(!ActionInvocation)} handler
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @protected
    */
   registerAction(method, handler) {
@@ -421,7 +421,7 @@ export class BaseElement {
    * Requests the element to execute the specified method. If method must have
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
-   * @param {!ActionInvocation} invocation The invocation data.
+   * @param {!./service/action-impl.ActionInvocation} invocation The invocation data.
    * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
@@ -560,7 +560,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!Viewport}
+   * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
     return viewportFor(this.getWin());
@@ -568,7 +568,7 @@ export class BaseElement {
 
  /**
   * Returns a previously measured layout box of the element.
-  * @return {!LayoutRect}
+  * @return {!./layout-rect.LayoutRectDef}
   */
   getIntersectionElementLayoutBox() {
     return this.resources_.getResourceForElement(this.element).getLayoutBox();

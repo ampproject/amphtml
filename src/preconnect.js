@@ -50,7 +50,7 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!Platform}  */
+    /** @private @const {!./platform.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
