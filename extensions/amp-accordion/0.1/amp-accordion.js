@@ -43,12 +43,7 @@ class AmpAccordion extends AMP.BaseElement {
 
     // sessionStorage key: special created id for this element, this.id_.
     // sessionStorage value: string that can convert to this.currentState_ obj.
-    // TODO: add test for setting and reading sessionStorage.
-    try {
-      this.currentState_ = this.getSessionState_();
-    } catch (e) {
-      console./*OK*/error(e.message, e.stack);
-    }
+    this.currentState_ = this.getSessionState_();
     if (!this.currentState_) {
       this.currentState_ = Object.create(null);
     }
@@ -88,20 +83,43 @@ class AmpAccordion extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Generate a sessionStorage Key based on amp-accordion element id.
+   * @return {string}
+   * @private
+   */
   getSessionStorageKey_() {
     const id_ = this.element.id;
     const url = removeFragment(this.win_.location.href);
     return `amp-${id_}-${url}`;
   }
 
+  /**
+   * Get previous state from sessionStorage.
+   * @return {!Object|null}
+   * @private
+   */
   getSessionState_() {
-    const sessionStr = this.win_./*REVIEW*/sessionStorage.getItem(this.id_);
-    return JSON.parse(sessionStr);
+    try {
+      const sessionStr = this.win_./*REVIEW*/sessionStorage.getItem(this.id_);
+      return JSON.parse(sessionStr);
+    } catch (e) {
+      console./*OK*/error(e.message, e.stack);
+      return null;
+    }
   }
 
+  /**
+   * Set current state to sessionStorage.
+   * @private
+   */
   setSessionState_() {
     const sessionStr = JSON.stringify(this.currentState_);
-    this.win_./*REVIEW*/sessionStorage.setItem(this.id_, sessionStr);
+    try {
+      this.win_./*REVIEW*/sessionStorage.setItem(this.id_, sessionStr);
+    } catch (e) {
+      console./*OK*/error(e.message, e.stack);
+    }
   }
 
   /**
@@ -126,13 +144,7 @@ class AmpAccordion extends AMP.BaseElement {
       }
     }, content);
     this.currentState_[contentId] = !isSectionClosedAfterClick;
-    // sessionStorage key: special created id for this element, this.id_.
-    // sessionStorage value: string that can convert to this.currentState_ obj.
-    try {
-      this.setSessionState_();
-    } catch (e) {
-      console./*OK*/error(e.message, e.stack);
-    }
+    this.setSessionState_();
   }
 }
 
