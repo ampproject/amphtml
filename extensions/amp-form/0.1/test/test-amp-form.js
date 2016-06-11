@@ -82,11 +82,17 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
       expect(ampForm.xhr_.fetchJson.called).to.be.true;
-      expect(ampForm.xhr_.fetchJson.calledWith('https://example.com')).to.be.true;
+      expect(ampForm.xhr_.fetchJson.calledWith(
+          'https://example.com')).to.be.true;
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
-      expect(config.body.get('name')).to.be.equal('John Miller');
+      // FormData.get and other methods are not supported by old browsers.
+      for (const entry of config.body.entries()) {
+        if (entry[0] == 'name') {
+          expect(entry[1]).to.be.equal('John Miller');
+        }
+      }
       expect(config.method).to.equal('GET');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
