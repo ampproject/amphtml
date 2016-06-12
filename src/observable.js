@@ -15,12 +15,6 @@
  */
 
 
-/**
- * This type signifies a callback that can be called to remove the listener.
- * @typedef {function()}
- */
-let UnlistenDef;
-
 
 /**
  * This class helps to manage observers. Observers can be added, removed or

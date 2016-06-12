@@ -54,7 +54,7 @@ export class Viewport {
   /**
    * @param {!Window} win
    * @param {!ViewportBindingDef} binding
-   * @param {!Viewer} viewer
+   * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(win, binding, viewer) {
     /** @const {!Window} */
@@ -63,12 +63,12 @@ export class Viewport {
     /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
-    /** @const {!Viewer} */
+    /** @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /**
      * Used to cache the rect of the viewport.
-     * @private {?LayoutRect}
+     * @private {?../layout-rect.LayoutRectDef}
      */
     this.rect_ = null;
 
@@ -95,7 +95,7 @@ export class Viewport {
     /** @private {number} */
     this.scrollMeasureTime_ = 0;
 
-    /** @private {Vsync} */
+    /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(win);
 
     /** @private {boolean} */
@@ -255,7 +255,7 @@ export class Viewport {
 
   /**
    * Returns the rect of the viewport which includes scroll positions and size.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}}
    */
   getRect() {
     if (this.rect_ == null) {
@@ -271,7 +271,7 @@ export class Viewport {
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}}
    */
   getLayoutRect(el) {
     return this.binding_.getLayoutRect(el,
@@ -302,7 +302,7 @@ export class Viewport {
   /**
    * Registers the handler for ViewportChangedEventDef events.
    * @param {!function(!ViewportChangedEventDef)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onChanged(handler) {
     return this.changeObservable_.add(handler);
@@ -315,7 +315,7 @@ export class Viewport {
    * scrolling might be going on. To get more information {@link onChanged}
    * handler should be used.
    * @param {!function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onScroll(handler) {
     return this.scrollObservable_.add(handler);
@@ -592,7 +592,7 @@ export class ViewportBindingDef {
 
   /**
    * Updates binding with the new viewer's viewport info.
-   * @param {!Viewer} unusedViewer
+   * @param {!./viewer-impl.Viewer} unusedViewer
    */
   updateViewerViewport(unusedViewer) {}
 
@@ -652,7 +652,7 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 

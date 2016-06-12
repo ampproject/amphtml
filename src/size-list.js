@@ -22,7 +22,7 @@ import {user} from './log';
  * A single option within a SizeList.
  * @typedef {{
  *   mediaQuery: (string|undefined),
- *   size: (!Length)
+ *   size: (!./layout.LengthDef)
  * }}
  */
 let SizeListOptionDef;
@@ -163,7 +163,7 @@ export class SizeList {
    *
    * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
    * @param {!Window} win
-   * @return {!LengthDef|string}
+   * @return {!./layout.LengthDef|string}
    */
   select(win) {
     for (let i = 0; i < this.sizes_.length - 1; i++) {
@@ -177,7 +177,7 @@ export class SizeList {
 
   /**
    * Returns the last size in the SizeList, which is the default.
-   * @return {!LengthDef|string}
+   * @return {!./layout.LengthDef|string}
    */
   getLast() {
     return this.sizes_[this.sizes_.length - 1].size;

@@ -181,7 +181,10 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        externs: 'build-system/amp.extern.js',
+        externs: [
+          'build-system/amp.extern.js',
+          'third_party/closure-compiler/externs/intersection_observer.js',
+        ],
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
@@ -197,6 +200,11 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        hide_warnings_for: [
+          'ads/',  // TODO(@cramforce): Remove when we are better at typing.
+          'node_modules/',
+          'build/patched-module/',
+        ],
       }
     };
 

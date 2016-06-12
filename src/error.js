@@ -76,7 +76,6 @@ export function reportError(error, opt_associatedElement) {
 
 /**
  * Returns an error for a cancellation of a promise.
- * @param {string} message
  * @return {!Error}
  */
 export function cancellation() {

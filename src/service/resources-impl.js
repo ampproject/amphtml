@@ -52,15 +52,27 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   resource: !Resource,
+ *   newHeight: (number|undefined),
+ *   newWidth: (number|undefined),
+ *   force: boolean,
+ *   callback: (function()|undefined)
+ * }}
+ */
+let ChangeSizeRequestDef;
+
 export class Resources {
   constructor(window) {
     /** @const {!Window} */
     this.win = window;
 
-    /** @const @private {!Viewer} */
+    /** @const @private {!./viewer-impl.Viewer} */
     this.viewer_ = installViewerService(window);
 
-    /** @const @private {!Platform} */
+    /** @const @private {!../platform.Platform} */
     this.platform_ = platformFor(window);
 
     /** @private {boolean} */
@@ -119,19 +131,6 @@ export class Resources {
     this.queue_ = new TaskQueue_();
 
    /**
-    * The internal structure of a ChangeHeightRequest.
-    * @typedef {{
-    *   resource: !Resource,
-    *   newHeight: (number|undefined),
-    *   newWidth: (number|undefined),
-    *   force: boolean,
-    *   callback: (function()|undefined)
-    * }}
-    * @private
-    */
-    let ChangeSizeRequestDef;
-
-   /**
     * @private {!Array<!ChangeSizeRequestDef>}
     */
     this.requestsChangeSize_ = [];
@@ -145,10 +144,10 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private @const {!Viewport} */
+    /** @private @const {!./viewport-impl.Viewport} */
     this.viewport_ = installViewportService(this.win);
 
-    /** @private @const {!Vsync} */
+    /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.win);
 
     /** @private @const {!FocusHistory} */
@@ -157,7 +156,7 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
-    /** @private @const {!Framerate}  */
+    /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
@@ -344,7 +343,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!Viewport}
+   * @return {!./viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;
@@ -1111,7 +1110,7 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
-   * @param {!LayoutRect} viewportRect
+   * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
    * @param {!TaskDef} task
    * @private
@@ -1585,10 +1584,10 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.initialLayoutBox_ = this.layoutBox_;
 
     /** @private {boolean} */
@@ -1825,7 +1824,7 @@ export class Resource {
 
   /**
    * Returns a previously measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.layoutBox_;
@@ -1833,7 +1832,7 @@ export class Resource {
 
   /**
    * Returns the first measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getInitialLayoutBox() {
     return this.initialLayoutBox_;
@@ -1858,7 +1857,7 @@ export class Resource {
 
   /**
    * Whether the element's layout box overlaps with the specified rect.
-   * @param {!LayoutRect} rect
+   * @param {!../layout-rect.LayoutRectDef} rect
    * @return {boolean}
    */
   overlaps(rect) {

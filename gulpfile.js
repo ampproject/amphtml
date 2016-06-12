@@ -292,10 +292,17 @@ function checkTypes() {
   buildAlp({
     minify: true,
     checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildExperiments({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
   });
   // These are not turned on on Travis.
   if (argv.more) {
-    compile(false, true, true, /* check types */ true);
+    compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+        /* check types */ true);
   }
 }
 
@@ -612,6 +619,7 @@ function buildExperiments(options) {
           includePolyfills: true,
           minifiedName: minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          checkTypes: options.checkTypes,
         });
       });
 }

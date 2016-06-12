@@ -27,8 +27,8 @@ import {timer} from './timer';
  * Mutates passed in rootBounds to have x and y according to spec.
  *
  * @param {number} time Time when values below were measured.
- * @param {!LayoutRect} rootBounds Equivalent to viewport.getRect()
- * @param {!LayoutRect} elementLayoutBox Layout box of the element
+ * @param {!./layout-rect.LayoutRectDef} rootBounds Equivalent to viewport.getRect()
+ * @param {!./layout-rect.LayoutRectDef} elementLayoutBox Layout box of the element
  *     that may intersect with the rootBounds.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
