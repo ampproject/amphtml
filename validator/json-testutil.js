@@ -111,7 +111,7 @@ function objToJsonSegments(obj, out, cmpFn) {
  * Default key comparator for ordering the json output.
  * @param {string} a
  * @param {string} b
- * @return {!number} */
+ * @return {number} */
 json_testutil.defaultCmpFn = function(a, b) {
   if (a < b) return -1;
   if (a > b) return 1;
@@ -122,9 +122,9 @@ json_testutil.defaultCmpFn = function(a, b) {
  * Determines whether the provided string starts with a particular character.
  * Note: In ES6, there's string::startsWith but we want to make this work
  * for some interpreters < ES6.
- * @param {!string} str
- * @param {!string} ch
- * @return {!boolean}
+ * @param {string} str
+ * @param {string} ch
+ * @return {boolean}
  */
 function startsWithChar(str, ch) {
   return str.length > 0 && str.charAt(0) === ch;
@@ -134,9 +134,9 @@ function startsWithChar(str, ch) {
  * Determines whether the provided string ends with a particular character.
  * Note: In ES6, there's string::endsWith but we want to make this work
  * for some interpreters < ES6.
- * @param {!string} str
- * @param {!string} ch
- * @return {!boolean}
+ * @param {string} str
+ * @param {string} ch
+ * @return {boolean}
  */
 function endsWithChar(str, ch) {
   return str.length > 0 && str.charAt(str.length - 1) === ch;
@@ -154,7 +154,7 @@ function endsWithChar(str, ch) {
  * @param {function(string, string):number=} [cmpFn=json_testutil.defaultCmpFn]
  * json key comparator
  * @param {number=} [offset=0] Offset number of characters.
- * @return {!string}
+ * @return {string}
  */
 json_testutil.renderJSON = function(obj, cmpFn, offset) {
   if (cmpFn === undefined) cmpFn = json_testutil.defaultCmpFn;

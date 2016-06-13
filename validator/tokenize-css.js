@@ -51,6 +51,7 @@ goog.provide('parse_css.StringToken');
 goog.provide('parse_css.StringValuedToken');
 goog.provide('parse_css.SubstringMatchToken');
 goog.provide('parse_css.SuffixMatchToken');
+goog.provide('parse_css.TRIVIAL_EOF_TOKEN');
 goog.provide('parse_css.TRIVIAL_ERROR_TOKEN');
 goog.provide('parse_css.Token');
 goog.provide('parse_css.TokenType');
@@ -99,11 +100,10 @@ goog.require('amp.validator.ValidationError');
  *   - ErrorToken
  *
  * @param {string} strIn
- * @param {number} line
- * @param {number} col
+ * @param {number|undefined} line
+ * @param {number|undefined} col
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!Array<!parse_css.Token>}
- * @export
  */
 parse_css.tokenize = function(strIn, line, col, errors) {
   const tokenizer = new Tokenizer(strIn, line, col, errors);
@@ -266,8 +266,8 @@ function stringFromCode(code) {
 class Tokenizer {
   /**
    * @param {string} strIn
-   * @param {number} line
-   * @param {number} col
+   * @param {number|undefined} line
+   * @param {number|undefined} col
    * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
    */
   constructor(strIn, line, col, errors) {
@@ -294,12 +294,14 @@ class Tokenizer {
     this.code_;
 
     // Line number information.
-    const eofToken = new parse_css.EOFToken();
+    let eofToken;
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** @private @type {!Array<number>} */
       this.lineByPos_ = [];
+      /** @private @type {!Array<number>} */
       this.colByPos_ = [];
-      let currentLine = line;
-      let currentCol = col;
+      let currentLine = line || 1;
+      let currentCol = col || 0;
       for (let i = 0; i < this.codepoints_.length; ++i) {
         this.lineByPos_[i] = currentLine;
         this.colByPos_[i] = currentCol;
@@ -310,16 +312,19 @@ class Tokenizer {
           ++currentCol;
         }
       }
+      eofToken = new parse_css.EOFToken();
       eofToken.line = currentLine;
       eofToken.col = currentCol;
+    } else {
+      eofToken = parse_css.TRIVIAL_EOF_TOKEN;
     }
 
     let iterationCount = 0;
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
-      if (token instanceof parse_css.ErrorToken) {
+      if (token.tokenType === parse_css.TokenType.ERROR) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          this.errors_.push(token);
+          this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
         } else {
           this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           this.tokens_ = [];
@@ -415,15 +420,22 @@ class Tokenizer {
   consumeAToken() {
     this.consumeComments();
     this.consume();
-    const mark = new MarkedPosition(this);  // Save off line/col.
+    const mark = new parse_css.Token();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      mark.line = this.getLine();
+      mark.col = this.getCol();
+    }
     if (whitespace(this.code_)) {
       // Merge consecutive whitespace into one token.
       while (whitespace(this.next())) {
         this.consume();
       }
-      return mark.addPositionTo(new parse_css.WhitespaceToken);
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.WhitespaceToken());
+      }
+      return TRIVIAL_WHITESPACE_TOKEN;
     } else if (this.code_ === /* '"' */ 0x22) {
-      return mark.addPositionTo(this.consumeAStringToken());
+      return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '#' */ 0x23) {
       if (nameChar(this.next()) ||
           this.areAValidEscape(this.next(1), this.next(2))) {
@@ -432,143 +444,232 @@ class Tokenizer {
                 this.next(1), this.next(2), this.next(3))) {
           type = 'id';
         }
-        const token = new parse_css.HashToken(/*val=*/this.consumeAName());
+        const token = new parse_css.HashToken();
+        token.value = this.consumeAName();
         if (type !== null) {
           token.type = type;
         }
-        return mark.addPositionTo(token);
+        return mark.copyPosTo(token);
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_23;
       }
     } else if (this.code_ === /* '$' */ 0x24) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        return mark.addPositionTo(new parse_css.SuffixMatchToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          mark.copyPosTo(new parse_css.SuffixMatchToken());
+        }
+        return TRIVIAL_SUFFIX_MATCH_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_24;
       }
     } else if (this.code_ === /* ''' */ 0x27) {
-      return mark.addPositionTo(this.consumeAStringToken());
+      return mark.copyPosTo(this.consumeAStringToken());
     } else if (this.code_ === /* '(' */ 0x28) {
-      return mark.addPositionTo(new parse_css.OpenParenToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.OpenParenToken());
+      }
+      return TRIVIAL_OPEN_PAREN_TOKEN;
     } else if (this.code_ === /* ')' */ 0x29) {
-      return mark.addPositionTo(new parse_css.CloseParenToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.CloseParenToken());
+      }
+      return TRIVIAL_CLOSE_PAREN_TOKEN;
     } else if (this.code_ === /* '*' */ 0x2a) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        return mark.addPositionTo(new parse_css.SubstringMatchToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.SubstringMatchToken());
+        }
+        return TRIVIAL_SUBSTRING_MATCH_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_2A;
       }
     } else if (this.code_ === /* '+' */ 0x2b) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
-        return mark.addPositionTo(this.consumeANumericToken());
+        return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_2B;
       }
     } else if (this.code_ === /* ',' */ 0x2c) {
-      return mark.addPositionTo(new parse_css.CommaToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.CommaToken());
+      }
+      return TRIVIAL_COMMA_TOKEN;
     } else if (this.code_ === /* '-' */ 0x2d) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
-        return mark.addPositionTo(this.consumeANumericToken());
+        return mark.copyPosTo(this.consumeANumericToken());
       } else if (
           this.next(1) === /* '-' */ 0x2d && this.next(2) === /* '>' */ 0x3e) {
         this.consume(2);
-        return mark.addPositionTo(new parse_css.CDCToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.CDCToken());
+        }
+        return TRIVIAL_CDC_TOKEN;
       } else if (this./*OK*/ startsWithAnIdentifier()) {
         this.reconsume();
-        return mark.addPositionTo(this.consumeAnIdentlikeToken());
+        return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_2D;
       }
     } else if (this.code_ === /* '.' */ 0x2e) {
       if (this./*OK*/ startsWithANumber()) {
         this.reconsume();
-        return mark.addPositionTo(this.consumeANumericToken());
+        return mark.copyPosTo(this.consumeANumericToken());
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_2E;
       }
     } else if (this.code_ === /* ':' */ 0x3a) {
-      return mark.addPositionTo(new parse_css.ColonToken);
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.ColonToken());
+      }
+      return TRIVIAL_COLON_TOKEN;
     } else if (this.code_ === /* ';' */ 0x3b) {
-      return mark.addPositionTo(new parse_css.SemicolonToken);
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.SemicolonToken());
+      }
+      return TRIVIAL_SEMICOLON_TOKEN;
     } else if (this.code_ === /* '<' */ 0x3c) {
       if (this.next(1) === /* '!' */ 0x21 && this.next(2) === /* '-' */ 0x2d &&
           this.next(3) === /* '-' */ 0x2d) {
         this.consume(3);
-        return mark.addPositionTo(new parse_css.CDOToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.CDOToken());
+        }
+        return TRIVIAL_CDO_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_3C;
       }
     } else if (this.code_ === /* '@' */ 0x40) {
       if (this.wouldStartAnIdentifier(
               this.next(1), this.next(2), this.next(3))) {
-        return mark.addPositionTo(
-            new parse_css.AtKeywordToken(this.consumeAName()));
+        const token = new parse_css.AtKeywordToken();
+        token.value = this.consumeAName();
+        return mark.copyPosTo(token);
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_40;
       }
     } else if (this.code_ === /* '[' */ 0x5b) {
-      return mark.addPositionTo(new parse_css.OpenSquareToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.OpenSquareToken());
+      }
+      return TRIVIAL_OPEN_SQUARE_TOKEN;
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this./*OK*/ startsWithAValidEscape()) {
         this.reconsume();
-        return mark.addPositionTo(this.consumeAnIdentlikeToken());
+        return mark.copyPosTo(this.consumeAnIdentlikeToken());
       } else {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           // This condition happens if we are in consumeAToken (this method),
           // the current codepoint is 0x5c (\) and the next codepoint is a
           // newline (\n).
-          return mark.addPositionTo(new parse_css.ErrorToken(
+          return mark.copyPosTo(new parse_css.ErrorToken(
               amp.validator.ValidationError.Code
                   .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
               ['style']));
-        } else {
-          return parse_css.TRIVIAL_ERROR_TOKEN;
         }
+        return parse_css.TRIVIAL_ERROR_TOKEN;
       }
     } else if (this.code_ === /* ']' */ 0x5d) {
-      return mark.addPositionTo(new parse_css.CloseSquareToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.CloseSquareToken());
+      }
+      return TRIVIAL_CLOSE_SQUARE_TOKEN;
     } else if (this.code_ === /* '^' */ 0x5e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        return mark.addPositionTo(new parse_css.PrefixMatchToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.PrefixMatchToken());
+        }
+        return TRIVIAL_PREFIX_MATCH_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_5E;
       }
     } else if (this.code_ === /* '{' */ 0x7b) {
-      return mark.addPositionTo(new parse_css.OpenCurlyToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.OpenCurlyToken());
+      }
+      return TRIVIAL_OPEN_CURLY_TOKEN;
     } else if (this.code_ === /* '|' */ 0x7c) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        return mark.addPositionTo(new parse_css.DashMatchToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DashMatchToken());
+        }
+        return TRIVIAL_DASH_MATCH_TOKEN;
       } else if (this.next() === /* '|' */ 0x7c) {
         this.consume();
-        return mark.addPositionTo(new parse_css.ColumnToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.ColumnToken());
+        }
+        return TRIVIAL_COLUMN_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_7C;
       }
     } else if (this.code_ === /* '}' */ 0x7d) {
-      return mark.addPositionTo(new parse_css.CloseCurlyToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.CloseCurlyToken());
+      }
+      return TRIVIAL_CLOSE_CURLY_TOKEN;
     } else if (this.code_ === /* '~' */ 0x7e) {
       if (this.next() === /* '=' */ 0x3d) {
         this.consume();
-        return mark.addPositionTo(new parse_css.IncludeMatchToken());
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.IncludeMatchToken());
+        }
+        return TRIVIAL_CLOSE_CURLY_TOKEN;
       } else {
-        return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          return mark.copyPosTo(new parse_css.DelimToken(this.code_));
+        }
+        return TRIVIAL_DELIM_TOKEN_7E;
       }
     } else if (digit(this.code_)) {
       this.reconsume();
-      return mark.addPositionTo(this.consumeANumericToken());
+      return mark.copyPosTo(this.consumeANumericToken());
     } else if (nameStartChar(this.code_)) {
       this.reconsume();
-      return mark.addPositionTo(this.consumeAnIdentlikeToken());
+      return mark.copyPosTo(this.consumeAnIdentlikeToken());
     } else if (this.eof()) {
-      return mark.addPositionTo(new parse_css.EOFToken());
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        return mark.copyPosTo(new parse_css.EOFToken());
+      }
+      return parse_css.TRIVIAL_EOF_TOKEN;
     } else {
-      return mark.addPositionTo(new parse_css.DelimToken(this.code_));
+      const token = new parse_css.DelimToken(this.code_);
+      return mark.copyPosTo(token);
     }
   }
 
@@ -577,7 +678,11 @@ class Tokenizer {
    * emitting a parse error if we hit the end of the file. Returns nothing.
    */
   consumeComments() {
-    const mark = new MarkedPosition(this);
+    const mark = new parse_css.Token();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      mark.line = this.getLine();
+      mark.col = this.getCol();
+    }
     while (this.next(1) === /* '/' */ 0x2f && this.next(2) === /* '*' */ 0x2a) {
       this.consume(2);
       while (true) {
@@ -589,12 +694,10 @@ class Tokenizer {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             // For example "h1 { color: red; } \* " would emit this parse error
             // at the end of the string.
-            const error = new parse_css.ErrorToken(
+            this.errors_.push(mark.copyPosTo(new parse_css.ErrorToken(
                 amp.validator.ValidationError.Code
                     .CSS_SYNTAX_UNTERMINATED_COMMENT,
-                ['style']);
-            mark.addPositionTo(error);
-            this.errors_.push(error);
+                ['style'])));
           } else {
             this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           }
@@ -646,19 +749,27 @@ class Tokenizer {
         this.consume();
       }
       if (this.next() === /* '"' */ 0x22 || this.next() === /* ''' */ 0x27) {
-        return new parse_css.FunctionToken(name);
+        const token = new parse_css.FunctionToken();
+        token.value = name;
+        return token;
       } else if (
           whitespace(this.next()) && (this.next(2) === /* '"' */ 0x22 ||
                                       this.next(2) === /* ''' */ 0x27)) {
-        return new parse_css.FunctionToken(name);
+        const token = new parse_css.FunctionToken();
+        token.value = name;
+        return token;
       } else {
         return this.consumeAURLToken();
       }
     } else if (this.next() === /* '(' */ 0x28) {
       this.consume();
-      return new parse_css.FunctionToken(name);
+      const token = new parse_css.FunctionToken();
+      token.value = name;
+      return token;
     } else {
-      return new parse_css.IdentToken(name);
+      const token = new parse_css.IdentToken();
+      token.value = name;
+      return token;
     }
   }
 
@@ -677,7 +788,9 @@ class Tokenizer {
     while (true) {
       this.consume();
       if (this.code_ === endingCodePoint || this.eof()) {
-        return new parse_css.StringToken(string);
+        const token = new parse_css.StringToken();
+        token.value = string;
+        return token;
       } else if (newline(this.code_)) {
         this.reconsume();
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -708,7 +821,7 @@ class Tokenizer {
    * @return {!parse_css.Token}
    */
   consumeAURLToken() {
-    const token = new parse_css.URLToken('');
+    const token = new parse_css.URLToken();
     while (whitespace(this.next())) {
       this.consume();
     }
@@ -998,96 +1111,113 @@ class Tokenizer {
 
 
 /**
- * A MarkedPosition object saves position information from the given
- * tokenizer and can later write that position back to a Token
- * object.
- * @private
- */
-class MarkedPosition {
-  /**
-   * @param {!Tokenizer} tokenizer
-   */
-  constructor(tokenizer) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** @type {number} line number */
-      this.line = tokenizer.getLine();
-      /** @type {number} line */
-      this.col = tokenizer.getCol();
-    }
-  }
-
-  /**
-   * Adds position data to the given token, returning it for chaining.
-   * @param {!parse_css.Token} token
-   * @return {!parse_css.Token}
-   */
-  addPositionTo(token) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      token.line = this.line;
-      token.col = this.col;
-    }
-    return token;
-  }
-}
-
-
-/**
- * @enum {string}
+ * NOTE: When adding to this enum, you must update TokenType_NamesById below.
+ * @enum {number}
  */
 parse_css.TokenType = {
-  UNKNOWN: 'UNKNOWN',
-  AT_KEYWORD: 'AT_KEYWORD',
-  CDC: 'CDC',  // -->
-  CDO: 'CDO',  // <!--
-  CLOSE_CURLY: 'CLOSE_CURLY',
-  CLOSE_PAREN: 'CLOSE_PAREN',
-  CLOSE_SQUARE: 'CLOSE_SQUARE',
-  COLON: 'COLON',
-  COLUMN: 'COLUMN',  // ||
-  COMMA: 'COMMA',
-  DASH_MATCH: 'DASH_MATCH',  // |=
-  DELIM: 'DELIM',
-  DIMENSION: 'DIMENSION',
-  EOF_TOKEN: 'EOF_TOKEN',  // Can't call this EOF due to symbol conflict in C.
-  ERROR: 'ERROR',
-  FUNCTION_TOKEN: 'FUNCTION_TOKEN',
-  HASH: 'HASH',  // #
-  IDENT: 'IDENT',
-  INCLUDE_MATCH: 'INCLUDE_MATCH',  // ~=
-  NUMBER: 'NUMBER',
-  OPEN_CURLY: 'OPEN_CURLY',
-  OPEN_PAREN: 'OPEN_PAREN',
-  OPEN_SQUARE: 'OPEN_SQUARE',
-  PERCENTAGE: 'PERCENTAGE',
-  PREFIX_MATCH: 'PREFIX_MATCH',  // ^=
-  SEMICOLON: 'SEMICOLON',
-  STRING: 'STRING',
-  SUBSTRING_MATCH: 'SUBSTRING_MATCH',  // *=
-  SUFFIX_MATCH: 'SUFFIX_MATCH',        // $=
-  WHITESPACE: 'WHITESPACE',
-  URL: 'URL',
+  UNKNOWN: 0,
+  AT_KEYWORD: 1,
+  CDC: 2,  // -->
+  CDO: 3,  // <!--
+  CLOSE_CURLY: 4,
+  CLOSE_PAREN: 5,
+  CLOSE_SQUARE: 6,
+  COLON: 7,
+  COLUMN: 8,  // ||
+  COMMA: 9,
+  DASH_MATCH: 10,  // |=
+  DELIM: 11,
+  DIMENSION: 12,
+  EOF_TOKEN: 13,  // Can't call this EOF due to symbol conflict in C.
+  ERROR: 14,
+  FUNCTION_TOKEN: 15,
+  HASH: 16,  // #
+  IDENT: 17,
+  INCLUDE_MATCH: 18,  // ~=
+  NUMBER: 19,
+  OPEN_CURLY: 20,
+  OPEN_PAREN: 21,
+  OPEN_SQUARE: 22,
+  PERCENTAGE: 23,
+  PREFIX_MATCH: 24,  // ^=
+  SEMICOLON: 25,
+  STRING: 26,
+  SUBSTRING_MATCH: 27,  // *=
+  SUFFIX_MATCH: 28,     // $=
+  WHITESPACE: 29,
+  URL: 30,
 
   // AST nodes produced by the parsing routines.
-  STYLESHEET: 'STYLESHEET',
-  AT_RULE: 'AT_RULE',
-  QUALIFIED_RULE: 'QUALIFIED_RULE',
-  DECLARATION: 'DECLARATION',
-  BLOCK: 'BLOCK',
-  FUNCTION: 'FUNCTION',
+  STYLESHEET: 31,
+  AT_RULE: 32,
+  QUALIFIED_RULE: 33,
+  DECLARATION: 34,
+  BLOCK: 35,
+  FUNCTION: 36,
 
   // For ExtractUrls
-  PARSED_CSS_URL: 'PARSED_CSS_URL',
+  PARSED_CSS_URL: 37,
 
   // For css-selectors.js.
-  TYPE_SELECTOR: 'TYPE_SELECTOR',
-  ID_SELECTOR: 'ID_SELECTOR',
-  ATTR_SELECTOR: 'ATTR_SELECTOR',
-  PSEUDO_SELECTOR: 'PSEUDO_SELECTOR',
-  CLASS_SELECTOR: 'CLASS_SELECTOR',
-  SIMPLE_SELECTOR_SEQUENCE: 'SIMPLE_SELECTOR_SEQUENCE',
-  COMBINATOR: 'COMBINATOR',
-  SELECTORS_GROUP: 'SELECTORS_GROUP'
+  TYPE_SELECTOR: 38,
+  ID_SELECTOR: 39,
+  ATTR_SELECTOR: 40,
+  PSEUDO_SELECTOR: 41,
+  CLASS_SELECTOR: 42,
+  SIMPLE_SELECTOR_SEQUENCE: 43,
+  COMBINATOR: 44,
+  SELECTORS_GROUP: 45
 };
+
+/** @type {!Array<string>} */
+const TokenType_NamesById = [
+  'UNKNOWN',
+  'AT_KEYWORD',
+  'CDC',
+  'CDO',
+  'CLOSE_CURLY',
+  'CLOSE_PAREN',
+  'CLOSE_SQUARE',
+  'COLON',
+  'COLUMN',
+  'COMMA',
+  'DASH_MATCH',
+  'DELIM',
+  'DIMENSION',
+  'EOF_TOKEN',
+  'ERROR',
+  'FUNCTION_TOKEN',
+  'HASH',
+  'IDENT',
+  'INCLUDE_MATCH',
+  'NUMBER',
+  'OPEN_CURLY',
+  'OPEN_PAREN',
+  'OPEN_SQUARE',
+  'PERCENTAGE',
+  'PREFIX_MATCH',
+  'SEMICOLON',
+  'STRING',
+  'SUBSTRING_MATCH',
+  'SUFFIX_MATCH',
+  'WHITESPACE',
+  'URL',
+  'STYLESHEET',
+  'AT_RULE',
+  'QUALIFIED_RULE',
+  'DECLARATION',
+  'BLOCK',
+  'FUNCTION',
+  'PARSED_CSS_URL',
+  'TYPE_SELECTOR',
+  'ID_SELECTOR',
+  'ATTR_SELECTOR',
+  'PSEUDO_SELECTOR',
+  'CLASS_SELECTOR',
+  'SIMPLE_SELECTOR_SEQUENCE',
+  'COMBINATOR',
+  'SELECTORS_GROUP',
+];
 
 /**
  * The abstract superclass for all tokens.
@@ -1100,33 +1230,35 @@ parse_css.Token = class {
       /** @type {number} */
       this.col = 0;
     }
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
   /**
-   * Propagates the start position of |this| to |other|.
-   * @param {!parse_css.Token} other
+   * Copies the line / col values of |this| to |other|.
+   * @param {!T} other
+   * @return {!T}
+   * @template T
    */
-  copyStartPositionTo(other) {
+  copyPosTo(other) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       other.line = this.line;
       other.col = this.col;
     }
-  }
-
-  /** @return {!string} */
-  toSource() { return '' + this; }
-
-  /** @return {!Object} */
-  toJSON() {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return {'tokenType': this.tokenType, 'line': this.line, 'col': this.col};
-    } else {
-      return {'tokenType': this.tokenType};
-    }
+    return other;
   }
 };
+/** @type {!parse_css.TokenType} */
+parse_css.Token.prototype.tokenType = parse_css.TokenType.UNKNOWN;
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @return {!Object} */
+  parse_css.Token.prototype.toJSON = function() {
+    return {
+      'tokenType': TokenType_NamesById[this.tokenType],
+      'line': this.line,
+      'col': this.col
+    };
+  };
+}
 
 /**
  * Error tokens carry an error code and parameters, which can be
@@ -1135,214 +1267,169 @@ parse_css.Token = class {
  */
 parse_css.ErrorToken = class extends parse_css.Token {
   /**
-   * @param {amp.validator.ValidationError.Code=} opt_code
-   * @param {Array<!string>=} opt_params
+   * @param {!amp.validator.ValidationError.Code} code
+   * @param {!Array<string>} params
    */
-  constructor(opt_code, opt_params) {
+  constructor(code, params) {
     super();
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** @type {!amp.validator.ValidationError.Code} */
-      this.code = opt_code || amp.validator.ValidationError.Code.UNKNOWN_CODE;
-      /** @export {!Array<!string>} */
-      this.params = opt_params || [];
+      this.code = code;
+      /** @type {!Array<string>} */
+      this.params = params;
     }
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.ERROR;
-  }
-
-  /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      json['code'] = this.code;
-      json['params'] = this.params;
-    }
-    return json;
   }
 };
+/** @type {!parse_css.TokenType} */
+parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.ErrorToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
+    json['code'] = this.code;
+    json['params'] = this.params;
+    return json;
+  };
+}
 
 /**
  * @type {!parse_css.ErrorToken}
  */
-parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken();
+parse_css.TRIVIAL_ERROR_TOKEN = new parse_css.ErrorToken(
+    amp.validator.ValidationError.Code.UNKNOWN_CODE, []);
 
-parse_css.WhitespaceToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.WHITESPACE;
-  }
+parse_css.WhitespaceToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.WhitespaceToken.prototype.tokenType = parse_css.TokenType.WHITESPACE;
+const TRIVIAL_WHITESPACE_TOKEN = new parse_css.WhitespaceToken();
 
-  /** @inheritDoc */
-  toSource() { return ' '; }
-};
+parse_css.CDOToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.CDOToken.prototype.tokenType = parse_css.TokenType.CDO;
+const TRIVIAL_CDO_TOKEN = new parse_css.CDOToken();
 
-parse_css.CDOToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.CDO;
-  }
+parse_css.CDCToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.CDCToken.prototype.tokenType = parse_css.TokenType.CDC;
+const TRIVIAL_CDC_TOKEN = new parse_css.CDCToken();
 
-  /** @inheritDoc */
-  toSource() { return '<!--'; }
-};
+parse_css.ColonToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.ColonToken.prototype.tokenType = parse_css.TokenType.COLON;
+const TRIVIAL_COLON_TOKEN = new parse_css.ColonToken();
 
-parse_css.CDCToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.CDC;
-  }
+parse_css.SemicolonToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.SemicolonToken.prototype.tokenType = parse_css.TokenType.SEMICOLON;
+const TRIVIAL_SEMICOLON_TOKEN = new parse_css.SemicolonToken();
 
-  /** @inheritDoc */
-  toSource() { return '-->'; }
-};
+parse_css.CommaToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.CommaToken.prototype.tokenType = parse_css.TokenType.COMMA;
+const TRIVIAL_COMMA_TOKEN = new parse_css.CommaToken();
 
-parse_css.ColonToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.COLON;
-  }
-};
+parse_css.GroupingToken = class extends parse_css.Token {};
+/** @type {string} */
+parse_css.GroupingToken.prototype.value = 'abstract';
+/** @type {string} */
+parse_css.GroupingToken.prototype.mirror = 'abstract';
 
-parse_css.SemicolonToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.SEMICOLON;
-  }
-};
+parse_css.OpenCurlyToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.OpenCurlyToken.prototype.tokenType = parse_css.TokenType.OPEN_CURLY;
+/** @type {string} */
+parse_css.OpenCurlyToken.prototype.value = '{';
+/** @type {string} */
+parse_css.OpenCurlyToken.prototype.mirror = '}';
+const TRIVIAL_OPEN_CURLY_TOKEN = new parse_css.OpenCurlyToken();
 
-parse_css.CommaToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.COMMA;
-  }
-};
+parse_css.CloseCurlyToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.CloseCurlyToken.prototype.tokenType = parse_css.TokenType.CLOSE_CURLY;
+/** @type {string} */
+parse_css.CloseCurlyToken.prototype.value = '}';
+/** @type {string} */
+parse_css.CloseCurlyToken.prototype.mirror = '{';
+const TRIVIAL_CLOSE_CURLY_TOKEN = new parse_css.CloseCurlyToken();
 
-parse_css.GroupingToken = class extends parse_css.Token {
-  /**
-   * @param {!string} value
-   * @param {!string} mirror
-   */
-  constructor(value, mirror) {
-    super();
-    /** @type {string} */
-    this.value = value;
-    /** @type {string} */
-    this.mirror = mirror;
-  }
-};
+parse_css.OpenSquareToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.OpenSquareToken.prototype.tokenType = parse_css.TokenType.OPEN_SQUARE;
+/** @type {string} */
+parse_css.OpenSquareToken.prototype.value = '[';
+/** @type {string} */
+parse_css.OpenSquareToken.prototype.mirror = ']';
+const TRIVIAL_OPEN_SQUARE_TOKEN = new parse_css.OpenSquareToken();
 
-parse_css.OpenCurlyToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super('{', '}');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.OPEN_CURLY;
-  }
-};
+parse_css.CloseSquareToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.CloseSquareToken.prototype.tokenType =
+    parse_css.TokenType.CLOSE_SQUARE;
+/** @type {string} */
+parse_css.CloseSquareToken.prototype.value = ']';
+/** @type {string} */
+parse_css.CloseSquareToken.prototype.mirror = '[';
+const TRIVIAL_CLOSE_SQUARE_TOKEN = new parse_css.CloseSquareToken();
 
-parse_css.CloseCurlyToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super('}', '{');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.CLOSE_CURLY;
-  }
-};
+parse_css.OpenParenToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.OpenParenToken.prototype.tokenType = parse_css.TokenType.OPEN_PAREN;
+/** @type {string} */
+parse_css.OpenParenToken.prototype.value = '(';
+/** @type {string} */
+parse_css.OpenParenToken.prototype.mirror = ')';
+const TRIVIAL_OPEN_PAREN_TOKEN = new parse_css.OpenParenToken();
 
-parse_css.OpenSquareToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super('[', ']');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.OPEN_SQUARE;
-  }
-};
+parse_css.CloseParenToken = class extends parse_css.GroupingToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.CloseParenToken.prototype.tokenType = parse_css.TokenType.CLOSE_PAREN;
+/** @type {string} */
+parse_css.CloseParenToken.prototype.value = ')';
+/** @type {string} */
+parse_css.CloseParenToken.prototype.mirror = '(';
+const TRIVIAL_CLOSE_PAREN_TOKEN = new parse_css.CloseParenToken();
 
-parse_css.CloseSquareToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super(']', '[');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.CLOSE_SQUARE;
-  }
-};
+parse_css.IncludeMatchToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.IncludeMatchToken.prototype.tokenType =
+    parse_css.TokenType.INCLUDE_MATCH;
+const TRIVIAL_INCLUDE_MATCH_TOKEN = new parse_css.IncludeMatchToken();
 
-parse_css.OpenParenToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super('(', ')');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.OPEN_PAREN;
-  }
-};
+parse_css.DashMatchToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.DashMatchToken.prototype.tokenType = parse_css.TokenType.DASH_MATCH;
+const TRIVIAL_DASH_MATCH_TOKEN = new parse_css.DashMatchToken();
 
-parse_css.CloseParenToken = class extends parse_css.GroupingToken {
-  constructor() {
-    super(')', '(');
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.CLOSE_PAREN;
-  }
-};
+parse_css.PrefixMatchToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.PrefixMatchToken.prototype.tokenType =
+    parse_css.TokenType.PREFIX_MATCH;
+const TRIVIAL_PREFIX_MATCH_TOKEN = new parse_css.PrefixMatchToken();
 
-parse_css.IncludeMatchToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.INCLUDE_MATCH;
-  }
-};
+parse_css.SuffixMatchToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.SuffixMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUFFIX_MATCH;
+const TRIVIAL_SUFFIX_MATCH_TOKEN = new parse_css.SuffixMatchToken();
 
-parse_css.DashMatchToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.DASH_MATCH;
-  }
-};
+parse_css.SubstringMatchToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.SubstringMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUBSTRING_MATCH;
+const TRIVIAL_SUBSTRING_MATCH_TOKEN = new parse_css.SubstringMatchToken();
 
-parse_css.PrefixMatchToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.PREFIX_MATCH;
-  }
-};
+parse_css.ColumnToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.ColumnToken.prototype.tokenType = parse_css.TokenType.COLUMN;
+const TRIVIAL_COLUMN_TOKEN = new parse_css.ColumnToken();
 
-parse_css.SuffixMatchToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.SUFFIX_MATCH;
-  }
-};
+parse_css.EOFToken = class extends parse_css.Token {};
+/** @type {!parse_css.TokenType} */
+parse_css.EOFToken.prototype.tokenType = parse_css.TokenType.EOF_TOKEN;
 
-parse_css.SubstringMatchToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.SUBSTRING_MATCH;
-  }
-};
-
-parse_css.ColumnToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.COLUMN;
-  }
-};
-
-parse_css.EOFToken = class extends parse_css.Token {
-  constructor() {
-    super();
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.EOF_TOKEN;
-  }
-
-  /** @inheritDoc */
-  toSource() { return ''; };
-};
+/** @type {!parse_css.EOFToken} */
+parse_css.TRIVIAL_EOF_TOKEN = new parse_css.EOFToken();
 
 parse_css.DelimToken = class extends parse_css.Token {
   /**
@@ -1352,32 +1439,37 @@ parse_css.DelimToken = class extends parse_css.Token {
     super();
     /** @type {string} */
     this.value = stringFromCode(code);
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.DELIM;
-  }
-
-  /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['value'] = this.value;
-    return json;
-  }
-
-  /** @inheritDoc */
-  toSource() {
-    if (this.value === '\\') {
-      return '\\\n';
-    } else {
-      return this.value;
-    }
   }
 };
+/** @type {!parse_css.TokenType} */
+parse_css.DelimToken.prototype.tokenType = parse_css.TokenType.DELIM;
+
+const TRIVIAL_DELIM_TOKEN_23 = new parse_css.DelimToken(0x23);
+const TRIVIAL_DELIM_TOKEN_24 = new parse_css.DelimToken(0x24);
+const TRIVIAL_DELIM_TOKEN_2A = new parse_css.DelimToken(0x2a);
+const TRIVIAL_DELIM_TOKEN_2B = new parse_css.DelimToken(0x2b);
+const TRIVIAL_DELIM_TOKEN_2D = new parse_css.DelimToken(0x2d);
+const TRIVIAL_DELIM_TOKEN_2E = new parse_css.DelimToken(0x2e);
+const TRIVIAL_DELIM_TOKEN_3C = new parse_css.DelimToken(0x3c);
+const TRIVIAL_DELIM_TOKEN_40 = new parse_css.DelimToken(0x40);
+const TRIVIAL_DELIM_TOKEN_5E = new parse_css.DelimToken(0x5E);
+const TRIVIAL_DELIM_TOKEN_7C = new parse_css.DelimToken(0x7C);
+const TRIVIAL_DELIM_TOKEN_7E = new parse_css.DelimToken(0x7E);
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.DelimToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
+    json['value'] = this.value;
+    return json;
+  };
+}
 
 parse_css.StringValuedToken = class extends parse_css.Token {
   constructor() {
     super();
     /** @type {string} */
-    this.value = 'abstract';
+    this.value = '';
   }
 
   /**
@@ -1385,176 +1477,109 @@ parse_css.StringValuedToken = class extends parse_css.Token {
    * @return {boolean}
    */
   ASCIIMatch(str) { return this.value.toLowerCase() === str.toLowerCase(); }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.StringValuedToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     return json;
-  }
-};
+  };
+}
 
-parse_css.IdentToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
-    super();
-    /** @type {string} */
-    this.value = val;
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.IDENT;
-  }
+parse_css.IdentToken = class extends parse_css.StringValuedToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.IdentToken.prototype.tokenType = parse_css.TokenType.IDENT;
 
-  /** @inheritDoc */
-  toSource() { return escapeIdent(this.value); }
-};
+parse_css.FunctionToken = class extends parse_css.StringValuedToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.FunctionToken.prototype.tokenType =
+    parse_css.TokenType.FUNCTION_TOKEN;
+/** @type {string} */
+parse_css.FunctionToken.prototype.mirror = ')';
 
-parse_css.FunctionToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
-    super();
-    /** @type {string} */
-    this.value = val;
-    /** @type {string} */
-    this.mirror = ')';
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.FUNCTION_TOKEN;
-  }
-
-  /** @inheritDoc */
-  toSource() { return escapeIdent(this.value) + '('; }
-};
-
-parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
-    super();
-    /** @type {string} */
-    this.value = val;
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.AT_KEYWORD;
-  }
-
-  /** @inheritDoc */
-  toSource() { return '@' + escapeIdent(this.value); }
-};
+parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.AtKeywordToken.prototype.tokenType = parse_css.TokenType.AT_KEYWORD;
 
 parse_css.HashToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
+  constructor() {
     super();
-    /** @type {string} */
-    this.value = val;
     /** @type {string} */
     this.type = 'unrestricted';
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.HASH;
   }
+};
+/** @type {!parse_css.TokenType} */
+parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
 
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['value'] = this.value;
+  parse_css.HashToken.prototype.toJSON = function() {
+    const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
     json['type'] = this.type;
     return json;
-  }
+  };
+}
 
-  /** @inheritDoc */
-  toSource() {
-    if (this.type === 'id') {
-      return '#' + escapeIdent(this.value);
-    } else {
-      return '#' + escapeHash(this.value);
-    }
-  }
-};
+parse_css.StringToken = class extends parse_css.StringValuedToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.StringToken.prototype.tokenType = parse_css.TokenType.STRING;
 
-parse_css.StringToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
-    super();
-    /** @type {string} */
-    this.value = val;
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.STRING;
-  }
-};
-
-parse_css.URLToken = class extends parse_css.StringValuedToken {
-  /**
-   * @param {string} val
-   */
-  constructor(val) {
-    super();
-    /** @type {string} */
-    this.value = val;
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.URL;
-  }
-
-  /** @return {string} */
-  toSource() { return 'url("' + escapeString(this.value) + '")'; }
-};
+parse_css.URLToken = class extends parse_css.StringValuedToken {};
+/** @type {!parse_css.TokenType} */
+parse_css.URLToken.prototype.tokenType = parse_css.TokenType.URL;
 
 parse_css.NumberToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.type = 'integer';
     /** @type {string} */
     this.repr = '';
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.NUMBER;
   }
+};
+/** @type {!parse_css.TokenType} */
+parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
 
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.NumberToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['type'] = this.type;
     json['repr'] = this.repr;
     return json;
-  }
-
-  /** @return {string} */
-  toSource() { return this.repr; }
-};
+  };
+}
 
 parse_css.PercentageToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.repr = '';
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.PERCENTAGE;
   }
+};
+/** @type {!parse_css.TokenType} */
+parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
 
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.PercentageToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['repr'] = this.repr;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() { return this.repr + '%'; }
-};
+  };
+}
 
 parse_css.DimensionToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.type = 'integer';
@@ -1562,112 +1587,19 @@ parse_css.DimensionToken = class extends parse_css.Token {
     this.repr = '';
     /** @type {string} */
     this.unit = '';
-    /** @type {parse_css.TokenType} */
-    this.tokenType = parse_css.TokenType.DIMENSION;
   }
+};
+/** @type {!parse_css.TokenType} */
+parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
 
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.DimensionToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['type'] = this.type;
     json['repr'] = this.repr;
     json['unit'] = this.unit;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() {
-    const source = this.repr;
-    let unit = escapeIdent(this.unit);
-    if (unit[0].toLowerCase() === 'e' &&
-        (unit[1] === '-' || digit(unit.charCodeAt(1)))) {
-      // Unit is ambiguous with scinot
-      // Remove the leading "e", replace with escape.
-      unit = '\\65 ' + unit.slice(1, unit.length);
-    }
-    return source + unit;
-  }
-};
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeIdent(string) {
-  string = '' + string;
-  let result = '';
-  const firstcode = string.charCodeAt(0);
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-    if (between(code, 0x1, 0x1f) || code === 0x7f || (i === 0 && digit(code)) ||
-        (i === 1 && digit(code) && firstcode === /* '-' */ 0x2d)) {
-      result += '\\' + code.toString(16) + ' ';
-    } else if (
-        code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
-        digit(code) || letter(code)) {
-      result += string[i];
-    } else {
-      result += '\\' + string[i];
-    }
-  }
-  return result;
-}
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeHash(string) {
-  // Escapes the contents of "unrestricted"-type hash tokens.
-  // Won't preserve the ID-ness of "id"-type hash tokens;
-  // use escapeIdent() for that.
-  string = '' + string;
-  let result = '';
-  const firstcode = string.charCodeAt(0);
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-
-    if (code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
-        digit(code) || letter(code)) {
-      result += string[i];
-    } else {
-      result += '\\' + code.toString(16) + ' ';
-    }
-  }
-  return result;
-}
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeString(string) {
-  string = '' + string;
-  let result = '';
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-
-    if (between(code, 0x1, 0x1f) || code === 0x7f) {
-      result += '\\' + code.toString(16) + ' ';
-    } else if (code === /* '"' */ 0x22 || code === /* '\' */ 0x5c) {
-      result += '\\' + string[i];
-    } else {
-      result += string[i];
-    }
-  }
-  return result;
+  };
 }

@@ -45,7 +45,7 @@ parse_srcset.SrcsetParsingResult;
  *
  * If parsing fails, returns false in SrcsetParsingResult.status.
  *
- * @param {!string} srcset
+ * @param {string} srcset
  * @return {!parse_srcset.SrcsetParsingResult}
  * @export
  */
