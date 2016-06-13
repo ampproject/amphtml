@@ -320,7 +320,7 @@ function updateVisibilityState(global) {
 
 /**
  * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number)} observerCallback
+ * @param {function(number, number)} observerCallback
  * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
@@ -332,7 +332,7 @@ function onResizeSuccess(observerCallback) {
 
 /**
  * Registers a callback for communicating when a resize request is denied.
- * @param {function(number)} observerCallback
+ * @param {function(number, number)} observerCallback
  * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
@@ -458,7 +458,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONObject}
+ * @return {!JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -469,7 +469,7 @@ export function parseFragment(fragment) {
   if (json.indexOf('{%22') == 0) {
     json = decodeURIComponent(json);
   }
-  return json ? JSON.parse(json) : {};
+  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**

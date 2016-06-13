@@ -41,7 +41,7 @@ export function installAlpClickHandler(win) {
 /**
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
- * @param {!MouseEvent} e
+ * @param {!Event} e
  * @visibleForTesting
  */
 export function handleClick(e) {
@@ -94,7 +94,7 @@ export function handleClick(e) {
  * }|undefined} A URL on the AMP Cache.
  */
 function getLinkInfo(e) {
-  const a = closest(e.target, element => {
+  const a = closest(/** @type {!Element} */ (e.target), element => {
     return element.tagName == 'A' && element.href;
   });
   if (!a) {

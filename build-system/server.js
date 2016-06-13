@@ -53,7 +53,7 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
-app.use('/form/echo-html/post', function(req, res) {
+app.use('/form/html/post', function(req, res) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -69,6 +69,17 @@ app.use('/form/echo-html/post', function(req, res) {
         <p>Please make sure to confirm your email ${fields['email']}</p>
       `);
     }
+  });
+});
+
+app.use('/form/echo-json/post', function(req, res) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    if (fields['email'] == 'already@subscribed.com') {
+      res.statusCode = 500;
+    }
+    res.end(JSON.stringify(fields));
   });
 });
 

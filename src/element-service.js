@@ -27,7 +27,7 @@ import * as dom from './dom';
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
+ * @param {string} providedByElement Name of the custom element that provides
  *     the implementation of this service.
  * @return {!Promise<*>}
  */
@@ -47,7 +47,7 @@ export function getElementService(win, id, providedByElement) {
  * actually available on the current page.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
+ * @param {string} providedByElement Name of the custom element that provides
  *     the implementation of this service.
  * @return {!Promise<*>}
  */

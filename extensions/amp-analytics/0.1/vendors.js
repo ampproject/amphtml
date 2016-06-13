@@ -15,7 +15,7 @@
  */
 
 /**
- * @const {!JSONObject}
+ * @const {!JSONType}
  */
 export const ANALYTICS_CONFIG = {
 

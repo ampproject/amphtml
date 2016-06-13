@@ -41,7 +41,8 @@
     "@polymer/polymer": "1.2.5-npm-test.2",
     "codemirror": "5.15.2",
     "commander": "2.9.0",
-    "webcomponents-lite": "0.6.0"
+    "webcomponents-lite": "0.6.0",
+    "promise" : "7.1.1"
   },
   "devDependencies": {
     "google-closure-compiler": "20160517.1.0",

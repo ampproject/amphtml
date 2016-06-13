@@ -38,7 +38,7 @@ const DEFAULT_METHOD_ = 'activate';
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONObject,
+ *   args: ?JSONType,
  *   str: string
  * }}
  */
@@ -50,12 +50,13 @@ let ActionInfoDef;
  * @struct
  * @const
  * TODO(dvoytenko): add action arguments here as well.
+ * @package For type.
  */
-class ActionInvocation {
+export class ActionInvocation {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -64,7 +65,7 @@ class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONObject} */
+    /** @const {?JSONType} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -94,7 +95,7 @@ export class ActionService {
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
-    /** @private {!Vsync} */
+    /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
     // Add core events.
@@ -141,7 +142,7 @@ export class ActionService {
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -212,7 +213,7 @@ export class ActionService {
   /**
    * The errors that are a result of action definition.
    * @param {string} s
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    * @param {?Element} target
    * @private
    */
@@ -226,10 +227,10 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,

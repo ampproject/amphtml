@@ -16,14 +16,90 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
+import {assertHttpsUrl} from '../../../src/url';
+import {user} from '../../../src/log';
+import {onDocumentReady} from '../../../src/document-ready';
+import {xhrFor} from '../../../src/xhr';
+import {toArray} from '../../../src/types';
+import {startsWith} from '../../../src/string';
+
 
 /** @type {string} */
 const TAG = 'amp-form';
 
+export class AmpForm {
+
+  /**
+   * Adds functionality to the passed form element and listens to submit event.
+   * @param {!HTMLFormElement} element
+   */
+  constructor(element) {
+    /** @const @private {!Window} */
+    this.win_ = element.ownerDocument.defaultView;
+
+    /** @const @private {!Element} */
+    this.form_ = element;
+
+    /** @const @private {!Xhr} */
+    this.xhr_ = xhrFor(this.win_);
+
+    /** @const @private {string} */
+    this.method_ = this.form_.getAttribute('method') || 'GET';
+
+    /** @const @private {?string} */
+    this.xhrAction_ = this.form_.getAttribute('action-xhr');
+    if (this.xhrAction_) {
+      assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
+      user.assert(!startsWith(this.xhrAction_, 'https://cdn.ampproject.org'),
+          'form action-xhr should not be on cdn.ampproject.org: %s',
+          this.form_);
+    }
+    this.installSubmitHandler_();
+  }
+
+  /** @private */
+  installSubmitHandler_() {
+    this.form_.addEventListener('submit', e => this.handleSubmit_(e));
+  }
+
+  /**
+   * @param {!Event} e
+   * @private
+   */
+  handleSubmit_(e) {
+    if (e.defaultPrevented) {
+      return;
+    }
+    if (this.xhrAction_) {
+      e.preventDefault();
+      this.xhr_.fetchJson(this.xhrAction_, {
+        body: new FormData(this.form_),
+        method: this.method_,
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+      });
+    }
+  }
+}
+
+
+/**
+ * Installs submission handler on all forms in the document.
+ * @param {!Window} win
+ */
+function installSubmissionHandlers(win) {
+  onDocumentReady(win.document, () => {
+    toArray(win.document.forms).forEach(form => {
+      new AmpForm(form);
+    });
+  });
+}
+
+
 function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
-      // TODO: Write the implementation of the service.
+      installSubmissionHandlers(win);
     }
     return {};
   });

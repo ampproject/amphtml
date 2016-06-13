@@ -18,8 +18,9 @@ import {getService} from './service';
 
 /**
  * @param {!Window} window
- * @return {!Resources}
+ * @return {!./service/resources-impl.Resources}
  */
 export function resourcesFor(window) {
-  return getService(window, 'resources');
+  return /** @type {!./service/resources-impl.Resources} */ (
+      getService(window, 'resources'));
 };

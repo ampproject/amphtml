@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <style amp-custom>
         input:invalid {
             background-color: #dc4e41;
@@ -30,9 +31,36 @@
     </style>
 </head>
 <body>
-<h2>Subscribe to our weekly Newsletter</h2>
 
-<form method="post" action="/form/echo-html/post" target="_blank">
+<h2>Subscribe to our weekly Newsletter (non-xhr)</h2>
+
+<form method="post" action="/form/html/post" target="_blank">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div class="invalid-message">
+        There are some input that needs fixing. Please fix them.
+    </div>
+    <div class="valid-message">
+        Everything looks good, you can submit now!
+    </div>
+</form>
+
+<h2>Subscribe to our weekly Newsletter (xhr)</h2>
+
+<form method="post"
+      action="/form/html/post"
+      action-xhr="/form/echo-json/post"
+      target="_blank">
     <fieldset>
         <label>
             <span>Your name</span>

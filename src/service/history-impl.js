@@ -564,10 +564,10 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
 
   /**
-   * @param {!Viewer} viewer
+   * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(viewer) {
-    /** @private @const {!Viewer} */
+    /** @private @const */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -610,7 +610,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!ViewerHistoryPoppedEvent} event
+   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
    * @private
    */
   onHistoryPopped_(event) {

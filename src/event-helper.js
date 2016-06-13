@@ -20,9 +20,9 @@ import {user} from './log';
 
 /**
  * Listens for the specified event on the element.
- * @param {!EventTarget} element
+ * @param {?EventTarget} element
  * @param {string} eventType
- * @param {function(Event)} listener
+ * @param {?function(Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
@@ -42,7 +42,7 @@ export function listen(element, eventType, listener, opt_capture) {
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {!EventTarget} element
+ * @param {?EventTarget} element
  * @param {string} eventType
  * @param {function(Event)} listener
  * @param {boolean=} opt_capture
@@ -140,7 +140,7 @@ export function loadPromise(element, opt_timeout) {
 
 /**
  * @param {!Promise<TYPE>} promise
- * @param {Unlisten|undefined} unlisten
+ * @param {UnlistenDef|undefined} unlisten
  * @param {number|undefined} timeout
  * @return {!Promise<TYPE>}
  * @template TYPE

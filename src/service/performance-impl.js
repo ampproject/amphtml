@@ -84,10 +84,10 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
-    /** @private {?Viewer} */
+    /** @private {?./viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?Resources} */
+    /** @private {?./resources-impl.Resources} */
     this.resources = null;
 
     /** @private @const {!Promise} */
@@ -192,7 +192,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONObject} params
+   * @param {!JSONType} params
    * @private
    */
   setFlushParams_(params) {
