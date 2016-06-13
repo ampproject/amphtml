@@ -51,8 +51,8 @@ tags: {  # <amp-o2-player>
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   also_requires_tag: "amp-o2-player extension .js script"
-  attrs: { name: "data-pid" mandatory: true }
-  attrs: { name: "data-bcid" mandatory: true }
+  attrs: { name: "data-pid" }
+  attrs: { name: "data-bcid" }
   # If data-embed is missing, the default value is "default".
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
@@ -61,6 +61,7 @@ tags: {  # <amp-o2-player>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
+    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
