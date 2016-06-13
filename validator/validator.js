@@ -604,7 +604,53 @@ class CdataMatcher {
 
     /** @private @type {!LineCol} */
     this.lineCol_ = new LineCol(1, 0);
+
+    /**
+     * @type {RegExp} cdataRegex
+     * @private
+     */
+    this.cdataRegex_ = null;
+    if (tagSpec.cdata && tagSpec.cdata.cdataRegex) {
+      this.cdataRegex_ = new RegExp('^(' + tagSpec.cdata.cdataRegex + ')$');
+    }
+
+    /** @type {string} */
+    var blacklistedCdataRegexStr = '';
+    if (tagSpec.cdata) {
+      for (const blacklist of tagSpec.cdata.blacklistedCdataRegex) {
+        blacklistedCdataRegexStr += blacklist + '|';
+      }
+    }
+    /**
+     * @type {RegExp} blacklistedCdataRegex
+     * @private
+     */
+    this.blacklistedCdataRegex_ = null;
+    if (blacklistedCdataRegexStr !== '') {
+      this.blacklistedCdataRegex_ =
+          new RegExp('(' + blacklistedCdataRegexStr + ')', 'i');
+    }
   }
+
+  /**
+   * @return {boolean}
+   */
+  hasCdataRegex() { return this.cdataRegex_ !== null; }
+
+  /**
+   * @return {RegExp} cdataRegex
+   */
+  getCdataRegex() { return this.cdataRegex_; }
+
+  /**
+   * @return {boolean}
+   */
+  hasBlacklistedCdataRegex() { return this.blacklistedCdataRegex_ !== null; }
+
+  /**
+   * @return {RegExp} blacklistedCdataRegex
+   */
+  getBlacklistedCdataRegex() { return this.blacklistedCdataRegex_; }
 
   /**
    * Matches the provided cdata against what this matcher expects.
@@ -662,9 +708,8 @@ class CdataMatcher {
       // We return early if the cdata has an exact match rule. The
       // spec shouldn't have an exact match rule that doesn't validate.
       return;
-    } else if (cdataSpec.cdataRegex !== null) {
-      const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
-      if (!cdataRegex.test(cdata)) {
+    } else if (this.hasCdataRegex()) {
+      if (!this.getCdataRegex().test(cdata)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -741,20 +786,27 @@ class CdataMatcher {
     // } end oneof
 
     // Blacklisted CDATA Regular Expressions
-    for (const blacklist of cdataSpec.blacklistedCdataRegex) {
-      const blacklistRegex = new RegExp(blacklist.regex, 'i');
-      if (blacklistRegex.test(cdata)) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
-              context.getDocLocator(),
-              /* params */
-              [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
-              this.tagSpec_.specUrl, validationResult);
-        } else {
-          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-          return;
+    // We use a combined regex as a fast test. If it matches, we re-match
+    // against each individual regex so that we can generate better error
+    // messages.
+    if (this.hasBlacklistedCdataRegex() &&
+        this.getBlacklistedCdataRegex().test(cdata)) {
+      for (const blacklist of cdataSpec.blacklistedCdataRegex) {
+        const blacklistRegex = new RegExp(blacklist.regex, 'i');
+        if (blacklistRegex.test(cdata)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            context.addError(
+                amp.validator.ValidationError.Severity.ERROR,
+                amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+                context.getDocLocator(),
+                /* params */
+                [getTagSpecName(this.tagSpec_), blacklist.errorMessage],
+                this.tagSpec_.specUrl, validationResult);
+          } else {
+            validationResult.status =
+                amp.validator.ValidationResult.Status.FAIL;
+            return;
+          }
         }
       }
     }
@@ -1266,7 +1318,66 @@ class ParsedAttrSpec {
      */
     this.mandatoryValuePropertyNames_ =
         sortAndUniquify(mandatoryValuePropertyNames);
+
+    /**
+     * @type {RegExp} valueRegex
+     * @private
+     */
+    this.valueRegex_ = null;
+    if (this.spec_ && this.spec_.valueRegex) {
+      this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
+    }
+
+    /**
+     * @type {RegExp} valueRegexCasei
+     * @private
+     */
+    this.valueRegexCasei_ = null;
+    if (this.spec_ && this.spec_.valueRegexCasei) {
+      this.valueRegexCasei_ =
+          new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
+    }
+
+    /**
+     * @type {RegExp} blacklistedValueRegex
+     * @private
+     */
+    this.blacklistedValueRegex_ = null;
+    if (this.spec_ && this.spec_.blacklistedValueRegex) {
+      this.blacklistedValueRegex_ =
+          new RegExp(this.spec_.blacklistedValueRegex, 'i');
+    }
   }
+
+  /**
+   * @return {boolean}
+   */
+  hasValueRegex() { return this.valueRegex_ !== null; }
+
+  /**
+   * @return {RegExp} valueRegex
+   */
+  getValueRegex() { return this.valueRegex_; }
+
+  /**
+   * @return {boolean}
+   */
+  hasValueRegexCasei() { return this.valueRegexCasei_ !== null; }
+
+  /**
+   * @return {RegExp} valueRegex
+   */
+  getValueRegexCasei() { return this.valueRegexCasei_; }
+
+  /**
+   * @return {boolean}
+   */
+  hasBlacklistedValueRegex() { return this.blacklistedValueRegex_ !== null; }
+
+  /**
+   * @return {RegExp} blacklistedValueRegex
+   */
+  getBlacklistedValueRegex() { return this.blacklistedValueRegex_; }
 
   /**
    * @return {number} unique for this attr spec.
@@ -1323,13 +1434,12 @@ class ParsedAttrSpec {
         result.status = amp.validator.ValidationResult.Status.FAIL;
         return;
       }
-    } else if (
-        this.spec_.valueRegex !== null || this.spec_.valueRegexCasei !== null) {
-      var valueRegex;
-      if (this.spec_.valueRegex !== null) {
-        valueRegex = new RegExp('^(' + this.spec_.valueRegex + ')$');
+    } else if (this.hasValueRegex() || this.hasValueRegexCasei()) {
+      let valueRegex;
+      if (this.hasValueRegex()) {
+        valueRegex = this.getValueRegex();
       } else {
-        valueRegex = new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
+        valueRegex = this.getValueRegexCasei();
       }
       if (!valueRegex.test(attrValue)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1660,7 +1770,7 @@ amp.validator.CssLengthAndUnit = class {
       this.isValid = allowAuto;
       return;
     }
-    const re = new RegExp('^\\d+(?:\\.\\d+)?(px|em|rem|vh|vw|vmin|vmax)?$');
+    const re = /^\d+(?:\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/;
     const match = re.exec(input);
     if (match !== null) {
       this.isValid = true;
@@ -1942,7 +2052,7 @@ class ParsedTagSpec {
     // system, supports replacement tags that start with {{ and end with }}.
     // We relax attribute value rules if the value contains this syntax as we
     // will validate the post-processed tag instead.
-    const mustacheTag = new RegExp('{{.*}}');
+    const mustacheTag = /{{.*}}/;
     return mustacheTag.test(value);
   }
 
@@ -1955,7 +2065,7 @@ class ParsedTagSpec {
     // Mustache (https://mustache.github.io/mustache.5.html), our template
     // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
     // be whitespace after the 2nd '{'. We disallow these in attribute Values.
-    const unescapedOpenTag = new RegExp('{{\\s*[&{]');
+    const unescapedOpenTag = /{{\s*[&{]/;
     return unescapedOpenTag.test(value);
   }
 
@@ -1969,7 +2079,7 @@ class ParsedTagSpec {
     // system, supports 'partials' which include other Mustache templates
     // in the format of {{>partial}} and there can be whitespace after the {{.
     // We disallow partials in attribute values.
-    const partialsTag = new RegExp('{{\\s*>');
+    const partialsTag = /{{\s*>/;
     return partialsTag.test(value);
   }
 
@@ -2342,10 +2452,8 @@ class ParsedTagSpec {
           return;
         }
       }
-      if (parsedSpec.getSpec().blacklistedValueRegex !== null) {
-        const blacklistedValueRegex =
-            new RegExp(parsedSpec.getSpec().blacklistedValueRegex, 'i');
-        if (blacklistedValueRegex.test(attrValue)) {
+      if (parsedSpec.hasBlacklistedValueRegex()) {
+        if (parsedSpec.getBlacklistedValueRegex().test(attrValue)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
