@@ -52,15 +52,27 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   resource: !Resource,
+ *   newHeight: (number|undefined),
+ *   newWidth: (number|undefined),
+ *   force: boolean,
+ *   callback: (function()|undefined)
+ * }}
+ */
+let ChangeSizeRequestDef;
+
 export class Resources {
   constructor(window) {
     /** @const {!Window} */
     this.win = window;
 
-    /** @const @private {!Viewer} */
+    /** @const @private {!./viewer-impl.Viewer} */
     this.viewer_ = installViewerService(window);
 
-    /** @const @private {!Platform} */
+    /** @const @private {!../platform.Platform} */
     this.platform_ = platformFor(window);
 
     /** @private {boolean} */
@@ -119,19 +131,6 @@ export class Resources {
     this.queue_ = new TaskQueue_();
 
    /**
-    * The internal structure of a ChangeHeightRequest.
-    * @typedef {{
-    *   resource: !Resource,
-    *   newHeight: (number|undefined),
-    *   newWidth: (number|undefined),
-    *   force: boolean,
-    *   callback: (function()|undefined)
-    * }}
-    * @private
-    */
-    let ChangeSizeRequestDef;
-
-   /**
     * @private {!Array<!ChangeSizeRequestDef>}
     */
     this.requestsChangeSize_ = [];
@@ -145,13 +144,10 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
-    /** @private {number} */
-    this.scrollHeight_ = 0;
-
-    /** @private @const {!Viewport} */
+    /** @private @const {!./viewport-impl.Viewport} */
     this.viewport_ = installViewportService(this.win);
 
-    /** @private @const {!Vsync} */
+    /** @private @const {!./vsync-impl.Vsync} */
     this.vsync_ = installVsyncService(this.win);
 
     /** @private @const {!FocusHistory} */
@@ -160,7 +156,7 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
-    /** @private @const {!Framerate}  */
+    /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
@@ -316,19 +312,6 @@ export class Resources {
     });
   }
 
-  /** @private */
-  updateScrollHeight_() {
-    if (!this.win.document.body) {
-      return;
-    }
-    const scrollHeight = this.win.document.body./*OK*/scrollHeight;
-    if (scrollHeight != this./*OK*/scrollHeight_) {
-      this./*OK*/scrollHeight_ = scrollHeight;
-      this.viewer_.postDocumentResized(this.viewport_.getSize().width,
-          scrollHeight);
-    }
-  }
-
   /**
    * Returns the maximum DPR available on this device.
    * @return {number}
@@ -360,7 +343,7 @@ export class Resources {
 
   /**
    * Returns the viewport instance
-   * @return {!Viewport}
+   * @return {!./viewport-impl.Viewport}
    */
   getViewport() {
     return this.viewport_;
@@ -576,7 +559,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function=} opt_callback A callback function to be called if the
+   * @param {function()=} opt_callback A callback function to be called if the
    *    height is updated.
    * @protected
    */
@@ -686,9 +669,7 @@ export class Resources {
 
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
-      this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body./*OK*/scrollHeight);
-      this.updateScrollHeight_();
+      this.viewer_.postDocumentReady();
     }
 
     const viewportSize = this.viewport_.getSize();
@@ -1129,7 +1110,7 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
-   * @param {!LayoutRect} viewportRect
+   * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
    * @param {!TaskDef} task
    * @private
@@ -1258,10 +1239,10 @@ export class Resources {
       request.callback = opt_callback;
     } else {
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
-        resource: resource,
-        newHeight: newHeight,
-        newWidth: newWidth,
-        force: force,
+        resource,
+        newHeight,
+        newWidth,
+        force,
         callback: opt_callback,
       });
     }
@@ -1358,10 +1339,10 @@ export class Resources {
 
     const task = {
       id: taskId,
-      resource: resource,
+      resource,
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
-      callback: callback,
+      callback,
       scheduleTime: timer.now(),
       startTime: 0,
       promise: null,
@@ -1469,7 +1450,6 @@ export class Resources {
         if (this.visible_) {
           dev.fine(TAG_, 'next pass:', delay);
           this.schedulePass(delay);
-          this.updateScrollHeight_();
         } else {
           dev.fine(TAG_, 'document is not visible: no scheduling');
         }
@@ -1604,10 +1584,10 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.initialLayoutBox_ = this.layoutBox_;
 
     /** @private {boolean} */
@@ -1844,7 +1824,7 @@ export class Resource {
 
   /**
    * Returns a previously measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.layoutBox_;
@@ -1852,7 +1832,7 @@ export class Resource {
 
   /**
    * Returns the first measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getInitialLayoutBox() {
     return this.initialLayoutBox_;
@@ -1877,7 +1857,7 @@ export class Resource {
 
   /**
    * Whether the element's layout box overlaps with the specified rect.
-   * @param {!LayoutRect} rect
+   * @param {!../layout-rect.LayoutRectDef} rect
    * @return {boolean}
    */
   overlaps(rect) {

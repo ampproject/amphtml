@@ -60,7 +60,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
   var requestId = ++this.requestIdCounter_;
   if (awaitResponse) {
     var promise = new Promise(function(resolve, reject) {
-      this.waitingForResponse_[requestId] = {resolve: resolve, reject: reject};
+      this.waitingForResponse_[requestId] = {resolve, reject};
     }.bind(this));
     this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
         true);
@@ -140,10 +140,10 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
 ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
       eventType, payload, awaitResponse) {
   var message = {
-    sentinel: sentinel,
-    requestId: requestId,
+    sentinel,
+    requestId,
     type: eventType,
-    payload: payload,
+    payload,
     rsvp: awaitResponse
   };
   this.target_./*OK*/postMessage(message, this.targetOrigin_);

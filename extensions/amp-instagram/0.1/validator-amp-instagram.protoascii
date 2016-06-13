@@ -51,6 +51,7 @@ tags: {  # <amp-instagram>
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   also_requires_tag: "amp-instagram extension .js script"
+  attrs: { name: "alt" }
   attrs: {
     name: "data-shortcode"
     mandatory_oneof: "['data-shortcode', 'src']"

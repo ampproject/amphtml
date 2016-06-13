@@ -104,7 +104,7 @@ function instrumentSrcdoc(parent, iframe) {
 /**
  * Instrument added nodes if they are instrumentable iframes.
  * @param {!Window} win
- * @param {!Array<!Node>} addedNodes
+ * @param {!Array<!Node>|NodeList<!Node>|NodeList<!Element>|null} addedNodes
  */
 function maybeInstrumentsNodes(win, addedNodes) {
   for (let n = 0; n < addedNodes.length; n++) {
@@ -281,8 +281,8 @@ export function becomeVisible() {
 
 /**
  * Calculates the minimum time that a timeout should have right now.
- * @param {number} time
- * @return {number}
+ * @param {number|undefined} time
+ * @return {number|undefined}
  */
 function minTime(time) {
   if (!inViewport) {

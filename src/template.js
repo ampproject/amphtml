@@ -26,7 +26,7 @@ import {user} from './log';
 
 
 /**
- * @typedef {function(new:!BaseTemplate, !Element)}
+ * @typedef {function(new:BaseTemplate, !Element)}
  */
 const TemplateClassDef = {};
 
@@ -65,7 +65,7 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JSONObject} unusedData
+   * @param {!JSONType} unusedData
    * @return {!Element}
    */
   render(unusedData) {
@@ -136,7 +136,7 @@ export class Templates {
   /**
    * Renders the specified template element using the supplied data.
    * @param {!Element} templateElement
-   * @param {!JSONObject} data
+   * @param {!JSONType} data
    * @return {!Promise<!Element>}
    */
   renderTemplate(templateElement, data) {
@@ -149,7 +149,7 @@ export class Templates {
    * Renders the specified template element using the supplied array of data
    * and returns an array of resulting elements.
    * @param {!Element} templateElement
-   * @param {!Array<!JSONObject>} array
+   * @param {!Array<!JSONType>} array
    * @return {!Promise<!Array<!Element>>}
    */
   renderTemplateArray(templateElement, array) {
@@ -169,7 +169,7 @@ export class Templates {
    * attribute  or as a child "template" element. When specified via "template"
    * attribute, the value indicates the ID of the template element.
    * @param {!Element} parent
-   * @param {!JSONObject} data
+   * @param {!JSONType} data
    * @return {!Promise<!Element>}
    */
   findAndRenderTemplate(parent, data) {
@@ -183,7 +183,7 @@ export class Templates {
    * attribute, the value indicates the ID of the template element. Returns
    * the array of the rendered elements.
    * @param {!Element} parent
-   * @param {!Array<!JSONObject>} array
+   * @param {!Array<!JSONType>} array
    * @return {!Promise<!Array<!Element>>}
    */
   findAndRenderTemplateArray(parent, array) {
@@ -308,7 +308,7 @@ export class Templates {
 
   /**
    * @param {!BaseTemplate} impl
-   * @param {!JSONObject} data
+   * @param {!JSONType} data
    * @private
    */
   render_(impl, data) {

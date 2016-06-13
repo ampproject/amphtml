@@ -58,7 +58,7 @@ export class Framerate {
      */
     this.loadedAd_ = false;
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
     /**
@@ -156,7 +156,7 @@ export class Framerate {
 
 /**
  * @param {!Window} win
- * @return {!ActionService}
+ * @return {!Framerate}
  */
 export function installFramerateService(win) {
   return getService(win, 'framerate', () => {

@@ -77,7 +77,7 @@ function findHtmlFilesRelativeToTestdata() {
       }
     } else {
       for (const subdir of readdir(root)) {
-        testSubdirs.push({root: root, subdir: subdir});
+        testSubdirs.push({root, subdir});
       }
     }
   }

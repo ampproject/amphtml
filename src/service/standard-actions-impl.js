@@ -29,10 +29,10 @@ export class StandardActions {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const @private {!ActionService} */
+    /** @const @private {!./action-impl.ActionService} */
     this.actions_ = installActionService(win);
 
-    /** @const @private {!Resources} */
+    /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesService(win);
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
@@ -41,7 +41,7 @@ export class StandardActions {
   /**
    * Handles "hide" action. This is a very simple action where "display: none"
    * is applied to the target element.
-   * @param {!ActionInvocation} invocation
+   * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
     this.resources_.mutateElement(invocation.target, () => {
@@ -53,10 +53,11 @@ export class StandardActions {
 
 /**
  * @param {!Window} win
- * @return {!ActionService}
+ * @return {!StandardActions}
  */
 export function installStandardActions(win) {
-  return getService(win, 'standard-actions', () => {
-    return new StandardActions(win);
-  });
+  return /** @type {!StandardActions} */ (
+      getService(win, 'standard-actions', () => {
+        return new StandardActions(win);
+      }));
 };

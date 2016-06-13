@@ -63,7 +63,7 @@ export class AccessServerAdapter {
 
   /**
    * @param {!Window} win
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(win, configJson, context) {

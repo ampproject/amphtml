@@ -28,7 +28,7 @@
  *   height: number
  * }}
  */
-let LayoutRectDef;
+export let LayoutRectDef;
 
 
 /**
@@ -42,10 +42,10 @@ let LayoutRectDef;
  */
 export function layoutRectLtwh(left, top, width, height) {
   return {
-    left: left,
-    top: top,
-    width: width,
-    height: height,
+    left,
+    top,
+    width,
+    height,
     bottom: top + height,
     right: left + width,
   };
@@ -55,7 +55,7 @@ export function layoutRectLtwh(left, top, width, height) {
 /**
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
- * @param {!DOMRect} rect
+ * @param {!Rect} rect
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {

@@ -35,8 +35,9 @@ const TAG = 'UrlReplacements';
 /**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
+ * @package For export.
  */
-class UrlReplacements {
+export class UrlReplacements {
   /** @param {!Window} win */
   constructor(win) {
     /** @private @const {!Window} */
@@ -159,7 +160,7 @@ class UrlReplacements {
       }
       return cidFor(win).then(cid => {
         return cid.get({
-          scope: scope,
+          scope,
           createCookieIfNotPresent: true,
         }, consent);
       });

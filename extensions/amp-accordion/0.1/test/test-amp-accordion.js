@@ -46,10 +46,7 @@ describe('amp-accordion', () => {
         }
       }
       return iframe.addElement(ampAccordion).then(() => {
-        return Promise.resolve({
-          iframe: iframe,
-          ampAccordion: ampAccordion,
-        });
+        return Promise.resolve({iframe, ampAccordion});
       });
     });
   }

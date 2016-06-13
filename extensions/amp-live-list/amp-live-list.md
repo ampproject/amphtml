@@ -101,9 +101,9 @@ polling interval.
 
 ### update
 
-The `update` reference point is hidden by default (through an `.amp-hidden`
-class which can be overriden) and is shown when new items are received from
-the server. You may style this reference point as a `fixed` position
+The `update` reference point is shown when new items are received from
+the server, to provide an affordance for users to refresh the page with new items when they are available. It is hidden by default (through an `.amp-hidden`
+class whose style can be overriden). You may style this reference point as a `fixed` position
 item if you want a floating button on the page like on social media websites, to
 draw the reader's attention to take action. Currently the `update` reference
 point is not shown for either updates (using `data-update-time`) or tombstone
@@ -256,7 +256,7 @@ An `amp-live-list-item` class is added to all the children of the `items`
 reference point.
 
 All newly inserted items will also have the `amp-live-list-item-new` class
-added, and will be removed once new items are inserted. You can add a
+added, and will be removed once the next set of new items are inserted on a subsequent update. You can add a
 highlighting effect like the css below.
 
 ```css
@@ -297,7 +297,7 @@ the lowest one.
 
 ```html
 
-<style>
+<style amp-custom>
   #fixed-button {
     position: fixed;
     top: 10px;
@@ -326,7 +326,7 @@ the lowest one.
   }
 </style>
 
-<amp-live-list id="live-list-1" data-poll-interval="16000" data-max-items-per-page"5">
+<amp-live-list id="live-list-1" data-poll-interval="16000" data-max-items-per-page="5">
   <button update id="fixed-button" class="button" on="tap:live-list-1.update">
     new updates on live list 1
   </button>
@@ -352,7 +352,7 @@ the lowest one.
   </div>
 </amp-live-list>
 
-<amp-live-list id="live-list-2" data-poll-interval="20000" data-max-items-per-page"10">
+<amp-live-list id="live-list-2" data-poll-interval="20000" data-max-items-per-page="10">
   <div update class="slide" on="tap:live-list-2.update">
     new updates on live list 2
   </div>

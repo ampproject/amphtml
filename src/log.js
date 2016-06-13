@@ -61,7 +61,7 @@ export const LogLevel = {
 export class Log {
   /**
    * @param {!Window} win
-   * @param {function(!Mode):!LogLevel} levelFunc
+   * @param {function(!./mode.ModeDef):!LogLevel} levelFunc
    * @param {string=} opt_suffix
    */
   constructor(win, levelFunc, opt_suffix) {
@@ -72,7 +72,7 @@ export class Log {
      */
     this.win = win.AMP_TEST ? win.parent : win;
 
-    /** @private @const {function(!Mode):boolean} */
+    /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
 
     /** @private @const {!LogLevel} */
@@ -117,7 +117,6 @@ export class Log {
    * @param {string} tag
    * @param {string} level
    * @param {!Array} messages
-   * @param {?} opt_error
    */
   msg_(tag, level, messages) {
     if (this.level_ != LogLevel.OFF) {
@@ -180,7 +179,6 @@ export class Log {
    * asynchronously.
    * @param {string} tag
    * @param {...*} var_args
-   * @param {?} opt_error
    */
   error(tag, var_args) {
     if (this.level_ >= LogLevel.ERROR) {
@@ -218,16 +216,16 @@ export class Log {
    *
    * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
    *     not evaluate to true.
-   * @param {string} message The assertion message
+   * @param {string=} opt_message The assertion message
    * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {T} The value of shouldBeTrueish.
    * @template T
    */
   /*eslint "google-camelcase/google-camelcase": 0*/
-  assert(shouldBeTrueish, message, var_args) {
+  assert(shouldBeTrueish, opt_message, var_args) {
     let firstElement;
     if (!shouldBeTrueish) {
-      message = message || 'Assertion failed';
+      const message = opt_message || 'Assertion failed';
       const splitMessage = message.split('%s');
       const first = splitMessage.shift();
       let formatted = first;
@@ -258,7 +256,7 @@ export class Log {
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *
-   * @param {!Enum<T>} enumObj
+   * @param {!Object<T>} enumObj
    * @param {string} s
    * @param {string=} opt_enumName
    * @return T
@@ -292,7 +290,7 @@ export class Log {
 
 
 /**
- * @param {*} val
+ * @param {string|!Element} val
  * @return {string}
  */
 function toString(val) {
@@ -373,7 +371,8 @@ export const user = new Log(window, mode => {
 
 
 /**
- * AMP development log. Stripped in the PROD binary.
+ * AMP development log. Calls to `dev.assert` and `dev.fine` are stripped in
+ * the PROD binary. However, `dev.assert` result is preserved in either case.
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.

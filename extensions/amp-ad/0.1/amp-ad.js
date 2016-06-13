@@ -333,7 +333,7 @@ class AmpAd extends AMP.BaseElement {
       const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
       postMessage(this.iframe_, 'embed-state', {
-        inViewport: inViewport,
+        inViewport,
         pageHidden: !this.viewer_.isVisible(),
       }, targetOrigin, /* opt_is3P */ true);
     }
@@ -347,7 +347,7 @@ class AmpAd extends AMP.BaseElement {
       postMessage(
           this.iframe_,
           'embed-size-denied',
-          {requestedHeight: requestedHeight, requestedWidth: requestedWidth},
+          {requestedHeight, requestedWidth},
           targetOrigin,
           /* opt_is3P */ true);
     }

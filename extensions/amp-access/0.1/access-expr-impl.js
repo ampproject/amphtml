@@ -245,7 +245,7 @@ parse: function parse(input) {
                     token: this.terminals_[symbol] || symbol,
                     line: lexer.yylineno,
                     loc: yyloc,
-                    expected: expected
+                    expected,
                 });
             }
         if (action[0] instanceof Array && action.length > 1) {

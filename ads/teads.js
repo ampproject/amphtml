@@ -26,7 +26,7 @@ export function teads(global, data) {
     allowed_data: ['pid', 'tag'],
     mandatory_data: ['pid'],
     mandatory_tag_data: ['tta', 'ttp'],
-    data: data,
+    data,
   };
 
   validateDataExists(data, global._teads_amp.mandatory_data);

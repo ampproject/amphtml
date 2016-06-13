@@ -38,7 +38,7 @@ const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
 export class FixedLayer {
   /**
    * @param {!Document} doc
-   * @param {!Vsync} vsync
+   * @param {!./vsync-impl.Vsync} vsync
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
@@ -46,7 +46,7 @@ export class FixedLayer {
     /** @const {!Document} */
     this.doc = doc;
 
-    /** @private @const {!Vsync} */
+    /** @private @const */
     this.vsync_ = vsync;
 
     /** @private {number} */
@@ -289,7 +289,7 @@ export class FixedLayer {
           state[fe.id] = {
             fixed: isFixed,
             transferrable: isTransferrable,
-            top: top,
+            top,
             zIndex: styles.getPropertyValue('z-index'),
           };
         });
@@ -350,7 +350,7 @@ export class FixedLayer {
       element[DECLARED_FIXED_PROP] = true;
       fe = {
         id: fixedId,
-        element: element,
+        element,
         selectors: [selector],
       };
       this.fixedElements_.push(fe);

@@ -45,7 +45,7 @@ const listeners = [];
  */
 export function listenParent(win, type, callback) {
   const listener = {
-    type: type,
+    type,
     cb: callback,
   };
   listeners.push(listener);
@@ -77,7 +77,8 @@ function startListening(win) {
       return;
     }
     // Parse JSON only once per message.
-    const data = JSON.parse(event.data.substr(4));
+    const data = /** @type {!Object} */ (
+        JSON.parse(event.data.substr(4)));
     if (data.sentinel != win.context.amp3pSentinel) {
       return;
     }

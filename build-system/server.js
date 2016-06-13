@@ -19,8 +19,9 @@
  * files and list directories for use with the gulp live server
  */
 var BBPromise = require('bluebird');
-var app = require('connect')();
+var app = require('express')();
 var bodyParser = require('body-parser');
+var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
@@ -29,32 +30,22 @@ var request = require('request');
 var url = require('url');
 
 app.use(bodyParser.json());
+app.use(morgan('dev'));
 
-app.use('/examples', function(req, res, next) {
-  // Redirect physical dir to build dir that has versions belonging to
-  // local AMP.
-  if (req.url == '/' || req.url == '') {
-    res.writeHead(302, {
-      'Location': '../examples.build/'
-    });
-    res.end();
-    return;
-  }
-  next();
+app.use('/examples', function(req, res) {
+  res.redirect('/examples.build');
 });
 
 app.use('/api/show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
+  res.json({
     showNotification: true
-  }));
+  });
 });
 
 app.use('/api/dont-show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
+  res.json({
     showNotification: false
-  }));
+  });
 });
 
 app.use('/api/echo/post', function(req, res) {
@@ -62,7 +53,7 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
-app.use('/form/echo-html/post', function(req, res) {
+app.use('/form/html/post', function(req, res) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -78,6 +69,17 @@ app.use('/form/echo-html/post', function(req, res) {
         <p>Please make sure to confirm your email ${fields['email']}</p>
       `);
     }
+  });
+});
+
+app.use('/form/echo-json/post', function(req, res) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    if (fields['email'] == 'already@subscribed.com') {
+      res.statusCode = 500;
+    }
+    res.end(JSON.stringify(fields));
   });
 });
 
@@ -202,7 +204,7 @@ app.use('/min/', function(req, res) {
 
 app.use('/examples.build/analytics.config.json', function (req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      'http://' + req.headers.host);
+      req.protocol + '://' + req.headers.host);
   next();
 });
 

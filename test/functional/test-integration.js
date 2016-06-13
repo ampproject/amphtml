@@ -153,7 +153,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -176,7 +176,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -208,7 +208,7 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {},
-        data: data,
+        data,
       },
     };
     expect(() => {
@@ -225,7 +225,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
         tagName: 'AMP-EMBED',
       },
     };
