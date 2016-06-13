@@ -104,8 +104,8 @@ class AmpAccordion extends AMP.BaseElement {
       const sessionStr = this.win_./*REVIEW*/sessionStorage.getItem(this.id_);
       return JSON.parse(sessionStr);
     } catch (e) {
-      console./*OK*/error(e.message, e.stack);
-      return null;
+      dev.error(e.message, e.stack);
+      return;
     }
   }
 
@@ -118,7 +118,7 @@ class AmpAccordion extends AMP.BaseElement {
     try {
       this.win_./*REVIEW*/sessionStorage.setItem(this.id_, sessionStr);
     } catch (e) {
-      console./*OK*/error(e.message, e.stack);
+      dev.error(e.message, e.stack);
     }
   }
 

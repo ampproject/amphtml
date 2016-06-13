@@ -101,7 +101,7 @@ describe('amp-accordion', () => {
     });
   });
 
-  it('get correct session storage key', () => {
+  it('should return correct sessionStorageKey', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
       const impl = obj.ampAccordion.implementation_;
@@ -139,7 +139,7 @@ describe('amp-accordion', () => {
     });
   });
 
-  it('should expand element to sessionStorage value', () => {
+  it('should show respect session states and expand/collapse', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
       const impl = obj.ampAccordion.implementation_;
