@@ -232,7 +232,10 @@ export class InstrumentationService {
     }
   }
 
-  /** @private {function()} fn function to run or schedule. */
+  /**
+   * @param {function()} fn function to run or schedule.
+   * @private
+   */
   runOrSchedule_(fn) {
     if (this.viewer_.isVisible()) {
       fn();
@@ -474,4 +477,3 @@ export function instrumentationServiceFor(window) {
     return new InstrumentationService(window);
   });
 }
-
