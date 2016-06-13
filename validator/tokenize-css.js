@@ -318,7 +318,7 @@ class Tokenizer {
       const token = this.consumeAToken();
       if (token.tokenType === parse_css.TokenType.ERROR) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          this.errors_.push(/** @type {!parse_css.ErrorToken} */(token));
+          this.errors_.push(/** @type {!parse_css.ErrorToken} */ (token));
         } else {
           this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           this.tokens_ = [];
@@ -414,7 +414,11 @@ class Tokenizer {
   consumeAToken() {
     this.consumeComments();
     this.consume();
-    const mark = new MarkedPosition(this);  // Save off line/col.
+    const mark = new parse_css.Token();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      mark.line = this.getLine();
+      mark.col = this.getCol();
+    }
     if (whitespace(this.code_)) {
       // Merge consecutive whitespace into one token.
       while (whitespace(this.next())) {
@@ -576,7 +580,11 @@ class Tokenizer {
    * emitting a parse error if we hit the end of the file. Returns nothing.
    */
   consumeComments() {
-    const mark = new MarkedPosition(this);
+    const mark = new parse_css.Token();
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      mark.line = this.getLine();
+      mark.col = this.getCol();
+    }
     while (this.next(1) === /* '/' */ 0x2f && this.next(2) === /* '*' */ 0x2a) {
       this.consume(2);
       while (true) {
@@ -997,40 +1005,6 @@ class Tokenizer {
 
 
 /**
- * A MarkedPosition object saves position information from the given
- * tokenizer and can later write that position back to a Token
- * object.
- * @private
- */
-class MarkedPosition {
-  /**
-   * @param {!Tokenizer} tokenizer
-   */
-  constructor(tokenizer) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** @type {number} line number */
-      this.line = tokenizer.getLine();
-      /** @type {number} line */
-      this.col = tokenizer.getCol();
-    }
-  }
-
-  /**
-   * Adds position data to the given token, returning it for chaining.
-   * @param {!parse_css.Token} token
-   * @return {!parse_css.Token}
-   */
-  addPositionTo(token) {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      token.line = this.line;
-      token.col = this.col;
-    }
-    return token;
-  }
-}
-
-
-/**
  * NOTE: When adding to this enum, you must update TokenType_NamesById below.
  * @enum {number}
  */
@@ -1063,7 +1037,7 @@ parse_css.TokenType = {
   SEMICOLON: 25,
   STRING: 26,
   SUBSTRING_MATCH: 27,  // *=
-  SUFFIX_MATCH: 28,        // $=
+  SUFFIX_MATCH: 28,     // $=
   WHITESPACE: 29,
   URL: 30,
 
@@ -1091,16 +1065,52 @@ parse_css.TokenType = {
 
 /** @type {!Array<string>} */
 const TokenType_NamesById = [
-  'UNKNOWN', 'AT_KEYWORD', 'CDC', 'CDO', 'CLOSE_CURLY', 'CLOSE_PAREN',
-  'CLOSE_SQUARE', 'COLON', 'COLUMN', 'COMMA', 'DASH_MATCH', 'DELIM',
-  'DIMENSION', 'EOF_TOKEN', 'ERROR', 'FUNCTION_TOKEN', 'HASH',
-  'IDENT', 'INCLUDE_MATCH', 'NUMBER', 'OPEN_CURLY', 'OPEN_PAREN',
-  'OPEN_SQUARE', 'PERCENTAGE', 'PREFIX_MATCH', 'SEMICOLON', 'STRING',
-  'SUBSTRING_MATCH', 'SUFFIX_MATCH', 'WHITESPACE', 'URL',
-  'STYLESHEET', 'AT_RULE', 'QUALIFIED_RULE', 'DECLARATION', 'BLOCK',
-  'FUNCTION', 'PARSED_CSS_URL', 'TYPE_SELECTOR', 'ID_SELECTOR',
-  'ATTR_SELECTOR', 'PSEUDO_SELECTOR', 'CLASS_SELECTOR',
-  'SIMPLE_SELECTOR_SEQUENCE', 'COMBINATOR', 'SELECTORS_GROUP',
+  'UNKNOWN',
+  'AT_KEYWORD',
+  'CDC',
+  'CDO',
+  'CLOSE_CURLY',
+  'CLOSE_PAREN',
+  'CLOSE_SQUARE',
+  'COLON',
+  'COLUMN',
+  'COMMA',
+  'DASH_MATCH',
+  'DELIM',
+  'DIMENSION',
+  'EOF_TOKEN',
+  'ERROR',
+  'FUNCTION_TOKEN',
+  'HASH',
+  'IDENT',
+  'INCLUDE_MATCH',
+  'NUMBER',
+  'OPEN_CURLY',
+  'OPEN_PAREN',
+  'OPEN_SQUARE',
+  'PERCENTAGE',
+  'PREFIX_MATCH',
+  'SEMICOLON',
+  'STRING',
+  'SUBSTRING_MATCH',
+  'SUFFIX_MATCH',
+  'WHITESPACE',
+  'URL',
+  'STYLESHEET',
+  'AT_RULE',
+  'QUALIFIED_RULE',
+  'DECLARATION',
+  'BLOCK',
+  'FUNCTION',
+  'PARSED_CSS_URL',
+  'TYPE_SELECTOR',
+  'ID_SELECTOR',
+  'ATTR_SELECTOR',
+  'PSEUDO_SELECTOR',
+  'CLASS_SELECTOR',
+  'SIMPLE_SELECTOR_SEQUENCE',
+  'COMBINATOR',
+  'SELECTORS_GROUP',
 ];
 
 /**
@@ -1120,20 +1130,25 @@ parse_css.Token = class {
   /**
    * Propagates the start position of |this| to |other|.
    * @param {!parse_css.Token} other
+   * @return {!parse_css.Token}
    */
-  copyStartPositionTo(other) {
+  addPositionTo(other) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       other.line = this.line;
       other.col = this.col;
     }
+    return other;
   }
 };
 
 if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @return {!Object} */
   parse_css.Token.prototype.toJSON = function() {
-    return {'tokenType': TokenType_NamesById[this.tokenType],
-            'line': this.line, 'col': this.col};
+    return {
+      'tokenType': TokenType_NamesById[this.tokenType],
+      'line': this.line,
+      'col': this.col
+    };
   };
 }
 

@@ -121,7 +121,7 @@ parse_css.TokenStream = class {
  */
 function createEOFTokenAt(positionToken) {
   const eof = new parse_css.EOFToken;
-  positionToken.copyStartPositionTo(eof);
+  positionToken.addPositionTo(eof);
   return eof;
 }
 
@@ -134,7 +134,7 @@ function createEOFTokenAt(positionToken) {
  */
 function createParseErrorTokenAt(positionToken, code, params) {
   const error = new parse_css.ErrorToken(code, params);
-  positionToken.copyStartPositionTo(error);
+  positionToken.addPositionTo(error);
   return error;
 }
 
@@ -159,7 +159,7 @@ parse_css.parseAStylesheet = function(
 
   stylesheet.rules =
       canonicalizer.parseAListOfRules(tokenList, /* topLevel */ true, errors);
-  tokenList[0].copyStartPositionTo(stylesheet);
+  tokenList[0].addPositionTo(stylesheet);
   const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
   stylesheet.eof = eof;
@@ -436,7 +436,7 @@ class Canonicalizer {
     const startToken =
         /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
     const rule = new parse_css.AtRule(startToken.value);
-    startToken.copyStartPositionTo(rule);
+    startToken.addPositionTo(rule);
 
     while (true) {
       tokenStream.consume();
@@ -497,7 +497,7 @@ class Canonicalizer {
     }
 
     const rule = new parse_css.QualifiedRule();
-    tokenStream.current().copyStartPositionTo(rule);
+    tokenStream.current().addPositionTo(rule);
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
@@ -606,7 +606,7 @@ class Canonicalizer {
     const startToken =
         /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     const decl = new parse_css.Declaration(startToken.value);
-    startToken.copyStartPositionTo(decl);
+    startToken.addPositionTo(decl);
 
     while (tokenStream.next().tokenType === parse_css.TokenType.WHITESPACE) {
       tokenStream.consume();
@@ -839,7 +839,7 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
   goog.asserts.assert(tokenIdx + 1 < tokens.length);
   const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
-  token.copyStartPositionTo(parsed);
+  token.addPositionTo(parsed);
   parsed.utf8Url = /** @type {parse_css.URLToken}*/ (token).value;
 }
 
@@ -861,7 +861,7 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
       /** @type {parse_css.FunctionToken} */ (token).value === 'url');
   goog.asserts.assert(
       tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN);
-  token.copyStartPositionTo(parsed);
+  token.addPositionTo(parsed);
   ++tokenIdx;  // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
   goog.asserts.assert(tokenIdx < tokens.length);
@@ -955,7 +955,7 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
             const error = new parse_css.ErrorToken(
                 amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
                 /* params */['style']);
-            token.copyStartPositionTo(error);
+            token.addPositionTo(error);
             this.errors.push(error);
           } else {
             this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
