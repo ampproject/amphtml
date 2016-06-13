@@ -35,8 +35,6 @@ goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
-goog.require('goog.structs.Map');
-goog.require('goog.structs.Set');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
@@ -784,10 +782,10 @@ class Context {
   constructor() {
     /**
      * The mandatory alternatives that we've validated.
-     * @type {!goog.structs.Set<string>}
+     * @type {!Object<string, ?>}
      * @private
      */
-    this.mandatoryAlternativesSatisfied_ = new goog.structs.Set();
+    this.mandatoryAlternativesSatisfied_ = {};
     /**
      * DocLocator object from the parser which gives us line/col numbers.
      * @type {amp.htmlparser.DocLocator}
@@ -808,10 +806,11 @@ class Context {
     this.tagStack_ = new TagStack();
 
     /**
-     * @type {!goog.structs.Set<number>}
+     * Maps from the tagspec id to the tagspec id.
+     * @type {!Object<number, ?>}
      * @private
      */
-    this.tagspecsValidated_ = new goog.structs.Set();
+    this.tagspecsValidated_ = {};
   }
 
   /**
@@ -859,15 +858,15 @@ class Context {
    * @return {boolean} whether or not the tag spec had been encountered before.
    */
   recordTagspecValidated(tagSpecId) {
-    const duplicate = this.tagspecsValidated_.contains(tagSpecId);
+    const duplicate = this.tagspecsValidated_.hasOwnProperty(tagSpecId);
     if (!duplicate) {
-      this.tagspecsValidated_.add(tagSpecId);
+      this.tagspecsValidated_[tagSpecId] = 0;
     }
     return !duplicate;
   }
 
   /**
-   * @return {!goog.structs.Set<number>}
+   * @return {!Object<number, ?>}
    */
   getTagspecsValidated() { return this.tagspecsValidated_; }
 
@@ -876,12 +875,12 @@ class Context {
    * @param {string} alternative id of the validated alternative.
    */
   recordMandatoryAlternativeSatisfied(alternative) {
-    this.mandatoryAlternativesSatisfied_.add(alternative);
+    this.mandatoryAlternativesSatisfied_[alternative] = 0;
   }
 
   /**
    * The mandatory alternatives that we've satisfied.
-   * @return {!goog.structs.Set<string>}
+   * @return {!Object<string, ?>}
    */
   getMandatoryAlternativesSatisfied() {
     return this.mandatoryAlternativesSatisfied_;
@@ -930,13 +929,13 @@ class ParsedUrlSpec {
     this.spec_ = spec;
 
     /**
-     * @type {!goog.structs.Set<string>}
+     * @type {!Object<string, ?>}
      * @private
      */
-    this.allowedProtocols_ = new goog.structs.Set();
+    this.allowedProtocols_ = {};
     if (this.spec_ !== null) {
       for (const protocol of this.spec_.allowedProtocol) {
-        this.allowedProtocols_.add(protocol);
+        this.allowedProtocols_[protocol] = 0;
       }
     }
   }
@@ -997,7 +996,7 @@ class ParsedUrlSpec {
       return;
     }
     if (uri.hasScheme() &&
-        !this.allowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+        !this.allowedProtocols_.hasOwnProperty(uri.getScheme().toLowerCase())) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrlProtocol(
             context, uri.getScheme().toLowerCase(), tagSpec, result);
@@ -1253,14 +1252,14 @@ class ParsedAttrSpec {
      */
     this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
     /**
-     * @type {!goog.structs.Map<string, !amp.validator.PropertySpec>}
+     * @type {!Object<string, !amp.validator.PropertySpec>}
      * @private
      */
-    this.valuePropertyByName_ = new goog.structs.Map();
+    this.valuePropertyByName_ = {};
     const mandatoryValuePropertyNames = [];
     if (this.spec_.valueProperties !== null) {
       for (const propertySpec of this.spec_.valueProperties.properties) {
-        this.valuePropertyByName_.set(propertySpec.name, propertySpec);
+        this.valuePropertyByName_[propertySpec.name] = propertySpec;
         if (propertySpec.mandatory) {
           mandatoryValuePropertyNames.push(propertySpec.name);
         }
@@ -1500,20 +1499,20 @@ class ParsedAttrSpec {
   validateAttrValueProperties(context, attrName, attrValue, tagSpec, result) {
     // TODO(johannes): Replace this hack with a parser.
     const segments = attrValue.split(',');
-    const properties = new goog.structs.Map();
+    /** @type {!Object<string, string>} */
+    const properties = {};
     for (const segment of segments) {
       const keyValue = segment.split('=');
       if (keyValue.length < 2) {
         continue;
       }
-      properties.set(keyValue[0].trim().toLowerCase(), keyValue[1]);
+      properties[keyValue[0].trim().toLowerCase()] = keyValue[1];
     }
     // TODO(johannes): End hack.
-    const names = properties.getKeys();
-    goog.array.sort(names);
+    const names = Object.keys(properties).sort();
     for (const name of names) {
-      const value = properties.get(name);
-      if (!this.valuePropertyByName_.containsKey(name)) {
+      const value = properties[name];
+      if (!this.valuePropertyByName_.hasOwnProperty(name)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1528,7 +1527,7 @@ class ParsedAttrSpec {
           return;
         }
       }
-      const propertySpec = this.valuePropertyByName_.get(name);
+      const propertySpec = this.valuePropertyByName_[name];
       if (propertySpec.value !== null) {
         if (propertySpec.value != value.toLowerCase()) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1592,20 +1591,23 @@ class ParsedAttrSpec {
  * It's possible to provide multiple
  * specifications for the same attribute name, but for any given tag only one
  * such specification can be active. The precedence is (1), (2), (3), (4)
- * @param {!Object} tagSpec
- * @param {!goog.structs.Map<string, !amp.validator.AttrList>} rulesAttrMap
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!Object<string, !amp.validator.AttrList>} rulesAttrMap
  * @return {!Array<!amp.validator.AttrSpec>} all of the AttrSpec pointers
  */
 function GetAttrsFor(tagSpec, rulesAttrMap) {
+  /** @type {!Array<!amp.validator.AttrSpec>} */
   const attrs = [];
-  const namesSeen = new goog.structs.Set();
+  /** @type {!Object<string, ?>} */
+  const namesSeen = {};
   // (1) layout attrs.
   if (tagSpec.ampLayout !== null) {
-    const layoutSpecs = rulesAttrMap.get('$AMP_LAYOUT_ATTRS');
+    const layoutSpecs = rulesAttrMap['$AMP_LAYOUT_ATTRS'];
     if (layoutSpecs) {
       for (const spec of layoutSpecs.attrs) {
-        if (!namesSeen.contains(spec.name)) {
-          namesSeen.add(spec.name);
+        goog.asserts.assert(spec.name != null);
+        if (!namesSeen.hasOwnProperty(spec.name)) {
+          namesSeen[spec.name] = 0;
           attrs.push(spec);
         }
       }
@@ -1613,30 +1615,34 @@ function GetAttrsFor(tagSpec, rulesAttrMap) {
   }
   // (2) attributes specified within |tagSpec|.
   for (const spec of tagSpec.attrs) {
-    if (!namesSeen.contains(spec.name)) {
-      namesSeen.add(spec.name);
+    goog.asserts.assert(spec.name != null);
+    if (!namesSeen.hasOwnProperty(spec.name)) {
+      goog.asserts.assert(spec.name != null);
+      namesSeen[spec.name] = 0;
       attrs.push(spec);
     }
   }
   // (3) attributes specified via reference to an attr_list.
   for (const tagSpecKey of tagSpec.attrLists) {
-    const specs = rulesAttrMap.get(tagSpecKey);
+    const specs = rulesAttrMap[tagSpecKey];
     goog.asserts.assert(specs !== undefined);
     for (const spec of specs.attrs) {
-      if (!namesSeen.contains(spec.name)) {
-        namesSeen.add(spec.name);
+      goog.asserts.assert(spec.name != null);
+      if (!namesSeen.hasOwnProperty(spec.name)) {
+        namesSeen[spec.name] = 0;
         attrs.push(spec);
       }
     }
   }
   // (3) attributes specified in the global_attr list.
-  const globalSpecs = rulesAttrMap.get('$GLOBAL_ATTRS');
+  const globalSpecs = rulesAttrMap['$GLOBAL_ATTRS'];
   if (!globalSpecs) {
     return attrs;
   }
   for (const spec of globalSpecs.attrs) {
-    if (!namesSeen.contains(spec.name)) {
-      namesSeen.add(spec.name);
+    goog.asserts.assert(spec.name != null);
+    if (!namesSeen.hasOwnProperty(spec.name)) {
+      namesSeen[spec.name] = 0;
       attrs.push(spec);
     }
   }
@@ -1806,13 +1812,13 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Unique tags
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
- * @param {!goog.structs.Set<string>} tagSpecNamesToTrack
+ * @param {!Object<string, ?>} tagSpecNamesToTrack
  * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
   return tag.mandatory || tag.unique ||
       getTagSpecName(tag) != null &&
-      tagSpecNamesToTrack.contains(getTagSpecName(tag));
+      tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
 /**
@@ -1842,8 +1848,8 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
 class ParsedTagSpec {
   /**
    * @param {string} templateSpecUrl
-   * @param {!goog.structs.Map<string, !amp.validator.AttrList>} attrListsByName
-   * @param {!goog.structs.Map<string, number>} tagspecIdsByTagSpecName
+   * @param {!Object<string, !amp.validator.AttrList>} attrListsByName
+   * @param {!Object<string, number>} tagspecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} tagId
@@ -1870,10 +1876,10 @@ class ParsedTagSpec {
     this.attrsById_ = [];
     /**
      * ParsedAttributes keyed by name.
-     * @type {!goog.structs.Map<string, !ParsedAttrSpec>}
+     * @type {!Object<string, !ParsedAttrSpec>}
      * @private
      */
-    this.attrsByName_ = new goog.structs.Map();
+    this.attrsByName_ = {};
     /**
      * Attribute ids that are mandatory for this tag to legally validate.
      * @type {!Array<number>}
@@ -1915,7 +1921,7 @@ class ParsedTagSpec {
     for (let i = 0; i < attrs.length; ++i) {
       const parsedAttrSpec = new ParsedAttrSpec(attrs[i], i);
       this.attrsById_.push(parsedAttrSpec);
-      this.attrsByName_.set(parsedAttrSpec.getSpec().name, parsedAttrSpec);
+      this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(i);
       }
@@ -1925,7 +1931,7 @@ class ParsedTagSpec {
       }
       const altNames = parsedAttrSpec.getSpec().alternativeNames;
       for (const altName of altNames) {
-        this.attrsByName_.set(altName, parsedAttrSpec);
+        this.attrsByName_[altName] = parsedAttrSpec;
       }
       if (parsedAttrSpec.getSpec().dispatchKey) {
         this.dispatchKeyAttrSpec_ = i;
@@ -1937,7 +1943,7 @@ class ParsedTagSpec {
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
-      this.alsoRequiresTag_.push(tagspecIdsByTagSpecName.get(tagSpecName));
+      this.alsoRequiresTag_.push(tagspecIdsByTagSpecName[tagSpecName]);
     }
   }
 
@@ -2041,17 +2047,17 @@ class ParsedTagSpec {
    * Validates the layout for the given tag. This involves checking the
    * layout, width, height, sizes attributes with AMP specific logic.
    * @param {!Context} context
-   * @param {!goog.structs.Map<string, string>} attrsByKey
+   * @param {!Object<string, string>} attrsByKey
    * @param {!amp.validator.ValidationResult} result
    */
   validateLayout(context, attrsByKey, result) {
     goog.asserts.assert(this.spec_.ampLayout != null);
 
-    const layoutAttr = attrsByKey.get('layout');
-    const widthAttr = attrsByKey.get('width');
-    const heightAttr = attrsByKey.get('height');
-    const sizesAttr = attrsByKey.get('sizes');
-    const heightsAttr = attrsByKey.get('heights');
+    const layoutAttr = attrsByKey['layout'];
+    const widthAttr = attrsByKey['width'];
+    const heightAttr = attrsByKey['height'];
+    const sizesAttr = attrsByKey['sizes'];
+    const heightsAttr = attrsByKey['heights'];
 
     // We disable validating layout for tags where one of the layout attributes
     // contains mustache syntax.
@@ -2342,9 +2348,10 @@ class ParsedTagSpec {
    */
   validateAttributes(context, encounteredAttrs, result) {
     if (this.spec_.ampLayout !== null) {
-      const attrsByKey = new goog.structs.Map();
+      /** @type {!Object<string, string>} */
+      const attrsByKey = {};
       for (let i = 0; i < encounteredAttrs.length; i += 2) {
-        attrsByKey.set(encounteredAttrs[i], encounteredAttrs[i + 1]);
+        attrsByKey[encounteredAttrs[i]] = encounteredAttrs[i + 1];
       }
       this.validateLayout(context, attrsByKey, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
@@ -2353,14 +2360,17 @@ class ParsedTagSpec {
     }
     const hasTemplateAncestor = context.getTagStack().hasAncestor('template');
     let mandatoryAttrsSeen = [];
-    /** @type {!goog.structs.Set<string>} */
-    const mandatoryOneofsSeen = new goog.structs.Set();
+    /** @type {!Object<string, ?>} */
+    const mandatoryOneofsSeen = {};
     let parsedTriggerSpecs = [];
     /** If a tag has implicit attributes, we then add these attributes as
      * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
-     * @type {!goog.structs.Set<number>}
+     * @type {!Object<number, ?>}
      */
-    const attrspecsValidated = new goog.structs.Set(this.implicitAttrspecs_);
+    const attrspecsValidated = {};
+    for (const implicit of this.implicitAttrspecs_) {
+      attrspecsValidated[implicit] = 0;
+    }
     // Our html parser delivers attributes as an array of alternating keys and
     // values. We skip over this array 2 at a time to iterate over the keys.
     for (let i = 0; i < encounteredAttrs.length; i += 2) {
@@ -2368,8 +2378,9 @@ class ParsedTagSpec {
       const attrName = attrKey.toLowerCase();
       let attrValue = encounteredAttrs[i + 1];
 
-      const parsedSpec = this.attrsByName_.get(attrName);
-      if (parsedSpec === undefined) {
+      let parsedSpec;
+      if (!this.attrsByName_.hasOwnProperty(attrName) ||
+          (parsedSpec = this.attrsByName_[attrName]) === undefined) {
         this.validateAttrNotFoundInSpec(context, attrName, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
@@ -2428,7 +2439,8 @@ class ParsedTagSpec {
       // wants exactly one of the alternatives, so here
       // we check whether we already saw another alternative
       if (parsedSpec.getSpec().mandatoryOneof &&
-          mandatoryOneofsSeen.contains(parsedSpec.getSpec().mandatoryOneof)) {
+          mandatoryOneofsSeen.hasOwnProperty(
+              parsedSpec.getSpec().mandatoryOneof)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -2442,19 +2454,21 @@ class ParsedTagSpec {
         }
         return;
       }
-      mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
+      const mandatoryOneof = parsedSpec.getSpec().mandatoryOneof;
+      goog.asserts.assert(mandatoryOneof != null);
+      mandatoryOneofsSeen[mandatoryOneof] = 0;
       if (parsedSpec.hasTriggerSpec() &&
           parsedSpec.getTriggerSpec().hasIfValueRegex()) {
         if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
           parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
         }
       }
-      attrspecsValidated.add(parsedSpec.getId());
+      attrspecsValidated[parsedSpec.getId()] = 0;
     }
     // The "at least 1" part of mandatory_oneof: If none of the
     // alternatives were present, we report that an attribute is missing.
     for (const mandatoryOneof of this.mandatoryOneofs_) {
-      if (!mandatoryOneofsSeen.contains(mandatoryOneof)) {
+      if (!mandatoryOneofsSeen.hasOwnProperty(mandatoryOneof)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -2469,11 +2483,12 @@ class ParsedTagSpec {
     }
     for (const triggerSpec of parsedTriggerSpecs) {
       for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
-        const parsedSpec = this.attrsByName_.get(alsoRequiresAttr);
-        if (parsedSpec === undefined) {
+        let parsedSpec;
+        if (!this.attrsByName_.hasOwnProperty(alsoRequiresAttr) ||
+            (parsedSpec = this.attrsByName_[alsoRequiresAttr]) === undefined) {
           continue;
         }
-        if (!attrspecsValidated.contains(parsedSpec.getId())) {
+        if (!attrspecsValidated.hasOwnProperty(parsedSpec.getId())) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -2602,10 +2617,10 @@ class TagSpecDispatch {
   constructor() {
     /**
      * TagSpec ids for a specific attribute dispatch key.
-     * @type {!goog.structs.Map<string, number>}
+     * @type {Object<string, number>}
      * @private
      */
-    this.tagSpecsByDispatch_ = new goog.structs.Map();
+    this.tagSpecsByDispatch_ = null;
     /**
      * @type {!Array<number>}
      * @private
@@ -2620,9 +2635,11 @@ class TagSpecDispatch {
    * @public
    */
   registerDispatchKey(dispatchKey, tagSpecId) {
-    goog.asserts.assert(
-        this.tagSpecsByDispatch_.containsKey(dispatchKey) === false);
-    this.tagSpecsByDispatch_.set(dispatchKey, tagSpecId);
+    if (this.tagSpecsByDispatch_ === null) {
+      this.tagSpecsByDispatch_ = {};
+    }
+    goog.asserts.assert(!this.tagSpecsByDispatch_.hasOwnProperty(dispatchKey));
+    this.tagSpecsByDispatch_[dispatchKey] = tagSpecId;
   }
 
   /**
@@ -2635,7 +2652,7 @@ class TagSpecDispatch {
   /**
    * @return {boolean}
    */
-  hasDispatchKeys() { return !this.tagSpecsByDispatch_.isEmpty(); }
+  hasDispatchKeys() { return this.tagSpecsByDispatch_ !== null; }
 
   /**
    * Looks up a dispatch key as previously registered, returning the
@@ -2648,7 +2665,7 @@ class TagSpecDispatch {
   matchingDispatchKey(attrName, attrValue, mandatoryParent) {
     // Try first to find a key with the given parent.
     const dispatchKey = makeDispatchKey(attrName, attrValue, mandatoryParent);
-    const match = this.tagSpecsByDispatch_.get(dispatchKey);
+    const match = this.tagSpecsByDispatch_[dispatchKey];
     if (match !== undefined) {
       return match;
     }
@@ -2656,7 +2673,7 @@ class TagSpecDispatch {
     // Try next to find a key with the *any* parent.
     const noParentKey =
         makeDispatchKey(attrName, attrValue, /*mandatoryParent*/ '');
-    const noParentMatch = this.tagSpecsByDispatch_.get(noParentKey);
+    const noParentMatch = this.tagSpecsByDispatch_[noParentKey];
     if (noParentMatch !== undefined) {
       return noParentMatch;
     }
@@ -2854,10 +2871,10 @@ class ParsedValidatorRules {
     this.tagSpecById_ = [];
     /**
      * ParsedTagSpecs keyed by name
-     * @type {!goog.structs.Map<string, !TagSpecDispatch>}
+     * @type {!Object<string, !TagSpecDispatch>}
      * @private
      */
-    this.tagSpecByTagName_ = new goog.structs.Map();
+    this.tagSpecByTagName_ = {};
     /**
      * Tag ids that are mandatory for a document to legally validate.
      * @type {!Array<number>}
@@ -2868,26 +2885,27 @@ class ParsedValidatorRules {
     /** @type {!amp.validator.ValidatorRules} */
     const rules = amp.validator.RULES;
 
-    /** @type {!goog.structs.Map<string, !amp.validator.AttrList>} */
-    const attrListsByName = new goog.structs.Map();
+    /** @type {!Object<string, !amp.validator.AttrList>} */
+    const attrListsByName = {};
     for (const attrList of rules.attrLists) {
-      attrListsByName.set(attrList.name, attrList);
+      goog.asserts.assert(attrList.name != null);
+      attrListsByName[attrList.name] = attrList;
     }
 
-    /** @type {!goog.structs.Map<string, number>} */
-    const tagspecIdsByTagSpecName = new goog.structs.Map();
-    /** @type {!goog.structs.Set<string>} */
-    const tagSpecNamesToTrack = new goog.structs.Set();
+    /** @type {!Object<string, number>} */
+    const tagspecIdsByTagSpecName = {};
+    /** @type {!Object<string, boolean>} */
+    const tagSpecNamesToTrack = {};
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
       goog.asserts.assert(
-          !tagspecIdsByTagSpecName.containsKey(getTagSpecName(tag)));
-      tagspecIdsByTagSpecName.set(getTagSpecName(tag), i);
+          !tagspecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
+      tagspecIdsByTagSpecName[getTagSpecName(tag)] = i;
       if (tag.alsoRequiresTag.length > 0) {
-        tagSpecNamesToTrack.add(getTagSpecName(tag));
+        tagSpecNamesToTrack[getTagSpecName(tag)] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
-        tagSpecNamesToTrack.add(alsoRequiresTag);
+        tagSpecNamesToTrack[alsoRequiresTag] = true;
       }
     }
 
@@ -2899,10 +2917,10 @@ class ParsedValidatorRules {
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
       goog.asserts.assert(tag.tagName !== null);
-      if (!this.tagSpecByTagName_.containsKey(tag.tagName)) {
-        this.tagSpecByTagName_.set(tag.tagName, new TagSpecDispatch());
+      if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
+        this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
       }
-      const tagnameDispatch = this.tagSpecByTagName_.get(tag.tagName);
+      const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
       if (parsedTagSpec.hasDispatchKey()) {
         tagnameDispatch.registerDispatchKey(parsedTagSpec.getDispatchKey(), i);
       } else {
@@ -2911,19 +2929,18 @@ class ParsedValidatorRules {
       if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, string>}
-       */
-      this.formatByCode_ = new goog.structs.Map();
+      /** type {!Object<!amp.validator.ValidationError.Code, string>} */
+      this.formatByCode_ = {};
       for (let i = 0; i < rules.errorFormats.length; ++i) {
         const errorFormat = rules.errorFormats[i];
         goog.asserts.assert(errorFormat !== null);
-        this.formatByCode_.set(errorFormat.code, errorFormat.format);
+        this.formatByCode_[errorFormat.code] = errorFormat.format;
       }
     }
   }
 
   /**
-   * @return {!goog.structs.Map<!amp.validator.ValidationError.Code, string>}
+   * @return {!Object<!amp.validator.ValidationError.Code, string>}
    */
   getFormatByCode() { return this.formatByCode_; }
 
@@ -2938,8 +2955,9 @@ class ParsedValidatorRules {
    * @param {!amp.validator.ValidationResult} validationResult
    */
   validateTag(context, tagName, encounteredAttrs, validationResult) {
-    const tagSpecDispatch = this.tagSpecByTagName_.get(tagName);
-    if (tagSpecDispatch === undefined) {
+    let tagSpecDispatch;
+    if (!this.tagSpecByTagName_.hasOwnProperty(tagName) ||
+        (tagSpecDispatch = this.tagSpecByTagName_[tagName]) === undefined) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
@@ -3116,7 +3134,7 @@ class ParsedValidatorRules {
    */
   maybeEmitMandatoryTagValidationErrors(context, validationResult) {
     for (const tagspecId of this.mandatoryTagSpecs_) {
-      if (!context.getTagspecsValidated().contains(tagspecId)) {
+      if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           const spec = this.tagSpecById_[tagspecId].getSpec();
           context.addError(
@@ -3140,12 +3158,15 @@ class ParsedValidatorRules {
    * @param {!amp.validator.ValidationResult} validationResult
    */
   maybeEmitAlsoRequiresTagValidationErrors(context, validationResult) {
-    let tagspecsValidated = context.getTagspecsValidated().getValues();
+    /** @type {!Array<number>} */
+    const tagspecsValidated =
+        Object.keys(context.getTagspecsValidated()).map(Number);
     goog.array.sort(tagspecsValidated);
     for (const tagspecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagspecId];
       for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
-        if (!context.getTagspecsValidated().contains(alsoRequiresTagspecId)) {
+        if (!context.getTagspecsValidated().hasOwnProperty(
+                alsoRequiresTagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             const alsoRequiresTagspec =
                 this.tagSpecById_[alsoRequiresTagspecId];
@@ -3184,7 +3205,7 @@ class ParsedValidatorRules {
       const spec = tagSpec.getSpec();
       if (spec.mandatoryAlternatives !== null) {
         const alternative = spec.mandatoryAlternatives;
-        if (!satisfied.contains(alternative)) {
+        if (!satisfied.hasOwnProperty(alternative)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             missing.push(alternative);
             specUrlsByMissing[alternative] = spec.specUrl;

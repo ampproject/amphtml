@@ -163,24 +163,17 @@ function applyFormat(format, error) {
 }
 
 /**
- * Renders the error message for a single error, regardless of whether
- * or not it has an associated format.
+ * Renders the error message for a single error.
  * @param {!amp.validator.ValidationError} error
  * @return {string}
  * @export
  */
 amp.validator.renderErrorMessage = function(error) {
-  let out = '';
-  const format =
-      parsedValidatorRulesSingleton.getFormatByCode().get(error.code);
-  // A11Y errors are special cased and don't have parameters.
-  if (format !== undefined && error.params.length > 0) {
-    out += applyFormat(format, error);
-  } else {
-    out += error.code;
-    if (error.detail !== undefined) out += ' ' + error.detail;
-  }
-  return out;
+  goog.asserts.assert(error.code !== null);
+  goog.asserts.assert(error.params.length > 0);
+  const format = parsedValidatorRulesSingleton.getFormatByCode()[error.code];
+  goog.asserts.assert(format !== undefined);
+  return applyFormat(format, error);
 };
 
 /**
