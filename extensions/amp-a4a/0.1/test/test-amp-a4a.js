@@ -19,14 +19,10 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
-import {
-  data as minimumAmpData,
-} from './testdata/minimum_valid_amp.reserialized';
+import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
 import {data as regexpsAmpData} from './testdata/regexps.reserialized';
-import {
-  data as validCSSAmpData,
-  sig as validCSSAmpSignature,
-} from './testdata/valid_css_at_rules_amp.reserialized';
+import {data as validCSSAmp}
+    from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import * as sinon from 'sinon';
@@ -52,13 +48,13 @@ describe('amp-a4a', () => {
   let viewerForMock;
   const mockResponse = {
     arrayBuffer: function() {
-      return Promise.resolve(stringToArrayBuffer(validCSSAmpData));
+      return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
     },
     bodyUsed: false,
     headers: {
       get: function(name) {
         const headerValues = {
-          'X-Google-header': validCSSAmpSignature,
+          'X-Google-header': validCSSAmp.signature,
         };
         return headerValues[name];
       },
@@ -97,7 +93,8 @@ describe('amp-a4a', () => {
         // a bug in the data or a bug in the crypto or something else.
         // Regardless, that's causing this test to fail.  For the moment,
         // we stub out crypto validation.  Remove this stub when crypto works.
-        const validateStub = sandbox.stub(AmpA4A.prototype, 'validateAdResponse_')
+        const validateStub = sandbox.stub(AmpA4A.prototype,
+                                          'validateAdResponse_')
             .returns(Promise.resolve(true));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
@@ -348,10 +345,11 @@ describe('amp-a4a', () => {
 
   describe('#formatBody_', () => {
     it('handles full reserialized minimum AMP doc', () => {
-      const metaData = AmpA4A.prototype.getAmpAdMetadata_(minimumAmpData);
+      const metaData = AmpA4A.prototype.getAmpAdMetadata_(
+          minimumAmp.reserialized);
       expect(metaData).to.not.be.null;
-      expect(AmpA4A.prototype.formatBody_(minimumAmpData, metaData)).to
-        .equal(expectations.minimumDocBodyFormatted);
+      expect(AmpA4A.prototype.formatBody_(minimumAmp.reserialized, metaData))
+          .to.equal(expectations.minimumDocBodyFormatted);
     });
 
     it('handles full reserialized regexp AMP doc', () => {
@@ -387,9 +385,11 @@ describe('amp-a4a', () => {
         '<style amp-custom>amp-ad-body { color: purple }</style>');
     });
 
-    it('should rewrite CSS from validCSSAmpData', () => {
-      const metaData = AmpA4A.prototype.getAmpAdMetadata_(validCSSAmpData);
-      expect(AmpA4A.prototype.formatCSSBlock_(validCSSAmpData, metaData))
+    it('should rewrite CSS from validCSSAmp', () => {
+      const metaData = AmpA4A.prototype.getAmpAdMetadata_(
+          validCSSAmp.reserialized);
+      expect(AmpA4A.prototype.formatCSSBlock_(validCSSAmp.reserialized,
+                                              metaData))
         .to.equal(expectations.validCssDocCssBlockFormatted);
     });
   });
