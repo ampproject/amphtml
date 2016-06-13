@@ -46,7 +46,8 @@ let fullVersion = '';
 
 export const isMinified = env.PROD;
 
-export const isLocalDev = !!(location.hostname == 'localhost' ||
+export const isLocalDev = (env.FOR_TESTING && !env.PROD) &&
+    !!(location.hostname == 'localhost' ||
     (location.ancestorOrigins && location.ancestorOrigins[0] &&
         location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
     // Filter out localhost running against a prod script.

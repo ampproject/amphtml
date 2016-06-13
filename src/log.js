@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getMode, isLocalDev} from './mode';
+import {getMode} from './mode';
 
 
 /** @const Time when this JS loaded.  */
@@ -105,7 +105,7 @@ export class Log {
     }
 
     // LocalDev by default allows INFO level, unless overriden by `#log`.
-    if (isLocalDev && !mode.log) {
+    if (getMode().localDev && !mode.log) {
       return LogLevel.INFO;
     }
 

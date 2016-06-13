@@ -16,7 +16,7 @@
 
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
-import {getMode, isLocalDev} from '../mode';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
@@ -208,7 +208,7 @@ export class Viewer {
     // realistic iOS environment.
     if (platform.isIos() &&
             this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (isLocalDev || getMode().development)) {
+            (getMode().localDev || getMode().development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
