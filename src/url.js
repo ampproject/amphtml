@@ -74,7 +74,7 @@ export function parseUrl(url) {
 
   // Some IE11 specific polyfills.
   // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname === '' || info.pathname[0] !== '/') {
+  if (info.pathname[0] !== '/') {
     info.pathname = '/' + info.pathname;
   }
 
