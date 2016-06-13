@@ -2455,8 +2455,9 @@ class ParsedTagSpec {
         return;
       }
       const mandatoryOneof = parsedSpec.getSpec().mandatoryOneof;
-      goog.asserts.assert(mandatoryOneof != null);
-      mandatoryOneofsSeen[mandatoryOneof] = 0;
+      if (mandatoryOneof !== null) {
+        mandatoryOneofsSeen[mandatoryOneof] = 0;
+      }
       if (parsedSpec.hasTriggerSpec() &&
           parsedSpec.getTriggerSpec().hasIfValueRegex()) {
         if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
