@@ -902,7 +902,7 @@ amp.htmlparser.toLowerCase = function(str) {
  * to remain unchanged for these objects.
  */
 function unusedHtmlParser() {
-  console.log(ElementsWithNoEndElements['']);
-  console.log(HtmlStructureElements['']);
-  console.log(HeadElements['']);
+  console./*OK*/log(ElementsWithNoEndElements['']);
+  console./*OK*/log(HtmlStructureElements['']);
+  console./*OK*/log(HeadElements['']);
 }

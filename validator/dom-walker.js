@@ -213,5 +213,5 @@ amp.domwalker.DomWalker = class {
  * to remain unchanged for these objects.
  */
 function unusedDomWalker() {
-  console.log(CdataTagsToValidate['']);
+  console./*OK*/log(CdataTagsToValidate['']);
 }
