@@ -38,6 +38,7 @@ goog.require('amp.validator.ValidationError.Code');
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
+goog.require('parse_css.TRIVIAL_EOF_TOKEN');
 goog.require('parse_css.TRIVIAL_ERROR_TOKEN');
 goog.require('parse_css.Token');
 goog.require('parse_css.TokenType');
@@ -114,31 +115,6 @@ parse_css.TokenStream = class {
 };
 
 /**
- * Creates an EOF token at the same line/col as the given token,
- * used for breaking up a list of tokens.
- * @param {!parse_css.Token} positionToken
- * @return {!parse_css.EOFToken}
- */
-function createEOFTokenAt(positionToken) {
-  const eof = new parse_css.EOFToken;
-  positionToken.addPositionTo(eof);
-  return eof;
-}
-
-/**
- * Creates a ParseError token at the same line/col as the given token.
- * @param {!parse_css.Token} positionToken
- * @param {!amp.validator.ValidationError.Code} code
- * @param {!Array<string>} params
- * @return {!parse_css.ErrorToken}
- */
-function createParseErrorTokenAt(positionToken, code, params) {
-  const error = new parse_css.ErrorToken(code, params);
-  positionToken.addPositionTo(error);
-  return error;
-}
-
-/**
  * Returns a Stylesheet object with nested parse_css.Rules.
  *
  * The top level Rules in a Stylesheet are always a series of
@@ -159,7 +135,7 @@ parse_css.parseAStylesheet = function(
 
   stylesheet.rules =
       canonicalizer.parseAListOfRules(tokenList, /* topLevel */ true, errors);
-  tokenList[0].addPositionTo(stylesheet);
+  tokenList[0].copyPosTo(stylesheet);
   const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
   stylesheet.eof = eof;
@@ -436,7 +412,9 @@ class Canonicalizer {
     const startToken =
         /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
     const rule = new parse_css.AtRule(startToken.value);
-    startToken.addPositionTo(rule);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      startToken.copyPosTo(rule);
+    }
 
     while (true) {
       tokenStream.consume();
@@ -447,7 +425,8 @@ class Canonicalizer {
         return rule;
       }
       if (current === parse_css.TokenType.OPEN_CURLY) {
-        rule.prelude.push(createEOFTokenAt(tokenStream.current()));
+        rule.prelude.push(
+            tokenStream.current().copyPosTo(new parse_css.EOFToken()));
 
         /** @type {!Array<!parse_css.Token>} */
         const contents = parse_css.extractASimpleBlock(tokenStream);
@@ -496,25 +475,25 @@ class Canonicalizer {
       return;
     }
 
-    const rule = new parse_css.QualifiedRule();
-    tokenStream.current().addPositionTo(rule);
+    const rule = tokenStream.current().copyPosTo(new parse_css.QualifiedRule());
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
       const current = tokenStream.current().tokenType;
       if (current === parse_css.TokenType.EOF_TOKEN) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          errors.push(createParseErrorTokenAt(
-              rule, amp.validator.ValidationError.Code
-                        .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
-              ['style']));
+          errors.push(rule.copyPosTo(new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code
+                  .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE,
+              ['style'])));
         } else {
           errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
         }
         return;
       }
       if (current === parse_css.TokenType.OPEN_CURLY) {
-        rule.prelude.push(createEOFTokenAt(tokenStream.current()));
+        rule.prelude.push(
+            tokenStream.current().copyPosTo(new parse_css.EOFToken()));
 
         // This consumes declarations (ie: "color: red;" ) inside
         // a qualified rule as that rule's value.
@@ -556,10 +535,9 @@ class Canonicalizer {
         // We consume an AT rule, but drop it and instead push an error token.
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           const atRule = this.parseAnAtRule(tokenStream, errors);
-          errors.push(createParseErrorTokenAt(
-              atRule,
+          errors.push(atRule.copyPosTo(new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
-              ['style', atRule.name]));
+              ['style', atRule.name])));
         } else {
           errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
           return [];
@@ -571,10 +549,9 @@ class Canonicalizer {
           errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
           return [];
         }
-        errors.push(createParseErrorTokenAt(
-            tokenStream.current(),
+        errors.push(tokenStream.current().copyPosTo(new parse_css.ErrorToken(
             amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
-            ['style']));
+            ['style'])));
         tokenStream.reconsume();
         while (
             !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
@@ -605,8 +582,8 @@ class Canonicalizer {
 
     const startToken =
         /** @type {!parse_css.IdentToken} */ (tokenStream.current());
-    const decl = new parse_css.Declaration(startToken.value);
-    startToken.addPositionTo(decl);
+    const decl =
+        startToken.copyPosTo(new parse_css.Declaration(startToken.value));
 
     while (tokenStream.next().tokenType === parse_css.TokenType.WHITESPACE) {
       tokenStream.consume();
@@ -618,10 +595,9 @@ class Canonicalizer {
         errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
         return;
       }
-      errors.push(createParseErrorTokenAt(
-          startToken,
+      errors.push(startToken.copyPosTo(new parse_css.ErrorToken(
           amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
-          ['style']));
+          ['style'])));
       tokenStream.reconsume();
       while (
           !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
@@ -637,7 +613,7 @@ class Canonicalizer {
       tokenStream.consume();
       consumeAComponentValue(tokenStream, decl.value);
     }
-    decl.value.push(createEOFTokenAt(tokenStream.next()));
+    decl.value.push(tokenStream.next().copyPosTo(new parse_css.EOFToken()));
 
     let foundImportant = false;
     for (let i = decl.value.length - 1; i >= 0; i--) {
@@ -738,10 +714,11 @@ parse_css.extractASimpleBlock = function(tokenStream) {
   goog.asserts.assert(consumedTokens.length >= 2);
 
   // Exclude the start token. Convert end token to EOF.
-  /** @type {!Array<!parse_css.Token>} */
-  const tokenList = consumedTokens.slice(1, -1);
-  tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
-  return tokenList;
+  const end = consumedTokens.length - 1;
+  consumedTokens[end] = amp.validator.GENERATE_DETAILED_ERRORS ?
+      consumedTokens[end].copyPosTo(new parse_css.EOFToken()) :
+      parse_css.TRIVIAL_EOF_TOKEN;
+  return consumedTokens.slice(1);
 };
 
 /**
@@ -785,10 +762,11 @@ parse_css.extractAFunction = function(tokenStream) {
   goog.asserts.assert(consumedTokens.length >= 2);
 
   // Convert end token to EOF.
-  /** @type {!Array<!parse_css.Token>} */
-  const tokenList = consumedTokens.slice(0, -1);
-  tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
-  return tokenList;
+  const end = consumedTokens.length - 1;
+  consumedTokens[end] = amp.validator.GENERATE_DETAILED_ERRORS ?
+      consumedTokens[end].copyPosTo(new parse_css.EOFToken()) :
+      parse_css.TRIVIAL_EOF_TOKEN;
+  return consumedTokens;
 };
 
 /**
@@ -839,7 +817,7 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
   goog.asserts.assert(tokenIdx + 1 < tokens.length);
   const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
-  token.addPositionTo(parsed);
+  token.copyPosTo(parsed);
   parsed.utf8Url = /** @type {parse_css.URLToken}*/ (token).value;
 }
 
@@ -861,7 +839,7 @@ function parseUrlFunction(tokens, tokenIdx, parsed) {
       /** @type {parse_css.FunctionToken} */ (token).value === 'url');
   goog.asserts.assert(
       tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN);
-  token.addPositionTo(parsed);
+  token.copyPosTo(parsed);
   ++tokenIdx;  // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
   goog.asserts.assert(tokenIdx < tokens.length);
@@ -952,11 +930,9 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
         ii = parseUrlFunction(declaration.value, ii, parsedUrl);
         if (ii === -1) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const error = new parse_css.ErrorToken(
+            this.errors.push(token.copyPosTo(new parse_css.ErrorToken(
                 amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
-                /* params */['style']);
-            token.addPositionTo(error);
-            this.errors.push(error);
+                ['style'])));
           } else {
             this.errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
           }

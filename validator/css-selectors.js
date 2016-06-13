@@ -204,9 +204,8 @@ parse_css.parseATypeSelector = function(tokenStream) {
     elementName = ident.value;
     tokenStream.consume();
   }
-  const selector = new parse_css.TypeSelector(namespacePrefix, elementName);
-  start.addPositionTo(selector);
-  return selector;
+  return start.copyPosTo(
+      new parse_css.TypeSelector(namespacePrefix, elementName));
 };
 
 /**
@@ -252,9 +251,7 @@ parse_css.parseAnIdSelector = function(tokenStream) {
       'Precondition violated: must start with HashToken');
   const hash = /** @type {!parse_css.HashToken} */ (tokenStream.current());
   tokenStream.consume();
-  const selector = new parse_css.IdSelector(hash.value);
-  hash.addPositionTo(selector);
-  return selector;
+  return hash.copyPosTo(new parse_css.IdSelector(hash.value));
 };
 
 /**
@@ -311,11 +308,9 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
  * @return {!parse_css.ErrorToken}
  */
 function newInvalidAttrSelectorError(start) {
-  const error = new parse_css.ErrorToken(
+  return start.copyPosTo(new parse_css.ErrorToken(
       amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
-      ['style']);
-  start.addPositionTo(error);
-  return error;
+      ['style']));
 }
 
 /**
@@ -434,8 +429,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   tokenStream.consume();
   const selector = new parse_css.AttrSelector(
       namespacePrefix, attrName, matchOperator, value);
-  start.addPositionTo(selector);
-  return selector;
+  return start.copyPosTo(selector);
 };
 
 /**
@@ -519,17 +513,14 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
     func = parse_css.extractAFunction(tokenStream);
     tokenStream.consume();
   } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
-    const error = new parse_css.ErrorToken(
+    return firstColon.copyPosTo(new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
-        ['style']);
-    firstColon.addPositionTo(error);
-    return error;
+        ['style']));
   } else {
     return parse_css.TRIVIAL_ERROR_TOKEN;
   }
-  const selector = new parse_css.PseudoSelector(isClass, name, func);
-  firstColon.addPositionTo(selector);
-  return selector;
+  return firstColon.copyPosTo(
+      new parse_css.PseudoSelector(isClass, name, func));
 };
 
 /**
@@ -577,10 +568,7 @@ parse_css.parseAClassSelector = function(tokenStream) {
   tokenStream.consume();
   const ident = /** @type {!parse_css.IdentToken} */ (tokenStream.current());
   tokenStream.consume();
-  const selector = new parse_css.ClassSelector(ident.value);
-  selector.line = dot.line;
-  selector.col = dot.col;
-  return selector;
+  return dot.copyPosTo(new parse_css.ClassSelector(ident.value));
 };
 
 
@@ -642,8 +630,7 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
  * @return {!parse_css.SimpleSelectorSequence|!parse_css.ErrorToken}
  */
 parse_css.parseASimpleSelectorSequence = function(tokenStream) {
-  const line = tokenStream.current().line;
-  const col = tokenStream.current().col;
+  const start = tokenStream.current();
   let typeSelector = null;
   if (isDelim(tokenStream.current(), '*') ||
       isDelim(tokenStream.current(), '|') ||
@@ -679,27 +666,19 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const error = new parse_css.ErrorToken(
+            return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
                 amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
-                ['style']);
-            error.line = tokenStream.current().line;
-            error.col = tokenStream.current().col;
-            return error;
+                ['style']));
           } else {
             return parse_css.TRIVIAL_ERROR_TOKEN;
           }
         }
         // If no type selector is given then the universal selector is implied.
-        typeSelector = new parse_css.TypeSelector(
-            /*namespacePrefix=*/null, /*elementName=*/'*');
-        typeSelector.line = line;
-        typeSelector.col = col;
+        typeSelector = start.copyPosTo(new parse_css.TypeSelector(
+            /*namespacePrefix=*/null, /*elementName=*/'*'));
       }
-      const sequence =
-          new parse_css.SimpleSelectorSequence(typeSelector, otherSelectors);
-      sequence.line = line;
-      sequence.col = col;
-      return sequence;
+      return start.copyPosTo(
+          new parse_css.SimpleSelectorSequence(typeSelector, otherSelectors));
     }
   }
 };
@@ -819,12 +798,9 @@ function isSimpleSelectorSequenceStart(token) {
 parse_css.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      const error = new parse_css.ErrorToken(
+      return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
           amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-          ['style']);
-      error.line = tokenStream.current().line;
-      error.col = tokenStream.current().col;
-      return error;
+          ['style']));
     } else {
       return parse_css.TRIVIAL_ERROR_TOKEN;
     }
@@ -860,11 +836,9 @@ parse_css.parseASelector = function(tokenStream) {
     if (right.tokenType === parse_css.TokenType.ERROR) {
       return right;  // TODO(johannes): more than one error / partial tree.
     }
-    left = new parse_css.Combinator(
+    left = combinatorToken.copyPosTo(new parse_css.Combinator(
         combinatorTypeForToken(combinatorToken), left,
-        /** @type {!parse_css.SimpleSelectorSequence} */ (right));
-    left.line = combinatorToken.line;
-    left.col = combinatorToken.col;
+        /** @type {!parse_css.SimpleSelectorSequence} */ (right)));
   }
 };
 
@@ -918,11 +892,9 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
 parse_css.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      const error = new parse_css.ErrorToken(
+      return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
           amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
-          ['style']);
-      tokenStream.current().addPositionTo(error);
-      return error;
+          ['style']));
     } else {
       return parse_css.TRIVIAL_ERROR_TOKEN;
     }
@@ -952,12 +924,10 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     // but before we do, we check that no unparsed input remains.
     if (!(tokenStream.current().tokenType === parse_css.TokenType.EOF_TOKEN)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        const error = new parse_css.ErrorToken(
+        return tokenStream.current().copyPosTo(new parse_css.ErrorToken(
             amp.validator.ValidationError.Code
                 .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
-            ['style']);
-        tokenStream.current().addPositionTo(error);
-        return error;
+            ['style']));
       } else {
         return parse_css.TRIVIAL_ERROR_TOKEN;
       }
@@ -965,8 +935,6 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     if (elements.length == 1) {
       return elements[0];
     }
-    const group = new parse_css.SelectorsGroup(elements);
-    start.addPositionTo(group);
-    return group;
+    return start.copyPosTo(new parse_css.SelectorsGroup(elements));
   }
 };
