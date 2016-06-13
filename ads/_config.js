@@ -61,6 +61,7 @@ export const adPrefetch = {
     'https://yads.c.yimg.jp/js/yads.js',
   ],
   nend: 'https://js1.nend.net/js/amp.js',
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
 };
 
 /**
@@ -169,6 +170,7 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
+  adgeneration: 'https://i.socdm.com',
 };
 
 /**
