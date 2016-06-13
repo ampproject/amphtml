@@ -44,7 +44,7 @@ goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
  * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {Object<string, number>}
+ * @type {Object<string, ?>}
  * @private
  */
 const ElementsWithNoEndElements = {
@@ -66,36 +66,36 @@ const ElementsWithNoEndElements = {
 };
 
 /**
- * Set of HTML tags which should never trigger an implied open of a <head>
+ * Set of HTML tags which should never trigger an implied open of a <head>
  * or <body> element.
- * @type {Object<string,number>}
+ * @type {Object<string,?>}
  * @private
- */
+ */
 const HtmlStructureElements = {
-   // See https://www.w3.org/TR/html5/document-metadata.html
-  '!doctype': 0,
-  'html': 0,
-  'head': 0,
-  'body': 0,
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  '!doctype': 0,
+  'html': 0,
+  'head': 0,
+  'body': 0,
 };
 
 /**
- * The set of HTML tags which are legal in the HTML document <head> and
- * the 'head' tag itself.
- * @type {Object<string,number>}
- * @private
- */
+* The set of HTML tags which are legal in the HTML document <head> and
+* the 'head' tag itself.
+* @type {Object<string,?>}
+* @private
+*/
 const HeadElements = {
   'head': 0,
-  // See https://www.w3.org/TR/html5/document-metadata.html
-  'title': 0,
-  'base': 0,
-  'link': 0,
-  'meta': 0,
-  'style': 0,
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  'title': 0,
+  'base': 0,
+  'link': 0,
+  'meta': 0,
+  'style': 0,
   // Also legal in the document <head>, though not per spec.
-  'noscript': 0,
-  'script': 0,
+  'noscript': 0,
+  'script': 0,
 };
 
 /**
@@ -524,7 +524,7 @@ amp.htmlparser.HtmlParser.EFlags = {
 
 /**
  * A map of element to a bitmap of flags it has, used internally on the parser.
- * @type {Object<string,number>}
+ * @type {Object<string,?>}
  */
 amp.htmlparser.HtmlParser.Elements = {
   'a': 0,
