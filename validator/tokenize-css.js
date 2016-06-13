@@ -298,8 +298,8 @@ class Tokenizer {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       this.lineByPos_ = [];
       this.colByPos_ = [];
-      let currentLine = line;
-      let currentCol = col;
+      let currentLine = line || 1;
+      let currentCol = col || 0;
       for (let i = 0; i < this.codepoints_.length; ++i) {
         this.lineByPos_[i] = currentLine;
         this.colByPos_[i] = currentCol;
@@ -310,8 +310,8 @@ class Tokenizer {
           ++currentCol;
         }
       }
-      eofToken.line = goog.asserts.assertInstanceof(currentLine, Number);
-      eofToken.col = goog.asserts.assertInstanceof(currentCol, Number);
+      eofToken.line = currentLine;
+      eofToken.col = currentCol;
     }
 
     let iterationCount = 0;
