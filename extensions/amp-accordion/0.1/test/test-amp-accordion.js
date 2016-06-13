@@ -139,7 +139,7 @@ describe('amp-accordion', () => {
     });
   });
 
-  it('should show respect session states and expand/collapse', () => {
+  it('should respect session states and expand/collapse', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
       const impl = obj.ampAccordion.implementation_;

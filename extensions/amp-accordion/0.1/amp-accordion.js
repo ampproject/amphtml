@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Layout} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 
 class AmpAccordion extends AMP.BaseElement {
@@ -101,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     try {
-      const sessionStr = this.win_./*REVIEW*/sessionStorage.getItem(this.id_);
+      const sessionStr = this.win_./*OK*/sessionStorage.getItem(this.id_);
       return JSON.parse(sessionStr);
     } catch (e) {
       dev.error(e.message, e.stack);
@@ -116,7 +116,7 @@ class AmpAccordion extends AMP.BaseElement {
   setSessionState_() {
     const sessionStr = JSON.stringify(this.currentState_);
     try {
-      this.win_./*REVIEW*/sessionStorage.setItem(this.id_, sessionStr);
+      this.win_./*OK*/sessionStorage.setItem(this.id_, sessionStr);
     } catch (e) {
       dev.error(e.message, e.stack);
     }
