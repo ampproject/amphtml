@@ -99,8 +99,8 @@ goog.require('amp.validator.ValidationError');
  *   - ErrorToken
  *
  * @param {string} strIn
- * @param {number} line
- * @param {number} col
+ * @param {number|undefined} line
+ * @param {number|undefined} col
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!Array<!parse_css.Token>}
  * @export
@@ -266,8 +266,8 @@ function stringFromCode(code) {
 class Tokenizer {
   /**
    * @param {string} strIn
-   * @param {number} line
-   * @param {number} col
+   * @param {number|undefined} line
+   * @param {number|undefined} col
    * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
    */
   constructor(strIn, line, col, errors) {
@@ -310,8 +310,8 @@ class Tokenizer {
           ++currentCol;
         }
       }
-      eofToken.line = currentLine;
-      eofToken.col = currentCol;
+      eofToken.line = goog.asserts.assertInstanceof(currentLine, Number);
+      eofToken.col = goog.asserts.assertInstanceof(currentCol, Number);
     }
 
     let iterationCount = 0;

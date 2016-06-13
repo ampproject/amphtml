@@ -602,8 +602,10 @@ class CdataMatcher {
     // we've advanced past the tag. This information gets filled in
     // by Context.setCdataMatcher.
 
-    /** @private @type {!LineCol} */
-    this.lineCol_ = new LineCol(1, 0);
+    if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+      /** @private @type {!LineCol} */
+      this.lineCol_ = new LineCol(1, 0);
+    }
 
     /**
      * @type {RegExp} cdataRegex
@@ -728,7 +730,13 @@ class CdataMatcher {
       const cssErrors = [];
       /** @type {!Array<!parse_css.Token>} */
       const tokenList = parse_css.tokenize(
-          cdata, this.getLineCol().getLine(), this.getLineCol().getCol(),
+          cdata,
+          amp.validator.GENERATE_DETAILED_ERRORS
+              ? this.getLineCol().getLine()
+              : undefined,
+          amp.validator.GENERATE_DETAILED_ERRORS
+              ? this.getLineCol().getCol()
+              : undefined,
           cssErrors);
       if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -750,19 +758,20 @@ class CdataMatcher {
       /** @type {!Array<!parse_css.ParsedCssUrl>} */
       const parsedUrls = [];
       parse_css.extractUrls(sheet, parsedUrls, cssErrors);
-      if (!amp.validator.GENERATE_DETAILED_ERRORS && cssErrors.length > 0) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        for (const errorToken of cssErrors) {
+          // Override the first parameter with the name of this style tag.
+          let params = errorToken.params;
+          // Override the first parameter with the name of this style tag.
+          params[0] = getTagSpecName(this.tagSpec_);
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR, errorToken.code,
+              new LineCol(errorToken.line, errorToken.col), params,
+              /* url */ '', validationResult);
+        }
+      } else if (cssErrors.length > 0) {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         return;
-      }
-      for (const errorToken of cssErrors) {
-        // Override the first parameter with the name of this style tag.
-        let params = errorToken.params;
-        // Override the first parameter with the name of this style tag.
-        params[0] = getTagSpecName(this.tagSpec_);
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR, errorToken.code,
-            new LineCol(errorToken.line, errorToken.col), params,
-            /* url */ '', validationResult);
       }
       const parsedFontUrlSpec =
           new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
