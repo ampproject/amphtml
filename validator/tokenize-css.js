@@ -317,9 +317,9 @@ class Tokenizer {
     let iterationCount = 0;
     while (!this.eof(this.next())) {
       const token = this.consumeAToken();
-      if (token instanceof parse_css.ErrorToken) {
+      if (token.tokenType === parse_css.TokenType.ERROR) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          this.errors_.push(token);
+          this.errors_.push(/** @type {!parse_css.ErrorToken} */(token));
         } else {
           this.errors_.push(parse_css.TRIVIAL_ERROR_TOKEN);
           this.tokens_ = [];
@@ -1032,62 +1032,77 @@ class MarkedPosition {
 
 
 /**
- * @enum {string}
+ * NOTE: When adding to this enum, you must update TokenType_NamesById below.
+ * @enum {number}
  */
 parse_css.TokenType = {
-  UNKNOWN: 'UNKNOWN',
-  AT_KEYWORD: 'AT_KEYWORD',
-  CDC: 'CDC',  // -->
-  CDO: 'CDO',  // <!--
-  CLOSE_CURLY: 'CLOSE_CURLY',
-  CLOSE_PAREN: 'CLOSE_PAREN',
-  CLOSE_SQUARE: 'CLOSE_SQUARE',
-  COLON: 'COLON',
-  COLUMN: 'COLUMN',  // ||
-  COMMA: 'COMMA',
-  DASH_MATCH: 'DASH_MATCH',  // |=
-  DELIM: 'DELIM',
-  DIMENSION: 'DIMENSION',
-  EOF_TOKEN: 'EOF_TOKEN',  // Can't call this EOF due to symbol conflict in C.
-  ERROR: 'ERROR',
-  FUNCTION_TOKEN: 'FUNCTION_TOKEN',
-  HASH: 'HASH',  // #
-  IDENT: 'IDENT',
-  INCLUDE_MATCH: 'INCLUDE_MATCH',  // ~=
-  NUMBER: 'NUMBER',
-  OPEN_CURLY: 'OPEN_CURLY',
-  OPEN_PAREN: 'OPEN_PAREN',
-  OPEN_SQUARE: 'OPEN_SQUARE',
-  PERCENTAGE: 'PERCENTAGE',
-  PREFIX_MATCH: 'PREFIX_MATCH',  // ^=
-  SEMICOLON: 'SEMICOLON',
-  STRING: 'STRING',
-  SUBSTRING_MATCH: 'SUBSTRING_MATCH',  // *=
-  SUFFIX_MATCH: 'SUFFIX_MATCH',        // $=
-  WHITESPACE: 'WHITESPACE',
-  URL: 'URL',
+  UNKNOWN: 0,
+  AT_KEYWORD: 1,
+  CDC: 2,  // -->
+  CDO: 3,  // <!--
+  CLOSE_CURLY: 4,
+  CLOSE_PAREN: 5,
+  CLOSE_SQUARE: 6,
+  COLON: 7,
+  COLUMN: 8,  // ||
+  COMMA: 9,
+  DASH_MATCH: 10,  // |=
+  DELIM: 11,
+  DIMENSION: 12,
+  EOF_TOKEN: 13,  // Can't call this EOF due to symbol conflict in C.
+  ERROR: 14,
+  FUNCTION_TOKEN: 15,
+  HASH: 16,  // #
+  IDENT: 17,
+  INCLUDE_MATCH: 18,  // ~=
+  NUMBER: 19,
+  OPEN_CURLY: 20,
+  OPEN_PAREN: 21,
+  OPEN_SQUARE: 22,
+  PERCENTAGE: 23,
+  PREFIX_MATCH: 24,  // ^=
+  SEMICOLON: 25,
+  STRING: 26,
+  SUBSTRING_MATCH: 27,  // *=
+  SUFFIX_MATCH: 28,        // $=
+  WHITESPACE: 29,
+  URL: 30,
 
   // AST nodes produced by the parsing routines.
-  STYLESHEET: 'STYLESHEET',
-  AT_RULE: 'AT_RULE',
-  QUALIFIED_RULE: 'QUALIFIED_RULE',
-  DECLARATION: 'DECLARATION',
-  BLOCK: 'BLOCK',
-  FUNCTION: 'FUNCTION',
+  STYLESHEET: 31,
+  AT_RULE: 32,
+  QUALIFIED_RULE: 33,
+  DECLARATION: 34,
+  BLOCK: 35,
+  FUNCTION: 36,
 
   // For ExtractUrls
-  PARSED_CSS_URL: 'PARSED_CSS_URL',
+  PARSED_CSS_URL: 37,
 
   // For css-selectors.js.
-  TYPE_SELECTOR: 'TYPE_SELECTOR',
-  ID_SELECTOR: 'ID_SELECTOR',
-  ATTR_SELECTOR: 'ATTR_SELECTOR',
-  PSEUDO_SELECTOR: 'PSEUDO_SELECTOR',
-  CLASS_SELECTOR: 'CLASS_SELECTOR',
-  SIMPLE_SELECTOR_SEQUENCE: 'SIMPLE_SELECTOR_SEQUENCE',
-  COMBINATOR: 'COMBINATOR',
-  SELECTORS_GROUP: 'SELECTORS_GROUP'
+  TYPE_SELECTOR: 38,
+  ID_SELECTOR: 39,
+  ATTR_SELECTOR: 40,
+  PSEUDO_SELECTOR: 41,
+  CLASS_SELECTOR: 42,
+  SIMPLE_SELECTOR_SEQUENCE: 43,
+  COMBINATOR: 44,
+  SELECTORS_GROUP: 45
 };
+
+/** @type {!Array<!string>} */
+const TokenType_NamesById = [
+  'UNKNOWN', 'AT_KEYWORD', 'CDC', 'CDO', 'CLOSE_CURLY', 'CLOSE_PAREN',
+  'CLOSE_SQUARE', 'COLON', 'COLUMN', 'COMMA', 'DASH_MATCH', 'DELIM',
+  'DIMENSION', 'EOF_TOKEN', 'ERROR', 'FUNCTION_TOKEN', 'HASH',
+  'IDENT', 'INCLUDE_MATCH', 'NUMBER', 'OPEN_CURLY', 'OPEN_PAREN',
+  'OPEN_SQUARE', 'PERCENTAGE', 'PREFIX_MATCH', 'SEMICOLON', 'STRING',
+  'SUBSTRING_MATCH', 'SUFFIX_MATCH', 'WHITESPACE', 'URL',
+  'STYLESHEET', 'AT_RULE', 'QUALIFIED_RULE', 'DECLARATION', 'BLOCK',
+  'FUNCTION', 'PARSED_CSS_URL', 'TYPE_SELECTOR', 'ID_SELECTOR',
+  'ATTR_SELECTOR', 'PSEUDO_SELECTOR', 'CLASS_SELECTOR',
+  'SIMPLE_SELECTOR_SEQUENCE', 'COMBINATOR', 'SELECTORS_GROUP',
+];
 
 /**
  * The abstract superclass for all tokens.
@@ -1100,7 +1115,6 @@ parse_css.Token = class {
       /** @type {number} */
       this.col = 0;
     }
-    /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
@@ -1121,7 +1135,8 @@ parse_css.Token = class {
   /** @return {!Object} */
   toJSON() {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return {'tokenType': this.tokenType, 'line': this.line, 'col': this.col};
+      return {'tokenType': TokenType_NamesById[this.tokenType],
+              'line': this.line, 'col': this.col};
     } else {
       return {'tokenType': this.tokenType};
     }

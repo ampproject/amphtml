@@ -164,11 +164,8 @@ parse_css.TypeSelector = class extends parse_css.Selector {
  * @return {boolean}
  */
 function isDelim(token, delimChar) {
-  if (!(token instanceof parse_css.DelimToken)) {
-    return false;
-  }
-  const delimToken = goog.asserts.assertInstanceof(token, parse_css.DelimToken);
-  return delimToken.value === delimChar;
+  return token.tokenType === parse_css.TokenType.DELIM &&
+      /** @type {!parse_css.DelimToken} */(token).value === delimChar;
 }
 
 /**
@@ -200,8 +197,7 @@ parse_css.parseATypeSelector = function(tokenStream) {
     tokenStream.consume();
     tokenStream.consume();
   }
-  if (tokenStream.current() instanceof parse_css.DelimToken &&
-      isDelim(tokenStream.current(), '*')) {
+  if (isDelim(tokenStream.current(), '*')) {
     elementName = '*';
     tokenStream.consume();
   } else if (tokenStream.current() instanceof parse_css.IdentToken) {
