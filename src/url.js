@@ -59,7 +59,9 @@ export function parseUrl(url) {
   a.href = url;
   // IE11 doesn't provide full URL components when parsing relative URLs.
   // Assigning to itself again does the trick.
-  a.href = a.href;
+  if (!a.protocol) {
+    a.href = a.href;
+  }
 
   const info = {
     href: a.href,
