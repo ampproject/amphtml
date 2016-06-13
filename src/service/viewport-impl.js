@@ -841,6 +841,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
+    /** @private {number} */
+    this.paddingTop_ = 0;
+
     onDocumentReady(this.win.document, () => {
       // Microtask is necessary here to let Safari to recalculate scrollWidth
       // post DocumentReady signal.
@@ -946,6 +949,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, () => {
+      this.paddingTop_ = paddingTop;
       // Also tried `paddingTop` but it didn't work for `position:absolute`
       // on iOS.
       this.win.document.body.style.borderTop =
@@ -1058,7 +1062,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     const rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
-      this.pos_.y = -rect.top;
+      this.pos_.y = -rect.top + this.paddingTop_;
       this.scrollObservable_.fire();
     }
   }
@@ -1068,7 +1072,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     if (!this.scrollMoveEl_) {
       return;
     }
-    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
+    setStyle(this.scrollMoveEl_, 'transform',
+        `translateY(${scrollPos - this.paddingTop_}px)`);
     this.scrollMoveEl_./*OK*/scrollIntoView(true);
   }
 
@@ -1084,7 +1089,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
+    const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top +
+        this.paddingTop_;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
