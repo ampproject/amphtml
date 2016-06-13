@@ -66,14 +66,16 @@ parse_css.TokenStream = class {
    * @param {!Array<!parse_css.Token>} tokens
    */
   constructor(tokens) {
+    goog.asserts.assert(
+        tokens.length > 0,
+        'Internal Error: empty TokenStream - must have EOF token');
+    goog.asserts.assert(
+        tokens[tokens.length - 1].tokenType === parse_css.TokenType.EOF_TOKEN,
+        'Internal Error: TokenStream must end with EOF');
+
     /** @type {!Array<!parse_css.Token>} */
     this.tokens = tokens;
-    goog.asserts.assert(
-        this.tokens.length > 0,
-        'Internal Error: empty TokenStream - must have EOF token');
-    goog.asserts.assertInstanceof(
-        this.tokens[tokens.length - 1], parse_css.EOFToken,
-        'Internal Error: TokenStream must end with EOF');
+    /** @type {!number} */
     this.pos = -1;
   }
 
@@ -398,18 +400,19 @@ class Canonicalizer {
     const rules = [];
     while (true) {
       tokenStream.consume();
-      if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+      const current = tokenStream.current().tokenType;
+      if (current === parse_css.TokenType.WHITESPACE) {
         continue;
-      } else if (tokenStream.current() instanceof parse_css.EOFToken) {
+      } else if (current === parse_css.TokenType.EOF_TOKEN) {
         return rules;
       } else if (
-          tokenStream.current() instanceof parse_css.CDOToken ||
-          tokenStream.current() instanceof parse_css.CDCToken) {
+          current === parse_css.TokenType.CDO ||
+          current === parse_css.TokenType.CDC) {
         if (topLevel) {
           continue;
         }
         this.parseAQualifiedRule(tokenStream, rules, errors);
-      } else if (tokenStream.current() instanceof parse_css.AtKeywordToken) {
+      } else if (current === parse_css.TokenType.AT_KEYWORD) {
         rules.push(this.parseAnAtRule(tokenStream, errors));
       } else {
         this.parseAQualifiedRule(tokenStream, rules, errors);
@@ -425,8 +428,8 @@ class Canonicalizer {
    * @return {!parse_css.AtRule}
    */
   parseAnAtRule(tokenStream, errors) {
-    goog.asserts.assertInstanceof(
-        tokenStream.current(), parse_css.AtKeywordToken,
+    goog.asserts.assert(
+        tokenStream.current().tokenType === parse_css.TokenType.AT_KEYWORD,
         'Internal Error: parseAnAtRule precondition not met');
 
     const startToken =
@@ -436,12 +439,13 @@ class Canonicalizer {
 
     while (true) {
       tokenStream.consume();
-      if (tokenStream.current() instanceof parse_css.SemicolonToken ||
-          tokenStream.current() instanceof parse_css.EOFToken) {
+      const current = tokenStream.current().tokenType;
+      if (current === parse_css.TokenType.SEMICOLON ||
+          current === parse_css.TokenType.EOF_TOKEN) {
         rule.prelude.push(tokenStream.current());
         return rule;
       }
-      if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
+      if (current === parse_css.TokenType.OPEN_CURLY) {
         rule.prelude.push(createEOFTokenAt(tokenStream.current()));
 
         /** @type {!Array<!parse_css.Token>} */
@@ -483,8 +487,8 @@ class Canonicalizer {
    */
   parseAQualifiedRule(tokenStream, rules, errors) {
     goog.asserts.assert(
-        !(tokenStream.current() instanceof parse_css.EOFToken) &&
-            !(tokenStream.current() instanceof parse_css.AtKeywordToken),
+        tokenStream.current().tokenType !== parse_css.TokenType.EOF_TOKEN &&
+            tokenStream.current().tokenType !== parse_css.TokenType.AT_KEYWORD,
         'Internal Error: parseAQualifiedRule precondition not met');
 
     if (!amp.validator.GENERATE_DETAILED_ERRORS && errors.length > 0) {
@@ -496,7 +500,8 @@ class Canonicalizer {
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
-      if (tokenStream.current() instanceof parse_css.EOFToken) {
+      const current = tokenStream.current().tokenType;
+      if (current === parse_css.TokenType.EOF_TOKEN) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           errors.push(createParseErrorTokenAt(
               rule, amp.validator.ValidationError.Code
@@ -507,7 +512,7 @@ class Canonicalizer {
         }
         return;
       }
-      if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
+      if (current === parse_css.TokenType.OPEN_CURLY) {
         rule.prelude.push(createEOFTokenAt(tokenStream.current()));
 
         // This consumes declarations (ie: "color: red;" ) inside
@@ -538,12 +543,13 @@ class Canonicalizer {
     const tokenStream = new parse_css.TokenStream(tokenList);
     while (true) {
       tokenStream.consume();
-      if (tokenStream.current() instanceof parse_css.WhitespaceToken ||
-          tokenStream.current() instanceof parse_css.SemicolonToken) {
+      const current = tokenStream.current().tokenType;
+      if (current === parse_css.TokenType.WHITESPACE ||
+          current === parse_css.TokenType.SEMICOLON) {
         continue;
-      } else if (tokenStream.current() instanceof parse_css.EOFToken) {
+      } else if (current === parse_css.TokenType.EOF_TOKEN) {
         return decls;
-      } else if (tokenStream.current() instanceof parse_css.AtKeywordToken) {
+      } else if (current === parse_css.TokenType.AT_KEYWORD) {
         // The CSS3 Parsing spec allows for AT rules inside lists of
         // declarations, but our grammar does not so we deviate a tiny bit here.
         // We consume an AT rule, but drop it and instead push an error token.
@@ -557,7 +563,7 @@ class Canonicalizer {
           errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
           return [];
         }
-      } else if (tokenStream.current() instanceof parse_css.IdentToken) {
+      } else if (current === parse_css.TokenType.IDENT) {
         this.parseADeclaration(tokenStream, decls, errors);
       } else {
         if (!amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -570,8 +576,8 @@ class Canonicalizer {
             ['style']));
         tokenStream.reconsume();
         while (
-            !(tokenStream.next() instanceof parse_css.SemicolonToken ||
-              tokenStream.next() instanceof parse_css.EOFToken)) {
+            !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+              tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
           tokenStream.consume();
           const dummyTokenList = [];
           consumeAComponentValue(tokenStream, dummyTokenList);
@@ -588,8 +594,8 @@ class Canonicalizer {
    * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
    */
   parseADeclaration(tokenStream, declarations, errors) {
-    goog.asserts.assertInstanceof(
-        tokenStream.current(), parse_css.IdentToken,
+    goog.asserts.assert(
+        tokenStream.current().tokenType === parse_css.TokenType.IDENT,
         'Internal Error: parseADeclaration precondition not met');
 
     if (!amp.validator.GENERATE_DETAILED_ERRORS && errors.length > 0) {
@@ -601,12 +607,12 @@ class Canonicalizer {
     const decl = new parse_css.Declaration(startToken.value);
     startToken.copyStartPositionTo(decl);
 
-    while (tokenStream.next() instanceof parse_css.WhitespaceToken) {
+    while (tokenStream.next().tokenType === parse_css.TokenType.WHITESPACE) {
       tokenStream.consume();
     }
 
     tokenStream.consume();
-    if (!(tokenStream.current() instanceof parse_css.ColonToken)) {
+    if (!(tokenStream.current().tokenType === parse_css.TokenType.COLON)) {
       if (!amp.validator.GENERATE_DETAILED_ERRORS) {
         errors.push(parse_css.TRIVIAL_ERROR_TOKEN);
         return;
@@ -617,16 +623,16 @@ class Canonicalizer {
           ['style']));
       tokenStream.reconsume();
       while (
-          !(tokenStream.next() instanceof parse_css.SemicolonToken ||
-            tokenStream.next() instanceof parse_css.EOFToken)) {
+          !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+            tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
         tokenStream.consume();
       }
       return;
     }
 
     while (
-        !(tokenStream.next() instanceof parse_css.SemicolonToken ||
-          tokenStream.next() instanceof parse_css.EOFToken)) {
+        !(tokenStream.next().tokenType === parse_css.TokenType.SEMICOLON ||
+          tokenStream.next().tokenType === parse_css.TokenType.EOF_TOKEN)) {
       tokenStream.consume();
       consumeAComponentValue(tokenStream, decl.value);
     }
@@ -634,15 +640,16 @@ class Canonicalizer {
 
     let foundImportant = false;
     for (let i = decl.value.length - 1; i >= 0; i--) {
-      if (decl.value[i] instanceof parse_css.WhitespaceToken) {
+      if (decl.value[i].tokenType === parse_css.TokenType.WHITESPACE) {
         continue;
       } else if (
-          decl.value[i] instanceof parse_css.IdentToken &&
+          decl.value[i].tokenType === parse_css.TokenType.IDENT &&
           /** @type {parse_css.IdentToken} */ (decl.value[i])
               .ASCIIMatch('important')) {
         foundImportant = true;
       } else if (
-          foundImportant && decl.value[i] instanceof parse_css.DelimToken &&
+          foundImportant &&
+          decl.value[i].tokenType === parse_css.TokenType.DELIM &&
           /** @type {parse_css.DelimToken} */ (decl.value[i]).value === '!') {
         decl.value.splice(i, decl.value.length);
         decl.important = true;
@@ -663,11 +670,12 @@ class Canonicalizer {
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeAComponentValue(tokenStream, tokenList) {
-  if (tokenStream.current() instanceof parse_css.OpenCurlyToken ||
-      tokenStream.current() instanceof parse_css.OpenSquareToken ||
-      tokenStream.current() instanceof parse_css.OpenParenToken) {
+  const current = tokenStream.current().tokenType;
+  if (current === parse_css.TokenType.OPEN_CURLY ||
+      current === parse_css.TokenType.OPEN_SQUARE ||
+      current === parse_css.TokenType.OPEN_PAREN) {
     consumeASimpleBlock(tokenStream, tokenList);
-  } else if (tokenStream.current() instanceof parse_css.FunctionToken) {
+  } else if (current === parse_css.TokenType.FUNCTION_TOKEN) {
     consumeAFunction(tokenStream, tokenList);
   } else {
     tokenList.push(tokenStream.current());
@@ -682,10 +690,11 @@ function consumeAComponentValue(tokenStream, tokenList) {
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeASimpleBlock(tokenStream, tokenList) {
+  const current = tokenStream.current().tokenType;
   goog.asserts.assert(
-      (tokenStream.current() instanceof parse_css.OpenCurlyToken ||
-       tokenStream.current() instanceof parse_css.OpenSquareToken ||
-       tokenStream.current() instanceof parse_css.OpenParenToken),
+      (current === parse_css.TokenType.OPEN_CURLY ||
+       current === parse_css.TokenType.OPEN_SQUARE ||
+       current === parse_css.TokenType.OPEN_PAREN),
       'Internal Error: consumeASimpleBlock precondition not met');
 
   const startToken =
@@ -695,11 +704,14 @@ function consumeASimpleBlock(tokenStream, tokenList) {
   tokenList.push(startToken);
   while (true) {
     tokenStream.consume();
-    if (tokenStream.current() instanceof parse_css.EOFToken) {
+    const current = tokenStream.current().tokenType;
+    if (current === parse_css.TokenType.EOF_TOKEN) {
       tokenList.push(tokenStream.current());
       return;
     } else if (
-        tokenStream.current() instanceof parse_css.GroupingToken &&
+        (current === parse_css.TokenType.CLOSE_CURLY ||
+         current === parse_css.TokenType.CLOSE_SQUARE ||
+         current === parse_css.TokenType.CLOSE_PAREN) &&
         /** @type {parse_css.GroupingToken} */ (tokenStream.current()).value ===
             mirror) {
       tokenList.push(tokenStream.current());
@@ -739,14 +751,15 @@ parse_css.extractASimpleBlock = function(tokenStream) {
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeAFunction(tokenStream, tokenList) {
-  goog.asserts.assertInstanceof(
-      tokenStream.current(), parse_css.FunctionToken,
+  goog.asserts.assert(
+      tokenStream.current().tokenType === parse_css.TokenType.FUNCTION_TOKEN,
       'Internal Error: consumeAFunction precondition not met');
   tokenList.push(tokenStream.current());
   while (true) {
     tokenStream.consume();
-    if (tokenStream.current() instanceof parse_css.EOFToken ||
-        tokenStream.current() instanceof parse_css.CloseParenToken) {
+    const current = tokenStream.current().tokenType;
+    if (current === parse_css.TokenType.EOF_TOKEN ||
+        current === parse_css.TokenType.CLOSE_PAREN) {
       tokenList.push(tokenStream.current());
       return;
     } else {
