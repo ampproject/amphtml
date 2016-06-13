@@ -25,6 +25,7 @@ import {
 import {data as regexpsAmpData} from './testdata/regexps.reserialized';
 import {
   data as validCSSAmpData,
+  sig as validCSSAmpSignature,
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
@@ -49,7 +50,6 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   const mockResponse = {
-    // TODO: Use a signed body text here.
     arrayBuffer: function() {
       return Promise.resolve(stringToArrayBuffer(validCSSAmpData));
     },
@@ -57,10 +57,7 @@ describe('amp-a4a', () => {
     headers: {
       get: function(name) {
         const headerValues = {
-          // TODO: Use a real signature, corresponding to the real body
-          // text, above, so we can check that validation behaves
-          // correctly.
-          'X-Google-header': '012345',
+          'X-Google-header': validCSSAmpSignature,
         };
         return headerValues[name];
       },

@@ -20,7 +20,7 @@ import {timer} from '../../src/timer';
 import {
   validateExperimentIds,
   parseExperimentIds,
-} from '../../src/traffic-experiments';
+} from './traffic-experiments';
 
 
 /**

@@ -22,7 +22,7 @@ import {
   validateExperimentIds,
   addExperimentIdToElement,
   EXPERIMENT_ATTRIBUTE,
-} from '../../src/traffic-experiments';
+} from '../../ads/google/traffic-experiments';
 import {dev} from '../../src/log';
 import {
   isExperimentOn,

@@ -22,8 +22,8 @@
  * impacts on click-throughs.
  */
 
-import {isExperimentOn, toggleExperiment} from './experiments';
-import {getMode} from './mode';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {getMode} from '../../src/mode';
 
 /** @typedef {{string: {branches: control: string, experiment: string}} */
 export let ExperimentInfo;
