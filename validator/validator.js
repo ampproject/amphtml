@@ -155,27 +155,6 @@ class LineCol {
 }
 
 /**
- * Some tags have no end tags as per HTML5 spec. These were extracted
- * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {Object<string, number>}
- */
-const TagsWithNoEndTags = function() {
-  // TODO(johannes): Figure out how to prevent the Closure compiler from
-  // renaming entries in a map. I wanted to do it the same way that
-  // amp.htmlparser.HtmlParser.Elements is done (htmlparser.js), but it kept
-  // renaming my keys causing lookup failures. :-(
-  const tags = [
-    'base', 'link', 'meta', 'hr', 'br', 'wbr', 'img', 'embed', 'param',
-    'source', 'track', 'area', 'col', 'input', 'keygen'
-  ];
-  const dict = {};
-  for (const tag of tags) {
-    dict[tag] = 0;
-  }
-  return dict;
-}();
-
-/**
  * The child tag matcher evaluates ChildTagSpec. The constructor
  * provides the enclosing TagSpec for the parent tag so that we can
  * produce error messages mentioning the parent.
@@ -339,11 +318,6 @@ class TagStack {
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    */
   enterTag(tagName, context, result, encounteredAttrs) {
-    if (this.stack_.length > 0 &&
-        TagsWithNoEndTags.hasOwnProperty(
-            this.stack_[this.stack_.length - 1].tagName)) {
-      this.popFromStack_(context, result);
-    }
     let maybeDataAmpReportTestValue = null;
     for (let i = 0; i < encounteredAttrs.length; i += 2) {
       const attrName = encounteredAttrs[i];
@@ -393,26 +367,9 @@ class TagStack {
    * @param {!amp.validator.ValidationResult} result
    */
   exitTag(tagName, context, result) {
-    // We look for tagName from the end. If we can find it, we pop
-    // everything from thereon off the stack.
-    for (let idx = this.stack_.length - 1; idx > 0; idx--) {
-      if (this.stack_[idx].tagName === tagName) {
-        while (this.stack_.length > idx) {
-          this.popFromStack_(context, result);
-        }
-        return;
-      }
-    }
-  }
-
-  /**
-   * This method is called when we're done with the
-   * document. Normally, the parser should actually close the tags,
-   * but just in case it doesn't this easy-enough method will take care of it.
-   */
-  exitRemainingTags(context, result) {
-    while (this.stack_.length > 0) {
-      this.popFromStack_(context, result);
+    const top = this.stack_.pop();
+    if (top.matcher !== null) {
+      top.matcher.exitTag(context, result);
     }
   }
 
@@ -460,18 +417,6 @@ class TagStack {
       }
     }
     return false;
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {!amp.validator.ValidationResult} result
-   * @private
-   */
-  popFromStack_(context, result) {
-    const top = this.stack_.pop();
-    if (top.matcher !== null) {
-      top.matcher.exitTag(context, result);
-    }
   }
 }
 
