@@ -3320,15 +3320,6 @@ amp.validator.ValidationHandler =
      * @private
      */
     this.rules_ = parsedValidatorRulesSingleton;
-
-    /**
-     * Set to true when we encounter a start <style> tag, false when we
-     * encounter
-     * an end <style> tag.
-     * @type {boolean}
-     * @private
-     */
-    this.inCssRegion_ = false;
   }
 
   /**
@@ -3393,9 +3384,6 @@ amp.validator.ValidationHandler =
         this.context_, tagName, attrs, this.validationResult_);
     this.context_.getTagStack().matchChildTagName(
         this.context_, this.validationResult_);
-    if (tagName === 'style') {
-      this.inCssRegion_ = true;
-    }
   }
 
   /**
