@@ -103,7 +103,6 @@ goog.require('amp.validator.ValidationError');
  * @param {number|undefined} col
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!Array<!parse_css.Token>}
- * @export
  */
 parse_css.tokenize = function(strIn, line, col, errors) {
   const tokenizer = new Tokenizer(strIn, line, col, errors);
@@ -1128,20 +1127,15 @@ parse_css.Token = class {
       other.col = this.col;
     }
   }
-
-  /** @return {string} */
-  toSource() { return '' + this; }
-
-  /** @return {!Object} */
-  toJSON() {
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      return {'tokenType': TokenType_NamesById[this.tokenType],
-              'line': this.line, 'col': this.col};
-    } else {
-      return {'tokenType': this.tokenType};
-    }
-  }
 };
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @return {!Object} */
+  parse_css.Token.prototype.toJSON = function() {
+    return {'tokenType': TokenType_NamesById[this.tokenType],
+            'line': this.line, 'col': this.col};
+  };
+}
 
 /**
  * Error tokens carry an error code and parameters, which can be
@@ -1158,23 +1152,22 @@ parse_css.ErrorToken = class extends parse_css.Token {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** @type {!amp.validator.ValidationError.Code} */
       this.code = opt_code || amp.validator.ValidationError.Code.UNKNOWN_CODE;
-      /** @export {!Array<string>} */
+      /** @type {!Array<string>} */
       this.params = opt_params || [];
     }
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.ERROR;
   }
-
-  /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      json['code'] = this.code;
-      json['params'] = this.params;
-    }
-    return json;
-  }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.ErrorToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
+    json['code'] = this.code;
+    json['params'] = this.params;
+    return json;
+  };
+}
 
 /**
  * @type {!parse_css.ErrorToken}
@@ -1187,9 +1180,6 @@ parse_css.WhitespaceToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.WHITESPACE;
   }
-
-  /** @inheritDoc */
-  toSource() { return ' '; }
 };
 
 parse_css.CDOToken = class extends parse_css.Token {
@@ -1198,9 +1188,6 @@ parse_css.CDOToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.CDO;
   }
-
-  /** @inheritDoc */
-  toSource() { return '<!--'; }
 };
 
 parse_css.CDCToken = class extends parse_css.Token {
@@ -1209,9 +1196,6 @@ parse_css.CDCToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.CDC;
   }
-
-  /** @inheritDoc */
-  toSource() { return '-->'; }
 };
 
 parse_css.ColonToken = class extends parse_css.Token {
@@ -1354,9 +1338,6 @@ parse_css.EOFToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.EOF_TOKEN;
   }
-
-  /** @inheritDoc */
-  toSource() { return ''; };
 };
 
 parse_css.DelimToken = class extends parse_css.Token {
@@ -1370,23 +1351,15 @@ parse_css.DelimToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.DELIM;
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.DelimToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() {
-    if (this.value === '\\') {
-      return '\\\n';
-    } else {
-      return this.value;
-    }
-  }
-};
+  };
+}
 
 parse_css.StringValuedToken = class extends parse_css.Token {
   constructor() {
@@ -1400,14 +1373,15 @@ parse_css.StringValuedToken = class extends parse_css.Token {
    * @return {boolean}
    */
   ASCIIMatch(str) { return this.value.toLowerCase() === str.toLowerCase(); }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.StringValuedToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     return json;
-  }
-};
+  };
+}
 
 parse_css.IdentToken = class extends parse_css.StringValuedToken {
   /**
@@ -1420,9 +1394,6 @@ parse_css.IdentToken = class extends parse_css.StringValuedToken {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.IDENT;
   }
-
-  /** @inheritDoc */
-  toSource() { return escapeIdent(this.value); }
 };
 
 parse_css.FunctionToken = class extends parse_css.StringValuedToken {
@@ -1438,9 +1409,6 @@ parse_css.FunctionToken = class extends parse_css.StringValuedToken {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.FUNCTION_TOKEN;
   }
-
-  /** @inheritDoc */
-  toSource() { return escapeIdent(this.value) + '('; }
 };
 
 parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {
@@ -1454,9 +1422,6 @@ parse_css.AtKeywordToken = class extends parse_css.StringValuedToken {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.AT_KEYWORD;
   }
-
-  /** @inheritDoc */
-  toSource() { return '@' + escapeIdent(this.value); }
 };
 
 parse_css.HashToken = class extends parse_css.StringValuedToken {
@@ -1472,24 +1437,16 @@ parse_css.HashToken = class extends parse_css.StringValuedToken {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.HASH;
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.HashToken.prototype.toJSON = function() {
+    const json = parse_css.StringValuedToken.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['type'] = this.type;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() {
-    if (this.type === 'id') {
-      return '#' + escapeIdent(this.value);
-    } else {
-      return '#' + escapeHash(this.value);
-    }
-  }
-};
+  };
+}
 
 parse_css.StringToken = class extends parse_css.StringValuedToken {
   /**
@@ -1515,9 +1472,6 @@ parse_css.URLToken = class extends parse_css.StringValuedToken {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.URL;
   }
-
-  /** @return {string} */
-  toSource() { return 'url("' + escapeString(this.value) + '")'; }
 };
 
 parse_css.NumberToken = class extends parse_css.Token {
@@ -1532,19 +1486,17 @@ parse_css.NumberToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.NUMBER;
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.NumberToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['type'] = this.type;
     json['repr'] = this.repr;
     return json;
-  }
-
-  /** @return {string} */
-  toSource() { return this.repr; }
-};
+  };
+}
 
 parse_css.PercentageToken = class extends parse_css.Token {
   constructor() {
@@ -1556,18 +1508,16 @@ parse_css.PercentageToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.PERCENTAGE;
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.PercentageToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['repr'] = this.repr;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() { return this.repr + '%'; }
-};
+  };
+}
 
 parse_css.DimensionToken = class extends parse_css.Token {
   constructor() {
@@ -1583,109 +1533,15 @@ parse_css.DimensionToken = class extends parse_css.Token {
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.DIMENSION;
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.DimensionToken.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['value'] = this.value;
     json['type'] = this.type;
     json['repr'] = this.repr;
     json['unit'] = this.unit;
     return json;
-  }
-
-  /** @inheritDoc */
-  toSource() {
-    const source = this.repr;
-    let unit = escapeIdent(this.unit);
-    if (unit[0].toLowerCase() === 'e' &&
-        (unit[1] === '-' || digit(unit.charCodeAt(1)))) {
-      // Unit is ambiguous with scinot
-      // Remove the leading "e", replace with escape.
-      unit = '\\65 ' + unit.slice(1, unit.length);
-    }
-    return source + unit;
-  }
-};
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeIdent(string) {
-  string = '' + string;
-  let result = '';
-  const firstcode = string.charCodeAt(0);
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-    if (between(code, 0x1, 0x1f) || code === 0x7f || (i === 0 && digit(code)) ||
-        (i === 1 && digit(code) && firstcode === /* '-' */ 0x2d)) {
-      result += '\\' + code.toString(16) + ' ';
-    } else if (
-        code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
-        digit(code) || letter(code)) {
-      result += string[i];
-    } else {
-      result += '\\' + string[i];
-    }
-  }
-  return result;
-}
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeHash(string) {
-  // Escapes the contents of "unrestricted"-type hash tokens.
-  // Won't preserve the ID-ness of "id"-type hash tokens;
-  // use escapeIdent() for that.
-  string = '' + string;
-  let result = '';
-  const firstcode = string.charCodeAt(0);
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-
-    if (code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
-        digit(code) || letter(code)) {
-      result += string[i];
-    } else {
-      result += '\\' + code.toString(16) + ' ';
-    }
-  }
-  return result;
-}
-
-/**
- * @param {string} string
- * @return {string}
- */
-function escapeString(string) {
-  string = '' + string;
-  let result = '';
-  for (let i = 0; i < string.length; i++) {
-    const code = string.charCodeAt(i);
-
-    // Preprocessor removes this character. Cannot happen.
-    goog.asserts.assert(
-        code !== 0x0,
-        'Internal Error: Invalid character. The input contains U+0000.');
-
-    if (between(code, 0x1, 0x1f) || code === 0x7f) {
-      result += '\\' + code.toString(16) + ' ';
-    } else if (code === /* '"' */ 0x22 || code === /* '\' */ 0x5c) {
-      result += '\\' + string[i];
-    } else {
-      result += string[i];
-    }
-  }
-  return result;
+  };
 }

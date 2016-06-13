@@ -59,7 +59,6 @@ function arrayToJSON(arr) {
  * with a reference to a current position. Consume/Reconsume methods
  * move the current position. tokenAt, current, and next inspect tokens
  * at specific points.
- * @export
  */
 parse_css.TokenStream = class {
   /**
@@ -107,7 +106,6 @@ parse_css.TokenStream = class {
 
   /**
    * Advances the stream by one.
-   * @export
    */
   consume() { this.pos++; }
 
@@ -153,7 +151,6 @@ function createParseErrorTokenAt(positionToken, code, params) {
  * found in atRuleSpec.
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!parse_css.Stylesheet}
- * @export
  */
 parse_css.parseAStylesheet = function(
     tokenList, atRuleSpec, defaultSpec, errors) {
@@ -204,14 +201,6 @@ parse_css.Stylesheet = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['rules'] = arrayToJSON(this.rules);
-    json['eof'] = this.eof.toJSON();
-    return json;
-  }
-
-  /** @inheritDoc */
   accept(visitor) {
     visitor.visitStylesheet(this);
     for (const rule of this.rules) {
@@ -219,6 +208,15 @@ parse_css.Stylesheet = class extends parse_css.Rule {
     }
   }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.Stylesheet.prototype.toJSON = function() {
+    const json = parse_css.Rule.prototype.toJSON.call(this);
+    json['rules'] = arrayToJSON(this.rules);
+    json['eof'] = this.eof.toJSON();
+    return json;
+  };
+}
 
 parse_css.AtRule = class extends parse_css.Rule {
   /**
@@ -239,16 +237,6 @@ parse_css.AtRule = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['name'] = this.name;
-    json['prelude'] = arrayToJSON(this.prelude);
-    json['rules'] = arrayToJSON(this.rules);
-    json['declarations'] = arrayToJSON(this.declarations);
-    return json;
-  }
-
-  /** @inheritDoc */
   accept(visitor) {
     visitor.visitAtRule(this);
     for (const rule of this.rules) {
@@ -259,6 +247,17 @@ parse_css.AtRule = class extends parse_css.Rule {
     }
   }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.AtRule.prototype.toJSON = function() {
+    const json = parse_css.Rule.prototype.toJSON.call(this);
+    json['name'] = this.name;
+    json['prelude'] = arrayToJSON(this.prelude);
+    json['rules'] = arrayToJSON(this.rules);
+    json['declarations'] = arrayToJSON(this.declarations);
+    return json;
+  };
+}
 
 parse_css.QualifiedRule = class extends parse_css.Rule {
   constructor() {
@@ -272,14 +271,6 @@ parse_css.QualifiedRule = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['prelude'] = arrayToJSON(this.prelude);
-    json['declarations'] = arrayToJSON(this.declarations);
-    return json;
-  }
-
-  /** @inheritDoc */
   accept(visitor) {
     visitor.visitQualifiedRule(this);
     for (const declaration of this.declarations) {
@@ -287,6 +278,15 @@ parse_css.QualifiedRule = class extends parse_css.Rule {
     }
   }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.QualifiedRule.prototype.toJSON = function() {
+    const json = parse_css.Rule.prototype.toJSON.call(this);
+    json['prelude'] = arrayToJSON(this.prelude);
+    json['declarations'] = arrayToJSON(this.declarations);
+    return json;
+  };
+}
 
 parse_css.Declaration = class extends parse_css.Rule {
   /**
@@ -305,17 +305,18 @@ parse_css.Declaration = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  accept(visitor) { visitor.visitDeclaration(this); }
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.Declaration.prototype.toJSON = function() {
+    const json = parse_css.Rule.prototype.toJSON.call(this);
     json['name'] = this.name;
     json['important'] = this.important;
     json['value'] = arrayToJSON(this.value);
     return json;
-  }
-
-  /** @inheritDoc */
-  accept(visitor) { visitor.visitDeclaration(this); }
-};
+  };
+}
 
 parse_css.RuleVisitor = class {
   constructor() {}
@@ -815,15 +816,16 @@ parse_css.ParsedCssUrl = class extends parse_css.Token {
      */
     this.atRuleScope = '';
   }
-
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  parse_css.ParsedCssUrl.prototype.toJSON = function() {
+    const json = parse_css.Token.prototype.toJSON.call(this);
     json['utf8Url'] = this.utf8Url;
     json['atRuleScope'] = this.atRuleScope;
     return json;
-  }
-};
+  };
+}
 
 /**
  * Parses a CSS URL token; typically takes the form "url(http://foo)".

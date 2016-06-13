@@ -144,16 +144,17 @@ parse_css.TypeSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  accept(visitor) { visitor.visitTypeSelector(this); }
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.TypeSelector.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
     json['namespacePrefix'] = this.namespacePrefix;
     json['elementName'] = this.elementName;
     return json;
-  }
-
-  /** @inheritDoc */
-  accept(visitor) { visitor.visitTypeSelector(this); }
-};
+  };
+}
 
 /**
  * Helper function for determining whether the provided token is a specific
@@ -229,15 +230,16 @@ parse_css.IdSelector = class extends parse_css.Selector {
   toString() { return '#' + this.value; }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['value'] = this.value;
-    return json;
-  }
-
-  /** @inheritDoc */
   accept(visitor) { visitor.visitIdSelector(this); }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.IdSelector.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
+    json['value'] = this.value;
+    return json;
+  };
+}
 
 /**
  * tokenStream.current() must be the hash token.
@@ -288,18 +290,19 @@ parse_css.AttrSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  accept(visitor) { visitor.visitAttrSelector(this); }
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.AttrSelector.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
     json['namespacePrefix'] = this.namespacePrefix;
     json['attrName'] = this.attrName;
     json['matchOperator'] = this.matchOperator;
     json['value'] = this.value;
     return json;
-  }
-
-  /** @inheritDoc */
-  accept(visitor) { visitor.visitAttrSelector(this); }
-};
+  };
+}
 
 /**
  * Helper for parseAnAttrSelector.
@@ -468,19 +471,20 @@ parse_css.PseudoSelector = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
+  accept(visitor) { visitor.visitPseudoSelector(this); }
+};
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.PseudoSelector.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
     json['isClass'] = this.isClass;
     json['name'] = this.name;
     if (this.func.length !== 0) {
       json['func'] = recursiveArrayToJSON(this.func);
     }
     return json;
-  }
-
-  /** @inheritDoc */
-  accept(visitor) { visitor.visitPseudoSelector(this); }
-};
+  };
+}
 
 /**
  * tokenStream.current() must be the ColonToken. Returns an error if
@@ -548,15 +552,16 @@ parse_css.ClassSelector = class extends parse_css.Selector {
   toString() { return '.' + this.value; }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['value'] = this.value;
-    return json;
-  }
-
-  /** @inheritDoc */
   accept(visitor) { visitor.visitClassSelector(this); }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.ClassSelector.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
+    json['value'] = this.value;
+    return json;
+  };
+}
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
@@ -610,14 +615,6 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['typeSelector'] = this.typeSelector.toJSON();
-    json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
-    return json;
-  }
-
-  /** @inheritDoc */
   forEachChild(lambda) {
     lambda(this.typeSelector);
     for (const other of this.otherSelectors) {
@@ -628,6 +625,15 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   /** @inheritDoc */
   accept(visitor) { visitor.visitSimpleSelectorSequence(this); }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.SimpleSelectorSequence.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
+    json['typeSelector'] = this.typeSelector.toJSON();
+    json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
+    return json;
+  };
+}
 
 /**
  * tokenStream.current must be the first token of the sequence.
@@ -731,15 +737,6 @@ parse_css.Combinator = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['combinatorType'] = this.combinatorType;
-    json['left'] = this.left.toJSON();
-    json['right'] = this.right.toJSON();
-    return json;
-  }
-
-  /** @inheritDoc */
   forEachChild(lambda) {
     lambda(this.left);
     lambda(this.right);
@@ -748,6 +745,16 @@ parse_css.Combinator = class extends parse_css.Selector {
   /** @inheritDoc */
   accept(visitor) { visitor.visitCombinator(this); }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.Combinator.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
+    json['combinatorType'] = this.combinatorType;
+    json['left'] = this.left.toJSON();
+    json['right'] = this.right.toJSON();
+    return json;
+  };
+}
 
 /**
  * The CombinatorType for a given token; helper function used when
@@ -880,13 +887,6 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  toJSON() {
-    const json = super.toJSON();
-    json['elements'] = recursiveArrayToJSON(this.elements);
-    return json;
-  }
-
-  /** @inheritDoc */
   forEachChild(lambda) {
     for (const child of this.elements) {
       lambda(child);
@@ -896,6 +896,14 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
   /** @param {!parse_css.SelectorVisitor} visitor */
   accept(visitor) { visitor.visitSelectorsGroup(this); }
 };
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /** @inheritDoc */
+  parse_css.SelectorsGroup.prototype.toJSON = function() {
+    const json = parse_css.Selector.prototype.toJSON.call(this);
+    json['elements'] = recursiveArrayToJSON(this.elements);
+    return json;
+  };
+}
 
 /**
  * The selectors_group production from
