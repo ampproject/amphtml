@@ -58,7 +58,7 @@ amp.validator.Terminal = class {
    */
   constructor(opt_out) { this.out_ = opt_out || null; }
 
-  /** @param {!string} msg */
+  /** @param {string} msg */
   info(msg) {
     if (this.out_) {
       this.out_.push('I: ' + msg);
@@ -67,7 +67,7 @@ amp.validator.Terminal = class {
     }
   }
 
-  /** @param {!string} msg */
+  /** @param {string} msg */
   warn(msg) {
     if (this.out_) {
       this.out_.push('W: ' + msg);
@@ -78,7 +78,7 @@ amp.validator.Terminal = class {
     }
   }
 
-  /** @param {!string} msg */
+  /** @param {string} msg */
   error(msg) {
     if (this.out_) {
       this.out_.push('E: ' + msg);
@@ -95,7 +95,7 @@ amp.validator.Terminal = class {
  *   errors.
  * @param {string} url
  * @param {!amp.validator.Terminal=} opt_terminal
- * @param {!string=} opt_errorCategoryFilter
+ * @param {string=} opt_errorCategoryFilter
  */
 amp.validator.ValidationResult.prototype.outputToTerminal = function(
     url, opt_terminal, opt_errorCategoryFilter) {
@@ -149,9 +149,9 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
 
 /**
  * Applies the format to render the params in the provided error.
- * @param {!string} format
+ * @param {string} format
  * @param {!amp.validator.ValidationError} error
- * @return {!string}
+ * @return {string}
  */
 function applyFormat(format, error) {
   let message = format;
@@ -166,7 +166,7 @@ function applyFormat(format, error) {
  * Renders the error message for a single error, regardless of whether
  * or not it has an associated format.
  * @param {!amp.validator.ValidationError} error
- * @return {!string}
+ * @return {string}
  * @export
  */
 amp.validator.renderErrorMessage = function(error) {
@@ -185,9 +185,9 @@ amp.validator.renderErrorMessage = function(error) {
 
 /**
  * Renders one line of error output.
- * @param {!string} filenameOrUrl
+ * @param {string} filenameOrUrl
  * @param {!amp.validator.ValidationError} error
- * @return {!string}
+ * @return {string}
  */
 function errorLine(filenameOrUrl, error) {
   const line = error.line || 1;

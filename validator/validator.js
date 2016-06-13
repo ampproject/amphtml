@@ -139,8 +139,8 @@ amp.validator.ValidationResult.prototype.copyFrom = function(other) {
  */
 class LineCol {
   /**
-   * @param {!number} line
-   * @param {!number} col
+   * @param {number} line
+   * @param {number} col
    */
   constructor(line, col) {
     this.line_ = line;
@@ -193,7 +193,7 @@ class ChildTagMatcher {
     this.parentSpec_ = parentSpec;
 
     /**
-     * @type {!number}
+     * @type {number}
      * @private
      */
     this.numChildTagsSeen_ = 0;
@@ -333,7 +333,7 @@ class TagStack {
    * |result| are provided is that entering a tag can close the previous
    * tag, which can trigger validation (e.g., the previous tag may be
    * required to have two child tags).
-   * @param {!string} tagName
+   * @param {string} tagName
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
@@ -388,7 +388,7 @@ class TagStack {
   /**
    * Upon exiting a tag, validation for the current matcher is triggered,
    * e.g. for checking that the tag had some specified number of children.
-   * @param {!string} tagName
+   * @param {string} tagName
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
    */
@@ -418,7 +418,7 @@ class TagStack {
 
   /**
    * The name of the current tag.
-   * @return {!string}
+   * @return {string}
    */
   getCurrent() {
     goog.asserts.assert(this.stack_.length > 0, 'Empty tag stack.');
@@ -438,7 +438,7 @@ class TagStack {
 
   /**
    * The name of the parent of the current tag.
-   * @return {!string}
+   * @return {string}
    */
   getParent() {
     if (this.stack_.length >= 2) {
@@ -449,7 +449,7 @@ class TagStack {
 
   /**
    * Returns true if the current tag has ancestor with the given tag name.
-   * @param {!string} ancestor
+   * @param {string} ancestor
    * @return {boolean}
    */
   hasAncestor(ancestor) {
@@ -882,7 +882,7 @@ class Context {
    * @param {!amp.validator.ValidationError.Severity} severity
    * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
    * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
-   * @param {!Array<!string>} params
+   * @param {!Array<string>} params
    * @param {?string} specUrl a link (URL) to the amphtml spec
    * @param {!amp.validator.ValidationResult} validationResult
    */
@@ -998,8 +998,8 @@ class ParsedUrlSpec {
 
   /**
    * @param {!Context} context
-   * @param {!string} attrName
-   * @param {!string} url
+   * @param {string} attrName
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1026,7 +1026,7 @@ class ParsedUrlSpec {
    * {ParsedUrlSpec.AttrErrorAdapter_|ParsedUrlSpec.StylesheetErrorAdapter_}
    * adapter
    * @param {!Context} context
-   * @param {!string} url
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1077,7 +1077,7 @@ class ParsedUrlSpec {
  */
 ParsedUrlSpec.AttrErrorAdapter_ = class {
   /**
-   * @param {!string} attrName
+   * @param {string} attrName
    */
   constructor(attrName) { this.attrName_ = attrName; }
 
@@ -1096,7 +1096,7 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} url
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1110,7 +1110,7 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} protocol
+   * @param {string} protocol
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1125,7 +1125,7 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} url
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1144,8 +1144,8 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
  */
 ParsedUrlSpec.StylesheetErrorAdapter_ = class {
   /**
-   * @param {!number} line
-   * @param {!number} col
+   * @param {number} line
+   * @param {number} col
    */
   constructor(line, col) {
     /**
@@ -1170,7 +1170,7 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} url
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1184,7 +1184,7 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} protocol
+   * @param {string} protocol
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1199,7 +1199,7 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
-   * @param {!string} url
+   * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1233,7 +1233,7 @@ class ParsedAttrTriggerSpec {
 
     goog.asserts.assert(attrSpec.name != null);
     /**
-     * @type {!string} attrName
+     * @type {string} attrName
      * @private
      */
     this.attrName_ = attrSpec.name;
@@ -1260,7 +1260,7 @@ class ParsedAttrTriggerSpec {
   getIfValueRegex() { return this.ifValueRegex_; }
 
   /**
-   * @return {!string} attrName
+   * @return {string} attrName
    */
   getAttrName() { return this.attrName_; }
 
@@ -1322,7 +1322,7 @@ class ParsedAttrSpec {
       }
     }
     /**
-     * @type {!Array<!string>}
+     * @type {!Array<string>}
      * @private
      */
     this.mandatoryValuePropertyNames_ =
@@ -1410,8 +1410,8 @@ class ParsedAttrSpec {
 
   /**
    * @param {!Context} context
-   * @param {!string} attrName
-   * @param {!string} attrValue
+   * @param {string} attrName
+   * @param {string} attrValue
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
@@ -1474,14 +1474,14 @@ class ParsedAttrSpec {
 
   /**
    * @param {!Context} context
-   * @param {!string} attrName
-   * @param {!string} attrValue
+   * @param {string} attrName
+   * @param {string} attrValue
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    * @private
    */
   validateAttrValueUrl(context, attrName, attrValue, tagSpec, result) {
-    /** @type {!Array<!string>} */
+    /** @type {!Array<string>} */
     let maybeUris = [];
     if (attrName != 'srcset') {
       maybeUris.push(goog.string.trim(attrValue));
@@ -1546,8 +1546,8 @@ class ParsedAttrSpec {
 
   /**
    * @param {!Context} context
-   * @param {!string} attrName
-   * @param {!string} attrValue
+   * @param {string} attrName
+   * @param {string} attrValue
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    * @private
@@ -1862,7 +1862,7 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  * - Tags (identified by their TagSpecName() that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
  * @param {!goog.structs.Set<string>} tagSpecNamesToTrack
- * @return {!boolean}
+ * @return {boolean}
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
   return tag.mandatory || tag.unique ||
@@ -1880,9 +1880,9 @@ function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
  *  dispatch keys for an HTML tag match that of a a TagSpec, we validate that
  *  HTML tag against only this one TagSpec. Otherwise, this TagSpec is not
  *  eligible for validation against this HTML tag.
- * @param {!string} attrName
- * @param {!string} attrValue
- * @param {!string} mandatoryParent may be set to "$NOPARENT"
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {string} mandatoryParent may be set to "$NOPARENT"
  * @returns {string} dispatch key
  */
 function makeDispatchKey(attrName, attrValue, mandatoryParent) {
@@ -1896,10 +1896,10 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
  */
 class ParsedTagSpec {
   /**
-   * @param {!string} templateSpecUrl
+   * @param {string} templateSpecUrl
    * @param {!goog.structs.Map<string, !amp.validator.AttrList>} attrListsByName
    * @param {!goog.structs.Map<string, number>} tagspecIdsByTagSpecName
-   * @param {!boolean} shouldRecordTagspecValidated
+   * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} tagId
    */
@@ -1941,12 +1941,12 @@ class ParsedTagSpec {
      */
     this.mandatoryOneofs_ = [];
     /**
-     * @type {!string}
+     * @type {string}
      * @private
      */
     this.templateSpecUrl_ = templateSpecUrl;
     /**
-     * @type {!boolean}
+     * @type {boolean}
      * @private
      */
     this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
@@ -2053,7 +2053,7 @@ class ParsedTagSpec {
 
   /**
    * Returns true if |value| contains mustache template syntax.
-   * @param {!string} value
+   * @param {string} value
    * @return {boolean}
    */
   static valueHasTemplateSyntax(value) {
@@ -2067,7 +2067,7 @@ class ParsedTagSpec {
 
   /**
    * Returns true if |value| contains a mustache unescaped template syntax.
-   * @param {!string} value
+   * @param {string} value
    * @return {boolean}
    */
   static valueHasUnescapedTemplateSyntax(value) {
@@ -2080,7 +2080,7 @@ class ParsedTagSpec {
 
   /**
    * Returns true if |value| contains a mustache partials template syntax.
-   * @param {!string} value
+   * @param {string} value
    * @return {boolean}
    */
   static valueHasPartialsTemplateSyntax(value) {
@@ -2307,7 +2307,7 @@ class ParsedTagSpec {
    * encountered which is not specified by the validator.protoascii
    * specification.
    * @param {!Context} context
-   * @param {!string} attrName
+   * @param {string} attrName
    * @param {!amp.validator.ValidationResult} result
    */
   validateAttrNotFoundInSpec(context, attrName, result) {
@@ -2356,8 +2356,8 @@ class ParsedTagSpec {
   /**
    * Specific checks for attribute values descending from a template tag.
    * @param {!Context} context
-   * @param {!string} attrName
-   * @param {!string} attrValue
+   * @param {string} attrName
+   * @param {string} attrValue
    * @param {!amp.validator.ValidationResult} result
    */
   validateAttrValueBelowTemplateTag(context, attrName, attrValue, result) {
@@ -2657,7 +2657,7 @@ class TagSpecDispatch {
   constructor() {
     /**
      * TagSpec ids for a specific attribute dispatch key.
-     * @type {!goog.structs.Map<!string, number>}
+     * @type {!goog.structs.Map<string, number>}
      * @private
      */
     this.tagSpecsByDispatch_ = new goog.structs.Map();
@@ -2682,7 +2682,7 @@ class TagSpecDispatch {
 
   /**
    * Registers a new non dispatch key tagspec id.
-   * @param {!number} tagSpecId
+   * @param {number} tagSpecId
    * @public
    */
   registerTagSpec(tagSpecId) { this.allTagSpecs_.push(tagSpecId); }
@@ -2966,7 +2966,7 @@ class ParsedValidatorRules {
       if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
+      /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, string>}
        */
       this.formatByCode_ = new goog.structs.Map();
       for (let i = 0; i < rules.errorFormats.length; ++i) {
@@ -2978,7 +2978,7 @@ class ParsedValidatorRules {
   }
 
   /**
-   * @return {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
+   * @return {!goog.structs.Map<!amp.validator.ValidationError.Code, string>}
    */
   getFormatByCode() { return this.formatByCode_; }
 

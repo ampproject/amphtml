@@ -1090,7 +1090,7 @@ parse_css.TokenType = {
   SELECTORS_GROUP: 45
 };
 
-/** @type {!Array<!string>} */
+/** @type {!Array<string>} */
 const TokenType_NamesById = [
   'UNKNOWN', 'AT_KEYWORD', 'CDC', 'CDO', 'CLOSE_CURLY', 'CLOSE_PAREN',
   'CLOSE_SQUARE', 'COLON', 'COLUMN', 'COMMA', 'DASH_MATCH', 'DELIM',
@@ -1129,7 +1129,7 @@ parse_css.Token = class {
     }
   }
 
-  /** @return {!string} */
+  /** @return {string} */
   toSource() { return '' + this; }
 
   /** @return {!Object} */
@@ -1151,14 +1151,14 @@ parse_css.Token = class {
 parse_css.ErrorToken = class extends parse_css.Token {
   /**
    * @param {amp.validator.ValidationError.Code=} opt_code
-   * @param {Array<!string>=} opt_params
+   * @param {Array<string>=} opt_params
    */
   constructor(opt_code, opt_params) {
     super();
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** @type {!amp.validator.ValidationError.Code} */
       this.code = opt_code || amp.validator.ValidationError.Code.UNKNOWN_CODE;
-      /** @export {!Array<!string>} */
+      /** @export {!Array<string>} */
       this.params = opt_params || [];
     }
     /** @type {parse_css.TokenType} */
@@ -1240,8 +1240,8 @@ parse_css.CommaToken = class extends parse_css.Token {
 
 parse_css.GroupingToken = class extends parse_css.Token {
   /**
-   * @param {!string} value
-   * @param {!string} mirror
+   * @param {string} value
+   * @param {string} mirror
    */
   constructor(value, mirror) {
     super();
@@ -1523,6 +1523,7 @@ parse_css.URLToken = class extends parse_css.StringValuedToken {
 parse_css.NumberToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.type = 'integer';
@@ -1548,6 +1549,7 @@ parse_css.NumberToken = class extends parse_css.Token {
 parse_css.PercentageToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.repr = '';
@@ -1570,6 +1572,7 @@ parse_css.PercentageToken = class extends parse_css.Token {
 parse_css.DimensionToken = class extends parse_css.Token {
   constructor() {
     super();
+    /** @type {?number} */
     this.value = null;
     /** @type {string} */
     this.type = 'integer';

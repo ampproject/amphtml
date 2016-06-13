@@ -198,7 +198,7 @@ class LoggingHandlerWithLocation extends
     super();
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
-    /** @type {!Array<!string>} */
+    /** @type {!Array<string>} */
     this.log = [];
   }
 

@@ -85,7 +85,7 @@ amp.domwalker.NodeProcessingState_ = class {
 /**
  * Convert a dom namedNodeMap to an attribute/value list.
  * @param {NamedNodeMap} namedNodeMap
- * @return {Array<!string>} attributes as alternating key/value pairs
+ * @return {Array<string>} attributes as alternating key/value pairs
  */
 function attrList(namedNodeMap) {
   var ret = [];

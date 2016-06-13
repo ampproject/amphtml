@@ -75,7 +75,7 @@ parse_css.TokenStream = class {
 
     /** @type {!Array<!parse_css.Token>} */
     this.tokens = tokens;
-    /** @type {!number} */
+    /** @type {number} */
     this.pos = -1;
   }
 
@@ -131,7 +131,7 @@ function createEOFTokenAt(positionToken) {
  * Creates a ParseError token at the same line/col as the given token.
  * @param {!parse_css.Token} positionToken
  * @param {!amp.validator.ValidationError.Code} code
- * @param {!Array<!string>} params
+ * @param {!Array<string>} params
  * @return {!parse_css.ErrorToken}
  */
 function createParseErrorTokenAt(positionToken, code, params) {
@@ -805,13 +805,13 @@ parse_css.ParsedCssUrl = class extends parse_css.Token {
     /**
      * The decoded URL. This string will not contain CSS string escapes,
      * quotes, or similar. Encoding is utf8.
-     * @type {!string}
+     * @type {string}
      */
     this.utf8Url = '';
     /**
      * A rule scope, in case the url was encountered within an at-rule.
      * If not within an at-rule, this string is empty.
-     * @type {!string}
+     * @type {string}
      */
     this.atRuleScope = '';
   }
@@ -830,7 +830,7 @@ parse_css.ParsedCssUrl = class extends parse_css.Token {
  * Preconditions: tokens[token_idx] is a URL token
  *                and token_idx + 1 is in range.
  * @param {!Array<!parse_css.Token>} tokens
- * @param {!number} tokenIdx
+ * @param {number} tokenIdx
  * @param {!parse_css.ParsedCssUrl} parsed
  */
 function parseUrlToken(tokens, tokenIdx, parsed) {
@@ -848,9 +848,9 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
  * Preconditions: tokens[token_idx] is a URL token
  *                and tokens[token_idx]->StringValue() == "url"
  * @param {!Array<!parse_css.Token>} tokens
- * @param {!number} tokenIdx
+ * @param {number} tokenIdx
  * @param {!parse_css.ParsedCssUrl} parsed
- * @return {!number}
+ * @return {number}
  */
 function parseUrlFunction(tokens, tokenIdx, parsed) {
   const token = tokens[tokenIdx];
@@ -912,7 +912,7 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
     this.parsedUrls = parsedUrls;
     /** @type {!Array<!parse_css.ErrorToken>} */
     this.errors = errors;
-    /** @type {!string} */
+    /** @type {string} */
     this.atRuleScope = '';
   }
 

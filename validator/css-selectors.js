@@ -264,12 +264,12 @@ parse_css.parseAnIdSelector = function(tokenStream) {
 parse_css.AttrSelector = class extends parse_css.Selector {
   /**
    * @param {string?} namespacePrefix
-   * @param {!string} attrName
-   * @param {!string} matchOperator is either the string
+   * @param {string} attrName
+   * @param {string} matchOperator is either the string
    * representation of the match operator (e.g., '=' or '~=') or '',
    * in which case the attribute selector is a check for the presence
    * of the attribute.
-   * @param {!string} value is the value to apply the match operator
+   * @param {string} value is the value to apply the match operator
    * against, or if matchOperator is '', then this must be empty as
    * well.
    */
@@ -277,7 +277,7 @@ parse_css.AttrSelector = class extends parse_css.Selector {
     super();
     /** @type {string?} */
     this.namespacePrefix = namespacePrefix;
-    /** @type {!string} */
+    /** @type {string} */
     this.attrName = attrName;
     /** @type {string?} */
     this.matchOperator = matchOperator;
