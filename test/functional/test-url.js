@@ -74,6 +74,32 @@ describe('parseUrl', () => {
       origin: 'https://foo.com:123',
     });
   });
+  it('should omit HTTP default port', () => {
+    compareParse('http://foo.com:80/abc?123#foo', {
+      href: 'http://foo.com/abc?123#foo',
+      protocol: 'http:',
+      host: 'foo.com',
+      hostname: 'foo.com',
+      port: '',
+      pathname: '/abc',
+      search: '?123',
+      hash: '#foo',
+      origin: 'http://foo.com',
+    });
+  });
+  it('should omit HTTPS default port', () => {
+    compareParse('https://foo.com:443/abc?123#foo', {
+      href: 'https://foo.com/abc?123#foo',
+      protocol: 'https:',
+      host: 'foo.com',
+      hostname: 'foo.com',
+      port: '',
+      pathname: '/abc',
+      search: '?123',
+      hash: '#foo',
+      origin: 'https://foo.com',
+    });
+  });
   it('should support http', () => {
     compareParse('http://foo.com:123/abc?123#foo', {
       href: 'http://foo.com:123/abc?123#foo',
@@ -126,7 +152,6 @@ describe('parseUrl', () => {
       origin: 'http://foo.com:123',
     });
   });
-
   it('should parse origin https://twitter.com/path#abc', () => {
     expect(parseUrl('https://twitter.com/path#abc').origin)
         .to.equal('https://twitter.com');

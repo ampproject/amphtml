@@ -57,6 +57,14 @@ export function parseUrl(url) {
     return fromCache;
   }
   a.href = url;
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
+  // and it passes tests in all browsers.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
   const info = {
     href: a.href,
     protocol: a.protocol,
@@ -67,6 +75,21 @@ export function parseUrl(url) {
     search: a.search,
     hash: a.hash,
   };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if ((info.protocol == 'http:' && info.port == 80)
+      || (info.protocol == 'https:' && info.port == 443)) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
   if (a.origin && a.origin != 'null') {
