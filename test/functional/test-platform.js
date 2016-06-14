@@ -50,6 +50,12 @@ describe('Platform', () => {
     expect(platform.getMajorVersion()).to.equal(majorVersion);
   }
 
+  it('should tolerate empty or null', () => {
+    testUserAgent(null);
+    testUserAgent('');
+    testUserAgent(' ');
+  });
+
   it('iPhone 6 Plus v8', () => {
     isIos = true;
     isSafari = true;
@@ -67,6 +73,16 @@ describe('Platform', () => {
     majorVersion = 9;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
         ' AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0' +
+        ' Mobile/13E230 Safari/601.1');
+  });
+
+  it('iPhone 6 Plus no version', () => {
+    isIos = true;
+    isSafari = true;
+    isWebKit = true;
+    majorVersion = 0;
+    testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 9_3 like Mac OS X)' +
+        ' AppleWebKit/601.1.46 (KHTML, like Gecko)' +
         ' Mobile/13E230 Safari/601.1');
   });
 
