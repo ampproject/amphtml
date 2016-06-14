@@ -115,7 +115,8 @@ export class Platform {
 
   /**
    * @param {!RegExp} expr
-   * @param {number} index
+   * @param {number} index The index in the result that's interpreted as the
+   *   major version (integer).
    * @return {number}
    */
   evalMajorVersion_(expr, index) {
