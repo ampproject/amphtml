@@ -89,6 +89,45 @@ export class Platform {
   isWebKit() {
     return /WebKit/i.test(this.navigator.userAgent) && !this.isEdge();
   }
+
+  /**
+   * Returns the major version of the browser.
+   * @return {number}
+   */
+  getMajorVersion() {
+    if (this.isSafari()) {
+      return this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+    }
+    if (this.isChrome()) {
+      return this.evalMajorVersion_(/\Chrome\/(\d+)/, 1);
+    }
+    if (this.isFirefox()) {
+      return this.evalMajorVersion_(/\Firefox\/(\d+)/, 1);
+    }
+    if (this.isIe()) {
+      return this.evalMajorVersion_(/\MSIE\s(\d+)/, 1);
+    }
+    if (this.isEdge()) {
+      return this.evalMajorVersion_(/\Edge\/(\d+)/, 1);
+    }
+    return 0;
+  }
+
+  /**
+   * @param {!RegExp} expr
+   * @param {number} index
+   * @return {number}
+   */
+  evalMajorVersion_(expr, index) {
+    if (!this.navigator.userAgent) {
+      return 0;
+    }
+    const res = this.navigator.userAgent.match(expr);
+    if (!res && index >= res.length) {
+      return 0;
+    }
+    return parseInt(res[index], 10);
+  }
 };
 
 
