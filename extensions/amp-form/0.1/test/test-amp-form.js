@@ -88,7 +88,7 @@ describe('amp-form', () => {
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
       // FormData.get and other methods are not supported by old browsers.
-      for (const entry of config.body.entries()) {
+      for (const entry of config.body) {
         if (entry[0] == 'name') {
           expect(entry[1]).to.be.equal('John Miller');
         }

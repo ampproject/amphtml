@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -86,7 +86,10 @@ export class AmpForm {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
-          .catch(() => this.setState_(FormState_.SUBMIT_ERROR));
+          .catch(error => {
+            this.setState_(FormState_.SUBMIT_ERROR);
+            rethrowAsync('Form submission failed:', error);
+          });
     }
   }
 
