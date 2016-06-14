@@ -34,9 +34,12 @@ export function adgeneration(global, data) {
       'id=' + encodeURIComponent(data.id) +
       '&width=' + encodeURIComponent(data.width) +
       '&height=' + encodeURIComponent(data.height) +
-      '&adType=' + (data.adtype ? encodeURIComponent(data.adtype.toUpperCase()) : 'FREE') +
-      '&async=' + (data.async ? encodeURIComponent(data.async.toLowerCase()) : 'false') +
-      '&displayid=' + (data.displayid ? encodeURIComponent(data.displayid) : '1') +
+      '&adType=' +
+      (data.adtype ? encodeURIComponent(data.adtype.toUpperCase()) : 'FREE') +
+      '&async=' +
+      (data.async ? encodeURIComponent(data.async.toLowerCase()) : 'false') +
+      '&displayid=' +
+      (data.displayid ? encodeURIComponent(data.displayid) : '1') +
       '&tagver=2.0.0' +
       (data.targetid ? '&targetID=' + encodeURIComponent(data.targetid) : '') +
       (option ? '&' + option : '');
