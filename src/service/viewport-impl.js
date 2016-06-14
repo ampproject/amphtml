@@ -16,8 +16,8 @@
 
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
-import {checkAndFix as checkAndFixIosScrollfreezeBug}
-    from './ios-scrollfreeze-bug';
+import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+    './ios-scrollfreeze-bug';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
