@@ -852,6 +852,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(binding.getScrollTop()).to.equal(17);
   });
 
+  it('should calculate scrollTop from scrollpos element with padding', () => {
+    bodyChildren[0].getBoundingClientRect = () => {
+      return {top: 0, left: -11};
+    };
+    binding.updatePaddingTop(10);
+    binding.onScrolled_();
+    // scrollTop = - BCR.top + paddingTop
+    expect(binding.getScrollTop()).to.equal(10);
+  });
+
   it('should calculate scrollHeight from scrollpos/endpos elements', () => {
     bodyChildren[0].getBoundingClientRect = () => {
       return {top: -17, left: -11};
@@ -860,14 +870,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       return {top: 100, left: -11};
     };
     expect(binding.getScrollHeight()).to.equal(117);
-  });
-
-  it('should update scroll position via moving element', () => {
-    const moveEl = bodyChildren[1];
-    binding.setScrollTop(17);
-    expect(getStyle(moveEl, 'transform')).to.equal('translateY(17px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
-    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
   it('should offset client rect for layout', () => {
@@ -889,8 +891,18 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should set scroll position via moving element', () => {
     const moveEl = bodyChildren[1];
-    binding.setScrollPos_(10);
+    binding.setScrollTop(10);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+  });
+
+  it('should set scroll position via moving element with padding', () => {
+    binding.updatePaddingTop(19);
+    const moveEl = bodyChildren[1];
+    binding.setScrollTop(10);
+    // transform = scrollTop - paddingTop
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
@@ -902,6 +914,20 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
+  it('should adjust scroll position when scrolled to 0 w/padding', () => {
+    binding.updatePaddingTop(10);
+    const posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
+    const moveEl = bodyChildren[1];
+    const event = {preventDefault: sandbox.spy()};
+    binding.adjustScrollPos_(event);
+    // transform = 1 - updatePadding
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
     expect(event.preventDefault.callCount).to.equal(1);
