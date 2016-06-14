@@ -55,8 +55,8 @@ describe('SlideScroll', () => {
       const ampSlideScroll = dummyDiv.children[0];
       return iframe.addElement(ampSlideScroll).then(() => {
         return Promise.resolve({
-          iframe: iframe,
-          ampSlideScroll: ampSlideScroll,
+          iframe,
+          ampSlideScroll,
         });
       });
     });
@@ -86,27 +86,27 @@ describe('SlideScroll', () => {
       const hideRestOfTheSlidesSpy = sandbox.spy(impl, 'hideRestOfTheSlides_');
       const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
 
-      impl.showSlides_(-1);
+      impl.showSlide_(-1);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
 
-      impl.showSlides_(5);
+      impl.showSlide_(5);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
-      impl.showSlides_(impl.slideIndex_);
+      impl.showSlide_(impl.slideIndex_);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
 
-      impl.showSlides_(1);
+      impl.showSlide_(1);
 
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
@@ -126,7 +126,7 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(1);
       expect(setControlsStateSpy.callCount).to.equal(1);
 
-      impl.showSlides_(0);
+      impl.showSlide_(0);
 
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[1], false);
@@ -145,7 +145,7 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(2);
       expect(setControlsStateSpy.callCount).to.equal(2);
 
-      impl.showSlides_(4);
+      impl.showSlide_(4);
 
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
@@ -170,34 +170,36 @@ describe('SlideScroll', () => {
       const ampSlideScroll = obj.ampSlideScroll;
       const impl = ampSlideScroll.implementation_;
       const schedulePauseSpy = sandbox.spy(impl, 'schedulePause');
+      const hideRestOfTheSlidesSpy = sandbox.spy(impl, 'hideRestOfTheSlides_');
 
-      impl.hideRestOfTheSlides_(1);
+      impl.showSlide_(1);
 
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
       expect(impl.slideWrappers_[3].hasAttribute('show')).to.be.false;
       expect(impl.slideWrappers_[4].hasAttribute('show')).to.be.false;
-      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
-      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
-      expect(schedulePauseSpy.callCount).to.equal(2);
+      expect(schedulePauseSpy).to.not.have.been.called;
+      expect(schedulePauseSpy.callCount).to.equal(0);
 
-      impl.hideRestOfTheSlides_(0);
+      impl.showSlide_(0);
+
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
 
       expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.false;
       expect(impl.slideWrappers_[3].hasAttribute('show')).to.be.false;
       expect(impl.slideWrappers_[4].hasAttribute('show')).to.be.false;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
-      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
-      expect(schedulePauseSpy.callCount).to.equal(5);
+      expect(schedulePauseSpy.callCount).to.equal(1);
 
-      impl.hideRestOfTheSlides_(4);
+      impl.showSlide_(4);
+
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
 
       expect(impl.slideWrappers_[0].hasAttribute('show')).to.be.false;
       expect(impl.slideWrappers_[1].hasAttribute('show')).to.be.false;
       expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.false;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
-      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-      expect(schedulePauseSpy.callCount).to.equal(8);
+      expect(schedulePauseSpy.callCount).to.equal(3);
     });
   });
 
@@ -206,19 +208,19 @@ describe('SlideScroll', () => {
       const ampSlideScroll = obj.ampSlideScroll;
       const impl = ampSlideScroll.implementation_;
 
-      impl.showSlides_(1);
+      impl.showSlide_(1);
       expect(impl.hasNext()).to.be.true;
       expect(impl.hasPrev()).to.be.true;
       expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
 
-      impl.showSlides_(0);
+      impl.showSlide_(0);
       expect(impl.hasNext()).to.be.true;
       expect(impl.hasPrev()).to.be.false;
       expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
       expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.true;
 
-      impl.showSlides_(4);
+      impl.showSlide_(4);
       expect(impl.hasNext()).to.be.false;
       expect(impl.hasPrev()).to.be.true;
       expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.true;

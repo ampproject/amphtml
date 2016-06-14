@@ -16,12 +16,6 @@
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 
-/** @const */
-const DIR_FORWARD = 1;
-
-/** @const */
-const DIR_REVERSE = -1;
-
 
 export class AmpSlideScroll extends BaseCarousel {
   /** @override */
@@ -76,7 +70,7 @@ export class AmpSlideScroll extends BaseCarousel {
   layoutCallback() {
     if (this.slideIndex_ == null) {
       return this.mutateElement(() => {
-        this.showSlides_(0);
+        this.showSlide_(0);
       }, this.slidesContainer_);
     }
     return Promise.resolve();
@@ -106,10 +100,10 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   goCallback(dir, unusedAnimate) {
     if (this.slideIndex_ != null) {
-      if ((dir == DIR_FORWARD && this.hasNext()) ||
-          (dir == DIR_REVERSE && this.hasPrev())) {
+      if ((dir == 1 && this.hasNext()) ||
+          (dir == -1 && this.hasPrev())) {
         this.mutateElement(() => {
-          this.showSlides_(this.slideIndex_ + dir);
+          this.showSlide_(this.slideIndex_ + dir);
         }, this.slidesContainer_);
       }
     }
@@ -121,7 +115,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * @param {number} newindex Index of the slide to be displayed.
    * @private
    */
-  showSlides_(newindex) {
+  showSlide_(newindex) {
     const noOfSlides = this.noOfSlides_;
     if (newindex < 0 ||
         newindex >= this.noOfSlides_ ||
@@ -166,8 +160,10 @@ export class AmpSlideScroll extends BaseCarousel {
     for (let i = 0; i < this.noOfSlides_; i++) {
       if (i != index && i != index - 1 && i != index + 1 &&
           this.slideWrappers_[i]) {
-        this.slideWrappers_[i].removeAttribute('show');
-        this.schedulePause(this.slides_[i]);
+        if (this.slideWrappers_[i].hasAttribute('show')) {
+          this.slideWrappers_[i].removeAttribute('show');
+          this.schedulePause(this.slides_[i]);
+        }
       }
     }
   }

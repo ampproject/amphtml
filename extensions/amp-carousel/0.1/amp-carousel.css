@@ -80,6 +80,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-slides-container {
   height: 100% !important;
   overflow-x: auto !important;
+  overflow-y: hidden !important;
   position: relative;
   white-space: nowrap;
   width: 100% !important;
