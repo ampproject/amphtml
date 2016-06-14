@@ -16,6 +16,8 @@
 
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
+import {checkAndFix as checkAndFixIosScrollfreezeBug}
+    from './ios-scrollfreeze-bug';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
@@ -937,7 +939,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
 
-    // XXX
+    // Correct iOS Safari scroll freezing issues if applicable.
+    checkAndFixIosScrollfreezeBug(this.win);
   }
 
   /** @override */
