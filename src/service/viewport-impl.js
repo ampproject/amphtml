@@ -521,8 +521,11 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = timer.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => this.vsync_.measure(
-          this.throttledScroll_.bind(this, now, newScrollTop)), 36);
+      timer.delay(() => {
+        this.vsync_.measure(() => {
+          this.throttledScroll_(now, newScrollTop);
+        });
+      }, 36);
     }
     this.scrollObservable_.fire();
   }
