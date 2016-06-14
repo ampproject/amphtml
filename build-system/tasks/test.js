@@ -16,7 +16,7 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
-var karma = require('karma').server;
+var Karma = require('karma').Server;
 var config = require('../config');
 var karmaConfig = config.karma;
 var extend = require('util')._extend;
@@ -104,7 +104,8 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
     };
   }
 
-  karma.start(c, done);
+
+  new Karma(c, done).start();
 }, {
   options: {
     'verbose': '  With logging enabled',

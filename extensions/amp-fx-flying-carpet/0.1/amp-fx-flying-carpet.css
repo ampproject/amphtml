@@ -44,8 +44,6 @@ amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip {
 amp-fx-flying-carpet > .-amp-fx-flying-carpet-clip > .-amp-fx-flying-carpet-container {
   position: fixed !important;
   top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
   /*
    * Included to force slow webkit browsers (Android) into rendering the
    * container using the GPU.

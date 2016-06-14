@@ -98,6 +98,26 @@ describe('amp-fx-flying-carpet', () => {
     });
   });
 
+  it('should sync width of fixed container', () => {
+    return getAmpFlyingCarpet().then(flyingCarpet => {
+      const impl = flyingCarpet.implementation_;
+      const container = flyingCarpet.firstChild.firstChild;
+      let width = 10;
+
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.getLayoutWidth = () => width;
+
+      impl.onLayoutMeasure();
+      expect(container.style.width).to.equal(width + 'px');
+
+      width++;
+      impl.onLayoutMeasure();
+      expect(container.style.width).to.equal(width + 'px');
+    });
+  });
+
   it('should not render in the first viewport', () => {
     return getAmpFlyingCarpet(null, '99vh').then(() => {
       throw new Error('should never reach this');

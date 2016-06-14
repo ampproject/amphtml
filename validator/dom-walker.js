@@ -85,7 +85,7 @@ amp.domwalker.NodeProcessingState_ = class {
 /**
  * Convert a dom namedNodeMap to an attribute/value list.
  * @param {NamedNodeMap} namedNodeMap
- * @return {Array<!string>} attributes as alternating key/value pairs
+ * @return {Array<string>} attributes as alternating key/value pairs
  */
 function attrList(namedNodeMap) {
   var ret = [];
@@ -97,14 +97,10 @@ function attrList(namedNodeMap) {
 }
 
 /**
- * Condition evaluates if the given node name requires cdata validation.
- * @param {string} nodeName
- * @return {boolean}
+ * Set of element names requiring cdata validation.
+ * @type {Object<string,number>}
  */
-function cdataTagsToValidate(nodeName) {
-  const cdataTags = {'script': 0, 'style': 0};
-  return cdataTags.hasOwnProperty(nodeName);
-}
+const CdataTagsToValidate = {'script': 0, 'style': 0};
 
 /**
  * @enum {number}
@@ -172,7 +168,7 @@ amp.domwalker.DomWalker = class {
           amp.domwalker.HandlerCalls.START_TAG, tagName,
           attrList(nextChild.node().attributes)
         ]);
-        if (cdataTagsToValidate(tagName)) {
+        if (CdataTagsToValidate.hasOwnProperty(tagName)) {
           calls.push(
               [amp.domwalker.HandlerCalls.CDATA, nextChild.node().textContent]);
         }
@@ -209,3 +205,13 @@ amp.domwalker.DomWalker = class {
     handler.endDoc();
   }
 };
+
+/**
+ * This function gets eliminated by closure compiler. It's purpose in life
+ * is to work around a bug wherein the compiler renames the object keys
+ * for objects never accessed using an array ([]) operator. We need the keys
+ * to remain unchanged for these objects.
+ */
+function unusedDomWalker() {
+  console./*OK*/log(CdataTagsToValidate['']);
+}

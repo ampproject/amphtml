@@ -23,8 +23,8 @@ goog.require('amp.validator.validateString');
  * Returns the absolute path for a given test file, that is, a file
  * underneath a testdata directory. E.g., 'foo/bar/testdata/baz.html' =>
  * 'baz.html'.
- * @param {!string} testFile
- * @return {!string}
+ * @param {string} testFile
+ * @return {string}
  */
 function absolutePathFor(testFile) {
   for (const dir of process.env['TESTDATA_ROOTS'].split(':')) {
@@ -38,7 +38,7 @@ function absolutePathFor(testFile) {
 
 /**
  * @param {string} dir
- * @return {!Array<!string>}
+ * @return {!Array<string>}
  */
 function readdir(dir) {
   const files = fs.readdirSync(dir);
@@ -63,7 +63,7 @@ function isdir(dir) {
  * both for feature_tests/*.html and for tests in extension directories.
  * E.g.: extensions/amp-accordion/0.1/test/*.html and
  *       testdata/feature_tests/amp_accordion.html.
- * @return {!Array<!string>}
+ * @return {!Array<string>}
  */
 function findHtmlFilesRelativeToTestdata() {
   const testSubdirs = [];
@@ -77,7 +77,7 @@ function findHtmlFilesRelativeToTestdata() {
       }
     } else {
       for (const subdir of readdir(root)) {
-        testSubdirs.push({root, subdir});
+        testSubdirs.push({root: root, subdir: subdir});
       }
     }
   }
@@ -98,11 +98,11 @@ function findHtmlFilesRelativeToTestdata() {
  * @constructor
  */
 const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
-  /** @type {!string} */
+  /** @type {string} */
   this.name = ampHtmlFile;
-  /** @type {!string} */
+  /** @type {string} */
   this.ampHtmlFile = ampHtmlFile;
-  /** @type {!string} */
+  /** @type {string} */
   this.ampUrl = opt_ampUrl || ampHtmlFile;
   /**
    * This field can be null, indicating that the expectedOutput did not
@@ -111,10 +111,10 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
    */
   this.expectedOutputFile = path.join(
       path.dirname(ampHtmlFile), path.basename(ampHtmlFile, '.html') + '.out');
-  /** @type {!string} */
+  /** @type {string} */
   this.ampHtmlFileContents =
       fs.readFileSync(absolutePathFor(this.ampHtmlFile), 'utf8');
-  /** @type {!string} */
+  /** @type {string} */
   this.expectedOutput =
       fs.readFileSync(absolutePathFor(this.expectedOutputFile), 'utf8').trim();
 };

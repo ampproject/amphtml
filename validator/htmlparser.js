@@ -40,6 +40,238 @@ goog.require('amp.htmlparser.DocLocator');
 goog.require('amp.htmlparser.HtmlSaxHandler');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
+
+/**
+ * Some tags have no end tags as per HTML5 spec. These were extracted
+ * from the single page spec by looking for "no end tag" with CTRL+F.
+ * @type {Object<string, ?>}
+ * @private
+ */
+const ElementsWithNoEndElements = {
+  'base': 0,
+  'link': 0,
+  'meta': 0,
+  'hr': 0,
+  'br': 0,
+  'wbr': 0,
+  'img': 0,
+  'embed': 0,
+  'param': 0,
+  'source': 0,
+  'track': 0,
+  'area': 0,
+  'col': 0,
+  'input': 0,
+  'keygen': 0,
+};
+
+/**
+ * Set of HTML tags which should never trigger an implied open of a <head>
+ * or <body> element.
+ * @type {Object<string,?>}
+ * @private
+ */
+const HtmlStructureElements = {
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  '!doctype': 0,
+  'html': 0,
+  'head': 0,
+  'body': 0,
+};
+
+/**
+* The set of HTML tags which are legal in the HTML document <head> and
+* the 'head' tag itself.
+* @type {Object<string,?>}
+* @private
+*/
+const HeadElements = {
+  'head': 0,
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  'title': 0,
+  'base': 0,
+  'link': 0,
+  'meta': 0,
+  'style': 0,
+  // Also legal in the document <head>, though not per spec.
+  'noscript': 0,
+  'script': 0,
+};
+
+/**
+ * @enum {number}
+ */
+const TagRegion = {
+  PRE_HEAD: 0,
+  IN_HEAD: 1,
+  PRE_BODY: 2,  // After closing head tag, but before open body tag.
+  IN_BODY: 3,
+  // We don't track the region after the closing body tag.
+};
+
+/**
+ * This abstraction keeps track of which tags have been opened / closed as we
+ * traverse the tags in the document. Closing tags is tricky:
+ * - Some tags have no end tag per spec. For example, there is no </img> tag per
+ *   spec. Since we are making startTag/endTag calls, we manufacture endTag
+ *   calls for these immediately after the startTag.
+ * - We assume all end tags are optional and we pop tags off our stack as we
+ *   encounter parent closing tags. This part differs slightly from the behavior
+ *   per spec: instead of closing an <option> tag when a following <option> tag
+ *   is seen, we close it when the parent closing tag (in practice <select>) is
+ *   encountered
+ * @private
+ */
+class TagNameStack {
+  /** Creates an empty instance.
+   * @param {amp.htmlparser.HtmlSaxHandler|
+   *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+   *         HtmlSaxHandler that will receive the events.
+   */
+  constructor(handler) {
+    /**
+     * The current tag name and its parents.
+     * @type {!Array<string>}
+     * @private
+     */
+    this.stack_ = [];
+
+    /**
+     * The current tag name and its parents.
+     * @type {amp.htmlparser.HtmlSaxHandler|
+     *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+     *         HtmlSaxHandler that will receive the events.
+     * @private
+     */
+    this.handler_ = handler;
+
+    /**
+     * @type {number}
+     * @private
+     */
+    this.region_ = TagRegion.PRE_HEAD;
+
+    /**
+     * Tracks when the start <head> tag has been encountered or manufactured.
+     * @type {boolean}
+     * @private
+     */
+    this.isHeadStarted_ = false;
+
+    /**
+     * Tracks when the start <body> tag has been encountered or manufactured.
+     * @type {boolean}
+     * @private
+     */
+    this.isBodyStarted_ = false;
+  }
+
+  /**
+   * Enter a tag, opening a scope for child tags. Entering a tag can close the
+   * previous tag or enter other tags (such as opening a <body> tag when
+   * encountering a tag not allowed outside the body.
+   * @param {!string} tagName
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   */
+  startTag(tagName, encounteredAttrs) {
+    // This section deals with manufacturing <head>, </head>, and <body> tags
+    // if the document has left them out or placed them in the wrong location.
+    switch (this.region_) {
+      case TagRegion.PRE_HEAD:
+        if (tagName === 'head') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tagName === 'body') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tagName)) {
+          if (HeadElements.hasOwnProperty(tagName)) {
+            this.startTag('head', []);
+          } else {
+            this.startTag('body', []);
+          }
+        }
+        break;
+      case TagRegion.IN_HEAD:
+        if (!HeadElements.hasOwnProperty(tagName)) {
+          this.endTag('head');
+          if (tagName !== 'body') this.startTag('body', []);
+        }
+        break;
+      case TagRegion.PRE_BODY:
+        if (tagName !== 'body') {
+          this.startTag('body', []);
+        } else {
+          this.region_ = TagRegion.IN_BODY;
+        }
+        break;
+      case TagRegion.IN_BODY:
+        if (tagName === 'body') {
+          // If we've manufactured a body, then ignore the later body.
+          return;
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (this.handler_.startTag) {
+      this.handler_.startTag(tagName, encounteredAttrs);
+    }
+    if (ElementsWithNoEndElements.hasOwnProperty(tagName)) {
+      if (this.handler_.endTag) {
+        this.handler_.endTag(tagName);
+      }
+    } else {
+      this.stack_.push(tagName);
+    }
+  }
+
+  /**
+   * Upon exiting a tag, validation for the current matcher is triggered,
+   * e.g. for checking that the tag had some specified number of children.
+   * @param {!string} tagName
+   */
+  endTag(tagName) {
+    if (this.region_ == TagRegion.IN_HEAD && tagName === 'head')
+      this.region_ = TagRegion.PRE_BODY;
+
+    // We ignore close body tags (</body) and instead insert them when their
+    // outer scope is closed (/html). This is closer to how a browser parser
+    // works. The idea here is if other tags are found after the <body>,
+    // (ex: <div>) which are only allowed in the <body>, we will effectively
+    // move them into the body section.
+    if (tagName === 'body') return;
+
+    // We look for tagName from the end. If we can find it, we pop
+    // everything from thereon off the stack. If we can't find it,
+    // we don't bother with closing the tag, since it doesn't have
+    // a matching open tag, though in practice the HtmlParser class
+    // will have already manufactured a start tag.
+    for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
+      if (this.stack_[idx] === tagName) {
+        while (this.stack_.length > idx) {
+          if (this.handler_.endTag) {
+            this.handler_.endTag(this.stack_.pop());
+          }
+        }
+        return;
+      }
+    }
+  }
+
+  /**
+   * This method is called when we're done with the
+   * document. Normally, the parser should actually close the tags,
+   * but just in case it doesn't this easy-enough method will take care of it.
+   */
+  exitRemainingTags() {
+    while (this.stack_.length > 0) {
+      if (this.handler_.endTag) {
+        this.handler_.endTag(this.stack_.pop());
+      }
+    }
+  }
+}
+
 /**
  * An Html parser: {@code parse} takes a string and calls methods on
  * {@code amp.htmlparser.HtmlSaxHandler} while it is visiting it.
@@ -69,6 +301,7 @@ amp.htmlparser.HtmlParser = class {
     let tagName;         // The name of the tag currently being processed.
     let eflags;          // The element flags for the current tag.
     let openTag;         // True if the current tag is an open tag.
+    let tagStack = new TagNameStack(handler);
 
     // Only provide location information if the handler implements the
     // setDocLocator method.
@@ -119,13 +352,9 @@ amp.htmlparser.HtmlParser = class {
         } else if (m[4]) {
           if (eflags !== void 0) {  // False if not in whitelist.
             if (openTag) {
-              if (handler.startTag) {
-                handler.startTag(/** @type {string} */ (tagName), attribs);
-              }
+              tagStack.startTag(/** @type {string} */ (tagName), attribs);
             } else {
-              if (handler.endTag) {
-                handler.endTag(/** @type {string} */ (tagName));
-              }
+              tagStack.endTag(/** @type {string} */ (tagName));
             }
           }
 
@@ -197,6 +426,7 @@ amp.htmlparser.HtmlParser = class {
       locator.snapshotPos();
     }
     // Lets the handler know that we are done parsing the document.
+    tagStack.exitRemainingTags();
     handler.endDoc();
   }
 
@@ -292,10 +522,9 @@ amp.htmlparser.HtmlParser.EFlags = {
   UNKNOWN_OR_CUSTOM: 64
 };
 
-
 /**
  * A map of element to a bitmap of flags it has, used internally on the parser.
- * @type {Object<string,number>}
+ * @type {Object<string,?>}
  */
 amp.htmlparser.HtmlParser.Elements = {
   'a': 0,
@@ -665,3 +894,15 @@ amp.htmlparser.toLowerCase = function(str) {
     return String.fromCharCode(ch.charCodeAt(0) | 32);
   });
 };
+
+/**
+ * This function gets eliminated by closure compiler. It's purpose in life
+ * is to work around a bug wherein the compiler renames the object keys
+ * for objects never accessed using an array ([]) operator. We need the keys
+ * to remain unchanged for these objects.
+ */
+function unusedHtmlParser() {
+  console./*OK*/log(ElementsWithNoEndElements['']);
+  console./*OK*/log(HtmlStructureElements['']);
+  console./*OK*/log(HeadElements['']);
+}
