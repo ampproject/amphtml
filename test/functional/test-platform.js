@@ -47,6 +47,12 @@ describe('Platform', () => {
     expect(platform.isWebKit()).to.equal(isWebKit);
   }
 
+  it('should tolerate empty or null', () => {
+    testUserAgent(null);
+    testUserAgent('');
+    testUserAgent(' ');
+  });
+
   it('iPhone 6 Plus', () => {
     isIos = true;
     isSafari = true;
