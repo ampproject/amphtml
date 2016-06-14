@@ -936,6 +936,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     documentBody.appendChild(this.endPosEl_);
 
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
+
+    // XXX
   }
 
   /** @override */
