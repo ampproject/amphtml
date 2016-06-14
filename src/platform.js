@@ -124,7 +124,7 @@ export class Platform {
       return 0;
     }
     const res = this.navigator.userAgent.match(expr);
-    if (!res && index >= res.length) {
+    if (!res || index >= res.length) {
       return 0;
     }
     return parseInt(res[index], 10);
