@@ -132,10 +132,10 @@ export class Resource {
     /** @private {boolean} */
     this.isFixed_ = false;
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
-    /** @private {!LayoutRect} */
+    /** @private {!../layout-rect.LayoutRectDef} */
     this.initialLayoutBox_ = this.layoutBox_;
 
     /** @private {boolean} */
@@ -372,7 +372,7 @@ export class Resource {
 
   /**
    * Returns a previously measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getLayoutBox() {
     return this.layoutBox_;
@@ -380,7 +380,7 @@ export class Resource {
 
   /**
    * Returns the first measured layout box.
-   * @return {!LayoutRect}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   getInitialLayoutBox() {
     return this.initialLayoutBox_;
@@ -405,7 +405,7 @@ export class Resource {
 
   /**
    * Whether the element's layout box overlaps with the specified rect.
-   * @param {!LayoutRect} rect
+   * @param {!../layout-rect.LayoutRectDef} rect
    * @return {boolean}
    */
   overlaps(rect) {
