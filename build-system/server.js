@@ -19,49 +19,33 @@
  * files and list directories for use with the gulp live server
  */
 var BBPromise = require('bluebird');
-var app = require('connect')();
+var app = require('express')();
 var bodyParser = require('body-parser');
-var finalhandler = require('finalhandler');
+var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
 var formidable = require('formidable');
 var jsdom = require('jsdom');
 var path = require('path');
 var request = require('request');
-var serveIndex = require('serve-index');
-var serveStatic = require('serve-static');
 var url = require('url');
 
-var args = Array.prototype.slice.call(process.argv, 2, 4);
-var paths = args[0];
-var port = args[1];
-
 app.use(bodyParser.json());
+app.use(morgan('dev'));
 
-app.use('/examples', function(req, res, next) {
-  // Redirect physical dir to build dir that has versions belonging to
-  // local AMP.
-  if (req.url == '/' || req.url == '') {
-    res.writeHead(302, {
-      'Location': '../examples.build/'
-    });
-    res.end();
-    return;
-  }
-  next();
+app.use('/examples', function(req, res) {
+  res.redirect('/examples.build');
 });
 
 app.use('/api/show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
+  res.json({
     showNotification: true
-  }));
+  });
 });
 
 app.use('/api/dont-show', function(req, res) {
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify({
+  res.json({
     showNotification: false
-  }));
+  });
 });
 
 app.use('/api/echo/post', function(req, res) {
@@ -69,7 +53,7 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
-app.use('/form/echo-html/post', function(req, res) {
+app.use('/form/html/post', function(req, res) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -88,11 +72,22 @@ app.use('/form/echo-html/post', function(req, res) {
   });
 });
 
+app.use('/form/echo-json/post', function(req, res) {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function(err, fields) {
+    res.setHeader('Content-Type', 'application/json');
+    if (fields['email'] == 'already@subscribed.com') {
+      res.statusCode = 500;
+    }
+    res.end(JSON.stringify(fields));
+  });
+});
+
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.
 function proxyToAmpProxy(req, res, minify) {
-  res.setHeader('Content-Type', 'text/html');
   var url = 'https://cdn.ampproject.org/c' + req.url;
+  var localUrlPrefix = getUrlPrefix(req);
   request(url, function (error, response, body) {
     body = body
         // Unversion URLs.
@@ -102,15 +97,14 @@ function proxyToAmpProxy(req, res, minify) {
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
         .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
         .replace('https://cdn.ampproject.org/v0.max.js',
-            'http://localhost:8000/dist/amp.js')
+            localUrlPrefix + '/dist/amp.js')
         .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
-            'http://localhost:8000/dist/v0/');
+            localUrlPrefix + '/dist/v0/');
     if (minify) {
       body = body.replace(/\.max\.js/g, '.js')
           .replace('/dist/amp.js', '/dist/v0.js');
     }
-    res.statusCode = response.statusCode;
-    res.end(body);
+    res.status(response.statusCode).send(body);
   });
 }
 
@@ -124,14 +118,14 @@ app.use('/examples.build/live-list.amp.max.html', function(req, res) {
 });
 
 var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
-var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
-var liveListFile = fs.readFileSync(liveListUpdateFullPath);
 var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
 var doctype = '<!doctype html>\n';
 app.use(liveListUpdateFile, function(req, res) {
   if (!liveListDoc) {
+    var liveListUpdateFullPath = `${process.cwd()}${liveListUpdateFile}`;
+    var liveListFile = fs.readFileSync(liveListUpdateFullPath);
     liveListDoc = jsdom.jsdom(liveListFile);
   }
   var action = Math.floor(Math.random() * 3);
@@ -207,32 +201,13 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
-function setAMPAccessControlHeader(res, path) {
-  var curUrl = url.parse(path, true);
-  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
-    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        'http://localhost:' + port);
-  }
+app.use('/examples.build/analytics.config.json', function (req, res, next) {
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
+  next();
+});
+
+exports.app = app;
+
+function getUrlPrefix(req) {
+  return req.protocol + '://' + req.headers.host;
 }
-
-paths.split(',').forEach(function(pth) {
-  // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth),
-        {setHeaders: setAMPAccessControlHeader}));
-  // Serve directory listings
-  app.use(serveIndex(path.join(process.cwd(), pth),
-    {'icons':true,'view':'details'}));
-});
-
-// 404 everything else
-app.use(function notFound(req, res) {
-  var done = finalhandler(req,res);
-  var err = new Error('File Not Found');
-  err.status = 404;
-  done(err);
-});
-
-app.listen(port, function() {
-  console./*OK*/log('serving %s at http://localhost:%s', paths, port);
-});
-

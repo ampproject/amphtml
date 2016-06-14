@@ -59,7 +59,7 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise>, resolve:!Function,reject:!Function}} */
+    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -150,7 +150,7 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback: callback, resolve: resolve, reject: reject});
+    this.queue_.push({callback, resolve, reject});
     if (this.queue_.length == 1) {
       this.deque_();
     }
@@ -473,11 +473,7 @@ export class HistoryBindingNatural_ {
           resolve = aResolve;
           reject = aReject;
         }));
-    this.waitingState_ = {
-      promise: promise,
-      resolve: resolve,
-      reject: reject,
-    };
+    this.waitingState_ = {promise, resolve, reject};
     return promise;
   }
 
@@ -568,10 +564,10 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
 
   /**
-   * @param {!Viewer} viewer
+   * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(viewer) {
-    /** @private @const {!Viewer} */
+    /** @private @const */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -614,7 +610,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!ViewerHistoryPoppedEvent} event
+   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
    * @private
    */
   onHistoryPopped_(event) {

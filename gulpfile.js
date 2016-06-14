@@ -109,8 +109,10 @@ function polyfillsForTests() {
  * @param {boolean} watch
  * @param {boolean} shouldMinify
  * @param {boolean=} opt_preventRemoveAndMakeDir
+ * @param {boolean=} opt_checkTypes
  */
-function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
+function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
+    opt_checkTypes) {
   compileCss();
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
@@ -118,6 +120,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
     toName: 'amp.js',
     minifiedName: 'v0.js',
     includePolyfills: true,
+    checkTypes: opt_checkTypes,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
@@ -134,6 +137,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
   });
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
+    checkTypes: opt_checkTypes,
     watch: watch,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
@@ -276,6 +280,30 @@ function dist() {
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
+}
+
+/**
+ * Dedicated type check path.
+ */
+function checkTypes() {
+  process.env.NODE_ENV = 'production';
+  cleanupBuildDir();
+  // Our first passing type checked build.
+  buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildExperiments({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  // These are not turned on on Travis.
+  if (argv.more) {
+    compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+        /* check types */ true);
+  }
 }
 
 /**
@@ -591,6 +619,7 @@ function buildExperiments(options) {
           includePolyfills: true,
           minifiedName: minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          checkTypes: options.checkTypes,
         });
       });
 }
@@ -723,6 +752,7 @@ function mkdirSync(path) {
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
+gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist);

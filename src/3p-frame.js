@@ -81,7 +81,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
         timer.now(),
         viewportFor(parentWindow).getRect(),
         element.getLayoutBox()),
-    startTime: startTime,
+    startTime,
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {

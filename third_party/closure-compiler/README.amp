@@ -10,3 +10,4 @@ Local Modifications:
 - Add compiler-and-tests.jar (built from all-classes-jar ant build) to use
 for testing.
 - Add Messages.properties and ParserConfig.properties for testing.
+- Copied intersection_observer.js extern missing from default externs.

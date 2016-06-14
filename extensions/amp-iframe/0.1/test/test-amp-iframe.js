@@ -348,11 +348,7 @@ describe('amp-iframe', () => {
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
         impl.updateSize_ = (newHeight, newWidth) => {
-          resolve({
-            amp: amp,
-            newHeight: newHeight,
-            newWidth: newWidth,
-          });
+          resolve({amp, newHeight, newWidth});
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -382,10 +378,7 @@ describe('amp-iframe', () => {
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
         impl.updateSize_ = (newHeight, unusedNewWidth) => {
-          resolve({
-            amp: amp,
-            newHeight: newHeight,
-          });
+          resolve({amp, newHeight});
         };
       });
       amp.iframe.contentWindow.postMessage({

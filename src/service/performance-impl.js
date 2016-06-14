@@ -84,10 +84,10 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
-    /** @private {?Viewer} */
+    /** @private {?./viewer-impl.Viewer} */
     this.viewer_ = null;
 
-    /** @private {?Resources} */
+    /** @private {?./resources-impl.Resources} */
     this.resources = null;
 
     /** @private @const {!Promise} */
@@ -192,7 +192,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONObject} params
+   * @param {!JSONType} params
    * @private
    */
   setFlushParams_(params) {
@@ -215,9 +215,9 @@ export class Performance {
 
     if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
-        'label': label,
-        'from': opt_from,
-        'value': opt_value,
+        label,
+        from: opt_from,
+        value: opt_value,
       });
     } else {
       this.queueTick_(label, opt_from, opt_value);
@@ -277,9 +277,9 @@ export class Performance {
     }
 
     this.events_.push({
-      'label': label,
-      'from': opt_from,
-      'value': opt_value,
+      label,
+      from: opt_from,
+      value: opt_value,
     });
   }
 
@@ -340,7 +340,7 @@ export class Performance {
   prerenderComplete_(value) {
     if (this.viewer_) {
       this.viewer_.prerenderComplete({
-        'value': value,
+        value,
       });
     }
   }

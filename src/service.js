@@ -98,7 +98,7 @@ export function getServicePromise(win, id) {
   services[id] = {
     obj: null,
     promise: p,
-    resolve: resolve,
+    resolve,
   };
 
   return p;

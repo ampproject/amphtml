@@ -24,8 +24,7 @@ import * as st from './style';
  * dip above 1 or below 0. This is an acceptable case for some curves. The
  * second argument is a boolean value that equals "true" for the completed
  * transition and "false" for ongoing.
- * @typedef {function(normtime, boolean):RESULT}
- * @template RESULT
+ * @typedef {function(number, boolean):?}
  */
 let TransitionDef;
 

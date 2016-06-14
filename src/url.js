@@ -29,6 +29,21 @@ const cache = Object.create(null);
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
 /**
+ * @typedef {({
+ *   href: string,
+ *   protocol: string,
+ *   host: string,
+ *   hostname: string,
+ *   port: string,
+ *   pathname: string,
+ *   search: string,
+ *   hash: string,
+ *   origin: string
+ * }|!Location)}
+ */
+export let Location;
+
+/**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
  * Consider the returned object immutable. This is enforced during
@@ -42,6 +57,14 @@ export function parseUrl(url) {
     return fromCache;
   }
   a.href = url;
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
+  // and it passes tests in all browsers.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
   const info = {
     href: a.href,
     protocol: a.protocol,
@@ -52,10 +75,30 @@ export function parseUrl(url) {
     search: a.search,
     hash: a.hash,
   };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if ((info.protocol == 'http:' && info.port == 80)
+      || (info.protocol == 'https:' && info.port == 443)) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
-  user.assert(info.origin, 'Origin must exist');
+  if (a.origin && a.origin != 'null') {
+    info.origin = a.origin;
+  } else if (info.protocol == 'data:' || !info.host) {
+    info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
+  }
   // Freeze during testing to avoid accidental mutation.
   cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
   return info;
@@ -190,25 +233,6 @@ export function parseQueryString(queryString) {
 
 
 /**
- * Don't use this directly, only exported for testing. The value
- * is available via the origin property of the object returned by
- * parseUrl.
- * @param {string|!Location} url
- * @return {string}
- * @visibleForTesting
- */
-export function getOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrl(url);
-  }
-  if (url.protocol == 'data:' || !url.host) {
-    return url.href;
-  }
-  return url.protocol + '//' + url.host;
-}
-
-
-/**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same
  * string is returned.
  * @param {string} url
@@ -298,7 +322,7 @@ export function getSourceUrl(url) {
  * @return {string} The source origin of the URL.
  */
 export function getSourceOrigin(url) {
-  return getOrigin(getSourceUrl(url));
+  return parseUrl(getSourceUrl(url)).origin;
 }
 
 /**

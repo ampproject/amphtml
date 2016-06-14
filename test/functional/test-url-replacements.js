@@ -83,7 +83,7 @@ describe('UrlReplacements', () => {
         loadObservable.add(callback);
       },
       complete: false,
-      Object: Object,
+      Object,
       performance: {
         timing: {
           navigationStart: 100,

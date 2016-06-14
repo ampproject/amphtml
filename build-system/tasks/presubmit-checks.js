@@ -257,7 +257,12 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
-  'sessionStorage': requiresReviewPrivacy,
+  'sessionStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-accordion/0.1/amp-accordion.js',
+    ],
+  },
   'indexedDB': requiresReviewPrivacy,
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,

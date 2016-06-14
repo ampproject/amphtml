@@ -208,7 +208,7 @@ export class LiveListManager {
    * @return {number}
    */
   static getMinDataMaxItemsPerPage() {
-    return 10;
+    return 1;
   }
 }
 

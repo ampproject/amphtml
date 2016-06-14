@@ -88,7 +88,7 @@ export function isValidPercentage_(num) {
 
 /**
  * Checks and outputs information about visibilitySpecValidation.
- * @param {!JSONObject} config Configuration for instrumentation.
+ * @param {!JSONType} config Configuration for instrumentation.
  * @return {boolean} True if the spec is valid.
  * @private
  */
@@ -149,7 +149,7 @@ export function isVisibilitySpecValid(config) {
 let VisibilityListenerCallbackDef;
 
 /**
- * @typedef {Object<string, JSONObject|VisibilityListenerCallbackDef|Object>}
+ * @typedef {Object<string, JSONType|VisibilityListenerCallbackDef|Object>}
  */
 let VisibilityListenerDef;
 
@@ -162,7 +162,7 @@ let VisibilityListenerDef;
  */
 export class Visibility {
 
-  /** @param {!Window} */
+  /** @param {!Window} win */
   constructor(win) {
     this.win_ = win;
 
@@ -177,10 +177,10 @@ export class Visibility {
     /** @private {Array<!Resource>} */
     this.resources_ = [];
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundScrollListener_ = this.scrollListener_.bind(this);
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundVisibilityListener_ = this.visibilityListener_.bind(this);
 
     /** @private {boolean} */
@@ -234,7 +234,7 @@ export class Visibility {
   }
 
   /**
-   * @param {!JSONObject} config
+   * @param {!JSONType} config
    * @param {!VisibilityListenerCallbackDef} callback
    */
   listenOnce(config, callback) {

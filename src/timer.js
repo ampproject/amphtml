@@ -87,7 +87,7 @@ export class Timer {
 
   /**
    * Cancels the previously scheduled callback.
-   * @param {number|string} timeoutId
+   * @param {number|string|null} timeoutId
    */
   cancel(timeoutId) {
     if (typeof timeoutId == 'string') {

@@ -25,7 +25,7 @@ min_validator_revision_required: 135
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 224
+spec_file_revision: 228
 
 # Validator extensions.
 # =====================
@@ -610,87 +610,71 @@ tags: {
 # 4.3.2 The article element
 tags: {
   tag_name: "article"
-  disallowed_ancestor: "head"
 }
 # 4.3.3 The section element
 tags: {
   tag_name: "section"
-  disallowed_ancestor: "head"
   disallowed_ancestor: "amp-accordion"
 }
 # 4.3.4 The nav element
 tags: {
   tag_name: "nav"
-  disallowed_ancestor: "head"
 }
 # 4.3.5 The aside element
 tags: {
   tag_name: "aside"
-  disallowed_ancestor: "head"
 }
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
 tags: {
   tag_name: "h1"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 tags: {
   tag_name: "h2"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 tags: {
   tag_name: "h3"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 tags: {
   tag_name: "h4"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 tags: {
   tag_name: "h5"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 tags: {
   tag_name: "h6"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 # 4.3 7 The header element
 tags: {
   tag_name: "header"
-  disallowed_ancestor: "head"
 }
 # 4.3 7 The footer element
 tags: {
   tag_name: "footer"
-  disallowed_ancestor: "head"
 }
 # 4.3 7 The address element
 tags: {
   tag_name: "address"
-  disallowed_ancestor: "head"
 }
 
 # 4.4 Grouping Content
 # 4.4.1 The p element
 tags: {
   tag_name: "p"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 # 4.4.2 The hr element
 tags: {
   tag_name: "hr"
-  disallowed_ancestor: "head"
 }
 # 4.4.3 The pre element
 tags: {
   tag_name: "pre"
-  disallowed_ancestor: "head"
 }
 # 4.4.4 The blockquote element
 attr_lists: {
@@ -717,14 +701,12 @@ attr_lists: {
 }
 tags: {
   tag_name: "blockquote"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
 }
 # 4.4.5 The ol element
 tags: {
   tag_name: "ol"
-  disallowed_ancestor: "head"
   attrs: {
     name: "reversed"
     value: ""
@@ -741,12 +723,10 @@ tags: {
 # 4.4.6 The ul element
 tags: {
   tag_name: "ul"
-  disallowed_ancestor: "head"
 }
 # 4.4.7 The li element
 tags: {
   tag_name: "li"
-  disallowed_ancestor: "head"
   attrs: {
     name: "value"
     value_regex: "[0-9]*"
@@ -755,45 +735,37 @@ tags: {
 # 4.4.8 The dl element
 tags: {
   tag_name: "dl"
-  disallowed_ancestor: "head"
 }
 # 4.4.9 The dt element
 tags: {
   tag_name: "dt"
-  disallowed_ancestor: "head"
 }
 # 4.4.10 The dd element
 tags: {
   tag_name: "dd"
-  disallowed_ancestor: "head"
 }
 # 4.4.11 The figure element
 tags: {
   tag_name: "figure"
-  disallowed_ancestor: "head"
 }
 # 4.4.12 The figcaption element
 tags: {
   tag_name: "figcaption"
-  disallowed_ancestor: "head"
 }
 # 4.4.13 The div element
 tags: {
   tag_name: "div"
-  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 # 4.4.14 The main element
 tags: {
   tag_name: "main"
-  disallowed_ancestor: "head"
 }
 
 # 4.5 Text-level semantics
 # 4.5.1 The a element
 tags: {
   tag_name: "a"
-  disallowed_ancestor: "head"
   attrs: {
     name: "href"
     value_url: {
@@ -864,53 +836,43 @@ tags: {
 # 4.5.2 The em element
 tags: {
   tag_name: "em"
-  disallowed_ancestor: "head"
 }
 # 4.5.3 The strong element
 tags: {
   tag_name: "strong"
-  disallowed_ancestor: "head"
 }
 # 4.5.4 The small element
 tags: {
   tag_name: "small"
-  disallowed_ancestor: "head"
 }
 # 4.5.5 The s element
 tags: {
   tag_name: "s"
-  disallowed_ancestor: "head"
 }
 # 4.5.6 The cite element
 tags: {
   tag_name: "cite"
-  disallowed_ancestor: "head"
 }
 # 4.5.7 The q element
 tags: {
   tag_name: "q"
-  disallowed_ancestor: "head"
   attr_lists: "cite-attr"
 }
 # 4.5.8 The dfn element
 tags: {
   tag_name: "dfn"
-  disallowed_ancestor: "head"
 }
 # 4.5.9 The abbr element
 tags: {
   tag_name: "abbr"
-  disallowed_ancestor: "head"
 }
 # 4.5.10 The data element
 tags: {
   tag_name: "data"
-  disallowed_ancestor: "head"
 }
 # 4.5.11 The time element
 tags: {
   tag_name: "time"
-  disallowed_ancestor: "head"
   attrs: {
     name: "datetime"
   }
@@ -918,109 +880,88 @@ tags: {
 # 4.5.12 The code element
 tags: {
   tag_name: "code"
-  disallowed_ancestor: "head"
 }
 # 4.5.13 The var element
 tags: {
   tag_name: "var"
-  disallowed_ancestor: "head"
 }
 # 4.5.14 The samp element
 tags: {
   tag_name: "samp"
-  disallowed_ancestor: "head"
 }
 # 4.5.15 The kbd element
 tags: {
   tag_name: "kbd"
-  disallowed_ancestor: "head"
 }
 # 4.5.16 The sub and sup elements
 tags: {
   tag_name: "sub"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "sup"
-  disallowed_ancestor: "head"
 }
 # 4.5.17 The i element
 tags: {
   tag_name: "i"
-  disallowed_ancestor: "head"
 }
 # 4.5.18 The b element
 tags: {
   tag_name: "b"
-  disallowed_ancestor: "head"
 }
 # 4.5.19 The u element
 tags: {
   tag_name: "u"
-  disallowed_ancestor: "head"
 }
 # 4.5.20 The mark element
 tags: {
   tag_name: "mark"
-  disallowed_ancestor: "head"
 }
 # 4.5.21 The ruby element
 tags: {
   tag_name: "ruby"
-  disallowed_ancestor: "head"
 }
 # 4.5.22 The rb element
 tags: {
   tag_name: "rb"
-  disallowed_ancestor: "head"
 }
 # 4.5.23 The rt element
 tags: {
   tag_name: "rt"
-  disallowed_ancestor: "head"
 }
 # 4.5.24 The rtc element
 tags: {
   tag_name: "rtc"
-  disallowed_ancestor: "head"
 }
 # 4.5.25 The rp element
 tags: {
   tag_name: "rp"
-  disallowed_ancestor: "head"
 }
 # 4.5.26 The bdi element
 tags: {
   tag_name: "bdi"
-  disallowed_ancestor: "head"
 }
 # 4.5.27 The bdo element
 tags: {
   tag_name: "bdo"
   attrs: { name: "dir" }
-  disallowed_ancestor: "head"
 }
 # 4.5.28 The span element
 tags: {
   tag_name: "span"
-  disallowed_ancestor: "head"
 }
 # 4.5.29 The br element
 tags: {
   tag_name: "br"
-  disallowed_ancestor: "head"
 }
 # 4.5.30 The wbr element
 tags: {
   tag_name: "wbr"
-  disallowed_ancestor: "head"
 }
 
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: {
   tag_name: "ins"
-  disallowed_ancestor: "head"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
@@ -1031,7 +972,6 @@ tags: {
 # 4.6.2 The del element
 tags: {
   tag_name: "del"
-  disallowed_ancestor: "head"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
@@ -1474,7 +1414,6 @@ tags: {
 tags: {
   tag_name: "svg"
   disallowed_ancestor: "svg"
-  disallowed_ancestor: "head"
   attrs: { name: "class" }
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
@@ -1862,7 +1801,6 @@ tags: {
 # 4.9.1 The table element
 tags: {
   tag_name: "table"
-  disallowed_ancestor: "head"
   attrs: { name: "sortable" }
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
@@ -1876,39 +1814,32 @@ tags: {
 # 4.9.2 The caption element
 tags: {
   tag_name: "caption"
-  disallowed_ancestor: "head"
 }
 # 4.9.3 The colgroup element
 tags: {
   tag_name: "colgroup"
-  disallowed_ancestor: "head"
   attrs: { name: "span" }
 }
 # 4.9.4 The col element
 tags: {
   tag_name: "col"
-  disallowed_ancestor: "head"
   attrs: { name: "span" }
 }
 # 4.9.5 The tbody element
 tags: {
   tag_name: "tbody"
-  disallowed_ancestor: "head"
 }
 # 4.9.6 The thead element
 tags: {
   tag_name: "thead"
-  disallowed_ancestor: "head"
 }
 # 4.9.7 The tfoot element
 tags: {
   tag_name: "tfoot"
-  disallowed_ancestor: "head"
 }
 # 4.9.8 The tr element
 tags: {
   tag_name: "tr"
-  disallowed_ancestor: "head"
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
   attrs: { name: "align" }
@@ -1919,7 +1850,6 @@ tags: {
 # 4.9.9 The td element
 tags: {
   tag_name: "td"
-  disallowed_ancestor: "head"
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
@@ -1934,7 +1864,6 @@ tags: {
 # 4.9.10 The th element
 tags: {
   tag_name: "th"
-  disallowed_ancestor: "head"
   attrs: { name: "abbr" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
@@ -1954,7 +1883,6 @@ tags: {
 # Not allowed, except for button.
 tags: {
   tag_name: "button"
-  disallowed_ancestor: "head"
   attrs: {
     name: "disabled"
     value: ""
@@ -2009,26 +1937,6 @@ tags: {
 tags: {
   tag_name: "script"
   spec_name: "script type=application/ld+json"
-  mandatory_parent: "head"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "application/ld+json"
-    dispatch_key: true
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-}
-# Variant of the above, allowed in the body. See Github #2966.
-# TODO(gregable): Support repeated mandatory_parent perhaps.
-tags: {
-  tag_name: "script"
-  spec_name: "body > script type=application/ld+json"
-  mandatory_parent: "body"
   attrs: {
     name: "type"
     mandatory: true
@@ -2067,55 +1975,42 @@ tags: {
 # 11.2 Non-conforming features
 tags: {
   tag_name: "acronym"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "big"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "center"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "dir"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "hgroup"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "listing"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "multicol"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "nextid"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "nobr"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "spacer"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "strike"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "tt"
-  disallowed_ancestor: "head"
 }
 tags: {
   tag_name: "xmp"
-  disallowed_ancestor: "head"
 }
 
 # Some additional tags, microformats, allowances.
@@ -2153,7 +2048,6 @@ attr_lists: {
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {  # <amp-ad>
   tag_name: "amp-ad"
-  disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   attrs: { name: "alt" }
   attrs: { name: "json" }
@@ -2180,7 +2074,6 @@ tags: {  # <amp-ad>
 # so if you're changing amp-embed consider changing amp-ad as well.
 tags: {  # <amp-embed>
   tag_name: "amp-embed"
-  disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   attrs: { name: "alt" }
   attrs: { name: "json" }
@@ -2205,7 +2098,6 @@ tags: {  # <amp-embed>
 }
 tags: {  # <amp-img>
   tag_name: "amp-img"
-  disallowed_ancestor: "head"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "amp-sidebar"
   attrs: { name: "alt" }
@@ -2225,7 +2117,6 @@ tags: {  # <amp-img>
 }
 tags: {  # <amp-pixel>
   tag_name: "amp-pixel"
-  disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   attrs: {
     name: "src"
@@ -2246,7 +2137,6 @@ tags: {  # <amp-pixel>
 }
 tags: {  # <amp-video>
   tag_name: "amp-video"
-  disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }

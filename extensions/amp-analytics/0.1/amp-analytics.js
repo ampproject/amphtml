@@ -62,7 +62,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   createdCallback() {
     /**
-     * @const {!JSONObject} Copied here for tests.
+     * @const {!JSONType} Copied here for tests.
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
@@ -109,7 +109,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.requests_ = {};
 
     /**
-     * @private {JSONObject}
+     * @private {JSONType}
      */
     this.remoteConfig = {};
 
@@ -125,7 +125,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   onFetchRemoteConfigSuccess_() {
     /**
-     * @private {!JSONObject} The analytics config associated with the tag
+     * @private {!JSONType} The analytics config associated with the tag
      */
     this.config_ = this.mergeConfigs_();
 
@@ -215,7 +215,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
-   * @return {!Promise<>}
+   * @return {!Promise<undefined|JSONType>}
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
@@ -254,7 +254,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
-   * @return {!JSONObject}
+   * @return {!JSONType}
    */
   mergeConfigs_() {
     let inlineConfig = {};
@@ -349,7 +349,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Callback for events that are registered by the config's triggers. This
    * method generates the request and sends the request out.
    *
-   * @param {!JSONObject} trigger JSON config block that resulted in this event.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise.<string|undefined>} The request that was sent out.
    * @private
@@ -386,7 +386,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JSONObject} trigger The config to use to determine sampling.
+   * @param {!JSONType} trigger The config to use to determine sampling.
    * @return {!Promise.<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
@@ -416,7 +416,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} template The template to expand.
-   * @param {!JSONObject} The object to use for variable value lookups.
+   * @param {!JSONType} The object to use for variable value lookups.
    * @param {!Object} event Object with details about the event.
    * @param {number} opt_iterations Number of recursive expansions to perform.
    *    Defaults to 2 substitutions.
@@ -463,7 +463,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} request The full request string to send.
-   * @param {!JSONObject} trigger
+   * @param {!JSONType} trigger
    * @private
    */
   sendRequest_(request, trigger) {

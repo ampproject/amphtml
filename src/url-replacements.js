@@ -19,8 +19,9 @@ import {getService} from './service';
 
 /**
  * @param {!Window} window
- * @return {!UrlReplacements}
+ * @return {!./service/url-replacements-impl.UrlReplacements}
  */
 export function urlReplacementsFor(window) {
-  return getService(window, 'url-replace');
+  return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
+      getService(window, 'url-replace'));
 };
