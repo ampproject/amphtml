@@ -43,13 +43,13 @@ describe('error page', () => {
     });
   });
 
-  it('should show the body in error test', () => {
+  it.skipper().skipFirefox().run('should show the body in error test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 
   function shouldFail(id) {
     // Skip for issue #110
-    it('should fail to load #' + id, () => {
+    it.skipper().skipFirefox().run('should fail to load #' + id, () => {
       const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));
