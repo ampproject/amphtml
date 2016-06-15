@@ -222,7 +222,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonRejecter();
-      return timer.promise(20).then(() => {
+      return timer.promise(0).then(() => {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
         expect(ampForm.state_).to.equal('submit-error');
@@ -298,11 +298,22 @@ describe('amp-form', () => {
       newRender.innerText = 'New Success: What What';
 
       const ampForm = new AmpForm(form);
+      let fetchJsonResolver;
+      sandbox.stub(ampForm.xhr_, 'fetchJson')
+          .returns(new Promise(resolve => {
+            fetchJsonResolver = resolve;
+          }));
       sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
           .returns(new Promise(resolve => {
             resolve(newRender);
           }));
-      ampForm.renderTemplate_('submit-success', {'message': 'What What'});
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      fetchJsonResolver({'message': 'What What'});
       return timer.promise(0).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(

@@ -114,8 +114,8 @@ export class AmpForm {
         this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response);
       }).catch(error => {
         this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(FormState_.SUBMIT_ERROR, error).then(
-            rethrowAsync.bind(null, 'Form submission failed:', error));
+        this.renderTemplate_(FormState_.SUBMIT_ERROR, error);
+        rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
       this.setState_(FormState_.SUBMITTING);
@@ -148,15 +148,28 @@ export class AmpForm {
   renderTemplate_(state, data) {
     const container = this.form_.querySelector(`[${state}]`);
     if (container) {
-      const previousRender = container.querySelector(`.${state}-message`);
-      if (previousRender) {
-        removeElement(previousRender);
-      }
+      // TODO(#3587): Move the cleanup to do during submission.
+      this.cleanupRenderedTemplate_(state);
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
             rendered.classList.add(`${state}-message`);
             container.appendChild(rendered);
           });
+    }
+  }
+
+  /**
+   * @param {string} state
+   * @private
+   */
+  cleanupRenderedTemplate_(state) {
+    const container = this.form_.querySelector(`[${state}]`);
+    if (!container) {
+      return;
+    }
+    const previousRender = container.querySelector(`.${state}-message`);
+    if (previousRender) {
+      removeElement(previousRender);
     }
   }
 }
