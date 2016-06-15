@@ -53,6 +53,9 @@ export class AmpForm {
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
 
+    /** @const @private {string} */
+    this.target_ = this.form_.getAttribute('target');
+
     /** @const @private {?string} */
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
@@ -90,6 +93,8 @@ export class AmpForm {
             this.setState_(FormState_.SUBMIT_ERROR);
             rethrowAsync('Form submission failed:', error);
           });
+    } else if (this.target_ == '_top' && this.method_ == 'POST') {
+      this.setState_(FormState_.SUBMITTING);
     }
   }
 

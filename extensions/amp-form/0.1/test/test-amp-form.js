@@ -87,12 +87,6 @@ describe('amp-form', () => {
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
-      // FormData.get and other methods are not supported by old browsers.
-      for (const entry of config.body) {
-        if (entry[0] == 'name') {
-          expect(entry[1]).to.be.equal('John Miller');
-        }
-      }
       expect(config.method).to.equal('GET');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
@@ -142,7 +136,7 @@ describe('amp-form', () => {
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
       };
-      ampForm.handleSubmit_(event);
+      ampForm.handleSubmit_(event)
       expect(event.preventDefault.called).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
@@ -152,7 +146,7 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
-      });
+      }).should.eventually.throw;
     });
   });
 });
