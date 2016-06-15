@@ -65,10 +65,6 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     if (name.contains("$")) {
       return false;
     }
-    // We do not export class names and similar by default.
-    if (Character.isUpperCase(name.charAt(0))) {
-      return false;
-    }
     // Starting with _ explicitly exports a name.
     if (name.startsWith("_")) {
       return true;
