@@ -34,6 +34,16 @@ class Shell {
     if (this.currentPage_) {
       this.navigateTo(this.currentPage_);
     }
+
+    // Install service worker
+    if ('serviceWorker' in navigator) {
+      log('Register service worker');
+      navigator.serviceWorker.register('/examples/pwa-sw.js').then(reg => {
+        log('Service worker registered: ', reg);
+      }).catch(err => {
+        log('Service worker registration failed: ', err);
+      });
+    }
   }
 
   /**
@@ -151,7 +161,7 @@ class AmpViewer {
       const amp = AMP.attachShadowRoot(this.shadowRoot_);
       this.viewer_ = amp.viewer;
       this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
-          'http://localhost:8000');
+          this.getOrigin_(this.win.location.href));
     });
 
     // Head
@@ -264,6 +274,14 @@ class AmpViewer {
    */
   resolveUrl_(relativeUrlString) {
     return new URL(relativeUrlString, this.baseUrl_).toString();
+  }
+
+  /**
+   * @param {string} url
+   * @return {string}
+   */
+  getOrigin_(relativeUrlString) {
+    return new URL(relativeUrlString, this.baseUrl_).origin;
   }
 
   /**
