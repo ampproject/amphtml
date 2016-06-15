@@ -65,7 +65,7 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slideWidth_ = this.getLayoutWidth();
 
     /** @private {number} */
-    this.previousScrollLeft_ = this.slidesContainer_./*REVIEW*/scrollLeft;
+    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
@@ -147,7 +147,7 @@ export class AmpSlideScroll extends BaseCarousel {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     const newScrollLeft = (newIndex == 0) ? 0 : this.slideWidth_;
-    this.slidesContainer_./*REVIEW*/scrollLeft = newScrollLeft;
+    this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(newIndex);
     this.setControlsState();
