@@ -642,7 +642,7 @@ export class HistoryBindingVirtual_ {
 function createHistory_(window) {
   const viewer = installViewerService(window);
   let binding;
-  if (viewer.isOvertakeHistory()) {
+  if (viewer.isOvertakeHistory() || window.AMP_TEST) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
     binding = new HistoryBindingNatural_(window);
