@@ -117,7 +117,7 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, opt_init) {
-    input = getCorsUrl(this.win, input);
+    input = this.getCorsUrl(this.win, input);
     return this.fetch_(input, opt_init).catch(reason => {
       user.assert(false, 'Fetch failed %s: %s', input,
           reason && reason.message);
@@ -216,6 +216,40 @@ export class Xhr {
   sendSignal(input, opt_init) {
     return this.fetchAmpCors_(input, opt_init).then(response => {
       assertSuccess(response);
+    });
+  }
+
+  /**
+   * Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
+   * able to set a header (e.g. AMP-Source-Origin), but this will force
+   * preflight request on all CORS request.
+   * @param {!Window} win
+   * @param {string} url
+   * @return {string}
+   */
+  getCorsUrl(win, url) {
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    const parsedUrl = parseUrl(url);
+    const query = parseQueryString(parsedUrl.search);
+    user.assert(!(SOURCE_ORIGIN_PARAM in query),
+        'Source origin is not allowed in %s', url);
+    return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+  }
+
+  /**
+   * @param {!ArrayBuffer} bytes
+   * @return {!Promise<string>}
+   */
+  utf8FromArrayBuffer(bytes) {
+    if (window.TextDecoder) {
+      return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+    }
+    return new Promise(function(resolve, unusedReject) {
+      const reader = new FileReader();
+      reader.onloadend = function(unusedEvent) {
+        resolve(reader.result);
+      };
+      reader.readAsText(new Blob([bytes]));
     });
   }
 }
@@ -330,24 +364,6 @@ export function fetchPolyfill(input, opt_init) {
       xhr.send();
     }
   });
-}
-
-
-/**
- * Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
- * able to set a header (e.g. AMP-Source-Origin), but this will force
- * preflight request on all CORS request.
- * @param {!Window} win
- * @param {string} url
- * @return {string}
- */
-export function getCorsUrl(win, url) {
-  const sourceOrigin = getSourceOrigin(win.location.href);
-  const parsedUrl = parseUrl(url);
-  const query = parseQueryString(parsedUrl.search);
-  user.assert(!(SOURCE_ORIGIN_PARAM in query),
-      'Source origin is not allowed in %s', url);
-  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }
 
 /**
@@ -495,24 +511,6 @@ class FetchResponseHeaders {
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
-}
-
-
-/**
- * @param {!ArrayBuffer} bytes
- * @return {!Promise<string>}
- */
-export function utf8FromArrayBuffer(bytes) {
-  if (window.TextDecoder) {
-    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  }
-  return new Promise(function(resolve, unusedReject) {
-    const reader = new FileReader();
-    reader.onloadend = function(unusedEvent) {
-      resolve(reader.result);
-    };
-    reader.readAsText(new Blob([bytes]));
-  });
 }
 
 

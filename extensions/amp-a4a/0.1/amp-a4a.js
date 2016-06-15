@@ -26,10 +26,6 @@ import {insertAmpExtensionScript} from '../../../src/insert-extension';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
-import {
-  utf8FromArrayBuffer,
-  getCorsUrl,
-} from '../../../src/service/xhr-impl';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -436,7 +432,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.timerId_) {
       decrementLoadingAds(this.timerId_, this.getWin());
     }
-    return utf8FromArrayBuffer(bytes).then(creative => {
+    return xhrFor(this.getWin()).utf8FromArrayBuffer(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
       if (!creativeMetaData || !this.supportsShadowDom()) {
@@ -498,7 +494,8 @@ export class AmpA4A extends AMP.BaseElement {
     // ad URL otherwise cache will miss.
     // TODO: remove call to getCorsUrl and instead have fetch API return
     // modified url.
-    iframe.setAttribute('src', getCorsUrl(this.getWin(), this.adUrl_));
+    iframe.setAttribute(
+      'src', xhrFor(this.getWin()).getCorsUrl(this.getWin(), this.adUrl_));
     this.intersectionObserver_ =
         new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
     this.element.appendChild(iframe);
