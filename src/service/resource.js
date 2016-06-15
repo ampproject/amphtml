@@ -86,17 +86,6 @@ export class Resource {
   }
 
   /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   */
-  static setOwner(element, owner) {
-    dev.assert(owner.contains(element), 'Owner must contain the element');
-    element[OWNER_PROP_] = owner;
-  }
-
-  /**
    * @param {number} id
    * @param {!AmpElement} element
    * @param {!Resources} resources
@@ -203,6 +192,18 @@ export class Resource {
    */
   hasOwner() {
     return !!this.getOwner();
+  }
+
+  /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
+   * @param {!AmpElement} owner
+   */
+  setOwner(owner) {
+    dev.assert(owner.contains(this.element), 'Owner must contain the element');
+    this.owner_ = owner;
+    // To preserve the ownership when wrapping the element.
+    this.element[OWNER_PROP_] = owner;
   }
 
   /**
