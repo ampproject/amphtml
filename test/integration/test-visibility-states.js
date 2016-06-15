@@ -42,7 +42,8 @@ describe('Viewer Visibility State', () => {
 
   function noop() {}
 
-  describe('Element Transitions', () => {
+  // TODO(#3561): unmute the test.
+  describe.skipper().skipSafari().run('Element Transitions', () => {
     let fixture;
     let resources;
     let viewer;

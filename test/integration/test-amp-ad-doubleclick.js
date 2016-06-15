@@ -48,7 +48,8 @@ describe('Rendering of one ad', () => {
     }
   });
 
-  it('should create an iframe loaded', function() {
+  // TODO(#3561): unmute the test.
+  it.skipper().skipEdge().run('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;
