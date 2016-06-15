@@ -83,12 +83,14 @@ describe('SlideScroll', () => {
       const impl = ampSlideScroll.implementation_;
       const updateInViewportSpy = sandbox.spy(impl, 'updateInViewport');
       const scheduleLayoutSpy = sandbox.spy(impl, 'scheduleLayout');
+      const schedulePreloadSpy = sandbox.spy(impl, 'schedulePreload');
       const hideRestOfTheSlidesSpy = sandbox.spy(impl, 'hideRestOfTheSlides_');
       const setControlsStateSpy = sandbox.spy(impl, 'setControlsState');
 
       impl.showSlide_(-1);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
+      expect(schedulePreloadSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
@@ -96,12 +98,14 @@ describe('SlideScroll', () => {
       impl.showSlide_(5);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
+      expect(schedulePreloadSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
       impl.showSlide_(impl.slideIndex_);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
+      expect(schedulePreloadSpy).to.not.have.been.called;
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
@@ -119,10 +123,11 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
           .to.be.true;
-      expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
+      expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
-      expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[2]);
-      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[2]);
+      expect(scheduleLayoutSpy.callCount).to.equal(1);
+      expect(schedulePreloadSpy.callCount).to.equal(2);
       expect(impl.slideIndex_).to.equal(1);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
@@ -143,8 +148,9 @@ describe('SlideScroll', () => {
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
           .to.be.false;
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
-      expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
-      expect(scheduleLayoutSpy.callCount).to.equal(5);
+      expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[1]);
+      expect(scheduleLayoutSpy.callCount).to.equal(2);
+      expect(schedulePreloadSpy.callCount).to.equal(3);
       expect(impl.slideIndex_).to.equal(0);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
@@ -162,9 +168,10 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
           .to.be.true;
-      expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[3]);
+      expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[4]);
-      expect(scheduleLayoutSpy.callCount).to.equal(7);
+      expect(scheduleLayoutSpy.callCount).to.equal(3);
+      expect(schedulePreloadSpy.callCount).to.equal(4);
       expect(impl.slideIndex_).to.equal(4);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);

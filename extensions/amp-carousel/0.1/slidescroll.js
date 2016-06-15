@@ -110,42 +110,46 @@ export class AmpSlideScroll extends BaseCarousel {
   /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
-   * @param {number} newindex Index of the slide to be displayed.
+   * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
-  showSlide_(newindex) {
+  showSlide_(newIndex) {
     const noOfSlides = this.noOfSlides_;
-    if (newindex < 0 ||
-        newindex >= this.noOfSlides_ ||
-        this.slideIndex_ == newindex) {
+    if (newIndex < 0 ||
+        newIndex >= this.noOfSlides_ ||
+        this.slideIndex_ == newIndex) {
       return;
     }
     const showIndexArr = [];
-    if (newindex == noOfSlides - 1) {
+    if (newIndex == noOfSlides - 1) {
       // Last slide.
       showIndexArr.push(noOfSlides - 1, noOfSlides - 2);
-    } else if (newindex == 0) {
+    } else if (newIndex == 0) {
       // First slide.
       showIndexArr.push(0, 1);
     } else {
-      showIndexArr.push(newindex - 1, newindex, newindex + 1);
+      showIndexArr.push(newIndex - 1, newIndex, newIndex + 1);
     }
     if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], false);
     }
-    this.updateInViewport(this.slides_[newindex], true);
+    this.updateInViewport(this.slides_[newIndex], true);
     showIndexArr.forEach(showIndex => {
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
-      this.scheduleLayout(this.slides_[showIndex]);
+      if (showIndex == newIndex) {
+        this.scheduleLayout(this.slides_[showIndex]);
+      } else {
+        this.schedulePreload(this.slides_[showIndex]);
+      }
     });
     // A max of 3 slides are displayed at a time - we show the first slide
     // (which is at scrollLeft 0) when slide 0 is requested - for all other
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
-    const newScrollLeft = (newindex == 0) ? 0 : this.slideWidth_;
+    const newScrollLeft = (newIndex == 0) ? 0 : this.slideWidth_;
     this.slidesContainer_./*REVIEW*/scrollLeft = newScrollLeft;
-    this.slideIndex_ = newindex;
-    this.hideRestOfTheSlides_(newindex);
+    this.slideIndex_ = newIndex;
+    this.hideRestOfTheSlides_(newIndex);
     this.setControlsState();
   }
 
