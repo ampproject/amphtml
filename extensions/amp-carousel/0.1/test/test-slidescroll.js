@@ -36,23 +36,21 @@ describe('SlideScroll', () => {
       toggleExperiment(iframe.win, 'amp-slidescroll', true);
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
           'Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no';
-      const slideScrollHtml =
-        `<amp-carousel type='slides' width=400 height=300 id='c1' controls>
-          <amp-img src='${imgUrl}' width=400 height=300>
-          </amp-img>
-          <amp-img src='${imgUrl}' width=400 height=300>
-          </amp-img>
-          <amp-img src='${imgUrl}' width=400 height=300>
-          </amp-img>
-          <amp-img src='${imgUrl}' width=400 height=300>
-          </amp-img>
-          <amp-img src='${imgUrl}' width=400 height=300>
-          </amp-img>
-        </amp-carousel>
-      `;
+      const slideScrollHtml = "<amp-carousel type='slides'></amp-carousel>";
       const dummyDiv = iframe.doc.createElement('div');
       dummyDiv.innerHTML = slideScrollHtml.trim();
       const ampSlideScroll = dummyDiv.children[0];
+      ampSlideScroll.setAttribute('width', '400');
+      ampSlideScroll.setAttribute('height', '300');
+      ampSlideScroll.setAttribute('controls', '');
+
+      for (let i = 0; i < 5; i++) {
+        const img = document.createElement('amp-img');
+        ampSlideScroll.setAttribute('src', imgUrl);
+        ampSlideScroll.setAttribute('width', '400');
+        ampSlideScroll.setAttribute('height', '300');
+        ampSlideScroll.appendChild(img);
+      }
       return iframe.addElement(ampSlideScroll).then(() => {
         return Promise.resolve({
           iframe,
@@ -72,8 +70,10 @@ describe('SlideScroll', () => {
           ampSlideScroll.querySelectorAll(
             '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
       const impl = ampSlideScroll.implementation_;
-      expect(impl.slideWrappers_[0].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[1].hasAttribute('show')).to.be.true;
+      expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
     });
   });
 
@@ -113,9 +113,12 @@ describe('SlideScroll', () => {
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[1], true);
       expect(updateInViewportSpy.callCount).to.equal(2);
-      expect(impl.slideWrappers_[0].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[1].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.true;
+      expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[2]);
@@ -133,9 +136,12 @@ describe('SlideScroll', () => {
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], true);
       expect(updateInViewportSpy.callCount).to.equal(4);
-      expect(impl.slideWrappers_[0].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[1].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.false;
+      expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[1]);
       expect(scheduleLayoutSpy.callCount).to.equal(5);
@@ -152,8 +158,10 @@ describe('SlideScroll', () => {
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[4], true);
       expect(updateInViewportSpy.callCount).to.equal(6);
-      expect(impl.slideWrappers_[3].hasAttribute('show')).to.be.true;
-      expect(impl.slideWrappers_[4].hasAttribute('show')).to.be.true;
+      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
+      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+          .to.be.true;
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[3]);
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[4]);
       expect(scheduleLayoutSpy.callCount).to.equal(7);
@@ -175,8 +183,10 @@ describe('SlideScroll', () => {
       impl.showSlide_(1);
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
-      expect(impl.slideWrappers_[3].hasAttribute('show')).to.be.false;
-      expect(impl.slideWrappers_[4].hasAttribute('show')).to.be.false;
+      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
       expect(schedulePauseSpy).to.not.have.been.called;
       expect(schedulePauseSpy.callCount).to.equal(0);
 
@@ -184,9 +194,12 @@ describe('SlideScroll', () => {
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
 
-      expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.false;
-      expect(impl.slideWrappers_[3].hasAttribute('show')).to.be.false;
-      expect(impl.slideWrappers_[4].hasAttribute('show')).to.be.false;
+      expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
       expect(schedulePauseSpy.callCount).to.equal(1);
 
@@ -194,9 +207,12 @@ describe('SlideScroll', () => {
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
 
-      expect(impl.slideWrappers_[0].hasAttribute('show')).to.be.false;
-      expect(impl.slideWrappers_[1].hasAttribute('show')).to.be.false;
-      expect(impl.slideWrappers_[2].hasAttribute('show')).to.be.false;
+      expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
+      expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
+          .to.be.false;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
       expect(schedulePauseSpy.callCount).to.equal(3);

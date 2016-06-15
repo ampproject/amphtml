@@ -15,7 +15,10 @@
  */
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
+import {getStyle} from '../../../src/style';
 
+/** @const {string} */
+SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
 export class AmpSlideScroll extends BaseCarousel {
   /** @override */
@@ -29,8 +32,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private @const {!boolean} */
     this.hasNativeSnapPoints_ = (
-        this.element.style.scrollSnapType != undefined ||
-        this.element.style.webkitScrollSnapType != undefined);
+        getStyle(this.element, 'scrollSnapType') != undefined);
     this.element.classList.add('-amp-slidescroll');
 
     /** @private {!Array<!Element>} */
@@ -60,7 +62,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   onLayoutMeasure() {
     /** @private {number} */
-    this.slideWidth_ = this.slidesContainer_./*REVIEW*/offsetWidth;
+    this.slideWidth_ = this.getLayoutWidth();
 
     /** @private {number} */
     this.previousScrollLeft_ = this.slidesContainer_./*REVIEW*/scrollLeft;
@@ -137,7 +139,7 @@ export class AmpSlideScroll extends BaseCarousel {
     }
     this.updateInViewport(this.slides_[newindex], true);
     showIndexArr.forEach(showIndex => {
-      this.slideWrappers_[showIndex].setAttribute('show', '');
+      this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
       this.scheduleLayout(this.slides_[showIndex]);
     });
     // A max of 3 slides are displayed at a time - we show the first slide
@@ -160,8 +162,8 @@ export class AmpSlideScroll extends BaseCarousel {
     for (let i = 0; i < this.noOfSlides_; i++) {
       if (i != index && i != index - 1 && i != index + 1 &&
           this.slideWrappers_[i]) {
-        if (this.slideWrappers_[i].hasAttribute('show')) {
-          this.slideWrappers_[i].removeAttribute('show');
+        if (this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+          this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
           this.schedulePause(this.slides_[i]);
         }
       }

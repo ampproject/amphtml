@@ -96,7 +96,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 100% !important;
 }
 
-.-amp-slide-item[show] {
+.-amp-slide-item-show {
   display: inline-block !important;
 }
 
