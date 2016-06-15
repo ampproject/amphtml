@@ -150,7 +150,7 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
-      expect(event.preventDefault.calledOnce).to.be.true;
+      expect(event.preventDefault.callCount).to.equal(3);
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');

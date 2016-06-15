@@ -88,7 +88,12 @@ export class AmpForm {
    * @private
    */
   handleSubmit_(e) {
-    if (e.defaultPrevented || this.state_ == FormState_.SUBMITTING) {
+    if (e.defaultPrevented) {
+      return;
+    }
+
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.preventDefault();
       return;
     }
 
