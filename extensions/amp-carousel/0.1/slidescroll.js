@@ -18,7 +18,7 @@ import {Layout} from '../../../src/layout';
 import {getStyle} from '../../../src/style';
 
 /** @const {string} */
-SHOWN_CSS_CLASS = '-amp-slide-item-show';
+const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
 export class AmpSlideScroll extends BaseCarousel {
   /** @override */
@@ -71,9 +71,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   layoutCallback() {
     if (this.slideIndex_ == null) {
-      return this.mutateElement(() => {
-        this.showSlide_(0);
-      }, this.slidesContainer_);
+      this.showSlide_(0);
     }
     return Promise.resolve();
   }
@@ -104,9 +102,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.slideIndex_ != null) {
       if ((dir == 1 && this.hasNext()) ||
           (dir == -1 && this.hasPrev())) {
-        this.mutateElement(() => {
-          this.showSlide_(this.slideIndex_ + dir);
-        }, this.slidesContainer_);
+        this.showSlide_(this.slideIndex_ + dir);
       }
     }
   }
@@ -128,7 +124,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (newindex == noOfSlides - 1) {
       // Last slide.
       showIndexArr.push(noOfSlides - 1, noOfSlides - 2);
-    } else if (newindex === 0) {
+    } else if (newindex == 0) {
       // First slide.
       showIndexArr.push(0, 1);
     } else {
@@ -146,7 +142,7 @@ export class AmpSlideScroll extends BaseCarousel {
     // (which is at scrollLeft 0) when slide 0 is requested - for all other
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
-    const newScrollLeft = (newindex === 0) ? 0 : this.slideWidth_;
+    const newScrollLeft = (newindex == 0) ? 0 : this.slideWidth_;
     this.slidesContainer_./*REVIEW*/scrollLeft = newScrollLeft;
     this.slideIndex_ = newindex;
     this.hideRestOfTheSlides_(newindex);
