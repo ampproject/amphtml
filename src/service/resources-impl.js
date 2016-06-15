@@ -401,6 +401,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    element[RESOURCE_PROP_] = null;
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }

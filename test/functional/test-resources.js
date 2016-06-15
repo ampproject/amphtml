@@ -755,6 +755,7 @@ describe('Resources discoverWork', () => {
     const pendingElement = {'__AMP__RESOURCE': pendingResource};
     resources.remove(pendingElement);
     expect(resources.pendingBuildResources_.length).to.equal(0);
+    expect(pendingElement['__AMP__RESOURCE']).to.be.null;
   });
 
 });
