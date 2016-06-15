@@ -60,4 +60,12 @@ Hello, world.
 </html>`,
 
   signature: `ACWMjZEuSyBBmRGq7lNxah7UKttklVXU3uaSJTQA35+IX3d65H8HjWAoVGeetJYt3Y0nX28n24tB2kkIhrg4AZJJIykEm6sGCa/Pkuo0PfoIrqItkoitBLsWeNo2AGuzUKW0hrZ00olZgnHrjklz449Xp3aBmtDcNIzzVxuBl0hnAWzIrceo4JBo3j5V/MAjmxuZ7gIVKStL0WZdGFePlEE0hz4ePU0KLtJpv35u1iLHmmnQq0ssYf/O0UoFO2JNYzzBQmjv9HkoWc6ElNhK4qt0ja+91yZ6KK41Kri1quz1s57yR6GiF3c2+iQ9WGQ7zHNNsMCi9CjzceOgX54IbNHRR4Kk`,
+
+  publicKey: `{
+      "kty": "RSA",
+      "e": "AQAB",
+      "n": "oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1bakbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6fnvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEzfZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2sQuM5KangAkjJRe-Ej6aaQ",
+      "alg": "RS256",
+      "ext": true
+  }`;
 };

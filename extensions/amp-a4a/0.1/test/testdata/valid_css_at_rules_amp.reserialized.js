@@ -127,4 +127,12 @@ Hello, world.
 </html>`,
 
   signature: `ACWMjZEfDeiiPhbDLaJ7Kda+RbEVoC1bqyLdQMDpQ6Oe62RV4b733pacaQRmnLTTuwT7J/4NtNlCk6mz0myhm1/EVNA0ajzBKRfIWWps6KLIyzPRis1rpPvf7RtIzlRdorDdiZr5xtzI9Od9oxWA97dRFPkcr8eOoZOAhSWH5W6tom/UVY2pSMAn0EkwpgTBp7RLnsrVX29+6qAp37LLYlaLPSghzmzAK35h6BajTS/lw5ZfXZhN3MUIO0ns7Gj/6XMrfXLxyuz2B71sPlAt90vPssAlLRfUPsUqEGV8NM6Vn6KhO9qZ5gKWTZKY/FUqTTpJy3xuphpqA0iqtQ65H1z3S6Z2`,
+
+  publicKey: `{
+      "kty": "RSA",
+      "e": "AQAB",
+      "n": "oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1bakbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6fnvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEzfZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2sQuM5KangAkjJRe-Ej6aaQ",
+      "alg": "RS256",
+      "ext": true
+  }`;
 };
