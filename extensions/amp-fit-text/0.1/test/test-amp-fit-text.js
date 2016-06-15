@@ -16,7 +16,7 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-fit-text');
+import '../amp-fit-text';
 import {
   calculateFontSize_,
   updateOverflow_,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('../amp-install-serviceworker');
+import '../amp-install-serviceworker';
 import {adopt} from '../../../../src/runtime';
 import {getService} from '../../../../src/service';
 import * as sinon from 'sinon';

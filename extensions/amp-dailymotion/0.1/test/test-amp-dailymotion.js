@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-dailymotion');
+import '../amp-dailymotion';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

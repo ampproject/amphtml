@@ -63,6 +63,7 @@ describe('FontLoader', () => {
   let setupFontLoadSpy;
   let setupLoadWithPolyfillSpy;
   let setupDisposeSpy;
+  let setupCreateElementsSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

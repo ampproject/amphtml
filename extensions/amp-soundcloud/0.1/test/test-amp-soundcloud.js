@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-soundcloud');
+import '../amp-soundcloud';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

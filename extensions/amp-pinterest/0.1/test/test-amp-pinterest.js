@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-    require('../amp-pinterest');
+    import '../amp-pinterest';
     import {adopt} from '../../../../src/runtime';
     import {Timer} from '../../../../src/timer';
 
