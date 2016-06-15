@@ -23,8 +23,9 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
 import {getStyle} from '../../src/style';
+import {installViewerService} from '../../src/service/viewer-impl';
+import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 describe('Viewport', () => {
@@ -38,6 +39,7 @@ describe('Viewport', () => {
   let viewerViewportHandler;
   let updatedPaddingTop;
   let viewportSize;
+  let vsyncTasks;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -75,12 +77,35 @@ describe('Viewport', () => {
       return {then: callback => callback()};
     }};
     viewport.getSize();
+
+    // Use window since Animation by default will use window.
+    const vsync = vsyncFor(window);
+    vsyncTasks = [];
+    sandbox.stub(vsync, 'canAnimate').returns(true);
+    sandbox.stub(vsync, 'createAnimTask', task => {
+      return () => {
+        vsyncTasks.push(task);
+      };
+    });
   });
 
   afterEach(() => {
+    expect(vsyncTasks.length).to.equal(0);
     viewerMock.verify();
     sandbox.restore();
   });
+
+  function runVsync() {
+    const tasks = vsyncTasks.slice(0);
+    vsyncTasks = [];
+    tasks.forEach(function(task) {
+      const state = {};
+      if (task.measure) {
+        task.measure(state);
+      }
+      task.mutate(state);
+    });
+  }
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
@@ -286,6 +311,40 @@ describe('Viewport', () => {
         .returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     viewport.scrollIntoView(element);
+    bindingMock.verify();
+  });
+
+  it('should change scrollTop for animateScrollIntoView and respect ' +
+    'padding', () => {
+    const element = document.createElement('div');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getLayoutRect').withArgs(element)
+        .returns({top: 111}).once();
+    bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
+    const duration = 1000;
+    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+      bindingMock.verify();
+    });
+    clock.tick(duration);
+    runVsync();
+    return promise;
+  });
+
+  it('should not change scrollTop for animateScrollIntoView', () => {
+    const element = document.createElement('div');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getLayoutRect').withArgs(element)
+        .returns({top: 111}).once();
+    viewport.paddingTop_ = 0;
+    sandbox.stub(viewport, 'getScrollTop').returns(111);
+    bindingMock.expects('setScrollTop').withArgs(111).never();
+    const duration = 1000;
+    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+      bindingMock.verify();
+    });
+    clock.tick(duration);
+    runVsync();
+    return promise;
   });
 
   it('should send cached scroll pos to getLayoutRect', () => {

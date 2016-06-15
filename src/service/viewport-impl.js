@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
@@ -21,6 +22,7 @@ import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {numeric} from '../transition';
 import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
@@ -299,6 +301,32 @@ export class Viewport {
     const elementTop = this.binding_.getLayoutRect(element).top;
     const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
     this.binding_.setScrollTop(newScrollTop);
+  }
+
+  /**
+   * Scrolls element into view much like Element. scrollIntoView does but
+   * in the AMP/Viewer environment. Adds animation for the sccrollIntoView
+   * transition.
+   *
+   * @param {!Element} element
+   * @param {number=} duration
+   * @param {string=} curve
+   * @return {!Promise}
+   */
+  animateScrollIntoView(element, duration = 500, curve = 'ease-in') {
+    const elementTop = this.binding_.getLayoutRect(element).top;
+    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    const curScrollTop = this.getScrollTop();
+    if (newScrollTop == curScrollTop) {
+      return Promise.resolve();
+    }
+    const interpolate = numeric(curScrollTop, newScrollTop);
+    // TODO(erwinm): the duration should not be a constant and should
+    // be done in steps for better transition experience when things
+    // are closer vs farther.
+    return Animation.animate(pos => {
+      this.binding_.setScrollTop(interpolate(pos));
+    }, duration, curve).then();
   }
 
   /**
