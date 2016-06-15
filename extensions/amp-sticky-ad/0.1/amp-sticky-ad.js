@@ -104,6 +104,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     // Check user has scrolled at least one viewport from init position.
     if (scrollTop > viewportHeight) {
+      this.removeOnScrollListener_();
       this.deferMutate(() => {
         toggle(this.element, true);
         this.viewport_.addToFixedLayer(this.element);
@@ -113,7 +114,6 @@ class AmpStickyAd extends AMP.BaseElement {
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
-        this.removeOnScrollListener_();
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
