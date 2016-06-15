@@ -148,6 +148,7 @@
       this.viewportType_ = 'natural';  // "natural" or "virtual"
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
+      this.csi_ = 1;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -197,7 +198,7 @@
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
         viewerorigin: parseUrl(window.location.href).origin,
-        csi: 0
+        csi: this.csi_,
       };
       log('Params:' + JSON.stringify(params));
 
@@ -417,6 +418,17 @@
         return this.broadcast_(data);
       }
       if (type == 'setFlushParams') {
+        return;
+      }
+      if (type == 'prerenderComplete') {
+        return;
+      }
+      if (type == 'tick') {
+        log('[CSI] tick. label:', data.label);
+        return;
+      }
+      if (type == 'sendCsi') {
+        log('[CSI] sendCsi.');
         return;
       }
       return Promise.reject('request not supported: ' + type);

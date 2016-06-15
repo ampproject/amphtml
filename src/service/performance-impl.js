@@ -90,6 +90,9 @@ export class Performance {
     /** @private {?Resources} */
     this.resources = null;
 
+    /** @private {boolean} */
+    this.isMessagingReady_ = false;
+
     /** @private @const {!Promise} */
     this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
       onDocumentReady(this.win.document, () => {
@@ -109,22 +112,42 @@ export class Performance {
 
   /**
    * Listens to viewer and resource events.
+   * @return {!Promise}
    */
   coreServicesAvailable() {
     this.viewer_ = viewerFor(this.win);
     this.resources_ = resourcesFor(this.win);
 
+    // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
 
+    // Does not need to wait for messaging ready since it will be queued
+    // if it isn't ready.
     this.measureUserPerceivedVisualCompletenessTime_();
-    this.setDocumentInfoParams_();
 
-    // forward all queued ticks to the viewer.
-    this.flushQueuedTicks_();
-    // We need to call flush right away in case the viewer is available
-    // later than the amp codebase had invoked the performance services'
-    // `flush` method to forward ticks.
-    this.flush();
+    // Can be null which would mean this AMP page is not embedded
+    // and has no messaging channel.
+    const channelPromise = this.viewer_.whenMessagingReady();
+
+    // We don't check `isPerformanceTrackingOn` here since there are some
+    // events that we call on the viewer even though performance tracking
+    // is off we only need to know if the AMP page has a messaging
+    // channel or not.
+    if (!channelPromise) {
+      return Promise.resolve();
+    }
+
+    return channelPromise.then(() => {
+      this.isMessagingReady_ = true;
+
+      // This task is async
+      this.setDocumentInfoParams_();
+      // forward all queued ticks to the viewer since messaging
+      // is now ready.
+      this.flushQueuedTicks_();
+      // send all csi ticks through.
+      this.flush();
+    });
   }
 
   /**
@@ -213,7 +236,7 @@ export class Performance {
     opt_from = opt_from == undefined ? null : opt_from;
     opt_value = opt_value == undefined ? timer.now() : opt_value;
 
-    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
+    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
         label,
         from: opt_from,
@@ -253,7 +276,7 @@ export class Performance {
    * Calls the "flushTicks" function on the viewer.
    */
   flush() {
-    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
+    if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.flushTicks();
     }
   }
@@ -327,9 +350,8 @@ export class Performance {
         }
       });
 
-      // this should be guaranteed to be at the very least on the last
-      // visibility flush.
       this.setFlushParams_(params);
+      this.flush();
     });
   }
 

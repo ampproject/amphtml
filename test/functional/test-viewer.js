@@ -179,14 +179,27 @@ describe('Viewer', () => {
   it('should configure performance tracking', () => {
     windowApi.location.hash = '';
     let viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
 
     windowApi.location.hash = '#csi=1';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.true;
 
     windowApi.location.hash = '#csi=0';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 

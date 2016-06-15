@@ -456,10 +456,15 @@ export class Viewer {
 
   /**
    * Identifies if the viewer is recording instrumentation.
+   * Will also return false if no messaging channel is established, this
+   * means the AMP page is not embedded.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
-    return this.performanceTracking_;
+    // If there is no messagingMaybePromise_, then document is not
+    // embedded and no performance tracking is needed since there is nobody
+    // to forward the events.
+    return this.performanceTracking_ && !!this.messagingMaybePromise_;
   }
 
   /**
@@ -1020,6 +1025,15 @@ export class Viewer {
         this.sendMessageUnreliable_(eventType, data, false);
       }
     });
+  }
+
+  /**
+   * Resolves when there is a messaging channel established with the viewer.
+   * Will be null if no messaging is needed like in an non-embedded document.
+   * @return {?Promise}
+   */
+  whenMessagingReady() {
+    return this.messagingMaybePromise_;
   }
 }
 
