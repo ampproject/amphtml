@@ -17,6 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import {AmpForm} from '../amp-form';
 import * as sinon from 'sinon';
+import {timer} from '../../../../src/timer';
 
 describe('amp-form', () => {
 
@@ -64,7 +65,7 @@ describe('amp-form', () => {
   });
 
   it('should call fetchJson with the xhr action and form data', () => {
-    createIframePromise().then(iframe => {
+    return createIframePromise().then(iframe => {
       const form = iframe.doc.createElement('form');
       const nameInput = iframe.doc.createElement('input');
       nameInput.setAttribute('name', 'name');
@@ -72,7 +73,7 @@ describe('amp-form', () => {
       form.appendChild(nameInput);
       form.setAttribute('action-xhr', 'https://example.com');
       const ampForm = new AmpForm(form);
-      ampForm.xhr_.fetchJson = sandbox.spy();
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
@@ -81,15 +82,71 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
       expect(ampForm.xhr_.fetchJson.called).to.be.true;
-      expect(ampForm.xhr_.fetchJson.calledWith('https://example.com')).to.be.true;
+      expect(ampForm.xhr_.fetchJson.calledWith(
+          'https://example.com')).to.be.true;
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
-      expect(config.body.get('name')).to.be.equal('John Miller');
       expect(config.method).to.equal('GET');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
     });
   });
 
+  it('should manage form state classes (submitting, success)', () => {
+    return createIframePromise().then(iframe => {
+      const form = iframe.doc.createElement('form');
+      form.setAttribute('action-xhr', 'https://example.com');
+      const ampForm = new AmpForm(form);
+      let fetchJsonResolver;
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
+        fetchJsonResolver = resolve;
+      }));
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault.called).to.be.true;
+      expect(form.className).to.contain('amp-form-submitting');
+      expect(form.className).to.not.contain('amp-form-submit-error');
+      expect(form.className).to.not.contain('amp-form-submit-success');
+      fetchJsonResolver();
+      return timer.promise(20).then(() => {
+        expect(form.className).to.not.contain('amp-form-submitting');
+        expect(form.className).to.not.contain('amp-form-submit-error');
+        expect(form.className).to.contain('amp-form-submit-success');
+      });
+    });
+  });
+
+  it('should manage form state classes (submitting, error)', () => {
+    return createIframePromise().then(iframe => {
+      const form = iframe.doc.createElement('form');
+      form.setAttribute('action-xhr', 'https://example.com');
+      const ampForm = new AmpForm(form);
+      let fetchJsonRejecter;
+      sandbox.stub(ampForm.xhr_, 'fetchJson')
+          .returns(new Promise((unusedResolve, reject) => {
+            fetchJsonRejecter = reject;
+          }));
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault.called).to.be.true;
+      expect(form.className).to.contain('amp-form-submitting');
+      expect(form.className).to.not.contain('amp-form-submit-error');
+      expect(form.className).to.not.contain('amp-form-submit-success');
+      fetchJsonRejecter();
+      return timer.promise(20).then(() => {
+        expect(form.className).to.not.contain('amp-form-submitting');
+        expect(form.className).to.not.contain('amp-form-submit-success');
+        expect(form.className).to.contain('amp-form-submit-error');
+      }).should.eventually.throw;
+    });
+  });
 });

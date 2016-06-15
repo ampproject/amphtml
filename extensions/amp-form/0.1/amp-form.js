@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
-import {user} from '../../../src/log';
+import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
@@ -26,6 +26,13 @@ import {startsWith} from '../../../src/string';
 
 /** @type {string} */
 const TAG = 'amp-form';
+
+/** @const @enum {string} */
+const FormState_ = {
+  SUBMITTING: 'submitting',
+  SUBMIT_ERROR: 'submit-error',
+  SUBMIT_SUCCESS: 'submit-success',
+};
 
 export class AmpForm {
 
@@ -45,6 +52,9 @@ export class AmpForm {
 
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
+
+    /** @const @private {string} */
+    this.target_ = this.form_.getAttribute('target');
 
     /** @const @private {?string} */
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
@@ -72,13 +82,32 @@ export class AmpForm {
     }
     if (this.xhrAction_) {
       e.preventDefault();
+      this.setState_(FormState_.SUBMITTING);
       this.xhr_.fetchJson(this.xhrAction_, {
         body: new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
-      });
+      }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
+          .catch(error => {
+            this.setState_(FormState_.SUBMIT_ERROR);
+            rethrowAsync('Form submission failed:', error);
+          });
+    } else if (this.target_ == '_top' && this.method_ == 'POST') {
+      this.setState_(FormState_.SUBMITTING);
     }
+  }
+
+  /**
+   * Adds proper classes for the state passed.
+   * @param {string} state
+   * @private
+   */
+  setState_(state) {
+    for (const key in FormState_) {
+      this.form_.classList.remove(`amp-form-${FormState_[key]}`);
+    }
+    this.form_.classList.add(`amp-form-${state}`);
   }
 }
 
