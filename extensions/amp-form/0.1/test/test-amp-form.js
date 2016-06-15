@@ -136,7 +136,7 @@ describe('amp-form', () => {
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
       };
-      ampForm.handleSubmit_(event)
+      ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
