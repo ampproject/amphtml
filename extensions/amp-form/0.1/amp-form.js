@@ -64,6 +64,17 @@ export class AmpForm {
           'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
+
+    const submitButtons = this.form_.querySelectorAll('input[type=submit]');
+    user.assert(submitButtons && submitButtons.length > 0,
+        'form requires at least one <input type=submit>: %s', this.form_);
+
+    /** @const @private {!Array<!Element>} */
+    this.submitButtons_ = toArray(submitButtons);
+
+    /** @private {?string} */
+    this.state_ = null;
+
     this.installSubmitHandler_();
   }
 
@@ -80,6 +91,12 @@ export class AmpForm {
     if (e.defaultPrevented) {
       return;
     }
+
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.preventDefault();
+      return;
+    }
+
     if (this.xhrAction_) {
       e.preventDefault();
       this.setState_(FormState_.SUBMITTING);
@@ -104,10 +121,16 @@ export class AmpForm {
    * @private
    */
   setState_(state) {
-    for (const key in FormState_) {
-      this.form_.classList.remove(`amp-form-${FormState_[key]}`);
-    }
+    this.form_.classList.remove(`amp-form-${this.state_}`);
     this.form_.classList.add(`amp-form-${state}`);
+    this.state_ = state;
+    this.submitButtons_.forEach(button => {
+      if (state == FormState_.SUBMITTING) {
+        button.setAttribute('disabled', '');
+      } else {
+        button.removeAttribute('disabled');
+      }
+    });
   }
 }
 
