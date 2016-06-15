@@ -51,7 +51,7 @@ describe('Rendering of one ad with ad script', () => {
 
   // TODO(#3561): unmute the test.
   it.skipper().skipEdge()
-      .run('should create an iframe loaded with ad script', function() {
+  .run('should create an iframe loaded with ad script', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;

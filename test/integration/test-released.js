@@ -49,7 +49,7 @@ function runTest(shouldKillPolyfillableApis) {
     // at the rendering. The test passes when running locally in FF.
     // TODO(#3561): unmute the test.
     it.skipper().skipFirefox().skipChrome()
-        .run('all components should get loaded', function() {
+    .run('all components should get loaded', function() {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {
         expect(fixture.doc.querySelectorAll('.-amp-element'))
