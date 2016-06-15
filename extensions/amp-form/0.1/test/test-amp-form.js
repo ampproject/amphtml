@@ -22,6 +22,38 @@ import {timer} from '../../../../src/timer';
 describe('amp-form', () => {
 
   let sandbox;
+
+  function getAmpForm(button1 = true, button2 = false) {
+    return createIframePromise().then(iframe => {
+      const form = getForm(iframe.doc, button1, button2);
+      const ampForm = new AmpForm(form);
+      return ampForm;
+    });
+  }
+
+  function getForm(doc = document, button1 = true, button2 = false) {
+    const form = doc.createElement('form');
+
+    const nameInput = doc.createElement('input');
+    nameInput.setAttribute('name', 'name');
+    nameInput.setAttribute('value', 'John Miller');
+    form.appendChild(nameInput);
+    form.setAttribute('action-xhr', 'https://example.com');
+
+    if (button1) {
+      const submitBtn = doc.createElement('input');
+      submitBtn.setAttribute('type', 'submit');
+      form.appendChild(submitBtn);
+    }
+
+    if (button2) {
+      const submitBtn = doc.createElement('input');
+      submitBtn.setAttribute('type', 'submit');
+      form.appendChild(submitBtn);
+    }
+
+    return form;
+  }
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
@@ -30,8 +62,16 @@ describe('amp-form', () => {
     sandbox.restore();
   });
 
+  it('should assert form has at least 1 submit button', () => {
+    let form = getForm(document, false, false);
+    expect(() => new AmpForm(form)).to.throw(
+        /form requires at least one <input type=submit>/);
+    form = getForm(document, true, false);
+    expect(() => new AmpForm(form)).to.not.throw;
+  });
+
   it('should assert valid action-xhr when provided', () => {
-    const form = document.createElement('form');
+    const form = getForm();
     form.setAttribute('action-xhr', 'http://example.com');
     expect(() => new AmpForm(form)).to.throw(
         /form action-xhr must start with/);
@@ -43,7 +83,7 @@ describe('amp-form', () => {
   });
 
   it('should listen to submit event', () => {
-    const form = document.createElement('form');
+    const form = getForm();
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
@@ -52,7 +92,7 @@ describe('amp-form', () => {
   });
 
   it('should do nothing if defaultPrevented', () => {
-    const form = document.createElement('form');
+    const form = getForm();
     form.setAttribute('action-xhr', 'https://example.com');
     const ampForm = new AmpForm(form);
     const event = {
@@ -65,17 +105,10 @@ describe('amp-form', () => {
   });
 
   it('should call fetchJson with the xhr action and form data', () => {
-    return createIframePromise().then(iframe => {
-      const form = iframe.doc.createElement('form');
-      const nameInput = iframe.doc.createElement('input');
-      nameInput.setAttribute('name', 'name');
-      nameInput.setAttribute('value', 'John Miller');
-      form.appendChild(nameInput);
-      form.setAttribute('action-xhr', 'https://example.com');
-      const ampForm = new AmpForm(form);
+    return getAmpForm().then(ampForm => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
       const event = {
-        target: form,
+        target: ampForm.form_,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
       };
@@ -93,15 +126,54 @@ describe('amp-form', () => {
     });
   });
 
-  it('should manage form state classes (submitting, success)', () => {
-    return createIframePromise().then(iframe => {
-      const form = iframe.doc.createElement('form');
-      form.setAttribute('action-xhr', 'https://example.com');
-      const ampForm = new AmpForm(form);
+  it('should block multiple submissions and disable buttons', () => {
+    return getAmpForm(true, true).then(ampForm => {
       let fetchJsonResolver;
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
+      const form = ampForm.form_;
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      const button1 = form.querySelectorAll('input[type=submit]')[0];
+      const button2 = form.querySelectorAll('input[type=submit]')[1];
+      expect(button1.hasAttribute('disabled')).to.be.false;
+      expect(button2.hasAttribute('disabled')).to.be.false;
+      ampForm.handleSubmit_(event);
+      expect(ampForm.state_).to.equal('submitting');
+      expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
+      expect(button1.hasAttribute('disabled')).to.be.true;
+      expect(button2.hasAttribute('disabled')).to.be.true;
+      ampForm.handleSubmit_(event);
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault.called).to.be.true;
+      expect(event.preventDefault.calledOnce).to.be.true;
+      expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
+      expect(form.className).to.contain('amp-form-submitting');
+      expect(form.className).to.not.contain('amp-form-submit-error');
+      expect(form.className).to.not.contain('amp-form-submit-success');
+      fetchJsonResolver();
+      return timer.promise(20).then(() => {
+        expect(button1.hasAttribute('disabled')).to.be.false;
+        expect(button2.hasAttribute('disabled')).to.be.false;
+        expect(ampForm.state_).to.equal('submit-success');
+        expect(form.className).to.not.contain('amp-form-submitting');
+        expect(form.className).to.not.contain('amp-form-submit-error');
+        expect(form.className).to.contain('amp-form-submit-success');
+      });
+    });
+  });
+
+  it('should manage form state classes (submitting, success)', () => {
+    return getAmpForm().then(ampForm => {
+      let fetchJsonResolver;
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
+        fetchJsonResolver = resolve;
+      }));
+      const form = ampForm.form_;
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
@@ -109,11 +181,13 @@ describe('amp-form', () => {
       };
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
+      expect(ampForm.state_).to.equal('submitting');
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonResolver();
       return timer.promise(20).then(() => {
+        expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.contain('amp-form-submit-success');
@@ -122,27 +196,35 @@ describe('amp-form', () => {
   });
 
   it('should manage form state classes (submitting, error)', () => {
-    return createIframePromise().then(iframe => {
-      const form = iframe.doc.createElement('form');
-      form.setAttribute('action-xhr', 'https://example.com');
-      const ampForm = new AmpForm(form);
+    return getAmpForm(true, true).then(ampForm => {
       let fetchJsonRejecter;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
           }));
+      const form = ampForm.form_;
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
         defaultPrevented: false,
       };
+      const button1 = form.querySelectorAll('input[type=submit]')[0];
+      const button2 = form.querySelectorAll('input[type=submit]')[1];
+      expect(button1.hasAttribute('disabled')).to.be.false;
+      expect(button2.hasAttribute('disabled')).to.be.false;
       ampForm.handleSubmit_(event);
+      expect(button1.hasAttribute('disabled')).to.be.true;
+      expect(button2.hasAttribute('disabled')).to.be.true;
       expect(event.preventDefault.called).to.be.true;
+      expect(ampForm.state_).to.equal('submitting');
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonRejecter();
       return timer.promise(20).then(() => {
+        expect(button1.hasAttribute('disabled')).to.be.false;
+        expect(button2.hasAttribute('disabled')).to.be.false;
+        expect(ampForm.state_).to.equal('submit-error');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
