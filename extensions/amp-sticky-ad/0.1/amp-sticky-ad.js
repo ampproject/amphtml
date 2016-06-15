@@ -47,11 +47,17 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @const @private {!Element} */
     this.ad_ = children[0];
 
+    /** @private @const {!Element|null} */
+    this.closeButton_ = null;
+
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private @ const {!Function|null} */
+    this.boundOnClick_ = null;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -87,6 +93,15 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  removeOnClickListener_() {
+    if (this.boundOnClick_ && this.closeButton_) {
+      this.closeButton_.removeEventListener('click',
+          this.boundOnClick_);
+      this.boundOnClick_ = null;
+      this.closeButton_ = null;
+    }
+  }
+
   /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
@@ -113,6 +128,7 @@ class AmpStickyAd extends AMP.BaseElement {
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
+        this.addCloseButton_();
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
@@ -124,6 +140,33 @@ class AmpStickyAd extends AMP.BaseElement {
         }, 1000);
       });
     }
+  }
+
+  /**
+   * The function that add a close button to sticky ad
+   * @private
+   */
+  addCloseButton_() {
+    const closeButton = this.getWin().document.createElement('div');
+    closeButton.setAttribute('class', '-amp-sticky-ad-close-button');
+    this.element.appendChild(closeButton);
+    this.closeButton_ = closeButton;
+    if (!this.boundOnClick_) {
+      this.boundOnClick_ = this.onClick_.bind(this);
+    }
+    closeButton.addEventListener('click', this.boundOnClick_);
+  }
+
+  /**
+   * The listener function that listen to click event and dismiss sticky ad
+   * @private
+   */
+  onClick_() {
+    this.removeOnClickListener_();
+    this.vsync_.mutate(() => {
+      toggle(this.element, false);
+      this.viewport_.updatePaddingBottom(0);
+    });
   }
 }
 

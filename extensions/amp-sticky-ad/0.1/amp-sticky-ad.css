@@ -40,3 +40,13 @@ amp-sticky-ad {
 .-amp-sticky-ad-layout > amp-ad {
   display: block;
 }
+
+.-amp-sticky-ad-close-button {
+  position: absolute;
+  height: 33px;
+  width: 33px;
+  background-color: black;
+  opacity: 0.5;
+  top: -33px;
+  /*direction: rtl;*/
+}
