@@ -29,6 +29,7 @@ describe('amp-fx-flying-carpet', () => {
   function getAmpFlyingCarpet(opt_childrenCallback, opt_top) {
     let viewport;
     const top = opt_top || '200vh';
+    let flyingCarpet;
     return createIframePromise().then(i => {
       iframe = i;
       toggleExperiment(iframe.win, 'amp-fx-flying-carpet', true);
@@ -42,7 +43,7 @@ describe('amp-fx-flying-carpet', () => {
       parent.style.position = 'absolute';
       parent.style.top = top;
 
-      const flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
+      flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
       flyingCarpet.setAttribute('height', '10px');
       if (opt_childrenCallback) {
         const children = opt_childrenCallback(iframe);
@@ -55,6 +56,8 @@ describe('amp-fx-flying-carpet', () => {
     }).then(flyingCarpet => {
       viewport.setScrollTop(parseInt(top, 10));
       return flyingCarpet;
+    }, error => {
+      return Promise.reject({error, flyingCarpet});
     });
   }
 
@@ -121,20 +124,22 @@ describe('amp-fx-flying-carpet', () => {
   it('should not render in the first viewport', () => {
     return getAmpFlyingCarpet(null, '99vh').then(() => {
       throw new Error('should never reach this');
-    }, error => {
-      expect(error.message).to.have.string(
+    }, ref => {
+      expect(ref.error.message).to.have.string(
         'elements must be positioned after the first viewport'
       );
+      expect(ref.flyingCarpet).to.not.display;
     });
   });
 
   it('should not render in the last viewport', () => {
     return getAmpFlyingCarpet(null, '301vh').then(() => {
       throw new Error('should never reach this');
-    }, error => {
-      expect(error.message).to.have.string(
+    }, ref => {
+      expect(ref.error.message).to.have.string(
         'elements must be positioned before the last viewport'
       );
+      expect(ref.flyingCarpet).to.not.display;
     });
   });
 });
