@@ -75,24 +75,29 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 /* Begin SlideScroll */
 .-amp-slidescroll {
-  overflow: hidden;
-  overflow-x: auto;
-  /*VERTICAL ALIGN - http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/#update*/
-  transform-style: preserve-3d;
-  /*END*/
+}
+
+.-amp-slides-container {
+  height: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  position: relative;
   white-space: nowrap;
+  width: 100% !important;
+  scroll-snap-type: mandatory;
   -webkit-overflow-scrolling: touch;
 }
 
 .-amp-slide-item {
+  display: none;
+  height: 100% !important;
   position: relative;
-  top: 50%;
-  /*VERTICAL ALIGN*/
-  transform: translateY(-50%);
-  /*END*/
+  scroll-snap-coordinate: 0 0;
+  width: 100% !important;
 }
 
-.-amp-slide-item[show] {
+.-amp-slide-item-show {
   display: inline-block !important;
 }
+
 /* End SlideScroll */
