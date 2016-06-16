@@ -135,8 +135,9 @@ class Bezier {
     // Try gradient descent to solve for t. If it works, it is very fast.
     let tMin = 0;
     let tMax = 1;
+    let value = 0;
     for (let i = 0; i < 8; i++) {
-      const value = this.getPointX(t);
+      value = this.getPointX(t);
       const derivative = (this.getPointX(t + epsilon) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
