@@ -352,9 +352,9 @@ For instance:
 
 ### AMP_VERSION
 
-Provides a string with the AMP release version. The prefix denotes canary(`00`), production(`01`) or an experiment version ( &gt; `01`).
+Provides a string with the AMP release version.
 
-Example value: `001460655576651`
+Example value: `1460655576651`
 
 ### CLIENT_ID
 

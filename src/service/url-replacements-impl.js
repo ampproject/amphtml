@@ -26,7 +26,6 @@ import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
-import {getMode} from '../mode';
 
 
 /** @private @const {string} */
@@ -336,10 +335,8 @@ export class UrlReplacements {
       return this.getNavigationData_('redirectCount');
     });
 
-    this.set_('AMP_VERSION', () => {
-      const mode = getMode();
-      return mode && mode.version;
-    });
+    // returns the AMP version number
+    this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
   }
 
   /**
