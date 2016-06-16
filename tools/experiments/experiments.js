@@ -96,6 +96,11 @@ const EXPERIMENTS = [
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
+  {
+    id: 'no-auth-in-prerender',
+    name: 'Delay amp-access auth request until doc becomes visible.',
+    spec: '',
+  },
 ];
 
 
