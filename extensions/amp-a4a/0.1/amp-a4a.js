@@ -30,6 +30,7 @@ import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {
+  importPublicKey,
   verifySignature,
   verifySignatureIsAvailable,
 } from './crypto-verifier';
@@ -43,6 +44,28 @@ const modulus =
       'HIZeBlkjHKsQ46HTZPexZw==';
 
 const pubExp = 'AQAB';
+
+const btoaSubChars = /[+\/=]/g;
+// Translate +, / characters; lose padding.
+const btoaSubs = {'+': '-', '/': '_', '=': ''};
+
+/**
+ * Make a base64url (without padding) encoded version of a base64 string.
+ * @param {string} str
+ * @return {string}
+ */
+function base64Tobase64url(str) {
+  return str.replace(btoaSubChars, ch => btoaSubs[ch]);
+}
+
+
+const pubKeyInfos = [importPublicKey({
+  kty: 'RSA',
+  'n': base64Tobase64url(modulus),
+  'e': base64Tobase64url(pubExp),
+  alg: 'RS256',
+  ext: true,
+})];
 
 /**
  * @param {string} str
@@ -59,11 +82,6 @@ export function base64ToByteArray(str) {
   return bytes;
 }
 
-const rsaPubKey = {
-  'n': base64ToByteArray(modulus),
-  'e': base64ToByteArray(pubExp)};
-
-const rsaPubKeys = [rsaPubKey];
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
@@ -408,7 +426,7 @@ export class AmpA4A extends AMP.BaseElement {
               // Among other things, the signature might not be proper base64.
               return verifySignature(adResponse.creativeArrayBuffer,
                                      base64ToByteArray(adResponse.signature),
-                                     rsaPubKeys);
+                                     pubKeyInfos);
             } catch (e) {}
           }
           return false;

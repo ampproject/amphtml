@@ -21,8 +21,9 @@ import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
 import {data as regexpsAmpData} from './testdata/regexps.reserialized';
-import {data as validCSSAmp}
-    from './testdata/valid_css_at_rules_amp.reserialized';
+import {
+  data as validCSSAmp,
+} from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
 import * as sinon from 'sinon';
@@ -86,8 +87,8 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const extractCreativeAndSignatureSpy = sandbox.spy(
-            a4a, 'extractCreativeAndSignature');
+        // const extractCreativeAndSignatureSpy = sandbox.spy(
+        //     a4a, 'extractCreativeAndSignature');
         // TODO(tdrl): Currently, crypto validation is failing for the prototype
         // data that we're using here.  It's not clear whether that's because of
         // a bug in the data or a bug in the crypto or something else.
@@ -132,15 +133,6 @@ describe('amp-a4a', () => {
         // Disable shadow dom support.
         sandbox.stub(a4a, 'supportsShadowDom').returns(false);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        const extractCreativeAndSignatureSpy = sandbox.spy(
-            a4a, 'extractCreativeAndSignature');
-        // TODO(tdrl): Currently, crypto validation is failing for the prototype
-        // data that we're using here.  It's not clear whether that's because of
-        // a bug in the data or a bug in the crypto or something else.
-        // Regardless, that's causing this test to fail.  For the moment,
-        // we stub out crypto validation.  Remove this stub when crypto works.
-        const validateStub = sandbox.stub(AmpA4A.prototype, 'validateAdResponse_')
-            .returns(Promise.resolve(true));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
@@ -148,12 +140,6 @@ describe('amp-a4a', () => {
               .to.be.true;
           expect(xhrMock.calledOnce,
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
-          // TODO(tdrl): Uncomment the following and remove the following
-          // expectation on validateStub, once crypto works.
-          // expect(extractCreativeAndSignatureSpy.calledOnce,
-          //     'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(validateStub.calledOnce,
-              'validateAdResponse_ called exactly once').to.be.true;
           expect(a4aElement.shadowRoot, 'Shadow root is not set').to.be.null;
           expect(a4aElement.children.length, 'has child').to.equal(1);
           expect(a4aElement.firstChild.src, 'verify iframe src w/ origin').to
@@ -464,13 +450,6 @@ describe('amp-a4a', () => {
           const a4a = new MockA4AImpl(a4aElement);
           viewerForMock.returns(Promise.resolve());
           xhrMock.returns(Promise.resolve(mockResponse));
-          // TODO(tdrl): Currently, crypto validation is failing for the prototype
-          // data that we're using here.  It's not clear whether that's because of
-          // a bug in the data or a bug in the crypto or something else.
-          // Regardless, that's causing this test to fail.  For the moment,
-          // we stub out crypto validation.  Remove this stub when crypto works.
-          const validateStub = sandbox.stub(AmpA4A.prototype, 'validateAdResponse_')
-              .returns(Promise.resolve(true));
           a4a.onLayoutMeasure();
           expect(a4a.adPromise_).to.not.be.null;
           return a4a.adPromise_.then(() => {

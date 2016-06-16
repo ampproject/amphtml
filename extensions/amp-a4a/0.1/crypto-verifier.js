@@ -25,101 +25,123 @@ const crossCrypto = isWebkit ? window.crypto.webkitSubtle :
 const VERSION = 0x00;
 
 /**
+ * An object holding the public key, and stuff derived from it.
+ *
+ * @typedef {{
+ *   publicKey: !Object,               // Parsed form of JSON web key
+ *   hash: Uint8Array,
+ *   cryptoKey: CryptoKey              // CryptoKey form of key
+ * }}
+ */
+let PublicKeyInfoDef;
+
+/**
+ * Compute and cache hash and CryptoKey of public key
+ * @param {!Object} publicKey Parsed JSON web key
+ * @return {!Promise<!PublicKeyInfoDef>}
+ */
+export function importPublicKey(publicKey) {
+  const lenMod = lenPrefix(base64urlDecode(publicKey['n']));
+  const lenPubExp = lenPrefix(base64urlDecode(publicKey['e']));
+  const data = new Uint8Array(lenMod.length + lenPubExp.length);
+  data.set(lenMod);
+  data.set(lenPubExp, lenMod.length);
+  return crossCrypto.digest(
+    {
+      // The list of RSA public keys are not under attacker's control,
+      // so a collision would not help.
+      name: 'SHA-1',
+    },
+    data)
+    .then(digest => {
+      // Hash is the first 4 bytes of the SHA-1 digest.
+      const hash = new Uint8Array(digest, 0, 4);
+
+      // Now Get the CryptoKey.
+      let jsonPublicKey = publicKey;
+      if (isWebkit) {
+        // Webkit wants this as an ArrayBuffer.
+        const keyString = JSON.stringify(jsonPublicKey);
+        jsonPublicKey = new Uint8Array(keyString.length);
+        for (let i = 0; i < keyString.length; i++) {
+          // keyString is ASCII, so charCodeAt will fit in a byte.
+          jsonPublicKey[i] = keyString.charCodeAt(i);
+        }
+      }
+      // Convert the key to internal CryptoKey format.
+      return crossCrypto.importKey(
+        'jwk',
+        jsonPublicKey,
+        {
+          name: 'RSASSA-PKCS1-v1_5',
+          hash: {name: 'SHA-256'},
+        },
+        true,
+        ['verify'])
+        .then(cryptoKey => ({publicKey, hash, cryptoKey}));
+    });
+}
+
+/**
  * Verifies RSA signature corresponds to the data given a list of public keys.
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
- * @param {Array<{e: !Uint8Array, n:!Uint8Array, keyHash: !Uint8Array}>}
- *     rsaPubKeys the RSA public keys.
+ * @param {Array<!Promise<!PublicKeyInfoDef>>>} publicKeyInfos
+ *     The RSA public keys, with hash and CryptoKey.
  * @return {!Promise<!boolean>} whether the signature is valid for one of
  *     the public keys.
  */
-export function verifySignature(data, signature, rsaPubKeys) {
+export function verifySignature(data, signature, publicKeyInfos) {
   // Kludge for now, for testing.
   if (signature.length == 4 && signature.join() == '211,93,183,227') {
     return Promise.resolve(true);
   }
 
   // Try all the public keys.
-  return Promise.all(rsaPubKeys.map(
-    rsaPubKey => tryOnePubKey(data, signature, rsaPubKey)))
+  return Promise.all(publicKeyInfos.map(
+    publicKeyInfoPromise => publicKeyInfoPromise
+      .then(publicKeyInfo =>
+              verifyWithOnePublicKey(data, signature, publicKeyInfo))
+      .catch(err => {
+        // Note if anything goes wrong.
+        dev.error(TAG_, 'Error while verifying:', err);
+        throw err;
+      })))
     // If any public key verifies, then the signature verifies.
     .then(results => results.some(x => x));
 }
 
 
 /**
- * Verifies RSA signature corresponds to the data given a public key.
+ * Verifies RSA signature corresponds to the data, given a public key.
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
  * @param {{e: !Uint8Array, n:!Uint8Array, keyHash: !Uint8Array}}
- *     rsaPubKey the RSA public key. If keyHash in the public key is null,
+ *     pubKey the RSA public key. If keyHash in the public key is null,
  *     this function will compute it.
  * @return {!Promise<!boolean>} whether the signature is valid for
  *     the public key.
  */
-function tryOnePubKey(data, signature, rsaPubKey) {
-  return hashRSAPubKey(rsaPubKey).then(hash => {
-    if (rsaPubKey['keyHash'] == null) {
-      rsaPubKey['keyHash'] = new Uint8Array(hash, 0, 4);
-    }
-    const keyHash = rsaPubKey['keyHash'];
-    // The signature has the following format:
-    // 1-byte version + 4-byte key hash + raw RSA signature where
-    // the raw RSA signature is computed over (data || 1-byte version).
-    // If the hash doesn't match, don't bother checking this key.
-    if (!(signature.length > 5 && signature[0] == VERSION &&
-          hashesEqual(signature, keyHash))) {
-      return false;
-    }
+function verifyWithOnePublicKey(data, signature, publicKeyInfo) {
+  // The signature has the following format:
+  // 1-byte version + 4-byte key hash + raw RSA signature where
+  // the raw RSA signature is computed over (data || 1-byte version).
+  // If the hash doesn't match, don't bother checking this key.
+  if (!(signature.length > 5 && signature[0] == VERSION &&
+          hashesEqual(signature, publicKeyInfo.hash))) {
+    return false;
+  }
+  // Verify that the data matches the raw RSA signature, using the
+  // public key.
+  // Append the version number to the data.
+  const signedData = new Uint8Array(data.length + 1);
+  signedData.set(data);
+  signedData[data.length] = VERSION;
 
-    // Construct the JSON form of the public key.
-    let jsonRsaKey = {
-      kty: 'RSA',
-      e: base64urlEncodeByteArray(rsaPubKey['e'], true),
-      n: base64urlEncodeByteArray(rsaPubKey['n'], true),
-      alg: 'RS256',
-      ext: true,
-    };
-
-    if (isWebkit) {
-      // Webkit wants this as an ArrayBuffer.
-      const keyString = JSON.stringify(jsonRsaKey);
-      jsonRsaKey = new Uint8Array(keyString.length);
-      for (let i = 0; i < keyString.length; i++) {
-        // keyString is ASCII, so charCodeAt will fit in a byte.
-        jsonRsaKey[i] = keyString.charCodeAt(i);
-      }
-    }
-    // Convert the key to internal CryptoKey format.
-    return crossCrypto.importKey(
-      'jwk',
-      jsonRsaKey,
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: {name: 'SHA-256'},
-      },
-      true,
-      ['verify'])
-
-      // Verify that the data matches the raw RSA signature, using the
-      // public key.
-      .then(publicKey => {
-        // Append the version number to the data.
-        const signedData = new Uint8Array(data.length + 1);
-        signedData.set(data);
-        signedData[data.length] = VERSION;
-
-        return crossCrypto.verify({
-          name: 'RSASSA-PKCS1-v1_5',
-          hash: 'SHA-256',
-        }, publicKey, signature.subarray(5), signedData);
-      });
-  })
-  // Note if anything goes wrong.
-    .catch(err => {
-      dev.error(TAG_, 'Error while verifying:', err);
-      throw err;
-    });
+  return crossCrypto.verify({
+    name: 'RSASSA-PKCS1-v1_5',
+    hash: 'SHA-256',
+  }, publicKeyInfo.cryptoKey, signature.subarray(5), signedData);
 }
 
 /**
@@ -155,30 +177,6 @@ function lenPrefix(data) {
 }
 
 /**
- * @param {{e: !Uint8Array, n:!Uint8Array, keyHash: !Uint8Array}} the RSA
- *     public key. If keyHash is null, this function will compute it.
- * @return {!Promise<!ArrayBuffer>} the hash of RSA public key.
- */
-function hashRSAPubKey(rsaPubKey) {
-  if (rsaPubKey['keyHash'] == null) {
-    const lenMod = lenPrefix(rsaPubKey['n']);
-    const lenPubExp = lenPrefix(rsaPubKey['e']);
-    const data = new Uint8Array(lenMod.length + lenPubExp.length);
-    data.set(lenMod);
-    data.set(lenPubExp, lenMod.length);
-    return crossCrypto.digest(
-      {
-        // The list of RSA public keys are not under attacker's control,
-        // so a collision would not help.
-        name: 'SHA-1',
-      },
-      data);
-  } else {
-    return Promise.resolve(rsaPubKey['keyHash']);
-  }
-}
-
-/**
  * Compare the hash field of the signature to keyHash.
  * Note that signature has a one-byte version, followed by 4-byte hash.
  * @param {!Uint8Array} signature
@@ -194,19 +192,18 @@ function hashesEqual(signature, keyHash) {
   return true;
 }
 
-const btoaSubChars = /[+\/=]/g;
-// Translate +, / characters; lose padding.
-const btoaSubs = {'+': '-', '/': '_', '=': ''};
-
-/**
- * Make a base64url (without padding) encoded version of some bytes.
- * @param {Uint8Array} array
- * @return {string}
- */
-function base64urlEncodeByteArray(byteArray) {
-  const chars = Array(byteArray.length);
-  for (let i = 0; i < byteArray.length; i++) {
-    chars[i] = String.fromCharCode(byteArray[i]);
+export function stringToByteArray(str) {
+  const bytes = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    bytes[i] = str.charCodeAt(i);
   }
-  return btoa(chars.join('')).replace(btoaSubChars, ch => btoaSubs[ch]);
+  return bytes;
+};
+
+
+const atobSubs = {'-': '+', '_': '/', '.': '='};
+
+export function base64urlDecode(str) {
+  return stringToByteArray(atob(str.replace(/[-_.]/g,
+                                            ch => atobSubs[ch])));
 }

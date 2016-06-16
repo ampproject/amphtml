@@ -16,35 +16,12 @@
 
 import * as sinon from 'sinon';
 import {
+  importPublicKey,
+  stringToByteArray,
   verifySignature,
   verifySignatureIsAvailable,
 } from '../crypto-verifier';
 
-function stringToByteArray(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    bytes[i] = str.charCodeAt(i);
-  }
-  return bytes;
-};
-
-
-const atobSubs = {'-': '+', '_': '/', '.': '='};
-
-function base64urlDecode(str) {
-  return stringToByteArray(atob(str.replace(/[-_.]/g,
-                                                 ch => atobSubs[ch])));
-}
-
-function hexToByteArray(hexString) {
-  // Assume length is even.
-  const byteLength = hexString.length / 2;
-  const bytes = new Uint8Array(byteLength);
-  for (let i = 0; i < byteLength; i++) {
-    bytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
-  }
-  return bytes;
-};
 
 const modulus =
       '8iAq9Q7zaD93myumSS41aEha6HNRNlPD19tMQHHNjzFdtAH8-w' +
@@ -60,18 +37,37 @@ const modulus =
       'eJ8jvDx2_mBb';
 const pubExp = 'AQAB';
 
-const rsaPubKey = {
-  'n': base64urlDecode(modulus),
-  'e': base64urlDecode(pubExp)};
+const pubKeyInfo = importPublicKey({
+  kty: 'RSA',
+  'n': modulus,
+  'e': pubExp,
+  alg: 'RS256',
+  ext: true,
+});
+
 const modulus1 =
       'vwx9LQrXHQmiVxxSK9IA_wq9Yu2TFDEQHk9b_rdYJe6fEEwron' +
       '8W_9GBHbBwpNszMdgG531hZqvIU4xALhi47VsD4h5XJ2UNbCU2' +
       'kpcJ-XC_Q62ArEY5vqxJgdYjq4bE8s3f8rKC-Uqg_uepoFEn-X' +
       'Xf2l0UQmVcYCxeRY6ahvM';
 const pubExp1 = 'AQAB';
-const rsaPubKey1 = {
-  'n': base64urlDecode(modulus1),
-  'e': base64urlDecode(pubExp1),
+const pubKeyInfo1 = importPublicKey({
+  kty: 'RSA',
+  'n': modulus1,
+  'e': pubExp1,
+  alg: 'RS256',
+  ext: true,
+});
+
+
+function hexToByteArray(hexString) {
+  // Assume length is even.
+  const byteLength = hexString.length / 2;
+  const bytes = new Uint8Array(byteLength);
+  for (let i = 0; i < byteLength; i++) {
+    bytes[i] = parseInt(hexString.substr(i * 2, 2), 16);
+  }
+  return bytes;
 };
 
 const signature = hexToByteArray(
@@ -104,13 +100,13 @@ describe('verifySignature', function() {
   });
 
   it('should validate with the correct key and signature', () => {
-    verifySignature(data, signature, [rsaPubKey])
+    verifySignature(data, signature, [pubKeyInfo])
       .then(isvalid => expect(isvalid).to.be.true);
   });
 
   it('should not validate with the correct key but wrong data', () => {
     // Test with correct key, but wrong data.
-    verifySignature(wrongData, signature, [rsaPubKey])
+    verifySignature(wrongData, signature, [pubKeyInfo])
       .then(isvalid => expect(isvalid).to.be.false);
   });
 
@@ -119,25 +115,25 @@ describe('verifySignature', function() {
     for (let i = 0; i < signature.length ; i++) {
       const modifiedSig = signature.slice(0);
       modifiedSig[i] += 1;
-      arr[i] = verifySignature(data, modifiedSig, [rsaPubKey, rsaPubKey])
+      arr[i] = verifySignature(data, modifiedSig, [pubKeyInfo, pubKeyInfo])
         .then(isvalid => expect(isvalid).to.be.false);
     };
     return Promise.all(arr);
   });
 
   it('should not validate with wrong key', () =>
-    verifySignature(data, signature, [rsaPubKey1])
+    verifySignature(data, signature, [pubKeyInfo1])
       .then(isvalid => expect(isvalid).to.be.false));
 
   it('should validate with 1 correct key and 1 wrong key', () =>
-    verifySignature(data, signature, [rsaPubKey, rsaPubKey1])
+     verifySignature(data, signature, [pubKeyInfo, pubKeyInfo1])
       .then(isvalid => expect(isvalid).to.be.true));
 
   it('should validate with 1 wrong key and 1 correct key', () =>
-    verifySignature(data, signature, [rsaPubKey1, rsaPubKey1, rsaPubKey])
+    verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1, pubKeyInfo])
       .then(isvalid => expect(isvalid).to.be.true));
 
   it('should not validate with 2 wrong keys', () =>
-    verifySignature(data, signature, [rsaPubKey1, rsaPubKey1])
+    verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1])
       .then(isvalid => expect(isvalid).to.be.false));
 });
