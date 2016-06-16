@@ -42,11 +42,15 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slidesContainer_ = this.win_.document.createElement('div');
     this.slidesContainer_.classList.add('-amp-slides-container');
 
-    // workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
+    // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
     if (this.hasNativeSnapPoints_) {
-      const dummy = this.win_.document.createElement('div');
-      dummy.classList.add('-amp-carousel-start-marker');
-      this.slidesContainer_.appendChild(dummy);
+      const start = this.win_.document.createElement('div');
+      start.classList.add('-amp-carousel-start-marker');
+      this.slidesContainer_.appendChild(start);
+
+      const end = this.win_.document.createElement('div');
+      end.classList.add('-amp-carousel-end-marker');
+      this.slidesContainer_.appendChild(end);
     }
 
     /** @private {!Array<!Element>} */
@@ -60,13 +64,6 @@ export class AmpSlideScroll extends BaseCarousel {
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
-
-    // workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
-    if (this.hasNativeSnapPoints_) {
-      const dummy = this.win_.document.createElement('div');
-      dummy.classList.add('-amp-carousel-end-marker');
-      this.slidesContainer_.appendChild(dummy);
-    }
 
     this.element.appendChild(this.slidesContainer_);
 

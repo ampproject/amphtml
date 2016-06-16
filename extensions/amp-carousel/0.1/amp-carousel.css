@@ -78,30 +78,30 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container {
-  align-items: center;
   display: flex;
   height: 100% !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   position: relative;
-  text-align: center;
   white-space: nowrap;
   width: 100% !important;
-  scroll-snap-type: mandatory;
-  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .-amp-slide-item {
   display: none;
-  flex: 1 0 100% !important;
+  flex: 0 0 100% !important;
   height: 100% !important;
-  position: relative;
+  position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
 }
 
 .-amp-slide-item-show {
-  display: block !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
 }
 
 .-amp-carousel-start-marker,
@@ -111,7 +111,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 1px !important;
   background-color: transparent !important;
   scroll-snap-coordinate: 0 0 !important;
-  flex: 1 0 1px !important;
+  flex: 0 0 1px !important;
 }
 
 .-amp-carousel-start-marker {
