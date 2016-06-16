@@ -22,14 +22,14 @@ limitations under the License.
 <amp-ad width="320" height="50"
 	type="microad"
     data-spot="b4bf837c5ddd69758d5ac924d04cf502"
-    data-url=""
-    data-referrer="">
+    data-url="${COMPASS_EXT_URL}"
+    data-referrer="${COMPASS_EXT_REF}">
 </amp-ad>
 ```
 
 ## Configuration
 
-For configuration details and to generate your tags, [contact us](compass-support@microad.co.jp)
+For configuration details and to generate your tags, contact compass-support@microad.co.jp 
 
 Supported parameters:
 
