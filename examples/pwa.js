@@ -153,6 +153,12 @@ class AmpViewer {
 
     this.host_ = this.win.document.createElement('div');
     this.host_.classList.add('amp-doc-host');
+
+    const hostTemplate = this.win.document.getElementById('amp-slot-template');
+    if (hostTemplate) {
+      this.host_.appendChild(hostTemplate.content);
+    }
+
     this.container.appendChild(this.host_);
 
     this.shadowRoot_ = this.host_.createShadowRoot();

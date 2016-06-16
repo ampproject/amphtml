@@ -58,6 +58,12 @@
       font-size: 14px;
       color: rgba(0,0,0,0.87);
     }
+
+    .amp-slot {
+      padding: 16px;
+      font-size: larger;
+      background: cyan;
+    }
   </style>
 
   <script src="./pwa.js"></script>
@@ -85,6 +91,12 @@
     <div id="doc-container" class="doc-container">
       Document will appear here
     </div>
+    <template id="amp-slot-template">
+      <div class="amp-slot" slot="slot1" onclick="alert('This is not allowed and I don\'t care!');">
+        This content comes from parent shell! Including forbidden elements, styles, etc.
+        <img src="/examples.build/img/hero@1x.jpg" style="width: 40px; height: 40px;">
+      </div>
+    </template>
   </div>
 </body>
 </html>
