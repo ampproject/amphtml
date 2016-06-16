@@ -293,10 +293,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
     if (hasNewInsert) {
       promise = promise.then(() => {
-        this.getVsync().mutate(() => {
-          // Should scroll into view be toggleable
-          this.viewport_./*OK*/scrollIntoView(this.element);
-        });
+        return this.viewport_.animateScrollIntoView(this.element);
       });
     }
     return promise;
