@@ -184,7 +184,7 @@ describe('Visibility (tag: amp-analytics)', () => {
     // There is a 20ms offset in some timedurations because of initial
     // timeout in the listenOnce logic.
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
-      maxContinuousTime: '1000',
+      maxContinuousVisibleTime: '1000',
       totalVisibleTime: '1000',
       firstSeenTime: '20',
       fistVisibleTime: '1020',
@@ -220,7 +220,7 @@ describe('Visibility (tag: amp-analytics)', () => {
     sandbox.clock.tick(900);
     expect(callbackStub.callCount).to.equal(1);
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
-      maxContinuousTime: '1000',
+      maxContinuousVisibleTime: '1000',
       minVisiblePercentage: '50',
       maxVisiblePercentage: '50',
       totalVisibleTime: '1999',
