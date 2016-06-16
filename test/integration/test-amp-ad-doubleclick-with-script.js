@@ -20,7 +20,7 @@ import {
   poll,
 } from '../../testing/iframe';
 
-describe.only('Rendering of one ad with ad script', () => {
+describe('Rendering of one ad with ad script', () => {
   let fixture;
   let beforeHref;
 
