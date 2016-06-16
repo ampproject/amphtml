@@ -114,6 +114,18 @@ function polyfillsForTests() {
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
   compileCss();
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+    minifiedName: 'f.js',
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    minify: shouldMinify,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+  });
+  // The main binary does not yet compile successfully with type checking
+  // turned on. Skip for now.
+  if (opt_checkTypes && !argv.more) {
+    return;
+  }
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
@@ -134,13 +146,6 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         's.visibility="visible";' +
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
-  });
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
-    minifiedName: 'f.js',
-    checkTypes: opt_checkTypes,
-    watch: watch,
-    minify: shouldMinify,
-    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -288,7 +293,6 @@ function dist() {
 function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
-  // Our first passing type checked build.
   buildAlp({
     minify: true,
     checkTypes: true,
@@ -299,11 +303,9 @@ function checkTypes() {
     checkTypes: true,
     preventRemoveAndMakeDir: true,
   });
+  compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+      /* check types */ true);
   // These are not turned on on Travis.
-  if (argv.more) {
-    compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
-        /* check types */ true);
-  }
 }
 
 /**
