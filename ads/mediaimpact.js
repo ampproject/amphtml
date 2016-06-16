@@ -16,7 +16,7 @@
 
 import {loadScript} from '../3p/3p';
 
-/* global asmi: false */
+/* global asmi: true */
 
 /**
  * @param {!Window} global
@@ -33,7 +33,7 @@ export function mediaimpact(global, data) {
       'sas_' + data.slot.replace('sas_',''),
       1);
   }, false);
-  /* global asmiSetup: false */
+  /* global asmiSetup: true */
   /* eslint no-unused-vars: 0 */
   asmiSetup = {
     view: 'm',

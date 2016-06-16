@@ -40,7 +40,7 @@ describe('amp-install-serviceworker', () => {
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
-    let calledSrc = undefined;
+    let calledSrc;
     const p = new Promise(() => {});
     implementation.getWin = () => {
       return {
