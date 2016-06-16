@@ -30,6 +30,9 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
+    /** @private @const {boolean} */
+    this.hasLooping_ = this.element.hasAttribute('loop');
+
     /** @private @const {!boolean} */
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
