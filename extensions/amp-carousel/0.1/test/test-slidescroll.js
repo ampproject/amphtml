@@ -77,6 +77,23 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should create start/end markers when scroll-snap is available', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      ampSlideScroll.style['scrollSnapType'] = '';
+      ampSlideScroll.style['webkitScrollSnapType'] = '';
+      ampSlideScroll.style['msScrollSnapType'] = '';
+      impl.buildCarousel();
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-start-marker').length).to.equal(1);
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-end-marker').length).to.equal(1);
+    });
+  });
+
   it('should show the correct slide', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
@@ -186,16 +203,6 @@ describe('SlideScroll', () => {
       const hideRestOfTheSlidesSpy = sandbox.spy(impl, 'hideRestOfTheSlides_');
 
       impl.showSlide_(1);
-
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
-      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
-          .to.be.false;
-      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
-          .to.be.false;
-      expect(schedulePauseSpy).to.not.have.been.called;
-      expect(schedulePauseSpy.callCount).to.equal(0);
-
-      impl.showSlide_(0);
 
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
       expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))

@@ -20,9 +20,6 @@ import {getStyle} from '../../../src/style';
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
-/** @const {string} */
-const SHOWN_CSS_CLASS = '-amp-slide-item-show';
-
 export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   isLayoutSupported(layout) {
