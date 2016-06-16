@@ -77,6 +77,23 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should create start/end markers when scroll-snap is available', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      ampSlideScroll.style['scrollSnapType'] = '';
+      ampSlideScroll.style['webkitScrollSnapType'] = '';
+      ampSlideScroll.style['msScrollSnapType'] = '';
+      impl.buildCarousel();
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-start-marker').length).to.equal(1);
+      expect(
+          ampSlideScroll.getElementsByClassName(
+              '-amp-carousel-end-marker').length).to.equal(1);
+    });
+  });
+
   it('should show the correct slide', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
@@ -94,7 +111,6 @@ describe('SlideScroll', () => {
       expect(hideRestOfTheSlidesSpy).to.not.have.been.called;
       expect(setControlsStateSpy).to.not.have.been.called;
 
-
       impl.showSlide_(5);
       expect(updateInViewportSpy).to.not.have.been.called;
       expect(scheduleLayoutSpy).to.not.have.been.called;
@@ -111,7 +127,6 @@ describe('SlideScroll', () => {
 
 
       impl.showSlide_(1);
-
       expect(updateInViewportSpy).to.have.been.calledWith(
           impl.slides_[0], false);
       expect(updateInViewportSpy).to.have.been.calledWith(

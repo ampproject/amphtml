@@ -42,6 +42,17 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slidesContainer_ = this.win_.document.createElement('div');
     this.slidesContainer_.classList.add('-amp-slides-container');
 
+    // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
+    if (this.hasNativeSnapPoints_) {
+      const start = this.win_.document.createElement('div');
+      start.classList.add('-amp-carousel-start-marker');
+      this.slidesContainer_.appendChild(start);
+
+      const end = this.win_.document.createElement('div');
+      end.classList.add('-amp-carousel-end-marker');
+      this.slidesContainer_.appendChild(end);
+    }
+
     /** @private {!Array<!Element>} */
     this.slideWrappers_ = [];
 
@@ -53,6 +64,7 @@ export class AmpSlideScroll extends BaseCarousel {
       this.slidesContainer_.appendChild(slideWrapper);
       this.slideWrappers_.push(slideWrapper);
     });
+
     this.element.appendChild(this.slidesContainer_);
 
     /** @private {number} */
