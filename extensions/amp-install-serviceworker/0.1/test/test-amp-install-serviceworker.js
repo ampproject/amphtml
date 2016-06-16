@@ -40,7 +40,7 @@ describe('amp-install-serviceworker', () => {
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
-    let calledSrc;
+    let calledSrc = undefined;
     const p = new Promise(() => {});
     implementation.getWin = () => {
       return {
@@ -92,8 +92,7 @@ describe('amp-install-serviceworker', () => {
         },
         navigator: {
           serviceWorker: {
-            register: src => {
-              calledSrc = src;
+            register: () => {
               return p;
             },
           },

@@ -193,6 +193,7 @@ describe('CustomElement', () => {
   let sandbox;
   let resourcesMock;
   let clock;
+  let testElementGetInsersectionElementLayoutBox;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

@@ -315,6 +315,7 @@ describe('AccessService authorization', () => {
   let analyticsMock;
   let adapterMock;
   let performanceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -622,6 +623,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
   let configElement, elementOn, elementOff;
   let templatesMock;
   let mutateElementStub;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -768,6 +770,7 @@ describe('AccessService pingback', () => {
   let analyticsMock;
   let visibilityChanged;
   let scrolled;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -1103,6 +1106,7 @@ describe('AccessService login', () => {
   let cidMock;
   let analyticsMock;
   let serviceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -1424,6 +1428,7 @@ describe('AccessService analytics', () => {
 
   let sandbox;
   let configElement;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

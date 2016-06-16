@@ -34,7 +34,6 @@ describe('Rendering of one ad with ad script', () => {
   }
 
   beforeEach(() => {
-    replaceParentHref = false;
     return createFixtureIframe(
         'test/fixtures/doubleclick.with.script.html', 3000, win => {
           replaceUrl(win);

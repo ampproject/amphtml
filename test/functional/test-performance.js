@@ -21,7 +21,6 @@ import {
   installPerformanceService,
 } from '../../src/service/performance-impl';
 import {getService, resetServiceForTesting} from '../../src/service';
-import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
 
 
@@ -393,7 +392,6 @@ describe('performance', () => {
       viewer = viewerFor(window);
       sandbox.stub(viewer, 'whenMessagingReady')
           .returns(Promise.resolve());
-      resources = resourcesFor(window);
 
       tickSpy = sandbox.spy(perf, 'tick');
 

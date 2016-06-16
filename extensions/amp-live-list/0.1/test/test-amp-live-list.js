@@ -53,7 +53,7 @@ describe('amp-live-list', () => {
   });
 
   function buildElement(elem, attrs) {
-    for (key in attrs) {
+    for (const key in attrs) {
       elem.setAttribute(key, attrs[key]);
     }
     liveList = new AmpLiveList(elem);

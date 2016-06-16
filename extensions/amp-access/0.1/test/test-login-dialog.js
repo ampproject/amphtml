@@ -30,7 +30,6 @@ describe('ViewerLoginDialog', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     viewer = {
       getParam: param => {

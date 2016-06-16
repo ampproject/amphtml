@@ -186,7 +186,8 @@ describe('iframe-helper', function() {
 
   it('should set sentinel on postMessage data', () => {
     insert(testIframe);
-    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
+    const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
+        'postMessage');
     IframeHelper.postMessage(
         testIframe, 'testMessage', {}, 'http://google.com');
     expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');

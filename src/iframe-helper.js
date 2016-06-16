@@ -374,7 +374,7 @@ function parseIfNeeded(data) {
     try {
       data = JSON.parse(data);
     } catch (e) {
-      log.warn('Postmessage could not be parsed. ' +
+      dev.warn('Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
     }
   }
