@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
 import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
@@ -213,7 +212,7 @@ export class InstrumentationService {
    * @private
    */
   createVisibilityListener_(callback, config) {
-    if (config['visibilitySpec'] && this.isViewabilityExperimentOn_()) {
+    if (config['visibilitySpec']) {
       if (!isVisibilitySpecValid(config)) {
         return;
       }
@@ -458,13 +457,6 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
-  }
-
-  /**
-   * @return {boolean} True if the experiment is on. False otherwise.
-   */
-  isViewabilityExperimentOn_() {
-    return isExperimentOn(this.win_, 'amp-analytics-viewability');
   }
 }
 
