@@ -160,6 +160,7 @@ describe('IntersectionObserver', () => {
   let onScrollSpy;
   let onChangeSpy;
   let clock;
+  let testElementGetInsersectionElementLayoutBox;
 
   function getIframe(src) {
     const i = document.createElement('iframe');
@@ -226,7 +227,8 @@ describe('IntersectionObserver', () => {
   it('should not send intersection', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
+    const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
+        'postMessage');
     ioInstance.sendElementIntersection_();
     expect(postMessageSpy.callCount).to.equal(0);
     expect(ioInstance.pendingChanges_).to.have.length(0);

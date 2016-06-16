@@ -15,7 +15,7 @@
  */
 
 import * as sinon from 'sinon';
-require('../amp-carousel');
+import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 
