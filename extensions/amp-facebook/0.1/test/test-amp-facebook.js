@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-facebook');
+import '../amp-facebook';
 import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 

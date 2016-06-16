@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-instagram');
+import '../amp-instagram';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

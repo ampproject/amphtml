@@ -19,7 +19,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportFor} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
-require('../amp-fx-flying-carpet');
+import '../amp-fx-flying-carpet';
 
 adopt(window);
 
