@@ -23,7 +23,7 @@ import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
-import {removeElement} from '../../../src/dom';
+import {removeElement, childElementByAttr} from '../../../src/dom';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -114,7 +114,7 @@ export class AmpForm {
         this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response);
       }).catch(error => {
         this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(FormState_.SUBMIT_ERROR, error);
+        this.renderTemplate_(FormState_.SUBMIT_ERROR, error.responseJson);
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
@@ -145,14 +145,14 @@ export class AmpForm {
    * @param {!Object} data
    * @private
    */
-  renderTemplate_(state, data) {
+  renderTemplate_(state, data = {}) {
     const container = this.form_.querySelector(`[${state}]`);
     if (container) {
       // TODO(#3587): Move the cleanup to do during submission.
       this.cleanupRenderedTemplate_(state);
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
-            rendered.classList.add(`${state}-message`);
+            rendered.setAttribute('i-amp-rendered', '');
             container.appendChild(rendered);
           });
     }
@@ -167,7 +167,7 @@ export class AmpForm {
     if (!container) {
       return;
     }
-    const previousRender = container.querySelector(`.${state}-message`);
+    const previousRender = childElementByAttr(container, 'i-amp-rendered');
     if (previousRender) {
       removeElement(previousRender);
     }

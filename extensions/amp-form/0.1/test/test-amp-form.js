@@ -264,13 +264,13 @@ describe('amp-form', () => {
         defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
-      fetchJsonRejecter({'message': 'hello there'});
+      fetchJsonRejecter({responseJson: {message: 'hello there'} });
       return timer.promise(0).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
-            errorContainer, {'message': 'hello there'})).to.be.true;
+            errorContainer, {message: 'hello there'})).to.be.true;
         // Check that form has a rendered div with class .submit-error-message.
-        const renderedTemplate = form.querySelector('.submit-error-message');
+        const renderedTemplate = form.querySelector('[i-amp-rendered]');
         expect(renderedTemplate).to.not.be.null;
       });
     });
@@ -291,7 +291,7 @@ describe('amp-form', () => {
       successContainer.appendChild(successTemplate);
       const renderedTemplate = iframe.doc.createElement('div');
       renderedTemplate.innerText = 'Success: hello';
-      renderedTemplate.className = 'submit-success-message';
+      renderedTemplate.setAttribute('i-amp-rendered', '');
       successContainer.appendChild(renderedTemplate);
 
       const newRender = iframe.doc.createElement('div');
@@ -318,8 +318,7 @@ describe('amp-form', () => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
             successContainer, {'message': 'What What'})).to.be.true;
-        const renderedTemplates = form.querySelectorAll(
-            '.submit-success-message');
+        const renderedTemplates = form.querySelectorAll('[i-amp-rendered]');
         expect(renderedTemplates[0]).to.not.be.null;
         expect(renderedTemplates.length).to.equal(1);
         expect(renderedTemplates[0]).to.equal(newRender);
