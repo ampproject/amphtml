@@ -88,6 +88,9 @@ export class Viewport {
     /** @private {?number} */
     this.lastMeasureScrollTop_ = null;
 
+    /** @private {boolean} */
+    this.scrollAnimationFrameThrottled_ = false;
+
     /** @private {?number} */
     this./*OK*/scrollLeft_ = null;
 
@@ -143,6 +146,8 @@ export class Viewport {
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    this.onScroll(this.sendScrollMessage_.bind(this));
   }
 
   /** For testing. */
@@ -486,7 +491,7 @@ export class Viewport {
     dev.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
-        'top=', scrollLeft,
+        'left=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
@@ -516,8 +521,11 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = timer.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => this.vsync_.measure(
-          this.throttledScroll_.bind(this, now, newScrollTop)), 36);
+      timer.delay(() => {
+        this.vsync_.measure(() => {
+          this.throttledScroll_(now, newScrollTop);
+        });
+      }, 36);
     }
     this.scrollObservable_.fire();
   }
@@ -550,6 +558,19 @@ export class Viewport {
     }
   }
 
+  /**
+   * Send scroll message via the viewer per animation frame
+   * @private
+   */
+  sendScrollMessage_() {
+    if (!this.scrollAnimationFrameThrottled_) {
+      this.scrollAnimationFrameThrottled_ = true;
+      this.vsync_.measure(() => {
+        this.scrollAnimationFrameThrottled_ = false;
+        this.viewer_.postScroll(this.getScrollTop());
+      });
+    }
+  }
   /** @private */
   resize_() {
     this.rect_ = null;

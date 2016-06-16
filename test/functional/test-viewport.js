@@ -50,6 +50,7 @@ describe('Viewport', () => {
       },
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
+      postScroll: sandbox.spy(),
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
@@ -226,6 +227,46 @@ describe('Viewport', () => {
     bindingMock.verify();
   });
 
+  it('should send scroll events', () => {
+    // 0         ->    6     ->      12   ->      16         ->   18
+    // scroll-10    scroll-20    scroll-30   2nd anim frame    scroll-40
+
+    // when there's no scroll
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // scroll to 10
+    viewport.getScrollTop = () => 10;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 20
+    viewport.getScrollTop = () => 20;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 30
+    viewport.getScrollTop = () => 30;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, second animation frame starts
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(1);
+    expect(viewer.postScroll.withArgs(30).calledOnce).to.be.true;
+    // scroll to 40
+    viewport.getScrollTop = () => 40;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(1);
+  });
+
   it('should defer scroll events', () => {
     let changeEvent = null;
     let eventCount = 0;
@@ -233,8 +274,13 @@ describe('Viewport', () => {
       changeEvent = event;
       eventCount++;
     });
-    binding.getScrollTop = () => 34;
+    // when there's no scroll
     expect(viewport.scrollTracking_).to.be.false;
+    // expect(changeEvent).to.equal(null);
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // time 0: scroll to 34
+    // raf for viewer.postScroll, delay 36 ticks till raf for throttledScroll_
+    binding.getScrollTop = () => 34;
     viewport.scroll_();
     expect(viewport.scrollTracking_).to.be.true;
     viewport.scroll_();
@@ -242,34 +288,59 @@ describe('Viewport', () => {
     expect(changeEvent).to.equal(null);
     expect(viewport.scrollTracking_).to.be.true;
 
-    // Not enough time past.
     clock.tick(8);
     expect(changeEvent).to.equal(null);
     clock.tick(8);
+    // time 16: scroll to 35
+    // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
+    expect(viewer.postScroll.callCount).to.equal(1);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
-    clock.tick(16);
-    viewport.scroll_();
-    expect(changeEvent).to.equal(null);
 
-    // A bit more time.
     clock.tick(16);
+    // time 32: scroll to 35
+    // call viewer.postScroll, raf for viewer.postScroll
     viewport.scroll_();
     expect(changeEvent).to.equal(null);
     expect(viewport.scrollTracking_).to.be.true;
-    clock.tick(4);
+    expect(viewer.postScroll.callCount).to.equal(2);
+
+    // time 36:
+    // raf for throttledScroll_
+
+    clock.tick(16);
+    // time 48: scroll to 35
+    // call viewer.postScroll, call throttledScroll_
+    // raf for viewer.postScroll
+    // delay 36 ticks till raf for throttledScroll_
+    expect(viewport.scrollTracking_).to.be.false;
+    viewport.scroll_();
     expect(changeEvent).to.not.equal(null);
     expect(changeEvent.relayoutAll).to.equal(false);
-    expect(changeEvent.velocity).to.be.closeTo(0.019230, 1e-4);
+    expect(changeEvent.velocity).to.be.closeTo(0.020833, 1e-4);
     expect(eventCount).to.equal(1);
-    expect(viewport.scrollTracking_).to.be.false;
+    expect(viewport.scrollTracking_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(3);
     changeEvent = null;
-    binding.getScrollTop = () => 36;
-    viewport.scroll_();
-    expect(changeEvent).to.equal(null);
-    clock.tick(53);
+
+    clock.tick(16);
+    // time 64:
+    // call viewer.postScroll
+    expect(viewer.postScroll.callCount).to.equal(4);
+
+    clock.tick(20);
+    // time 84:
+    // raf for throttledScroll_
+
+    clock.tick(16);
+    // time 100:
+    // call throttledScroll_
     expect(changeEvent).to.not.equal(null);
+    expect(changeEvent.relayoutAll).to.equal(false);
+    expect(viewport.scrollTracking_).to.be.false;
+    expect(changeEvent.velocity).to.be.equal(0);
+    expect(eventCount).to.equal(2);
   });
 
   it('should update scroll pos and reset cache', () => {
