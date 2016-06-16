@@ -15,9 +15,7 @@
  */
 
 
-var fs = require('fs');
 var test = require('ava');
-// Module under test
 var m = require('./');
 
 var result = {
