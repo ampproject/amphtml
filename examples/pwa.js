@@ -25,7 +25,7 @@ class Shell {
         win.document.getElementById('doc-container'));
 
     /** @private {string} */
-    this.currentPage_ = stripHashMarker(win.location.hash);
+    this.currentPage_ = win.location.pathname;
 
     win.addEventListener('popstate', this.handlePopState_.bind(this));
 
@@ -38,7 +38,7 @@ class Shell {
     // Install service worker
     if ('serviceWorker' in navigator) {
       log('Register service worker');
-      navigator.serviceWorker.register('/examples/pwa-sw.js').then(reg => {
+      navigator.serviceWorker.register('/examples.build/pwa-sw.js').then(reg => {
         log('Service worker registered: ', reg);
       }).catch(err => {
         log('Service worker registration failed: ', err);
@@ -49,7 +49,7 @@ class Shell {
   /**
    */
   handlePopState_() {
-    const newPage = stripHashMarker(this.win.location.hash);
+    const newPage = this.win.location.pathname;
     log('Pop state: ', newPage, this.currentPage_);
     if (newPage != this.currentPage_) {
       this.navigateTo(newPage);
@@ -62,20 +62,21 @@ class Shell {
    */
   navigateTo(path) {
     log('Navigate to: ', path);
+    const oldPage = this.currentPage_;
     this.currentPage_ = path;
 
     // Update URL.
-    const newHash = '#' + path;
-    const push = !this.currentPage_ && !!path;
-    if (newHash != this.win.location.hash) {
+    const push = !isShellUrl(path) && isShellUrl(oldPage);
+    console.log('history push: ', push, path, oldPage);
+    if (path != this.win.location.pathname) {
       if (push) {
-        this.win.history.pushState(null, '', newHash);
+        this.win.history.pushState(null, '', path);
       } else {
-        this.win.history.replaceState(null, '', newHash);
+        this.win.history.replaceState(null, '', path);
       }
     }
 
-    if (!path) {
+    if (isShellUrl(path)) {
       log('Back to shell');
       this.ampViewer_.clear();
       return Promise.resolve();
@@ -293,13 +294,14 @@ class AmpViewer {
 
 
 /**
+ * @param {string} url
+ * @return {boolean}
  */
-function stripHashMarker(s) {
-  if (s && s.substr(0, 1) == '#') {
-    s = s.substr(1);
-  }
-  return s;
+function isShellUrl(url) {
+  // TODO: we can do better than this.
+  return url.indexOf('/pwa.html') != -1;
 }
+
 
 /**
  * @param {string} url
@@ -311,6 +313,7 @@ function fetchDocument(url) {
     xhr.open('GET', url, true);
     xhr.responseType = 'document';
     xhr.setRequestHeader('Accept', 'text/html');
+    xhr.setRequestHeader('AMP-Direct-Fetch', '1');
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;
