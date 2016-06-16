@@ -392,6 +392,12 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace AMP_VERSION', () => {
+    return expand('?sh=AMP_VERSION').then(res => {
+      expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
