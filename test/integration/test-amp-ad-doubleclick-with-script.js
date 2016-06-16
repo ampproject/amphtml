@@ -20,7 +20,7 @@ import {
   poll,
 } from '../../testing/iframe';
 
-describe('Rendering of one ad with ad script', () => {
+describe.only('Rendering of one ad with ad script', () => {
   let fixture;
   let beforeHref;
 
@@ -49,9 +49,7 @@ describe('Rendering of one ad with ad script', () => {
     }
   });
 
-  // TODO(#3561): unmute the test.
-  it.skipper().skipEdge()
-  .run('should create an iframe loaded with ad script', function() {
+  it('should create an iframe loaded with ad script', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;
@@ -69,6 +67,7 @@ describe('Rendering of one ad with ad script', () => {
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
       expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
     }).then(() => {
+      // XXX
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
             iframe.contentWindow.document.getElementById('c');
