@@ -78,36 +78,33 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container {
-  align-items: center;
-  display: flex;
+  align-items: center !important;
+  display: flex !important;
+  flex-wrap: nowrap;
   height: 100% !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  position: relative;
+  position: relative !important;
   text-align: center;
-  white-space: nowrap;
+  white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
   -webkit-overflow-scrolling: touch !important;
 }
 
 .-amp-slide-item {
-  display: none;
+  display: none !important;
   flex: 0 0 100% !important;
   height: 100% !important;
-<<<<<<< 4f5d20a64fd9ec5a3a6ac8e447924288556bce3d
   position: relative !important;
-=======
-  position: relative;
->>>>>>> Making slides flex and workaround for https://bugs.webkit.org/show_bug.cgi?id=158821.
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
 }
 
 .-amp-slide-item-show {
   display: flex !important;
-  align-items: center;
-  justify-content: center;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .-amp-carousel-start-marker,
@@ -132,12 +129,13 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 .-amp-carousel-start-marker,
 .-amp-carousel-end-marker {
-  display: block !important;
-  height: 100% !important;
-  width: 1px !important;
   background-color: transparent !important;
-  scroll-snap-coordinate: 0 0 !important;
+  display: block !important;
   flex: 1 0 1px !important;
+  height: 100% !important;
+  position: relative !important;
+  scroll-snap-coordinate: 0 0 !important;
+  width: 1px !important;
 }
 
 .-amp-carousel-start-marker {
