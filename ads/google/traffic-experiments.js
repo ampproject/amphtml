@@ -90,7 +90,7 @@ export function setupPageExperiments(win, experiments) {
     // externally.  Default it here if necessary.
     win.AMP_CONFIG = win.AMP_CONFIG || {};
   }
-  for (experimentId in experiments) {
+  for (const experimentId in experiments) {
     // Skip experimentId if it is not a key of experiments object or if it
     // has already been populated by some other property.
     if (!experiments.hasOwnProperty(experimentId) ||

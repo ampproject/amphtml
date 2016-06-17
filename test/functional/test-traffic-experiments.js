@@ -114,7 +114,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles multiple experiments', () => {
       sandbox.win.AMP_CONFIG = {};
-      config = sandbox.win.AMP_CONFIG;
+      const config = sandbox.win.AMP_CONFIG;
       config['expt_0'] = 1.0;
       config['expt_1'] = 0.0;
       config['expt_2'] = 1.0;
@@ -155,7 +155,7 @@ describe('all-traffic-experiments-tests', () => {
     it('handles multi-way branches', () => {
       dev.info(TAG_, 'Testing multi-way branches');
       sandbox.win.AMP_CONFIG = {};
-      config = sandbox.win.AMP_CONFIG;
+      const config = sandbox.win.AMP_CONFIG;
       config['expt_0'] = 1.0;
       const experimentInfo = {
         'expt_0': {
@@ -175,7 +175,7 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('handles multiple experiments with multi-way branches', () => {
       sandbox.win.AMP_CONFIG = {};
-      config = sandbox.win.AMP_CONFIG;
+      const config = sandbox.win.AMP_CONFIG;
       config['expt_0'] = 1.0;
       config['expt_1'] = 0.0;
       config['expt_2'] = 1.0;
@@ -237,7 +237,7 @@ describe('all-traffic-experiments-tests', () => {
         },
       };
       sandbox.win.AMP_CONFIG = {};
-      config = sandbox.win.AMP_CONFIG;
+      const config = sandbox.win.AMP_CONFIG;
       config['fooExpt'] = 0.0;
       setupPageExperiments(sandbox.win, exptAInfo);
       config['fooExpt'] = 1.0;

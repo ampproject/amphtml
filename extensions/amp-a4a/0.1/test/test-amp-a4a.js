@@ -279,7 +279,7 @@ describe('amp-a4a', () => {
   describe('#maybeRenderAmpAd_', () => {
     function buildCreativeArrayBuffer() {
       const baseTestDoc = testFragments.minimalDocOneStyle;
-      offsets = {
+      const offsets = {
         cssUtf16CharOffsets: [
           baseTestDoc.indexOf('<style>') + '<style>'.length,
           baseTestDoc.indexOf('</style>'),
@@ -513,7 +513,7 @@ describe('amp-a4a', () => {
           a4a.onLayoutMeasure();
           rejectResolve(new Error('some error'));
           return a4a.adPromise_.then(() => {
-            fail('should have thrown error');
+            assert.fail('should have thrown error');
           }).catch(reason => {
             expect(getAdUrlSpy.called, 'getAdUrl called once')
                 .to.be.true;
