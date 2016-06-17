@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {AmpA4A} from '../amp-a4a';
+import {
+  AmpA4A,
+  setPublicKeys,
+} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -62,6 +65,8 @@ describe('amp-a4a', () => {
     },
   };
 
+  setPublicKeys([JSON.parse(validCSSAmp.publicKey)]);
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
@@ -87,16 +92,8 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
-        // const extractCreativeAndSignatureSpy = sandbox.spy(
-        //     a4a, 'extractCreativeAndSignature');
-        // TODO(tdrl): Currently, crypto validation is failing for the prototype
-        // data that we're using here.  It's not clear whether that's because of
-        // a bug in the data or a bug in the crypto or something else.
-        // Regardless, that's causing this test to fail.  For the moment,
-        // we stub out crypto validation.  Remove this stub when crypto works.
-        const validateStub = sandbox.stub(AmpA4A.prototype,
-                                          'validateAdResponse_')
-            .returns(Promise.resolve(true));
+        const extractCreativeAndSignatureSpy = sandbox.spy(
+          a4a, 'extractCreativeAndSignature');
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
@@ -104,12 +101,8 @@ describe('amp-a4a', () => {
               .to.be.true;
           expect(xhrMock.calledOnce,
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
-          // TODO(tdrl): Uncomment the following and remove the following
-          // expectation on validateStub, once crypto works.
-          // expect(extractCreativeAndSignatureSpy.calledOnce,
-          //     'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(validateStub.calledOnce,
-              'validateAdResponse_ called exactly once').to.be.true;
+          expect(extractCreativeAndSignatureSpy.calledOnce,
+              'extractCreativeAndSignatureSpy called exactly once').to.be.true;
           expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;
           expect(a4aElement.shadowRoot.querySelector('style'),
               'style tag in shadow root').to.not.be.null;

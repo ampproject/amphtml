@@ -92,23 +92,16 @@ export function importPublicKey(publicKey) {
  *     the public keys.
  */
 export function verifySignature(data, signature, publicKeyInfos) {
-  // Kludge for now, for testing.
-  if (signature.length == 4 && signature.join() == '211,93,183,227') {
-    return Promise.resolve(true);
-  }
-
   // Try all the public keys.
-  return Promise.all(publicKeyInfos.map(
-    publicKeyInfoPromise => publicKeyInfoPromise
-      .then(publicKeyInfo =>
-              verifyWithOnePublicKey(data, signature, publicKeyInfo))
-      .catch(err => {
-        // Note if anything goes wrong.
-        dev.error(TAG_, 'Error while verifying:', err);
-        throw err;
-      })))
+  return Promise.all(publicKeyInfos.map(promise => promise.then(
+    publicKeyInfo => verifyWithOnePublicKey(data, signature, publicKeyInfo))))
     // If any public key verifies, then the signature verifies.
-    .then(results => results.some(x => x));
+    .then(results => results.some(x => x))
+    .catch(error => {
+      // Note if anything goes wrong.
+      dev.error(TAG_, 'Error while verifying:', error);
+      throw error;
+    });
 }
 
 
@@ -117,8 +110,7 @@ export function verifySignature(data, signature, publicKeyInfos) {
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
  * @param {{e: !Uint8Array, n:!Uint8Array, keyHash: !Uint8Array}}
- *     pubKey the RSA public key. If keyHash in the public key is null,
- *     this function will compute it.
+ *     publicKeyInfo the RSA public key.
  * @return {!Promise<!boolean>} whether the signature is valid for
  *     the public key.
  */

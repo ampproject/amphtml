@@ -15,7 +15,6 @@
  */
 
 import {createAdPromise} from '../../../../testing/ad-iframe';
-import {resetAdCountForTesting} from '../amp-ad';
 import * as sinon from 'sinon';
 
 describe('amp-ad-3p-impl', tests('amp-ad-3p-impl'));
@@ -34,7 +33,6 @@ function tests(name) {
       sandbox = sinon.sandbox.create();
     });
     afterEach(() => {
-      resetAdCountForTesting();
       sandbox.restore();
     });
 

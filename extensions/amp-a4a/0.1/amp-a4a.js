@@ -35,37 +35,19 @@ import {
   verifySignatureIsAvailable,
 } from './crypto-verifier';
 
-const modulus =
-      'z43rjaJ9PLk1FHMEL31/ILXGtUTN03rxJ9amD9y3BRDpbTA+GkUKiQM07xAd8OXP' +
-      'UZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7+GyTFWDcYz' +
-      'ey90jRFNNWxjzKrvSazacE0TvJ8S/AVP4EV67VdbByCC1tpBzLhhy7RFHp2cXGTp' +
-      'WYUqZUAVUdJoeBuCho/zQz2au7c6sDaLiF+uYL9Td9MrZ6tSLo3MeMIZia4WgWqj' +
-      'TDICR0h+zlbHUd0K9CoXbGTt5nvkebXHmbKd99ma6zRYVlYNJTuSqsRCBNYtCTFV' +
-      'HIZeBlkjHKsQ46HTZPexZw==';
-
-const pubExp = 'AQAB';
-
-const btoaSubChars = /[+\/=]/g;
-// Translate +, / characters; lose padding.
-const btoaSubs = {'+': '-', '/': '_', '=': ''};
 
 /**
- * Make a base64url (without padding) encoded version of a base64 string.
- * @param {string} str
- * @return {string}
+ * @type {Array<!Promise<!PublicKeyInfoDef>>}
  */
-function base64Tobase64url(str) {
-  return str.replace(btoaSubChars, ch => btoaSubs[ch]);
+let publicKeyInfos = [];
+
+/**
+ * @param {!Object} publicKeys An array of parsed JSON web keys.
+ */
+export function setPublicKeys(publicKeys) {
+  publicKeyInfos = publicKeys.map(importPublicKey);
 }
 
-
-const pubKeyInfos = [importPublicKey({
-  kty: 'RSA',
-  'n': base64Tobase64url(modulus),
-  'e': base64Tobase64url(pubExp),
-  alg: 'RS256',
-  ext: true,
-})];
 
 /**
  * @param {string} str
@@ -426,7 +408,7 @@ export class AmpA4A extends AMP.BaseElement {
               // Among other things, the signature might not be proper base64.
               return verifySignature(adResponse.creativeArrayBuffer,
                                      base64ToByteArray(adResponse.signature),
-                                     pubKeyInfos);
+                                     publicKeyInfos);
             } catch (e) {}
           }
           return false;
