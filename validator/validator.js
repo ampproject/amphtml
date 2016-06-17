@@ -1819,8 +1819,8 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
  * @param {!amp.validator.AmpLayout.Layout} inputLayout
  * @param {!amp.validator.CssLengthAndUnit} width
  * @param {!amp.validator.CssLengthAndUnit} height
- * @param {string?} sizesAttr
- * @param {string?} heightsAttr
+ * @param {?string} sizesAttr
+ * @param {?string} heightsAttr
  * @return {!amp.validator.AmpLayout.Layout}
  */
 function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {

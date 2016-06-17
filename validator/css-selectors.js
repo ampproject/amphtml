@@ -262,7 +262,7 @@ parse_css.parseAnIdSelector = function(tokenStream) {
  */
 parse_css.AttrSelector = class extends parse_css.Selector {
   /**
-   * @param {string?} namespacePrefix
+   * @param {?string} namespacePrefix
    * @param {string} attrName
    * @param {string} matchOperator is either the string
    * representation of the match operator (e.g., '=' or '~=') or '',
@@ -274,13 +274,13 @@ parse_css.AttrSelector = class extends parse_css.Selector {
    */
   constructor(namespacePrefix, attrName, matchOperator, value) {
     super();
-    /** @type {string?} */
+    /** @type {?string} */
     this.namespacePrefix = namespacePrefix;
     /** @type {string} */
     this.attrName = attrName;
-    /** @type {string?} */
+    /** @type {string} */
     this.matchOperator = matchOperator;
-    /** @type {string?} */
+    /** @type {string} */
     this.value = value;
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.ATTR_SELECTOR;
