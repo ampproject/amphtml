@@ -93,11 +93,11 @@ const AMP_BODY_STRING = 'amp-ad-body';
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
-              cssReplacementRanges: Array<number>,
-              bodyUtf16CharOffsets: !Array<number>,
-              bodyAttributes: ?string,
-              customElementExtensions: Array<string>,
-              customStylesheets: }} */
+               cssReplacementRanges: Array<number>,
+               bodyUtf16CharOffsets: !Array<number>,
+               bodyAttributes: ?string,
+               customElementExtensions: Array<string>,
+               customStylesheets: Array<string>}} */
 let CreativeMetaDataDef;
 
 export class AmpA4A extends AMP.BaseElement {
@@ -137,7 +137,7 @@ export class AmpA4A extends AMP.BaseElement {
      */
     this.stylesheets_ = [];
 
-    /** @param {IntersectionObserver} */
+    /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
   }
 
@@ -365,7 +365,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
    * @param {!Headers} unusedResponseHeaders Fetch API Headers object (or polyfill
    *     for it) containing the response headers.
-   * @return {!Promise<{!AdResponseDef}>}
+   * @return {!Promise<!AdResponseDef>}
    */
   extractCreativeAndSignature(unusedResponseArrayBuffer,
                               unusedResponseHeaders) {

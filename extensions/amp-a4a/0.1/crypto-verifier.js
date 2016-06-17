@@ -28,9 +28,9 @@ const VERSION = 0x00;
  * An object holding the public key, and stuff derived from it.
  *
  * @typedef {{
- *   publicKey: !Object,               // Parsed form of JSON web key
+ *   publicKey: !Object,
  *   hash: Uint8Array,
- *   cryptoKey: CryptoKey              // CryptoKey form of key
+ *   cryptoKey: CryptoKey
  * }}
  */
 let PublicKeyInfoDef;
@@ -86,7 +86,7 @@ export function importPublicKey(publicKey) {
  * Verifies RSA signature corresponds to the data given a list of public keys.
  * @param {!Uint8Array} data the data that was signed.
  * @param {!Uint8Array} signature the RSA signature.
- * @param {Array<!Promise<!PublicKeyInfoDef>>>} publicKeyInfos
+ * @param {Array<!Promise<!PublicKeyInfoDef>>} publicKeyInfos
  *     The RSA public keys, with hash and CryptoKey.
  * @return {!Promise<!boolean>} whether the signature is valid for one of
  *     the public keys.
