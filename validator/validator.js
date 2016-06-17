@@ -317,12 +317,14 @@ class TagStack {
    */
   enterTag(tagName, context, result, encounteredAttrs) {
     let maybeDataAmpReportTestValue = null;
-    for (let i = 0; i < encounteredAttrs.length; i += 2) {
-      const attrName = encounteredAttrs[i];
-      const attrValue = encounteredAttrs[i + 1];
-      if (attrName === 'data-amp-report-test') {
-        maybeDataAmpReportTestValue = attrValue;
-        break;
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      for (let i = 0; i < encounteredAttrs.length; i += 2) {
+        const attrName = encounteredAttrs[i];
+        const attrValue = encounteredAttrs[i + 1];
+        if (attrName === 'data-amp-report-test') {
+          maybeDataAmpReportTestValue = attrValue;
+          break;
+        }
       }
     }
     this.stack_.push({
