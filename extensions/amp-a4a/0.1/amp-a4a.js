@@ -379,6 +379,9 @@ export class AmpA4A extends AMP.BaseElement {
     const xhrInit = {
       mode: 'cors',
       method: 'GET',
+      credentials: 'include',
+      // TODO(kjwright):  Add requireAmpResponseSourceOrigin once supported
+      // server-side
     };
     return xhrFor(this.getWin())
         .fetch(adUrl, xhrInit)

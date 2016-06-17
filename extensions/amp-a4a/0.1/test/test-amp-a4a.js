@@ -83,7 +83,11 @@ describe('amp-a4a', () => {
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in shadow root', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
-      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      xhrMock.withArgs('https://test.location.org/ad/012345?args', {
+        mode: 'cors',
+        method: 'GET',
+        credentials: 'include',
+      }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
