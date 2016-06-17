@@ -153,10 +153,12 @@ def ValueToString(descriptor, field_desc, value):
   """
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if value:
-      return '[%s]' % ', '.join([NonRepeatedValueToString(
-          descriptor, field_desc, s) for s in value])
+      return '[%s]' % ', '.join([NonRepeatedValueToString(descriptor,
+                                                          field_desc, s)
+                                 for s in value])
     return '[]'
   return NonRepeatedValueToString(descriptor, field_desc, value)
+
 
 # For the validator-light version, skip these fields. This works by
 # putting them inside a conditional with
@@ -164,7 +166,9 @@ def ValueToString(descriptor, field_desc, value):
 # leave them out via dead code elimination.
 SKIP_FIELDS_FOR_LIGHT = ['error_formats', 'spec_url', 'validator_revision',
                          'spec_file_revision', 'template_spec_url',
-                         'min_validator_revision_required', 'deprecation_url']
+                         'min_validator_revision_required', 'deprecation_url',
+                         'errors']
+SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError']
 
 
 def PrintClassFor(descriptor, msg_desc, out):
@@ -182,6 +186,9 @@ def PrintClassFor(descriptor, msg_desc, out):
   """
   # TODO(johannes): Should we provide access to the default values?
   # Those are given in field.default_value for each field.
+  if msg_desc.full_name in SKIP_CLASSES_FOR_LIGHT:
+    out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+    out.PushIndent(2)
   out.Line('/**')
   out.Line(' * @constructor')
   is_exported = msg_desc.name in ['ValidationResult', 'ValidationError']
@@ -209,7 +216,14 @@ def PrintClassFor(descriptor, msg_desc, out):
       out.Line('}')
   out.PopIndent()
   out.Line('};')
+  if msg_desc.full_name in SKIP_CLASSES_FOR_LIGHT:
+    out.PopIndent()
+    out.Line('}')
   out.Line('')
+
+
+SKIP_ENUMS_FOR_LIGHT = ['amp.validator.ValidationError.Code',
+                        'amp.validator.ValidationError.Severity']
 
 
 def PrintEnumFor(enum_desc, out):
@@ -220,14 +234,20 @@ def PrintEnumFor(enum_desc, out):
     out: a list of lines to output (without the newline characters) wrapped as
         an Indenter instance, to which this function will append.
   """
+  if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
+    out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+    out.PushIndent(2)
   out.Line('/**')
   out.Line(' * @enum {string}')
   out.Line(' * @export')
   out.Line(' */')
   out.Line('%s = {' % enum_desc.full_name)
-  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name)
-                       for v in enum_desc.values]))
+  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in enum_desc.values
+                      ]))
   out.Line('};')
+  if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
+    out.PopIndent()
+    out.Line('}')
   out.Line('')
 
 
@@ -249,7 +269,6 @@ def PrintObject(descriptor, msg, this_id, out):
   Returns:
     The next object id, that is, next variable available for creating objects.
   """
-  out.PushIndent(2)
   out.Line('var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
   next_id = this_id + 1
   for (field_desc, field_val) in msg.ListFields():
@@ -275,7 +294,6 @@ def PrintObject(descriptor, msg, this_id, out):
     if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
       out.PopIndent()
       out.Line('}')
-  out.PopIndent()
   return next_id
 
 
@@ -333,8 +351,10 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
   out.Line(' */')
   out.Line('function createRules() {')
+  out.PushIndent(2)
   PrintObject(descriptor, rules, 0, out)
-  out.Line('  return o_0;')
+  out.Line('return o_0;')
+  out.PopIndent()
   out.Line('}')
   out.Line('')
   out.Line('/**')
