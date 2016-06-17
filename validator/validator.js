@@ -335,7 +335,7 @@ class TagStack {
   /**
    * Sets the tag matcher for the tag which is currently on the stack.
    * This gets called shortly after EnterTag for a given tag.
-   * @param {!ChildTagMatcher} matcher
+   * @param {?ChildTagMatcher} matcher
    */
   setChildTagMatcher(matcher) {
     this.stack_[this.stack_.length - 1].matcher = matcher;
@@ -792,10 +792,10 @@ class Context {
     this.docLocator_ = null;
 
     /**
-     * @type {!CdataMatcher}
+     * @type {?CdataMatcher}
      * @private
      */
-    this.cdataMatcher_ = new CdataMatcher(new amp.validator.TagSpec());
+    this.cdataMatcher_ = null;
 
     /**
      * @type {!TagStack}
@@ -884,25 +884,29 @@ class Context {
     return this.mandatoryAlternativesSatisfied_;
   }
 
-  /** @return {CdataMatcher} */
+  /** @return {?CdataMatcher} */
   getCdataMatcher() { return this.cdataMatcher_; }
 
   /** @param {CdataMatcher} matcher */
   setCdataMatcher(matcher) {
-    // We store away the position from when the matcher was created
-    // so we can use it to generate error messages relating to the opening tag.
-    matcher.setLineCol(
-        new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
+      // We store away the position from when the matcher was created
+      // so we can use it to generate error messages relating to the opening tag.
+      matcher.setLineCol(
+          new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    }
     this.cdataMatcher_ = matcher;
   }
 
   /** @return {!TagStack} */
   getTagStack() { return this.tagStack_; }
 
-  /** @param {ChildTagMatcher} matcher */
+  /** @param {?ChildTagMatcher} matcher */
   setChildTagMatcher(matcher) {
-    matcher.setLineCol(
-        new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
+        matcher.setLineCol(
+            new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    }
     this.tagStack_.setChildTagMatcher(matcher);
   }
 }
@@ -3153,8 +3157,10 @@ class ParsedValidatorRules {
     }
     // (Re)set the cdata matcher to the expectations that this tag
     // brings with it.
-    context.setCdataMatcher(new CdataMatcher(spec));
-    context.setChildTagMatcher(new ChildTagMatcher(spec));
+    if (spec.cdata !== null)
+      context.setCdataMatcher(new CdataMatcher(spec));
+    if (spec.childTags !== null)
+      context.setChildTagMatcher(new ChildTagMatcher(spec));
   }
 
   /**
@@ -3353,8 +3359,7 @@ amp.validator.ValidationHandler =
    * tag presence.
    */
   endDoc() {
-    this.context_.setCdataMatcher(
-        new CdataMatcher(new amp.validator.TagSpec()));
+    this.context_.setCdataMatcher(null);
     this.rules_.maybeEmitGlobalTagValidationErrors(
         this.context_, this.validationResult_);
     if (this.validationResult_.status ===
@@ -3372,8 +3377,7 @@ amp.validator.ValidationHandler =
    */
   startTag(tagName, attrs) {
     goog.asserts.assert(attrs !== null, 'Null attributes for tag: ' + tagName);
-    this.context_.setCdataMatcher(
-        new CdataMatcher(new amp.validator.TagSpec()));
+    this.context_.setCdataMatcher(null);
     this.context_.getTagStack().enterTag(
         tagName, this.context_, this.validationResult_, attrs);
     this.rules_.validateTag(
@@ -3388,8 +3392,7 @@ amp.validator.ValidationHandler =
    * @override
    */
   endTag(tagName) {
-    this.context_.setCdataMatcher(
-        new CdataMatcher(new amp.validator.TagSpec()));
+    this.context_.setCdataMatcher(null);
     this.context_.getTagStack().exitTag(
         tagName, this.context_, this.validationResult_);
   };
@@ -3417,8 +3420,9 @@ amp.validator.ValidationHandler =
    * @override
    */
   cdata(text) {
-    this.context_.getCdataMatcher().match(
-        text, this.context_, this.validationResult_);
+    const matcher = this.context_.getCdataMatcher();
+    if (matcher !== null)
+      matcher.match(text, this.context_, this.validationResult_);
   }
 };
 
