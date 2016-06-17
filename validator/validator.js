@@ -1579,6 +1579,12 @@ class ParsedAttrSpec {
 }
 
 /**
+ * TagSpecs specify attributes that are valid for a particular tag.
+ * They can also reference lists of attributes (AttrLists), thereby
+ * sharing those definitions. This abstraction instantiates
+ * ParsedAttrSpec for each AttrSpec (from validator-*.protoascii, our
+ * specification file) exactly once. To accomplish that, it keeps
+ * around the attr lists with ParsedAttrSpec instances.
  * @private
  */
 class ParsedAttrLists {
@@ -1588,14 +1594,18 @@ class ParsedAttrLists {
   constructor(attrLists) {
     /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
     this.attrListsByName = {};
-    /** @type {!number} */
-    this.maxId = -1;
+    /**
+     * The next id to assign to a ParsedAttrSpec instance. This is
+     * a globally unique id.
+     * @type {!number}
+     */
+    this.nextId = 0;
 
     for (const attrList of attrLists) {
       /** @type {!Array<!ParsedAttrSpec>} */
       const parsedAttrList = [];
       for (const attrSpec of attrList.attrs) {
-        parsedAttrList.push(new ParsedAttrSpec(attrSpec, this.maxId++));
+        parsedAttrList.push(new ParsedAttrSpec(attrSpec, this.nextId++));
       }
       goog.asserts.assert(attrList.name !== null);
       this.attrListsByName[attrList.name] = parsedAttrList;
@@ -1635,14 +1645,13 @@ class ParsedAttrLists {
         }
       }
     }
-    let maxId = this.maxId;
     // (2) attributes specified within |tagSpec|.
     for (const spec of tagSpec.attrs) {
       const name = spec.name;
       goog.asserts.assert(name != null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
-        attrs.push(new ParsedAttrSpec(spec, maxId++));
+        attrs.push(new ParsedAttrSpec(spec, this.nextId++));
       }
     }
     // (3) attributes specified via reference to an attr_list.
