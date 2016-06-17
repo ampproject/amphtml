@@ -148,20 +148,11 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
-message CssRuleSpec {
-  // TODO: Add fields such as
-  // optional bool top_level_only = 1;
-  // optional bool mandatory = 2;
-  // optional string selector_tag_regex = 3;
-  // optional string selector_id_regex = 4;
-  // repeated string pseudo_selector = 5;
-}
-
+// NEXT AVAILABLE TAG: 5
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
-  repeated CssRuleSpec css_rule = 2;
   // urls within the CSS are checked against this spec.
   optional UrlSpec image_url_spec = 3;
   optional UrlSpec font_url_spec = 4;
