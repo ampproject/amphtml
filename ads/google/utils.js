@@ -160,13 +160,15 @@ function adsenseRequestURL(startTime, slotNumber, global, data, isAmp,
   const screen = global.screen;
   // const fractionInViewport = intersectionRecord.intersectionRatio;
   const visibilityState = documentStateFor(global).getVisibilityState();
-  const visNum = {'visible': 1,
-                  'hidden': 2,
-                  'prerender': 3,
-                  // Not returned by getVisibilityState.
-                  'preview': 4,
-                  // Not expected by ad requests.
-                  'unloaded': 0}[visibilityState] || 0;
+  const visNum = {
+        'visible': 1,
+        'hidden': 2,
+        'prerender': 3,
+        // Not returned by getVisibilityState.
+        'preview': 4,
+        // Not expected by ad requests.
+        'unloaded': 0
+  }[visibilityState] || 0;
   const adtest = data['adtest'];
   const adClient = data['adClient'];
   const adSlot = data['adSlot'];
@@ -175,7 +177,6 @@ function adsenseRequestURL(startTime, slotNumber, global, data, isAmp,
       validateExperimentIds(parseExperimentIds(data['experimentId']))) {
     experimentIds = data['experimentId'];
   }
-
   let url = `https://googleads.g.doubleclick.net/pagead/ads?is_amp=${isAmp}` +
     // Protect against wildly long client and slot ids.
     (adClient ? `&client=${encodeURIComponent(adClient.substr(0, 50))}` : '') +
