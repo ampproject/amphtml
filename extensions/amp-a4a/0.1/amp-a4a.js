@@ -331,7 +331,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Iframe or shadow root attached as children.  Cannot delete shadowRoot
     // but creating new one clears.
     if (this.element.shadowRoot) {
-      this.element.shadowRoot./*REVIEW*/innerHTML = '';
+      this.element.shadowRoot./*OK*/innerHTML = '';
     } else {
       removeChildren(this.element);
     }
@@ -479,7 +479,7 @@ export class AmpA4A extends AMP.BaseElement {
           // Finally, add body and re-formatted CSS styling to the shadow root.
           const shadowRoot =
               this.element.shadowRoot || this.element.createShadowRoot();
-          shadowRoot./*REVIEW*/innerHTML += (cssBlock + bodyBlock);
+          shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
           this.rendered_ = true;
           this.onAmpCreativeShadowDomRender();
           return Promise.resolve(true);
