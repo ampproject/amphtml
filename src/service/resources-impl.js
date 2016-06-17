@@ -1402,25 +1402,35 @@ export class Resources {
     const paused = VisibilityState.PAUSED;
     const inactive = VisibilityState.INACTIVE;
 
+    // Variable managing defense in depth against
+    let processing = false;
     const doPass = () => {
-      // If viewport size is 0, the manager will wait for the resize event.
-      const viewportSize = this.viewport_.getSize();
-      if (viewportSize.height > 0 && viewportSize.width > 0) {
-        if (this.hasMutateWork_()) {
-          this.mutateWork_();
+      if (processing) {
+        return;
+      }
+      processing = true;
+      try {
+        // If viewport size is 0, the manager will wait for the resize event.
+        const viewportSize = this.viewport_.getSize();
+        if (viewportSize.height > 0 && viewportSize.width > 0) {
+          if (this.hasMutateWork_()) {
+            this.mutateWork_();
+          }
+          this.discoverWork_();
+          let delay = this.work_();
+          if (this.hasMutateWork_()) {
+            // Overflow mutate work.
+            delay = Math.min(delay, MUTATE_DEFER_DELAY_);
+          }
+          if (this.visible_) {
+            dev.fine(TAG_, 'next pass:', delay);
+            this.schedulePass(delay);
+          } else {
+            dev.fine(TAG_, 'document is not visible: no scheduling');
+          }
         }
-        this.discoverWork_();
-        let delay = this.work_();
-        if (this.hasMutateWork_()) {
-          // Overflow mutate work.
-          delay = Math.min(delay, MUTATE_DEFER_DELAY_);
-        }
-        if (this.visible_) {
-          dev.fine(TAG_, 'next pass:', delay);
-          this.schedulePass(delay);
-        } else {
-          dev.fine(TAG_, 'document is not visible: no scheduling');
-        }
+      } finally {
+        processing = false;
       }
     };
     const noop = () => {};

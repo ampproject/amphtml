@@ -48,6 +48,12 @@ export class Pass {
 
     /** @private @const */
     this.boundPass_ = () => this.pass_();
+
+    /**
+     * Last time we started a pass execution.
+     * @private {number}
+     */
+    this.lastPassTime_ = -1;
   }
 
   /**
@@ -73,13 +79,14 @@ export class Pass {
    */
   schedule(opt_delay) {
     let delay = opt_delay || this.defaultDelay_;
-    if (this.running_ && delay < 10) {
-      // If we get called recursively, wait at least 10ms for the next
-      // execution.
+    const now = timer.now();
+    if (this.running_ && delay < 10 || now - this.lastPassTime_ < 10) {
+      // If we get called recursively or less than 10ms passed since
+      // last execution, wait at least 10ms for the next execution.
       delay = 10;
     }
 
-    const nextTime = timer.now() + delay;
+    const nextTime = now + delay;
     // Schedule anew if nothing is scheduled currently or if the new time is
     // sooner then previously requested.
     if (!this.isPending() || nextTime - this.nextTime_ < -10) {
@@ -97,6 +104,7 @@ export class Pass {
     this.scheduled_ = -1;
     this.nextTime_ = 0;
     this.running_ = true;
+    this.lastPassTime_ = timer.now();
     this.handler_();
     this.running_ = false;
   }
