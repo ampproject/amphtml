@@ -40,7 +40,7 @@ const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
  * @param {!Element} targetElement  Element to copy attributes to.
  * @private
  */
-function CopyAttributes_(sourceElement, targetElement) {
+function copyAttributes_(sourceElement, targetElement) {
   for (let i = sourceElement.attributes.length - 1; i >= 0; --i) {
     const attr = sourceElement.attributes[i];
     if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
@@ -73,7 +73,7 @@ export class AmpAd extends AMP.BaseElement {
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
       const newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
-      CopyAttributes_(this.element, newChild);
+      copyAttributes_(this.element, newChild);
       this.element.appendChild(newChild);
       return;
     }
@@ -83,7 +83,7 @@ export class AmpAd extends AMP.BaseElement {
     // that the loader can handle the case.
     const extensionTag = TAG_NETWORK_CUSTOM_IMPL_.replace('${TYPE}', type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    CopyAttributes_(this.element, newChild);
+    copyAttributes_(this.element, newChild);
     /*REVIEW*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
     this.element.appendChild(newChild);
   }

@@ -20,7 +20,7 @@ import {
   incrementLoadingAds,
   isPositionFixed} from '../../amp-ad/0.1/amp-ad-3p-impl';
 import {adPreconnect} from '../../../ads/_config';
-import {removeElement} from '../../../src/dom';
+import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
 import {IntersectionObserver} from '../../../src/intersection-observer';
@@ -333,9 +333,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.element.shadowRoot) {
       this.element.shadowRoot./*REVIEW*/innerHTML = '';
     } else {
-      while (this.element.firstChild) {
-        removeElement(this.element.firstChild);
-      }
+      removeChildren(this.element);
     }
 
     this.stylesheets_.forEach(removeElement);
@@ -431,8 +429,7 @@ export class AmpA4A extends AMP.BaseElement {
             try {
               // Among other things, the signature might not be proper base64.
               return verifySignature(adResponse.creativeArrayBuffer,
-                                     base64ToByteArray(adResponse.signature),
-                                     publicKeyInfos);
+                  base64ToByteArray(adResponse.signature), publicKeyInfos);
             } catch (e) {}
           }
           return false;
