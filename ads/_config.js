@@ -170,7 +170,6 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
-  adgeneration: 'https://i.socdm.com',
 };
 
 /**
