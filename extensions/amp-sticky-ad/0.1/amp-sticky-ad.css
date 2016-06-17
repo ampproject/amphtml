@@ -40,6 +40,11 @@ amp-sticky-ad {
   background-color: #fff;
   box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
 }
+
+.amp-sticky-ad-loaded > div {
+  box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.5), 1px 0px 1px rgba(0, 0, 0, 0.5);
+}
+
 .-amp-sticky-ad-layout > amp-ad {
   display: block;
 }
@@ -50,8 +55,8 @@ amp-sticky-ad {
   width: 25px;
   background-color: #fff;
   color: grey;
-  box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.5);
   font-size: 100%;
   opacity: 0.5;
   top: -25px;
 }
+

@@ -128,13 +128,12 @@ class AmpStickyAd extends AMP.BaseElement {
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
-        // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
+        this.addCloseButton_();
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.
           this.vsync_.mutate(() => {
-            this.addCloseButton_();
             this.element.classList.add('amp-sticky-ad-loaded');
           });
         }, 1000);
@@ -147,9 +146,12 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
+    if (this.closeButton_ && this.boundOnClick_) {
+      return;
+    }
     const closeButton = this.getWin().document.createElement('div');
     closeButton.setAttribute('class', '-amp-sticky-ad-close-button');
-    closeButton.innerHTML = closeButton.innerHTML + '&#10006';
+    closeButton./*OK*/innerHTML = '&#10006';
     this.element.appendChild(closeButton);
     this.closeButton_ = closeButton;
     if (!this.boundOnClick_) {
