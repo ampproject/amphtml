@@ -24,7 +24,7 @@ class Shell {
     win.document.documentElement.addEventListener('click',
         this.handleNavigate_.bind(this));
 
-    log('STARTED');
+    log('Shell created');
 
     if (this.currentPage_) {
       this.navigateTo(this.currentPage_);
@@ -108,7 +108,6 @@ class Shell {
 
     // Update URL.
     const push = !isShellUrl(path) && isShellUrl(oldPage);
-    console.log('history push: ', push, path, oldPage);
     if (path != this.win.location.pathname) {
       if (push) {
         this.win.history.pushState(null, '', path);
@@ -287,7 +286,8 @@ class AmpViewer {
 
     // Scripts.
     this.scripts_.forEach(script => {
-      // XXX: stub elements, reg templates
+      // TODO(dvoytenko): extensions should be ideally registered via runtime
+      // to ensure correct stubbing, version management and other dependencies.
       const customElement = script.getAttribute('custom-element');
       const customTemplate = script.getAttribute('custom-template');
       const src = this.resolveUrl_(script.getAttribute('src'));
@@ -295,7 +295,6 @@ class AmpViewer {
       const existsExpr =
           customElement ? '[custom-element="' + customElement + '"]' :
           customTemplate ? '[custom-template="' + customTemplate + '"]' :
-          // TODO: version control!
           '[src="' + src + '"]';
       const exists = doc.querySelector('script' + existsExpr);
       if (exists) {
