@@ -244,7 +244,7 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
-  'isTrusted': {
+  'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
