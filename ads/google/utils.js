@@ -15,7 +15,6 @@
  */
 
 import {documentStateFor} from '../../src/document-state';
-import {getService} from '../../src/service';
 import {timer} from '../../src/timer';
 import {
   validateExperimentIds,
@@ -73,7 +72,11 @@ class AdsenseInfo {
 }
 
 export function getAdsenseInfo(win) {
-  return getService(win, 'adsenseInfo', () => new AdsenseInfo());
+  const infoWindow = win.context ? win.context.master : win;
+  if (!infoWindow.AMP_ADSENSE_INFO) {
+    infoWindow.AMP_ADSENSE_INFO = new AdsenseInfo();
+  }
+  return infoWindow.AMP_ADSENSE_INFO;
 }
 
 const SIZE_EXCEPTION_ID = -12245933;
