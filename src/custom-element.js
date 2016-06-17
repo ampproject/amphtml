@@ -421,8 +421,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**
