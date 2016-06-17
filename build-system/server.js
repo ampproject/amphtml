@@ -32,6 +32,35 @@ var url = require('url');
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
+app.use('/pwa', function(req, res, next) {
+  var file;
+  var contentType;
+  if (!req.url || req.url == '/') {
+    // pwa.html
+    contentType = 'text/html';
+    file = '/examples/pwa.html';
+  } else if (req.url == '/pwa.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa.js';
+  } else if (req.url == '/pwa-sw.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa-sw.js';
+  } else {
+    // Redirect to the underlying resource.
+    // TODO(dvoytenko): would be nicer to do forward instead of redirect.
+    res.writeHead(302, {'Location': req.url});
+    res.end();
+    return;
+  }
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  fs.readFileAsync(process.cwd() + file).then((file) => {
+    res.end(file);
+  });
+});
+
 app.use('/examples', function(req, res) {
   res.redirect('/examples.build');
 });
