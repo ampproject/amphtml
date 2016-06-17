@@ -37,6 +37,35 @@ var port = args[1];
 
 app.use(bodyParser.json());
 
+app.use('/pwa', function(req, res, next) {
+  var file;
+  var contentType;
+  if (!req.url || req.url == '/') {
+    // pwa.html
+    contentType = 'text/html';
+    file = '/examples/pwa.html';
+  } else if (req.url == '/pwa.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa.js';
+  } else if (req.url == '/pwa-sw.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa-sw.js';
+  } else {
+    // Redirect to the underlying resource.
+    // TODO(dvoytenko): would be nicer to do forward instead of redirect.
+    res.writeHead(302, {'Location': req.url});
+    res.end();
+    return;
+  }
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  fs.readFileAsync(process.cwd() + file).then((file) => {
+    res.end(file);
+  });
+});
+
 app.use('/examples', function(req, res, next) {
   // Redirect physical dir to build dir that has versions belonging to
   // local AMP.
@@ -49,17 +78,6 @@ app.use('/examples', function(req, res, next) {
   }
   next();
 });
-
-/* XXX: can only do this after updating relative URL resolution.
-app.use('/examples/pwa.html', function(req, res, next) {
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
-  fs.readFileAsync(process.cwd() +
-      '/examples/pwa.html').then((file) => {
-        res.end(file);
-      });
-});
-*/
 
 app.use('/api/show', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
@@ -98,6 +116,7 @@ app.use('/form/echo-html/post', function(req, res) {
     }
   });
 });
+
 
 // Fetches an AMP document from the AMP proxy and replaces JS
 // URLs, so that they point to localhost.

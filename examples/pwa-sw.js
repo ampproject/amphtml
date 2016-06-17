@@ -1,17 +1,15 @@
 'use strict';
 
-console.log('!!!!!! IN SERVICE WORKER !!!!!!');
-
 self.addEventListener('install', event => {
-  console.log('SW: install callback');
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.url.indexOf('amp.max.html') != -1) {
+    // Override response with the shell unless the leaf document is explicitly
+    // requested.
     const isDirectFetch = event.request.headers.get('AMP-Direct-Fetch') == '1';
-    console.log('SW: respond with shell: ', !isDirectFetch);
     if (!isDirectFetch) {
-      event.respondWith(fetch('/examples.build/pwa.html'));
+      event.respondWith(fetch('/pwa'));
     }
   }
 });

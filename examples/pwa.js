@@ -28,6 +28,8 @@ class Shell {
     this.currentPage_ = win.location.pathname;
 
     win.addEventListener('popstate', this.handlePopState_.bind(this));
+    win.document.documentElement.addEventListener('click',
+        this.handleNavigate_.bind(this));
 
     log('STARTED');
 
@@ -36,13 +38,59 @@ class Shell {
     }
 
     // Install service worker
+    this.registerServiceWorker_();
+  }
+
+  registerServiceWorker_() {
     if ('serviceWorker' in navigator) {
       log('Register service worker');
-      navigator.serviceWorker.register('/examples.build/pwa-sw.js').then(reg => {
+      navigator.serviceWorker.register('/pwa/pwa-sw.js').then(reg => {
         log('Service worker registered: ', reg);
       }).catch(err => {
         log('Service worker registration failed: ', err);
       });
+    }
+  }
+
+  unregisterServiceWorker_() {
+    if ('serviceWorker' in navigator) {
+      log('Register service worker');
+      navigator.serviceWorker.getRegistration('/pwa/pwa-sw.js').then(reg => {
+        log('Service worker found: ', reg);
+        reg.unregister();
+        log('Service worker unregistered');
+      });
+    }
+  }
+
+  /**
+   */
+  handleNavigate_(e) {
+    if (e.defaultPrevented) {
+      return false;
+    }
+    if (event.button) {
+      return false;
+    }
+    let a = event.target;
+    while (a) {
+      if (a.tagName == 'A' && a.href) {
+        break;
+      }
+      a = a.parentElement;
+    }
+    if (a) {
+      const url = new URL(a.href);
+      if (url.origin == this.win.location.origin &&
+              url.pathname.indexOf('/pwa/') == 0 &&
+              url.pathname.indexOf('amp.max.html') != -1) {
+        e.preventDefault();
+        const newPage = url.pathname;
+        log('Internal link to: ', newPage);
+        if (newPage != this.currentPage_) {
+          this.navigateTo(newPage);
+        }
+      }
     }
   }
 
@@ -156,7 +204,7 @@ class AmpViewer {
 
     const hostTemplate = this.win.document.getElementById('amp-slot-template');
     if (hostTemplate) {
-      this.host_.appendChild(hostTemplate.content);
+      this.host_.appendChild(hostTemplate.content.cloneNode(true));
     }
 
     this.container.appendChild(this.host_);
@@ -304,8 +352,7 @@ class AmpViewer {
  * @return {boolean}
  */
 function isShellUrl(url) {
-  // TODO: we can do better than this.
-  return url.indexOf('/pwa.html') != -1;
+  return (url == '/pwa' || url == '/pwa/');
 }
 
 
