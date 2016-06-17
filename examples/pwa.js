@@ -1,12 +1,5 @@
 'use strict';
 
-var shell;
-
-window.onload = () => {
-  shell = new Shell(window);
-};
-
-
 function log(args) {
   var var_args = Array.prototype.slice.call(arguments, 0);
   var_args.unshift('[SHELL]');
@@ -393,3 +386,7 @@ function fetchDocument(url) {
     xhr.send();
   });
 }
+
+
+
+var shell = new Shell(window);
