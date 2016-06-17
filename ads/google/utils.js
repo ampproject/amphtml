@@ -114,10 +114,10 @@ function adKey(slotNumber, slot, viewport, screen) {
  * @param {!IntersectionObserverEntry} intersectionRecord
  * @return {string}
  */
-export function adsenseRequestURLForAmpAd(slotNumber, global, data,
+export function adsenseRequestUrlForAmpAd(slotNumber, global, data,
                                           intersectionRecord) {
   // Assumes that data has been checked for valid parameters, via checkData.
-  return adsenseRequestURL(global.context.startTime, slotNumber, global,
+  return adsenseRequestUrl(global.context.startTime, slotNumber, global,
                            data, 1, global.context.canonicalUrl,
                            getCorrelator(global), intersectionRecord);
 }
@@ -149,7 +149,7 @@ const TRUNC_PARAM_ = '&trunc=1';
  * @param {!IntersectionObserverEntry} intersectionRecord
  * @return {string}
  */
-function adsenseRequestURL(startTime, slotNumber, global, data, isAmp,
+function adsenseRequestUrl(startTime, slotNumber, global, data, isAmp,
                            canonicalUrl, correlator, intersectionRecord) {
   // const lmt = global.document.lastModified;
   const slot = intersectionRecord.boundingClientRect;
@@ -160,13 +160,15 @@ function adsenseRequestURL(startTime, slotNumber, global, data, isAmp,
   const screen = global.screen;
   // const fractionInViewport = intersectionRecord.intersectionRatio;
   const visibilityState = documentStateFor(global).getVisibilityState();
-  const visNum = {'visible': 1,
-                  'hidden': 2,
-                  'prerender': 3,
-                  // Not returned by getVisibilityState.
-                  'preview': 4,
-                  // Not expected by ad requests.
-                  'unloaded': 0}[visibilityState] || 0;
+  const visNum = {
+    'visible': 1,
+    'hidden': 2,
+    'prerender': 3,
+    // Not returned by getVisibilityState.
+    'preview': 4,
+    // Not expected by ad requests.
+    'unloaded': 0,
+  }[visibilityState] || 0;
   const adtest = data['adtest'];
   const adClient = data['adClient'];
   const adSlot = data['adSlot'];
@@ -176,12 +178,16 @@ function adsenseRequestURL(startTime, slotNumber, global, data, isAmp,
     experimentIds = data['experimentId'];
   }
 
+  const encodedWidth = encodeURIComponent(width);
+  const encodedHeight = encodeURIComponent(height);
+
   let url = `https://googleads.g.doubleclick.net/pagead/ads?is_amp=${isAmp}` +
     // Protect against wildly long client and slot ids.
     (adClient ? `&client=${encodeURIComponent(adClient.substr(0, 50))}` : '') +
     (adSlot ? `&slotname=${encodeURIComponent(adSlot.substr(0, 50))}` : '') +
     '&d_imp=1&output=html' +
-    `&format=${width}x${height}&w=${width}&h=${height}` +
+    `&format=${encodedWidth}x${encodedHeight}` +
+    `&w=${encodedWidth}&h=${encodedHeight}` +
     `&adk=${adKey(slotNumber, slot, viewport, screen)}` +
     // Last modified time.
     // (lmt ? `&lmt=${(Date.parse(lmt) / 1000).toString()}` : '') +

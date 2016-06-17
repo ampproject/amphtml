@@ -36,10 +36,31 @@ import {
 } from './crypto-verifier';
 
 
+const modulus =
+      'z43rjaJ9PLk1FHMEL31_ILXGtUTN03rxJ9amD9y3BRDpbTA-GkUKiQM07xAd8OXP' +
+      'UZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7-GyTFWDcYz' +
+      'ey90jRFNNWxjzKrvSazacE0TvJ8S_AVP4EV67VdbByCC1tpBzLhhy7RFHp2cXGTp' +
+      'WYUqZUAVUdJoeBuCho_zQz2au7c6sDaLiF-uYL9Td9MrZ6tSLo3MeMIZia4WgWqj' +
+      'TDICR0h-zlbHUd0K9CoXbGTt5nvkebXHmbKd99ma6zRYVlYNJTuSqsRCBNYtCTFV' +
+      'HIZeBlkjHKsQ46HTZPexZw';
+
+const pubExp = 'AQAB';
+
 /**
+ * The current set of public keys.
+ *
  * @type {Array<!Promise<!PublicKeyInfoDef>>}
  */
-let publicKeyInfos = [];
+// TODO(bobcassels): When the signing server is finished, get the public keys
+// from there. For now, hard-wire the current signer public key.
+let publicKeyInfos = [importPublicKey({
+  kty: 'RSA',
+  'n': modulus,
+  'e': pubExp,
+  alg: 'RS256',
+  ext: true,
+})];
+
 
 /**
  * @param {!Object} publicKeys An array of parsed JSON web keys.
