@@ -125,6 +125,7 @@ export class Xhr {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
+        const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user.assert(allowSourceOriginHeader == sourceOrigin,
