@@ -5,6 +5,14 @@
   <title>PWA</title>
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto">
+
+  <!-- pwa.html should run at `/pwa` -->
+  <script>
+    if (window.location.pathname.indexOf('/examples') == 0) {
+      window.location.assign('/pwa');
+    }
+  </script>
+
   <style>
     body {
       margin: 0;
@@ -66,7 +74,7 @@
     }
   </style>
 
-  <script src="./pwa.js"></script>
+  <script src="/pwa/pwa.js"></script>
 </head>
 <body>
   <header>
@@ -75,13 +83,13 @@
   <div class="container">
     <section id="stream" class="stream">
       <article class="card">
-        <a href="/examples.build/article.amp.max.html">
+        <a href="/pwa/examples.build/article.amp.max.html">
           <h4>Lorem Ipsum</h4>
           <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
         </a>
       </article>
       <article class="card">
-        <a href="/examples.build/youtube.amp.max.html">
+        <a href="/pwa/examples.build/youtube.amp.max.html">
           <h4>YouTube video</h4>
           <div class="detail">Fusce pretium tempor justo, vitae consequat dolor maximus eget.</div>
         </a>
