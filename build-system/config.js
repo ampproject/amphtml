@@ -45,7 +45,7 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
-]
+];
 
 var testPaths = commonTestPaths.concat([
   'test/**/*.js',
@@ -57,38 +57,26 @@ var integrationTestPaths = commonTestPaths.concat([
   'extensions/**/test/integration/**/*.js',
 ]);
 
+var karmaDefault = {
+  configFile: karmaConf,
+  singleRun: true,
+  client: {
+    mocha: {
+      timeout: 10000
+    },
+    captureConsole: false,
+  },
+  browserDisconnectTimeout: 10000,
+  browserDisconnectTolerance: 2,
+  browserNoActivityTimeout: 4 * 60 * 1000,
+  captureTimeout: 4 * 60 * 1000,
+};
+
 var karma = {
-  default: {
-    configFile: karmaConf,
-    singleRun: true,
-    client: {
-      captureConsole: false,
-    }
-  },
-  firefox: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  safari: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  saucelabs: {
-    configFile: karmaConf,
+  default: karmaDefault,
+  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
+  safari: extend(karmaDefault, {browsers: ['Safari']}),
+  saucelabs: extend(karmaDefault, {
     reporters: ['dots', 'saucelabs'],
     browsers: [
       'SL_Chrome_android',
@@ -102,18 +90,7 @@ var karma = {
       //'SL_iOS_9_1',
       //'SL_IE_11',
     ],
-    singleRun: true,
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false,
-    },
-    browserDisconnectTimeout: 10000,
-    browserDisconnectTolerance: 1,
-    browserNoActivityTimeout: 4 * 60 * 1000,
-    captureTimeout: 4 * 60 * 1000,
-  }
+  })
 };
 
 /** @const  */
@@ -150,3 +127,7 @@ module.exports = {
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
+
+function extend(orig, add) {
+  return Object.assign({}, orig, add);
+}
