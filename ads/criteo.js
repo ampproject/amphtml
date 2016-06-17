@@ -16,6 +16,8 @@
 
 import {loadScript} from '../3p/3p';
 
+/* global Criteo: false */
+
 /**
  * @param {!Window} global
  * @param {!Object} data

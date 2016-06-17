@@ -171,14 +171,27 @@ describe('Viewer', () => {
   it('should configure performance tracking', () => {
     windowApi.location.hash = '';
     let viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
 
     windowApi.location.hash = '#csi=1';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.true;
 
     windowApi.location.hash = '#csi=0';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
@@ -405,6 +418,13 @@ describe('Viewer', () => {
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.title).to.equal('Awesome doc');
+  });
+
+  it('should post scroll event', () => {
+    viewer.postScroll(111);
+    const m = viewer.messageQueue_[0];
+    expect(m.eventType).to.equal('scroll');
+    expect(m.data.scrollTop).to.equal(111);
   });
 
   it('should post request/cancelFullOverlay event', () => {

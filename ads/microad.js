@@ -16,6 +16,8 @@
 
 import {loadScript, validateDataExists, checkData} from '../3p/3p';
 
+/* global MicroAd: false */
+
 /**
  * @param {!Window} global
  * @param {!Object} data

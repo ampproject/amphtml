@@ -26,6 +26,7 @@ describe('FocusHistory', () => {
   let eventListeners;
   let testWindow;
   let windowEventListeners;
+  let focusHistory;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

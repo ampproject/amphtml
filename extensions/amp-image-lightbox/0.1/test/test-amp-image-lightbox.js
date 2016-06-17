@@ -16,7 +16,7 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-image-lightbox');
+import '../amp-image-lightbox';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';

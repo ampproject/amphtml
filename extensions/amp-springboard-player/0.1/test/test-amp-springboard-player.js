@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-springboard-player');
+import '../amp-springboard-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

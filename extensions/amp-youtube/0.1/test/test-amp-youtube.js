@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-youtube');
+import '../amp-youtube';
 import {adopt} from '../../../../src/runtime';
 import {timer} from '../../../../src/timer';
 import * as sinon from 'sinon';

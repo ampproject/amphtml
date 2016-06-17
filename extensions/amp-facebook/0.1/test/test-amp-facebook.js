@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-facebook');
+import '../amp-facebook';
 import {adopt} from '../../../../src/runtime';
 import {facebook} from '../../../../3p/facebook';
 
@@ -113,7 +113,7 @@ describe('amp-facebook', function() {
         /* opt_noFakeResources */ true).then(ampFB => {
           return new Promise((resolve, unusedReject) => {
             const iframe = ampFB.firstChild;
-            impl = ampFB.implementation_;
+            const impl = ampFB.implementation_;
             impl.changeHeight = newHeight => {
               expect(newHeight).to.equal(666);
               resolve(iframe);

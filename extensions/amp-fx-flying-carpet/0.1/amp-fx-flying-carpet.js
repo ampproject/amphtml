@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
-import {setStyle} from '../../../src/style';
+import {toggle, setStyle} from '../../../src/style';
 
 /** @const */
 const EXPERIMENT = 'amp-fx-flying-carpet';
@@ -41,6 +41,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
       dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      toggle(this.element, false);
       return;
     }
 
@@ -101,7 +102,13 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   layoutCallback() {
-    this.assertPosition();
+    try {
+      this.assertPosition();
+    } catch (e) {
+      // Collapse the element if the effect is broken by the viewport location.
+      toggle(this.element, false);
+      throw e;
+    }
     return Promise.resolve();
   }
 }

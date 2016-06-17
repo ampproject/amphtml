@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-vimeo');
+import '../amp-vimeo';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

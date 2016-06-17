@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-brightcove');
+import '../amp-brightcove';
 import {adopt} from '../../../../src/runtime';
 import {parseUrl} from '../../../../src/url';
 

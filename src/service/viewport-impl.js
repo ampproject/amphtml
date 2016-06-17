@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
+import {Animation} from '../animation';
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
+import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
+    './ios-scrollfreeze-bug';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
+import {numeric} from '../transition';
 import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
@@ -86,6 +90,9 @@ export class Viewport {
     /** @private {?number} */
     this.lastMeasureScrollTop_ = null;
 
+    /** @private {boolean} */
+    this.scrollAnimationFrameThrottled_ = false;
+
     /** @private {?number} */
     this./*OK*/scrollLeft_ = null;
 
@@ -141,6 +148,8 @@ export class Viewport {
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    this.onScroll(this.sendScrollMessage_.bind(this));
   }
 
   /** For testing. */
@@ -297,6 +306,32 @@ export class Viewport {
     const elementTop = this.binding_.getLayoutRect(element).top;
     const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
     this.binding_.setScrollTop(newScrollTop);
+  }
+
+  /**
+   * Scrolls element into view much like Element. scrollIntoView does but
+   * in the AMP/Viewer environment. Adds animation for the sccrollIntoView
+   * transition.
+   *
+   * @param {!Element} element
+   * @param {number=} duration
+   * @param {string=} curve
+   * @return {!Promise}
+   */
+  animateScrollIntoView(element, duration = 500, curve = 'ease-in') {
+    const elementTop = this.binding_.getLayoutRect(element).top;
+    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    const curScrollTop = this.getScrollTop();
+    if (newScrollTop == curScrollTop) {
+      return Promise.resolve();
+    }
+    const interpolate = numeric(curScrollTop, newScrollTop);
+    // TODO(erwinm): the duration should not be a constant and should
+    // be done in steps for better transition experience when things
+    // are closer vs farther.
+    return Animation.animate(pos => {
+      this.binding_.setScrollTop(interpolate(pos));
+    }, duration, curve).then();
   }
 
   /**
@@ -484,7 +519,7 @@ export class Viewport {
     dev.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
-        'top=', scrollLeft,
+        'left=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
@@ -514,8 +549,11 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = timer.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => this.vsync_.measure(
-          this.throttledScroll_.bind(this, now, newScrollTop)), 36);
+      timer.delay(() => {
+        this.vsync_.measure(() => {
+          this.throttledScroll_(now, newScrollTop);
+        });
+      }, 36);
     }
     this.scrollObservable_.fire();
   }
@@ -548,6 +586,19 @@ export class Viewport {
     }
   }
 
+  /**
+   * Send scroll message via the viewer per animation frame
+   * @private
+   */
+  sendScrollMessage_() {
+    if (!this.scrollAnimationFrameThrottled_) {
+      this.scrollAnimationFrameThrottled_ = true;
+      this.vsync_.measure(() => {
+        this.scrollAnimationFrameThrottled_ = false;
+        this.viewer_.postScroll(this.getScrollTop());
+      });
+    }
+  }
   /** @private */
   resize_() {
     this.rect_ = null;
@@ -939,6 +990,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     documentBody.appendChild(this.endPosEl_);
 
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
+
+    // Correct iOS Safari scroll freezing issues if applicable.
+    checkAndFixIosScrollfreezeBug(this.win);
   }
 
   /** @override */

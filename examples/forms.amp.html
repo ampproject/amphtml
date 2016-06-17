@@ -13,9 +13,7 @@
             background-color: #dc4e41;
         }
 
-        form .valid-message,
-        form .invalid-message
-         {
+        form .form-message {
             display: none;
         }
 
@@ -27,6 +25,21 @@
         form:valid .valid-message {
             display: block;
             color: #4CAF50;
+        }
+
+        form.amp-form-submitting .submitting-message {
+            display: block;
+            color: #919191;
+        }
+
+        form.amp-form-submit-success .submit-success-message {
+            display: block;
+            color: #0000ff;
+        }
+
+        form.amp-form-submit-error .submit-error-message {
+            display: block;
+            color: #dc4e41;
         }
     </style>
 </head>
@@ -73,11 +86,21 @@
         <input type="submit" value="Subscribe">
     </fieldset>
 
-    <div class="invalid-message">
+    <div class="form-message invalid-message">
         There are some input that needs fixing. Please fix them.
     </div>
-    <div class="valid-message">
+    <div class="form-message valid-message">
         Everything looks good, you can submit now!
+    </div>
+    <div class="form-message submitting-message">
+        Please hold on while we submit your answer!
+    </div>
+    <div class="form-message submit-success-message">
+        Success! Thanks for subscribing! Please make sure to check your email
+        to confirm!
+    </div>
+    <div class="form-message submit-error-message">
+        Oops! We apologies something went wrong. Please try again later.
     </div>
 </form>
 </body>

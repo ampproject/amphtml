@@ -17,8 +17,8 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
-require('../amp-sticky-ad');
-require('../../../amp-ad/0.1/amp-ad');
+import '../amp-sticky-ad';
+import '../../../amp-ad/0.1/amp-ad';
 
 describe('amp-sticky-ad', () => {
   let sandbox;
