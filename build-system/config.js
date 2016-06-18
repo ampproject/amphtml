@@ -62,7 +62,7 @@ var karmaDefault = {
   singleRun: true,
   client: {
     mocha: {
-      timeout: 10000
+      timeout: process.env.TRAVIS ? 10000 : 2000
     },
     captureConsole: false,
   },
