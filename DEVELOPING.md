@@ -57,6 +57,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp watch`                  | Watches for changes in files, re-build.                               |
 | `gulp test`                   | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
+| `gulp test --nobuild`         | Runs tests without re-build.                                          |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
