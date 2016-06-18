@@ -21,7 +21,7 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
@@ -271,8 +271,10 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    this.vsync_.mutate(() => {
-      this.win.document.body.classList.toggle(clazz, on);
+    waitForBody(this.win.document, () => {
+      this.vsync_.mutate(() => {
+        this.win.document.body.classList.toggle(clazz, on);
+      });
     });
   }
 
