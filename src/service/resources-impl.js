@@ -31,7 +31,6 @@ import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {platformFor} from '../platform';
-import {FiniteStateMachine} from '../finite-state-machine';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';

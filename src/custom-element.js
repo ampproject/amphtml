@@ -317,8 +317,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(win);
+    /** @private @const {?./service/resources-impl.Resources}  */
+    this.resources_ = null;
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;

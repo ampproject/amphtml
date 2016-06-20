@@ -145,9 +145,6 @@ export class BaseElement {
 
     /** @protected {!./preconnect.Preconnect} */
     this.preconnect = preconnectFor(this.getWin());
-
-    /** @private {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(this.getWin());
   }
 
   /**
