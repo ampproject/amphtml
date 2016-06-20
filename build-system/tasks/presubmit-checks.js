@@ -340,6 +340,7 @@ var forbiddenTerms = {
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
+      'examples/pwa/pwa.js',
       'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',

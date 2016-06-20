@@ -72,6 +72,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
+    /DISALLOWED_TAG content/,  // Experiments with shadow slots
   ];
 
   const usedWhitelist = [];
