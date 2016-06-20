@@ -350,6 +350,12 @@ For instance:
 
 ## Miscellaneous
 
+### AMP_VERSION
+
+Provides a string with the AMP release version.
+
+Example value: `1460655576651`
+
 ### CLIENT_ID
 
 Use the special string `CLIENT_ID` to add a per document-source-origin (The origin of the website where you publish your AMP doc) and user identifier. The `CLIENT_ID` will be the same for the same user if they visit again within one year. It should behave roughly similar to a cookie storing a session id for one year. If the AMP document is not served through the Google AMP Cache, the `CLIENT_ID` will be replaced with a cookie of the name of the cid scope below. If it is not present a cookie will be set with the same name. These cookies will always have the prefix "amp-" followed by a random base64 encoded string.

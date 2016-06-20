@@ -62,11 +62,6 @@ const EXPERIMENTS = [
         'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
   },
   {
-    id: 'amp-analytics-viewability',
-    name: 'Viewability APIs for amp-analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
-  },
-  {
     id: 'amp-sticky-ad',
     name: 'AMP Sticky Ad',
     spec: 'https://github.com/ampproject/amphtml/issues/2472',
@@ -95,6 +90,11 @@ const EXPERIMENTS = [
     id: 'amp-form',
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
+  {
+    id: 'no-auth-in-prerender',
+    name: 'Delay amp-access auth request until doc becomes visible.',
+    spec: '',
   },
 ];
 

@@ -109,9 +109,10 @@ var karma = {
       },
       captureConsole: false,
     },
-    captureTimeout: 120000,
-    browserDisconnectTimeout: 120000,
-    browserNoActivityTimeout: 120000,
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 1,
+    browserNoActivityTimeout: 4 * 60 * 1000,
+    captureTimeout: 4 * 60 * 1000,
   }
 };
 

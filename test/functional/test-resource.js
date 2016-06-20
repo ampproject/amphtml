@@ -446,6 +446,7 @@ describe('Resource', () => {
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
 
     return promise.then(() => {
+      /* global fail: false */
       fail('should not be here');
     }, () => {
       expect(resource.getState()).to.equal(ResourceState.LAYOUT_FAILED);

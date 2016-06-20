@@ -32,6 +32,7 @@ import {
 } from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
+/* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
 
 adopt(window);

@@ -259,8 +259,8 @@ describe('Animation', () => {
   });
 
   it('should halt-freeze animation when cannot animate', () => {
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(0, () => {}, 0.8);
+    anim.add(0.2, () => {}, 0.8);
 
     const ap = anim.start(1000);
     let rejectCalled = false;

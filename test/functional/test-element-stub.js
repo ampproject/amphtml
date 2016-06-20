@@ -36,7 +36,7 @@ describe('test-element-stub', () => {
     return createIframePromise().then(f => {
       doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
-      testElement = iframe.doc.createElement(name);
+      const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
       testElement.setAttribute('type', 'a9');
@@ -54,7 +54,7 @@ describe('test-element-stub', () => {
   function getAnalyticsIframe() {
     return createIframePromise().then(f => {
       iframe = f;
-      testElement = iframe.doc.createElement('amp-analytics');
+      const testElement = iframe.doc.createElement('amp-analytics');
       return iframe.addElement(testElement);
     });
   }
@@ -64,7 +64,7 @@ describe('test-element-stub', () => {
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(0);
-      elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
+      new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
@@ -77,7 +77,7 @@ describe('test-element-stub', () => {
           .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
           .to.have.length(0);
-      elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
+      new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-embed"]'))
           .to.have.length(0);
@@ -92,7 +92,7 @@ describe('test-element-stub', () => {
       expect(iframe.doc.querySelectorAll('amp-analytics')).to.have.length(1);
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(0);
-      elementStub = new ElementStub(iframe.doc.body.querySelector('#parent')
+      new ElementStub(iframe.doc.body.querySelector('#parent')
           .firstChild);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(0);

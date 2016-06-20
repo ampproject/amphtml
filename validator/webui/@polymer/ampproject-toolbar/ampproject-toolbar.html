@@ -71,13 +71,23 @@
            target="_blank">GITHUB</a>
         &nbsp;&nbsp;&nbsp;
         <a href="https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc"
-           target="_blank">CHROME EXTENSION</a>
+           id="install-extension" onclick="return false;" target="_blank">CHROME EXTENSION</a>
       </div>
     </paper-toolbar>
   </template>
   <script>
     Polymer({
-    is: 'ampproject-toolbar'
+      is: 'ampproject-toolbar',
+      listeners: {
+        'install-extension.tap': 'installExtension'
+      },
+      installExtension: function(e) {
+        if (document.domain.endsWith('ampproject.org')) {
+          chrome.webstore.install('https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc');
+        } else {
+          window.open('https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc', '_blank');
+        }
+      }
     });
   </script>
 </dom-module>

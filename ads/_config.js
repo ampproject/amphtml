@@ -61,6 +61,7 @@ export const adPrefetch = {
     'https://yads.c.yimg.jp/js/yads.js',
   ],
   nend: 'https://js1.nend.net/js/amp.js',
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
 };
 
@@ -171,7 +172,7 @@ export const adPreconnect = {
     'https://img1.nend.net',
   ],
   adtech: [
-    'https://mads.at.atwola.com/',
+    'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
   ],
 };

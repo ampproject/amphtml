@@ -393,7 +393,12 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const responsePromise = this.adapter_.authorize().catch(error => {
+    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
+        ? this.viewer_.whenFirstVisible()
+        : Promise.resolve();
+    const responsePromise = startPromise.then(() => {
+      return this.adapter_.authorize();
+    }).catch(error => {
       this.analyticsEvent_('access-authorization-failed');
       if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.

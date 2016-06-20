@@ -111,7 +111,7 @@ describe('3p messaging', () => {
     let progress = '';
     const origOnError = window.onError;
     const expected = new Error('expected');
-    window.onerror = (message, source, lineno, colno, error) => {
+    window.onerror = function(message, source, lineno, colno, error) {
       if (error === expected) {
         return;
       }

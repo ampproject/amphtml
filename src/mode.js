@@ -93,6 +93,7 @@ function getMode_() {
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
+    /* global process: false */
     minified: process.env.NODE_ENV == 'production',
     test: !!(window.AMP_TEST),
     log: developmentQuery['log'],

@@ -334,6 +334,9 @@ export class UrlReplacements {
     this.set_('NAV_REDIRECT_COUNT', () => {
       return this.getNavigationData_('redirectCount');
     });
+
+    // returns the AMP version number
+    this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
   }
 
   /**

@@ -23,8 +23,9 @@ import {
   stringifyViewportMeta,
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
 import {getStyle} from '../../src/style';
+import {installViewerService} from '../../src/service/viewer-impl';
+import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 describe('Viewport', () => {
@@ -38,6 +39,7 @@ describe('Viewport', () => {
   let viewerViewportHandler;
   let updatedPaddingTop;
   let viewportSize;
+  let vsyncTasks;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -50,6 +52,7 @@ describe('Viewport', () => {
       },
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
+      postScroll: sandbox.spy(),
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
@@ -75,12 +78,35 @@ describe('Viewport', () => {
       return {then: callback => callback()};
     }};
     viewport.getSize();
+
+    // Use window since Animation by default will use window.
+    const vsync = vsyncFor(window);
+    vsyncTasks = [];
+    sandbox.stub(vsync, 'canAnimate').returns(true);
+    sandbox.stub(vsync, 'createAnimTask', task => {
+      return () => {
+        vsyncTasks.push(task);
+      };
+    });
   });
 
   afterEach(() => {
+    expect(vsyncTasks.length).to.equal(0);
     viewerMock.verify();
     sandbox.restore();
   });
+
+  function runVsync() {
+    const tasks = vsyncTasks.slice(0);
+    vsyncTasks = [];
+    tasks.forEach(function(task) {
+      const state = {};
+      if (task.measure) {
+        task.measure(state);
+      }
+      task.mutate(state);
+    });
+  }
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
@@ -226,6 +252,46 @@ describe('Viewport', () => {
     bindingMock.verify();
   });
 
+  it('should send scroll events', () => {
+    // 0         ->    6     ->      12   ->      16         ->   18
+    // scroll-10    scroll-20    scroll-30   2nd anim frame    scroll-40
+
+    // when there's no scroll
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // scroll to 10
+    viewport.getScrollTop = () => 10;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 20
+    viewport.getScrollTop = () => 20;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, still during first animation frame
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    // scroll to 30
+    viewport.getScrollTop = () => 30;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // 6 ticks later, second animation frame starts
+    clock.tick(6);
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.false;
+    expect(viewer.postScroll.callCount).to.equal(1);
+    expect(viewer.postScroll.withArgs(30).calledOnce).to.be.true;
+    // scroll to 40
+    viewport.getScrollTop = () => 40;
+    viewport.sendScrollMessage_();
+    expect(viewport.scrollAnimationFrameThrottled_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(1);
+  });
+
   it('should defer scroll events', () => {
     let changeEvent = null;
     let eventCount = 0;
@@ -233,8 +299,13 @@ describe('Viewport', () => {
       changeEvent = event;
       eventCount++;
     });
-    binding.getScrollTop = () => 34;
+    // when there's no scroll
     expect(viewport.scrollTracking_).to.be.false;
+    // expect(changeEvent).to.equal(null);
+    expect(viewer.postScroll.callCount).to.equal(0);
+    // time 0: scroll to 34
+    // raf for viewer.postScroll, delay 36 ticks till raf for throttledScroll_
+    binding.getScrollTop = () => 34;
     viewport.scroll_();
     expect(viewport.scrollTracking_).to.be.true;
     viewport.scroll_();
@@ -242,34 +313,59 @@ describe('Viewport', () => {
     expect(changeEvent).to.equal(null);
     expect(viewport.scrollTracking_).to.be.true;
 
-    // Not enough time past.
     clock.tick(8);
     expect(changeEvent).to.equal(null);
     clock.tick(8);
+    // time 16: scroll to 35
+    // call viewer.postScroll, raf for viewer.postScroll
     expect(changeEvent).to.equal(null);
+    expect(viewer.postScroll.callCount).to.equal(1);
     binding.getScrollTop = () => 35;
     viewport.scroll_();
-    clock.tick(16);
-    viewport.scroll_();
-    expect(changeEvent).to.equal(null);
 
-    // A bit more time.
     clock.tick(16);
+    // time 32: scroll to 35
+    // call viewer.postScroll, raf for viewer.postScroll
     viewport.scroll_();
     expect(changeEvent).to.equal(null);
     expect(viewport.scrollTracking_).to.be.true;
-    clock.tick(4);
+    expect(viewer.postScroll.callCount).to.equal(2);
+
+    // time 36:
+    // raf for throttledScroll_
+
+    clock.tick(16);
+    // time 48: scroll to 35
+    // call viewer.postScroll, call throttledScroll_
+    // raf for viewer.postScroll
+    // delay 36 ticks till raf for throttledScroll_
+    expect(viewport.scrollTracking_).to.be.false;
+    viewport.scroll_();
     expect(changeEvent).to.not.equal(null);
     expect(changeEvent.relayoutAll).to.equal(false);
-    expect(changeEvent.velocity).to.be.closeTo(0.019230, 1e-4);
+    expect(changeEvent.velocity).to.be.closeTo(0.020833, 1e-4);
     expect(eventCount).to.equal(1);
-    expect(viewport.scrollTracking_).to.be.false;
+    expect(viewport.scrollTracking_).to.be.true;
+    expect(viewer.postScroll.callCount).to.equal(3);
     changeEvent = null;
-    binding.getScrollTop = () => 36;
-    viewport.scroll_();
-    expect(changeEvent).to.equal(null);
-    clock.tick(53);
+
+    clock.tick(16);
+    // time 64:
+    // call viewer.postScroll
+    expect(viewer.postScroll.callCount).to.equal(4);
+
+    clock.tick(20);
+    // time 84:
+    // raf for throttledScroll_
+
+    clock.tick(16);
+    // time 100:
+    // call throttledScroll_
     expect(changeEvent).to.not.equal(null);
+    expect(changeEvent.relayoutAll).to.equal(false);
+    expect(viewport.scrollTracking_).to.be.false;
+    expect(changeEvent.velocity).to.be.equal(0);
+    expect(eventCount).to.equal(2);
   });
 
   it('should update scroll pos and reset cache', () => {
@@ -286,6 +382,40 @@ describe('Viewport', () => {
         .returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     viewport.scrollIntoView(element);
+    bindingMock.verify();
+  });
+
+  it('should change scrollTop for animateScrollIntoView and respect ' +
+    'padding', () => {
+    const element = document.createElement('div');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getLayoutRect').withArgs(element)
+        .returns({top: 111}).once();
+    bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
+    const duration = 1000;
+    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+      bindingMock.verify();
+    });
+    clock.tick(duration);
+    runVsync();
+    return promise;
+  });
+
+  it('should not change scrollTop for animateScrollIntoView', () => {
+    const element = document.createElement('div');
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getLayoutRect').withArgs(element)
+        .returns({top: 111}).once();
+    viewport.paddingTop_ = 0;
+    sandbox.stub(viewport, 'getScrollTop').returns(111);
+    bindingMock.expects('setScrollTop').withArgs(111).never();
+    const duration = 1000;
+    const promise = viewport.animateScrollIntoView(element, 1000).then(() => {
+      bindingMock.verify();
+    });
+    clock.tick(duration);
+    runVsync();
+    return promise;
   });
 
   it('should send cached scroll pos to getLayoutRect', () => {
@@ -852,6 +982,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(binding.getScrollTop()).to.equal(17);
   });
 
+  it('should calculate scrollTop from scrollpos element with padding', () => {
+    bodyChildren[0].getBoundingClientRect = () => {
+      return {top: 0, left: -11};
+    };
+    binding.updatePaddingTop(10);
+    binding.onScrolled_();
+    // scrollTop = - BCR.top + paddingTop
+    expect(binding.getScrollTop()).to.equal(10);
+  });
+
   it('should calculate scrollHeight from scrollpos/endpos elements', () => {
     bodyChildren[0].getBoundingClientRect = () => {
       return {top: -17, left: -11};
@@ -860,14 +1000,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       return {top: 100, left: -11};
     };
     expect(binding.getScrollHeight()).to.equal(117);
-  });
-
-  it('should update scroll position via moving element', () => {
-    const moveEl = bodyChildren[1];
-    binding.setScrollTop(17);
-    expect(getStyle(moveEl, 'transform')).to.equal('translateY(17px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
-    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
   it('should offset client rect for layout', () => {
@@ -889,8 +1021,18 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should set scroll position via moving element', () => {
     const moveEl = bodyChildren[1];
-    binding.setScrollPos_(10);
+    binding.setScrollTop(10);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+  });
+
+  it('should set scroll position via moving element with padding', () => {
+    binding.updatePaddingTop(19);
+    const moveEl = bodyChildren[1];
+    binding.setScrollTop(10);
+    // transform = scrollTop - paddingTop
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
@@ -902,6 +1044,20 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
+  it('should adjust scroll position when scrolled to 0 w/padding', () => {
+    binding.updatePaddingTop(10);
+    const posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
+    const moveEl = bodyChildren[1];
+    const event = {preventDefault: sandbox.spy()};
+    binding.adjustScrollPos_(event);
+    // transform = 1 - updatePadding
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(-9px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
     expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
     expect(event.preventDefault.callCount).to.equal(1);

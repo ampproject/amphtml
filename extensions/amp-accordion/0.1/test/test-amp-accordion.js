@@ -16,7 +16,7 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-accordion');
+import '../amp-accordion';
 import * as sinon from 'sinon';
 
 adopt(window);

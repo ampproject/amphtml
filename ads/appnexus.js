@@ -48,7 +48,7 @@ export function appnexus(global, data) {
    */
   function constructTtj(args) {
     let url = 'https://ib.adnxs.com/ttj?';
-    for (i = 0; i < args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
       //append arg to query. Please encode arg first.
       url += args[i] + '&';
     }

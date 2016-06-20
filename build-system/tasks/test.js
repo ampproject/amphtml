@@ -51,17 +51,10 @@ function getConfig() {
   return extend(obj, karmaConfig.default);
 }
 
-var prerequisites = ['build'];
-if (process.env.TRAVIS) {
-  // No need to do this because we are guaranteed to have done
-  // it.
-  prerequisites = [];
-}
-
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests', prerequisites, function(done) {
+gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   if (argv.saucelabs && process.env.MAIN_REPO &&
       // Sauce Labs does not work on Pull Requests directly.
       // The @ampsauce bot builds these.

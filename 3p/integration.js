@@ -75,6 +75,7 @@ import {microad} from '../ads/microad';
 import {yahoojp} from '../ads/yahoojp';
 import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
+import {adgeneration} from '../ads/adgeneration';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -136,6 +137,7 @@ register('microad', microad);
 register('yahoojp', yahoojp);
 register('chargeads', chargeads);
 register('nend', nend);
+register('adgeneration', adgeneration);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
