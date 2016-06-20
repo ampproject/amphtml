@@ -38,15 +38,15 @@ app.use('/pwa', function(req, res, next) {
   if (!req.url || req.url == '/') {
     // pwa.html
     contentType = 'text/html';
-    file = '/examples/pwa.html';
+    file = '/examples/pwa/pwa.html';
   } else if (req.url == '/pwa.js') {
     // pwa.js
     contentType = 'application/javascript';
-    file = '/examples/pwa.js';
+    file = '/examples/pwa/pwa.js';
   } else if (req.url == '/pwa-sw.js') {
     // pwa.js
     contentType = 'application/javascript';
-    file = '/examples/pwa-sw.js';
+    file = '/examples/pwa/pwa-sw.js';
   } else {
     // Redirect to the underlying resource.
     // TODO(dvoytenko): would be nicer to do forward instead of redirect.
