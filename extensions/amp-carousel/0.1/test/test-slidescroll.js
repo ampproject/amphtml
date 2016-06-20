@@ -208,7 +208,6 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(1);
 
-<<<<<<< ae1ca98a192faea1b527d9705b4dd386bc154c6c
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -219,30 +218,18 @@ describe('SlideScroll', () => {
       expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
-=======
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
-      expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
-          .to.be.false;
-      expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
->>>>>>> Making slides flex and workaround for https://bugs.webkit.org/show_bug.cgi?id=158821.
           .to.be.false;
       expect(schedulePauseSpy).to.not.have.been.called;
       expect(schedulePauseSpy.callCount).to.equal(0);
 
       impl.showSlide_(0);
 
-<<<<<<< ae1ca98a192faea1b527d9705b4dd386bc154c6c
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0,1]);
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains(SHOW_CLASS))
-=======
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
-
-      expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
->>>>>>> Making slides flex and workaround for https://bugs.webkit.org/show_bug.cgi?id=158821.
           .to.be.false;
       expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
           .to.be.false;
@@ -533,6 +520,5 @@ describe('SlideScroll', () => {
         expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
       });
     });
-
   });
 });
