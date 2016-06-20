@@ -26,7 +26,11 @@ export function adtech(global, data) {
 
   } else {
 
-    checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwsizes','atwwidth']);
+    checkData(data, [
+        'atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 
+        'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 
+        'atwsizes','atwwidth',
+    ]);
     validateDataExists(data,['atwmn', 'atwdiv']);
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
