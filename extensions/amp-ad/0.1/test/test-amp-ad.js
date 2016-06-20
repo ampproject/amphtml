@@ -23,9 +23,10 @@ describe('amp-embed', tests('amp-embed'));
 
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
-      opt_beforeLayoutCallback) {
-    return createAdPromise(name, attributes, canonical,
-        opt_handleElement, opt_beforeLayoutCallback);
+      opt_beforeLayoutCallback, opt_noFakeResources) {
+
+    return createAdPromise(name, attributes, canonical, opt_handleElement,
+      opt_beforeLayoutCallback, opt_noFakeResources);
   }
 
   return () => {
@@ -54,7 +55,7 @@ function tests(name) {
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
-        const url = iframe.getAttribute('src');
+        const url = iframe.src;
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(url).to.match(/frame(.max)?.html#{/);
         expect(iframe.style.display).to.equal('');
@@ -104,7 +105,8 @@ function tests(name) {
           type: 'a9',
           src: 'testsrc',
           resizable: '',
-        }, 'https://schema.org').then(element => {
+        }, 'https://schema.org', undefined, undefined,
+        /* opt_noFakeResources */ true).then(element => {
           return new Promise((resolve, unusedReject) => {
             const impl = element.implementation_;
             impl.layoutCallback();
@@ -141,7 +143,8 @@ function tests(name) {
           type: 'a9',
           src: 'testsrc',
           resizable: '',
-        }, 'https://schema.org').then(element => {
+        }, 'https://schema.org', undefined, undefined,
+        /* opt_noFakeResources */ true).then(element => {
           return new Promise((resolve, unusedReject) => {
             const impl = element.implementation_;
             impl.layoutCallback();

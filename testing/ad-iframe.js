@@ -15,9 +15,11 @@
  */
 
 
-import {createIframePromise} from './iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from './iframe';
 import {markElementScheduledForTesting} from '../src/custom-element';
-
 
 /**
  * Creates an iframe with an ad inside it for use in tests.
@@ -42,9 +44,12 @@ import {markElementScheduledForTesting} from '../src/custom-element';
  * @return {!Promise}
  */
 export function createAdPromise(name, attributes, canonical,
-    opt_handleElement, opt_beforeLayoutCallback) {
+    opt_handleElement, opt_beforeLayoutCallback, opt_noFakeResources) {
   return createIframePromise(undefined, opt_beforeLayoutCallback)
     .then(iframe => {
+      if (!opt_noFakeResources) {
+        doNotLoadExternalResourcesInTest(iframe.win);
+      }
       iframe.iframe.style.height = '400px';
       iframe.iframe.style.width = '400px';
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
@@ -71,4 +76,3 @@ export function createAdPromise(name, attributes, canonical,
       return iframe.addElement(a);
     });
 }
-
