@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-vine
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-vine extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-vine
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
 }
 tags: {  # <amp-vine>
-  tag_name: "amp-vine"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-VINE"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-vine extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-vineid" mandatory: true }
