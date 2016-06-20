@@ -72,6 +72,9 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
+
+    this.slidesContainer_.addEventListener(
+        'scroll', this.scrollHandler_.bind(this));
   }
 
   /** @override */
@@ -129,33 +132,99 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /**
+   * Handles scroll on the slides container.
+   * @param {!Event} event Event object.
+   * @private
+   */
+  scrollHandler_(event) {
+    const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
+    if (this.hasNativeSnapPoints_) {
+      this.snapHandler_(event, currentScrollLeft);
+    } else {
+      this.customScrollHandler_(event, currentScrollLeft);
+    }
+    this.previousScrollLeft_ = currentScrollLeft;
+  }
+
+  /**
+   * Detects snap end and updates slides/slideIndex after snap.
+   * @param {!Event} event Event object.
+   * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   * @private
+   */
+  snapHandler_(event, currentScrollLeft) {
+    // With snap points we know snapping happens precisely at the co-ordinates
+    if (currentScrollLeft % this.slideWidth_ == 0) {
+      this.updateOnScroll_(currentScrollLeft);
+    }
+  }
+
+  /**
+   * Updates to the right state of the new index on scroll.
+   * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   */
+  updateOnScroll_(currentScrollLeft) {
+    // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
+    // a time.
+    const shownSlideIndex = parseInt(currentScrollLeft / this.slideWidth_);
+    // Update value can be -1, 0 or 1 depending upon the index of the current
+    // shown slide.
+    let updateValue;
+    const lastSlideIndex = this.noOfSlides - 1;
+    if (this.slideIndex_ === 0 && shownSlideIndex === 0) {
+      // No need to update as slide has not moved from slide 0.
+      updateValue = 0;
+    } else if (this.slideIndex_ === 0 && shownSlideIndex ==1) {
+      // Slide moved one position to it's right.
+      updateValue = 1;
+    } else if (this.slideIndex_ == lastSlideIndex && shownSlideIndex == 1) {
+      // No need to update as slide has not moved from the last slide.
+      updateValue = 0;
+    } else if (this.slideIndex_ == lastSlideIndex && shownSlideIndex === 0) {
+      // Slide has scrolled to one position to it's left.
+      updateValue = -1;
+    } else {
+      // Handles shift for all slides except first and last.
+      updateValue = shownSlideIndex - 1;
+    }
+    this.showSlide_(this.slideIndex_ + updateValue);
+  }
+
+  /**
+   * Handles scroll on the slides container.
+   * @param {!Event} event Event object.
+   * @private
+   */
+  customScrollHandler_(event) {
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
   showSlide_(newIndex) {
+    console.log('skrish: ' + 'moving from: '+ this.slideIndex_ + ' to: '+ newIndex);
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
       return;
     }
+
+    const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
+        (this.hasLooping_) ? noOfSlides_ - 1 : null;
+    const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
+        (this.hasLooping_) ? 0 : null;
+
     const showIndexArr = [];
-    if (newIndex == noOfSlides_ - 1) {
-      // Last slide.
-      showIndexArr.push(noOfSlides_ - 2, noOfSlides_ - 1);
-      if (this.hasLooping_) {
-        showIndexArr.push(0);
-      }
-    } else if (newIndex == 0) {
-      // First slide.
-      if (this.hasLooping_) {
-        showIndexArr.push(noOfSlides_ - 1);
-      }
-      showIndexArr.push(0, 1);
-    } else {
-      showIndexArr.push(newIndex - 1, newIndex, newIndex + 1);
+    if (prevIndex != null) {
+      showIndexArr.push(prevIndex);
+    }
+    showIndexArr.push(newIndex);
+    if (nextIndex != null) {
+      showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], false);
@@ -163,7 +232,7 @@ export class AmpSlideScroll extends BaseCarousel {
     this.updateInViewport(this.slides_[newIndex], true);
     showIndexArr.forEach((showIndex, loopIndex) => {
       if (this.hasLooping_) {
-        setStyle(this.slideWrappers_[showIndex], 'order', loopIndex);
+        setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
       if (showIndex == newIndex) {
