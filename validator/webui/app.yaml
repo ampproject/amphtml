@@ -13,3 +13,6 @@ handlers:
 - url: /amp_favicon.png$
   static_files: amp_favicon.png
   upload: amp_favicon\.png$
+
+skip_files:
+- serve-standalone.go

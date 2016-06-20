@@ -56,7 +56,9 @@ run `npm install -g` in this directory. After that, you may type
 This is a simple web editor which validates AMP HTML documents on the fly.
 This feature is new and experimental, feedback is especially welcome.
 
-* Type `./index.js webui` in this directory.
+* Type `npm install webui` in this directory.
+* Type `go build webui/serve-standalone.go` in this directory.
+* Type `./serve-standalone` in this directory.
 * Point your web browser to http://127.0.0.1:8765/
 
 ## Using the NodeJS API (Beta!)

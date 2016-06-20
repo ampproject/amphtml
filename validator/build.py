@@ -128,6 +128,7 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   subprocess.check_call(['npm', 'install'])
+  subprocess.check_call(['npm', 'install', 'webui'])
   logging.info('... done')
 
 
@@ -422,15 +423,17 @@ def CreateWebuiAppengineDist(out_dir):
   try:
     tempdir = tempfile.mkdtemp()
     shutil.copytree('webui', os.path.join(tempdir, 'webui'))
-    os.symlink(os.path.abspath('node_modules/codemirror'),
+    node_modules = 'node_modules/amp-validator-webui/node_modules'
+    os.symlink(os.path.abspath(os.path.join(node_modules, 'codemirror')),
                os.path.join(tempdir, 'webui/codemirror'))
-    for d in os.listdir('node_modules/@polymer'):
-      os.symlink(os.path.abspath(os.path.join('node_modules/@polymer', d)),
+
+    for d in os.listdir(os.path.join(node_modules, '@polymer')):
+      os.symlink(os.path.abspath(os.path.join(node_modules, '@polymer', d)),
                  os.path.join(tempdir, 'webui/@polymer', d))
-    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
+    os.symlink(os.path.abspath(os.path.join(node_modules, 'webcomponents-lite')),
                os.path.join(tempdir, 'webui/webcomponents-lite'))
     vulcanized_index_html = subprocess.check_output([
-        'node_modules/vulcanize/bin/vulcanize',
+        os.path.join(node_modules, 'vulcanize/bin/vulcanize'),
         '--inline-scripts', '--inline-css',
         '-p', os.path.join(tempdir, 'webui'), 'index.html'])
   finally:
