@@ -1,0 +1,4 @@
+FAIL
+feature_tests/deprecation_warnings_and_errors.html:29:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
+feature_tests/deprecation_warnings_and_errors.html:30:12 The tag 'noscript > style[amp-boilerplate] - old variant' is deprecated - use 'noscript > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
+feature_tests/deprecation_warnings_and_errors.html:34:0 The tag 'disallowed-tag' is disallowed. [DISALLOWED_HTML]
