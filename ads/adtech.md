@@ -38,7 +38,7 @@ For semantics of configuration, please see ad network documentation.
 * `data-atwPlId` - placement ID (instead of Magic Number)
 * `data-atwOthAT` - generic var to set key/value pairs to send with the ad call; accepts mulitple values in a semi-colon delimited list
 * `data-atwCo` - override default country code
-* `data-atwMOAT` - set this var to '1' to enable MOAT
+* `data-atwMOAT` - set this to "1" to enable MOAT
 * `data-atwHtNmAT` - override ad host name
 * `data-atwNetId` - network ID
 * `data-atwWidth` - ad width (use with atwHeight only if the ad is not 300x250)
