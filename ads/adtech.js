@@ -18,32 +18,28 @@ import {writeScript, checkData, validateSrcPrefix, validateSrcContains, validate
 
 
 export function adtech(global, data) {
+  const adsrc = data.src;
+  if (typeof adsrc != 'undefined') {
+  	validateSrcPrefix('https:', adsrc);
+    validateSrcContains('/addyn/', adsrc);
+    writeScript(global, adsrc);
 
- const adsrc = data.src;
- if (typeof adsrc != 'undefined') {
- 	validateSrcPrefix('https:', adsrc);
- 	validateSrcContains('/addyn/', adsrc);
- 	writeScript(global, adsrc);
+  } else {
 
- } else {
-
-  checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwsizes','atwwidth']);
-
-  validateDataExists (data,['atwmn', 'atwdiv']);
-	global.atwco = data.atwco;
-	global.atwdiv = data.atwdiv;
-	global.atwheight = data.atwheight;
-	global.atwhtnmat = data.atwhtnmat;
-	global.atwmn = data.atwmn;
-	global.atwmoat = data.atwmoat;
-	global.atwnetid = data.atwnetid;
-	global.atwothat = data.atwothat;
-	global.atwplid = data.atwplid;
-	global.atwsizes = data.atwsizes;
-	global.atwwidth = data.atwwidth;
-
-  writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
-
+    checkData(data, ['atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 'atwsizes','atwwidth']);
+    validateDataExists(data,['atwmn', 'atwdiv']);
+    global.atwco = data.atwco;
+    global.atwdiv = data.atwdiv;
+    global.atwheight = data.atwheight;
+    global.atwhtnmat = data.atwhtnmat;
+    global.atwmn = data.atwmn;
+    global.atwmoat = data.atwmoat;
+    global.atwnetid = data.atwnetid;
+    global.atwothat = data.atwothat;
+    global.atwplid = data.atwplid;
+    global.atwsizes = data.atwsizes;
+    global.atwwidth = data.atwwidth;
+    writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
    }
 
 }
