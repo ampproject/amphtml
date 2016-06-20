@@ -176,6 +176,12 @@ Type attribute value: `mediametrie`
 
 Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
 
+### mParticle
+
+Type attribute value: `mparticle`
+
+Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](https://docs.mparticle.com/?javascript#amp/).
+
 ### OEWA
 
 Type attribute value: `oewa`
