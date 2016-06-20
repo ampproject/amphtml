@@ -344,7 +344,7 @@ function isRetriable(status) {
 /**
  * Returns the response if successful or otherwise throws an error.
  * @paran {!FetchResponse} response
- * @return {!FetchResponse}
+ * @return {!Promise<!FetchResponse|!Error>}
  * @private Visible for testing
  */
 export function assertSuccess(response) {
