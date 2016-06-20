@@ -157,8 +157,8 @@ export class Xhr {
     setupJson_(init);
 
     return this.fetchAmpCors_(input, init).then(response => {
-      return assertSuccess(response).then(response => response.json());
-    });
+      return assertSuccess(response);
+    }).then(response => response.json());
   }
 
   /**
@@ -177,8 +177,8 @@ export class Xhr {
     init.headers['Accept'] = 'text/html';
 
     return this.fetchAmpCors_(input, init).then(response => {
-      return assertSuccess(response).then(response => response.document_());
-    });
+      return assertSuccess(response);
+    }).then(response => response.document_());
   }
 
   /**
@@ -349,7 +349,7 @@ function isRetriable(status) {
  */
 export function assertSuccess(response) {
   return new Promise((resolve, reject) => {
-    if (!(response.status >= 200 && response.status < 300)) {
+    if (response.status < 200 || response.status >= 300) {
       const err = user.createError(`HTTP error ${response.status}`);
       if (isRetriable(response.status)) {
         err.retriable = true;
