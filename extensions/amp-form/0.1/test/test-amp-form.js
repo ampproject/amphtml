@@ -293,6 +293,7 @@ describe('amp-form', () => {
       renderedTemplate.innerText = 'Success: hello';
       renderedTemplate.setAttribute('i-amp-rendered', '');
       successContainer.appendChild(renderedTemplate);
+      ampForm.state_ = 'submit-success';
 
       const newRender = document.createElement('div');
       newRender.innerText = 'New Success: What What';

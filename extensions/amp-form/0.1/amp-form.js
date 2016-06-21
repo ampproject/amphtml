@@ -24,6 +24,8 @@ import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
 import {removeElement, childElementByAttr} from '../../../src/dom';
+import {installStyles} from '../../../src/styles';
+import {CSS} from '../../../build/amp-form-0.1.css';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -124,20 +126,25 @@ export class AmpForm {
 
   /**
    * Adds proper classes for the state passed.
-   * @param {string} state
+   * @param {string} newState
    * @private
    */
-  setState_(state) {
-    this.form_.classList.remove(`amp-form-${this.state_}`);
-    this.form_.classList.add(`amp-form-${state}`);
-    this.state_ = state;
+  setState_(newState) {
+    const previousState = this.state_;
+    this.form_.classList.remove(`amp-form-${previousState}`);
+    this.form_.classList.add(`amp-form-${newState}`);
+    this.state_ = newState;
     this.submitButtons_.forEach(button => {
-      if (state == FormState_.SUBMITTING) {
+      if (newState == FormState_.SUBMITTING) {
         button.setAttribute('disabled', '');
       } else {
         button.removeAttribute('disabled');
       }
     });
+
+    if (newState == FormState_.SUBMITTING) {
+      this.cleanupRenderedTemplate_(previousState);
+    }
   }
 
   /**
@@ -148,8 +155,6 @@ export class AmpForm {
   renderTemplate_(state, data = {}) {
     const container = this.form_.querySelector(`[${state}]`);
     if (container) {
-      // TODO(#3587): Move the cleanup to do during submission.
-      this.cleanupRenderedTemplate_(state);
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
             rendered.setAttribute('i-amp-rendered', '');
@@ -191,7 +196,7 @@ function installSubmissionHandlers(win) {
 function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
-      installSubmissionHandlers(win);
+      installStyles(win.document, CSS, () => installSubmissionHandlers(win));
     }
     return {};
   });
