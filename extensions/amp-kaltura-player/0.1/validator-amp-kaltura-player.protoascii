@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-kaltura-player
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-kaltura-player extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -49,9 +49,8 @@ tags: {  # amp-kaltura-player
 # amp-kaltura-player either comes with a video-id attribute, or with
 # a data-videoid attribute.
 tags: {  # <amp-kaltura-player>
-  tag_name: "amp-kaltura-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-KALTURA-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-kaltura-player extension .js script"
 
   attrs: { name: "data-partner" mandatory: true }

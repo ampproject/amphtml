@@ -90,7 +90,8 @@ amp.domwalker.NodeProcessingState_ = class {
 function attrList(namedNodeMap) {
   var ret = [];
   for (var i = 0; i < namedNodeMap.length; ++i) {
-    ret.push(namedNodeMap[i].name.toLowerCase());
+    // The attribute name is always lower cased when returned by the browser.
+    ret.push(namedNodeMap[i].name);
     ret.push(namedNodeMap[i].value);
   }
   return ret;
@@ -100,7 +101,7 @@ function attrList(namedNodeMap) {
  * Set of element names requiring cdata validation.
  * @type {Object<string,number>}
  */
-const CdataTagsToValidate = {'script': 0, 'style': 0};
+const CdataTagsToValidate = {'SCRIPT': 0, 'STYLE': 0};
 
 /**
  * @enum {number}
@@ -143,7 +144,7 @@ amp.domwalker.DomWalker = class {
     // Apparently the !doctype 'tag' is not considered an element in the DOM,
     // so we can't see it naively. Unsure if there is a better approach here.
     if (rootDoc.doctype !== null) {
-      handler.startTag('!doctype', [rootDoc.doctype.name, '']);
+      handler.startTag('!DOCTYPE', [rootDoc.doctype.name, '']);
     }
 
     // The approach here is to walk the DOM, generating handler calls which
@@ -161,9 +162,8 @@ amp.domwalker.DomWalker = class {
       const curState = tagStack[tagStack.length - 1];
       const nextChild = curState.nextChild();
       if (nextChild !== undefined) {
-        // TODO(gregable): browser always returns upper case tag names, can we
-        // just make the validator use upper case tag names too to avoid this?
-        const tagName = nextChild.node().nodeName.toLowerCase();
+        // The browser always returns upper case tag names.
+        const tagName = nextChild.node().nodeName;
         calls.push([
           amp.domwalker.HandlerCalls.START_TAG, tagName,
           attrList(nextChild.node().attributes)
@@ -179,7 +179,8 @@ amp.domwalker.DomWalker = class {
         if (tagStack.length > 1) {
           calls.push([
             amp.domwalker.HandlerCalls.END_TAG,
-            curState.node().nodeName.toLowerCase()
+            // The browser always returns upper case tag names.
+            curState.node().nodeName
           ]);
         }
         tagStack.pop();

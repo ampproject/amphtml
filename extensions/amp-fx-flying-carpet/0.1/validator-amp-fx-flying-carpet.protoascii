@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 tags: {  # <script custom-element="amp-fx-flying-carpet">
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-fx-flying-carpet extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -46,8 +46,8 @@ tags: {  # <script custom-element="amp-fx-flying-carpet">
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
 }
 tags: {  # <amp-fx-flying-carpet>
-  tag_name: "amp-fx-flying-carpet"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-FX-FLYING-CARPET"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-fx-flying-carpet extension .js script"
   attr_lists: "extended-amp-global"
   attrs: {

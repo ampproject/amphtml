@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-springboard-player
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-springboard-player extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-springboard-player
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
 }
 tags: {  # <amp-springboard-player>
-  tag_name: "amp-springboard-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-SPRINGBOARD-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-springboard-player extension .js script"
   attrs: {
     name: "data-content-id"
