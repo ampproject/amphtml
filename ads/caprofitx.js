@@ -24,5 +24,5 @@ export function caprofitx(global, data) {
   validateDataExists(data, ['tagid']);
 
   global.caprofitxConfig = data;
-  writeScript(global, 'https://cdn.caprofitx.com/tags/amp/profitx_amp.js');
+  loadScript(global, 'https://cdn.caprofitx.com/tags/amp/profitx_amp.js');
 }
