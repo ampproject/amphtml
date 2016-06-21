@@ -274,7 +274,6 @@ describe('amp-sticky-ad', () => {
       impl.displayAfterScroll_();
       expect(addCloseButtonSpy).to.be.called;
       expect(impl.closeButton_).not.to.be.null;
-      expect(impl.boundOnClick_).not.to.be.null;
     });
   });
 
@@ -283,8 +282,6 @@ describe('amp-sticky-ad', () => {
       const iframe = obj.iframe;
       const stickyAdElement = obj.ampStickyAd;
       const impl = stickyAdElement.implementation_;
-      const removeOnClickListenerSpy =
-          sandbox.spy(impl, 'removeOnClickListener_');
 
       impl.viewport_.getScrollTop = function() {
         return 100;
@@ -309,13 +306,11 @@ describe('amp-sticky-ad', () => {
       let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('50px');
-      impl.boundOnClick_();
+      impl.closeButton_.dispatchEvent(new Event('click'));
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');
-      expect(removeOnClickListenerSpy).to.be.called;
       expect(impl.closeButton_).to.be.null;
-      expect(impl.boundOnClick_).to.be.null;
     });
   });
 });

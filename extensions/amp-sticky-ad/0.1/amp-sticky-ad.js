@@ -56,9 +56,6 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @ const {!Function|null} */
-    this.boundOnClick_ = null;
-
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
      * @const @private {!UnlistenDef}
@@ -90,15 +87,6 @@ class AmpStickyAd extends AMP.BaseElement {
     if (this.scrollUnlisten_) {
       this.scrollUnlisten_();
       this.scrollUnlisten_ = null;
-    }
-  }
-
-  removeOnClickListener_() {
-    if (this.boundOnClick_ && this.closeButton_) {
-      this.closeButton_.removeEventListener('click',
-          this.boundOnClick_);
-      this.boundOnClick_ = null;
-      this.closeButton_ = null;
     }
   }
 
@@ -146,26 +134,24 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
-    if (this.closeButton_ && this.boundOnClick_) {
+    if (this.closeButton_) {
       return;
     }
     const closeButton = this.getWin().document.createElement('div');
-    closeButton.setAttribute('class', '-amp-sticky-ad-close-button');
-    closeButton./*OK*/innerHTML = '&#10006';
+    closeButton.classList.add('-amp-sticky-ad-close-button');
+    closeButton.textContent = '&#10006';
     this.element.appendChild(closeButton);
     this.closeButton_ = closeButton;
-    if (!this.boundOnClick_) {
-      this.boundOnClick_ = this.onClick_.bind(this);
-    }
-    closeButton.addEventListener('click', this.boundOnClick_);
+    const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
+    this.closeButton_.addEventListener('click', boundOnCloseButtonClick);
   }
 
   /**
    * The listener function that listen to click event and dismiss sticky ad
    * @private
    */
-  onClick_() {
-    this.removeOnClickListener_();
+  onCloseButtonClick_() {
+    this.closeButton_ = null;
     this.vsync_.mutate(() => {
       toggle(this.element, false);
       this.viewport_.updatePaddingBottom(0);
