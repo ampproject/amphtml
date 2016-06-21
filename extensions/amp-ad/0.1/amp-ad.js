@@ -393,6 +393,9 @@ class AmpAd extends AMP.BaseElement {
       });
     }
     this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
       if (this.fallback_) {
         // Hide placeholder when falling back.
         if (this.placeholder_) {
