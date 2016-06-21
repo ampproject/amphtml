@@ -26,6 +26,7 @@ import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
+import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
 
@@ -316,8 +317,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(win);
+    /** @private @const {?./service/resources-impl.Resources}  */
+    this.resources_ = null;
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -381,6 +382,16 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
+  };
+
+  /** @return {!Resources} */
+  ElementProto.getResources = function() {
+    return dev.assert(this.resources_);
+  };
+
+  /** @return {!Viewport} */
+  ElementProto.getViewport = function() {
+    return dev.assert(this.viewport_);
   };
 
   /** @private @this {!Element} */
@@ -641,13 +652,44 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     }
     if (!this.everAttached) {
       this.everAttached = true;
+
+      const win = this.ownerDocument.defaultView;
+      /** @private @const {?Resources}  */
+      this.resources_ = !win.AMP_SHADOW ? resourcesFor(win) : null;
+      /** @private @const {?Viewport}  */
+      this.viewport_ = !win.AMP_SHADOW ? viewportFor(win) : null;
+      if (!this.resources_) {
+        /** @private @const {?ShadowRoot}  */
+        this.shadowRoot_ = null;
+        for (let n = this.parentNode; n; n = n.parentNode) {
+          if (n instanceof ShadowRoot) {
+            this.shadowRoot_ = n;
+            break;
+          }
+        }
+        dev.assert(this.shadowRoot_, 'Shadow root not available');
+        /** @private @const {?Promise}  */
+        this.shadowRootAttached_ = awaitShadowRoot(this.shadowRoot_).then(() => {
+          console.log('AMP: shadow root resolved!!!');
+          this.resources_ = resourcesFor(this.shadowRoot_.AMP);
+          this.viewport_ = viewportFor(this.shadowRoot_.AMP);
+          console.log('- resources: ', this.resources_);
+        });
+      }
+
       try {
         this.firstAttachedCallback_();
       } catch (e) {
         reportError(e, this);
       }
     }
-    this.resources_.add(this);
+    if (this.resources_ != null) {
+      this.resources_.add(this);
+    } else {
+      this.shadowRootAttached_.then(() => {
+        this.resources_.add(this);
+      });
+    }
   };
 
   /**
@@ -1290,4 +1332,27 @@ export function resetScheduledElementForTesting(win, elementName) {
  */
 export function getElementClassForTesting(elementName) {
   return knownElements[elementName] || null;
+}
+
+/**
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Promise}
+ */
+export function awaitShadowRoot(shadowRoot) {
+  let promise = shadowRoot['__AMP_READY_PROMISE'];
+  if (!promise) {
+    promise = new Promise(resolve => {
+      shadowRoot['__AMP_READY_PROMISE_RESOLVE'] = resolve;
+    });
+    shadowRoot['__AMP_READY_PROMISE'] = promise;
+  }
+  return promise;
+}
+
+/**
+ */
+export function attachShadowRoot(win, shadowRoot) {
+  const promise = awaitShadowRoot(shadowRoot);
+  const resolve = shadowRoot['__AMP_READY_PROMISE_RESOLVE'];
+  resolve();
 }

@@ -37,51 +37,71 @@ import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
 import {isExperimentOn} from './experiments';
 
+function install() {
+  // XXX
+  installCoreServices(window);    // MIXED
+  // We need the core services (viewer/resources) to start instrumenting
+  if (!window.AMP_SHADOW) {
+    perf.coreServicesAvailable();   // DOC
+    maybeTrackImpression(window);   // DOC
+  }
+  templatesFor(window);           // SUPER
+
+  installImg(window);             // SUPER
+  installPixel(window);           // SUPER
+  installVideo(window);           // SUPER
+
+  adopt(window);                  // ????
+  stubElements(window);           // SUPER    XXX: add more stubs (inject via runtime?)
+
+  if (!window.AMP_SHADOW) {
+    installPullToRefreshBlocker(window);    // SUPER   NEEDED?
+    installGlobalClickListener(window);     // SUPER   NEEDED?
+    if (isExperimentOn(window, 'form-submit')) {
+      installGlobalSubmitListener(window);    // SUPER   NEEDED?
+    }
+  }
+}
+
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
 // a completely blank page.
 try {
+  console.log('AMP: init AMP:', window.AMP_SHADOW);
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
   const perf = installPerformanceService(window);
 
   perf.tick('is');
-  installStyles(document, cssText, () => {
-    try {
-      installCoreServices(window);
-      // We need the core services (viewer/resources) to start instrumenting
-      perf.coreServicesAvailable();
-      maybeTrackImpression(window);
-      templatesFor(window);
+  if (!window.AMP_SHADOW) {
+    installStyles(document, cssText, () => {
+      try {
+        install();
 
-      installImg(window);
-      installPixel(window);
-      installVideo(window);
-
-      adopt(window);
-      stubElements(window);
-
-      installPullToRefreshBlocker(window);
-      installGlobalClickListener(window);
-      if (isExperimentOn(window, 'form-submit')) {
-        installGlobalSubmitListener(window);
+        maybeValidate(window);
+        if (!window.AMP_SHADOW) {
+          makeBodyVisible(document, /* waitForExtensions */ true);    // DOC
+        }
+      } catch (e) {
+        if (!window.AMP_SHADOW) {
+          makeBodyVisible(document);
+        }
+        throw e;
+      } finally {
+        perf.tick('e_is');
+        // TODO(erwinm): move invocation of the `flush` method when we have the
+        // new ticks in place to batch the ticks properly.
+        perf.flush();
       }
-
-      maybeValidate(window);
-      makeBodyVisible(document, /* waitForExtensions */ true);
-    } catch (e) {
-      makeBodyVisible(document);
-      throw e;
-    } finally {
-      perf.tick('e_is');
-      // TODO(erwinm): move invocation of the `flush` method when we have the
-      // new ticks in place to batch the ticks properly.
-      perf.flush();
-    }
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+    }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  } else {
+    install();
+  }
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(document);
+  if (!window.AMP_SHADOW) {
+    makeBodyVisible(document);
+  }
   throw e;
 }
 

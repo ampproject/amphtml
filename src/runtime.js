@@ -16,13 +16,14 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './template';
+import {cssText} from '../build/css';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
-import {installStyles} from './styles';
-import {installCoreServices} from './amp-core-service';
+import {installStyles, installStylesForShadowRoot} from './styles';
+import {installCoreServices, installCoreServicesShadowRoot} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {registerElement} from './custom-element';
+import {registerElement, attachShadowRoot} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
@@ -100,16 +101,18 @@ export function adopt(global) {
   };
 
   installCoreServices(global);
-  const viewer = viewerFor(global);
+  if (!global.AMP_SHADOW) {
+    const viewer = viewerFor(global);
 
-  /** @const */
-  global.AMP.viewer = viewer;
+    /** @const */
+    global.AMP.viewer = viewer;
 
-  if (getMode().development) {
-    /** @const */
-    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-    /** @const */
-    global.AMP.resources = resourcesFor(global);
+    if (getMode().development) {
+      /** @const */
+      global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+      /** @const */
+      global.AMP.resources = resourcesFor(global);
+    }
   }
 
   // Experiments.
@@ -118,13 +121,19 @@ export function adopt(global) {
   /** @const */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
-  const viewport = viewportFor(global);
+  if (!global.AMP_SHADOW) {
+    const viewport = viewportFor(global);
 
-  /** @const */
-  global.AMP.viewport = {};
-  global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
-  global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
-  global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+    /** @const */
+    global.AMP.viewport = {};
+    global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
+    global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
+    global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+  }
+
+  if (global.AMP_SHADOW) {
+    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null, global);
+  }
 
   /**
    * Registers a new custom element.
@@ -185,4 +194,21 @@ export function registerForUnitTest(win) {
       registerElement(win, element.name, element.implementationClass);
     }
   }
+}
+
+
+/**
+ */
+export function prepareAndAttachShadowRoot(global, shadowRoot) {
+  console.log('AMP: Attach shadow root: ', shadowRoot);
+  shadowRoot.AMP = {};
+  installStylesForShadowRoot(shadowRoot, cssText, () => {},
+      /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  // XXX: discover all other extensions and install their CSS
+  installCoreServicesShadowRoot(global, shadowRoot);
+  attachShadowRoot(global, shadowRoot);
+
+  shadowRoot.AMP.viewer = viewerFor(shadowRoot.AMP);
+
+  return shadowRoot.AMP;
 }

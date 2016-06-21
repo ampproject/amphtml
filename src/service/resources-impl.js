@@ -27,9 +27,10 @@ import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
 import {installFramerateService} from './framerate-impl';
-import {installViewerService} from './viewer-impl';
-import {installViewportService} from './viewport-impl';
-import {installVsyncService} from './vsync-impl';
+import {viewerFor} from '../viewer';
+import {viewportFor} from '../viewport';
+import {vsyncFor} from '../vsync';
+import {platformFor} from '../platform';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
@@ -61,15 +62,12 @@ const FOUR_FRAME_DELAY_ = 70;
 let ChangeSizeRequestDef;
 
 export class Resources {
-  /**
-   * @param {!Window} window
-   */
-  constructor(window) {
+  constructor(window, viewer, viewport) {
     /** @const {!Window} */
     this.win = window;
 
-    /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(window);
+    /** @const @private {!Viewer} */
+    this.viewer_ = viewer;
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -140,11 +138,14 @@ export class Resources {
     /** @private {boolean} */
     this.isCurrentlyBuildingPendingResources_ = false;
 
+    /** @private {number} */
+    this.scrollHeight_ = 0;
+
     /** @private @const {!./viewport-impl.Viewport} */
-    this.viewport_ = installViewportService(this.win);
+    this.viewport_ = viewport;
 
     /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = installVsyncService(this.win);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
@@ -1539,6 +1540,27 @@ let SizeDef;
  */
 export function installResourcesService(win) {
   return getService(win, 'resources', () => {
-    return new Resources(win);
+    return new Resources(
+        win,
+        viewerFor(win),
+        viewportFor(win)
+        );
+  });
+};
+
+/**
+ * @param {!Window} win
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!Resources}
+ */
+export function installResourcesServiceForShadowRoot(win, shadowRoot) {
+  console.log('AMP: installResourcesServiceForShadowRoot');
+  return getService(shadowRoot.AMP, 'resources', () => {
+    // XXX: redo
+    return new Resources(
+        win,
+        viewerFor(shadowRoot.AMP),
+        viewportFor(shadowRoot.AMP)
+        );
   });
 };
