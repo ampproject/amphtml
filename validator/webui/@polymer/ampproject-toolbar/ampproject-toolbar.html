@@ -82,7 +82,7 @@
         'install-extension.tap': 'installExtension'
       },
       installExtension: function(e) {
-        if (document.domain.endsWith('ampproject.org')) {
+        if (document.domain.endsWith('placeholder')) {
           chrome.webstore.install('https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc');
         } else {
           window.open('https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc', '_blank');
