@@ -39,6 +39,8 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskScore', () => {
     const viewportRect = layoutRectLtwh(0, 100, 300, 400);
+    sandbox.stub(resources.viewport_, 'getRect', () => viewportRect);
+
     // Task 1 is right in the middle of the viewport and priority 0
     const task_vp0_p0 = {
       resource: {
@@ -136,20 +138,20 @@ describe('Resources', () => {
       priority: 1,
     };
 
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vp0_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vp0_p1)).to.equal(10);
+    expect(resources.calcTaskScore_(task_vp0_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_vp0_p1)).to.equal(10);
 
     // +2 for "one viewport away" * 2 because dir is opposite
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpu_p0)).to.equal(2);
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpu_p1)).to.equal(12);
+    expect(resources.calcTaskScore_(task_vpu_p0)).to.equal(2);
+    expect(resources.calcTaskScore_(task_vpu_p1)).to.equal(12);
 
     // +1 for "one viewport away" * 1 because dir is the same
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpd_p0)).to.equal(1);
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpd_p1)).to.equal(11);
+    expect(resources.calcTaskScore_(task_vpd_p0)).to.equal(1);
+    expect(resources.calcTaskScore_(task_vpd_p1)).to.equal(11);
 
     // 0 for fixed.
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpf_p0)).to.equal(0);
-    expect(resources.calcTaskScore_(viewportRect, 0, task_vpf_p1)).to.equal(10);
+    expect(resources.calcTaskScore_(task_vpf_p0)).to.equal(0);
+    expect(resources.calcTaskScore_(task_vpf_p1)).to.equal(10);
   });
 
   it('should calculate correct calcTaskTimeout', () => {
