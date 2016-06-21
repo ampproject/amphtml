@@ -197,14 +197,11 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
   ],
-  caprofitx: [
-    'https://cdn.caprofitx.com',
-    'https://ad.caprofitx.adtdp.com',
-  ],
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
   ],
+  caprofitx: 'https://ad.caprofitx.adtdp.com',
 };
 
 /**
