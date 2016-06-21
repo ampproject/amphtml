@@ -301,8 +301,6 @@ export const ANALYTICS_CONFIG = {
   },
 
   'cxense': {
-    'vars': {
-    },
     'requests': {
       'host': 'https://scomcluster.cxense.com',
       'base': '${host}/Repo/rep.gif',
