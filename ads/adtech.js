@@ -37,7 +37,7 @@ export function adtech(global, data) {
       'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
       'atwsizes','atwwidth',
     ]);
-    validateDataExists(data,['atwmn', 'atwdiv']);
+    validateDataExists(data,['atwmn', 'atwdiv', 'atwmoat']);
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
     global.atwheight = data.atwheight;
