@@ -275,6 +275,9 @@ class AmpAd extends AMP.BaseElement {
         }, /* opt_is3P */ true);
         this.iframe_.style.visibility = 'hidden';
         listenForOnce(this.iframe_, 'render-start', () => {
+          if (!this.iframe_) {
+            return;
+          }
           this.iframe_.style.visibility = '';
           this.sendEmbedInfo_(this.isInViewport());
         }, /* opt_is3P */ true);
@@ -372,6 +375,10 @@ class AmpAd extends AMP.BaseElement {
    * @private
    */
   noContentHandler_() {
+    // If iframe is null nothing to do.
+    if (!this.iframe_) {
+      return;
+    }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
       this.attemptChangeHeight(0, () => {
@@ -379,6 +386,9 @@ class AmpAd extends AMP.BaseElement {
       });
     }
     this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
       if (this.fallback_) {
         // Hide placeholder when falling back.
         if (this.placeholder_) {
