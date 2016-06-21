@@ -20,6 +20,7 @@ require('./clean');
 require('./compile');
 require('./compile-access-expr');
 require('./dep-check');
+require('./get-zindex');
 require('./lint');
 require('./make-golden');
 require('./presubmit-checks');
