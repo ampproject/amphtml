@@ -111,10 +111,10 @@ export class AmpForm {
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
         this.setState_(FormState_.SUBMIT_SUCCESS);
-        this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response);
+        this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response || {});
       }).catch(error => {
         this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(FormState_.SUBMIT_ERROR, error.responseJson);
+        this.renderTemplate_(FormState_.SUBMIT_ERROR, error.responseJson || {});
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
