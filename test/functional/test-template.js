@@ -18,7 +18,7 @@ import {
   BaseTemplate,
   installTemplatesService,
   registerExtendedTemplate,
-} from '../../src/service-template-impl';
+} from '../../src/service/template-impl';
 
 
 describe('Template', () => {
