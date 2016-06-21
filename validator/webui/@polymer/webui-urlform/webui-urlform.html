@@ -15,9 +15,10 @@
 -->
 <!-- Form for entering a URL above the main editor window. -->
 <link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../paper-toast/paper-toast.html">
 <dom-module id="webui-urlform">
   <style scope="webui-urlform">
     .flex-horizontal {
@@ -28,8 +29,15 @@
     .flexchild {
       @apply(--layout-flex);
     }
+    #urlToast {
+      left: auto;
+      min-height: auto;
+      min-width: auto;
+      right: 0;
+    }
   </style>
   <template>
+    <paper-toast id="urlToast" text="Could not fetch the given URL."></paper-toast>
     <div class="container flex-horizontal">
       <paper-input auto-validate required pattern="[^ \s]+(://.*|\.[a-z]+($|(/.*)))"
           error-message="Please enter a valid URL" on-focus="checkURL"
@@ -52,6 +60,9 @@
       },
       checkURL: function(e) {
         this.validURL = !this.$.urlToFetch.invalid;
+      },
+      displayToast: function() {
+        this.$.urlToast.open();
       },
       keyPress: function(e) {
         if (this.validURL && 13 === e.charCode) {
