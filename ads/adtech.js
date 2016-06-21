@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateSrcPrefix, validateSrcContains, validateDataExists} from '../3p/3p';
+import {writeScript, checkData, validateSrcPrefix,
+    validateSrcContains, validateDataExists,
+    }
+    from '../3p/3p';
 
 
 export function adtech(global, data) {
   const adsrc = data.src;
   if (typeof adsrc != 'undefined') {
-  	validateSrcPrefix('https:', adsrc);
+    validateSrcPrefix('https:', adsrc);
     validateSrcContains('/addyn/', adsrc);
     writeScript(global, adsrc);
 
   } else {
 
     checkData(data, [
-        'atwco', 'atwdiv', 'atwheight', 'atwhtnmat', 
-        'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid', 
-        'atwsizes','atwwidth',
+      'atwco', 'atwdiv', 'atwheight', 'atwhtnmat',
+      'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
+      'atwsizes','atwwidth',
     ]);
     validateDataExists(data,['atwmn', 'atwdiv']);
     global.atwco = data.atwco;
@@ -44,6 +47,6 @@ export function adtech(global, data) {
     global.atwsizes = data.atwsizes;
     global.atwwidth = data.atwwidth;
     writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
-   }
+  }
 
 }
