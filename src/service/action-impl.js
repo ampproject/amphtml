@@ -16,6 +16,7 @@
 
 import {dev, user} from '../log';
 import {getService} from '../service';
+import {getMode} from '../mode';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
@@ -398,7 +399,7 @@ export function parseActionMap(s, context) {
         event,
         target,
         method,
-        args: (args && window.AMP_TEST && Object.freeze) ?
+        args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
         str: s,
       };

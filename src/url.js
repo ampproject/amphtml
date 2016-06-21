@@ -16,6 +16,7 @@
 
 import {endsWith} from './string';
 import {user} from './log';
+import {getMode} from './mode';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
 const a = window.document.createElement('a');
@@ -100,7 +101,7 @@ export function parseUrl(url) {
     info.origin = info.protocol + '//' + info.host;
   }
   // Freeze during testing to avoid accidental mutation.
-  cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
+  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
   return info;
 }
 

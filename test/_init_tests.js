@@ -108,6 +108,10 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+beforeEach(() => {
+  window.AMP_TEST = true;
+});
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
