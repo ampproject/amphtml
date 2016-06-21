@@ -30,6 +30,7 @@ limitations under the License.
 ```
 
 ## Configuration
+For configuration in detail, [please contact us](ca_profitx_support@cyberagent.co.jp).
 
 ### parameters
 - (Required) data-tagid
