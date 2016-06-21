@@ -30,9 +30,6 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
-    /** @private @const {boolean} */
-    this.hasLooping_ = this.element.hasAttribute('loop');
-
     /** @private @const {!boolean} */
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
@@ -72,6 +69,10 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
+
+    /** @private @const {boolean} */
+    this.hasLooping_ =
+        this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -175,7 +176,7 @@ export class AmpSlideScroll extends BaseCarousel {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if ((!this.hasLooping_ && newIndex == 0) || noOfSlides_ == 1) {
+    if (!this.hasLooping_ && newIndex == 0) {
       newScrollLeft = 0;
     }
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
@@ -186,7 +187,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * Given an index, hides rest of the slides that are not needed.
-   * @param {!Array.<number>} indexArr Array of indices that
+   * @param {!Array<number>} indexArr Array of indices that
    *    should not be hidden.
    * @private
    */
