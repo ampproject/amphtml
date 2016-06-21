@@ -21,7 +21,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
-import {toggle} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -110,7 +109,7 @@ class AmpStickyAd extends AMP.BaseElement {
       this.deferMutate(() => {
         setStyles(this.element, {
           'visibility': 'visible',
-        })
+        });
         this.viewport_.addToFixedLayer(this.element);
         this.scheduleLayout(this.ad_);
         // Add border-bottom to the body to compensate space that was taken
