@@ -175,7 +175,7 @@ export class AmpSlideScroll extends BaseCarousel {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.hasLooping_ && newIndex == 0) {
+    if ((!this.hasLooping_ && newIndex == 0) || noOfSlides_ == 1) {
       newScrollLeft = 0;
     }
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;

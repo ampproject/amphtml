@@ -284,6 +284,17 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should set the correct scrollLeft when there is only one slide', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+
+      impl.noOfSlides_ = 1;
+      impl.showSlide_(0);
+      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
+    });
+  });
+
   describe('Looping', () => {
     beforeEach(() => {
       toggleExperiment(window, 'amp-slidescroll', true);
@@ -497,6 +508,17 @@ describe('SlideScroll', () => {
         expect(impl.hasPrev()).to.be.true;
         expect(impl.nextButton_.classList.contains('amp-disabled')).to.be.false;
         expect(impl.prevButton_.classList.contains('amp-disabled')).to.be.false;
+      });
+    });
+
+    it('should set the correct scrollLeft when there is only one slide', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+
+        impl.noOfSlides_ = 1;
+        impl.showSlide_(0);
+        expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
       });
     });
 
