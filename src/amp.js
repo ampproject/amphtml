@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
+ */
+
 import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
