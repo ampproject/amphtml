@@ -386,3 +386,12 @@ amp-analytics {
 [amp-access][amp-access-hide] {
   display: none;
 }
+
+
+/**
+ * Forms error/success messaging containers should be hidden at first.
+ */
+form [submit-success],
+form [submit-error] {
+  display: none;
+}

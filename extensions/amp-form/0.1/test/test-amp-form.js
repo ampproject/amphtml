@@ -19,13 +19,16 @@ import {AmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
+import {installTemplatesService} from '../../../../src/service/template-impl';
 
 describe('amp-form', () => {
 
   let sandbox;
+  installTemplatesService(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
+      installTemplatesService(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
       const ampForm = new AmpForm(form);
       return ampForm;
@@ -234,21 +237,19 @@ describe('amp-form', () => {
   });
 
   it('should allow rendering responses through templates', () => {
-    return createIframePromise().then(iframe => {
-      const form = iframe.doc.createElement('form');
-      form.setAttribute('action-xhr', 'https://example.com');
+    return getAmpForm(true).then(ampForm => {
+      const form = ampForm.form_;
       // Add a div[submit-error] with a template child.
-      const errorContainer = iframe.doc.createElement('div');
+      const errorContainer = document.createElement('div');
       errorContainer.setAttribute('submit-error', '');
       form.appendChild(errorContainer);
-      const errorTemplate = iframe.doc.createElement('template');
+      const errorTemplate = document.createElement('template');
       errorTemplate.setAttribute('type', 'amp-mustache');
       errorTemplate.content.appendChild(
-          iframe.doc.createTextNode('Error: {{message}}'));
+          document.createTextNode('Error: {{message}}'));
       errorContainer.appendChild(errorTemplate);
-      const renderedTemplate = iframe.doc.createElement('div');
+      const renderedTemplate = document.createElement('div');
       renderedTemplate.innerText = 'Error: hello there';
-      const ampForm = new AmpForm(form);
       let fetchJsonRejecter;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
           .returns(new Promise((unusedResolve, reject) => {
@@ -278,26 +279,24 @@ describe('amp-form', () => {
 
 
   it('should replace previously rendered responses', () => {
-    return createIframePromise().then(iframe => {
-      const form = iframe.doc.createElement('form');
-      form.setAttribute('action-xhr', 'https://example.com');
-      const successContainer = iframe.doc.createElement('div');
+    return getAmpForm(true).then(ampForm => {
+      const form = ampForm.form_;
+      const successContainer = document.createElement('div');
       successContainer.setAttribute('submit-success', '');
       form.appendChild(successContainer);
-      const successTemplate = iframe.doc.createElement('template');
+      const successTemplate = document.createElement('template');
       successTemplate.setAttribute('type', 'amp-mustache');
       successTemplate.content.appendChild(
-          iframe.doc.createTextNode('Success: {{message}}'));
+          document.createTextNode('Success: {{message}}'));
       successContainer.appendChild(successTemplate);
-      const renderedTemplate = iframe.doc.createElement('div');
+      const renderedTemplate = document.createElement('div');
       renderedTemplate.innerText = 'Success: hello';
       renderedTemplate.setAttribute('i-amp-rendered', '');
       successContainer.appendChild(renderedTemplate);
 
-      const newRender = iframe.doc.createElement('div');
+      const newRender = document.createElement('div');
       newRender.innerText = 'New Success: What What';
 
-      const ampForm = new AmpForm(form);
       let fetchJsonResolver;
       sandbox.stub(ampForm.xhr_, 'fetchJson')
           .returns(new Promise(resolve => {
