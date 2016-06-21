@@ -16,6 +16,7 @@
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
+import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -40,6 +41,13 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
+
+    /** @private {number} */
+    this.noOfSlides_ = this.slides_.length;
+
+    /** @private @const {boolean} */
+    this.hasLooping_ =
+        this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
 
     /** @private {!Element} */
     this.slidesContainer_ = this.win_.document.createElement('div');
@@ -70,12 +78,14 @@ export class AmpSlideScroll extends BaseCarousel {
 
     this.element.appendChild(this.slidesContainer_);
 
-    /** @private {number} */
-    this.noOfSlides_ = this.slides_.length;
-
     /** @private @const {boolean} */
-    this.hasLooping_ =
-        this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
+    this.snappingInProgress_ = false;
+
+    /** @private {?number}*/
+    this.scrollTimeout_ = null;
+
+    this.slidesContainer_.addEventListener(
+        'scroll', this.scrollHandler_.bind(this));
   }
 
   /** @override */
@@ -133,19 +143,106 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /**
+   * Handles scroll on the slides container.
+   * @param {!Event} event Event object.
+   * @private
+   */
+  scrollHandler_(event) {
+    if (this.scrollTimeout_) {
+      timer.cancel(this.scrollTimeout_);
+    }
+    if (this.snappingInProgress_) {
+      return;
+    }
+    const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
+    console.log(this.element.id, ' moving from SL: '+ this.previousScrollLeft_ + ' to: '+ currentScrollLeft);
+    if (currentScrollLeft != this.previousScrollLeft_ &&
+        !this.hasNativeSnapPoints_) {
+      this.customScrollHandler_(event, currentScrollLeft);
+    }
+    this.scrollTimeout_ = timer.delay(() => {
+      if (this.hasNativeSnapPoints_) {
+        this.snapHandler_(event, currentScrollLeft);
+      }
+    }, 150);
+    this.previousScrollLeft_ = currentScrollLeft;
+  }
+
+  /**
+   * Detects snap end and updates slides/slideIndex after snap.
+   * @param {!Event} event Event object.
+   * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   * @private
+   */
+  snapHandler_(event, currentScrollLeft) {
+    this.updateOnScroll_(currentScrollLeft);
+  }
+
+  /**
+   * Updates to the right state of the new index on scroll.
+   * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   */
+  updateOnScroll_(currentScrollLeft) {
+    // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
+    // a time.
+    const scrolledSlideIndex = parseInt(currentScrollLeft / this.slideWidth_);
+    // Update value can be -1, 0 or 1 depending upon the index of the current
+    // shown slide.
+    let updateValue = 0;
+
+    if (this.hasPrev() && this.hasNext()) {
+      updateValue = scrolledSlideIndex - 1;
+    } else if (this.hasNext()) {
+      // Has next and does not have a prev. (slideIndex 0)
+      updateValue = scrolledSlideIndex;
+    } else if (this.hasPrev()) {
+      // Has prev and no next slide (last slide)
+      updateValue = scrolledSlideIndex - 1;
+    }
+
+    let newIndex = this.slideIndex_ + updateValue;
+    newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
+        (newIndex >= this.noOfSlides_) ? 0 : newIndex;
+    this.slidesContainer_.classList.add('no-scroll');
+    this.showSlide_(newIndex);
+    timer.delay(() => {
+      this.slidesContainer_.classList.remove('no-scroll');
+      // if (this.hasLooping_ || this.slideIndex_ != 0) {
+      //   this.slidesContainer_.scrollLeft = this.slideWidth_;
+      // } else if (this.slideIndex_ == 0) {
+      //   this.slidesContainer_.scrollLeft = 0;
+      // }
+    }, 10);
+  }
+
+
+
+  /**
+   * Handles scroll on the slides container.
+   * @param {!Event} event Event object.
+   * @private
+   */
+  customScrollHandler_(event) {
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
   showSlide_(newIndex) {
+    console.log(this.element.id, ' moving from: '+ this.slideIndex_ + ' to: '+ newIndex);
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
       return;
     }
-
+    if (this.snappingInProgress_) {
+      return;
+    }
+    this.snappingInProgress_ = true;
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.hasLooping_) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
@@ -183,6 +280,7 @@ export class AmpSlideScroll extends BaseCarousel {
       newScrollLeft = 0;
     }
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
+    this.snappingInProgress_ = false;
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
