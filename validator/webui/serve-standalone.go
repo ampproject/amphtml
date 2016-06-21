@@ -1,3 +1,18 @@
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package main
 
 import (
@@ -13,7 +28,10 @@ import (
 	"time"
 )
 
-var validator_js = flag.String("validator_js", "https://cdn.ampproject.org/v0/validator.js", "The Validator Javascript. Latest published version by default, or dist/validator_minified.js (built with build.py) for development.")
+var validator_js = flag.String("validator_js", "https://cdn.ampproject.org/"+
+	"v0/validator.js", "The Validator Javascript. Latest published version "+
+	"by default, or dist/validator_minified.js (built with build.py) for "+
+	"development.")
 
 var ext_to_mime = map[string]string{
 	".html": "text/html",
@@ -35,7 +53,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			}
 			w.Header().Set("Content-type", "text/html")
 			if *validator_js != "https://cdn.ampproject.org/v0/validator.js" {
-				bytes = []byte(strings.Replace(string(bytes), "https://cdn.ampproject.org/v0/validator.js", "/validator.js", -1))
+				bytes = []byte(strings.Replace(string(bytes),
+					"https://cdn.ampproject.org/v0/validator.js", "/validator.js", -1))
 			}
 			w.Write(bytes)
 			return
@@ -72,7 +91,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		for i := range roots {
 			root := roots[i]
 			// Only serve files below the current working directory.
-			abs_path, err := filepath.Abs(path.Join(".", root, relative_path))
+			abs_path, err := filepath.Abs(
+				path.Join(".", root, relative_path))
 			if err != nil {
 				continue
 			}
@@ -101,7 +121,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		r.Header.Get("X-Requested-By") == "validator webui" {
 		param := r.FormValue("url")
 		u, err := url.Parse(param)
-		if param == "" || err != nil || (u.Scheme != "http" && u.Scheme != "https") {
+		if param == "" || err != nil ||
+			(u.Scheme != "http" && u.Scheme != "https") {
 			http.Error(w, "Bad request.", http.StatusBadRequest)
 			return
 		}
