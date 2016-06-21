@@ -16,14 +16,14 @@
 
 import {
   BaseTemplate,
+  installTemplatesService,
   registerExtendedTemplate,
-  templatesFor,
-} from '../../src/template';
+} from '../../src/service-template-impl';
 
 
 describe('Template', () => {
 
-  const templates = templatesFor(window);
+  const templates = installTemplatesService(window);
 
   class TemplateImpl extends BaseTemplate {
     render(data) {

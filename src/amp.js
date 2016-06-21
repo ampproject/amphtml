@@ -17,7 +17,7 @@
 import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {templatesFor} from './template';
+import {installTemplatesService} from './service/template-impl';
 import {installCoreServices} from './amp-core-service';
 import {installGlobalClickListener} from './document-click';
 import {installGlobalSubmitListener} from './document-submit';
@@ -48,7 +48,7 @@ try {
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(window);
-      templatesFor(window);
+      installTemplatesService(window);
 
       installImg(window);
       installPixel(window);
