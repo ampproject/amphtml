@@ -267,6 +267,17 @@ describe('XHR', function() {
                 expect(error.responseJson.a).to.equal(2);
               });
         });
+
+        it('should not return a resolved indented promise', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json';
+          mockXhr.getResponseHeader = () => 'application/json';
+          const promise = assertSuccess(
+              createResponseInstance('{"a": 2}', mockXhr));
+          promise.should.be.rejected;
+          return promise;
+        });
       });
 
       it('should do simple JSON fetch', () => {

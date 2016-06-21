@@ -344,7 +344,7 @@ function isRetriable(status) {
 /**
  * Returns the response if successful or otherwise throws an error.
  * @paran {!FetchResponse} response
- * @return {!Promise<!FetchResponse|!Error>}
+ * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
 export function assertSuccess(response) {
@@ -355,7 +355,7 @@ export function assertSuccess(response) {
         err.retriable = true;
       }
       if (response.headers.get('Content-Type') == 'application/json') {
-        return response.json().then(json => {
+        response.json().then(json => {
           err.responseJson = json;
           reject(err);
         }).catch(() => {
@@ -363,10 +363,11 @@ export function assertSuccess(response) {
           // setting responseJson.
           reject(err);
         });
+      } else {
+        reject(err);
       }
-      return reject(err);
     }
-    return resolve(response);
+    resolve(response);
   });
 }
 
