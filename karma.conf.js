@@ -54,13 +54,18 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome'],
+    browsers: ['Chrome_no_extensions'],
 
     customLaunchers: {
       /*eslint "google-camelcase/google-camelcase": 0*/
       Chrome_travis_ci: {
         base: 'Chrome',
-        flags: ['--no-sandbox'],
+        flags: ['--no-sandbox', '--disable-extensions',],
+      },
+      Chrome_no_extensions: {
+        base: 'Chrome',
+        // Dramatically speeds up iframe creation time.
+        flags: ['--disable-extensions'],
       },
       // SauceLabs configurations.
       // New configurations can be created here:
