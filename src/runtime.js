@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './template';
+import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';

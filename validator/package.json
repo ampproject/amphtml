@@ -15,6 +15,10 @@
     "amp-validator": "index.js"
   },
   "dependencies": {
+    "@polymer/iron-a11y-announcer": "0.0.3",
+    "@polymer/iron-fit-behavior": "0.0.3",
+    "@polymer/iron-overlay-behavior": "0.0.3",
+    "@polymer/paper-toast": "0.0.3",
     "commander": "2.9.0",
     "promise" : "7.1.1"
   },

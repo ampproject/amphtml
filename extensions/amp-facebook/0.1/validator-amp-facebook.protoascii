@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-facebook
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-facebook extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-facebook
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
 }
 tags: {  # <amp-facebook>
-  tag_name: "amp-facebook"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-FACEBOOK"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-facebook extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-href" mandatory: true }

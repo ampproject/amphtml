@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the license.
 #
-
-tags: {  # amp-kaltura-player
+tags: {  # <script custom-element="amp-fx-flying-carpet">
   tag_name: "SCRIPT"
-  spec_name: "amp-kaltura-player extension .js script"
+  spec_name: "amp-fx-flying-carpet extension .js script"
   mandatory_parent: "HEAD"
   attrs: {
     name: "async"
@@ -26,13 +25,13 @@ tags: {  # amp-kaltura-player
   attrs: {
     name: "custom-element"
     mandatory: true
-    value: "amp-kaltura-player"
+    value: "amp-fx-flying-carpet"
     dispatch_key: true
   }
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-kaltura-player-(latest|0\\.1)\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fx-flying-carpet-(latest|0\\.1)\\.js"
   }
   attrs: {
     name: "type"
@@ -44,25 +43,16 @@ tags: {  # amp-kaltura-player
       error_message: "contents"
     }
   }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
 }
-# amp-kaltura-player either comes with a video-id attribute, or with
-# a data-videoid attribute.
-tags: {  # <amp-kaltura-player>
-  tag_name: "AMP-KALTURA-PLAYER"
+tags: {  # <amp-fx-flying-carpet>
+  tag_name: "AMP-FX-FLYING-CARPET"
   disallowed_ancestor: "AMP-SIDEBAR"
-  also_requires_tag: "amp-kaltura-player extension .js script"
-
-  attrs: { name: "data-partner" mandatory: true }
-
+  also_requires_tag: "amp-fx-flying-carpet extension .js script"
   attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-kaltura-player.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
+  attrs: {
+    name: "height"
+    mandatory: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fx-flying-carpet.html"
 }

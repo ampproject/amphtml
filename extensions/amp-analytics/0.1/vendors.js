@@ -300,6 +300,29 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'cxense': {
+    'requests': {
+      'host': 'https://scomcluster.cxense.com',
+      'base': '${host}/Repo/rep.gif',
+      'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+          'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+          'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+          'bln=${browserLanguage}&chs=${documentCharset}&' +
+          'col=${screenColorDepth}&tzo=${timezone}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
@@ -622,6 +645,37 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'segment': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'anonymousId': 'CLIENT_ID(segment_amp_id)',
+    },
+    'requests': {
+      'host': 'https://api.segment.io/v1/pixel',
+      'base': '?writeKey=${writeKey}' +
+        '&anonymousId=${anonymousId}' +
+        '&context.locale=${browserLanguage}' +
+        '&context.page.path=${canonicalPath}' +
+        '&context.page.url=${canonicalUrl}' +
+        '&context.page.referrer=${documentReferrer}' +
+        '&context.page.title=${title}' +
+        '&context.screen.width=${screenWidth}' +
+        '&context.screen.height=${screenHeight}',
+      'page': '${host}/page${base}&name=${name}',
+      'track': '${host}/track${base}&event=${event}',
+    },
+    'triggers': {
+      'page': {
+        'on': 'visible',
+        'request': 'page',
+      },
+    },
+  },
+
   'snowplow': {
     'requests': {
       'aaVersion': 'amp-0.1',
@@ -820,4 +874,3 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
-

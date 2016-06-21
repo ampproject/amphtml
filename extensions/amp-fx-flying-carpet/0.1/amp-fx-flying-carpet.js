@@ -31,12 +31,6 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // Wait for all our children to be parsed.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {

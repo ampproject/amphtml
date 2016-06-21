@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-jwplayer
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-jwplayer extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -48,9 +48,8 @@ tags: {  # amp-jwplayer
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md"
 }
 tags: {  # <amp-jwplayer>
-  tag_name: "amp-jwplayer"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-JWPLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-jwplayer extension .js script"
   attrs: {
     name: "data-media-id"

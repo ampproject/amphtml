@@ -34,6 +34,11 @@
     "base": "https://sb.scorecardresearch.com/b?",
     "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=$c2&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
+  "cxense": {
+    "host": "https://scomcluster.cxense.com",
+    "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
+    "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_"
+  },
   "googleanalytics": {
     "host": "https://www.google-analytics.com",
     "basePrefix": "v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
@@ -92,6 +97,12 @@
     "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
     "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
     "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&t=5000&e=5000"
+  },
+  "segment": {
+    "host": "https://api.segment.io/v1/pixel",
+    "base": "?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
+    "page": "https://api.segment.io/v1/pixel/page?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&name=$name",
+    "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
   "snowplow": {
     "aaVersion": "amp-0.1",

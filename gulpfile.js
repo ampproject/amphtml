@@ -147,6 +147,17 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
   });
+  // Entry point for shadow runtime.
+  compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+    toName: 'amp-shadow.js',
+    minifiedName: 'shadow-v0.js',
+    includePolyfills: true,
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: windowConfig.getTemplate() + '<%= contents %>'
+  });
   thirdPartyBootstrap(watch, shouldMinify);
 }
 

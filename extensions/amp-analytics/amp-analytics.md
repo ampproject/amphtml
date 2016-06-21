@@ -125,6 +125,12 @@ Type attribute value: `comscore`
 
 Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
 
+### Cxense
+
+Type attribute value: `cxense`
+
+Adds support for Cxense Insight analytics. Requires defining *var* `siteId` with Cxense-provided *siteId*. More details can be found at [wiki.cxense.com](https://wiki.cxense.com/display/cust/Accelerated+Mobile+Pages+%28AMP%29+integration).
+
 ### Google Analytics
 
 Type attribute value: `googleanalytics`
@@ -207,6 +213,13 @@ Adds support for Piano.  Configuration details can be found at [vx.piano.io](htt
 Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
+## Segment
+
+Type attribute value: `segment`
+
+Adds support for segment page views and events.
+To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
 
 ### SOASTA mPulse
 
