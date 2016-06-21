@@ -32,11 +32,6 @@ class AmpSlides extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return this.getRealChildren().length > 0;
-  }
-
-  /** @override */
   buildCallback() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
