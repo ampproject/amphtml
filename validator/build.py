@@ -128,7 +128,8 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   subprocess.check_call(['npm', 'install'])
-  subprocess.check_call(['npm', 'install', 'webui'])
+  logging.info('installing webui dependencies ...')
+  subprocess.check_call(['npm', 'install'], cwd='webui')
   logging.info('... done')
 
 
@@ -420,10 +421,11 @@ def RunTests(out_dir, nodejs_cmd):
 
 def CreateWebuiAppengineDist(out_dir):
   logging.info('entering ...')
-  for dirName, subdirList, fileList in os.walk('.'):
+  for dirName, subdirList, fileList in os.walk('webui'):
     logging.info('Found directory: %s' % dirName)
     for fname in fileList:
       logging.info('-> %s' % fname)
+  sys.exit(1)
   try:
     tempdir = tempfile.mkdtemp()
     shutil.copytree('webui', os.path.join(tempdir, 'webui'))
