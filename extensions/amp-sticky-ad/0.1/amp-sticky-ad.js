@@ -19,9 +19,9 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
+import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
-import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -29,7 +29,7 @@ const TAG = 'amp-sticky-ad';
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+    return layout == Layout.CONTAINER;
   }
 
   /** @override */
@@ -108,7 +108,6 @@ class AmpStickyAd extends AMP.BaseElement {
     if (scrollTop > viewportHeight) {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
-        //toggle(this.element, true);
         setStyles(this.element, {
           'visibility': 'visible',
         })

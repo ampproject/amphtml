@@ -15,7 +15,6 @@
  */
 
 amp-sticky-ad {
-  visibility: hidden;
   position: fixed !important;
   text-align:center;
   bottom: 0 !important;
@@ -29,6 +28,7 @@ amp-sticky-ad {
 }
 
 .-amp-sticky-ad-layout {
+  visibility: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
