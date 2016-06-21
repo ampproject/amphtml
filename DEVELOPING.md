@@ -65,6 +65,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
+| `ava build-system/tasks/**/test.js` | Run node tests for tasks/offline code.  Make sure to install `ava` globally through `npm i -g ava`. |
 
 
 #### Saucelabs

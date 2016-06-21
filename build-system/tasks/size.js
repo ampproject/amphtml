@@ -25,6 +25,8 @@ var through = require('through2');
 var util = require('gulp-util');
 
 
+var tempFolderName = '__size-temp';
+
 var MIN_FILE_SIZE_POS = 0;
 var GZIP_POS = 1;
 var BROTLI_POS = 2;
@@ -202,12 +204,14 @@ function sizer() {
  * output from the process.
  */
 function sizeTask() {
-  return gulp.src([
+  gulp.src([
       'dist/**/*.js',
       '!dist/**/*-latest.js',
       'dist.3p/{current,current-min}/**/*.js',
     ])
-    .pipe(sizer());
+    .pipe(sizer())
+    .pipe(gulp.dest(tempFolderName))
+    .on('end', del.bind(null, [tempFolderName]));
 }
 
 gulp.task('size', 'Runs a report on artifact size', sizeTask);

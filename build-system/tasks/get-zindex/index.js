@@ -45,10 +45,9 @@ function zIndexCollector(acc, css) {
       selectorNames = selectorNames.split(',');
       if (decl.prop == 'z-index') {
         selectorNames.forEach(selector => {
-          if (!acc[selector]) {
-            acc[selector] = [];
-          }
-          acc[selector].push(decl.value);
+          // If multiple redeclaration of a selector and z index
+          // are done in a single file, this will get overridden.
+          acc[selector] = decl.value;
         });
       }
     });
@@ -56,13 +55,11 @@ function zIndexCollector(acc, css) {
 }
 
 /**
- * @param {!Object<string, !Object<string, !Array<number>} filesData
- *    accumulation of files and the rules and z index values.
  * @param {!Vinyl} file vinyl fs object
  * @param {string} enc encoding value
  * @param {function(err: ?Object, data: !Vinyl|string)} cb chunk data through
  */
-function onFileThrough(filesData, file, enc, cb) {
+function onFileThrough(file, enc, cb) {
   if (file.isNull()) {
     cb(null, file);
     return;
@@ -73,13 +70,13 @@ function onFileThrough(filesData, file, enc, cb) {
     return;
   }
 
-  var selectors = filesData[file.relative] = Object.create(null);
+  var selectors = Object.create(null);
 
   postcss([zIndexCollector.bind(null, selectors)])
       .process(file.contents.toString(), {
         from: file.relative
       }).then(res => {
-        cb(null, file);
+        cb(null, { name: file.relative, selectors: selectors });
       });
 }
 
@@ -87,34 +84,55 @@ function onFileThrough(filesData, file, enc, cb) {
  * @param {!Object<string, !Object<string, !Array<number>} filesData
  *    accumulation of files and the rules and z index values.
  * @param {function()} cb callback to end the stream
+ * @return {!Array<!Array<string>>}
  */
-function onFileThroughEnd(filesData, cb) {
+function createTable(filesData, cb) {
   var rows = [];
-  rows.unshift.apply(rows, tableHeaders);
   Object.keys(filesData).sort().forEach((fileName, fileIdx) => {
     var selectors = filesData[fileName];
     Object.keys(selectors).sort().forEach((selectorName, selectorIdx) => {
-      var zIndexes = selectors[selectorName];
-      var row = [selectorName, zIndexes.join(', '), fileName];
+      var zIndex = selectors[selectorName];
+      var row = [selectorName, zIndex, fileName];
       rows.push(row);
     });
   });
-  var tbl = table(rows, tableOptions);
-  fs.writeFileSync('css/Z_INDEX.md', tbl);
-  cb();
+  rows.sort((a, b) => {
+    var aZIndex = parseInt(a[1], 10);
+    var bZIndex = parseInt(b[1], 10);
+    return aZIndex - bZIndex;
+  });
+  return rows;
 }
 
 
 /**
  * @return {!Stream}
  */
-function getZindex() {
-  var filesData = Object.create(null);
-  return gulp.src('{css,src,extensions}/**/*.css').pipe(through.obj(
-      onFileThrough.bind(null, filesData),
-      onFileThroughEnd.bind(null, filesData)));
+function getZindex(glob) {
+  return gulp.src(glob).pipe(through.obj(onFileThrough));
 }
 
+/**
+ * @param {function()} cb
+ */
+function getZindexForAmp(cb) {
+  var filesData = Object.create(null);
+  // Don't return the stream here since we do a `writeFileSync`
+  getZindex('{css,src,extensions}/**/*.css')
+      .on('data', (chunk) => {
+        filesData[chunk.name] = chunk.selectors;
+      })
+      .on('end', () => {
+        var rows = createTable(filesData);
+        rows.unshift.apply(rows, tableHeaders);
+        var tbl = table(rows, tableOptions);
+        fs.writeFileSync('css/Z_INDEX.md', tbl);
+        cb();
+      });
+}
 
 gulp.task('get-zindex', 'Runs through all css files of project to gather ' +
-    'z-index values', getZindex);
+    'z-index values', getZindexForAmp);
+
+exports.getZindex = getZindex;
+exports.createTable = createTable;
