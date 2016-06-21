@@ -155,6 +155,13 @@ export class Resources {
     /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
+    /**
+     * Used for tracking max call stack problem described in #3519.
+     * TODO(dvoytenko, #3519): Remove after reproducing.
+     * @private {number}
+     */
+    this.maxCallStackBugTracking_ = 0;
+
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -1004,6 +1011,13 @@ export class Resources {
     const now = timer.now();
     const visibility = this.viewer_.getVisibilityState();
 
+    // TODO(dvoytenko, #3519): Remove once the bug is reproduced.
+    this.maxCallStackBugTracking_++;
+    if (this.maxCallStackBugTracking_ >= 3) {
+      dev.error(TAG_, 'too deep in recursive work_: ', new Error(),
+          visibility);
+    }
+
     const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
         this.getScrollDirection());
 
@@ -1047,6 +1061,8 @@ export class Resources {
 
     dev.fine(TAG_, 'queue size:', this.queue_.getSize());
     dev.fine(TAG_, 'exec size:', this.exec_.getSize());
+
+    this.maxCallStackBugTracking_--;
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
