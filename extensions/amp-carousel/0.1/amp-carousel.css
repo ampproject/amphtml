@@ -78,7 +78,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container {
-  align-items: center !important;
   display: flex !important;
   flex-wrap: nowrap;
   height: 100% !important;
@@ -92,9 +91,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slide-item {
+  align-items: center !important;
   display: none !important;
   flex: 0 0 100% !important;
   height: 100% !important;
+  justify-content: center !important;
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
@@ -102,8 +103,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 .-amp-slide-item-show {
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 .-amp-carousel-start-marker,

@@ -135,7 +135,6 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   showSlide_(newIndex) {
-    console.log('skrish: ' + 'moving from: '+ this.slideIndex_ + ' to: '+ newIndex);
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
         newIndex >= noOfSlides_ ||
@@ -181,31 +180,26 @@ export class AmpSlideScroll extends BaseCarousel {
     }
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
     this.slideIndex_ = newIndex;
-    this.hideRestOfTheSlides_(newIndex);
+    this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
   }
 
   /**
    * Given an index, hides rest of the slides that are not needed.
-   * @param {number} index Index of the slide to be displayed.
+   * @param {!Array.<number>} indexArr Array of indices that
+   *    should not be hidden.
    * @private
    */
-  hideRestOfTheSlides_(index) {
+  hideRestOfTheSlides_(indexArr) {
     const noOfSlides_ = this.noOfSlides_;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (i != index && i != index - 1 && i != index + 1 &&
-          this.slideWrappers_[i]) {
-        if (this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
-          if (this.hasLooping_) {
-            if ((index == 0 && i == noOfSlides_ - 1) ||
-                (index == noOfSlides_ - 1 && i == 0)) {
-              continue;
-            }
-            setStyle(this.slideWrappers_[i], 'order', '');
-          }
-          this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
-          this.schedulePause(this.slides_[i]);
+      if (indexArr.indexOf(i) == -1 &&
+          this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+        if (this.hasLooping_) {
+          setStyle(this.slideWrappers_[i], 'order', '');
         }
+        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        this.schedulePause(this.slides_[i]);
       }
     }
   }

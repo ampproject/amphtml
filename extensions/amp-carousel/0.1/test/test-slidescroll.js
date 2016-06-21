@@ -149,7 +149,7 @@ describe('SlideScroll', () => {
       expect(schedulePreloadSpy.callCount).to.equal(2);
       expect(impl.slideIndex_).to.equal(1);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(1);
       expect(setControlsStateSpy.callCount).to.equal(1);
 
@@ -172,7 +172,7 @@ describe('SlideScroll', () => {
       expect(schedulePreloadSpy.callCount).to.equal(3);
       expect(impl.slideIndex_).to.equal(0);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(2);
       expect(setControlsStateSpy.callCount).to.equal(2);
 
@@ -193,7 +193,7 @@ describe('SlideScroll', () => {
       expect(schedulePreloadSpy.callCount).to.equal(4);
       expect(impl.slideIndex_).to.equal(4);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
       expect(hideRestOfTheSlidesSpy.callCount).to.equal(3);
       expect(setControlsStateSpy.callCount).to.equal(3);
     });
@@ -208,7 +208,7 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(1);
 
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
@@ -224,7 +224,7 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(0);
 
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0,1]);
 
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -241,7 +241,7 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(4);
 
-      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
 
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.false;
@@ -339,7 +339,7 @@ describe('SlideScroll', () => {
         expect(impl.slideIndex_).to.equal(1);
         expect(impl.slidesContainer_./*OK*/scrollLeft)
             .to.equal(impl.slideWidth_);
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(1);
         expect(setControlsStateSpy.callCount).to.equal(1);
 
@@ -365,7 +365,7 @@ describe('SlideScroll', () => {
         expect(schedulePreloadSpy.callCount).to.equal(4);
         expect(impl.slideIndex_).to.equal(0);
         expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([4, 0, 1]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(2);
         expect(setControlsStateSpy.callCount).to.equal(2);
 
@@ -390,7 +390,7 @@ describe('SlideScroll', () => {
         expect(impl.slideIndex_).to.equal(4);
         expect(impl.slidesContainer_./*OK*/scrollLeft)
             .to.equal(impl.slideWidth_);
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4, 0]);
         expect(hideRestOfTheSlidesSpy.callCount).to.equal(3);
         expect(setControlsStateSpy.callCount).to.equal(3);
 
@@ -407,7 +407,7 @@ describe('SlideScroll', () => {
 
         impl.showSlide_(1);
 
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
         expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
             .to.be.true;
         expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
@@ -430,7 +430,7 @@ describe('SlideScroll', () => {
 
         impl.showSlide_(0);
 
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([4, 0, 1]);
 
         expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
             .to.be.true;
@@ -452,7 +452,7 @@ describe('SlideScroll', () => {
 
         impl.showSlide_(4);
 
-        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
+        expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4, 0]);
 
         expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
             .to.be.true;
