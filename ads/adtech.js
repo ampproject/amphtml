@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateSrcPrefix,
-    validateSrcContains, validateDataExists,
-    }
-    from '../3p/3p';
+import {
+  writeScript,
+  checkData,
+  validateSrcPrefix,
+  validateSrcContains,
+  validateDataExists,
+  } from '../3p/3p';
 
 
 export function adtech(global, data) {
