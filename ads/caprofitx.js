@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, checkData, validateDataExists} from '../3p/3p';
 /**
  * @param {!Window} global
  * @param {!Object} data
