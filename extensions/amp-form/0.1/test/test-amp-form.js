@@ -265,7 +265,7 @@ describe('amp-form', () => {
         defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
-      fetchJsonRejecter({responseJson: {message: 'hello there'} });
+      fetchJsonRejecter({responseJson: {message: 'hello there'}});
       return timer.promise(0).then(() => {
         expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
         expect(ampForm.templates_.findAndRenderTemplate.calledWith(
