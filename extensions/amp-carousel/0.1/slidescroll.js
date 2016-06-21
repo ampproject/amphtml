@@ -15,7 +15,7 @@
  */
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {getStyle} from '../../../src/style';
+import {getStyle, setStyle} from '../../../src/style';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -69,6 +69,10 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
+
+    /** @private @const {boolean} */
+    this.hasLooping_ =
+        this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
   }
 
   /** @override */
@@ -101,12 +105,12 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   hasPrev() {
-    return this.slideIndex_ > 0;
+    return this.hasLooping_ || this.slideIndex_ > 0;
   }
 
   /** @override */
   hasNext() {
-    return this.slideIndex_ < this.slides_.length - 1;
+    return this.hasLooping_ || this.slideIndex_ < this.slides_.length - 1;
   }
 
   /** @override */
@@ -114,7 +118,13 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.slideIndex_ != null) {
       if ((dir == 1 && this.hasNext()) ||
           (dir == -1 && this.hasPrev())) {
-        this.showSlide_(this.slideIndex_ + dir);
+        let newIndex = this.slideIndex_ + dir;
+        if (newIndex == -1) {
+          newIndex = this.noOfSlides_ - 1;
+        } else if (newIndex >= this.noOfSlides_) {
+          newIndex = 0;
+        }
+        this.showSlide_(newIndex);
       }
     }
   }
@@ -126,27 +136,34 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   showSlide_(newIndex) {
-    const noOfSlides = this.noOfSlides_;
+    const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
-        newIndex >= this.noOfSlides_ ||
+        newIndex >= noOfSlides_ ||
         this.slideIndex_ == newIndex) {
       return;
     }
+
+    const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
+        (this.hasLooping_) ? noOfSlides_ - 1 : null;
+    const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
+        (this.hasLooping_) ? 0 : null;
+
     const showIndexArr = [];
-    if (newIndex == noOfSlides - 1) {
-      // Last slide.
-      showIndexArr.push(noOfSlides - 1, noOfSlides - 2);
-    } else if (newIndex == 0) {
-      // First slide.
-      showIndexArr.push(0, 1);
-    } else {
-      showIndexArr.push(newIndex - 1, newIndex, newIndex + 1);
+    if (prevIndex != null) {
+      showIndexArr.push(prevIndex);
+    }
+    showIndexArr.push(newIndex);
+    if (nextIndex != null) {
+      showIndexArr.push(nextIndex);
     }
     if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], false);
     }
     this.updateInViewport(this.slides_[newIndex], true);
-    showIndexArr.forEach(showIndex => {
+    showIndexArr.forEach((showIndex, loopIndex) => {
+      if (this.hasLooping_) {
+        setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
+      }
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
@@ -158,26 +175,32 @@ export class AmpSlideScroll extends BaseCarousel {
     // (which is at scrollLeft 0) when slide 0 is requested - for all other
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
-    const newScrollLeft = (newIndex == 0) ? 0 : this.slideWidth_;
+    let newScrollLeft = this.slideWidth_;
+    if (!this.hasLooping_ && newIndex == 0) {
+      newScrollLeft = 0;
+    }
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
     this.slideIndex_ = newIndex;
-    this.hideRestOfTheSlides_(newIndex);
+    this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
   }
 
   /**
    * Given an index, hides rest of the slides that are not needed.
-   * @param {number} index Index of the slide to be displayed.
+   * @param {!Array<number>} indexArr Array of indices that
+   *    should not be hidden.
    * @private
    */
-  hideRestOfTheSlides_(index) {
-    for (let i = 0; i < this.noOfSlides_; i++) {
-      if (i != index && i != index - 1 && i != index + 1 &&
-          this.slideWrappers_[i]) {
-        if (this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
-          this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
-          this.schedulePause(this.slides_[i]);
+  hideRestOfTheSlides_(indexArr) {
+    const noOfSlides_ = this.noOfSlides_;
+    for (let i = 0; i < noOfSlides_; i++) {
+      if (indexArr.indexOf(i) == -1 &&
+          this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+        if (this.hasLooping_) {
+          setStyle(this.slideWrappers_[i], 'order', '');
         }
+        this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+        this.schedulePause(this.slides_[i]);
       }
     }
   }
