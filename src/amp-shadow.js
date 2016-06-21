@@ -21,11 +21,11 @@
 
 import './polyfills';
 
-import {templatesFor} from './template';
+import {installTemplatesService} from './service/template-impl';
 
 
 // Register runtime-level services.
-templatesFor(window);
+installTemplatesService(window);
 
 
 // Output a message to the console and add an attribute to the <html>

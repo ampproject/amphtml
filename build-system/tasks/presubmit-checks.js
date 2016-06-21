@@ -115,6 +115,14 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
+  'installTemplatesService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/service/template-impl.js',
+    ],
+  },
   'installUrlReplacementsService': {
     message: privateServiceFactory,
     whitelist: [
