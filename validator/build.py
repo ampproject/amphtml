@@ -420,7 +420,10 @@ def RunTests(out_dir, nodejs_cmd):
 
 def CreateWebuiAppengineDist(out_dir):
   logging.info('entering ...')
-  os.system('find')
+  for dirName, subdirList, fileList in os.walk('.'):
+    print 'Found directory: %s' % dirName
+    for fname in fileList:
+      print '-> %s' % fname
   try:
     tempdir = tempfile.mkdtemp()
     shutil.copytree('webui', os.path.join(tempdir, 'webui'))
