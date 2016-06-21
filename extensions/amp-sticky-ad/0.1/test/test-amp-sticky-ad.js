@@ -310,7 +310,6 @@ describe('amp-sticky-ad', () => {
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');
-      expect(impl.closeButton_).to.be.null;
     });
   });
 });

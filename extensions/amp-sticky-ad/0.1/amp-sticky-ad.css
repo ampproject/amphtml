@@ -33,7 +33,6 @@ amp-sticky-ad {
   align-items: center;
   justify-content: center;
   overflow: visible !important;
-  direction: rtl;
 }
 
 .amp-sticky-ad-loaded {
@@ -58,5 +57,6 @@ amp-sticky-ad {
   font-size: 100%;
   opacity: 0.5;
   top: -25px;
+  right: 0;
 }
 
