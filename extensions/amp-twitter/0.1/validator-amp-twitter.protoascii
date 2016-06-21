@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-twitter
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-twitter extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-twitter
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
 }
 tags: {  # <amp-twitter>
-  tag_name: "amp-twitter"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-TWITTER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-twitter extension .js script"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
   attrs: {

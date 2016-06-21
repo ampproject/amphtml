@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 tags: {  # <script custom-element="amp-sticky-ad">
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-sticky-ad extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -46,14 +46,14 @@ tags: {  # <script custom-element="amp-sticky-ad">
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sticky-ad.html"
 }
 tags: {  # <amp-sticky-ad>
-  tag_name: "amp-sticky-ad"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-STICKY-AD"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-sticky-ad extension .js script"
   attr_lists: "extended-amp-global"
   unique: true
   child_tags: {
     mandatory_num_child_tags: 1
-    first_child_tag_name_oneof: "amp-ad"
+    first_child_tag_name_oneof: "AMP-AD"
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sticky-ad.html"
   amp_layout: {

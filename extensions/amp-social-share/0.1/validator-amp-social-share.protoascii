@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-social-share
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-social-share extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-social-share
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
 }
 tags: {  # <amp-social-share>
-  tag_name: "amp-social-share"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-SOCIAL-SHARE"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-social-share extension .js script"
   attrs: {
     name: "type"

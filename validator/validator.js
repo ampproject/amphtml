@@ -215,7 +215,8 @@ class ChildTagMatcher {
               amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName, getTagSpecName(this.parentSpec_), allowedNames],
+              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+               allowedNames.toLowerCase()],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -235,7 +236,8 @@ class ChildTagMatcher {
                   .DISALLOWED_FIRST_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName, getTagSpecName(this.parentSpec_), allowedNames],
+              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+               allowedNames.toLowerCase()],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -1704,7 +1706,7 @@ function getTagSpecName(tagSpec) {
     return tagSpec.specName;
   }
   goog.asserts.assert(tagSpec.tagName !== null);
-  return tagSpec.tagName;
+  return tagSpec.tagName.toLowerCase();
 }
 
 
@@ -2101,7 +2103,7 @@ class ParsedTagSpec {
 
     // We disable validating layout for tags where one of the layout attributes
     // contains mustache syntax.
-    const hasTemplateAncestor = context.getTagStack().hasAncestor('template');
+    const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
     if (hasTemplateAncestor &&
         (ParsedTagSpec.valueHasTemplateSyntax(layoutAttr) ||
          ParsedTagSpec.valueHasTemplateSyntax(widthAttr) ||
@@ -2398,7 +2400,7 @@ class ParsedTagSpec {
         return;
       }
     }
-    const hasTemplateAncestor = context.getTagStack().hasAncestor('template');
+    const hasTemplateAncestor = context.getTagStack().hasAncestor('TEMPLATE');
     let mandatoryAttrsSeen = [];
     /** @type {!Object<string, ?>} */
     const mandatoryOneofsSeen = {};
@@ -2584,8 +2586,9 @@ class ParsedTagSpec {
             context.getDocLocator(),
             /* params */
             [
-              getTagSpecName(this.spec_), context.getTagStack().getParent(),
-              this.spec_.mandatoryParent
+              getTagSpecName(this.spec_),
+              context.getTagStack().getParent().toLowerCase(),
+              this.spec_.mandatoryParent.toLowerCase()
             ],
             this.spec_.specUrl, validationResult);
       } else {
@@ -2612,8 +2615,9 @@ class ParsedTagSpec {
                 context.getDocLocator(),
                 /* params */
                 [
-                  this.spec_.tagName, mandatoryAncestor,
-                  this.spec_.mandatoryAncestorSuggestedAlternative
+                  this.spec_.tagName.toLowerCase(),
+                  mandatoryAncestor.toLowerCase(),
+                  this.spec_.mandatoryAncestorSuggestedAlternative.toLowerCase()
                 ],
                 this.spec_.specUrl, validationResult);
           } else {
@@ -2621,7 +2625,8 @@ class ParsedTagSpec {
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
                 context.getDocLocator(),
-                /* params */[this.spec_.tagName, mandatoryAncestor],
+                /* params */[this.spec_.tagName.toLowerCase(),
+                             mandatoryAncestor.toLowerCase()],
                 this.spec_.specUrl, validationResult);
           }
         } else {
@@ -2637,7 +2642,8 @@ class ParsedTagSpec {
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
               context.getDocLocator(),
-              /* params */[this.spec_.tagName, disallowedAncestor],
+              /* params */[this.spec_.tagName.toLowerCase(),
+                           disallowedAncestor.toLowerCase()],
               this.spec_.specUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2999,7 +3005,8 @@ class ParsedValidatorRules {
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_TAG,
             context.getDocLocator(),
-            /* params */[tagName], /* specUrl */ '', validationResult);
+            /* params */[tagName.toLowerCase()],
+            /* specUrl */ '', validationResult);
       } else {
         validationResult.status = amp.validator.ValidationResult.Status.FAIL;
       }
@@ -3050,7 +3057,8 @@ class ParsedValidatorRules {
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
               context.getDocLocator(),
-              /* params */[tagName], /* specUrl */ '', validationResult);
+              /* params */[tagName.toLowerCase()],
+              /* specUrl */ '', validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
         }

@@ -20,9 +20,9 @@
 template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
 
 tags: {  # amp-mustache
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-mustache extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -54,9 +54,9 @@ tags: {  # amp-mustache
 
 # HTML5, 4.11.3 The template element
 tags: {
-  tag_name: "template"
+  tag_name: "TEMPLATE"
   # <template> tags may not be nested inside other <template> tags.
-  disallowed_ancestor: "template"
+  disallowed_ancestor: "TEMPLATE"
   also_requires_tag: "amp-mustache extension .js script"
   attrs: {
     name: "type"

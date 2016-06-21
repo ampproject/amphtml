@@ -203,10 +203,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.getElementById('parent')
-              .appendChild(element);
-          // Wait for mutation observer to fire.
-          return new Timer(window).promise(16).then(() => {
+          const iWin = iframe.contentWindow;
+          const p = onInsert(iWin).then(() => {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
             element.build(true);
@@ -226,6 +224,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             }
             return element;
           });
+          iWin.document.getElementById('parent')
+              .appendChild(element);
+          return p;
         }
       });
     };
@@ -371,6 +372,26 @@ export function doNotLoadExternalResourcesInTest(win) {
     }
     return element;
   };
+}
+
+/**
+ * Returns a promise for when an element has been added to the given
+ * window. This is for use in tests to wait until after the
+ * attachment of an element to the DOM should have been registered.
+ * @param {!Window} win
+ * @return {!Promise<undefined>}
+ */
+function onInsert(win) {
+  return new Promise(resolve => {
+    const observer = new win.MutationObserver(() => {
+      observer.disconnect();
+      resolve();
+    });
+    observer.observe(win.document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  })
 }
 
 /**
