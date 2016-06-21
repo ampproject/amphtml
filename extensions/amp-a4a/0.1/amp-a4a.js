@@ -534,10 +534,13 @@ export class AmpA4A extends AMP.BaseElement {
    * TODO(keithwrightbos@): report error cases
    */
   getAmpAdMetadata_(creative) {
-    window.top.creative = creative;
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
+    if (metadataStart < 0) {
+      // Couldn't find a metadata blob.
+      return null;
+    }
     const metadataEnd = creative.lastIndexOf('</script>');
-    if (metadataStart < 0 || metadataEnd < 0) {
+    if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
       return null;
     }
@@ -628,14 +631,11 @@ export class AmpA4A extends AMP.BaseElement {
   formatBody_(creative, metaData) {
     const body = creative.substring(metaData.bodyUtf16CharOffsets[0],
         metaData.bodyUtf16CharOffsets[1]);
-    let openString = '<' + AMP_BODY_STRING;
+    let bodyAttrString = '';
     if (metaData.bodyAttributes) {
-      openString += ' ' + metaData.bodyAttributes + '>';
-    } else {
-      openString += '>';
+      bodyAttrString = ' ' + metaData.bodyAttributes;
     }
-    const closeString = '</' + AMP_BODY_STRING + '>';
-    return openString + body + closeString;
+    return `<${AMP_BODY_STRING}${bodyAttrString}>${body}</${AMP_BODY_STRING}>`;
   }
 
   /**
