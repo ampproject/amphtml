@@ -72,9 +72,6 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
-
-    this.slidesContainer_.addEventListener(
-        'scroll', this.scrollHandler_.bind(this));
   }
 
   /** @override */
@@ -129,73 +126,6 @@ export class AmpSlideScroll extends BaseCarousel {
         this.showSlide_(newIndex);
       }
     }
-  }
-
-  /**
-   * Handles scroll on the slides container.
-   * @param {!Event} event Event object.
-   * @private
-   */
-  scrollHandler_(event) {
-    const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
-    if (this.hasNativeSnapPoints_) {
-      this.snapHandler_(event, currentScrollLeft);
-    } else {
-      this.customScrollHandler_(event, currentScrollLeft);
-    }
-    this.previousScrollLeft_ = currentScrollLeft;
-  }
-
-  /**
-   * Detects snap end and updates slides/slideIndex after snap.
-   * @param {!Event} event Event object.
-   * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @private
-   */
-  snapHandler_(event, currentScrollLeft) {
-    // With snap points we know snapping happens precisely at the co-ordinates
-    if (currentScrollLeft % this.slideWidth_ == 0) {
-      this.updateOnScroll_(currentScrollLeft);
-    }
-  }
-
-  /**
-   * Updates to the right state of the new index on scroll.
-   * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   */
-  updateOnScroll_(currentScrollLeft) {
-    // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
-    // a time.
-    const shownSlideIndex = parseInt(currentScrollLeft / this.slideWidth_);
-    // Update value can be -1, 0 or 1 depending upon the index of the current
-    // shown slide.
-    let updateValue;
-    const lastSlideIndex = this.noOfSlides - 1;
-    if (this.slideIndex_ === 0 && shownSlideIndex === 0) {
-      // No need to update as slide has not moved from slide 0.
-      updateValue = 0;
-    } else if (this.slideIndex_ === 0 && shownSlideIndex ==1) {
-      // Slide moved one position to it's right.
-      updateValue = 1;
-    } else if (this.slideIndex_ == lastSlideIndex && shownSlideIndex == 1) {
-      // No need to update as slide has not moved from the last slide.
-      updateValue = 0;
-    } else if (this.slideIndex_ == lastSlideIndex && shownSlideIndex === 0) {
-      // Slide has scrolled to one position to it's left.
-      updateValue = -1;
-    } else {
-      // Handles shift for all slides except first and last.
-      updateValue = shownSlideIndex - 1;
-    }
-    this.showSlide_(this.slideIndex_ + updateValue);
-  }
-
-  /**
-   * Handles scroll on the slides container.
-   * @param {!Event} event Event object.
-   * @private
-   */
-  customScrollHandler_(event) {
   }
 
   /**

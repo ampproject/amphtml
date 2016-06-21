@@ -85,7 +85,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-x: auto !important;
   overflow-y: hidden !important;
   position: relative !important;
-  text-align: center;
   white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
