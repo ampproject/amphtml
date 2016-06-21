@@ -129,7 +129,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 .-amp-carousel-end-marker {
   background-color: transparent !important;
   display: block !important;
-  flex: 1 0 1px !important;
+  flex: 0 0 1px !important;
   height: 100% !important;
   position: relative !important;
   scroll-snap-coordinate: 0 0 !important;
