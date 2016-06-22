@@ -149,7 +149,7 @@ describe('amp-a4a', () => {
     it('must not be position:fixed', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return expect(createIframePromise().then(fixture => {
+      return createIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('width', 200);
@@ -161,8 +161,8 @@ describe('amp-a4a', () => {
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
         doc.body.appendChild(a4aElement);
-        a4a.onLayoutMeasure();
-      })).to.be.rejectedWith(/fixed/);
+        expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
+      });
     });
     it('#onLayoutMeasure #layoutCallback not valid AMP', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());

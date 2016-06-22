@@ -214,8 +214,8 @@ export class AmpA4A extends AMP.BaseElement {
     }
     this.layoutMeasureExecuted_ = true;
     user.assert(!isPositionFixed(this.element, this.getWin()),
-        '<amp-ad> is not allowed to be placed in elements with ' +
-        'position:fixed: %s', this.element);
+        '<%s> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element.tagName, this.element);
     // if (isPositionFixed(this.element, this.getWin())) {
     //   user.error('<amp-ad> is not allowed to be placed in elements with ' +
     //              'position:fixed: %s', this.element);
