@@ -25,7 +25,7 @@ import {cancellation} from '../../../src/error';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -85,6 +85,16 @@ export function base64ToByteArray(str) {
   return bytes;
 }
 
+/**
+ * @param {*} ary
+ * @return {boolean} whether input is array of 2 numeric elements.
+ * @private
+ */
+function isValidOffsetArray(ary) {
+  return isArray(ary) && ary.length == 2 &&
+      typeof ary[0] === 'number' &&
+      typeof ary[1] === 'number';
+};
 
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
@@ -504,10 +514,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaIframe_(opt_isNonAmpCreative) {
-    if (!this.adUrl_) {
-      // Error should not occur.
-      return;
-    }
+    user.assert(this.adUrl_, 'creative missing in renderViaIframe_?');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -537,17 +544,24 @@ export class AmpA4A extends AMP.BaseElement {
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
+      dev.warn("A4A",
+        "Could not locate start index for amp meta data in: %s", creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
+      dev.warn("A4A",
+        "Could not locate closing script tag for amp meta data in: %s",
+        creative);
       return null;
     }
     try {
       return this.buildCreativeMetaData_(JSON.parse(
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
     } catch (err) {
+      dev.warn("A4A", "Invalid amp metadata: %s",
+        creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
   }
@@ -559,11 +573,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   buildCreativeMetaData_(metaDataObj) {
     const metaData = {};
-    const isValidOffsetArray = function(ary) {
-      return isArray(ary) && ary.length == 2 &&
-          typeof ary[0] === 'number' &&
-          typeof ary[1] === 'number';
-    };
+
     metaData.bodyUtf16CharOffsets = metaDataObj['bodyUtf16CharOffsets'];
     if (!isValidOffsetArray(metaData.bodyUtf16CharOffsets)) {
       // Invalid/Missing body offsets array.
