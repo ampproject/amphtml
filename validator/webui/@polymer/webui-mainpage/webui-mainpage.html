@@ -155,10 +155,12 @@
             setLocationHashParams(params);
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
-              if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
-              } else {
-                urlForm.displayToast();
+              if (xmlHttp.readyState == 4) {
+                if (xmlHttp.status == 200) {
+                  editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
+                } else {
+                  urlForm.displayToast();
+                }
               }
             };
             xmlHttp.open('POST', '/fetch', true);
