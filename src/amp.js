@@ -30,6 +30,7 @@ import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
+import {installDocService} from './service/ampdoc-impl';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
@@ -48,6 +49,10 @@ try {
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
+      // Declare that this runtime will support a single root doc.
+      installDocService(window, /* isSingleDoc */ true);
+
+      // Core services.
       installCoreServices(window);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
