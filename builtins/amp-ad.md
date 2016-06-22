@@ -94,6 +94,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [I-Mobile](../ads/imobile.md)
 - [Improve Digital](../ads/improvedigital.md)
 - [Industrybrains](../ads/industrybrains.md)
+- [Kargo](../ads/kargo.md)
 - [MANTIS](../ads/mantis.md)
 - [MediaImpact](../ads/mediaimpact.md)
 - [Nend](../ads/nend.md)

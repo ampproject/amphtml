@@ -170,6 +170,11 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
+  kargo: [
+    'https://storage.cloud.kargo.com',
+    'https://pubads.g.doubleclick.net',
+    'https://prg.kargo.com',
+  ],
 };
 
 /**
