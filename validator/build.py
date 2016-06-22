@@ -441,9 +441,9 @@ def CreateWebuiAppengineDist(out_dir):
       shutil.copytree(os.path.join('webui/node_modules/@polymer', entry),
                       os.path.join(tempdir, '@polymer', entry))
     vulcanized_index_html = subprocess.check_output([
-        os.path.join(tempdir, 'vulcanize/bin/vulcanize'),
+        'webui/node_modules/vulcanize/bin/vulcanize',
         '--inline-scripts', '--inline-css',
-        '-p', os.path.join(tempdir), 'index.html'])
+        '-p', tempdir, 'index.html'])
   finally:
     shutil.rmtree(tempdir)
   webui_out = os.path.join(out_dir, 'webui_appengine')
