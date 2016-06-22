@@ -38,6 +38,7 @@ var ext_to_mime = map[string]string{
 	".js":   "text/javascript",
 	".css":  "text/css",
 	".png":  "image/png",
+	".svg":  "image/svg+xml",
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +47,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		// Handle '/'.
 		//
 		if r.RequestURI == "/" {
-			bytes, err := ioutil.ReadFile("webui/index.html")
+			bytes, err := ioutil.ReadFile("index.html")
 			if err != nil {
 				http.Error(w, "File not found.", http.StatusNotFound)
 				return
@@ -63,7 +64,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		// Handle '/webui.js'
 		//
 		if r.RequestURI == "/webui.js" {
-			bytes, err := ioutil.ReadFile("webui/webui.js")
+			bytes, err := ioutil.ReadFile("webui.js")
 			if err != nil {
 				http.Error(w, "File not found.", http.StatusNotFound)
 				return
@@ -86,8 +87,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		// Look up any other resources relative to node_modules or webui.
 		relative_path := r.RequestURI[1:] // Strip leading "/".
-		roots := []string{"node_modules/amp-validator-webui/node_modules",
-			"webui"}
+		roots := []string{".", "node_modules"}
 		for i := range roots {
 			root := roots[i]
 			// Only serve files below the current working directory.
