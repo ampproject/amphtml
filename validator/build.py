@@ -427,8 +427,8 @@ def CreateWebuiAppengineDist(out_dir):
     for d in os.listdir('node_modules/@polymer'):
       os.symlink(os.path.abspath(os.path.join('node_modules/@polymer', d)),
                  os.path.join(tempdir, 'webui/@polymer', d))
-    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
-               os.path.join(tempdir, 'webui/webcomponents-lite'))
+    os.symlink(os.path.abspath('node_modules/webcomponents.js'),
+               os.path.join(tempdir, 'webui/webcomponents.js'))
     vulcanized_index_html = subprocess.check_output([
         'node_modules/vulcanize/bin/vulcanize',
         '--inline-scripts', '--inline-css',
