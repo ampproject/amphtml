@@ -39,20 +39,26 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       return;
     }
 
+    const doc = this.element.ownerDocument;
+    const container = doc.createElement('div');
+    const childNodes = this.getRealChildNodes();
+
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
-    const children = this.getRealChildNodes();
-    const doc = this.element.ownerDocument;
-    const container = doc.createElement('div');
-
     /**
      * Preserved so that we may keep track of the "good" children. When an
-     * element collapses, we remove it from the list. If the list becomes
-     * empty, we attempt to collapse ourselves.
+     * element collapses, we remove it from the list.
      * @private @const
      */
-    this.children_ = children;
+    this.children_ = this.getRealChildren();
+
+    /**
+     * The number of children left that ares still "good". If no more are left,
+     * we attempt to collapse the flying carpet.
+     * @private
+     */
+    this.totalChildren_ = childNodes.length;
 
     /**
      * A cached reference to the container, used to set its width to match
@@ -65,12 +71,9 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
     container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
-    children.forEach((child) => {
-      this.setAsOwner(child);
-      container.appendChild(child);
-    });
+    this.children_.forEach(child => this.setAsOwner(child));
+    childNodes.forEach(child => container.appendChild(child));
     clip.appendChild(container);
-
     this.element.appendChild(clip);
   }
 
@@ -82,7 +85,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   viewportCallback(inViewport) {
-    this.children_.forEach(child => this.updateInViewport(child, inViewport));
+    this.updateInViewport(this.children_, inViewport);
   }
 
   assertPosition() {
@@ -117,7 +120,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.collapse();
       throw e;
     }
-    this.children_.forEach(child => this.scheduleLayout(child));
+    this.scheduleLayout(this.children_);
     return Promise.resolve();
   }
 
@@ -125,7 +128,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const index = this.children_.indexOf(child);
     if (index > -1) {
       this.children_.splice(index, 1);
-      if (this.children_.length == 0) {
+      this.totalChildren_--;
+      if (this.totalChildren_ == 0) {
         this.attemptChangeHeight(0, () => this.collapse());
       }
     }
