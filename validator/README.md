@@ -51,16 +51,6 @@ install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
 run `npm install -g` in this directory. After that, you may type
 `amp-validator` in any directory to invoke the validator.
 
-## Using the web UI (Beta!)
-
-This is a simple web editor which validates AMP HTML documents on the fly.
-This feature is new and experimental, feedback is especially welcome.
-
-* Type `npm install webui` in this directory.
-* Type `go build webui/serve-standalone.go` in this directory.
-* Type `./serve-standalone` in this directory.
-* Point your web browser to http://127.0.0.1:8765/
-
 ## Using the NodeJS API (Beta!)
 
 This API is new and still experimental, feedback is especially welcome. We may
