@@ -146,7 +146,7 @@ describe('amp-a4a', () => {
         });
       });
     });
-    it.skip('must not be position:fixed', () => {
+    it('must not be position:fixed', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createIframePromise().then(fixture => {
@@ -157,12 +157,11 @@ describe('amp-a4a', () => {
         a4aElement.setAttribute('type', 'adsense');
         const s = doc.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
-        doc.body.appendChild(s);
+        doc.head.appendChild(s);
         a4aElement.className = 'fixed';
         const a4a = new MockA4AImpl(a4aElement);
-        a4a.onLayoutMeasure();
-        // TODO(keithwrightbos): isPositionFixed not returning true?
-        expect(a4a.adPromise_).to.be.null;
+        doc.body.appendChild(a4aElement);
+        expect(a4a.onLayoutMeasure.bind(a4a)).to.throw(/fixed/);
       });
     });
     it('#onLayoutMeasure #layoutCallback not valid AMP', () => {

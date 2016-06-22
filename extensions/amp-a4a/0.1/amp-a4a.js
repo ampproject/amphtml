@@ -223,11 +223,9 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.layoutMeasureExecuted_ = true;
-    if (isPositionFixed(this.element, this.getWin())) {
-      user.error('<amp-ad> is not allowed to be placed in elements with ' +
-                 'position:fixed: %s', this.element);
-      return;
-    }
+    user.assert(!isPositionFixed(this.element, this.getWin()),
+        '<%s> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element.tagName, this.element);
     // OnLayoutMeasure can be called when page is in prerender so delay until
     // visible.  Assume that it is ok to call isValidElement as it should
     // only being looking at window, immutable properties (i.e. location) and
@@ -688,9 +686,11 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(tdrl): How to test for existence already?
       const doc = this.element.ownerDocument;
       const linkElem = doc.createElement('link');
-      Object.keys(s).forEach(k => {
-        linkElem.setAttribute(k, s[k]);
-      });
+      for (let attr in s) {
+        if (s.hasOwnProperty(attr)) {
+          linkElem.setAttribute(attr, s[attr]);
+        }
+      }
       doc.head.appendChild(linkElem);
       this.stylesheets_.push(linkElem);
     });
