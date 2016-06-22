@@ -216,11 +216,6 @@ export class AmpA4A extends AMP.BaseElement {
     user.assert(!isPositionFixed(this.element, this.getWin()),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
-    // if (isPositionFixed(this.element, this.getWin())) {
-    //   user.error('<amp-ad> is not allowed to be placed in elements with ' +
-    //              'position:fixed: %s', this.element);
-    //   return;
-    // }
     // OnLayoutMeasure can be called when page is in prerender so delay until
     // visible.  Assume that it is ok to call isValidElement as it should
     // only being looking at window, immutable properties (i.e. location) and
