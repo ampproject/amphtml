@@ -19,12 +19,22 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {installImg} from '../../../../builtins/amp-img';
 import {viewportFor} from '../../../../src/viewport';
 import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 import '../amp-fx-flying-carpet';
 
 adopt(window);
 
 describe('amp-fx-flying-carpet', () => {
   let iframe;
+
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function getAmpFlyingCarpet(opt_childrenCallback, opt_top) {
     let viewport;
@@ -142,4 +152,29 @@ describe('amp-fx-flying-carpet', () => {
       expect(ref.flyingCarpet).to.not.display;
     });
   });
+
+  it('should collapse when its children do', () => {
+    let img;
+    return getAmpFlyingCarpet(iframe => {
+      installImg(iframe.win);
+      img = iframe.doc.createElement('amp-img');
+      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('width', 300);
+      img.setAttribute('height', 200);
+      return [img];
+    }).then(flyingCarpet => {
+      sandbox.stub(
+        flyingCarpet.implementation_,
+        'attemptChangeHeight',
+        function(height, callback) {
+          flyingCarpet.style.height = height;
+          callback();
+        }
+      );
+      expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
+      img.collapse();
+      expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
+      expect(flyingCarpet.style.display).to.equal('none');
+    });
+  })
 });
