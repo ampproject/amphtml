@@ -646,11 +646,6 @@ class AmpImageLightbox extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return true;
-  }
-
-  /** @override */
   buildCallback() {
 
     /** @private {number} */

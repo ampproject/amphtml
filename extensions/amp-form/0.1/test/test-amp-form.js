@@ -18,13 +18,17 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {AmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
+import '../../../amp-mustache/0.1/amp-mustache';
+import {installTemplatesService} from '../../../../src/service/template-impl';
 
 describe('amp-form', () => {
 
   let sandbox;
+  installTemplatesService(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
+      installTemplatesService(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
       const ampForm = new AmpForm(form);
       return ampForm;
@@ -221,14 +225,103 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonRejecter();
-      return timer.promise(20).then(() => {
+      return timer.promise(0).then(() => {
         expect(button1.hasAttribute('disabled')).to.be.false;
         expect(button2.hasAttribute('disabled')).to.be.false;
         expect(ampForm.state_).to.equal('submit-error');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
-      }).should.eventually.throw;
+      });
+    });
+  });
+
+  it('should allow rendering responses through templates', () => {
+    return getAmpForm(true).then(ampForm => {
+      const form = ampForm.form_;
+      // Add a div[submit-error] with a template child.
+      const errorContainer = document.createElement('div');
+      errorContainer.setAttribute('submit-error', '');
+      form.appendChild(errorContainer);
+      const errorTemplate = document.createElement('template');
+      errorTemplate.setAttribute('type', 'amp-mustache');
+      errorTemplate.content.appendChild(
+          document.createTextNode('Error: {{message}}'));
+      errorContainer.appendChild(errorTemplate);
+      const renderedTemplate = document.createElement('div');
+      renderedTemplate.innerText = 'Error: hello there';
+      let fetchJsonRejecter;
+      sandbox.stub(ampForm.xhr_, 'fetchJson')
+          .returns(new Promise((unusedResolve, reject) => {
+            fetchJsonRejecter = reject;
+          }));
+      sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+          .returns(new Promise(resolve => {
+            resolve(renderedTemplate);
+          }));
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      fetchJsonRejecter({responseJson: {message: 'hello there'}});
+      return timer.promise(0).then(() => {
+        expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
+        expect(ampForm.templates_.findAndRenderTemplate.calledWith(
+            errorContainer, {message: 'hello there'})).to.be.true;
+        // Check that form has a rendered div with class .submit-error-message.
+        const renderedTemplate = form.querySelector('[i-amp-rendered]');
+        expect(renderedTemplate).to.not.be.null;
+      });
+    });
+  });
+
+
+  it('should replace previously rendered responses', () => {
+    return getAmpForm(true).then(ampForm => {
+      const form = ampForm.form_;
+      const successContainer = document.createElement('div');
+      successContainer.setAttribute('submit-success', '');
+      form.appendChild(successContainer);
+      const successTemplate = document.createElement('template');
+      successTemplate.setAttribute('type', 'amp-mustache');
+      successTemplate.content.appendChild(
+          document.createTextNode('Success: {{message}}'));
+      successContainer.appendChild(successTemplate);
+      const renderedTemplate = document.createElement('div');
+      renderedTemplate.innerText = 'Success: hello';
+      renderedTemplate.setAttribute('i-amp-rendered', '');
+      successContainer.appendChild(renderedTemplate);
+
+      const newRender = document.createElement('div');
+      newRender.innerText = 'New Success: What What';
+
+      let fetchJsonResolver;
+      sandbox.stub(ampForm.xhr_, 'fetchJson')
+          .returns(new Promise(resolve => {
+            fetchJsonResolver = resolve;
+          }));
+      sandbox.stub(ampForm.templates_, 'findAndRenderTemplate')
+          .returns(new Promise(resolve => {
+            resolve(newRender);
+          }));
+      const event = {
+        target: form,
+        preventDefault: sandbox.spy(),
+        defaultPrevented: false,
+      };
+      ampForm.handleSubmit_(event);
+      fetchJsonResolver({'message': 'What What'});
+      return timer.promise(0).then(() => {
+        expect(ampForm.templates_.findAndRenderTemplate.called).to.be.true;
+        expect(ampForm.templates_.findAndRenderTemplate.calledWith(
+            successContainer, {'message': 'What What'})).to.be.true;
+        const renderedTemplates = form.querySelectorAll('[i-amp-rendered]');
+        expect(renderedTemplates[0]).to.not.be.null;
+        expect(renderedTemplates.length).to.equal(1);
+        expect(renderedTemplates[0]).to.equal(newRender);
+      });
     });
   });
 });

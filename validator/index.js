@@ -310,7 +310,8 @@ var extToMime = {
   '.html': 'text/html',
   '.js': 'text/javascript',
   '.css': 'text/css',
-  '.png': 'image/png'
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml'
 };
 
 /**

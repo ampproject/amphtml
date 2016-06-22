@@ -22,7 +22,8 @@ import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-
+import {templatesFor} from '../../../src/template';
+import {removeElement, childElementByAttr} from '../../../src/dom';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -46,6 +47,9 @@ export class AmpForm {
 
     /** @const @private {!Element} */
     this.form_ = element;
+
+    /** @const @private {!Templates} */
+    this.templates_ = templatesFor(this.win_);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
@@ -105,11 +109,14 @@ export class AmpForm {
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
-      }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
-          .catch(error => {
-            this.setState_(FormState_.SUBMIT_ERROR);
-            rethrowAsync('Form submission failed:', error);
-          });
+      }).then(response => {
+        this.setState_(FormState_.SUBMIT_SUCCESS);
+        this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response || {});
+      }).catch(error => {
+        this.setState_(FormState_.SUBMIT_ERROR);
+        this.renderTemplate_(FormState_.SUBMIT_ERROR, error.responseJson || {});
+        rethrowAsync('Form submission failed:', error);
+      });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
       this.setState_(FormState_.SUBMITTING);
     }
@@ -131,6 +138,39 @@ export class AmpForm {
         button.removeAttribute('disabled');
       }
     });
+  }
+
+  /**
+   * @param {string} state
+   * @param {!Object} data
+   * @private
+   */
+  renderTemplate_(state, data = {}) {
+    const container = this.form_.querySelector(`[${state}]`);
+    if (container) {
+      // TODO(#3587): Move the cleanup to do during submission.
+      this.cleanupRenderedTemplate_(state);
+      return this.templates_.findAndRenderTemplate(container, data)
+          .then(rendered => {
+            rendered.setAttribute('i-amp-rendered', '');
+            container.appendChild(rendered);
+          });
+    }
+  }
+
+  /**
+   * @param {string} state
+   * @private
+   */
+  cleanupRenderedTemplate_(state) {
+    const container = this.form_.querySelector(`[${state}]`);
+    if (!container) {
+      return;
+    }
+    const previousRender = childElementByAttr(container, 'i-amp-rendered');
+    if (previousRender) {
+      removeElement(previousRender);
+    }
   }
 }
 
