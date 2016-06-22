@@ -81,6 +81,10 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     });
   }
 
+  viewportCallback(inViewport) {
+    this.children_.forEach(child => this.updateInViewport(child, inViewport));
+  }
+
   assertPosition() {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
@@ -113,6 +117,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.collapse();
       throw e;
     }
+    this.children_.forEach(child => this.scheduleLayout(child));
     return Promise.resolve();
   }
 
@@ -120,7 +125,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const index = this.children_.indexOf(child);
     if (index > -1) {
       this.children_.splice(index, 1);
-      if (this.children_.length === 0) {
+      if (this.children_.length == 0) {
         this.attemptChangeHeight(0, () => this.collapse());
       }
     }
