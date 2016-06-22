@@ -105,6 +105,7 @@ export class AmpForm {
 
     if (this.xhrAction_) {
       e.preventDefault();
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       this.xhr_.fetchJson(this.xhrAction_, {
         body: new FormData(this.form_),
@@ -113,13 +114,14 @@ export class AmpForm {
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
         this.setState_(FormState_.SUBMIT_SUCCESS);
-        this.renderTemplate_(FormState_.SUBMIT_SUCCESS, response || {});
+        this.renderTemplate_(response || {});
       }).catch(error => {
         this.setState_(FormState_.SUBMIT_ERROR);
-        this.renderTemplate_(FormState_.SUBMIT_ERROR, error.responseJson || {});
+        this.renderTemplate_(error.responseJson || {});
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
     }
   }
@@ -141,19 +143,14 @@ export class AmpForm {
         button.removeAttribute('disabled');
       }
     });
-
-    if (newState == FormState_.SUBMITTING) {
-      this.cleanupRenderedTemplate_(previousState);
-    }
   }
 
   /**
-   * @param {string} state
    * @param {!Object} data
    * @private
    */
-  renderTemplate_(state, data = {}) {
-    const container = this.form_.querySelector(`[${state}]`);
+  renderTemplate_(data = {}) {
+    const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
@@ -164,11 +161,10 @@ export class AmpForm {
   }
 
   /**
-   * @param {string} state
    * @private
    */
-  cleanupRenderedTemplate_(state) {
-    const container = this.form_.querySelector(`[${state}]`);
+  cleanupRenderedTemplate_() {
+    const container = this.form_.querySelector(`[${this.state_}]`);
     if (!container) {
       return;
     }
