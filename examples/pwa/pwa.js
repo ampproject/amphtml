@@ -335,7 +335,6 @@ class AmpViewer {
   installScript_(src, customElement, customTemplate) {
     const doc = this.win.document;
     const el = doc.createElement('script');
-    el.setAttribute('async', '');
     el.setAttribute('src', src);
     if (customElement) {
       el.setAttribute('custom-element', customElement);
