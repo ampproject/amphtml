@@ -17,6 +17,7 @@
 import {dev, user} from '../log';
 import {getServiceForDoc} from '../service';
 import {getMode} from '../mode';
+import {getServiceForDoc} from '../service';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';

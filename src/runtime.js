@@ -16,9 +16,11 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {ampdocFor} from './ampdoc';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
+import {installActionService} from './service/action-impl';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
@@ -107,6 +109,9 @@ export function adopt(global) {
   // of functions
   const preregisteredElements = global.AMP || [];
 
+  const ampdocService = ampdocFor(global);
+  const isSingleDoc = ampdocService.isSingleDoc();
+
   global.AMP = {
     win: global,
   };
@@ -155,31 +160,36 @@ export function adopt(global) {
   };
 
   installRuntimeServices(global);
-  const viewer = viewerFor(global);
+  if (isSingleDoc) {
+    const viewer = viewerFor(global);
 
-  /** @const */
-  global.AMP.viewer = viewer;
+    /** @const */
+    global.AMP.viewer = viewer;
 
-  if (getMode().development) {
+    if (getMode().development) {
+      /** @const */
+      global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+      /** @const */
+      global.AMP.resources = resourcesFor(global);
+    }
+
+    // Experiments.
     /** @const */
-    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+    global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
     /** @const */
-    global.AMP.resources = resourcesFor(global);
+    global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
+
+    const viewport = viewportFor(global);
+
+    /** @const */
+    global.AMP.viewport = {};
+    global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
+    global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
+    global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+  } else {
+    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null,
+        global, ampdocService);
   }
-
-  // Experiments.
-  /** @const */
-  global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
-  /** @const */
-  global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
-
-  const viewport = viewportFor(global);
-
-  /** @const */
-  global.AMP.viewport = {};
-  global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
-  global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
-  global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
 
   /**
    * Registers a new custom element.
@@ -219,6 +229,22 @@ export function adopt(global) {
     // go out of scope here, but just making sure.
     preregisteredElements.length = 0;
   });
+}
+
+
+/**
+ */
+export function prepareAndAttachShadowRoot(global, ampdocService, shadowRoot) {
+  console.log('AMP: Attach shadow root: ', shadowRoot);
+  const ampdoc = ampdocService.getAmpDoc(shadowRoot);
+  console.log('AMP: ampdoc registered:', ampdoc);
+
+  shadowRoot.AMP = {};
+
+  // Install services.
+  installActionServiceForDoc(shadowRoot);
+
+  return shadowRoot.AMP;
 }
 
 
