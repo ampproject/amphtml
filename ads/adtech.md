@@ -23,18 +23,15 @@ limitations under the License.
         type="adtech"
         data-atwMN="2842475"
         data-atwDiv="adtech-ad-container"
-        data-atwMOAT="1"
         >
 ```
 
 ## Configuration
-
 For semantics of configuration, please see ad network documentation.
 
 ### Required Parameters:
 * `data-atwMN` - magic number for the ad spot
 * `data-atwDiv` - div name of the ad spot; can be class or id
-* `data-atwMOAT` - set this to "1" to enable MOAT, "0" to disable MOAT call from adsWrapper
 
 ### Optional parameters:
 * `data-atwPlId` - placement ID (instead of Magic Number)
