@@ -205,13 +205,21 @@ class AmpAd extends AMP.BaseElement {
    * anyway.
    */
   isPositionFixed() {
+    const win = this.getWin();
+    // TODO(@cramforce): Figure out why test comes here with the window
+    // removed. This is somehow related to the resource framework running
+    // on a timer that is not bound to the lifetime of the iframe.
+    // See https://github.com/ampproject/amphtml/issues/3709
+    if (!win) {
+      return false;
+    }
     let el = this.element;
     let hasFixedAncestor = false;
     do {
       if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
         return false;
       }
-      if (this.getWin()/*because only called from onLayoutMeasure */
+      if (win/*because only called from onLayoutMeasure */
           ./*OK*/getComputedStyle(el).position == 'fixed') {
         // Because certain blessed elements may contain a position fixed
         // container (which contain an ad), we continue to search the
