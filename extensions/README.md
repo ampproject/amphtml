@@ -19,6 +19,7 @@ Current list of extended components:
 | --------- | ----------- |
 | [`amp-access`](amp-access/amp-access.md) | Provides AMP paywall and subscription support.  |
 | [`amp-accordion`](amp-accordion/amp-accordion.md) | Provides a way for viewers to have a glance at the outline of the content and jump to a section of their choice at will. |
+| [`amp-ad`](../builtins/amp-ad.md) | A container to display an ad. |
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
 | [`amp-anim`](amp-anim/amp-anim.md) | Manages an animated image, typically a GIF. |
 | [`amp-audio`](amp-audio/amp-audio.md) | Replaces the HTML5 `audio` tag. |
@@ -27,9 +28,11 @@ Current list of extended components:
 | [`amp-carousel`](amp-carousel/amp-carousel.md) | Displays multiple similar pieces of content along a horizontal axis. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
 | [`amp-dynamic-css-classes`](amp-dynamic-css-classes/amp-dynamic-css-classes.md) | Adds several dynamic CSS class names onto the HTML element. |
+| [`amp-embed`](../builtins/amp-embed.md) | Embed elements into the AMP page. Can be used instead of `amp-ad` when semantically more accurate.  |
 | [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md) | Expands or shrinks font size to fit the content within the space given. |
 | [`amp-font`](amp-font/amp-font.md) | Triggers and monitors the loading of custom fonts. |
+| [`amp-form`](amp-form/amp-form.md) | Allow usage of `<form>` and input tags. |
 | [`amp-fx-flying-carpet`](amp-fx-flying-carpet/amp-fx-flying-carpet.md) | Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport. |
 | [`amp-iframe`](amp-iframe/amp-iframe.md) | Displays an iframe. |
 | [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for an “image lightbox” or similar experience. |
@@ -39,6 +42,7 @@ Current list of extended components:
 | [`amp-kaltura-player`](amp-kaltura-player/amp-kaltura-player.md) | Displays the Kaltura Player as used in [Kaltura's Video Platform](https://corp.kaltura.com/). |
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md) | Allows for a “lightbox” or similar experience. |
 | [`amp-list`](amp-list/amp-list.md) | Dynamically downloads data and creates list items using a template. |
+| [`amp-live-list`](amp-live-list/amp-live-list.md) | A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document. |
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
 | [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
@@ -46,6 +50,7 @@ Current list of extended components:
 | [`amp-social-share`](amp-social-share/amp-social-share.md) | Displays a social share button. |
 | [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
 | [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a [Springboard Platform](http://publishers.springboardplatform.com/users/login) video player |
+| [`amp-sticky-ad`](amp-sticky-ad/amp-sticky-ad.md) | Provides a way to fix an ad at the bottom of a page. |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
 | [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |
