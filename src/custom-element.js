@@ -916,6 +916,22 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
+   * Collapses the element, and notifies its owner (if there is one) that the
+   * element is no longer present.
+   */
+  ElementProto.collapse = function() {
+    this.implementation_.collapse();
+  };
+
+  /**
+   * Called every time an owned AmpElement collapses itself.
+   * @param {!AmpElement} unusedElement
+   */
+  ElementProto.collapsedCallback = function(element) {
+    this.implementation_.collapsedCallback(element);
+  };
+
+  /**
    * Enqueues the action with the element. If element has been upgraded and
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready

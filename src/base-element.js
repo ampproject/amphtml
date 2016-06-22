@@ -705,6 +705,22 @@ export class BaseElement {
   }
 
   /**
+   * Collapses the element, and notifies its owner (if there is one) that the
+   * element is no longer present.
+   */
+  collapse() {
+    this.resources_.collapseElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement collapses itself.
+   * @param {!AmpElement} unusedElement
+   */
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
+  }
+
+  /**
    * Called when we just measured the layout rect of this element. Doing
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file
