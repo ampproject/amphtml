@@ -17,7 +17,7 @@
 import {getServiceForDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
-import {toggle} from './style';
+import {toggle} from '../style';
 
 
 /**

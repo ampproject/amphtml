@@ -33,7 +33,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
-import {toggle} from '../dom';
+import {toggle} from '../style';
 
 
 const TAG_ = 'Resources';
