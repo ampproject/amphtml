@@ -38,9 +38,8 @@ const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
  *
  * @param {!Element} sourceElement  Element to copy attributes from.
  * @param {!Element} targetElement  Element to copy attributes to.
- * @private
  */
-function copyAttributes_(sourceElement, targetElement) {
+function copyAttributes(sourceElement, targetElement) {
   for (let i = sourceElement.attributes.length - 1; i >= 0; --i) {
     const attr = sourceElement.attributes[i];
     if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
@@ -66,25 +65,24 @@ export class AmpAd extends AMP.BaseElement {
       // Unspecified or empty type.  Nothing to do here except bail out.
       return;
     }
+    let newChild;
     // TODO(tdrl): Check amp-ad registry to see if they have this already.
     if (!a4aRegistry[type] ||
         !a4aRegistry[type](this.getWin(), this.element)) {
       // Network either has not provided any A4A implementation or the
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
-      const newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
-      copyAttributes_(this.element, newChild);
-      this.element.appendChild(newChild);
-      return;
+      newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
+    } else {
+      // Note: The insertAmpExtensionScript method will pick the version number.
+      // If we ever reach a point at which there are different extensions with
+      // different version numbers at play simultaneously, we'll have to make sure
+      // that the loader can handle the case.
+      const extensionTag = TAG_NETWORK_CUSTOM_IMPL_.replace('${TYPE}', type);
+      newChild = this.element.ownerDocument.createElement(extensionTag);
+      /*REVIEW*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
     }
-    // Note: The insertAmpExtensionScript method will pick the version number.
-    // If we ever reach a point at which there are different extensions with
-    // different version numbers at play simultaneously, we'll have to make sure
-    // that the loader can handle the case.
-    const extensionTag = TAG_NETWORK_CUSTOM_IMPL_.replace('${TYPE}', type);
-    const newChild = this.element.ownerDocument.createElement(extensionTag);
-    copyAttributes_(this.element, newChild);
-    /*REVIEW*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
+    copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }
 }

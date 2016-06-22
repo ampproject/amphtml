@@ -155,13 +155,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
-    // Wait until DOMReady.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     /** @private {?Element} */
     this.iframe_ = null;
