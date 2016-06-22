@@ -273,7 +273,8 @@ describe('amp-sticky-ad', () => {
 
       impl.displayAfterScroll_();
       expect(addCloseButtonSpy).to.be.called;
-      expect(impl.closeButton_).not.to.be.null;
+      expect(impl.element.children[1]).to.be.not.null;
+      expect(impl.element.children[1].tagName).to.equal('BUTTON');
     });
   });
 
@@ -306,7 +307,8 @@ describe('amp-sticky-ad', () => {
       let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('50px');
-      impl.closeButton_.dispatchEvent(new Event('click'));
+      expect(impl.element.children[1]).to.be.not.null;
+      impl.element.children[1].dispatchEvent(new Event('click'));
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');

@@ -47,9 +47,6 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @const @private {!Element} */
     this.ad_ = children[0];
 
-    /** @private @const {!Element|null} */
-    this.closeButton_ = null;
-
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
@@ -134,14 +131,14 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
-    const closeButton = this.getWin().document.createElement('div');
+    const closeButton = this.getWin().document.createElement('button');
     closeButton.classList.add('-amp-sticky-ad-close-button');
-    closeButton.setAttribute('aria-label','Close');
-    closeButton.textContent = 'x';
-    this.element.appendChild(closeButton);
-    this.closeButton_ = closeButton;
+    closeButton.setAttribute('aria-label',
+        this.element.getAttribute('data-close-button-aria-label') || 'Close');
+    closeButton.textContent = '\u2716';
     const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
-    this.closeButton_.addEventListener('click', boundOnCloseButtonClick);
+    closeButton.addEventListener('click', boundOnCloseButtonClick);
+    this.element.appendChild(closeButton);
   }
 
   /**
