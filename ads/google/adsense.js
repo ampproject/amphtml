@@ -48,7 +48,7 @@ export function adsense(global, data) {
   if (data['adHost']) {
     i.setAttribute('data-ad-host', data['adHost']);
   }
-  if ('adtest' in data && data['adtest'] != null) {
+  if (data['adtest'] != null) {
     i.setAttribute('data-adtest', data['adtest']);
   }
   if (data['tagOrigin']) {
