@@ -22,7 +22,10 @@ import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-
+import {templatesFor} from '../../../src/template';
+import {removeElement, childElementByAttr} from '../../../src/dom';
+import {installStyles} from '../../../src/styles';
+import {CSS} from '../../../build/amp-form-0.1.css';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -46,6 +49,9 @@ export class AmpForm {
 
     /** @const @private {!Element} */
     this.form_ = element;
+
+    /** @const @private {!Templates} */
+    this.templates_ = templatesFor(this.win_);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
@@ -99,38 +105,73 @@ export class AmpForm {
 
     if (this.xhrAction_) {
       e.preventDefault();
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       this.xhr_.fetchJson(this.xhrAction_, {
         body: new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
-      }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
-          .catch(error => {
-            this.setState_(FormState_.SUBMIT_ERROR);
-            rethrowAsync('Form submission failed:', error);
-          });
+      }).then(response => {
+        this.setState_(FormState_.SUBMIT_SUCCESS);
+        this.renderTemplate_(response || {});
+      }).catch(error => {
+        this.setState_(FormState_.SUBMIT_ERROR);
+        this.renderTemplate_(error.responseJson || {});
+        rethrowAsync('Form submission failed:', error);
+      });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
     }
   }
 
   /**
    * Adds proper classes for the state passed.
-   * @param {string} state
+   * @param {string} newState
    * @private
    */
-  setState_(state) {
-    this.form_.classList.remove(`amp-form-${this.state_}`);
-    this.form_.classList.add(`amp-form-${state}`);
-    this.state_ = state;
+  setState_(newState) {
+    const previousState = this.state_;
+    this.form_.classList.remove(`amp-form-${previousState}`);
+    this.form_.classList.add(`amp-form-${newState}`);
+    this.state_ = newState;
     this.submitButtons_.forEach(button => {
-      if (state == FormState_.SUBMITTING) {
+      if (newState == FormState_.SUBMITTING) {
         button.setAttribute('disabled', '');
       } else {
         button.removeAttribute('disabled');
       }
     });
+  }
+
+  /**
+   * @param {!Object} data
+   * @private
+   */
+  renderTemplate_(data = {}) {
+    const container = this.form_.querySelector(`[${this.state_}]`);
+    if (container) {
+      return this.templates_.findAndRenderTemplate(container, data)
+          .then(rendered => {
+            rendered.setAttribute('i-amp-rendered', '');
+            container.appendChild(rendered);
+          });
+    }
+  }
+
+  /**
+   * @private
+   */
+  cleanupRenderedTemplate_() {
+    const container = this.form_.querySelector(`[${this.state_}]`);
+    if (!container) {
+      return;
+    }
+    const previousRender = childElementByAttr(container, 'i-amp-rendered');
+    if (previousRender) {
+      removeElement(previousRender);
+    }
   }
 }
 
@@ -151,7 +192,7 @@ function installSubmissionHandlers(win) {
 function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
-      installSubmissionHandlers(win);
+      installStyles(win.document, CSS, () => installSubmissionHandlers(win));
     }
     return {};
   });

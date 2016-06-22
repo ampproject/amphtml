@@ -17,5 +17,10 @@ handlers:
   upload: amp_favicon\.png$
   secure: always
 
+- url: /logo-blue.svg$
+  static_files: logo-blue.svg
+  upload: logo-blue\.svg$
+  secure: always
+
 skip_files:
-- serve-standalone.go
+  serve-standalone.go
