@@ -44,22 +44,32 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
     const children = this.getRealChildNodes();
     const doc = this.element.ownerDocument;
+    const container = doc.createElement('div');
+
+    /**
+     * Preserved so that we may keep track of the "good" children. When an
+     * element collapses, we remove it from the list. If the list becomes
+     * empty, we attempt to collapse ourselves.
+     * @private @const
+     */
+    this.children_ = children;
 
     /**
      * A cached reference to the container, used to set its width to match
      * the flying carpet's.
      * @private @const
      */
-    this.container_ = doc.createElement('div');
+    this.container_ = container;
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    this.container_.setAttribute('class', '-amp-fx-flying-carpet-container');
+    container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
-    for (let i = 0; i < children.length; i++) {
-      this.container_.appendChild(children[i]);
-    }
-    clip.appendChild(this.container_);
+    children.forEach((child) => {
+      this.setAsOwner(child);
+      container.appendChild(child);
+    });
+    clip.appendChild(container);
 
     this.element.appendChild(clip);
   }
@@ -100,10 +110,20 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.assertPosition();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
-      toggle(this.element, false);
+      this.collapse();
       throw e;
     }
     return Promise.resolve();
+  }
+
+  collapsedCallback(child) {
+    const index = this.children_.indexOf(child);
+    if (index > -1) {
+      this.children_.splice(index, 1);
+      if (this.children_.length === 0) {
+        this.attemptChangeHeight(0, () => this.collapse());
+      }
+    }
   }
 }
 
