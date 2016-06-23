@@ -58,9 +58,16 @@ describe('AmpDocService', () => {
   describe('shadow-doc mode', () => {
 
     let service;
+    let host, shadowRoot, content;
 
     beforeEach(() => {
       service = new AmpDocService(window, /* isSingleDoc */ false);
+      content = document.createElement('span');
+      host = document.createElement('div');
+      if (host.createShadowRoot) {
+        shadowRoot = host.createShadowRoot();
+        shadowRoot.appendChild(content);
+      }
     });
 
     it('should initialize as single-doc', () => {
@@ -69,17 +76,117 @@ describe('AmpDocService', () => {
     });
 
     it('should yield custom-element shadow-doc when exists', () => {
-      // TODO
+      const ampDoc = {};
+      content.getAmpDoc = () => ampDoc;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should yield cached or custom-element shadow-doc when exists', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      const ampDoc = {};
+      shadowRoot['__AMPDOC'] = ampDoc;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
+
+      // Override via custom element.
+      const ampDoc2 = {};
+      content.getAmpDoc = () => ampDoc2;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc2);
+
+      // Fallback to cached version when custom element returns null.
+      content.getAmpDoc = () => null;
+      expect(service.getAmpDoc(content)).to.equal(ampDoc);
+    });
+
+    it('should create and cached shadow-doc', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.exist;
+      expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
+      expect(ampDoc).to.be.instanceOf(AmpDocShadow);
+      expect(ampDoc.shadowRoot_).to.equal(shadowRoot);
+      expect(shadowRoot['__AMPDOC']).to.equal(ampDoc);
+    });
+
+    it('should fail if shadow root not found', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      expect(() => {
+        service.getAmpDoc(host);
+      }).to.throw(/No root found/);
     });
   });
 });
 
 
 describe('AmpDocSingle', () => {
-  // TODO
+
+  let ampdoc;
+
+  beforeEach(() => {
+    ampdoc = new AmpDocSingle(window);
+  });
+
+  it('should return window', () => {
+    expect(ampdoc.getWin()).to.equal(window);
+  });
+
+  it('should return document as root', () => {
+    expect(ampdoc.getRootNode()).to.equal(window.document);
+  });
+
+  it('should find element by id', () => {
+    const id = 'ampdoc_test_element_' + Date.now();
+    const element = document.createElement('div');
+    element.setAttribute('id', id);
+    document.body.appendChild(element);
+    expect(ampdoc.getElementById(id)).to.equal(element);
+  });
 });
 
 
 describe('AmpDocShadow', () => {
-  // TODO
+
+  let content, host, shadowRoot;
+  let ampdoc;
+
+  beforeEach(() => {
+    content = document.createElement('div');
+    host = document.createElement('div');
+    if (host.createShadowRoot) {
+      shadowRoot = host.createShadowRoot();
+      shadowRoot.appendChild(content);
+      ampdoc = new AmpDocShadow(shadowRoot);
+    }
+  });
+
+  it('should return window', () => {
+    if (!ampdoc) {
+      return;
+    }
+    expect(ampdoc.getWin()).to.equal(window);
+  });
+
+  it('should return document as root', () => {
+    if (!ampdoc) {
+      return;
+    }
+    expect(ampdoc.getRootNode()).to.equal(shadowRoot);
+  });
+
+  it('should find element by id', () => {
+    if (!ampdoc) {
+      return;
+    }
+    const id = 'ampdoc_test_element_' + Date.now();
+    const element = document.createElement('div');
+    element.setAttribute('id', id);
+    content.appendChild(element);
+    expect(ampdoc.getElementById(id)).to.equal(element);
+  });
 });
