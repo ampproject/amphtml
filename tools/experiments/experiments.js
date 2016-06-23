@@ -56,6 +56,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
   },
   {
+    id: 'amp-experiment',
+    name: 'AMP Experiment',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-experiment/amp-experiment.md',
+  },
+  {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
