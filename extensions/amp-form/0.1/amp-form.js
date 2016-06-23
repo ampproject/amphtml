@@ -26,6 +26,7 @@ import {templatesFor} from '../../../src/template';
 import {removeElement, childElementByAttr} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
+import {ValidationBubble} from './validation-bubble';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -36,6 +37,9 @@ const FormState_ = {
   SUBMIT_ERROR: 'submit-error',
   SUBMIT_SUCCESS: 'submit-success',
 };
+
+/** @type {?./validation-bubble.ValidationBubble} */
+let validationBubble;
 
 export class AmpForm {
 
@@ -94,12 +98,16 @@ export class AmpForm {
    * @private
    */
   handleSubmit_(e) {
-    if (e.defaultPrevented) {
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.preventDefault();
       return;
     }
 
-    if (this.state_ == FormState_.SUBMITTING) {
+    const shouldValidate = !this.form_.hasAttribute('novalidate');
+    const isInvalid = this.form_.checkValidity && !this.form_.checkValidity();
+    if (shouldValidate && isInvalid) {
       e.preventDefault();
+      reportFormValidity(this.form_);
       return;
     }
 
@@ -146,7 +154,7 @@ export class AmpForm {
   }
 
   /**
-   * @param {!Object} data
+   * @param {!Object=} data
    * @private
    */
   renderTemplate_(data = {}) {
@@ -177,8 +185,69 @@ export class AmpForm {
 
 
 /**
+ * Reports validity for the first invalid input - if any.
+ * @param {!HTMLFormElement} form
+ * @private
+ */
+function reportFormValidity(form) {
+  const inputs = toArray(form.querySelectorAll('input,select,textarea'));
+  for (let i = 0; i < inputs.length; i++) {
+    if (!inputs[i].checkValidity()) {
+      return reportInputValidity(inputs[i]);
+    }
+  }
+}
+
+
+/**
+ * Revalidates the currently focused input after a change.
+ * @param {!KeyboardEvent} event
+ * @private
+ */
+function onInvalidInputKeyUp_(event) {
+  validationBubble.hide();
+  if (!event.target.checkValidity()) {
+    validationBubble.show(event.target, event.target.validationMessage);
+  }
+}
+
+
+/**
+ * Hides validation bubble and removes listeners on the invalid input.
+ * @param {!Event} event
+ * @private
+ */
+function onInvalidInputBlur_(event) {
+  validationBubble.hide();
+  event.target.removeEventListener('blur', onInvalidInputBlur_);
+  event.target.removeEventListener('keyup', onInvalidInputKeyUp_);
+}
+
+
+/**
+ * Focuses and reports the invalid message of the input in a message bubble.
+ * @param {!HTMLInputElement} input
+ * @private
+ */
+function reportInputValidity(input) {
+  input./*REVIEW*/focus();
+
+  // Remove any previous listeners on the same input. This avoids adding many
+  // listeners on the same element when the user submit pressing Enter or any
+  // other method to submit the form without the element losing focus.
+  input.removeEventListener('blur', onInvalidInputBlur_);
+  input.removeEventListener('keyup', onInvalidInputKeyUp_);
+
+  input.addEventListener('keyup', onInvalidInputKeyUp_);
+  input.addEventListener('blur', onInvalidInputBlur_);
+  validationBubble.show(input, input.validationMessage);
+}
+
+
+/**
  * Installs submission handler on all forms in the document.
  * @param {!Window} win
+ * @private
  */
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, () => {
@@ -189,10 +258,17 @@ function installSubmissionHandlers(win) {
 }
 
 
+/**
+ * @param {!Window} win
+ * @private
+ */
 function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
-      installStyles(win.document, CSS, () => installSubmissionHandlers(win));
+      installStyles(win.document, CSS, () => {
+        validationBubble = new ValidationBubble(window);
+        installSubmissionHandlers(win);
+      });
     }
     return {};
   });
