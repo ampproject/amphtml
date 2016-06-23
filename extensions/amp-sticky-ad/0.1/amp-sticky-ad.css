@@ -37,11 +37,6 @@ amp-sticky-ad {
 
 .amp-sticky-ad-loaded {
   background-color: #fff;
-  box-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
-}
-
-.amp-sticky-ad-loaded > button {
-  box-shadow: -1px -1px 1px rgba(0, 0, 0, 0.5), 1px 0px 1px rgba(0, 0, 0, 0.5);
 }
 
 .-amp-sticky-ad-layout > amp-ad {
@@ -50,11 +45,14 @@ amp-sticky-ad {
 
 .-amp-sticky-ad-close-button {
   position: absolute;
+  display: block;
   height: 32px;
   width: 32px;
   background-color: #fff;
   color: grey;
-  font-size: 100%;
+  font-size: 150%;
+  vertical-align: middle;
+  padding: 0px;
   opacity: 0.5;
   top: -32px;
   right: 0;
