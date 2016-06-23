@@ -50,9 +50,10 @@ amp-sticky-ad {
   width: 32px;
   background-color: #fff;
   color: grey;
-  font-size: 150%;
+  font-size: 26px;
+  line-height: 26px;
   vertical-align: middle;
-  padding: 0px;
+  padding: 0;
   opacity: 0.5;
   top: -32px;
   right: 0;
