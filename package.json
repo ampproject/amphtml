@@ -14,7 +14,8 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "test": "gulp test",
+    "test": "gulp test && ava",
+    "node-test": "ava",
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
@@ -96,5 +97,13 @@
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
     "watchify": "3.7.0"
+  },
+  "ava": {
+    "files": [
+      "build-system/tasks/**/{test,test-*}.js"
+    ],
+    "concurrency": 5,
+    "tap": true,
+    "failFast": true
   }
 }
