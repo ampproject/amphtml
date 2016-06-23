@@ -21,3 +21,6 @@ handlers:
   static_files: logo-blue.svg
   upload: logo-blue\.svg$
   secure: always
+
+skip_files:
+  serve-standalone.go
