@@ -42,6 +42,7 @@ For semantics of configuration, please see ad network documentation.
 * `data-atwWidth` - ad width (use with atwHeight only if the ad is not 300x250)
 * `data-atwHeight`- ad height (use with atwWidth only if the ad is not 300x250)
 * `data-atwSizes` - this overrides atwWidth/atwHeight; use this to create a comma-separated list of possible ad sizes
+* 'data-atwPolar' - set to "1" to enable Polar.me ad in the ad spot
 
 ### Direct URL Call:
 * `src` - Value must start with `https:` and contain `/addyn/`.  This should only be used in cases where a direct ad call is being used rather than a magic number (MN).
