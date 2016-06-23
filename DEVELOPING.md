@@ -81,7 +81,7 @@ Also for local testing, download [saucelabs connect](https://docs.saucelabs.com/
 
 If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically built and tested on [Travis](https://travis-ci.org/ampproject/amphtml/builds). After the travis run completes, the result will be logged to your PR.
 
-If a test flaked on a pull request you can ask a project owner to restart the tests for you.
+If a test flaked on a pull request you can ask a project owner to restart the tests for you. Use [`this.retries(x)`](https://mochajs.org/#retry-tests) as the last resort.
 
 ### Manual testing
 
