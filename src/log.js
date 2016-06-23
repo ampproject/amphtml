@@ -105,7 +105,7 @@ export class Log {
     }
 
     // LocalDev by default allows INFO level, unless overriden by `#log`.
-    if (mode.localDev && !mode.log) {
+    if (getMode().localDev && !mode.log) {
       return LogLevel.INFO;
     }
 
