@@ -471,6 +471,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  '\\.collapse(?!_)': bannedTermsHelpString,
   'insertAmpExtensionScript': {
     message: bannedTermsHelpString,
     whitelist: [

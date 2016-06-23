@@ -117,7 +117,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.assertPosition();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
-      this.collapse();
+      this./*REVIEW*/collapse();
       throw e;
     }
     this.scheduleLayout(this.children_);
@@ -130,7 +130,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.children_.splice(index, 1);
       this.totalChildren_--;
       if (this.totalChildren_ == 0) {
-        this.attemptChangeHeight(0, () => this.collapse());
+        this.attemptChangeHeight(0, () => this./*REVIEW*/collapse());
       }
     }
   }

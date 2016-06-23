@@ -48,7 +48,7 @@ export class StandardActions {
     const target = invocation.target;
     this.resources_.mutateElement(target, () => {
       if (target.classList.contains('-amp-element')) {
-        target.collapse();
+        target./*REVIEW*/collapse();
       } else {
         toggle(target, false)
       }
