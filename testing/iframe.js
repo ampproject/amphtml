@@ -71,6 +71,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
@@ -190,7 +191,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST = true;
+      iframe.contentWindow.AMP_TEST_IFRAME = true;
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
@@ -242,6 +243,7 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       installCoreServices(win);
       registerForUnitTest(win);

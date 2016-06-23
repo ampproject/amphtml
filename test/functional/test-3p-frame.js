@@ -84,6 +84,14 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
+    setModeForTesting({
+      localDev: true,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    });
+
     clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -169,18 +177,16 @@ describe('3p-frame', () => {
     });
   });
 
+
   it('should pick the right bootstrap url for local-dev mode', () => {
+    setModeForTesting({localDev: true});
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap url for testing mode', () => {
-    const win = {
-      AMP_TEST: true,
-      location: window.location,
-      document: window.document,
-    };
-    expect(getBootstrapBaseUrl(win)).to.equal(
+    setModeForTesting({test: true});
+    expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
@@ -211,6 +217,7 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+    setModeForTesting({localDev: true});
     const preconnect = preconnectFor(window);
     const origPreloadSupportValue = preconnect.preloadSupported_;
     preconnect.preloadSupported_ = false;
