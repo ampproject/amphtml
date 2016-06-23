@@ -26,8 +26,12 @@ import {templatesFor} from '../../../src/template';
 import {removeElement, childElementByAttr} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
+<<<<<<< ec96f9c220cd99848281596b37987a70ace1ac14
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
+=======
+import {actionServiceFor} from '../../../src/action';
+>>>>>>> Expose submit event with on=submit:el.action syntax.
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -52,7 +56,7 @@ export class AmpForm {
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
 
-    /** @const @private {!Element} */
+    /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
@@ -94,28 +98,36 @@ export class AmpForm {
 
   /** @private */
   installSubmitHandler_() {
-    this.form_.addEventListener('submit', e => this.handleSubmit_(e));
+    this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
   }
 
   /**
+   * Note on stopImmediatePropagation usage here, it is important to emulate native
+   * browser submit event blocking. Otherwise any other submit listeners would get the
+   * event.
+   *
+   * For example, action service shouldn't trigger 'submit' event if form is actually
+   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
+   *
+   *
    * @param {!Event} e
    * @private
    */
   handleSubmit_(e) {
-    if (this.state_ == FormState_.SUBMITTING) {
-      e.preventDefault();
-      return;
-    }
-
     const shouldValidate = !this.form_.hasAttribute('novalidate');
-    if (shouldValidate &&
-        this.form_.checkValidity && !this.form_.checkValidity()) {
-      e.preventDefault();
+    const isInvalid = shouldValidate &&
+        this.form_.checkValidity && !this.form_.checkValidity();
+    if (isInvalid) {
+      e.stopImmediatePropagation();
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
         measure: undefined,
         mutate: reportValidity,
       }, {form: this.form_});
+    }
+
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.stopImmediatePropagation();
       return;
     }
 

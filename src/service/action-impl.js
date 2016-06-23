@@ -117,6 +117,10 @@ export class ActionService {
           this.trigger(event.target, 'tap', event);
         }
       });
+    } else if (name == 'submit') {
+      this.win.document.addEventListener('submit', event => {
+        this.trigger(event.target, 'submit', event);
+      });
     }
   }
 
