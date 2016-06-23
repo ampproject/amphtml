@@ -161,7 +161,7 @@ describe('AmpDocShadow', () => {
     if (host.createShadowRoot) {
       shadowRoot = host.createShadowRoot();
       shadowRoot.appendChild(content);
-      ampdoc = new AmpDocShadow(shadowRoot);
+      ampdoc = new AmpDocShadow(window, shadowRoot);
     }
   });
 

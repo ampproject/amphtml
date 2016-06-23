@@ -89,7 +89,7 @@ export class AmpDocService {
     }
     let ampDoc = shadowRoot[AMPDOC_PROP];
     if (!ampDoc) {
-      ampDoc = new AmpDocShadow(shadowRoot);
+      ampDoc = new AmpDocShadow(this.win, shadowRoot);
       shadowRoot[AMPDOC_PROP] = ampDoc;
     }
     return ampDoc;
@@ -172,17 +172,20 @@ export class AmpDocSingle extends AmpDoc {
  */
 export class AmpDocShadow extends AmpDoc {
   /**
+   * @param {!Window} win
    * @param {!ShadowRoot} shadowRoot
    */
-  constructor(shadowRoot) {
+  constructor(win, shadowRoot) {
     super();
+    /** @const {!Window} */
+    this.win = win;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
   }
 
   /** @override */
   getWin() {
-    return this.shadowRoot_.ownerDocument.defaultView;
+    return this.win;
   }
 
   /** @override */
