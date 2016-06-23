@@ -101,6 +101,14 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installDocService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/service/ampdoc-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
