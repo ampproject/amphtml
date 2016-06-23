@@ -356,8 +356,9 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
-  buildExample('live-list.amp.html');
+  buildExample('live-blog.amp.html');
   buildExample('live-list-update.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
