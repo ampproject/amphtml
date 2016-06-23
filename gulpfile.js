@@ -120,6 +120,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     watch: watch,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
   });
   // The main binary does not yet compile successfully with type checking
   // turned on. Skip for now.
