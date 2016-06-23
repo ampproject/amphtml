@@ -358,7 +358,7 @@ export function assertSuccess(response) {
         response.json().then(json => {
           err.responseJson = json;
           reject(err);
-        }).catch(() => {
+        }, () => {
           // Ignore a failed json parsing and just throw the error without
           // setting responseJson.
           reject(err);
