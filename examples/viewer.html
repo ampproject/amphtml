@@ -111,6 +111,14 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="4"] #container4 {
+      visibility: visible;
+    }
+
+    viewer[data-show-container="4"] #show-container4-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -191,6 +199,7 @@
         prerenderSize: this.prerenderSize_,
         viewerorigin: parseUrl(window.location.href).origin,
         csi: this.csi_,
+        cap: 'foo,a2a',
       };
       log('Params:' + JSON.stringify(params));
 
@@ -405,8 +414,13 @@
       }
       if (type == 'sendCsi') {
         log('[CSI] sendCsi.');
+        return;
       }
       if (type == 'scroll') {
+        return;
+      }
+      if (type == 'a2a') {
+        log('a2a navigation', data);
         return;
       }
       return Promise.reject('request not supported: ' + type);
@@ -483,6 +497,13 @@
           false).start();
       addShowContainer('3');
 
+      new Viewer(
+          'container4',
+          '4',
+          'http://localhost:8000/examples.build/alp.amp.max.html',
+          false).start();
+      addShowContainer('4');
+
       showContainer('1');
     }
 
@@ -512,6 +533,7 @@
       <a class="show-container-anchor" id="show-container1-anchor">One</a>
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
+      <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -526,6 +548,11 @@
       </div>
     </container>
     <container id="container3">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container4">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

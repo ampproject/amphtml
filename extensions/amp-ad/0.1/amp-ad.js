@@ -26,6 +26,8 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {removeElement} from '../../../src/dom';
+import {setupA2AListener} from './a2a-listener';
+
 
 
 /** @const These tags are allowed to have fixed positioning */
@@ -90,6 +92,7 @@ class AmpAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    const win = this.getWin();
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -122,7 +125,8 @@ class AmpAd extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.viewer_ = viewerFor(this.getWin());
+    this.viewer_ = viewerFor(win);
+    setupA2AListener(win);
   }
 
   /**

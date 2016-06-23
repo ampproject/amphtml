@@ -59,6 +59,7 @@ describe('alp-handler', () => {
       },
     };
     event = {
+      trusted: true,
       buttons: 0,
       target: anchor,
       preventDefault: sandbox.spy(),
@@ -83,6 +84,21 @@ describe('alp-handler', () => {
     expect(event.preventDefault.callCount).to.equal(1);
   }
 
+  function a2aSuccess() {
+    const parent = win.parent = {
+      postMessage: sandbox.stub(),
+    };
+    win.parent.parent = {};
+    handleClick(event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(parent.postMessage.callCount).to.equal(1);
+    expect(parent.postMessage.lastCall.args[0]).to.equal(
+        'a2a;{"url":"https://cdn.ampproject.org/c/www.example.com/amp.html' +
+        '#click=https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%' +
+        '252Fcdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html"}');
+    expect(open.callCount).to.equal(0);
+  }
+
   function noNavigation() {
     handleClick(event);
     expect(open.callCount).to.equal(0);
@@ -96,6 +112,48 @@ describe('alp-handler', () => {
   it('should navigate to correct destination (left mouse button)', () => {
     event.button = 1;
     simpleSuccess();
+  });
+
+  it('should perform a2a navigation if appropriate', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.google.com',
+    ];
+    a2aSuccess();
+  });
+
+  it('should perform a2a navigation if appropriate (.de)', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.google.de',
+    ];
+    a2aSuccess();
+  });
+
+  it('should not perform a2a for other origins', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.other.com',
+    ];
+    simpleSuccess();
+  });
+
+  it('should not perform a2a for other origins (2)', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject2.org',
+      'https://www.google.com',
+    ];
+    simpleSuccess();
+  });
+
+  it('should navigate if trusted is not set.', () => {
+    delete event.trusted;
+    simpleSuccess();
+  });
+
+  it('should fail with trusted being false', () => {
+    event.isTrusted = false;
+    noNavigation();
   });
 
   it('should support custom arg name', () => {

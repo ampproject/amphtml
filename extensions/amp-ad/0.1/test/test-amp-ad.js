@@ -90,7 +90,9 @@ function tests(name) {
         expect(preconnects[preconnects.length - 1].href).to.equal(
             'https://testsrc/');
         // Make sure we run tests without CID available by default.
-        expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
+        const win = ad.ownerDocument.defaultView;
+        expect(win.services.cid).to.be.undefined;
+        expect(win.a2alistener).to.be.true;
       });
     });
 
