@@ -72,6 +72,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     window.beforeLoad = function(win) {
       // Flag as being a test window.
       win.AMP_TEST_IFRAME = true;
+      win.AMP_TEST = true;
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
@@ -243,6 +244,7 @@ export function createServedIframe(src) {
     iframe.onload = function() {
       const win = iframe.contentWindow;
       win.AMP_TEST_IFRAME = true;
+      win.AMP_TEST = true;
       installCoreServices(win);
       registerForUnitTest(win);
       resolve({

@@ -20,6 +20,7 @@ import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {platform} from '../src/platform';
+import {setModeForTesting} from '../src/mode';
 
 adopt(window);
 
@@ -109,6 +110,7 @@ sinon.sandbox.create = function(config) {
 };
 
 beforeEach(() => {
+  setModeForTesting(null);
   window.AMP_TEST = true;
 });
 
