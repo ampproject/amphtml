@@ -102,6 +102,7 @@ module.exports = {
   karma: karma,
   lintGlobs: [
     '**/*.js',
+    '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
     '!{testing,examples,examples.build}/**/*.*',

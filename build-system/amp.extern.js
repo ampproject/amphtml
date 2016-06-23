@@ -22,6 +22,7 @@ process.end.NODE_ENV;
 // Exposed to ads.
 window.context = {};
 window.context.amp3pSentinel;
+window.context.clientId;
 
 // Exposed to custom ad iframes.
 /* @type {!Function} */
@@ -120,4 +121,3 @@ twttr.widgets.createTweet;
 
 var FB;
 FB.init;
-

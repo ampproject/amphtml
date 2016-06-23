@@ -83,12 +83,14 @@ export function writeScript(win, url, opt_cb) {
  * Asynchronously load the given script URL.
  * @param {!Window} win
  * @param {string} url
- * @param {function()} cb
+ * @param {function()=} opt_cb
  */
-export function loadScript(win, url, cb) {
+export function loadScript(win, url, opt_cb) {
   const s = win.document.createElement('script');
   s.src = url;
-  s.onload = cb;
+  if (opt_cb) {
+    s.onload = opt_cb;
+  }
   win.document.body.appendChild(s);
 }
 
