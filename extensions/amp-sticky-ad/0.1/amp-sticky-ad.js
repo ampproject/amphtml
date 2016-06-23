@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
@@ -147,7 +148,7 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
-      toggle(this.element, false);
+      removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });
   }
