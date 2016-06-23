@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestNode} from '../dom';
 import {dev} from '../log';
 import {getService} from '../service';
 import {isShadowRoot} from '../types';
@@ -44,7 +45,7 @@ export class AmpDocService {
     /** @private @const {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
-      this.singleDoc_ = new AmpDocSingle(ths.win);
+      this.singleDoc_ = new AmpDocSingle(win);
     }
   }
 
@@ -81,7 +82,8 @@ export class AmpDocService {
     }
 
     // Otherwise discover and possibly create the ampdoc.
-    const shadowRoot = findShadowRoot(node);
+    // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
+    const shadowRoot = closestNode(node, node => isShadowRoot(node));
     if (!shadowRoot) {
       throw dev.createError('No root found for', node);
     }
@@ -92,20 +94,6 @@ export class AmpDocService {
     }
     return ampDoc;
   }
-}
-
-/**
- * @param {!Node} node
- * @return {?ShadowRoot}
- */
-function findShadowRoot(node) {
-  // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
-  for (let n = node; n; n = n.parentNode) {
-    if (isShadowRoot(n)) {
-      return n;
-    }
-  }
-  return null;
 }
 
 
