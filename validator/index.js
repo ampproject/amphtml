@@ -153,61 +153,61 @@ function ValidationResult() {
  * @constructor
  */
 function ValidationError() {
-    /**
-     * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
-     * 'ERROR', and 'WARNING'.
-     */
-    this.severity = 'UNKNOWN_SEVERITY';
-    /**
-     * The line number at which the error was seen (1 is the first line).
-     */
-    this.line = 1;
-    /**
-     * The column number at which the error was seen (0 is the first column).
-     */
-    this.col = 0;
-    /**
-     * A human-readable error message for the validation error.
-     * If you find yourself trying to write a parser against this string
-     * to scrape out some detail, consider looking at the code and params
-     * fields below.
-     * @type {!string}
-     */
-    this.message = '';
-    /**
-     * The spec URL is often added by the validator to provide additional
-     * context for the error. In a user interface this would be shown
-     * as a "Learn more" link.
-     * @type {!string}
-     */
-    this.specUrl = null;
-    /**
-     * Categorizes error messages into higher-level groups. This makes it
-     * easier to create error statistics across a site and give advice based
-     * on the most common problems for a set of pages.
-     * See the ErrorCategory.Code enum in validator.proto for possible values.
-     * @type {!string}
-     */
-    this.category = 'UNKNOWN';
-    /**
-     * This field is only useful when scripting against the validator,
-     * it should not be displayed in a user interface as it adds nothing
-     * for humans to read over the message field (see above).
-     * Possible values are the codes listed in ValidationError.Code - see
-     * validator.proto. Examples: 'UNKNOWN_CODE', 'MANDATORY_TAG_MISSING',
-     * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
-     * format string in validator-main.protoascii (look for error_formats),
-     * which is used to assemble the message from the strings in params.
-     * @type {!string}
-     */
-    this.code = 'UNKNOWN_CODE';
-    /**
-     * This field is only useful when scripting against the validator,
-     * it should not be displayed in a user interface as it adds nothing
-     * for humans to read over the message field (see above).
-     * @type {!Array<!string>}
-     */
-    this.params = [];
+  /**
+   * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
+   * 'ERROR', and 'WARNING'.
+   */
+  this.severity = 'UNKNOWN_SEVERITY';
+  /**
+   * The line number at which the error was seen (1 is the first line).
+   */
+  this.line = 1;
+  /**
+   * The column number at which the error was seen (0 is the first column).
+   */
+  this.col = 0;
+  /**
+   * A human-readable error message for the validation error.
+   * If you find yourself trying to write a parser against this string
+   * to scrape out some detail, consider looking at the code and params
+   * fields below.
+   * @type {!string}
+   */
+  this.message = '';
+  /**
+   * The spec URL is often added by the validator to provide additional
+   * context for the error. In a user interface this would be shown
+   * as a "Learn more" link.
+   * @type {!string}
+   */
+  this.specUrl = null;
+  /**
+   * Categorizes error messages into higher-level groups. This makes it
+   * easier to create error statistics across a site and give advice based
+   * on the most common problems for a set of pages.
+   * See the ErrorCategory.Code enum in validator.proto for possible values.
+   * @type {!string}
+   */
+  this.category = 'UNKNOWN';
+  /**
+   * This field is only useful when scripting against the validator,
+   * it should not be displayed in a user interface as it adds nothing
+   * for humans to read over the message field (see above).
+   * Possible values are the codes listed in ValidationError.Code - see
+   * validator.proto. Examples: 'UNKNOWN_CODE', 'MANDATORY_TAG_MISSING',
+   * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
+   * format string in validator-main.protoascii (look for error_formats),
+   * which is used to assemble the message from the strings in params.
+   * @type {!string}
+   */
+  this.code = 'UNKNOWN_CODE';
+  /**
+   * This field is only useful when scripting against the validator,
+   * it should not be displayed in a user interface as it adds nothing
+   * for humans to read over the message field (see above).
+   * @type {!Array<!string>}
+   */
+  this.params = [];
 }
 
 /**
@@ -220,22 +220,22 @@ function ValidationError() {
  * @constructor
  */
 function Validator(scriptContents) {
-    // The 'sandbox' is a Javascript object (dictionary) which holds
-    // the results of evaluating the validatorJs / scriptContents, so
-    // basically, it holds functions, prototypes, etc. As a
-    // side-effect of evaluating, the VM will compile this code and
-    // it's worth holding onto it. Hence, this validate function is
-    // reached via 2 codepaths - either the sandbox came from the
-    // cache, precompiledByValidatorJs - or we just varructed it
-    // after downloading and evaluating the script. The API is fancier
-    // here, vm.Script / vm.createContext / vm.runInContext and all
-    // that, but it's quite similar to a Javascript eval.
-    this.sandbox = vm.createContext();
-    try {
-      new vm.Script(scriptContents).runInContext(this.sandbox);
-    } catch (error) {
-      throw new Error('Could not instantiate validator.js - ' + error.message);
-    }
+  // The 'sandbox' is a Javascript object (dictionary) which holds
+  // the results of evaluating the validatorJs / scriptContents, so
+  // basically, it holds functions, prototypes, etc. As a
+  // side-effect of evaluating, the VM will compile this code and
+  // it's worth holding onto it. Hence, this validate function is
+  // reached via 2 codepaths - either the sandbox came from the
+  // cache, precompiledByValidatorJs - or we just varructed it
+  // after downloading and evaluating the script. The API is fancier
+  // here, vm.Script / vm.createContext / vm.runInContext and all
+  // that, but it's quite similar to a Javascript eval.
+  this.sandbox = vm.createContext();
+  try {
+    new vm.Script(scriptContents).runInContext(this.sandbox);
+  } catch (error) {
+    throw new Error('Could not instantiate validator.js - ' + error.message);
+  }
 }
 
 /**
@@ -243,25 +243,26 @@ function Validator(scriptContents) {
  * @returns {!ValidationResult}
  * @export
  */
-Validator.prototype.validateString = function(inputString) {
-    var internalResult = this.sandbox.amp.validator.validateString(inputString);
-    var result = new ValidationResult();
-    result.status = internalResult.status;
-    for (var ii = 0; ii < internalResult.errors.length; ii++) {
-      var internalError = internalResult.errors[ii];
-      var error = new ValidationError();
-      error.severity = internalError.severity;
-      error.line = internalError.line;
-      error.col = internalError.col;
-      error.message =
-          this.sandbox.amp.validator.renderErrorMessage(internalError);
-      error.specUrl = internalError.specUrl;
-      error.code = internalError.code;
-      error.params = internalError.params;
-      error.category = this.sandbox.amp.validator.categorizeError(internalError);
-      result.errors.push(error);
-    }
-    return result;
+Validator.prototype.validateString =
+    function(inputString) {
+  var internalResult = this.sandbox.amp.validator.validateString(inputString);
+  var result = new ValidationResult();
+  result.status = internalResult.status;
+  for (var ii = 0; ii < internalResult.errors.length; ii++) {
+    var internalError = internalResult.errors[ii];
+    var error = new ValidationError();
+    error.severity = internalError.severity;
+    error.line = internalError.line;
+    error.col = internalError.col;
+    error.message =
+        this.sandbox.amp.validator.renderErrorMessage(internalError);
+    error.specUrl = internalError.specUrl;
+    error.code = internalError.code;
+    error.params = internalError.params;
+    error.category = this.sandbox.amp.validator.categorizeError(internalError);
+    result.errors.push(error);
+  }
+  return result;
 }
 
 /**
