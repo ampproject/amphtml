@@ -268,8 +268,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
   } catch (e) {
-    lightweightErrorReport(e);
-    throw e;
+    if (!window.context.mode.test) {
+      lightweightErrorReport(e);
+      throw e;
+    }
   }
 };
 
