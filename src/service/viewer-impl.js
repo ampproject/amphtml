@@ -407,6 +407,43 @@ export class Viewer {
   }
 
   /**
+   * Viewers can communicate their "capabilities" and this method allows
+   * checking them.
+   * @param {string} name Of the capability.
+   * @return {boolean}
+   */
+  hasCapability(name) {
+    const capabilities = this.params_['cap'];
+    if (!capabilities) {
+      return false;
+    }
+    // TODO(@cramforce): Consider caching the split.
+    return capabilities.split(',').indexOf(name) != -1;
+  }
+
+  /**
+   * Requests A2A navigation to the given destination. If the viewer does
+   * not support this operation, will navigate the top level window
+   * to the destination.
+   * The URL is assumed to be in AMP Cache format already.
+   * @param {string} url An AMP article URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   */
+  navigateTo(url, requestedBy) {
+    dev.assert(url.indexOf('https://cdn.ampproject.org/') == 0,
+        'Invalid A2A URL %s %s', url, requestedBy);
+    if (this.hasCapability('a2a')) {
+      this.sendMessage('a2a', {
+        url,
+        requestedBy,
+      }, /* awaitResponse */ false);
+    } else {
+      this.win.top.location.href = url;
+    }
+  }
+
+  /**
    * Whether the document is embedded in a iframe.
    * @return {boolean}
    */

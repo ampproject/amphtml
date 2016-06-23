@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-require('./babel-helpers');
-require('./changelog');
-require('./clean');
-require('./compile');
-require('./compile-access-expr');
-require('./csvify-size');
-require('./dep-check');
-require('./get-zindex');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./serve');
-require('./size');
-require('./runtime-test');
-require('./validator');
+import {getService} from './service';
+
+/**
+ * Returns the global instance of the `AmpDocService` service that can be
+ * used to resolve an ampdoc for any node: either in the single-doc or
+ * shadow-doc environment.
+ * @param {!Window} window
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+export function ampdocFor(window) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(window, 'ampdoc'));
+}

@@ -69,3 +69,16 @@ export function isObject(value) {
 export function isFormData(value) {
   return toString(value) === '[object FormData]';
 }
+
+/**
+ * Determines if value is actually a `ShadowRoot` node.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isShadowRoot(value) {
+  // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
+  // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  return (!!value &&
+      value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
+      toString(value) === '[object ShadowRoot]');
+}

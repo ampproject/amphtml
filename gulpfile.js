@@ -65,7 +65,7 @@ function buildExtensions(options) {
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
-  buildExtension('amp-form', '0.1', false, options);
+  buildExtension('amp-form', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
@@ -120,6 +120,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     watch: watch,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
   });
   // The main binary does not yet compile successfully with type checking
   // turned on. Skip for now.
@@ -355,8 +356,9 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
-  buildExample('live-list.amp.html');
+  buildExample('live-blog.amp.html');
   buildExample('live-list-update.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');

@@ -189,6 +189,9 @@ class AmpViewer {
     this.scripts_ = [];
     /** @private @const {...} */
     this.viewer_ = null;
+
+    // Immediately install amp-shadow.js.
+    this.installScript_('/dist/amp-shadow.js');
   }
 
   /**
@@ -315,20 +318,32 @@ class AmpViewer {
       const exists = doc.querySelector('script' + existsExpr);
       if (exists) {
         log('- script already exists: ', customElement, customTemplate, src);
+      } else if (src.indexOf('/amp.js') != -1) {
+        // Do not install runtime again. Already installed via amp-shadow.js.
+        log('- runtime already installed: ', src);
       } else {
-        const el = doc.createElement('script');
-        el.setAttribute('async', '');
-        el.setAttribute('src', src);
-        if (customElement) {
-          el.setAttribute('custom-element', customElement);
-        }
-        if (customTemplate) {
-          el.setAttribute('custom-template', customTemplate);
-        }
-        doc.head.appendChild(el);
-        log('- script added: ', src, el);
+        this.installScript_(src, customElement, customTemplate);
       }
     });
+  }
+
+  /**
+   * @param {string} src
+   * @param {string=} customElement
+   * @param {string=} customTemplate
+   */
+  installScript_(src, customElement, customTemplate) {
+    const doc = this.win.document;
+    const el = doc.createElement('script');
+    el.setAttribute('src', src);
+    if (customElement) {
+      el.setAttribute('custom-element', customElement);
+    }
+    if (customTemplate) {
+      el.setAttribute('custom-template', customTemplate);
+    }
+    doc.head.appendChild(el);
+    log('- script added: ', src, el);
   }
 
   /**

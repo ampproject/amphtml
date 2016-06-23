@@ -128,6 +128,8 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   subprocess.check_call(['npm', 'install'])
+  logging.info('installing webui dependencies ...')
+  subprocess.check_call(['npm', 'install'], cwd='webui')
   logging.info('... done')
 
 
@@ -421,18 +423,27 @@ def CreateWebuiAppengineDist(out_dir):
   logging.info('entering ...')
   try:
     tempdir = tempfile.mkdtemp()
-    shutil.copytree('webui', os.path.join(tempdir, 'webui'))
-    os.symlink(os.path.abspath('node_modules/codemirror'),
-               os.path.join(tempdir, 'webui/codemirror'))
-    for d in os.listdir('node_modules/@polymer'):
-      os.symlink(os.path.abspath(os.path.join('node_modules/@polymer', d)),
-                 os.path.join(tempdir, 'webui/@polymer', d))
-    os.symlink(os.path.abspath('node_modules/webcomponents.js'),
-               os.path.join(tempdir, 'webui/webcomponents.js'))
+    # Merge the contents of webui with the installed node_modules into a
+    # common root (a temp directory). This lets us use the vulcanize tool.
+    for entry in os.listdir('webui'):
+      if entry != 'node_modules':
+        if os.path.isfile(os.path.join('webui', entry)):
+          shutil.copyfile(os.path.join('webui', entry),
+                          os.path.join(tempdir, entry))
+        else:
+          shutil.copytree(os.path.join('webui', entry),
+                          os.path.join(tempdir, entry))
+    for entry in os.listdir('webui/node_modules'):
+      if entry != '@polymer':
+        shutil.copytree(os.path.join('webui/node_modules', entry),
+                        os.path.join(tempdir, entry))
+    for entry in os.listdir('webui/node_modules/@polymer'):
+      shutil.copytree(os.path.join('webui/node_modules/@polymer', entry),
+                      os.path.join(tempdir, '@polymer', entry))
     vulcanized_index_html = subprocess.check_output([
-        'node_modules/vulcanize/bin/vulcanize',
+        'webui/node_modules/vulcanize/bin/vulcanize',
         '--inline-scripts', '--inline-css',
-        '-p', os.path.join(tempdir, 'webui'), 'index.html'])
+        '-p', tempdir, 'index.html'])
   finally:
     shutil.rmtree(tempdir)
   webui_out = os.path.join(out_dir, 'webui_appengine')

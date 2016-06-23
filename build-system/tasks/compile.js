@@ -139,6 +139,7 @@ function compile(entryModuleFilename, outputDir,
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!**/*.extern.js',
     ];
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -166,6 +167,14 @@ function compile(entryModuleFilename, outputDir,
       }
     });
 
+    var externs = [
+      'build-system/amp.extern.js',
+      'third_party/closure-compiler/externs/intersection_observer.js',
+    ];
+    if (options.externs) {
+      externs = externs.concat(options.externs);
+    }
+
     /*eslint "google-camelcase/google-camelcase": 0*/
     var compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
@@ -181,10 +190,7 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        externs: [
-          'build-system/amp.extern.js',
-          'third_party/closure-compiler/externs/intersection_observer.js',
-        ],
+        externs: externs,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
@@ -201,7 +207,6 @@ function compile(entryModuleFilename, outputDir,
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
         hide_warnings_for: [
-          'ads/',  // TODO(@cramforce): Remove when we are better at typing.
           'node_modules/',
           'build/patched-module/',
         ],

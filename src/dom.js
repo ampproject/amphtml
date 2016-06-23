@@ -161,6 +161,23 @@ export function closest(element, callback) {
 
 
 /**
+ * Finds the closest node that satisfies the callback from this node
+ * up the DOM subtree.
+ * @param {!Node} node
+ * @param {function(!Node):boolean} callback
+ * @return {?Node}
+ */
+export function closestNode(node, callback) {
+  for (let n = node; n; n = n.parentNode) {
+    if (callback(n)) {
+      return n;
+    }
+  }
+  return null;
+}
+
+
+/**
  * Finds the closest element with the specified name from this element
  * up the DOM subtree.
  * @param {!Element} element

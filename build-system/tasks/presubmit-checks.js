@@ -244,7 +244,7 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
-  'isTrusted': {
+  'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
@@ -309,6 +309,7 @@ var forbiddenTerms = {
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/tasks/csvify-size/index.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],

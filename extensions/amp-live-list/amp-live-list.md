@@ -42,6 +42,10 @@ limitations under the License.
     <td>
       <ul>
         <li>
+          <a
+          href="https://github.com/ampproject/amphtml/blob/master/examples/live-blog.amp.html">live-blog.amp.html</a>
+        </li>
+        <li>
           <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list.amp.html">live-list.amp.html</a>
         </li>
         <li>

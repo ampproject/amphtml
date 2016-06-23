@@ -14,7 +14,8 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "test": "gulp test",
+    "test": "gulp test && ava",
+    "node-test": "ava",
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
@@ -30,6 +31,7 @@
     "babel-core": "5.8.35",
     "babel-eslint": "4.1.8",
     "babelify": "6.4.0",
+    "baconipsum": "0.1.2",
     "bluebird": "3.0.5",
     "body-parser": "1.14.2",
     "brotli-size": "0.0.1",
@@ -96,5 +98,13 @@
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
     "watchify": "3.7.0"
+  },
+  "ava": {
+    "files": [
+      "build-system/tasks/**/{test,test-*}.js"
+    ],
+    "concurrency": 5,
+    "tap": true,
+    "failFast": true
   }
 }
