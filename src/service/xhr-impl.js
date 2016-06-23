@@ -366,8 +366,9 @@ export function assertSuccess(response) {
       } else {
         reject(err);
       }
+    } else {
+      resolve(response);
     }
-    resolve(response);
   });
 }
 

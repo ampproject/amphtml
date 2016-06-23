@@ -268,15 +268,13 @@ describe('XHR', function() {
               });
         });
 
-        it('should not return a resolved indented promise', () => {
+        it('should not resolve after rejecting promise', () => {
           mockXhr.status = 500;
           mockXhr.responseText = '{"a": "hello"}';
           mockXhr.headers['Content-Type'] = 'application/json';
           mockXhr.getResponseHeader = () => 'application/json';
-          const promise = assertSuccess(
-              createResponseInstance('{"a": 2}', mockXhr));
-          promise.should.be.rejected;
-          return promise;
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .should.not.be.fulfilled;
         });
       });
 
