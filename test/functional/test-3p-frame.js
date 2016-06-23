@@ -227,10 +227,8 @@ describe('3p-frame', () => {
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(fetches[0].getAttribute('as')).to.equal('document');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-    expect(fetches[1].getAttribute('as')).to.equal('script');
     preconnect.preloadSupported_ = origPreloadSupportValue;
   });
 

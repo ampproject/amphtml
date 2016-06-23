@@ -229,9 +229,7 @@ describe('preconnect', () => {
           'link[rel=prefetch],link[rel=preload]');
       expect(fetches).to.have.length(2);
       expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
-      expect(fetches[0].getAttribute('as')).to.equal('script');
       expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
-      expect(fetches[1].getAttribute('as')).to.equal('style');
     });
   });
 
@@ -261,9 +259,7 @@ describe('preconnect', () => {
           'link[rel=prefetch]');
       expect(fetches).to.have.length(2);
       expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
-      expect(fetches[0].getAttribute('as')).to.equal('script');
       expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
-      expect(fetches[1].getAttribute('as')).to.equal('style');
     });
   });
 
@@ -291,9 +287,7 @@ describe('preconnect', () => {
           'link[rel=preload]');
       expect(preloads).to.have.length(2);
       expect(preloads[0].href).to.equal('https://a.prefetch.com/foo/bar');
-      expect(preloads[0].getAttribute('as')).to.equal('script');
       expect(preloads[1].href).to.equal('https://a.prefetch.com/other');
-      expect(preloads[1].getAttribute('as')).to.equal('style');
     });
   });
 });
