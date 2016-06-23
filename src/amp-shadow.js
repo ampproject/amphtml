@@ -21,8 +21,12 @@
 
 import './polyfills';
 
+import {installDocService} from './service/ampdoc-impl';
 import {installTemplatesService} from './service/template-impl';
 
+
+// Declare that this runtime will support multiple shadow-root docs.
+installDocService(window, /* isSingleDoc */ false);
 
 // Register runtime-level services.
 installTemplatesService(window);

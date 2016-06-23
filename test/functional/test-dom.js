@@ -70,6 +70,7 @@ describe('DOM', () => {
     element.appendChild(child);
 
     expect(dom.closest(child, () => true)).to.equal(child);
+    expect(dom.closestNode(child, () => true)).to.equal(child);
     expect(dom.closestByTag(child, 'div')).to.equal(child);
     expect(dom.closestByTag(child, 'DIV')).to.equal(child);
   });
@@ -84,13 +85,31 @@ describe('DOM', () => {
     element.appendChild(child);
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
+    expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestByTag(child, 'child')).to.equal(child);
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
+    expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
+        .to.equal(element);
     expect(dom.closestByTag(child, 'element')).to.equal(element);
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
+    expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestByTag(child, 'parent')).to.equal(parent);
+  });
+
+  it('closestNode should find nodes as well as elements', () => {
+    const fragment = document.createDocumentFragment();
+
+    const element = document.createElement('div');
+    fragment.appendChild(element);
+
+    const text = document.createTextNode('abc');
+    element.appendChild(text);
+
+    expect(dom.closestNode(text, () => true)).to.equal(text);
+    expect(dom.closestNode(text, n => n.nodeType == 1)).to.equal(element);
+    expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
   it('closest should find first match', () => {
