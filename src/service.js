@@ -16,7 +16,6 @@
 
 // Requires polyfills in immediate side effect.
 import './polyfills';
-import {ampdocFor} from './ampdoc';
 import {dev} from './log';
 
 /**
@@ -89,7 +88,7 @@ export function getServicePromiseOrNull(win, id) {
  */
 export function getServiceForDoc(node, id, opt_factory) {
   const win = node.ownerDocument.defaultView;
-  const ampdocService = ampdocFor(win);
+  const ampdocService = getAmpdocService(win);
   const ampdoc = ampdocService.getAmpDoc(node);
   return getServiceInternal(
       ampdocService.isSingleDoc() ? win : ampdoc,
@@ -107,7 +106,7 @@ export function getServiceForDoc(node, id, opt_factory) {
  */
 export function getServicePromiseForDoc(node, id) {
   const win = node.ownerDocument.defaultView;
-  const ampdocService = ampdocFor(win);
+  const ampdocService = getAmpdocService(win);
   return getServicePromiseInternal(
       ampdocService.isSingleDoc() ? win : ampdocService.getAmpDoc(node),
       id);
@@ -122,10 +121,21 @@ export function getServicePromiseForDoc(node, id) {
  */
 export function getServicePromiseOrNullForDoc(node, id) {
   const win = node.ownerDocument.defaultView;
-  const ampdocService = ampdocFor(win);
+  const ampdocService = getAmpdocService(win);
   return getServicePromiseOrNullInternal(
       ampdocService.isSingleDoc() ? win : ampdocService.getAmpDoc(node),
       id);
+}
+
+/**
+ * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
+ * circular dependencies.
+ * @param {!Window} win
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+function getAmpdocService(win) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(win, 'ampdoc'));
 }
 
 /**
