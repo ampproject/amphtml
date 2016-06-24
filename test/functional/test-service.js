@@ -100,8 +100,8 @@ describe('service', () => {
   describe('ampdoc singletons', () => {
 
     let windowApi;
-    let ampdocServiceMock;
     let ampdoc;
+    let ampdocMock;
     let node;
     let count;
     let factory;
@@ -111,15 +111,15 @@ describe('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
-      ampdoc = {};
-      const ampdocServiceApi = {
+      ampdoc = {
         isSingleDoc: () => false,
-        getAmpDoc: () => ampdoc,
+        getWin: () => windowApi,
       };
-      ampdocServiceMock = sandbox.mock(ampdocServiceApi);
+      ampdocMock = sandbox.mock(ampdoc);
+      const ampdocServiceApi = {getAmpDoc: () => ampdoc};
       windowApi = {};
       getService(windowApi, 'ampdoc', () => ampdocServiceApi);
-      node = {ownerDocument: {defaultView: windowApi}};
+      node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
       resetServiceForTesting(windowApi, 'a');
       resetServiceForTesting(windowApi, 'b');
       resetServiceForTesting(windowApi, 'c');
@@ -127,7 +127,7 @@ describe('service', () => {
     });
 
     it('should make per ampdoc singletons and store them in window', () => {
-      ampdocServiceMock.expects('isSingleDoc').returns(true).atLeast(1);
+      ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
 
       const a1 = getServiceForDoc(node, 'a', factory);
       const a2 = getServiceForDoc(node, 'a', factory);
@@ -148,8 +148,21 @@ describe('service', () => {
       expect(ampdoc.services).to.not.exist;
     });
 
+    it('should make per ampdoc singletons via ampdoc', () => {
+      ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
+
+      const a1 = getServiceForDoc(ampdoc, 'a', factory);
+      const a2 = getServiceForDoc(ampdoc, 'a', factory);
+      expect(a1).to.equal(a2);
+      expect(a1).to.equal(1);
+      expect(factory.callCount).to.equal(1);
+      expect(factory.args[0][0]).to.equal(ampdoc);
+      expect(windowApi.services['a']).to.exist;
+      expect(ampdoc.services).to.not.exist;
+    });
+
     it('should make per ampdoc singletons and store them in ampdoc', () => {
-      ampdocServiceMock.expects('isSingleDoc').returns(false).atLeast(1);
+      ampdocMock.expects('isSingleDoc').returns(false).atLeast(1);
 
       const a1 = getServiceForDoc(node, 'a', factory);
       const a2 = getServiceForDoc(node, 'a', factory);
