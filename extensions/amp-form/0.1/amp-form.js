@@ -27,6 +27,7 @@ import {removeElement, childElementByAttr} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
+import {vsyncFor} from '../../../src/vsync';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -38,7 +39,7 @@ const FormState_ = {
   SUBMIT_SUCCESS: 'submit-success',
 };
 
-/** @type {?./validation-bubble.ValidationBubble} */
+/** @type {?./validation-bubble.ValidationBubble|undefined} */
 let validationBubble;
 
 export class AmpForm {
@@ -53,6 +54,9 @@ export class AmpForm {
 
     /** @const @private {!Element} */
     this.form_ = element;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win_);
 
     /** @const @private {!Templates} */
     this.templates_ = templatesFor(this.win_);
@@ -104,10 +108,10 @@ export class AmpForm {
     }
 
     const shouldValidate = !this.form_.hasAttribute('novalidate');
-    const isInvalid = this.form_.checkValidity && !this.form_.checkValidity();
-    if (shouldValidate && isInvalid) {
+    if (shouldValidate &&
+        this.form_.checkValidity && !this.form_.checkValidity()) {
       e.preventDefault();
-      reportFormValidity(this.form_);
+      this.vsync_.run({mutate: reportValidity}, {form: this.form_});
       return;
     }
 
@@ -184,6 +188,10 @@ export class AmpForm {
 }
 
 
+function reportValidity(state) {
+  reportFormValidity(state.form);
+}
+
 /**
  * Reports validity for the first invalid input - if any.
  * @param {!HTMLFormElement} form
@@ -193,7 +201,8 @@ function reportFormValidity(form) {
   const inputs = toArray(form.querySelectorAll('input,select,textarea'));
   for (let i = 0; i < inputs.length; i++) {
     if (!inputs[i].checkValidity()) {
-      return reportInputValidity(inputs[i]);
+      reportInputValidity(inputs[i]);
+      break;
     }
   }
 }
@@ -230,7 +239,7 @@ function onInvalidInputBlur_(event) {
  * @private
  */
 function reportInputValidity(input) {
-  input./*REVIEW*/focus();
+  input./*OK*/focus();
 
   // Remove any previous listeners on the same input. This avoids adding many
   // listeners on the same element when the user submit pressing Enter or any

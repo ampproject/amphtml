@@ -16,30 +16,30 @@
 
 form.amp-form-submit-success [submit-success],
 form.amp-form-submit-error [submit-error] {
-    display: block;
+  display: block;
 }
 
 
 .-amp-validation-bubble {
-    background-color: white;
-    box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
-    max-width: 200px;
-    position: absolute;
-    top: -999px;
-    left: -999px;
-    box-sizing: border-box;
-    padding: 10px;
-    border-radius: 5px;
+  transform: translate(-50%, -100%);
+  background-color: white;
+  box-shadow: 0 5px 15px 0 rgba(0, 0, 0, .5);
+  max-width: 200px;
+  position: absolute;
+  display: none;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .-amp-validation-bubble:after {
-    content: ' ';
-    position: absolute;
-    bottom: -8px;
-    left: 30px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #fff;
+  content: ' ';
+  position: absolute;
+  bottom: -8px;
+  left: 30px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #fff;
 }

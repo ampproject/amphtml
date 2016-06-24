@@ -18,8 +18,6 @@ import {vsyncFor} from '../../../src/vsync';
 import {viewportFor} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
 
-const EDGE = '-99999px';
-
 export class ValidationBubble {
 
   /**
@@ -44,11 +42,10 @@ export class ValidationBubble {
    * Hides the bubble off screen.
    */
   hide() {
-    this.vsync_.mutate(() => {
-      setStyles(this.bubbleElement_, {
-        top: EDGE,
-        left: EDGE,
-      });
+    this.vsync_.run({
+      mutate: hideBubble,
+    }, {
+      bubbleElement: this.bubbleElement_,
     });
   }
 
@@ -58,49 +55,52 @@ export class ValidationBubble {
    * @param {string} message
    */
   show(targetElement, message) {
-    this.bubbleElement_.textContent = message;
-
-    let targetRect;
-    let bubbleRect;
+    const state = {
+      message,
+      targetElement,
+      bubbleElement: this.bubbleElement_,
+      viewport: this.viewport_,
+    };
     this.vsync_.run({
-      measure: () => {
-        targetRect = this.viewport_.getLayoutRect(targetElement);
-        bubbleRect = this.viewport_.getLayoutRect(this.bubbleElement_);
-      },
-      mutate: () => {
-        setStyles(this.bubbleElement_, {
-          top: `${this.computeTop_(bubbleRect, targetRect)}px`,
-          left: `${this.computeLeft_(bubbleRect, targetRect)}px`,
-        });
-      },
-    });
+      measure: measureTargetElement,
+      mutate: showBubbleElement,
+    }, state);
   }
+}
 
-  /**
-   * Computes the left position of the bubble.
-   * @param {!../../../src/layout-rect.LayoutRectDef} bubbleRect
-   * @param {!../../../src/layout-rect.LayoutRectDef} targetRect
-   * @return {number}
-   * @private
-   */
-  computeLeft_(bubbleRect, targetRect) {
-    return (targetRect.left -
-        // Center the bubble relative to the target element.
-        (bubbleRect.width - targetRect.width) / 2);
-  }
 
-  /**
-   * Computes the left position of the bubble.
-   * @param {!../../../src/layout-rect.LayoutRectDef} bubbleRect
-   * @param {!../../../src/layout-rect.LayoutRectDef} targetRect
-   * @return {number}
-   * @private
-   */
-  computeTop_(bubbleRect, targetRect) {
-    return (targetRect.top -
-        // Move the bubble the height of the bubble box.
-        bubbleRect.height -
-        // Account for the bubble caret and some margin from the input field.
-        10);
-  }
+/**
+ * Hides the bubble element passed through state object.
+ * @param {!Object} state
+ * @private
+ */
+function hideBubble(state) {
+  setStyles(state.bubbleElement, {
+    display: 'none',
+  });
+}
+
+
+/**
+ * Measures the layout for the target element passed through state object.
+ * @param {!Object} state
+ * @private
+ */
+function measureTargetElement(state) {
+  state.targetRect = state.viewport.getLayoutRect(state.targetElement);
+}
+
+
+/**
+ * Updates text content, positions and displays the bubble.
+ * @param {!Object} state
+ * @private
+ */
+function showBubbleElement(state) {
+  state.bubbleElement.textContent = state.message;
+  setStyles(state.bubbleElement, {
+    display: 'initial',
+    top: `${state.targetRect.top - 10}px`,
+    left: `${state.targetRect.left + state.targetRect.width / 2}px`,
+  });
 }
