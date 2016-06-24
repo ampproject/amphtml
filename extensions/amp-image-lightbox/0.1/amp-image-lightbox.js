@@ -460,7 +460,7 @@ export class ImageViewer {
     }
 
     // Continue motion.
-    this.motion_ = continueMotion(this.lightbox_,
+    this.motion_ = continueMotion(this.image_,
         this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
           const newPosX = this.boundX_(x, true);
@@ -545,7 +545,7 @@ export class ImageViewer {
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
     } else {
-      promise = continueMotion(this.lightbox_,
+      promise = continueMotion(this.image_,
           deltaX, deltaY, veloX, veloY,
           (x, y) => {
             this.onZoomInc_(centerClientX, centerClientY, x, y);
@@ -591,7 +591,7 @@ export class ImageViewer {
       const scaleFunc = tr.numeric(this.scale_, newScale);
       const xFunc = tr.numeric(this.posX_, newPosX);
       const yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate(this.lightbox_, time => {
+      promise = Animation.animate(this.image_, time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
         this.posY_ = yFunc(time);
