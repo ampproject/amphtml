@@ -375,6 +375,21 @@ export function childElementByTag(parent, tagName) {
 
 
 /**
+ * A wrapper around native querySelectorAll to use :scope when possible.
+ * @param {!Element} parent
+ * @param {string} selector
+ * @returns {!Array.<!Element>}
+ */
+export function querySelectorAll(parent, selector) {
+  if (scopeSelectorSupported) {
+    const scopedSelectors = selector.split(',').map(sel => `:scope ${sel}`);
+    return toArray(parent.querySelectorAll(scopedSelectors.join(',')));
+  }
+  return toArray(parent.querySelectorAll(selector));
+}
+
+
+/**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
