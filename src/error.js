@@ -107,8 +107,7 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (this && this.document) {
     makeBodyVisible(this.document);
   }
-  const mode = getMode();
-  if (mode.localDev || mode.development || mode.test) {
+  if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
   const url = getErrorReportUrl(message, filename, line, col, error);

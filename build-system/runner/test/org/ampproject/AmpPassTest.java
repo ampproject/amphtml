@@ -17,7 +17,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
       "dev.fine");
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, suffixTypes);
+    return new AmpPass(compiler, true, suffixTypes);
   }
 
   @Override protected int getNumRepetitions() {
@@ -130,19 +130,61 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testGetModeLocalDevReplacement() throws Exception {
+  public void testGetModeLocalDevPropertyReplacement() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
-             "function getMode$$module$src$mode() { return { localDev: true } }",
-             "  if (getMode$$module$src$mode().localDev) {",
+             "function getMode() { return { localDev: true } }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode().localDev) {",
              "    console.log('hello world');",
              "  }",
             "})()"),
         LINE_JOINER.join(
              "(function() {",
-             "function getMode$$module$src$mode() { return { localDev: true } }",
+             "function getMode() { return { localDev: true }; }",
+             "var $mode = { getMode: getMode };",
              "  if (false) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
+  public void testGetModeTestPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true } }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode().test) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true }; }",
+             "var $mode = { getMode: getMode };",
+             "  if (false) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
+  public void testGetModeMinifiedPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false } }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode().minified) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false }; }",
+             "var $mode = { getMode: getMode };",
+             "  if (true) {",
              "    console.log('hello world');",
              "  }",
             "})()"));

@@ -43,10 +43,12 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
   private final Set<String> stripTypeSuffixes;
+  final boolean isProd;
 
-  public AmpPass(AbstractCompiler compiler, Set<String> stripTypeSuffixes) {
+  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
+    this.isProd = isProd;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -58,15 +60,33 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
+    // Remove `dev.assert` calls and preserve first argument if any.
     if (isNameStripType(n, ImmutableSet.of( "dev.assert"))) {
       maybeEliminateCallExceptFirstParam(n, parent);
+    // Remove any `stripTypes` passed in outright like `dev.warn`.
     } else if (isNameStripType(n, stripTypeSuffixes)) {
       removeExpression(n, parent);
-    } else if (isFunctionInvokeAndPropAccess(n, "getMode", ImmutableSet.of("localDev", "test"))) {
-      replaceWithFalseExpression(n, parent);
+    // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
+    } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
+        ImmutableSet.of("localDev", "test"))) {
+      replaceWithBooleanExpression(false, n, parent);
+    // Remove any `getMode().minified` calls and replace it with `true`.
+    } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
+        ImmutableSet.of("minified"))) {
+      replaceWithBooleanExpression(true, n, parent);
     }
   }
-  
+
+  /**
+   * Predicate for any <code>fnQualifiedName</code>.<code>props</code> call.
+   * example:
+   *   isFunctionInvokeAndPropAccess(n, "getMode", "test"); // matches `getMode().test`
+   *
+   * @param n
+   * @param fnQualifiedName
+   * @param props
+   * @return
+   */
   private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
     // mode.getMode().localDev
     // mode [property] ->
@@ -91,6 +111,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
          String name = maybeProp.getString();
          for (String prop : props) {
            if (prop == name) {
+             System.out.println(qualifiedName);
              return true;
            }
          }
@@ -99,11 +120,11 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
     return false;
   }
-  
-  private void replaceWithFalseExpression(Node n, Node parent) {
-    Node falseNode = IR.falseNode();
-    falseNode.useSourceInfoIfMissingFrom(n);
-    parent.replaceChild(n, falseNode);
+
+  private void replaceWithBooleanExpression(boolean bool, Node n, Node parent) {
+    Node booleanNode = bool ? IR.trueNode() : IR.falseNode();
+    booleanNode.useSourceInfoIfMissingFrom(n);
+    parent.replaceChild(n, booleanNode);
     compiler.reportCodeChange();
   }
 
@@ -133,7 +154,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     }
     compiler.reportCodeChange();
   }
-  
+
   private void maybeEliminateCallExceptFirstParam(Node n, Node p) {
     Node call = n.getFirstChild();
     if (call == null) {

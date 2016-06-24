@@ -206,6 +206,7 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        define: [],
         hide_warnings_for: [
           'node_modules/',
           'build/patched-module/',
@@ -217,8 +218,16 @@ function compile(entryModuleFilename, outputDir,
     if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
-      compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
+      compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+    }
+
+    if (argv.fortesting) {
+      compilerOptions.compilerFlags.define.push('FORTESTING=true');
+    }
+
+    if (compilerOptions.compilerFlags.define.length == 0) {
+      delete compilerOptions.compilerFlags.define;
     }
 
     var stream = gulp.src(srcs)

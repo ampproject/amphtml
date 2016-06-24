@@ -35,6 +35,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    * Identifies if the runner only needs to do type checking.
    */
   private boolean typecheck_only = false;
+  
+  private boolean production_env = true;
 
   /**
    * List of string suffixes to eliminate from the AST.
@@ -52,7 +54,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
-    AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
+    AmpPass ampPass = new AmpPass(getCompiler(), production_env, suffixTypes);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
@@ -91,15 +93,22 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   protected void setTypeCheckOnly(boolean value) {
     typecheck_only = value;
   }
+  
+  protected void setProductionFlag(boolean value) {
+    production_env = value;
+  }
 
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
 
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
-      if (arg.contains("TYPECHECK_ONLY=true")) {
+      System.out.println(arg);
+      if (arg.contains("--define=TYPECHECK_ONLY=true")) {
         runner.setTypeCheckOnly(true);
-        break;
+      }
+      if (arg.contains("--define=FORTESTING=true")) {
+        runner.setProductionFlag(false);
       }
     }
 
