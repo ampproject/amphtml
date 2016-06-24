@@ -25,8 +25,8 @@ describe('allocateVariant', () => {
       Math: {
         random: () => {
           return 0.567;
-        }
-      }
+        },
+      },
     };
   });
 
@@ -46,8 +46,8 @@ describe('allocateVariant', () => {
     expect(() => {
       allocateVariant(fakeWin, {
         variants: {
-          'invalid_char_%_in_name': 1
-        }
+          'invalid_char_%_in_name': 1,
+        },
       });
     }).to.throw(/Invalid variant name/);
 
@@ -55,24 +55,24 @@ describe('allocateVariant', () => {
       allocateVariant(fakeWin, {
         variants: {
           'variant_1': 50,
-          'variant_2': 51
-        }
+          'variant_2': 51,
+        },
       });
     }).to.throw(/Total percentage is bigger than 100/);
 
     expect(() => {
       allocateVariant(fakeWin, {
         variants: {
-          'negative_percentage': -1
-        }
+          'negative_percentage': -1,
+        },
       });
     }).to.throw(/Invalid percentage/);
 
     expect(() => {
       allocateVariant(fakeWin, {
         variants: {
-          'too_big_percentage': 101
-        }
+          'too_big_percentage': 101,
+        },
       });
     }).to.throw(/Invalid percentage/);
   });
@@ -82,8 +82,8 @@ describe('allocateVariant', () => {
       cidScope: null,
       variants: {
         '-Variant_1': 56.1,
-        '-Variant_2': 23.3
-      }
+        '-Variant_2': 23.3,
+      },
     })).to.eventually.equal('-Variant_2');
   });
 
@@ -93,8 +93,8 @@ describe('allocateVariant', () => {
       variants: {
         '-Variant_1': 2.1,
         '-Variant_2': 23.3,
-        '-Variant_3': 20.123
-      }
+        '-Variant_3': 20.123,
+      },
     })).to.eventually.equal(null);
   });
 });

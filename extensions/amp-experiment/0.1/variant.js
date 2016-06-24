@@ -31,12 +31,12 @@ export function allocateVariant(win, config) {
   const cidScope =
       config.cidScope === undefined ? 'amp-experiment' : config.cidScope;
 
-  return getTicketNumber(win, cidScope).then(modulo => {
+  return getBucketTicket(win, cidScope).then(bucketTicket => {
     let upperBound = 0;
     for (const variantName in config.variants) {
       if (config.variants.hasOwnProperty(variantName)) {
         upperBound += config.variants[variantName];
-        if (modulo < upperBound) {
+        if (bucketTicket < upperBound) {
           return variantName;
         }
       }
@@ -79,14 +79,14 @@ function validateConfig(config) {
 }
 
 /**
- * Returns a float number in the range of [0, 100]. The number is hashed from
- * the current CID of the given scope (opt_cidScope). If the scope is not
- * provided, a random number is used.
+ * Returns a float number (bucket ticket) in the range of [0, 100]. The number
+ * is hashed from the current CID of the given scope (opt_cidScope). If the
+ * scope is not provided, a random number is used.
  * @param {!Window} win
  * @param {?string} opt_cidScope
  * @return {Promise<!number>} a number in the range of [0, 100]
  */
-function getTicketNumber(win, opt_cidScope) {
+function getBucketTicket(win, opt_cidScope) {
   if (opt_cidScope) {
     // TODO(lannka): implement CID
     return Promise.resolve(1);
