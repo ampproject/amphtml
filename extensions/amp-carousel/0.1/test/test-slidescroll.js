@@ -294,6 +294,55 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should update to the right slide on scroll', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+      impl.vsync_ = {
+        mutatePromise: cb => {
+          cb();
+          return {
+            then: cb2 => {
+              cb2();
+            },
+          };
+        },
+        mutate: cb => {
+          cb();
+        },
+      };
+
+      impl.slideWidth_ = 400;
+
+      // Move to slide 1 (from slide 0).
+      impl.showSlide_(1);
+      expect(showSlideSpy).to.be.calledWith(1);
+      expect(impl.snappingInProgress_).to.be.false;
+
+      //Move to slide 0 - via scrolling back.
+      impl.updateOnScroll_(1);
+      expect(showSlideSpy).to.be.calledWith(0);
+      expect(impl.slideIndex_).to.equal(0);
+
+      // Try scrolling Fwd and move to slide 1.
+      impl.updateOnScroll_(401);
+      expect(showSlideSpy).to.be.calledWith(1);
+      expect(impl.slideIndex_).to.equal(1);
+
+
+      impl.updateOnScroll_(700);
+      expect(showSlideSpy).to.be.calledWith(2);
+      expect(impl.slideIndex_).to.equal(2);
+
+      impl.showSlide_(4);
+      impl.updateOnScroll_(700);
+      expect(showSlideSpy).to.be.calledWith(4);
+      expect(impl.slideIndex_).to.equal(4);
+    });
+  });
+
   describe('Looping', () => {
     beforeEach(() => {
       toggleExperiment(window, 'amp-slidescroll', true);
@@ -518,6 +567,58 @@ describe('SlideScroll', () => {
         impl.noOfSlides_ = 1;
         impl.showSlide_(0);
         expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
+      });
+    });
+
+    it('should update to the right slide on scroll', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+
+        impl.vsync_ = {
+          mutatePromise: cb => {
+            cb();
+            return {
+              then: cb2 => {
+                cb2();
+              },
+            };
+          },
+          mutate: cb => {
+            cb();
+          },
+        };
+
+        impl.slideWidth_ = 400;
+
+        // Move to slide 1 (from slide 0).
+        impl.showSlide_(1);
+        expect(showSlideSpy).to.be.calledWith(1);
+        expect(impl.snappingInProgress_).to.be.false;
+
+        //Move to slide 0 - via scrolling back.
+        impl.updateOnScroll_(1);
+        expect(showSlideSpy).to.be.calledWith(0);
+        expect(impl.slideIndex_).to.equal(0);
+
+        // Try scrolling Fwd and move a little fwd to stay in the same slide.
+        impl.updateOnScroll_(401);
+        expect(showSlideSpy).to.be.calledWith(0);
+        expect(impl.slideIndex_).to.equal(0);
+
+        impl.updateOnScroll_(700);
+        expect(showSlideSpy).to.be.calledWith(1);
+        expect(impl.slideIndex_).to.equal(1);
+
+        impl.showSlide_(4);
+        impl.updateOnScroll_(700);
+        expect(showSlideSpy).to.be.calledWith(0);
+        expect(impl.slideIndex_).to.equal(0);
+
+        impl.updateOnScroll_(1);
+        expect(showSlideSpy).to.be.calledWith(4);
+        expect(impl.slideIndex_).to.equal(4);
       });
     });
   });

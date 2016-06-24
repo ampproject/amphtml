@@ -31,6 +31,9 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+
     /** @private @const {boolean} */
     this.hasLooping_ = this.element.hasAttribute('loop');
 
@@ -113,10 +116,6 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  setupGestures() {
-  }
-
-  /** @override */
   hasPrev() {
     return this.hasLooping_ || this.slideIndex_ > 0;
   }
@@ -151,78 +150,67 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
-    if (this.snappingInProgress_) {
-      return;
-    }
     const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
-    console.log(this.element.id, ' moving from SL: '+ this.previousScrollLeft_ + ' to: '+ currentScrollLeft);
     if (currentScrollLeft != this.previousScrollLeft_ &&
         !this.hasNativeSnapPoints_) {
-      this.customScrollHandler_(event, currentScrollLeft);
+      //Handle custom scroll here.
     }
     this.scrollTimeout_ = timer.delay(() => {
-      if (this.hasNativeSnapPoints_) {
-        this.snapHandler_(event, currentScrollLeft);
+      if (this.snappingInProgress_) {
+        return;
       }
-    }, 150);
+      if (this.hasNativeSnapPoints_) {
+        this.updateOnScroll_(currentScrollLeft);
+      }
+    }, 100);
     this.previousScrollLeft_ = currentScrollLeft;
   }
 
-  /**
-   * Detects snap end and updates slides/slideIndex after snap.
-   * @param {!Event} event Event object.
-   * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @private
-   */
-  snapHandler_(event, currentScrollLeft) {
-    this.updateOnScroll_(currentScrollLeft);
-  }
 
   /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   updateOnScroll_(currentScrollLeft) {
+    this.snappingInProgress_ = true;
     // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
     // a time.
-    const scrolledSlideIndex = parseInt(currentScrollLeft / this.slideWidth_);
+    const scrolledSlideIndex = Math.round(currentScrollLeft / this.slideWidth_);
     // Update value can be -1, 0 or 1 depending upon the index of the current
     // shown slide.
     let updateValue = 0;
 
-    if (this.hasPrev() && this.hasNext()) {
+    const hasPrev_ = this.hasPrev();
+    const hasNext_ = this.hasNext();
+
+    if (hasPrev_ && hasNext_) {
       updateValue = scrolledSlideIndex - 1;
-    } else if (this.hasNext()) {
+    } else if (hasNext_) {
       // Has next and does not have a prev. (slideIndex 0)
       updateValue = scrolledSlideIndex;
-    } else if (this.hasPrev()) {
+    } else if (hasPrev_) {
       // Has prev and no next slide (last slide)
       updateValue = scrolledSlideIndex - 1;
     }
 
     let newIndex = this.slideIndex_ + updateValue;
-    newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
-        (newIndex >= this.noOfSlides_) ? 0 : newIndex;
-    this.slidesContainer_.classList.add('no-scroll');
-    this.showSlide_(newIndex);
-    timer.delay(() => {
-      this.slidesContainer_.classList.remove('no-scroll');
-      // if (this.hasLooping_ || this.slideIndex_ != 0) {
-      //   this.slidesContainer_.scrollLeft = this.slideWidth_;
-      // } else if (this.slideIndex_ == 0) {
-      //   this.slidesContainer_.scrollLeft = 0;
-      // }
-    }, 10);
-  }
 
-
-
-  /**
-   * Handles scroll on the slides container.
-   * @param {!Event} event Event object.
-   * @private
-   */
-  customScrollHandler_(event) {
+    if (this.hasLooping_) {
+      newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
+          (newIndex >= this.noOfSlides_) ? 0 : newIndex;
+    } else {
+      newIndex = (newIndex < 0) ? 0 :
+          (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
+    }
+    this.vsync_.mutatePromise(() => {
+      this.slidesContainer_.classList.add('no-scroll');
+      this.showSlide_(newIndex);
+    }).then(() => {
+      this.vsync_.mutate(() => {
+        this.slidesContainer_.classList.remove('no-scroll');
+        this.snappingInProgress_ = false;
+      });
+    });
   }
 
   /**
@@ -232,17 +220,12 @@ export class AmpSlideScroll extends BaseCarousel {
    * @private
    */
   showSlide_(newIndex) {
-    console.log(this.element.id, ' moving from: '+ this.slideIndex_ + ' to: '+ newIndex);
     const noOfSlides_ = this.noOfSlides_;
     if (newIndex < 0 ||
-        newIndex >= noOfSlides_ ||
-        this.slideIndex_ == newIndex) {
+      newIndex >= noOfSlides_ ||
+      this.slideIndex_ == newIndex) {
       return;
     }
-    if (this.snappingInProgress_) {
-      return;
-    }
-    this.snappingInProgress_ = true;
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
         (this.hasLooping_) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
@@ -279,8 +262,8 @@ export class AmpSlideScroll extends BaseCarousel {
     if (!this.hasLooping_ && newIndex == 0) {
       newScrollLeft = 0;
     }
+
     this.slidesContainer_./*OK*/scrollLeft = newScrollLeft;
-    this.snappingInProgress_ = false;
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
