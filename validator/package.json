@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "bin": {
-    "amp-validator": "index.js"
+    "amp-validator": "index.sh"
   },
   "dependencies": {
     "colors": "1.1.2",
