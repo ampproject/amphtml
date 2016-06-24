@@ -100,7 +100,7 @@ describe('allocateVariant', () => {
           // They add up to 100.00000000000001​​​ in JS
         },
       });
-    }).not.to.throw();
+    }).to.not.throw();
   });
 
   it('without CID scope, succeed with a variant allocated', () => {
