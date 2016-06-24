@@ -102,6 +102,11 @@ const EXPERIMENTS = [
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
   },
+  {
+    id: 'amp-share-tracking',
+    name: 'AMP Share Tracking',
+    spec: 'https://github.com/ampproject/amphtml/issues/3135',
+  },
 ];
 
 
