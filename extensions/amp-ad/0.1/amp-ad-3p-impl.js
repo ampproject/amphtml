@@ -16,17 +16,16 @@
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getAdCid} from '../../../src/ad-cid';
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
+import {prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor, listenForOnce,
-    postMessage} from '../../../src/iframe-helper';
+import {postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
-import {removeElement} from '../../../src/dom';
+import {AmpAdApiHandler} from './amp-ad-api-handler';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
@@ -156,8 +155,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
-    this.iframe_ = null;
+    /** @private {?AmpAdApiHandler} */
+    this.apiHandler_ = null;
 
     /** @private {?Element} */
     this.placeholder_ = this.getPlaceholder();
@@ -229,7 +228,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     this.isInFixedContainer_ = isPositionFixed(this.element, this.getWin());
-    // We remeasured this tag, lets also remeasure the iframe. Should be
+    // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
     // When the framework has the need to remeasure us, our position might
@@ -245,9 +244,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.iframe_) {
+    if (this.apiHandler_ && this.apiHandler_.getIframe()) {
       this.iframeLayoutBox_ =
-          this.getViewport().getLayoutRect(this.iframe_);
+          this.getViewport().getLayoutRect(this.apiHandler_.getIframe());
     }
   }
 
@@ -255,7 +254,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.iframe_) {
+    if (!this.apiHandler_ && !this.apiHandler_.getIframe()) {
       return super.getIntersectionElementLayoutBox();
     }
     if (!this.iframeLayoutBox_) {
@@ -266,7 +265,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.iframe_) {
+    if (!this.apiHandler_) {
       user.assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
@@ -275,105 +274,39 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         if (cid) {
           this.element.setAttribute('ampcid', cid);
         }
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element);
-        this.iframe_.setAttribute('scrolling', 'no');
-        this.applyFillContent(this.iframe_);
-        this.intersectionObserver_ =
-            new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
-        // Triggered by context.noContentAvailable() inside the ad iframe.
-        listenForOnce(this.iframe_, 'no-content', () => {
-          this.noContentHandler_();
-        }, /* opt_is3P */ true);
-        // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
-        // iframe.
-        listenForOnce(this.iframe_, 'entity-id', info => {
-          this.element.creativeId = info.id;
-        }, /* opt_is3P */ true);
-        listenFor(this.iframe_, 'embed-size', data => {
-          let newHeight, newWidth;
-          if (data.width !== undefined) {
-            newWidth = Math.max(this.element./*OK*/offsetWidth +
-                data.width - this.iframe_./*OK*/offsetWidth, data.width);
-            this.iframe_.width = data.width;
-            this.element.setAttribute('width', newWidth);
-          }
-          if (data.height !== undefined) {
-            newHeight = Math.max(this.element./*OK*/offsetHeight +
-                data.height - this.iframe_./*OK*/offsetHeight, data.height);
-            this.iframe_.height = data.height;
-            this.element.setAttribute('height', newHeight);
-          }
-          if (newHeight !== undefined || newWidth !== undefined) {
-            this.updateSize_(newHeight, newWidth);
-          }
-        }, /* opt_is3P */ true);
-        this.iframe_.style.visibility = 'hidden';
-        listenForOnce(this.iframe_, 'render-start', () => {
-          this.iframe_.style.visibility = '';
-          this.sendEmbedInfo_(this.isInViewport());
-        }, /* opt_is3P */ true);
-        this.viewer_.onVisibilityChanged(() => {
-          this.sendEmbedInfo_(this.isInViewport());
-        });
-        this.element.appendChild(this.iframe_);
-        return loadPromise(this.iframe_);
+        this.apiHandler_ = new AmpAdApiHandler(this.getWin(), this.element,
+            this);
+        return this.apiHandler_.startUp();
       });
     }
-    return loadPromise(this.iframe_);
+    return loadPromise(this.apiHandler_.getIframe());
   }
 
   /** @override  */
   unlayoutCallback() {
-    if (!this.iframe_) {
+    if (!this.apiHandler_) {
       return true;
     }
+    this.apiHandler_.shutDown();
 
-    removeElement(this.iframe_);
-    if (this.placeholder_) {
-      this.togglePlaceholder(true);
-    }
-    if (this.fallback_) {
-      this.toggleFallback(false);
-    }
+    this.attemptToggleFallback(false);
 
-    this.iframe_ = null;
+    this.apiHandler_ = null;
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
     this.intersectionObserver_ = null;
     return true;
   }
 
-  /** @override  */
-  viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
-    }
-    this.sendEmbedInfo_(inViewport);
-  }
-
-  /**
-   * @param {boolean} inViewport
-   * @private
-   */
-  sendEmbedInfo_(inViewport) {
-    if (this.iframe_) {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(this.iframe_, 'embed-state', {
-        inViewport,
-        pageHidden: !this.viewer_.isVisible(),
-      }, targetOrigin, /* opt_is3P */ true);
-    }
-  }
 
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown) {
+    if (overflown && this.apiHandler_ && this.apiHandler_.getIframe()) {
+      const src = this.apiHandler_.getSrc();
       const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+          src ? parseUrl(src).origin : '*';
       postMessage(
-          this.iframe_,
+          this.apiHandler_.getIframe(),
           'embed-size-denied',
           {requestedHeight, requestedWidth},
           targetOrigin,
@@ -381,4 +314,30 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
   }
 
+  attemptTogglePlaceholder(opt_state) {
+    if (this.placeholder_) {
+      this.togglePlaceholder(opt_state);
+    }
+  }
+
+  attemptToggleFallback(opt_state) {
+    if (this.fallback_) {
+      // Hide placeholder when falling back.
+      this.attemptTogglePlaceholder(!opt_state);
+      this.toggleFallback(opt_state);
+    }
+  }
+
+  setUpIntersectionObserver(iframe) {
+    this.intersectionObserver_ =
+        new IntersectionObserver(this, iframe, /* opt_is3P */true);
+  }
+
+  getInsersectionObserver() {
+    return this.intersectionObserver_;
+  }
+
+  getViewer() {
+    return this.viewer_;
+  }
 }

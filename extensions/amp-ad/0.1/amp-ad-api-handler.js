@@ -15,25 +15,27 @@
  */
 
 import {getIframe} from '../../../src/3p-frame';
+import {removeElement} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
 import {listenFor, listenForOnce, postMessage}
     from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
 
 export class AmpAdApiHandler {
   constructor(win, element, adImpl) {
     this.adImpl_ = adImpl;
     this.element_ = element;
-    this.iframe_ = getIframe(win, this.element_);
-    this.viewer_ = viewerFor(win);
+    this.iframe_ = null;
     this.fallback_ = this.adImpl_.getFallback();
     this.placeholder_ = this.adImpl_.getPlaceholder();
+    this.embedSizeUnlistener_ = null;
+  }
+
+  startUp() {
+    this.iframe_ = getIframe(win, this.element_);
     this.iframe_.setAttribute('scrolling', 'no');
     this.adImpl_.applyFillContent(this.iframe_);
-    this.intersectionObserver_ =
-        new IntersectionObserver(this.adImpl_, this.iframe_,
-            /* opt_is3P */true);
+    this.adImpl_.setUpIntersectionObserver(this.iframe_);
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       this.noContentHandler_();
@@ -43,7 +45,7 @@ export class AmpAdApiHandler {
     listenForOnce(this.iframe_, 'entity-id', info => {
       this.element_.creativeId = info.id;
     }, /* opt_is3P */ true);
-    listenFor(this.iframe_, 'embed-size', data => {
+    this.embedSizeUnlistener_ = listenFor(this.iframe_, 'embed-size', data => {
       let newHeight, newWidth;
       if (data.width !== undefined) {
         newWidth = Math.max(this.element_./*OK*/offsetWidth +
@@ -66,12 +68,28 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = '';
       this.sendEmbedInfo_(this.adImpl_.isInViewport());
     }, /* opt_is3P */ true);
-    this.viewer_.onVisibilityChanged(() => {
+    this.adImpl_.getViewer().onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.adImpl_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_);
-    // TODO(tdrl): Pick up here and continue the refactor.
+  }
+
+  shutDown() {
+    if (this.embedSizeUnlistener_) {
+      this.embedSizeUnlistener_();
+    }
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+    }
+  }
+
+  getIframe() {
+    return this.iframe_;
+  }
+
+  getSrc() {
+    return this.iframe_ ? this.iframe_.src : null;
   }
 
   /**
@@ -80,20 +98,14 @@ export class AmpAdApiHandler {
    * @private
    */
   noContentHandler_() {
-    // If a fallback does not exist attempt to collapse the ad.
+    // If a fallback does not exist, attempt to collapse the ad.
     if (!this.fallback_) {
       this.adImpl_.attemptChangeHeight(0, () => {
         this.element.style.display = 'none';
       });
     }
     this.deferMutate(() => {
-      if (this.fallback_) {
-        // Hide placeholder when falling back.
-        if (this.placeholder_) {
-          this.togglePlaceholder(false);
-        }
-        this.toggleFallback(true);
-      }
+      this.adImpl_.attemptToggleFallback(true);
       // Remove the iframe only if it is not the master.
       if (this.iframe_.name.indexOf('_master') == -1) {
         removeElement(this.iframe_);
@@ -120,6 +132,29 @@ export class AmpAdApiHandler {
           targetOrigin,
           /* opt_is3P */ true);
     });
+  }
+
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  sendEmbedInfo_(inViewport) {
+    if (this.iframe_) {
+      const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+      postMessage(this.iframe_, 'embed-state', {
+        inViewport,
+        pageHidden: !this.adImpl_.getViewer().isVisible(),
+      }, targetOrigin, /* opt_is3P */ true);
+    }
+  }
+
+  /** @override  */
+  viewportCallback(inViewport) {
+    if (this.adImpl_.getIntersectionObserver()) {
+      this.adImpl_.getIntersectionObserver().onViewportCallback(inViewport);
+    }
+    this.sendEmbedInfo_(inViewport);
   }
 
 }
