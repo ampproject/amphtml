@@ -35,7 +35,8 @@ export function allocateVariant(win, config) {
   return getBucketTicket(win, cidScope).then(bucketTicket => {
     let upperBound = 0;
 
-    // Loop through keys in a stable order.
+    // Loop through keys in a specific order since the default object key
+    // enumeration is implementation (browser) dependent.
     const variantNames = Object.keys(config.variants).sort();
     for (let i = 0; i < variantNames.length; i++) {
       upperBound += config.variants[variantNames[i]];

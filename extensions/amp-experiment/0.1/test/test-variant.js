@@ -44,6 +44,10 @@ describe('allocateVariant', () => {
     }).to.throw(/Missing experiment variants config/);
 
     expect(() => {
+      allocateVariant(fakeWin, {variants: {}});
+    }).to.throw(/Missing experiment variants config/);
+
+    expect(() => {
       allocateVariant(fakeWin, {
         variants: {
           'invalid_char_%_in_name': 1,
