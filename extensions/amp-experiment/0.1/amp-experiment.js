@@ -59,7 +59,7 @@ export class AmpExperiment extends AMP.BaseElement {
         children.length == 1 && children[0].tagName.toUpperCase() == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
-        'The tag should contain exactly one ' +
+        '<amp-experiment> should contain exactly one ' +
         '<script type="application/json"> child.');
 
     return JSON.parse(children[0].textContent);

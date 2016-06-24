@@ -14,9 +14,58 @@
  * limitations under the License.
  */
 
+import {createIframePromise} from '../../../../testing/iframe';
+import {AmpExperiment} from '../amp-experiment';
+
 describe('amp-experiment', () => {
 
-  it('', () => {
+  let win;
+  let experiment;
+  let configScript;
 
+  beforeEach(() => {
+    return createIframePromise().then(iframe => {
+      iframe.doc.title = 'Test Title';
+      // markElementScheduledForTesting(iframe.win, 'amp-analytics');
+      // const link = document.createElement('link');
+      // link.setAttribute('rel', 'canonical');
+      // link.setAttribute('href', './test-canonical.html');
+      // iframe.win.document.head.appendChild(link);
+      win = iframe.win;
+
+      const el = win.document.createElement('amp-experiment');
+      configScript = win.document.createElement('script');
+      configScript.setAttribute('type', 'application/json');
+      el.appendChild(configScript);
+      experiment = new AmpExperiment(el);
+    });
+  });
+
+  function setExperimentConfig(config) {
+    config = JSON.stringify(config);
+    configScript.textContent = config;
+  }
+
+  function expectBodyAttributes(attributes) {
+    for (const attributeName in attributes) {
+      if (attributes.hasOwnProperty(attributeName)) {
+        expect(win.document.body.getAttribute(attributeName))
+            .to.equal(attributes[attributeName]);
+      }
+    }
+  }
+
+  it('', () => {
+    setExperimentConfig({
+      'experiment-1': {
+        'variant-a': 10.1,
+        'variant-b': 10.2,
+      },
+    });
+
+    experiment.buildCallback();
+    expectBodyAttributes({
+      'experiment-1': 'variant-a',
+    });
   });
 });
