@@ -16,7 +16,7 @@
 
 // Requires polyfills in immediate side effect.
 import './polyfills';
-
+import {macroTask} from './macro-task';
 import {user} from './log';
 
 /**
@@ -73,7 +73,7 @@ export class Timer {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
       const id = 'p' + this.taskCount_++;
-      this.resolved_.then(() => {
+      macroTask(() => {
         if (this.canceled_[id]) {
           delete this.canceled_[id];
           return;

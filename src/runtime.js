@@ -36,6 +36,7 @@ import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {macroTask} from './macro-task';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
@@ -121,24 +122,26 @@ export function adopt(global) {
    *     Typically imported from generated CSS-in-JS file for each component.
    */
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
-    const register = function() {
-      registerExtendedElement(global, name, implementationClass);
-      elementsForTesting.push({
-        name,
-        implementationClass,
-        css: opt_css,
-      });
-      // Resolve this extension's Service Promise.
-      getService(global, name, () => {
-        // All services need to resolve to an object.
-        return {};
-      });
-    };
-    if (opt_css) {
-      installStyles(global.document, opt_css, register, false, name);
-    } else {
-      register();
-    }
+    macroTask(() => {
+      const register = function() {
+        registerExtendedElement(global, name, implementationClass);
+        elementsForTesting.push({
+          name,
+          implementationClass,
+          css: opt_css,
+        });
+        // Resolve this extension's Service Promise.
+        getService(global, name, () => {
+          // All services need to resolve to an object.
+          return {};
+        });
+      };
+      if (opt_css) {
+        installStyles(global.document, opt_css, register, false, name);
+      } else {
+        register();
+      }
+    });
   };
 
   /** @const */
@@ -208,13 +211,15 @@ export function adopt(global) {
   waitForBody(global.document, () => {
     for (let i = 0; i < preregisteredElements.length; i++) {
       const fn = preregisteredElements[i];
-      try {
-        fn(global.AMP);
-      } catch (e) {
-        // Throw errors outside of loop in its own micro task to
-        // avoid on error stopping other extensions from loading.
-        dev.error(TAG, 'Extension failed: ', e);
-      }
+      macroTask(() => {
+        try {
+          fn(global.AMP);
+        } catch (e) {
+          // Throw errors outside of loop in its own micro task to
+          // avoid on error stopping other extensions from loading.
+          dev.error(TAG, 'Extension failed: ', e);
+        }
+      });
     }
     // Make sure we empty the array of preregistered extensions.
     // Technically this is only needed for testing, as everything should
