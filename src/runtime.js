@@ -19,14 +19,14 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
-import {installActionService} from './service/action-impl';
+import {installActionServiceForDoc} from './service/action-impl';
 import {installFramerateService} from './service/framerate-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
-import {installStandardActions} from './service/standard-actions-impl';
+import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles} from './styles';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
@@ -61,9 +61,7 @@ export function installRuntimeServices(global) {
   installViewportService(global);
   installHistoryService(global);
   installVsyncService(global);
-  installActionService(global);
   installResourcesService(global);
-  installStandardActions(global);
   installFramerateService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
@@ -76,10 +74,12 @@ export function installRuntimeServices(global) {
 
 /**
  * Install ampdoc-level services.
- * @param {!./service/ampdoc-impl.AmpDoc} unusedAmpdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
-export function installAmpdocServices(unusedAmpdoc) {
+export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installActionServiceForDoc(ampdoc);
+  installStandardActionsForDoc(ampdoc);
 }
 
 
