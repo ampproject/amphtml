@@ -111,7 +111,10 @@ export class AmpForm {
     if (shouldValidate &&
         this.form_.checkValidity && !this.form_.checkValidity()) {
       e.preventDefault();
-      this.vsync_.run({mutate: reportValidity}, {form: this.form_});
+      this.vsync_.run({
+        measure: undefined,
+        mutate: reportValidity
+      }, {form: this.form_});
       return;
     }
 
@@ -188,14 +191,18 @@ export class AmpForm {
 }
 
 
+/**
+ * Reports validity of the form passed through state object.
+ * @param {!Object} state
+ */
 function reportValidity(state) {
   reportFormValidity(state.form);
 }
 
+
 /**
  * Reports validity for the first invalid input - if any.
  * @param {!HTMLFormElement} form
- * @private
  */
 function reportFormValidity(form) {
   const inputs = toArray(form.querySelectorAll('input,select,textarea'));
@@ -211,11 +218,11 @@ function reportFormValidity(form) {
 /**
  * Revalidates the currently focused input after a change.
  * @param {!KeyboardEvent} event
- * @private
  */
 function onInvalidInputKeyUp_(event) {
-  validationBubble.hide();
-  if (!event.target.checkValidity()) {
+  if (event.target.checkValidity()) {
+    validationBubble.hide();
+  } else {
     validationBubble.show(event.target, event.target.validationMessage);
   }
 }
@@ -224,7 +231,6 @@ function onInvalidInputKeyUp_(event) {
 /**
  * Hides validation bubble and removes listeners on the invalid input.
  * @param {!Event} event
- * @private
  */
 function onInvalidInputBlur_(event) {
   validationBubble.hide();
@@ -236,7 +242,6 @@ function onInvalidInputBlur_(event) {
 /**
  * Focuses and reports the invalid message of the input in a message bubble.
  * @param {!HTMLInputElement} input
- * @private
  */
 function reportInputValidity(input) {
   input./*OK*/focus();
@@ -256,7 +261,6 @@ function reportInputValidity(input) {
 /**
  * Installs submission handler on all forms in the document.
  * @param {!Window} win
- * @private
  */
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, () => {
@@ -269,7 +273,6 @@ function installSubmissionHandlers(win) {
 
 /**
  * @param {!Window} win
- * @private
  */
 function installAmpForm(win) {
   return getService(win, 'amp-form', () => {

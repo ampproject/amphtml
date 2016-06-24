@@ -43,6 +43,7 @@ export class ValidationBubble {
    */
   hide() {
     this.vsync_.run({
+      measure: undefined,
       mutate: hideBubble,
     }, {
       bubbleElement: this.bubbleElement_,
