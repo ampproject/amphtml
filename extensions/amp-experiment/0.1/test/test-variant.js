@@ -89,6 +89,20 @@ describe('allocateVariant', () => {
     }).to.throw(/Invalid percentage/);
   });
 
+  it('should work around float rounding error', () => {
+    expect(() => {
+      allocateVariant(fakeWin, {
+        variants: {
+          'a': 50.1,
+          'b': 40.3,
+          'c': 9.2,
+          'd': 0.4,
+          // They add up to 100.00000000000001​​​ in JS
+        },
+      });
+    }).not.to.throw();
+  });
+
   it('without CID scope, succeed with a variant allocated', () => {
     return expect(allocateVariant(fakeWin, {
       cidScope: null,

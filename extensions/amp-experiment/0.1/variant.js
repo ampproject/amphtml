@@ -73,7 +73,8 @@ function validateConfig(config) {
       totalPercentage += percentage;
     }
   }
-  user.assert(totalPercentage <= 100,
+  // Word around the float number precision error.
+  user.assert(totalPercentage.toFixed(6) <= 100,
       'Total percentage is bigger than 100: ' + totalPercentage);
 }
 
