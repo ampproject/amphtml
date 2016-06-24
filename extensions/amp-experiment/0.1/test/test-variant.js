@@ -123,7 +123,7 @@ describe('allocateVariant', () => {
     })).to.eventually.equal('-Variant_2');
   });
 
-  it('without CID scope, succeed with no variant allocated', () => {
+  it('can have no variant allocated if variants don\'t add up to 100', () => {
     return expect(allocateVariant(fakeWin, {
       cidScope: null,
       variants: {
