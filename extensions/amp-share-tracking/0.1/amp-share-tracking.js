@@ -34,7 +34,7 @@ class AmpShareTracking extends AMP.BaseElement {
 }
 
 /**
- * ShareTrackingService
+ * ShareTrackingService processes the incoming and outcoming url fragment
  */
 export class ShareTrackingService {
   constructor(window) {
@@ -45,21 +45,11 @@ export class ShareTrackingService {
 /**
  * @param {!Window} window
  * @return {!ShareTrackingService}
- * @private
  */
-function getShareTrackingService_(window) {
+export function installShareTrackingService(window) {
   return getService(window, 'shareTrackingService', () => {
     return new ShareTrackingService(window);
   });
-}
-
-/**
- * @param {!Window} window
- * @return {!ShareTrackingService}
- * @private
- */
-export function installShareTrackingService(window) {
-  return getShareTrackingService_(window);
 }
 
 installShareTrackingService(AMP.win);
