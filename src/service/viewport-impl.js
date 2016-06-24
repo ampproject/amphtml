@@ -329,7 +329,8 @@ export class Viewport {
     // TODO(erwinm): the duration should not be a constant and should
     // be done in steps for better transition experience when things
     // are closer vs farther.
-    return Animation.animate(pos => {
+    // TODO(dvoytenko, #3742): documentElement will be replaced by ampdoc.
+    return Animation.animate(this.win_.document.documentElement, pos => {
       this.binding_.setScrollTop(interpolate(pos));
     }, duration, curve).then();
   }
