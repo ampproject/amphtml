@@ -28,7 +28,7 @@ const TAG = 'amp-sticky-ad';
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -122,7 +122,9 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        this.element.classList.add('visible');
+        setStyles(this.element, {
+          'visibility': 'visible',
+        });
         this.viewport_.addToFixedLayer(this.element);
         this.updateInViewport(this.ad_, true);
         this.scheduleLayout(this.ad_);

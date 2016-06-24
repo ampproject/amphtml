@@ -15,7 +15,6 @@
  */
 
 amp-sticky-ad {
-  visibility: hidden !important;
   position: fixed !important;
   text-align:center;
   bottom: 0 !important;
@@ -28,12 +27,9 @@ amp-sticky-ad {
   background-color: rgba(255,255,255,0.5);
 }
 
-amp-sticky-ad.visible {
-  visibility: visible !important;
-}
-
 .-amp-sticky-ad-layout {
-  display: flex;
+  display: flex !important;
+  visibility: hidden;
   flex-direction: column;
   align-items: center;
   justify-content: center;
