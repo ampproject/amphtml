@@ -129,4 +129,22 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  console.log('this is preserved', someValue);",
             "})()"));
   }
+
+  public void testGetModeLocalDevReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode$$module$src$mode() { return { localDev: true } }",
+             "  if (getMode$$module$src$mode().localDev) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode$$module$src$mode() { return { localDev: true } }",
+             "  if (false) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
 }

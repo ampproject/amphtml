@@ -17,10 +17,12 @@ package org.ampproject;
 
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.AbstractCompiler;
 import com.google.javascript.jscomp.HotSwapCompilerPass;
 import com.google.javascript.jscomp.NodeTraversal;
 import com.google.javascript.jscomp.NodeTraversal.AbstractPostOrderCallback;
+import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
 /**
@@ -56,58 +58,82 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
-    if (isDevAssertCall(n)) {
+    if (isNameStripType(n, ImmutableSet.of( "dev.assert"))) {
       maybeEliminateCallExceptFirstParam(n, parent);
-    } else if (n.isExprResult()) {
-      maybeEliminateExpressionBySuffixName(n, parent);
+    } else if (isNameStripType(n, stripTypeSuffixes)) {
+      removeExpression(n, parent);
+    } else if (isFunctionInvokeAndPropAccess(n, "getMode", ImmutableSet.of("localDev", "test"))) {
+      replaceWithFalseExpression(n, parent);
     }
   }
+  
+  private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
+    // mode.getMode().localDev
+    // mode [property] ->
+    //   getMode [call] 
+    //   ${property} [string]
+    if (!n.isGetProp()) {
+      return false;
+    }
+    Node call = n.getFirstChild();
+    if (!call.isCall()) {
+      return false;
+    }
+    Node fullQualifiedFnName = call.getFirstChild();
+    if (fullQualifiedFnName == null) {
+      return false;
+    }
 
-  private boolean isDevAssertCall(Node n) {
-    if (n.isCall()) {
-      Node expression = n.getFirstChild();
-      if (expression == null) {
-        return false;
-      }
-
-      String name = expression.getQualifiedName();
-      if (name == null) {
-        return false;
-      }
-
-      if (name.endsWith("dev.assert")) {
-        return true;
+    String qualifiedName = fullQualifiedFnName.getQualifiedName();
+    if (qualifiedName != null && qualifiedName.endsWith(fnQualifiedName)) {
+      Node maybeProp = n.getSecondChild();
+      if (maybeProp != null && maybeProp.isString()) {
+         String name = maybeProp.getString();
+         for (String prop : props) {
+           if (prop == name) {
+             return true;
+           }
+         }
       }
     }
+
     return false;
+  }
+  
+  private void replaceWithFalseExpression(Node n, Node parent) {
+    Node falseNode = IR.falseNode();
+    falseNode.useSourceInfoIfMissingFrom(n);
+    parent.replaceChild(n, falseNode);
+    compiler.reportCodeChange();
   }
 
   /**
    * Checks if expression is a GETPROP() (method invocation) and the property
    * name ends with one of the items in stripTypeSuffixes.
+   * This method does not do a deep check and will only do a shallow
+   * expression -> property -> call check.
    */
-  private void maybeEliminateExpressionBySuffixName(Node n, Node parent) {
-    // n = EXPRESSION_RESULT > CALL > GETPROP
-    Node call = n.getFirstChild();
-    if (call == null) {
-      return;
+  private boolean isNameStripType(Node n, Set<String> suffixes) {
+    if (!n.isCall()) {
+      return false;
     }
-    Node expression = call.getFirstChild();
-    if (expression == null) {
-      return;
+    Node getprop = n.getFirstChild();
+    if (getprop == null) {
+      return false;
     }
-
-    if (qualifiedNameEndsWithStripType(expression)) {
-      if (parent.isExprResult()) {
-        Node grandparent = parent.getParent();
-        grandparent.removeChild(parent);
-      } else {
-        parent.removeChild(n);
-      }
-      compiler.reportCodeChange();
-    }
+    return qualifiedNameEndsWithStripType(getprop, suffixes);
   }
 
+  private void removeExpression(Node n, Node parent) {
+    if (parent.isExprResult()) {
+      Node grandparent = parent.getParent();
+      grandparent.removeChild(parent);
+    } else {
+      parent.removeChild(n);
+    }
+    compiler.reportCodeChange();
+  }
+  
   private void maybeEliminateCallExceptFirstParam(Node n, Node p) {
     Node call = n.getFirstChild();
     if (call == null) {
@@ -130,17 +156,17 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    * Checks the nodes qualified name if it ends with one of the items in
    * stripTypeSuffixes
    */
-  boolean qualifiedNameEndsWithStripType(Node n) {
+  boolean qualifiedNameEndsWithStripType(Node n, Set<String> suffixes) {
     String name = n.getQualifiedName();
-    return qualifiedNameEndsWithStripType(name);
+    return qualifiedNameEndsWithStripType(name, suffixes);
   }
 
   /**
    * Checks if the string ends with one of the items in stripTypeSuffixes
    */
-  boolean qualifiedNameEndsWithStripType(String name) {
+  boolean qualifiedNameEndsWithStripType(String name, Set<String> suffixes) {
     if (name != null) {
-      for (String suffix : stripTypeSuffixes) {
+      for (String suffix : suffixes) {
         if (name.endsWith(suffix)) {
           return true;
         }
