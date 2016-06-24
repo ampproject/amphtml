@@ -113,7 +113,7 @@ export class AmpForm {
       e.preventDefault();
       this.vsync_.run({
         measure: undefined,
-        mutate: reportValidity
+        mutate: reportValidity,
       }, {form: this.form_});
       return;
     }
