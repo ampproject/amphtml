@@ -48,13 +48,14 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @private @const {number} */
     this.height_ = getLengthNumeral(height);
 
-    const imageSrc = assertHttpsUrl(this.element.getAttribute('src'),
+    /** @private @const {string} */
+    this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
         this.element);
     // TODO(dvoytenko): Consider recompiling and hosting viewer on the
     // cdn.ampproject.org as an iframe viewer or even possibly compiling
     // it as an AMP element.
     let src = 'https://storage.googleapis.com/vrview/index.html';
-    src = addParamToUrl(src, 'image', imageSrc);
+    src = addParamToUrl(src, 'image', this.imageSrc_);
     if (this.element.hasAttribute('stereo')) {
       src = addParamToUrl(src, 'is_stereo', 'true');
     }
@@ -73,7 +74,15 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   preconnectCallback() {
     if (this.src_) {
       this.preconnect.prefetch(this.src_);
+      this.preconnect.prefetch(this.imageSrc_);
     }
+  }
+
+  /** @override */
+  createPlaceholderCallback() {
+    // TODO(dvoytenko): Add a placeholder by downloading the target image
+    // and aligning it based on the specified yaw and mono/stereo.
+    return null;
   }
 
   /** @override */
