@@ -76,7 +76,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
-      'src/amp-core-service.js',
+      'src/runtime.js',
     ],
   },
   'installActionHandler': {
@@ -126,22 +126,21 @@ var forbiddenTerms = {
   'installTemplatesService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp.js',
-      'src/amp-shadow.js',
+      'src/runtime.js',
       'src/service/template-impl.js',
     ],
   },
   'installUrlReplacementsService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/history-impl.js',
       'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
@@ -152,7 +151,7 @@ var forbiddenTerms = {
   'installViewportService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
@@ -160,7 +159,7 @@ var forbiddenTerms = {
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -169,7 +168,7 @@ var forbiddenTerms = {
   'installResourcesService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
@@ -177,7 +176,7 @@ var forbiddenTerms = {
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/xhr-impl.js',
     ],
   },
