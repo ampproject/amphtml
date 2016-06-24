@@ -22,7 +22,8 @@ function getLocationHashParams() {
   for (var ii = 0; ii < paramStrings.length; ii++) {
     var keyValue = paramStrings[ii].split('=');
     if (keyValue[0].length > 0) {
-      params[keyValue[0]] = keyValue[1] ? decodeURI(keyValue[1]) : undefined;
+      params[keyValue[0]] = keyValue[1]
+          ? decodeURIComponent(keyValue[1]) : undefined;
     }
   }
   return params;
@@ -40,7 +41,7 @@ function setLocationHashParams(params) {
   out = [];
   for (key in params) {
     if (params.hasOwnProperty(key)) {
-      out.push(key + '=' + encodeURI(params[key]));
+      out.push(key + '=' + encodeURIComponent(params[key]));
     }
   }
   window.location.hash = out.join('&');
