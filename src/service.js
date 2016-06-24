@@ -79,19 +79,17 @@ export function getServicePromiseOrNull(win, id) {
  * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
  * If the service is not yet available the factory function is invoked and
  * expected to return the service.
- * @param {!Node} node
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @param {function(!AmpDoc):!Object=} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
  * @return {*}
  */
-export function getServiceForDoc(node, id, opt_factory) {
-  const win = node.ownerDocument.defaultView;
-  const ampdocService = getAmpdocService(win);
-  const ampdoc = ampdocService.getAmpDoc(node);
+export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
   return getServiceInternal(
-      ampdocService.isSingleDoc() ? win : ampdoc,
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
       id,
       opt_factory ? () => opt_factory(ampdoc) : undefined);
 }
@@ -100,31 +98,41 @@ export function getServiceForDoc(node, id, opt_factory) {
  * Returns a promise for a service for the given id and ampdoc. Also expects
  * a service that has the actual implementation. The promise resolves when
  * the implementation loaded.
- * @param {!Node} node
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {!Promise<*>}
  */
-export function getServicePromiseForDoc(node, id) {
-  const win = node.ownerDocument.defaultView;
-  const ampdocService = getAmpdocService(win);
+export function getServicePromiseForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseInternal(
-      ampdocService.isSingleDoc() ? win : ampdocService.getAmpDoc(node),
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
       id);
 }
 
 /**
  * Like getServicePromiseForDoc but returns null if the service was never
  * registered for this ampdoc.
- * @param {!Node} node
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @param {string} id of the service.
  * @return {?Promise<*>}
  */
-export function getServicePromiseOrNullForDoc(node, id) {
-  const win = node.ownerDocument.defaultView;
-  const ampdocService = getAmpdocService(win);
+export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseOrNullInternal(
-      ampdocService.isSingleDoc() ? win : ampdocService.getAmpDoc(node),
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
       id);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-impl.AmpDoc}
+ */
+function getAmpdoc(nodeOrDoc) {
+  if (nodeOrDoc.nodeType) {
+    return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
+        nodeOrDoc);
+  }
+  return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }
 
 /**

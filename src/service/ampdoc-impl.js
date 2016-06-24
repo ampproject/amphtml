@@ -107,6 +107,15 @@ export class AmpDocService {
 export class AmpDoc {
 
   /**
+   * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
+   * mode that supports multiple documents per a single window.
+   * @return {boolean}
+   */
+  isSingleDoc() {
+    return dev.assert(null, 'not implemented');
+  }
+
+  /**
    * @return {!Window}
    */
   getWin() {
@@ -154,6 +163,11 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
+  isSingleDoc() {
+    return true;
+  }
+
+  /** @override */
   getWin() {
     return this.win;
   }
@@ -181,6 +195,11 @@ export class AmpDocShadow extends AmpDoc {
     this.win = win;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
+  }
+
+  /** @override */
+  isSingleDoc() {
+    return false;
   }
 
   /** @override */
