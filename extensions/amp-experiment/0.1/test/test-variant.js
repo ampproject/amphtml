@@ -79,7 +79,7 @@ describe('allocateVariant', () => {
     expect(() => {
       allocateVariant(fakeWin, {
         variants: {
-          'negative_percentage': '50',
+          'non_number_percentage': '50',
         },
       });
     }).to.throw(/Invalid percentage/);

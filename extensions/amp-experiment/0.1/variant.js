@@ -15,6 +15,7 @@
  */
 
 import {isObject} from '../../../src/types';
+import {user} from '../../../src/log';
 
 const nameValidator = /^[\w-]+$/;
 
@@ -23,7 +24,7 @@ const nameValidator = /^[\w-]+$/;
  * experiment config.
  * @param {!Window} win
  * @param {!Object} config
- * @return {Promise<?string>}
+ * @return {!Promise<?string>}
  */
 export function allocateVariant(win, config) {
   validateConfig(config);
@@ -36,7 +37,7 @@ export function allocateVariant(win, config) {
 
     // Loop through keys in a stable order.
     const variantNames = Object.keys(config.variants).sort();
-    for (let i = 0; i < variantNames.length; ++i) {
+    for (let i = 0; i < variantNames.length; i++) {
       upperBound += config.variants[variantNames[i]];
       if (bucketTicket < upperBound) {
         return variantNames[i];
@@ -53,43 +54,39 @@ export function allocateVariant(win, config) {
  */
 function validateConfig(config) {
   const variants = config.variants;
-  if (!isObject(variants) || Object.keys(variants).length == 0) {
-    throw new Error('Missing experiment variants config.');
-  }
+  user.assert(isObject(variants) && Object.keys(variants).length > 0,
+    'Missing experiment variants config.');
 
   let totalPercentage = 0;
   for (const variantName in variants) {
     if (variants.hasOwnProperty(variantName)) {
-      if (!variantName.match(nameValidator)) {
-        throw new Error('Invalid variant name: '
-            + variantName + '. Allowed chars are [a-zA-Z0-9-_].');
-      }
+      user.assert(nameValidator.test(variantName),
+          'Invalid variant name: %s. Allowed chars are [a-zA-Z0-9-_].',
+          variantName);
 
       const percentage = variants[variantName];
-      if (typeof percentage !== 'number'
-          || percentage <= 0 || percentage >= 100) {
-        throw new Error('Invalid percentage ' + variantName + ': ' + percentage
-            + '. Has to be in range of [0,100]');
-      }
+      user.assert(
+          typeof percentage === 'number' && percentage > 0 && percentage < 100,
+          'Invalid percentage %s:%s. Has to be in range of (0,100)',
+          variantName, percentage);
       totalPercentage += percentage;
     }
   }
-  if (totalPercentage > 100) {
-    throw new Error('Total percentage is bigger than 100: ' + totalPercentage);
-  }
+  user.assert(totalPercentage <= 100,
+      'Total percentage is bigger than 100: ' + totalPercentage);
 }
 
 /**
- * Returns a float number (bucket ticket) in the range of [0, 100]. The number
- * is hashed from the current CID of the given scope (opt_cidScope). If the
+ * Returns a float number (bucket ticket) in the range of [0, 100). The number
+ * is hashed from the CID of the given scope (opt_cidScope). If the
  * scope is not provided, a random number is used.
  * @param {!Window} win
- * @param {?string} opt_cidScope
- * @return {Promise<!number>} a number in the range of [0, 100]
+ * @param {string=} opt_cidScope
+ * @return {!Promise<!number>} a float number in the range of [0, 100)
  */
 function getBucketTicket(win, opt_cidScope) {
   if (opt_cidScope) {
-    // TODO(lannka): implement CID
+    // TODO(@lannka, #1411): implement hashing with CID
     return Promise.resolve(1);
   } else {
     return Promise.resolve(win.Math.random() * 100);
