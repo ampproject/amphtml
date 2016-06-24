@@ -24,16 +24,16 @@ amp-sticky-ad {
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
   box-sizing: border-box;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .-amp-sticky-ad-layout {
-  display: flex !important;
-  visibility: hidden;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: visible !important;
+  transform: translateZ(0) !important;
 }
 
 .amp-sticky-ad-loaded {
@@ -41,6 +41,8 @@ amp-sticky-ad {
 }
 
 .-amp-sticky-ad-layout > amp-ad {
+  /* need a background-color other than default to prevent blink */
+  /*background-color: rgba(255, 255, 255, 0);*/
   display: block;
 }
 
