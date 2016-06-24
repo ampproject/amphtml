@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {waitForBody} from '../../../src/dom';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
@@ -36,7 +37,50 @@ export class AmpExperiment extends AMP.BaseElement {
       toggle(this.element, false);
       return;
     }
-    dev.info(EXPERIMENT, 'amp-experiment is on');
+
+    const config = this.getConfig_();
+    const results = {};
+    this.experimentVariants = Promise.all(
+        Object.keys(config).map(experimentName => {
+          return this.getVariantAllocation_(config[experimentName])
+              .then(variantName => {
+                if (variantName) {
+                  results[experimentName] = variantName;
+                }
+              });
+        })).then(() => results);
+    
+    this.experimentVariants.then(this.addToBody_());
+  }
+
+  getConfig_() {
+    const children = this.element.children;
+    user.assert(
+        children.length == 1 && children[0].tagName.toUpperCase() == 'SCRIPT'
+            && children[0].getAttribute('type').toUpperCase()
+                == 'APPLICATION/JSON',
+        'The tag should contain exactly one ' +
+        '<script type="application/json"> child.');
+
+    return JSON.parse(children[0].textContent);
+  }
+
+  getVariantAllocation_(config) {
+    // TODO(@lannka, #1411): wire up with real variant allocation code.
+    return Promise.resolve(Object.keys(config.variants)[0]);
+  }
+
+  addToBody_() {
+    const document = this.getWin().document;
+    return experiments => {
+      waitForBody(document, () => {
+        for (const name in experiments) {
+          if (experiments.hasOwnProperty(name)) {
+            document.body.setAttribute(name, experiments[name]);
+          }
+        }
+      });
+    };
   }
 }
 
