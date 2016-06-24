@@ -15,3 +15,5 @@ limitations under the License.
 -->
 
 # <a name="amp-experiment"></a> `amp-experiment`
+
+Under development. See [issue #1411](https://github.com/ampproject/amphtml/issues/1411).
