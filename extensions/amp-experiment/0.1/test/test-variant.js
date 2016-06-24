@@ -75,6 +75,14 @@ describe('allocateVariant', () => {
         },
       });
     }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+      allocateVariant(fakeWin, {
+        variants: {
+          'negative_percentage': '50',
+        },
+      });
+    }).to.throw(/Invalid percentage/);
   });
 
   it('without CID scope, succeed with a variant allocated', () => {
@@ -83,6 +91,16 @@ describe('allocateVariant', () => {
       variants: {
         '-Variant_1': 56.1,
         '-Variant_2': 23.3,
+      },
+    })).to.eventually.equal('-Variant_2');
+  });
+
+  it('should allocate variant in name order', () => {
+    return expect(allocateVariant(fakeWin, {
+      cidScope: null,
+      variants: {
+        '-Variant_2': 50,
+        '-Variant_1': 50,
       },
     })).to.eventually.equal('-Variant_2');
   });

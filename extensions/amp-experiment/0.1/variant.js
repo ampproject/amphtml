@@ -33,12 +33,13 @@ export function allocateVariant(win, config) {
 
   return getBucketTicket(win, cidScope).then(bucketTicket => {
     let upperBound = 0;
-    for (const variantName in config.variants) {
-      if (config.variants.hasOwnProperty(variantName)) {
-        upperBound += config.variants[variantName];
-        if (bucketTicket < upperBound) {
-          return variantName;
-        }
+
+    // Loop through keys in a stable order.
+    const variantNames = Object.keys(config.variants).sort();
+    for (let i = 0; i < variantNames.length; ++i) {
+      upperBound += config.variants[variantNames[i]];
+      if (bucketTicket < upperBound) {
+        return variantNames[i];
       }
     }
     return null;
