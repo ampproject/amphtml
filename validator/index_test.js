@@ -140,7 +140,7 @@ it('emits text if --format=text is specified on command line', function(done) {
         'feature_tests/minimum_valid_amp.html'
       ],
       {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
-      (error, stdout, stderr) => {
+      function (error, stdout, stderr) {
         expect(error).toBeDefined();  // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);
         expect(stdout).toBe('feature_tests/minimum_valid_amp.html: PASS\n');
@@ -158,7 +158,7 @@ it('emits json if --format=json is specified on command line', function(done) {
         'feature_tests/minimum_valid_amp.html'
       ],
       {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
-      (error, stdout, stderr) => {
+      function (error, stdout, stderr) {
         expect(error).toBeDefined();  // At least one file had errors
         expect(stderr).toBe('');      // entire json results will be on stdout
 
