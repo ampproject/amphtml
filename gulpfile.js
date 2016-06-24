@@ -378,7 +378,6 @@ function buildExamples(watch) {
   buildExample('pinterest.amp.html');
   buildExample('reach-player.amp.html');
   buildExample('released.amp.html');
-  buildExample('share-tracking.amp.html');
   buildExample('social-share.amp.html');
   buildExample('twitter.amp.html');
   buildExample('soundcloud.amp.html');
