@@ -15,6 +15,7 @@
  */
 
 import {ActionService, parseActionMap} from '../../src/service/action-impl';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 
@@ -258,7 +259,7 @@ describe('Action findAction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
   });
 
   afterEach(() => {
@@ -320,7 +321,7 @@ describe('Action method', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
     onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -414,7 +415,7 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
@@ -500,7 +501,7 @@ describe('Action common handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
