@@ -224,11 +224,11 @@ export class Vsync {
   }
 
   /**
-   * @param {!Node=} unused_opt_contextNode
+   * @param {!Node=} unusedOptContextNode
    * @return {boolean}
    * @private
    */
-  canAnimate_(unused_opt_contextNode) {
+  canAnimate_(unusedOptContextNode) {
     // TODO(dvoytenko, #3742): Use opt_node -> ampdoc.
     return this.viewer_.isVisible();
   }
