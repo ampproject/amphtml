@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-sticky-ad"></a> `amp-google-vrview-image`
+# <a name="amp-google-vrview-image"></a> `amp-google-vrview-image`
 
 <table>
   <tr>
