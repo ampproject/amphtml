@@ -291,6 +291,32 @@ describe('DOM', () => {
     expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
   });
 
+  function testScopedQuerySelectorAll() {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    parent.appendChild(element2);
+    const element3 = document.createElement('element3');
+    element1.appendChild(element3);
+
+    const element1Nested = document.createElement('element1');
+    element2.appendChild(element1Nested);
+
+    expect(dom.scopedQuerySelectorAll(parent, 'element1, element3').length)
+        .to.equal(3);
+    expect(dom.scopedQuerySelectorAll(parent, 'element2').length).to.equal(1);
+    expect(dom.scopedQuerySelectorAll(parent, 'element4').length).to.equal(0);
+  }
+
+  it('scopedQuerySelectorAll should return all matches',
+      testScopedQuerySelectorAll);
+
+  it('scopedQuerySelectorAll should return all matches (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testScopedQuerySelectorAll();
+  });
+
   describe('contains', () => {
     let connectedElement;
     let connectedChild;
