@@ -42,6 +42,7 @@ export class ValidationBubble {
    * Hides the bubble off screen.
    */
   hide() {
+    // TODO(#3776): Use .mutate method when it supports passing state.
     this.vsync_.run({
       measure: undefined,
       mutate: hideBubble,
@@ -100,7 +101,7 @@ function measureTargetElement(state) {
 function showBubbleElement(state) {
   state.bubbleElement.textContent = state.message;
   setStyles(state.bubbleElement, {
-    display: 'initial',
+    display: '',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });

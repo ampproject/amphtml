@@ -111,6 +111,7 @@ export class AmpForm {
     if (shouldValidate &&
         this.form_.checkValidity && !this.form_.checkValidity()) {
       e.preventDefault();
+      // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
         measure: undefined,
         mutate: reportValidity,
