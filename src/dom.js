@@ -378,9 +378,9 @@ export function childElementByTag(parent, tagName) {
  * A wrapper around native querySelectorAll to use :scope when possible.
  * @param {!Element} parent
  * @param {string} selector
- * @returns {!Array.<!Element>}
+ * @returns {!Array<!Element>}
  */
-export function querySelectorAll(parent, selector) {
+export function scopedQuerySelectorAll(parent, selector) {
   if (scopeSelectorSupported) {
     const scopedSelectors = selector.split(',').map(sel => `:scope ${sel}`);
     return toArray(parent.querySelectorAll(scopedSelectors.join(',')));

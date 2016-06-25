@@ -291,7 +291,7 @@ describe('DOM', () => {
     expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
   });
 
-  function testQuerySelectorAll() {
+  function testScopedQuerySelectorAll() {
     const parent = document.createElement('parent');
     const element1 = document.createElement('element1');
     parent.appendChild(element1);
@@ -303,17 +303,18 @@ describe('DOM', () => {
     const element1Nested = document.createElement('element1');
     element2.appendChild(element1Nested);
 
-    expect(dom.querySelectorAll(parent, 'element1, element3').length)
+    expect(dom.scopedQuerySelectorAll(parent, 'element1, element3').length)
         .to.equal(3);
-    expect(dom.querySelectorAll(parent, 'element2').length).to.equal(1);
-    expect(dom.querySelectorAll(parent, 'element4').length).to.equal(0);
+    expect(dom.scopedQuerySelectorAll(parent, 'element2').length).to.equal(1);
+    expect(dom.scopedQuerySelectorAll(parent, 'element4').length).to.equal(0);
   }
 
-  it('querySelectorAll should return all matches', testQuerySelectorAll);
+  it('scopedQuerySelectorAll should return all matches',
+      testScopedQuerySelectorAll);
 
-  it('querySelectorAll should return all matches (polyfill)', () => {
+  it('scopedQuerySelectorAll should return all matches (polyfill)', () => {
     dom.setScopeSelectorSupportedForTesting(false);
-    testQuerySelectorAll();
+    testScopedQuerySelectorAll();
   });
 
   describe('contains', () => {
