@@ -122,8 +122,8 @@ describe('amp-experiment', () => {
     experiment.buildCallback();
     return experiment.experimentVariants.then(() => {
       expectBodyHasAttributes({
-        'experiment-1': 'variant-a',
-        'experiment-2': 'variant-d',
+        'amp-x-experiment-1': 'variant-a',
+        'amp-x-experiment-2': 'variant-d',
       });
     });
   });

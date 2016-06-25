@@ -21,6 +21,7 @@ import {waitForBody} from '../../../src/dom';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
+const ATTR_PREFIX = 'amp-x-';
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -75,7 +76,7 @@ export class AmpExperiment extends AMP.BaseElement {
       waitForBody(document, () => {
         for (const name in experiments) {
           if (experiments.hasOwnProperty(name)) {
-            document.body.setAttribute(name, experiments[name]);
+            document.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
           }
         }
       });
