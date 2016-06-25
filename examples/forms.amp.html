@@ -42,11 +42,11 @@
             color: #dc4e41;
         }
 
-        .lightbox1 {
+        .lightbox {
             background: rgba(0,0,0,.8);
         }
 
-        .lightbox1-content {
+        .lightbox-content {
             display: flex;
             flex-direction: column;
             flex-wrap: nowrap;
@@ -87,7 +87,7 @@
       action="/form/html/post"
       action-xhr="/form/echo-json/post"
       target="_blank"
-      on="submit:lightbox1">
+      on="submit-success:success-lightbox">
     <fieldset>
         <label>
             <span>Your name</span>
@@ -122,10 +122,10 @@
     </div>
 </form>
 
-<amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
-    <div class="lightbox1-content">
+<amp-lightbox id="success-lightbox" class="lightbox" layout="nodisplay">
+    <div class="lightbox-content">
         <h1>Thanks for the submission! Here's a cupcake!</h1>
-        <amp-img id="img0" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h600-no-n" width=400 height=600 layout="fixed" on="tap:lightbox1.close" role="img" tabindex="1"></amp-img>
+        <amp-img id="img0" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h600-no-n" width=400 height=600 layout="fixed" on="tap:success-lightbox.close" role="img" tabindex="1"></amp-img>
     </div>
 </amp-lightbox>
 

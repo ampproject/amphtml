@@ -101,6 +101,7 @@ export class ActionService {
 
     // Add core events.
     this.addEvent('tap');
+    this.addEvent('submit');
   }
 
   /**

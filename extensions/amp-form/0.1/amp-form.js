@@ -68,6 +68,9 @@ export class AmpForm {
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
+    /** @const @private {!../../../src/action-impl.Action} */
+    this.actions_ = actionServiceFor(this.win_);
+
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
 
@@ -143,9 +146,11 @@ export class AmpForm {
       }).then(response => {
         this.setState_(FormState_.SUBMIT_SUCCESS);
         this.renderTemplate_(response || {});
+        this.actions_.trigger(this.form_, 'submit-success', null);
       }).catch(error => {
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
+        this.actions_.trigger(this.form_, 'submit-error', null);
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
