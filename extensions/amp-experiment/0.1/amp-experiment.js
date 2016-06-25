@@ -49,7 +49,6 @@ export class AmpExperiment extends AMP.BaseElement {
                 }
               });
         })).then(() => results);
-    
     this.experimentVariants.then(this.addToBody_());
   }
 
