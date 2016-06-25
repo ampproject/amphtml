@@ -20,9 +20,11 @@ const tasks = window.AMP_TASKS = window.AMP_TASKS ? window.AMP_TASKS : [];
 
 const shouldNotUseMacroTask = /nochunking/.test(window.location.href);
 
+const resolved = Promise.resolve();
+
 export function macroTask(fn) {
   if (shouldNotUseMacroTask) {
-    fn();
+    resolved.then(fn);
     return;
   }
   tasks.push(fn);
@@ -30,7 +32,7 @@ export function macroTask(fn) {
 }
 
 function run(event) {
-  if (event.data != 'amp-macro-task') {
+  if (event && event.type == 'message' && event.data != 'amp-macro-task') {
     return;
   }
   const t = tasks.shift();
@@ -43,6 +45,19 @@ function run(event) {
 }
 
 function next() {
+  const viewer = window.AMP && window.AMP.viewer;
+  const visible = viewer
+      ? viewer.hasBeenVisible()
+      : !(/visibilityState=hidden/.test(window.location.href))
+  if (window.requestIdleCallback && !visible) {
+    if (viewer) {
+      viewer.whenFirstVisible().then(run);
+    }
+    window.requestIdleCallback(run, {
+      timeout: 1000,
+    });
+    return;
+  }
   window.postMessage('amp-macro-task', '*');
 }
 
