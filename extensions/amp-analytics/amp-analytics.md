@@ -176,6 +176,12 @@ Type attribute value: `mediametrie`
 
 Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
 
+### Nielsen
+
+Type attribute value: `nielsen`
+
+Adds support for Nielsen DCR pageview measurement. Please contact your Nielsen representative for your `appid`.
+
 ### OEWA
 
 Type attribute value: `oewa`

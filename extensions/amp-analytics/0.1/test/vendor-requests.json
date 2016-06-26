@@ -62,6 +62,9 @@
     "host": "https://prof.estat.com/m/web",
     "pageview": "https://prof.estat.com/m/web/$serial?c=$level1&dom=_ampdoc_url_&enc=_document_charset_&l3=$level3&l4=$level4&n=_random_&p=$level2&r=_document_referrer_&sch=_screen_height_&scw=_screen_width_&tn=amp&v=1&vh=_available_screen_height_&vw=_available_screen_width_"
   },
+  "nielsen": {
+    "pageview": "https://secure-gl.imrworldwide.com/cgi-bin/gn?prd=dcr&at=unified&c27=cln,1&c69=cvw,1&rt=text&cr=V&ad=0&id=${clientId(imrworldwide)}&asn=${assetName}&c13=asid,${appid}&c16=sdkv,bj.5.0.0&c32=segA,${segA}&c33=segB,${segB}&c34=segC,${segC}"
+  },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
