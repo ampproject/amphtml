@@ -15,7 +15,7 @@ public class AmpPassTestEnvTest extends Es6CompilerTestCase {
   ImmutableSet<String> suffixTypes = ImmutableSet.of();
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, false, suffixTypes);
+    return new AmpPass(compiler, /* isProd */ false, suffixTypes);
   }
 
   @Override protected int getNumRepetitions() {

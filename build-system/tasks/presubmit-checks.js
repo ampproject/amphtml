@@ -63,6 +63,15 @@ var forbiddenTerms = {
       'validator/validator.js',
     ]
   },
+  // Match `getMode` that is not followed by a "()." and is assigned
+  // as a variable.
+  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
+    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
+        ' Use explicitly like "getMode().localDev" instead.',
+    whitelist: [
+      'dist.3p/current/integration.js'
+    ]
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',

@@ -17,7 +17,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
       "dev.fine");
 
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, true, suffixTypes);
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes);
   }
 
   @Override protected int getNumRepetitions() {
@@ -185,6 +185,43 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "function getMode() { return { minified: false }; }",
              "var $mode = { getMode: getMode };",
              "  if (true) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
+  public void testGetModePreserve() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false } }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode()) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false }; }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode()) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { otherProp: true } }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode().otherProp) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { otherProp: true }; }",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode().otherProp) {",
              "    console.log('hello world');",
              "  }",
             "})()"));

@@ -81,11 +81,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
    * Predicate for any <code>fnQualifiedName</code>.<code>props</code> call.
    * example:
    *   isFunctionInvokeAndPropAccess(n, "getMode", "test"); // matches `getMode().test`
-   *
-   * @param n
-   * @param fnQualifiedName
-   * @param props
-   * @return
    */
   private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
     // mode.getMode().localDev
@@ -111,7 +106,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
          String name = maybeProp.getString();
          for (String prop : props) {
            if (prop == name) {
-             System.out.println(qualifiedName);
              return true;
            }
          }
