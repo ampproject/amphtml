@@ -20,6 +20,7 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -50,8 +51,11 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
-    /** @const @private {!Vsync} */
+    /** @private @const {!Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @private @const {!Function|null}*/
+    this.bindedHorizontalScroll_ = null;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -60,6 +64,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
   }
+
 
   /** @override */
   layoutCallback() {
@@ -88,6 +93,18 @@ class AmpStickyAd extends AMP.BaseElement {
   }
 
   /**
+   * The function that remove listener to sticky-ad onHorizontal scroll event.
+   * @private
+   */
+  removeOnHorizontalListener_() {
+    if (this.bindedOnHorizontalScroll_) {
+      this.element.removeEventListener('scroll',
+          this.bindedOnHorizontalScroll_);
+      this.bindedOnHorizontalScroll_ = null;
+    }
+  }
+
+  /**
    * The listener function that listen on onScroll event and
    * show sticky ad when user scroll at least one viewport and
    * there is at least one more viewport available.
@@ -97,6 +114,7 @@ class AmpStickyAd extends AMP.BaseElement {
     const scrollTop = this.viewport_.getScrollTop();
     const viewportHeight = this.viewport_.getSize().height;
     const scrollHeight = this.viewport_.getScrollHeight();
+    this.viewportWidth_ = this.viewport_.getSize().width;
     if (scrollHeight < viewportHeight * 2) {
       this.removeOnScrollListener_();
       return;
@@ -122,8 +140,75 @@ class AmpStickyAd extends AMP.BaseElement {
             this.element.classList.add('amp-sticky-ad-loaded');
           });
         }, 1000);
+        this.scrollTimeout_ = null;
+        this.positioningInProgress_ = null;
+
+        const dummyElement = global.document.createElement('div');
+        dummyElement.classList.add('-amp-sticky-ad-delete-box');
+        dummyElement.style.minHeight = borderBottom + 'px';
+        this.element.appendChild(dummyElement);
+
+        if (!this.bindedHorizontalScroll_) {
+          this.bindedOnHorizontalScroll_ = this.onHorizontalScroll_.bind(this);
+        }
+        this.element.addEventListener('scroll', this.bindedOnHorizontalScroll_);
       });
     }
+  }
+
+  /**
+   * The listener function that listen on sticky-ad horizontal scroll event.
+   * Dismiss sticky-ad after scroll certain distance, or re-center sticky-ad.
+   * @private
+   */
+  onHorizontalScroll_() {
+    if (this.scrollTimeout) {
+      window.clearTimeout(this.scrollTimeout);
+    }
+    if (this.element.scrollLeft > this.viewportWidth_ * 0.35) {
+      this.deferMutate(() => {
+        this.positionInProgress = true;
+        this.element.classList.add('-amp-sticky-ad-delete');
+        timer.delay(() => {
+          toggle(this.element, false);
+          this.viewport_.updatePaddingBottom(0);
+        }, 500);
+        this.removeOnHorizontalListener_();
+        return;
+      });
+      // TODO: UX? Delete icon?
+    }
+    this.scrollTimeout = window.setTimeout(() => {
+      if (this.element.scrollLeft != 0) {
+        this.deferMutate(() => {
+          this.centerElement();
+        });
+      }
+    }, 150);
+  }
+
+  /**
+   * Function to re-center sticky-ad.
+   * @private
+   */
+  centerElement() {
+    if (this.positionInProgress) {
+      return;
+    }
+    this.poisitioningInProgress = true;
+    this.vsync_.mutatePromise(() => {
+      setStyles(this.element, {
+        'overflowX': 'hidden',
+      });
+      this.element.scrollLeft = 0;
+    }).then(() => {
+      this.vsync_.mutate(() => {
+        setStyles(this.element, {
+          'overflowX': 'scroll',
+        });
+        this.positionInProgress_ = false;
+      });
+    });
   }
 }
 
