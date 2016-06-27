@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
@@ -113,7 +114,7 @@ class AmpStickyAd extends AMP.BaseElement {
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
-        // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
+        this.addCloseButton_();
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
@@ -124,6 +125,32 @@ class AmpStickyAd extends AMP.BaseElement {
         }, 1000);
       });
     }
+  }
+
+  /**
+   * The function that add a close button to sticky ad
+   * @private
+   */
+  addCloseButton_() {
+    const closeButton = this.getWin().document.createElement('button');
+    closeButton.classList.add('-amp-sticky-ad-close-button');
+    closeButton.setAttribute('aria-label',
+        this.element.getAttribute('data-close-button-aria-label') || 'Close');
+    closeButton.textContent = '\u00D7';
+    const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
+    closeButton.addEventListener('click', boundOnCloseButtonClick);
+    this.element.appendChild(closeButton);
+  }
+
+  /**
+   * The listener function that listen to click event and dismiss sticky ad
+   * @private
+   */
+  onCloseButtonClick_() {
+    this.vsync_.mutate(() => {
+      removeElement(this.element);
+      this.viewport_.updatePaddingBottom(0);
+    });
   }
 }
 
