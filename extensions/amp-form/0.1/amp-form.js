@@ -206,7 +206,7 @@ function reportValidity(state) {
  * @param {!HTMLFormElement} form
  */
 function reportFormValidity(form) {
-  const inputs = toArray(form.querySelectorAll('input,select,textarea'));
+  const inputs = form.querySelectorAll('input,select,textarea');
   for (let i = 0; i < inputs.length; i++) {
     if (!inputs[i].checkValidity()) {
       reportInputValidity(inputs[i]);
