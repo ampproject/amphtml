@@ -274,12 +274,13 @@ function installSubmissionHandlers(win) {
 
 /**
  * @param {!Window} win
+ * @private visible for testing.
  */
-function installAmpForm(win) {
+export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(window);
+        validationBubble = new ValidationBubble(win);
         installSubmissionHandlers(win);
       });
     }

@@ -18,6 +18,9 @@ import {vsyncFor} from '../../../src/vsync';
 import {viewportFor} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
 
+/** @type {string} */
+const OBJ_PROP = '__BUBBLE_OBJ';
+
 export class ValidationBubble {
 
   /**
@@ -35,6 +38,7 @@ export class ValidationBubble {
     /** @private @const {!HTMLDivElement} */
     this.bubbleElement_ = win.document.createElement('div');
     this.bubbleElement_.classList.add('-amp-validation-bubble');
+    this.bubbleElement_[OBJ_PROP] = this;
     win.document.body.appendChild(this.bubbleElement_);
   }
 
