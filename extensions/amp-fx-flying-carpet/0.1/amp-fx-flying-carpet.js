@@ -54,11 +54,13 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     this.children_ = this.getRealChildren();
 
     /**
-     * The number of children left that ares still "good". If no more are left,
-     * we attempt to collapse the flying carpet.
+     * The number of non-empty child nodes left that are still "good". If no
+     * more are left, we attempt to collapse the flying carpet.
+     * Note that this may not be the number for child elements, since Text also
+     * appears inside the flying carpet.
      * @private
      */
-    this.totalChildren_ = childNodes.length;
+    this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     /**
      * A cached reference to the container, used to set its width to match
@@ -133,6 +135,28 @@ class AmpFlyingCarpet extends AMP.BaseElement {
         this.attemptChangeHeight(0, () => this./*REVIEW*/collapse());
       }
     }
+  }
+
+  /**
+   * Determines the child nodes that are "visible". We purposefully ignore Text
+   * nodes that only contain whitespace since they do not contribute anything
+   * visually, only their surrounding Elements or non-whitespace Texts do.
+   * @param {!Array<!Node>} nodes
+   * @private
+   */
+  visibileChildren_(nodes) {
+    return nodes.filter(node => {
+      if (node.nodeType === /* Element */1) {
+        return true;
+      }
+
+      if (node.nodeType === /* Text */3) {
+        // Is there a non-whitespace character?
+        return /\S/.test(node.textContent);
+      }
+
+      return false;
+    });
   }
 }
 

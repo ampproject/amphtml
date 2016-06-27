@@ -157,11 +157,15 @@ describe('amp-fx-flying-carpet', () => {
     let img;
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
+      // Usually, the children appear on a new line with indentation
+      const pretext = iframe.doc.createTextNode('\n  ');
       img = iframe.doc.createElement('amp-img');
       img.setAttribute('src', '/base/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
-      return [img];
+      // Usually, the closing node appears on a new line
+      const posttext = iframe.doc.createTextNode('\n');
+      return [pretext, img, posttext];
     }).then(flyingCarpet => {
       sandbox.stub(
         flyingCarpet.implementation_,
