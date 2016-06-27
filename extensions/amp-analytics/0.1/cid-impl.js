@@ -121,6 +121,8 @@ class Cid {
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
+      return viewerFor(this.win).whenFirstVisible();
+    }).then(() => {
       return getExternalCid(this, getCidStruct,
           opt_persistenceConsent || consent);
     });

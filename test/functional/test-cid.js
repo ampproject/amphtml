@@ -33,6 +33,7 @@ describe('cid', () => {
   let storage;
   let cid;
   let viewerBaseCidStub;
+  let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
 
@@ -41,6 +42,7 @@ describe('cid', () => {
     isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    whenFirstVisible = Promise.resolve();
     storage = {};
     fakeWin = {
       localStorage: {
@@ -73,6 +75,9 @@ describe('cid', () => {
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
+    });
+    sandbox.stub(viewer, 'whenFirstVisible', function() {
+      return whenFirstVisible;
     });
     viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
@@ -272,6 +277,18 @@ describe('cid', () => {
         });
       });
     });
+  });
+
+  it('should wait until after pre-rendering', () => {
+    let nonce = 'not visible';
+    whenFirstVisible = timer.promise(100).then(() => {
+      nonce = 'visible';
+    });
+    const p = cid.get('test', hasConsent).then(unusedC => {
+      expect(nonce).to.equal('visible');
+    });
+    clock.tick(100);
+    return p;
   });
 
   it('should wait for consent', () => {
