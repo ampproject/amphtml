@@ -15,11 +15,12 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {AmpForm} from '../amp-form';
+import {AmpForm, installAmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describe('amp-form', () => {
 
@@ -28,7 +29,9 @@ describe('amp-form', () => {
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-form', true);
       installTemplatesService(iframe.win);
+      installAmpForm(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
       const ampForm = new AmpForm(form);
       return ampForm;
@@ -37,6 +40,7 @@ describe('amp-form', () => {
 
   function getForm(doc = document, button1 = true, button2 = false) {
     const form = doc.createElement('form');
+    form.setAttribute('method', 'POST');
 
     const nameInput = doc.createElement('input');
     nameInput.setAttribute('name', 'name');
@@ -95,17 +99,121 @@ describe('amp-form', () => {
     expect(form.addEventListener.calledWith('submit')).to.be.true;
   });
 
-  it('should do nothing if defaultPrevented', () => {
+  it('should do nothing if already submitted', () => {
     const form = getForm();
-    form.setAttribute('action-xhr', 'https://example.com');
+    const ampForm = new AmpForm(form);
+    ampForm.state_ = 'submitting';
+    const event = {
+      target: form,
+      preventDefault: sandbox.spy(),
+    };
+    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.spy(form, 'checkValidity');
+    ampForm.handleSubmit_(event);
+    expect(event.preventDefault.called).to.be.true;
+    expect(form.checkValidity.called).to.be.false;
+    expect(ampForm.xhr_.fetchJson.called).to.be.false;
+  });
+
+  it('should respect novalidate on a form', () => {
+    const form = getForm();
+    form.setAttribute('novalidate', '');
     const ampForm = new AmpForm(form);
     const event = {
       target: form,
       preventDefault: sandbox.spy(),
-      defaultPrevented: true,
     };
+    sandbox.spy(form, 'checkValidity');
+    ampForm.xhrAction_ = null;
     ampForm.handleSubmit_(event);
     expect(event.preventDefault.called).to.be.false;
+    expect(form.checkValidity.called).to.be.false;
+  });
+
+  it('should check validity and report when invalid', () => {
+    return getAmpForm().then(ampForm => {
+      const form = ampForm.form_;
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      form.appendChild(emailInput);
+      sandbox.spy(form, 'checkValidity');
+      sandbox.spy(ampForm.xhr_, 'fetchJson');
+
+      const event = {
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+      };
+
+      ampForm.vsync_ = {
+        run: (task, state) => {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+        },
+      };
+
+      const bubbleEl = ampForm.win_.document.querySelector(
+          '.-amp-validation-bubble');
+      const validationBubble = bubbleEl['__BUBBLE_OBJ'];
+      sandbox.spy(validationBubble, 'show');
+      sandbox.spy(validationBubble, 'hide');
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault.called).to.be.true;
+      expect(form.checkValidity.called).to.be.true;
+      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+
+      const showCall1 = validationBubble.show.getCall(0);
+      expect(showCall1.args[0]).to.equal(emailInput);
+      expect(showCall1.args[1]).to.not.be.null;
+
+      // Check bubble would show with a new message when user
+      // change its content.
+      emailInput.value = 'cool';
+      emailInput.dispatchEvent(new Event('keyup'));
+      const showCall2 = validationBubble.show.getCall(1);
+      expect(showCall2.args[0]).to.equal(emailInput);
+      expect(showCall2.args[1]).to.not.be.null;
+      expect(showCall2.args[1]).to.not.equal(showCall1.args[0]);
+      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+
+      // Check bubble would hide when input becomes valid.
+      emailInput.value = 'cool@bea.ns';
+      emailInput.dispatchEvent(new Event('keyup'));
+      expect(validationBubble.hide.calledOnce).to.be.true;
+      expect(validationBubble.show.calledTwice).to.be.true;
+
+      // Check that we'd hide the bubble when user move out.
+      emailInput.dispatchEvent(new Event('blur'));
+      expect(validationBubble.hide.calledTwice).to.be.true;
+
+      // Check that we no longer have event listeners on the input.
+      emailInput.dispatchEvent(new Event('blur'));
+      expect(validationBubble.hide.calledThrice).to.be.false;
+      emailInput.dispatchEvent(new Event('keyup'));
+      expect(validationBubble.show.calledThrice).to.be.false;
+
+      // Check that we're removing previously added listeners
+      // everytime the form is submitted.
+      emailInput.value = 'cool';
+      sandbox.spy(emailInput, 'removeEventListener');
+      ampForm.handleSubmit_(event);
+      expect(emailInput.removeEventListener.calledTwice).to.be.true;
+      expect(emailInput.removeEventListener.calledWith('blur')).to.be.true;
+      expect(emailInput.removeEventListener.calledWith('keyup')).to.be.true;
+
+      ampForm.handleSubmit_(event);
+      expect(emailInput.removeEventListener.callCount).to.equal(4);
+
+      // Check xhr goes through when form is valid.
+      emailInput.value = 'cool@bea.ns';
+      ampForm.handleSubmit_(event);
+      expect(ampForm.xhr_.fetchJson.called).to.be.true;
+    });
   });
 
   it('should call fetchJson with the xhr action and form data', () => {
@@ -114,7 +222,6 @@ describe('amp-form', () => {
       const event = {
         target: ampForm.form_,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
@@ -124,7 +231,7 @@ describe('amp-form', () => {
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
-      expect(config.method).to.equal('GET');
+      expect(config.method).to.equal('POST');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
     });
@@ -140,7 +247,6 @@ describe('amp-form', () => {
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       const button1 = form.querySelectorAll('input[type=submit]')[0];
       const button2 = form.querySelectorAll('input[type=submit]')[1];
@@ -181,7 +287,6 @@ describe('amp-form', () => {
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
@@ -210,7 +315,6 @@ describe('amp-form', () => {
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       const button1 = form.querySelectorAll('input[type=submit]')[0];
       const button2 = form.querySelectorAll('input[type=submit]')[1];
@@ -262,7 +366,6 @@ describe('amp-form', () => {
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       fetchJsonRejecter({responseJson: {message: 'hello there'}});
@@ -310,7 +413,6 @@ describe('amp-form', () => {
       const event = {
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       fetchJsonResolver({'message': 'What What'});
