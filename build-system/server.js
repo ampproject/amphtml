@@ -278,13 +278,14 @@ function getLiveBlogItem() {
 }
 
 // Will match live-blog max/min/none
-app.use('/examples.build/live-blog.amp.max.html', function(req, res, next) {
-  if ('amp_latest_update_time' in req.query) {
-    res.setHeader('Content-Type', 'text/html');
-    res.end(getLiveBlogItem());
-    return;
-  }
-  next();
+app.use('/examples.build/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+  function(req, res, next) {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItem());
+      return;
+    }
+    next();
 });
 
 // Proxy with unminified JS.

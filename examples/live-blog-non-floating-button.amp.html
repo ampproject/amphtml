@@ -129,31 +129,6 @@
       background: yellow;
     }
 
-    #live-list-update-button {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .button {
-      border: none;
-      border-radius: 2px;
-
-      color: #fafafa;
-      height: 26px;
-      min-width: 32px;
-      padding: 0 16px;
-      margin: 0 16px;
-      text-transform: uppercase;
-      letter-spacing: 0;
-      cursor: pointer;
-      vertical-align: middle;
-      line-height: 26px;
-      text-align: center;
-      background: #3f51b5;
-    }
-
     .amp-live-list-item {
       border: 1px solid #dcdcdc;
       border-width: 1px 0 0;
@@ -162,6 +137,40 @@
     .social-box {
       text-align: right;
       margin: 10px 0;
+    }
+
+    .update-panel {
+      background-color: #f4f4f4;
+      border: 1px #dcdcdc solid;
+      height: 40px;
+      cursor: pointer;
+    }
+
+    .update-panel:hover {
+      background-color: #dcdcdc;
+    }
+
+    #live-blog-1 > .update-panel.amp-active {
+      display: flex;
+      overflow-y: hidden;
+      height: 100px;
+      max-height: 150px;
+      transition-property: height;
+      transition-duration: .5s;
+      transition-timing-function: ease-in;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #live-blog-1 > .update-panel.amp-hidden {
+      max-height: 0;
+      overflow: hidden;
+      /*
+        We need this so that animation is triggered since by default the
+        update button is `display: none`
+       */
+      display: flex;
+      border-width: 0;
     }
 
     amp-live-list > [update] {
@@ -198,8 +207,10 @@
             data-poll-interval="15000"
             data-max-items-per-page="5"
             id="live-blog-1">
-            <button id="live-list-update-button" update class="button"
-                on="tap:live-blog-1.update">You have updates</button>
+            <div id="live-list-update-button" update class="update-panel"
+              on="tap:live-blog-1.update">
+              <a href="#">You have updates</a>
+            </div>
             <div items>
               <div id="live-blog-item-1" data-sort-time="1466669033418">
                 <h3 class="headline">
