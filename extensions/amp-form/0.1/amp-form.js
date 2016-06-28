@@ -26,12 +26,9 @@ import {templatesFor} from '../../../src/template';
 import {removeElement, childElementByAttr} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
-<<<<<<< ec96f9c220cd99848281596b37987a70ace1ac14
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
-=======
 import {actionServiceFor} from '../../../src/action';
->>>>>>> Expose submit event with on=submit:el.action syntax.
 
 /** @type {string} */
 const TAG = 'amp-form';
