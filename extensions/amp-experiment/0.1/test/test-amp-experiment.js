@@ -16,6 +16,7 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
+import * as variant from '../variant';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -115,9 +116,11 @@ describe('amp-experiment', () => {
 
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
-    const stub = sandbox.stub(experiment, 'getVariantAllocation_');
-    stub.withArgs(config['experiment-1']).returns(Promise.resolve('variant-a'));
-    stub.withArgs(config['experiment-2']).returns(Promise.resolve('variant-d'));
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(
+        win, config['experiment-1']).returns(Promise.resolve('variant-a'));
+    stub.withArgs(
+        win, config['experiment-2']).returns(Promise.resolve('variant-d'));
 
     experiment.buildCallback();
     return experiment.experimentVariants.then(() => {
