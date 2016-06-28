@@ -21,14 +21,19 @@ import {timer} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
 import {toggleExperiment} from '../../../../src/experiments';
+import {installDocService,} from
+    '../../../../src/service/ampdoc-impl';
+import {installActionServiceForDoc,} from
+    '../../../../src/service/action-impl';
 
 describe('amp-form', () => {
 
   let sandbox;
-  installTemplatesService(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
+      const docService = installDocService(iframe.win, /* isSingleDoc */ true);
+      installActionServiceForDoc(docService.getAmpDoc());
       toggleExperiment(iframe.win, 'amp-form', true);
       installTemplatesService(iframe.win);
       installAmpForm(iframe.win);
@@ -62,7 +67,12 @@ describe('amp-form', () => {
 
     return form;
   }
+
   beforeEach(() => {
+    installTemplatesService(window);
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
+
     sandbox = sinon.sandbox.create();
   });
 
@@ -104,13 +114,14 @@ describe('amp-form', () => {
     const ampForm = new AmpForm(form);
     ampForm.state_ = 'submitting';
     const event = {
+      stopImmediatePropagation: sandbox.spy(),
       target: form,
       preventDefault: sandbox.spy(),
     };
     sandbox.spy(ampForm.xhr_, 'fetchJson');
     sandbox.spy(form, 'checkValidity');
     ampForm.handleSubmit_(event);
-    expect(event.preventDefault.called).to.be.true;
+    expect(event.stopImmediatePropagation.called).to.be.true;
     expect(form.checkValidity.called).to.be.false;
     expect(ampForm.xhr_.fetchJson.called).to.be.false;
   });
@@ -120,6 +131,7 @@ describe('amp-form', () => {
     form.setAttribute('novalidate', '');
     const ampForm = new AmpForm(form);
     const event = {
+      stopImmediatePropagation: sandbox.spy(),
       target: form,
       preventDefault: sandbox.spy(),
     };
@@ -142,6 +154,7 @@ describe('amp-form', () => {
       sandbox.spy(ampForm.xhr_, 'fetchJson');
 
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: ampForm.form_,
         preventDefault: sandbox.spy(),
       };
@@ -163,7 +176,7 @@ describe('amp-form', () => {
       sandbox.spy(validationBubble, 'show');
       sandbox.spy(validationBubble, 'hide');
       ampForm.handleSubmit_(event);
-      expect(event.preventDefault.called).to.be.true;
+      expect(event.stopImmediatePropagation.called).to.be.true;
       expect(form.checkValidity.called).to.be.true;
       expect(ampForm.xhr_.fetchJson.called).to.be.false;
 
@@ -220,6 +233,7 @@ describe('amp-form', () => {
     return getAmpForm().then(ampForm => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: ampForm.form_,
         preventDefault: sandbox.spy(),
       };
@@ -245,6 +259,7 @@ describe('amp-form', () => {
       }));
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
@@ -260,7 +275,8 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
-      expect(event.preventDefault.callCount).to.equal(3);
+      expect(event.preventDefault.callCount).to.equal(1);
+      expect(event.stopImmediatePropagation.callCount).to.equal(2);
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
@@ -283,8 +299,10 @@ describe('amp-form', () => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
+      sandbox.spy(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
@@ -300,6 +318,9 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.contain('amp-form-submit-success');
+        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger.calledWith(
+            form, 'submit-success', null)).to.be.true;
       });
     });
   });
@@ -311,8 +332,10 @@ describe('amp-form', () => {
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
           }));
+      sandbox.spy(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
@@ -336,9 +359,13 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
+        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger.calledWith(
+            form, 'submit-error', null)).to.be.true;
       });
     });
   });
+
 
   it('should allow rendering responses through templates', () => {
     return getAmpForm(true).then(ampForm => {
@@ -364,6 +391,7 @@ describe('amp-form', () => {
             resolve(renderedTemplate);
           }));
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };
@@ -411,6 +439,7 @@ describe('amp-form', () => {
             resolve(newRender);
           }));
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
       };

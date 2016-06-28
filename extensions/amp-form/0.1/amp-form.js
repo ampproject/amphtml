@@ -28,7 +28,7 @@ import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
-import {actionServiceFor} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/action';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -66,7 +66,7 @@ export class AmpForm {
     this.xhr_ = xhrFor(this.win_);
 
     /** @const @private {!../../../src/action-impl.Action} */
-    this.actions_ = actionServiceFor(this.win_);
+    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
@@ -114,6 +114,11 @@ export class AmpForm {
    * @private
    */
   handleSubmit_(e) {
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.stopImmediatePropagation();
+      return;
+    }
+
     const shouldValidate = !this.form_.hasAttribute('novalidate');
     const isInvalid = shouldValidate &&
         this.form_.checkValidity && !this.form_.checkValidity();
@@ -124,10 +129,6 @@ export class AmpForm {
         measure: undefined,
         mutate: reportValidity,
       }, {form: this.form_});
-    }
-
-    if (this.state_ == FormState_.SUBMITTING) {
-      e.stopImmediatePropagation();
       return;
     }
 
@@ -141,13 +142,13 @@ export class AmpForm {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
+        this.actions_.trigger(this.form_, 'submit-success', null);
         this.setState_(FormState_.SUBMIT_SUCCESS);
         this.renderTemplate_(response || {});
-        this.actions_.trigger(this.form_, 'submit-success', null);
       }).catch(error => {
+        this.actions_.trigger(this.form_, 'submit-error', null);
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
-        this.actions_.trigger(this.form_, 'submit-error', null);
         rethrowAsync('Form submission failed:', error);
       });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {

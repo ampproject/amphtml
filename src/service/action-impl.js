@@ -119,7 +119,7 @@ export class ActionService {
         }
       });
     } else if (name == 'submit') {
-      this.win.document.addEventListener('submit', event => {
+      this.ampdoc.getRootNode().addEventListener('submit', event => {
         this.trigger(event.target, 'submit', event);
       });
     }
