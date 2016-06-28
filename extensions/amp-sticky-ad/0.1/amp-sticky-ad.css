@@ -29,10 +29,16 @@ amp-sticky-ad {
 
 .-amp-sticky-ad-layout {
   display: flex;
+  visibility: hidden !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: visible !important;
+  transform: translateZ(0) !important;
+}
+
+.-amp-sticky-ad-visible {
+  visibility: visible !important;
 }
 
 .amp-sticky-ad-loaded {
@@ -48,13 +54,12 @@ amp-sticky-ad {
   display: block;
   height: 32px;
   width: 32px;
-  background-color: #fff;
+  background-color: rgba(255,255,255,0.6);
   color: grey;
   font-size: 26px;
   line-height: 26px;
   vertical-align: middle;
   padding: 0;
-  opacity: 0.5;
   top: -32px;
   right: 0;
 }

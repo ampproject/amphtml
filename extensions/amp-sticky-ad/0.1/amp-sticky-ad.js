@@ -39,7 +39,7 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
-
+    toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
     user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
@@ -47,12 +47,16 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @const @private {!Element} */
     this.ad_ = children[0];
+    this.setAsOwner(this.ad_);
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
+
+    /** @const @private {boolean} */
+    this.visible_ = false;
 
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
@@ -69,7 +73,17 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
+    // Reschedule layout for ad if layout sticky-ad again.
+    if (this.visible_) {
+      this.updateInViewport(this.ad_, true);
+      this.scheduleLayout(this.ad_);
+    }
     return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    return true;
   }
 
   /** @override */
@@ -107,8 +121,10 @@ class AmpStickyAd extends AMP.BaseElement {
     if (scrollTop > viewportHeight) {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
-        toggle(this.element, true);
+        this.visible_ = true;
+        this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
+        this.updateInViewport(this.ad_, true);
         this.scheduleLayout(this.ad_);
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
