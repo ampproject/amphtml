@@ -86,9 +86,11 @@ export class AmpAdApiHandler {
     this.unlisteners_.push(listenFor(this.iframe_, 'embed-size', data => {
       this.updateSize_(data.width, data.height);
     }, this.is3p_));
-    // TODO(tdrl,keithwrightbos): This will not work for A4A with an AMP
-    // creative as it will not expect having to send the render-start message.
-    this.iframe_.style.visibility = 'hidden';
+    if (this.is3p_) {
+      // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
+      // creative as it will not expect having to send the render-start message.
+      this.iframe_.style.visibility = 'hidden';
+    }
     listenForOnce(this.iframe_, 'render-start', () => {
       this.iframe_.style.visibility = '';
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
