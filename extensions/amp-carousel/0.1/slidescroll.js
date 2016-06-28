@@ -140,17 +140,17 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * Handles scroll on the slides container.
-   * @param {!Event} event Event object.
+   * @param {!Event} unusedEvent Event object.
    * @private
    */
-  scrollHandler_(event) {
+  scrollHandler_(unusedEvent) {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (currentScrollLeft != this.previousScrollLeft_ &&
         !this.hasNativeSnapPoints_) {
-      // TODO(sriramkrish85)Handle custom scroll here.
+      // TODO(sriramkrish85): Handle custom scroll here.
     }
 
     // Timer that detects scroll end and/or end of snap scroll.
@@ -201,11 +201,13 @@ export class AmpSlideScroll extends BaseCarousel {
       newIndex = (newIndex < 0) ? 0 :
           (newIndex >= this.noOfSlides_) ? this.noOfSlides_ - 1 : newIndex;
     }
-    this.vsync_.mutatePromise(() => {
+    this.vsync_.mutate(() => {
+      // Make the container non scrollable to stop scroll events.
       this.slidesContainer_.classList.add('no-scroll');
+      // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
-    }).then(() => {
       this.vsync_.mutate(() => {
+        // Make the container scrollable again to enable user swiping.
         this.slidesContainer_.classList.remove('no-scroll');
         this.snappingInProgress_ = false;
       });

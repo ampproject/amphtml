@@ -577,14 +577,6 @@ describe('SlideScroll', () => {
         const showSlideSpy = sandbox.spy(impl, 'showSlide_');
 
         impl.vsync_ = {
-          mutatePromise: cb => {
-            cb();
-            return {
-              then: cb2 => {
-                cb2();
-              },
-            };
-          },
           mutate: cb => {
             cb();
           },
