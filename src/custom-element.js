@@ -920,7 +920,7 @@ function createBaseAmpElementProto(win) {
    * element is no longer present.
    */
   ElementProto.collapse = function() {
-    this.implementation_.collapse();
+    this.implementation_./*OK*/collapse();
   };
 
   /**
