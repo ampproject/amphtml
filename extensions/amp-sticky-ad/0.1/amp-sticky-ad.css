@@ -24,7 +24,7 @@ amp-sticky-ad {
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
   box-sizing: border-box;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.6);
 }
 
 .-amp-sticky-ad-layout {
@@ -50,35 +50,23 @@ amp-sticky-ad {
 }
 
 .amp-sticky-ad-close-button {
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAAXNSR0IArs4c6QAAAAlwSFlzAAALEwAACxMBAJqcGAAAAVlpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDUuNC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KTMInWQAAAEhQTFRFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAq4SsmwAAABd0Uk5TAAECAwQFoqWnqKqsra6vsbKztPv8/f6dEhNgAAABC0lEQVQ4y3WS27aCMBBDgw7qgQJqM83//+l54CKUgUealax2bxSqAwynz4BBLGBx/QUJA5K8EHJnkDA0SXQXPspBwtD0olMD7m9l1gkDkkgqAbhNysyHhKFJyj6ft7CpWjE0vbJn9Q0MaOuVpT8rNeuP2z4x98/7S2WL+6TsWS/Aqv4tsXUASfRf/5pYVjpgXO93eJhlhXo8Reehf72aTaK75M6qf1v5ioUsrvEKbyeWQj3DcxjwmgOPq4JRPk90oR8Lf/HKj5n/qwsTG/8R+IZ+7PjHfvz4WOTHgX/gR8X/7EfN/+BHyP/kx4l/u1sZQv6bHx0u+C+3dYHFT35tK16IQg0h3hb3j1j+Adk9Hwu5QFblAAAAAElFTkSuQmCC');
+  background-size: 80%;
+  background-position: 3px;
+  background-repeat: no-repeat;
+  background-color: #fff;
+  visibility: hidden;
   position: absolute;
-  display: block;
   height: 32px;
   width: 32px;
-  background-color: #000;
-  opacity: 0.6;
-  padding: 0;
-  top: -34px;
+  top: -32px;
   right: 0px;
-  border-width: 1px;
-  border-color: #C0C0C0;
-  border-style: solid;
+  border: 1px, solid, #C0C0C0;
 }
 
-.amp-sticky-ad-close-button:before {
-  content: '\0000D7';
-  font-size: 40px;
-  color: #fff;
-  position: relative;
-  top: -10px;
-}
 
-.amp-sticky-ad-close-button-loaded {
-  background-color: #fff;
-  opacity: 1;
-}
-
-.amp-sticky-ad-close-button-loaded:before {
-  color: #000;
+.amp-sticky-ad-loaded .amp-sticky-ad-close-button {
+  visibility: visible;
 }
 
 [dir=rtl] .amp-sticky-ad-close-button {
