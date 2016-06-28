@@ -34,9 +34,6 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
-    /** @private @const {boolean} */
-    this.hasLooping_ = this.element.hasAttribute('loop');
-
     /** @private @const {!boolean} */
     this.hasNativeSnapPoints_ = (
         getStyle(this.element, 'scrollSnapType') != undefined);
@@ -150,11 +147,13 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
-    const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
+    const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (currentScrollLeft != this.previousScrollLeft_ &&
         !this.hasNativeSnapPoints_) {
-      //Handle custom scroll here.
+      // TODO(sriramkrish85)Handle custom scroll here.
     }
+
+    // Timer that detects scroll end and/or end of snap scroll.
     this.scrollTimeout_ = timer.delay(() => {
       if (this.snappingInProgress_) {
         return;
