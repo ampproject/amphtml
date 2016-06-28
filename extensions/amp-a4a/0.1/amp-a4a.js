@@ -149,6 +149,9 @@ export class AmpA4A extends AMP.BaseElement {
 
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
+
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
   }
 
   /** @override */
@@ -336,24 +339,26 @@ export class AmpA4A extends AMP.BaseElement {
     if (!this.layoutMeasureExecuted_) {
       return true;
     }
-    // Iframe or shadow root attached as children.  Cannot delete shadowRoot
-    // but creating new one clears.
-    if (this.element.shadowRoot) {
-      this.element.shadowRoot./*OK*/innerHTML = '';
-    } else {
-      removeChildren(this.element);
-    }
+    this.vsync_.mutate(() => {
+      // Iframe or shadow root attached as children.  Cannot delete shadowRoot
+      // but creating new one clears.
+      if (this.element.shadowRoot) {
+        this.element.shadowRoot./*OK*/innerHTML = '';
+      } else {
+        removeChildren(this.element);
+      }
 
-    this.stylesheets_.forEach(removeElement);
-    this.stylesheets_ = [];
-    this.adPromise_ = null;
+      this.stylesheets_.forEach(removeElement);
+      this.stylesheets_ = [];
+      this.adPromise_ = null;
+      this.adUrl_ = null;
+      this.rendered_ = false;
+      this.timerId_ = 0;
+      this.intersectionObserver_ = null;
+      this.layoutMeasureExecuted_ = false;
+    });
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
-    this.adUrl_ = null;
-    this.rendered_ = false;
-    this.timerId_ = 0;
-    this.layoutMeasureExecuted_ = false;
-    this.intersectionObserver_ = null;
     return true;
   }
 
@@ -480,16 +485,35 @@ export class AmpA4A extends AMP.BaseElement {
           // the doc.
           const cssBlock = this.formatCSSBlock_(creative, creativeMetaData);
           const bodyBlock = this.formatBody_(creative, creativeMetaData);
-          // Copy fonts to host document head.
-          this.relocateFonts_(creativeMetaData);
-          // Add extensions to head.
-          this.addCreativeExtensions_(creativeMetaData);
-          // Finally, add body and re-formatted CSS styling to the shadow root.
-          const shadowRoot =
-              this.element.shadowRoot || this.element.createShadowRoot();
-          shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
-          this.rendered_ = true;
-          this.onAmpCreativeShadowDomRender();
+          // Note: We schedule DOM mutations via the Vsync handler system to
+          // avoid user-visible rewrites.  However, that means that rendering
+          // is being handled outside this promise chain.  There are two
+          // consequences, both *probably* minor:
+          // 1) If everything succeeds, the promise chain will resolve(true)
+          //    before any content is actually rendered.  Thus, the enclosing
+          //    layoutCallback will think that stuff is rendered before it
+          //    actually is.  This shouldn't be a problem, though, because
+          //    vsync will *eventually* get around to rendering it.
+          // 2) If any of the calls in this block fails, they will do so outside
+          //    the try/catch block, so we won't have any notification of
+          //    failure.  As a result, the outside world will see
+          //    Promise.resolve(true), even though things have failed.  That
+          //    would cause render-in-iframe to be skipped, even though
+          //    render-in-DOM failed, and no ad would be displayed.  However,
+          //    all of the enclosed mutations are fairly simple and unlikely
+          //    to fail.
+          this.vsync_.mutate(() => {
+            // Copy fonts to host document head.
+            this.relocateFonts_(creativeMetaData);
+            // Add extensions to head.
+            this.addCreativeExtensions_(creativeMetaData);
+            // Finally, add body and re-formatted CSS styling to the shadow root.
+            const shadowRoot =
+                this.element.shadowRoot || this.element.createShadowRoot();
+            shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
+            this.rendered_ = true;
+            this.onAmpCreativeShadowDomRender();
+          });
           return Promise.resolve(true);
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
@@ -522,9 +546,11 @@ export class AmpA4A extends AMP.BaseElement {
     // modified url.
     iframe.setAttribute(
       'src', xhrFor(this.getWin()).getCorsUrl(this.getWin(), this.adUrl_));
-    this.intersectionObserver_ =
-        new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
-    this.element.appendChild(iframe);
+    this.vsync_.mutate(() => {
+      this.intersectionObserver_ =
+          new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
+      this.element.appendChild(iframe);
+    });
   }
 
   /**
