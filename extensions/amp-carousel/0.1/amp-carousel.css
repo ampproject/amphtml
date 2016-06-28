@@ -86,7 +86,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   position: relative !important;
   white-space: nowrap !important;
   width: 100% !important;
-  scroll-snap-destination: 50% 50% !important;
   scroll-snap-type: mandatory !important;
   -webkit-overflow-scrolling: touch !important;
 }
@@ -102,7 +101,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   height: 100% !important;
   justify-content: center !important;
   position: relative !important;
-  scroll-snap-coordinate: 50% 50% !important;
+  scroll-snap-coordinate: 0 0 !important;
   width: 100% !important;
 }
 
