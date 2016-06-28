@@ -273,7 +273,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
           this, this.element, this.noContentHandler_);
-        return this.apiHandler_.startUp(this.iframe_);
+        return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
     return loadPromise(this.iframe_);

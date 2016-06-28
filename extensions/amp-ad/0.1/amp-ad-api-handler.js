@@ -84,7 +84,22 @@ export class AmpAdApiHandler {
       this.element_.creativeId = info.id;
     }, this.is3p_);
     this.unlisteners_.push(listenFor(this.iframe_, 'embed-size', data => {
-      this.updateSize_(data.width, data.height);
+      let newHeight, newWidth;
+      if (data.width !== undefined) {
+        newWidth = Math.max(this.element_./*OK*/offsetWidth +
+            data.width - this.iframe_./*OK*/offsetWidth, data.width);
+        this.iframe_.width = newWidth;
+        this.element_.setAttribute('width', newWidth);
+      }
+      if (data.height !== undefined) {
+        newHeight = Math.max(this.element_./*OK*/offsetHeight +
+            data.height - this.iframe_./*OK*/offsetHeight, data.height);
+        this.iframe_.height = newHeight;
+        this.element_.setAttribute('height', newHeight);
+      }
+      if (newHeight !== undefined || newWidth !== undefined) {
+        this.updateSize_(newHeight, newWidth);
+      }
     }, this.is3p_));
     if (this.is3p_) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
@@ -118,35 +133,35 @@ export class AmpAdApiHandler {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {number|undefined} width
    * @param {number|undefined} height
+   * @param {number|undefined} width
    * @private
    */
-  updateSize_(width, height) {
-    let newHeight, newWidth;
-    if (width !== undefined) {
-      newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          width - this.iframe_./*OK*/offsetWidth, width);
-      this.iframe_.width = newWidth;
-      this.element_.setAttribute('width', newWidth);
-    }
-    if (height !== undefined) {
-      newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          height - this.iframe_./*OK*/offsetHeight, height);
-      this.iframe_.height = newHeight;
-      this.element_.setAttribute('height', newHeight);
-    }
-    if (height !== undefined || height !== undefined) {
-      this.element_.attemptChangeSize(newHeight, newWidth, () => {
-        const targetOrigin =
-            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-        postMessage(
-            this.iframe_,
-            'embed-size-changed',
-            {requestedHeight: newHeight, requestedWidth: newWidth},
-            targetOrigin,
-            /* opt_is3P */ true);
-      });
+  updateSize_(height, width) {
+    this.baseInstance_.attemptChangeSize(height, width, () => {
+      const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+      postMessage(
+          this.iframe_,
+          'embed-size-changed',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p);
+    });
+  }
+
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  sendEmbedInfo_(inViewport) {
+    if (this.iframe_) {
+      const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+      postMessage(this.iframe_, 'embed-state', {
+        inViewport,
+        pageHidden: !this.viewer_.isVisible(),
+      }, targetOrigin, this.is3p_);
     }
   }
 
@@ -154,12 +169,6 @@ export class AmpAdApiHandler {
   viewportCallback(inViewport) {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(this.iframe_, 'embed-state', {
-        inViewport,
-        pageHidden: !this.baseInstance_.getViewer().isVisible(),
-      }, targetOrigin, this.is3p_);
     }
     this.sendEmbedInfo_(inViewport);
   }
