@@ -180,5 +180,5 @@ describe('amp-fx-flying-carpet', () => {
       expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
       expect(flyingCarpet.style.display).to.equal('none');
     });
-  })
+  });
 });

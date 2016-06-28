@@ -50,7 +50,7 @@ export class StandardActions {
       if (target.classList.contains('-amp-element')) {
         target./*OK*/collapse();
       } else {
-        toggle(target, false)
+        toggle(target, false);
       }
     });
   }
