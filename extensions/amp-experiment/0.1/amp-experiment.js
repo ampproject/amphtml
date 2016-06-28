@@ -40,7 +40,7 @@ export class AmpExperiment extends AMP.BaseElement {
     }
 
     const config = this.getConfig_();
-    const results = {};
+    const results = Object.create(null);
     this.experimentVariants = Promise.all(
         Object.keys(config).map(experimentName => {
           return this.getVariantAllocation_(config[experimentName])
@@ -80,16 +80,14 @@ export class AmpExperiment extends AMP.BaseElement {
   /**
    * Adds the given experiment and variant pairs to body element as attributes
    * and values.
-   * @param {!JSONType} experiments
+   * @param {!Object<string, string>} experiments
    * @private
    */
   addToBody_(experiments) {
     const doc = this.getWin().document;
     waitForBody(doc, () => {
       for (const name in experiments) {
-        if (experiments.hasOwnProperty(name)) {
-          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
-        }
+        doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
       }
     });
   }
