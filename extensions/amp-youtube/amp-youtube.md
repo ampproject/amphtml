@@ -68,6 +68,8 @@ Keys and values will be URI encoded. Keys will be camel cased.
 
 See [Youtube Embedded Player Parameters](https://developers.google.com/youtube/player_parameters) for more parameter options for youtube.
 
+Because of limitations in mobile browsers, the `autoplay` param is currently not supported. Follow [this issue](https://github.com/ampproject/amphtml/issues/3799) for updates on autoplay support in AMP.
+
 ## Validation
 
 See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/validator-amp-youtube.protoascii) in the AMP validator specification.

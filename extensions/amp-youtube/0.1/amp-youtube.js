@@ -86,7 +86,7 @@ class AmpYoutube extends AMP.BaseElement {
       delete params['autoplay'];
       user.warn('Autoplay is currently not support with amp-youtube.');
     }
-    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
+    src = addParamsToUrl(src, params);
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
