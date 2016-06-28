@@ -166,8 +166,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!result) {
             return;
           }
-          addListener(this.getWin(), trigger,
-              this.handleEvent_.bind(this, trigger));
+
+          if (trigger['selector']) {
+            // Expand the selector using variable expansion.
+            trigger['selector'] = this.expandTemplate_(trigger['selector'],
+                trigger);
+            addListener(this.getWin(), trigger, this.handleEvent_.bind(this,
+                  trigger));
+
+          } else {
+            addListener(this.getWin(), trigger,
+                this.handleEvent_.bind(this, trigger));
+          }
         }));
       }
     }
