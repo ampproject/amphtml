@@ -105,7 +105,7 @@ function tests(name) {
           return new Promise((resolve, unusedReject) => {
             const impl = element.implementation_;
             impl.layoutCallback();
-            impl.updateSize_ = (newHeight, newWidth) => {
+            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
               expect(newWidth).to.equal(114);
               resolve(impl);
@@ -142,7 +142,7 @@ function tests(name) {
           return new Promise((resolve, unusedReject) => {
             const impl = element.implementation_;
             impl.layoutCallback();
-            impl.updateSize_ = (newHeight, newWidth) => {
+            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
               expect(newWidth).to.be.undefined;
               resolve(impl);
@@ -174,7 +174,7 @@ function tests(name) {
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
-          impl.updateSize_(217, 114);
+          impl.apiHandler_.updateSize_(217, 114);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
           expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
@@ -191,7 +191,7 @@ function tests(name) {
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
-          impl.updateSize_(217);
+          impl.apiHandler_.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
           expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
         });

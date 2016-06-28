@@ -19,6 +19,7 @@ import {
   decrementLoadingAds,
   incrementLoadingAds,
   isPositionFixed} from '../../amp-ad/0.1/amp-ad-3p-impl';
+import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
@@ -132,6 +133,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?string} */
     this.adUrl_ = null;
 
+    /** @private {?AmpAdApiHandler} */
+    this.apiHandler_ = null;
+
     /** @private {boolean} */
     this.rendered_ = false;
 
@@ -146,9 +150,6 @@ export class AmpA4A extends AMP.BaseElement {
      *    based creative injection.
      */
     this.stylesheets_ = [];
-
-    /** @private {IntersectionObserver} */
-    this.intersectionObserver_ = null;
   }
 
   /** @override */
@@ -215,8 +216,8 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @override */
   onLayoutMeasure() {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.apiHandler_) {
+      this.apiHandler_.onLayoutMeasure();
     }
     if (this.layoutMeasureExecuted_ || !verifySignatureIsAvailable()) {
       // onLayoutMeasure gets called multiple times.
@@ -353,10 +354,27 @@ export class AmpA4A extends AMP.BaseElement {
     this.rendered_ = false;
     this.timerId_ = 0;
     this.layoutMeasureExecuted_ = false;
-    this.intersectionObserver_ = null;
+    if (this.apiHandler_) {
+      this.apiHandler_.unlayoutCallback();
+      this.apiHandler_ = null;
+    }
     return true;
   }
 
+  /** @override  */
+  viewportCallback(inViewport) {
+    if (this.apiHandler_) {
+      this.apiHandler_.viewportCallback(inViewport);
+    }
+  }
+
+  /** @override  */
+  overflowCallback(overflown, requestedHeight, requestedWidth) {
+    if (this.apiHandler_) {
+      this.apiHandler_.overflowCallback(
+        overflown, requestedHeight, requestedWidth);
+    }
+  }
 
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
@@ -522,9 +540,10 @@ export class AmpA4A extends AMP.BaseElement {
     // modified url.
     iframe.setAttribute(
       'src', xhrFor(this.getWin()).getCorsUrl(this.getWin(), this.adUrl_));
-    this.intersectionObserver_ =
-        new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
-    this.element.appendChild(iframe);
+    // TODO(keithwrightbos): noContentCallback?
+    this.apiHandler_ = new AmpAdApiHandler(this, this.element);
+    // TODO(keithwrightbos): startup returns load event, do we need to wait?
+    this.apiHandler_.startUp(iframe, opt_isNonAmpCreative);
   }
 
   /**

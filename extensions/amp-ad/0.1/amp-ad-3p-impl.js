@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {removeElement} from '../../../src/dom';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getAdCid} from '../../../src/ad-cid';
 import {prefetchBootstrap} from '../../../src/3p-frame';
@@ -24,7 +25,7 @@ import {parseUrl} from '../../../src/url';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {getIframe} from '../../../src/3p-frame';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
 
 /** @const These tags are allowed to have fixed positioning */
@@ -155,6 +156,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    /** @private {?Element} */
+    this.iframe_ = null;
+
     /** @private {?AmpAdApiHandler} */
     this.apiHandler_ = null;
 
@@ -183,11 +187,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
-
-    /**
-     * @private @const
-     */
-    this.viewer_ = viewerFor(this.getWin());
   }
 
   /**
@@ -231,11 +230,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
-    // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.apiHandler_) {
+      this.apiHandler_.onLayoutMeasure();
     }
   }
 
@@ -244,9 +240,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   measureIframeLayoutBox_() {
-    if (this.apiHandler_ && this.apiHandler_.getIframe()) {
-      this.iframeLayoutBox_ =
-          this.getViewport().getLayoutRect(this.apiHandler_.getIframe());
+    if (this.iframe_) {
+      this.iframeLayoutBox_ = this.getViewport().getLayoutRect(this.iframe_);
     }
   }
 
@@ -254,7 +249,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
-    if (!this.apiHandler_ && !this.apiHandler_.getIframe()) {
+    if (!this.iframe_) {
       return super.getIntersectionElementLayoutBox();
     }
     if (!this.iframeLayoutBox_) {
@@ -265,7 +260,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.apiHandler_) {
+    if (!this.iframe_) {
       user.assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
@@ -274,70 +269,84 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         if (cid) {
           this.element.setAttribute('ampcid', cid);
         }
-        this.apiHandler_ = new AmpAdApiHandler(this.getWin(), this.element,
-            this);
-        return this.apiHandler_.startUp();
+        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+            this.element);
+        this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.noContentHandler_);
+        return this.apiHandler_.startUp(this.iframe_);
       });
     }
-    return loadPromise(this.apiHandler_.getIframe());
+    return loadPromise(this.iframe_);
+  }
+
+  /** @override  */
+  viewportCallback(inViewport) {
+    if (this.apiHandler_) {
+      this.apiHandler_.viewportCallback(inViewport);
+    }
+  }
+
+  /**
+   * Activates the fallback if the ad reports that the ad slot cannot
+   * be filled.
+   * @private
+   */
+  noContentHandler_() {
+    // If iframe is null nothing to do.
+    if (!this.iframe_) {
+      return;
+    }
+    // If a fallback does not exist attempt to collapse the ad.
+    if (!this.fallback_) {
+      this.attemptChangeHeight(0, () => {
+        this.element.style.display = 'none';
+      });
+    }
+    this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
+      if (this.fallback_) {
+        // Hide placeholder when falling back.
+        if (this.placeholder_) {
+          this.togglePlaceholder(false);
+        }
+        this.toggleFallback(true);
+      }
+      // Remove the iframe only if it is not the master.
+      if (this.iframe_.name.indexOf('_master') == -1) {
+        removeElement(this.iframe_);
+        this.iframe_ = null;
+      }
+    });
   }
 
   /** @override  */
   unlayoutCallback() {
-    if (!this.apiHandler_) {
+    if (!this.iframe_) {
       return true;
     }
-    this.apiHandler_.shutDown();
 
-    this.attemptToggleFallback(false);
+    if (this.placeholder_) {
+      this.togglePlaceholder(true);
+    }
+    if (this.fallback_) {
+      this.toggleFallback(false);
+    }
 
-    this.apiHandler_ = null;
-    // IntersectionObserver's listeners were cleaned up by
-    // setInViewport(false) before #unlayoutCallback
-    this.intersectionObserver_ = null;
+    this.iframe_ = null;
+    if (this.apiHandler_) {
+      this.apiHandler_.unlayoutCallback();
+      this.apiHandler_ = null;
+    }
     return true;
   }
 
-
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown && this.apiHandler_ && this.apiHandler_.getIframe()) {
-      const src = this.apiHandler_.getSrc();
-      const targetOrigin =
-          src ? parseUrl(src).origin : '*';
-      postMessage(
-          this.apiHandler_.getIframe(),
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          /* opt_is3P */ true);
+    if (this.apiHandler_) {
+      this.apiHandler_.overflowCallback(
+        overflown, requestedHeight, requestedWidth);
     }
-  }
-
-  attemptTogglePlaceholder(opt_state) {
-    if (this.placeholder_) {
-      this.togglePlaceholder(opt_state);
-    }
-  }
-
-  attemptToggleFallback(opt_state) {
-    if (this.fallback_) {
-      // Hide placeholder when falling back.
-      this.attemptTogglePlaceholder(!opt_state);
-      this.toggleFallback(opt_state);
-    }
-  }
-
-  setUpIntersectionObserver(iframe) {
-    this.intersectionObserver_ =
-        new IntersectionObserver(this, iframe, /* opt_is3P */true);
-  }
-
-  getInsersectionObserver() {
-    return this.intersectionObserver_;
-  }
-
-  getViewer() {
-    return this.viewer_;
   }
 }
