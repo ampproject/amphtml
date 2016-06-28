@@ -50,6 +50,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let viewerForMock;
+  let mutateMock;
   const mockResponse = {
     arrayBuffer: function() {
       return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
@@ -101,6 +102,9 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(xhrMock.calledOnce,
@@ -133,6 +137,9 @@ describe('amp-a4a', () => {
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
           expect(getAdUrlSpy.calledOnce, 'getAdUrl called exactly once')
               .to.be.true;
           expect(xhrMock.calledOnce,
@@ -449,16 +456,21 @@ describe('amp-a4a', () => {
           a4a.onLayoutMeasure();
           expect(a4a.adPromise_).to.not.be.null;
           return a4a.adPromise_.then(() => {
+            // Force vsync system to run all queued tasks, so that DOM mutations
+            // are actually completed before testing.
+            a4a.vsync_.runScheduledTasks_();
             expect(a4a.element.shadowRoot, 'shadowRoot').to.not.be.null;
             expect(a4a.element.shadowRoot.children.length, 'children count')
                 .to.not.equal(0);
             a4a.unlayoutCallback();
+            a4a.vsync_.runScheduledTasks_();
             expect(a4a.adPromise_).to.be.null;
             expect(a4a.element.shadowRoot.children.length).to.equal(0);
             // call onLayoutMeasure again and verify shadowRoot has children.
             a4a.onLayoutMeasure();
             expect(a4a.adPromise_).to.not.be.null;
             return a4a.adPromise_.then(() => {
+              a4a.vsync_.runScheduledTasks_();
               expect(a4a.element.shadowRoot.children.length).to.not.equal(0);
             });
           });
