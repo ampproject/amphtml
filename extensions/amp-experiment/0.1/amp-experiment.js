@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {waitForBody} from '../../../src/dom';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
+const ATTR_PREFIX = 'amp-x-';
 
 export class AmpExperiment extends AMP.BaseElement {
 
@@ -36,7 +38,58 @@ export class AmpExperiment extends AMP.BaseElement {
       toggle(this.element, false);
       return;
     }
-    dev.info(EXPERIMENT, 'amp-experiment is on');
+
+    const config = this.getConfig_();
+    const results = Object.create(null);
+    this.experimentVariants = Promise.all(
+        Object.keys(config).map(experimentName => {
+          return this.getVariantAllocation_(config[experimentName])
+              .then(variantName => {
+                if (variantName) {
+                  results[experimentName] = variantName;
+                }
+              });
+        })).then(() => results);
+    this.experimentVariants.then(this.addToBody_.bind(this));
+  }
+
+  getConfig_() {
+    const children = this.element.children;
+    user.assert(
+        children.length == 1 && children[0].tagName == 'SCRIPT'
+            && children[0].getAttribute('type').toUpperCase()
+                == 'APPLICATION/JSON',
+        '<amp-experiment> should contain exactly one ' +
+        '<script type="application/json"> child.');
+
+    return JSON.parse(children[0].textContent);
+  }
+
+  /**
+   * Allocates the current page view to a variant according to the given
+   * experiment config.
+   * @param {!JSONType} config experiment config
+   * @returns {!Promise<?string>} the name of the allocated variant
+   * @private
+   */
+  getVariantAllocation_(config) {
+    // TODO(@lannka, #1411): wire up with real variant allocation code.
+    return Promise.resolve(Object.keys(config.variants)[0]);
+  }
+
+  /**
+   * Adds the given experiment and variant pairs to body element as attributes
+   * and values.
+   * @param {!Object<string, string>} experiments
+   * @private
+   */
+  addToBody_(experiments) {
+    const doc = this.getWin().document;
+    waitForBody(doc, () => {
+      for (const name in experiments) {
+        doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+      }
+    });
   }
 }
 

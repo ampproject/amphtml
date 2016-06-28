@@ -8,9 +8,41 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="../dist/amp.js"></script>
   <script async custom-element="amp-experiment" src="../dist/v0/amp-experiment-0.1.max.js"></script>
+  <style amp-custom>
+    body[amp-x-background-color-test=yellow] {
+      background-color: yellow;
+    }
+    body[amp-x-background-color-test=green] {
+      background-color: green;
+    }
+    body[amp-x-font-color-test=red] {
+      color: red;
+    }
+    body[amp-x-font-color-test=blue] {
+      color: blue;
+    }
+  </style>
 </head>
 <body>
-  <amp-experiment >
+  <h1>Welcome to the A/B experiment</h1>
+  <amp-experiment>
+    <script type="application/json">
+      {
+        "background-color-test": {
+          "variants": {
+            "yellow": 50,
+            "green": 50
+          }
+        },
+        "font-color-test": {
+          "cidScope": null,
+          "variants": {
+            "blue": 20,
+            "red": 20
+          }
+        }
+      }
+    </script>
   </amp-experiment>
 </body>
 </html>
