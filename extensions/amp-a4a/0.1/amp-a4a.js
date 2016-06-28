@@ -350,15 +350,15 @@ export class AmpA4A extends AMP.BaseElement {
 
       this.stylesheets_.forEach(removeElement);
       this.stylesheets_ = [];
+      this.adPromise_ = null;
+      this.adUrl_ = null;
+      this.rendered_ = false;
+      this.timerId_ = 0;
+      this.intersectionObserver_ = null;
+      this.layoutMeasureExecuted_ = false;
     });
-    this.adPromise_ = null;
     // Increment promiseId to cause any pending promise to cancel.
     this.promiseId_++;
-    this.adUrl_ = null;
-    this.rendered_ = false;
-    this.timerId_ = 0;
-    this.layoutMeasureExecuted_ = false;
-    this.intersectionObserver_ = null;
     return true;
   }
 
@@ -542,13 +542,13 @@ export class AmpA4A extends AMP.BaseElement {
     iframe.setAttribute('width', this.element.getAttribute('width'));
     // XHR request modifies URL by adding origin as parameter.  Need to append
     // ad URL otherwise cache will miss.
-    // TODO: remove call to getCorsUrl and instead have fetch API returnCf
+    // TODO: remove call to getCorsUrl and instead have fetch API return
     // modified url.
     iframe.setAttribute(
       'src', xhrFor(this.getWin()).getCorsUrl(this.getWin(), this.adUrl_));
-    this.intersectionObserver_ =
-        new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
     this.vsync_.mutate(() => {
+      this.intersectionObserver_ =
+          new IntersectionObserver(this, iframe, opt_isNonAmpCreative);
       this.element.appendChild(iframe);
     });
   }
