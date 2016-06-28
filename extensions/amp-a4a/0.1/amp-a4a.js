@@ -356,6 +356,10 @@ export class AmpA4A extends AMP.BaseElement {
       this.rendered_ = false;
       this.timerId_ = 0;
       this.intersectionObserver_ = null;
+      if (this.apiHandler_) {
+        this.apiHandler_.unlayoutCallback();
+        this.apiHandler_ = null;
+      }
       this.layoutMeasureExecuted_ = false;
     });
     // Increment promiseId to cause any pending promise to cancel.
