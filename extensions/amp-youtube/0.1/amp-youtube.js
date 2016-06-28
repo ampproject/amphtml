@@ -81,7 +81,12 @@ class AmpYoutube extends AMP.BaseElement {
 
     let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
 
-    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
+    const params = getDataParamsFromAttributes(this.element);
+    if ('autoplay' in params) {
+      delete params['autoplay'];
+      user.warn('Autoplay is currently not support with amp-youtube.');
+    }
+    src = addParamsToUrl(src, params);
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
