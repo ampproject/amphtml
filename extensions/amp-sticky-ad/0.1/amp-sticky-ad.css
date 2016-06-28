@@ -24,7 +24,7 @@ amp-sticky-ad {
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
   box-sizing: border-box;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(0,0,0,0.5);
 }
 
 .-amp-sticky-ad-layout {
@@ -49,22 +49,39 @@ amp-sticky-ad {
   display: block;
 }
 
-.-amp-sticky-ad-close-button {
+.amp-sticky-ad-close-button {
   position: absolute;
   display: block;
   height: 32px;
   width: 32px;
-  background-color: rgba(255,255,255,0.6);
-  color: grey;
-  font-size: 26px;
-  line-height: 26px;
-  vertical-align: middle;
+  background-color: #000;
+  opacity: 0.6;
   padding: 0;
-  top: -32px;
-  right: 0;
+  top: -34px;
+  right: 0px;
+  border-width: 1px;
+  border-color: #C0C0C0;
+  border-style: solid;
 }
 
-[dir=rtl] .-amp-sticky-ad-close-button {
+.amp-sticky-ad-close-button:before {
+  content: '\0000D7';
+  font-size: 40px;
+  color: #fff;
+  position: relative;
+  top: -10px;
+}
+
+.amp-sticky-ad-close-button-loaded {
+  background-color: #fff;
+  opacity: 1;
+}
+
+.amp-sticky-ad-close-button-loaded:before {
+  color: #000;
+}
+
+[dir=rtl] .amp-sticky-ad-close-button {
   right: auto;
   left: 0;
 }

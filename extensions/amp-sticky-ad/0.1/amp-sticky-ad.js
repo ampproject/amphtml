@@ -58,6 +58,9 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @const @private {boolean} */
     this.visible_ = false;
 
+    /** @const @private {!Element|null} */
+    this.closeButton_ = null;
+
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
      * @const @private {!UnlistenDef}
@@ -137,6 +140,8 @@ class AmpStickyAd extends AMP.BaseElement {
           // now.
           this.vsync_.mutate(() => {
             this.element.classList.add('amp-sticky-ad-loaded');
+            this.closeButton_.classList.add
+                ('amp-sticky-ad-close-button-loaded');
           });
         }, 1000);
       });
@@ -148,14 +153,15 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
-    const closeButton = this.getWin().document.createElement('button');
-    closeButton.classList.add('-amp-sticky-ad-close-button');
+    const closeButton = this.getWin().document.createElement('div');
+    closeButton.classList.add('amp-sticky-ad-close-button');
+    closeButton.setAttribute('role', 'button');
     closeButton.setAttribute('aria-label',
         this.element.getAttribute('data-close-button-aria-label') || 'Close');
-    closeButton.textContent = '\u00D7';
     const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
     closeButton.addEventListener('click', boundOnCloseButtonClick);
     this.element.appendChild(closeButton);
+    this.closeButton_ = closeButton;
   }
 
   /**
