@@ -19,7 +19,6 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
-import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
@@ -35,11 +34,11 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
+    // this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    // if (!this.isExperimentOn_) {
+    //   dev.warn(TAG, `TAG ${TAG} disabled`);
+    //   return;
+    // }
     toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
@@ -70,10 +69,10 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return Promise.resolve();
-    }
+    // if (!this.isExperimentOn_) {
+    //   dev.warn(TAG, `TAG ${TAG} disabled`);
+    //   return Promise.resolve();
+    // }
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
       this.updateInViewport(this.ad_, true);
@@ -123,10 +122,7 @@ class AmpStickyAd extends AMP.BaseElement {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
         this.visible_ = true;
-        setStyles(this.element, {
-          'visibility': 'visible',
-        });
-        toggle(this.element, true);
+        this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
         this.updateInViewport(this.ad_, true);
         this.scheduleLayout(this.ad_);
