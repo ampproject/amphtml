@@ -50,13 +50,13 @@ export class AmpExperiment extends AMP.BaseElement {
                 }
               });
         })).then(() => results);
-    this.experimentVariants.then(this.addToBody_());
+    this.experimentVariants.then(this.addToBody_.bind(this));
   }
 
   getConfig_() {
     const children = this.element.children;
     user.assert(
-        children.length == 1 && children[0].tagName.toUpperCase() == 'SCRIPT'
+        children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
         '<amp-experiment> should contain exactly one ' +
@@ -65,22 +65,33 @@ export class AmpExperiment extends AMP.BaseElement {
     return JSON.parse(children[0].textContent);
   }
 
+  /**
+   * Allocates the current page view to a variant according to the given
+   * experiment config.
+   * @param {!JSONType} config experiment config
+   * @returns {!Promise<?string>} the name of the allocated variant
+   * @private
+   */
   getVariantAllocation_(config) {
     // TODO(@lannka, #1411): wire up with real variant allocation code.
     return Promise.resolve(Object.keys(config.variants)[0]);
   }
 
-  addToBody_() {
-    const document = this.getWin().document;
-    return experiments => {
-      waitForBody(document, () => {
-        for (const name in experiments) {
-          if (experiments.hasOwnProperty(name)) {
-            document.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
-          }
+  /**
+   * Adds the given experiment and variant pairs to body element as attributes
+   * and values.
+   * @param {!JSONType} experiments
+   * @private
+   */
+  addToBody_(experiments) {
+    const doc = this.getWin().document;
+    waitForBody(doc, () => {
+      for (const name in experiments) {
+        if (experiments.hasOwnProperty(name)) {
+          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
         }
-      });
-    };
+      }
+    });
   }
 }
 
