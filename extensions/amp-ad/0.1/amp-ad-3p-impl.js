@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import {removeElement} from '../../../src/dom';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getAdCid} from '../../../src/ad-cid';
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
+import {prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor, listenForOnce,
-    postMessage} from '../../../src/iframe-helper';
+import {postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
-import {removeElement} from '../../../src/dom';
+import {getIframe} from '../../../src/3p-frame';
+import {AmpAdApiHandler} from './amp-ad-api-handler';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
@@ -159,6 +159,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = null;
 
+    /** @private {?AmpAdApiHandler} */
+    this.apiHandler_ = null;
+
     /** @private {?Element} */
     this.placeholder_ = this.getPlaceholder();
 
@@ -184,11 +187,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
-
-    /**
-     * @private @const
-     */
-    this.viewer_ = viewerFor(this.getWin());
   }
 
   /**
@@ -229,14 +227,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     this.isInFixedContainer_ = isPositionFixed(this.element, this.getWin());
-    // We remeasured this tag, lets also remeasure the iframe. Should be
+    // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
-    // When the framework has the need to remeasure us, our position might
-    // have changed. Send an intersection record if needed. This does nothing
-    // if we aren't currently in view.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.fire();
+    if (this.apiHandler_) {
+      this.apiHandler_.onLayoutMeasure();
     }
   }
 
@@ -246,8 +241,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   measureIframeLayoutBox_() {
     if (this.iframe_) {
-      this.iframeLayoutBox_ =
-          this.getViewport().getLayoutRect(this.iframe_);
+      this.iframeLayoutBox_ = this.getViewport().getLayoutRect(this.iframe_);
     }
   }
 
@@ -277,128 +271,19 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         }
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
-        this.iframe_.setAttribute('scrolling', 'no');
-        this.applyFillContent(this.iframe_);
-        this.intersectionObserver_ =
-            new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
-        // Triggered by context.noContentAvailable() inside the ad iframe.
-        listenForOnce(this.iframe_, 'no-content', () => {
-          this.noContentHandler_();
-        }, /* opt_is3P */ true);
-        // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
-        // iframe.
-        listenForOnce(this.iframe_, 'entity-id', info => {
-          this.element.creativeId = info.id;
-        }, /* opt_is3P */ true);
-        listenFor(this.iframe_, 'embed-size', data => {
-          let newHeight, newWidth;
-          if (data.width !== undefined) {
-            newWidth = Math.max(this.element./*OK*/offsetWidth +
-                data.width - this.iframe_./*OK*/offsetWidth, data.width);
-            this.iframe_.width = data.width;
-            this.element.setAttribute('width', newWidth);
-          }
-          if (data.height !== undefined) {
-            newHeight = Math.max(this.element./*OK*/offsetHeight +
-                data.height - this.iframe_./*OK*/offsetHeight, data.height);
-            this.iframe_.height = data.height;
-            this.element.setAttribute('height', newHeight);
-          }
-          if (newHeight !== undefined || newWidth !== undefined) {
-            this.updateSize_(newHeight, newWidth);
-          }
-        }, /* opt_is3P */ true);
-        this.iframe_.style.visibility = 'hidden';
-        listenForOnce(this.iframe_, 'render-start', () => {
-          this.iframe_.style.visibility = '';
-          this.sendEmbedInfo_(this.isInViewport());
-        }, /* opt_is3P */ true);
-        this.viewer_.onVisibilityChanged(() => {
-          this.sendEmbedInfo_(this.isInViewport());
-        });
-        this.element.appendChild(this.iframe_);
-        return loadPromise(this.iframe_);
+        this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.noContentHandler_);
+        return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
     return loadPromise(this.iframe_);
   }
 
   /** @override  */
-  unlayoutCallback() {
-    if (!this.iframe_) {
-      return true;
-    }
-
-    removeElement(this.iframe_);
-    if (this.placeholder_) {
-      this.togglePlaceholder(true);
-    }
-    if (this.fallback_) {
-      this.toggleFallback(false);
-    }
-
-    this.iframe_ = null;
-    // IntersectionObserver's listeners were cleaned up by
-    // setInViewport(false) before #unlayoutCallback
-    this.intersectionObserver_ = null;
-    return true;
-  }
-
-  /** @override  */
   viewportCallback(inViewport) {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.onViewportCallback(inViewport);
+    if (this.apiHandler_) {
+      this.apiHandler_.viewportCallback(inViewport);
     }
-    this.sendEmbedInfo_(inViewport);
-  }
-
-  /**
-   * @param {boolean} inViewport
-   * @private
-   */
-  sendEmbedInfo_(inViewport) {
-    if (this.iframe_) {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(this.iframe_, 'embed-state', {
-        inViewport,
-        pageHidden: !this.viewer_.isVisible(),
-      }, targetOrigin, /* opt_is3P */ true);
-    }
-  }
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown) {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          /* opt_is3P */ true);
-    }
-  }
-
-  /**
-   * Updates the element's dimensions to accommodate the iframe's
-   *    requested dimensions.
-   * @param {number|undefined} newWidth
-   * @param {number|undefined} newHeight
-   * @private
-   */
-  updateSize_(newHeight, newWidth) {
-    this.attemptChangeSize(newHeight, newWidth, () => {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(
-          this.iframe_,
-          'embed-size-changed',
-          {requestedHeight: newHeight, requestedWidth: newWidth},
-          targetOrigin,
-          /* opt_is3P */ true);
-    });
   }
 
   /**
@@ -407,6 +292,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   noContentHandler_() {
+    // If iframe is null nothing to do.
+    if (!this.iframe_) {
+      return;
+    }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
       this.attemptChangeHeight(0, () => {
@@ -414,6 +303,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       });
     }
     this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
       if (this.fallback_) {
         // Hide placeholder when falling back.
         if (this.placeholder_) {
@@ -427,5 +319,34 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = null;
       }
     });
+  }
+
+  /** @override  */
+  unlayoutCallback() {
+    if (!this.iframe_) {
+      return true;
+    }
+
+    if (this.placeholder_) {
+      this.togglePlaceholder(true);
+    }
+    if (this.fallback_) {
+      this.toggleFallback(false);
+    }
+
+    this.iframe_ = null;
+    if (this.apiHandler_) {
+      this.apiHandler_.unlayoutCallback();
+      this.apiHandler_ = null;
+    }
+    return true;
+  }
+
+  /** @override  */
+  overflowCallback(overflown, requestedHeight, requestedWidth) {
+    if (this.apiHandler_) {
+      this.apiHandler_.overflowCallback(
+        overflown, requestedHeight, requestedWidth);
+    }
   }
 }
