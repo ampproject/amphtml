@@ -46,13 +46,11 @@ export function importPublicKey(publicKey) {
   const data = new Uint8Array(lenMod.length + lenPubExp.length);
   data.set(lenMod);
   data.set(lenPubExp, lenMod.length);
-  return crossCrypto.digest(
-    {
-      // The list of RSA public keys are not under attacker's control,
-      // so a collision would not help.
-      name: 'SHA-1',
-    },
-    data)
+  return crossCrypto.digest({
+    // The list of RSA public keys are not under attacker's control,
+    // so a collision would not help.
+    name: 'SHA-1',
+  }, data)
     .then(digest => {
       // Hash is the first 4 bytes of the SHA-1 digest.
       const hash = new Uint8Array(digest, 0, 4);
