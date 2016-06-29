@@ -456,20 +456,8 @@ export const ANALYTICS_CONFIG = {
 
   'mparticle': {
     'vars': {
-      'apiKey': '',
-      'eventName': '',
       'eventType': 'Unknown',
-      'eventAttributes_Keys': [],
-      'eventAttributes_Values': [],
-      'userAttributes_Keys': [],
-      'userAttributes_Values': [],
-      'userIdentities_Types': [],
-      'userIdentities_Values': [],
       'debug': false,
-      'location': [],
-      'customFlags_Keys': [],
-      'customFlags_Values': [],
-      'appVersion': '',
       'amp_clientId': 'CLIENT_ID(mparticle_amp_id)',
     },
     'requests': {
