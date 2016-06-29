@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,6 @@ import {xhrFor} from '../../../src/xhr';
 /** @private @const {string} */
 const TAG = 'amp-user-notification';
 
-
-/**
- * @export
- * @typedef {{
- *   elementId: string,
- *   ampUserId: string
- * }}
- */
-let PostRequestMetadataDef;
 
 /**
  * @export
@@ -239,21 +230,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   shouldShow() {
-    let maybeCheckStoragePromise;
-
-    if (this.persistDismissal_) {
-      maybeCheckStoragePromise = this.storagePromise_.then(storage => {
-        return storage.get(this.storageKey_);
-      });
-    } else {
-      // Skip reading storage when not data-persist-dismissal.
-      maybeCheckStoragePromise = Promise.resolve(null);
-    }
-
-    return maybeCheckStoragePromise.catch(reason => {
-      dev.error(TAG, 'Failed to read storage', reason);
-      return false;
-    }).then(dismissed => {
+    return this.isDismissed().then(dismissed => {
       if (dismissed) {
         // Consent has been accepted. Nothing more to do.
         return false;
@@ -284,6 +261,25 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.element.classList.add('amp-active');
     this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;
+  }
+
+  /**
+   * Returns whether this notification has been dismissed and the dismissal
+   * has been persisted in storage. Returns false if storage throws error or
+   * 'data-persist-dismissal' is disabled.
+   * @return {!Promise<boolean>}
+   */
+  isDismissed() {
+    if (!this.persistDismissal_) {
+      return Promise.resolve(false);
+    }
+    return this.storagePromise_
+        .then(storage => storage.get(this.storageKey_))
+        .catch(reason => {
+          dev.error(TAG, 'Failed to read storage', reason);
+          return false;
+        })
+        .then(persistedValue => !!persistedValue);
   }
 
   /**
@@ -339,7 +335,7 @@ export class UserNotificationManager {
    * Retrieve a promise associated to an `amp-user-notification` component
    * that is resolved when user agrees to the terms.
    * @param {string} id
-   * @return {!Promise}
+   * @return {!Promise<>}
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
@@ -347,19 +343,18 @@ export class UserNotificationManager {
         user.warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });
-    return this.getElementDeferById_(id).promise;
+    return this.getOrCreateDeferById_(id).promise;
   }
 
   /**
    * Register an instance of `amp-user-notification`.
    * @param {string} id
-   * @param {!UserNotification} userNotification
+   * @param {!AmpUserNotification} userNotification
    * @return {!Promise}
    * @package
    */
   registerUserNotification(id, userNotification) {
-    const deferred = this.getElementDeferById_(id);
-
+    const deferred = this.getOrCreateDeferById_(id);
     // Compose the registered notifications into a promise queue
     // that blocks until one notification is dismissed.
     return this.nextInQueue_ = this.nextInQueue_
@@ -370,27 +365,19 @@ export class UserNotificationManager {
             }
           });
         })
-        .then(deferred.resolve)
+        .then(deferred.resolve.bind(this, userNotification))
         .catch(rethrowAsync.bind(null,
             'Notification service failed amp-user-notification', id));
   }
 
   /**
-   * Retrieve UserNotificationDeferDef object.
+   * Retrieves UserNotificationDeferDef object. Creates an defer if it doesn't
+   * exist.
    * @param {string} id
    * @return {!UserNotificationDeferDef}
    * @private
    */
-  getElementDeferById_(id) {
-    return this.createOrReturnDefer_(id);
-  }
-
-  /**
-   * Create an defer if it doesnt exist, else just return the one in the
-   * registry.
-   * @return {!UserNotificationDeferDef}
-   */
-  createOrReturnDefer_(id) {
+  getOrCreateDeferById_(id) {
     if (this.deferRegistry_[id]) {
       return this.deferRegistry_[id];
     }
