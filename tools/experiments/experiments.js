@@ -18,6 +18,7 @@ import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
+import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
@@ -54,59 +55,70 @@ const EXPERIMENTS = [
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
     id: 'amp-experiment',
     name: 'AMP Experiment',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-experiment/amp-experiment.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
   },
   {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
     id: 'amp-sticky-ad',
     name: 'AMP Sticky Ad',
     spec: 'https://github.com/ampproject/amphtml/issues/2472',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
     id: 'amp-live-list',
     name: 'AMP Live List/Blog',
     spec: 'https://github.com/ampproject/amphtml/issues/2762',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
   },
   {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
     id: 'amp-slidescroll',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
   },
   {
     id: 'form-submit',
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
   },
   {
     id: 'amp-form',
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
   },
   {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-google-vrview-image/amp-google-vrview-image.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
     id: 'amp-share-tracking',
@@ -114,6 +126,13 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
 ];
+
+if (getMode().localDev) {
+  EXPERIMENTS.forEach(experiment => {
+    dev.assert(experiment.cleanupIssue, `experiment ${experiment.name} must ` +
+        'have a `cleanupIssue` field.');
+  });
+}
 
 
 /**
