@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {loadScript} from '../3p/3p';
-
 export function nativo(global, data) {
-
   let ntvAd;
   (function(ntvAd, global, data) {
     global
       .frames
       .location
       .hash = global.frames.location.hash.replace(/({).*(})/,'');
-
-    ///
     // Private
-    ///
     let delayedAdLoad = false;
     let percentageOfadViewed;
     const loc = global.context.location;
-
     function isValidDelayTime(delay) {
       return ((typeof delay != 'undefined'
         && !isNaN(delay)
@@ -51,11 +44,11 @@ export function nativo(global, data) {
       global.context.observeIntersection(function(positions) {
         const coordinates = getLastPositionCoordinates(positions);
         if ((coordinates
-          .intersectionRect
-          .top == (coordinates
-          .rootBounds.top + coordinates
-          .boundingClientRect
-          .y))) {
+              .intersectionRect
+              .top == (coordinates
+              .rootBounds.top + coordinates
+              .boundingClientRect
+              .y))) {
           if (isDelayedViewStart(data) && !delayedAdLoad) {
             g.PostRelease.Start();
             delayedAdLoad = true;
@@ -68,7 +61,7 @@ export function nativo(global, data) {
       setTimeout(function() {
         g.PostRelease.Start();
         delayedAdLoad = true;
-      },parseInt(data.delayByTime, 10));
+      }, parseInt(data.delayByTime, 10));
     }
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
@@ -76,26 +69,20 @@ export function nativo(global, data) {
     function setPercentageOfadViewed(percentage) {
       percentageOfadViewed = percentage;
     }
-
     // Used to track ad during scrolling event and trigger checkIsAdVisible method on PostRelease instance
     function viewabilityConfiguration(positions) {
       const coordinates = getLastPositionCoordinates(positions);
       setPercentageOfadViewed(
         (((coordinates.intersectionRect
-        .height * 100) / coordinates
-        .boundingClientRect
-        .height) / 100));
+            .height * 100) / coordinates
+            .boundingClientRect
+            .height) / 100));
       global.PostRelease.checkIsAdVisible();
     }
-
-    ////
     // Public
-    ///
     ntvAd.getPercentageOfadViewed = function() {
       return percentageOfadViewed;
     };
-
-
     ntvAd.getScriptURL = function() {
       return 'https://s.ntv.io/serve/load.js';
     };
@@ -113,7 +100,6 @@ export function nativo(global, data) {
         }
       }
     };
-
     // Used to Delay Start and Initalize Tracking. This is a callback AMP will use once script is loaded
     ntvAd.Start = function() {
       if (isDelayedTimeStart(data)) {
@@ -128,10 +114,8 @@ export function nativo(global, data) {
       global.context.observeIntersection(viewabilityConfiguration);
     };
   })(ntvAd || (ntvAd = {}), global, data);
-
   // Setup Configurations
   ntvAd.setupAd();
-
   // Load Nativo Script
-  loadScript(global,ntvAd.getScriptURL(),ntvAd.Start);
+  loadScript(global, ntvAd.getScriptURL(), ntvAd.Start);
 }
