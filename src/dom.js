@@ -438,16 +438,16 @@ export function hasNextNodeInDocumentOrder(element) {
 
 
 /**
- * Finds all ancestor elements that satisfies the callback.
+ * Finds all ancestor elements that satisfies predicate.
  * @param {!Element} child
- * @param {function(!Element):boolean} callback
+ * @param {function(!Element):boolean} predicate
  * @return {!Array<!Element>}
  */
-export function ancestorElements(child, callback) {
+export function ancestorElements(child, predicate) {
   const ancestors = [];
   for (let ancestor = child.parentElement; ancestor;
        ancestor = ancestor.parentElement) {
-    if (callback(ancestor)) {
+    if (predicate(ancestor)) {
       ancestors.push(ancestor);
     }
   }
@@ -459,12 +459,12 @@ export function ancestorElements(child, callback) {
  * Finds all ancestor elements that has the specified tag name.
  * @param {!Element} child
  * @param {string} attr
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
-  const upperTagName = tagName.toUpperCase();
+  tagName = tagName.toUpperCase();
   return ancestorElements(child, el => {
-    return el.tagName == upperTagName;
+    return el.tagName == tagName;
   });
 }
 

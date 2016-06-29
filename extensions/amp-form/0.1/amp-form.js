@@ -45,6 +45,15 @@ const FormState_ = {
   SUBMIT_SUCCESS: 'submit-success',
 };
 
+
+/** @const @enum {string} */
+const UserValidityState = {
+  NONE: 'none',
+  USER_VALID: 'valid',
+  USER_INVALID: 'invalid',
+};
+
+
 /** @type {?./validation-bubble.ValidationBubble|undefined} */
 let validationBubble;
 
@@ -115,10 +124,10 @@ export class AmpForm {
   /** @private */
   installSubmitHandler_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
-    // Add 'focus' event on all inputs.
     const inputs = this.form_.querySelectorAll('input,select,textarea');
     for (let i = 0; i < inputs.length; i++) {
-      inputs[i].addEventListener('focus', onInputFocus_);
+      inputs[i].addEventListener('blur', onInputInteraction_);
+      inputs[i].addEventListener('input', onInputInteraction_);
     }
   }
 
@@ -238,7 +247,7 @@ function reportValidity(state) {
 
 
 /**
- * Reports validity for the first invainputnput - if any.
+ * Reports validity for the first invalid input - if any.
  * @param {!HTMLFormElement} form
  */
 function reportFormValidity(form) {
@@ -313,6 +322,22 @@ function checkUserValidityOnSubmission_(form) {
 
 
 /**
+ * Returns the user validity state of the element.
+ * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @return {string}
+ */
+function getUserValidityStateFor(element) {
+  if (element.classList.contains('user-valid')) {
+    return UserValidityState.USER_VALID;
+  } else if (element.classList.contains('user-invalid')) {
+    return UserValidityState.USER_INVALID;
+  }
+
+  return UserValidityState.NONE;
+}
+
+
+/**
  * Checks user validity which applies .user-valid and .user-invalid AFTER the user
  * interacts with the input by moving away from the input (blur) or by changing its
  * value (input).
@@ -328,19 +353,22 @@ function checkUserValidityOnSubmission_(form) {
  * @returns {boolean} true to indicate that validity should propagate to ancestors.
  */
 function checkUserValidity(element) {
-  const currentUserValid = element.classList.contains('user-valid');
-  const currentUserInvalid = element.classList.contains('user-invalid');
-  if (!currentUserValid && element.checkValidity()) {
+  const previousValidityState = getUserValidityStateFor(element);
+  const isCurrentlyValid = element.checkValidity();
+  if (previousValidityState != UserValidityState.USER_VALID &&
+      isCurrentlyValid) {
     element.classList.add('user-valid');
     element.classList.remove('user-invalid');
-    return currentUserInvalid;
-  } else if (!currentUserInvalid && !element.checkValidity()) {
+    // Don't propagate user-valid if this was unmarked before.
+    return previousValidityState != UserValidityState.NONE;
+  } else if (previousValidityState != UserValidityState.USER_INVALID &&
+      !isCurrentlyValid) {
     element.classList.add('user-invalid');
     element.classList.remove('user-valid');
+    // Always propagate an invalid state change.
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 
@@ -365,29 +393,6 @@ function onInputInteraction_(e) {
   if (input.form) {
     checkUserValidity(input.form);
   }
-}
-
-
-/**
- * Removes event listeners from input.
- * @param {!Event} e
- */
-function onInputBlur_(e) {
-  const input = e.target;
-  input.removeEventListener('blur', onInputInteraction_);
-  input.removeEventListener('input', onInputInteraction_);
-  input.removeEventListener('blur', onInputBlur_)
-}
-
-
-/**
- * Adds blur and input event listeners to react to interactions on the input.
- * @param {!Event} e
- */
-function onInputFocus_(e) {
-  const input = e.target;
-  input.addEventListener('blur', onInputInteraction_);
-  input.addEventListener('input', onInputInteraction_);
 }
 
 
