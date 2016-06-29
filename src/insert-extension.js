@@ -35,28 +35,16 @@ export function resetExtensionScriptInsertedOrPresentForTesting() {
  * Check script info in HTML head and make update if necessary
  * @param {!Window} win
  * @param {string} extension
- * @param {boolean} opt_ignoreElementExistenceCheck if true, will not check and
- *    require that extension element exist in document
  */
-export function insertAmpExtensionScript(
-    win, extension, opt_ignoreElementExistenceCheck) {
+export function insertAmpExtensionScript(win, extension) {
   if (extension == 'amp-embed') {
     extension = 'amp-ad';
-  }
-  if (!opt_ignoreElementExistenceCheck) {
-    let element = win.document.querySelector(extension);
-    if (!element && extension == 'amp-ad') {
-      element = win.document.querySelector('amp-embed');
-    }
-    if (!element) {
-      return;
-    }
   }
   if (isAmpExtensionScriptRequired(win, extension)) {
     const ampExtensionScript = createAmpExtensionScript(win, extension);
     win.document.head.appendChild(ampExtensionScript);
   }
-};
+}
 
 /**
  * Create the missing amp extension HTML script element.
