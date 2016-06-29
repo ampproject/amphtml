@@ -21,6 +21,7 @@ import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {platform} from '../src/platform';
 import {setModeForTesting} from '../src/mode';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 adopt(window);
 
@@ -145,6 +146,7 @@ afterEach(() => {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
+  setDefaultBootstrapBaseUrlForTesting(null);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
