@@ -335,7 +335,7 @@ export class UserNotificationManager {
    * Retrieve a promise associated to an `amp-user-notification` component
    * that is resolved when user agrees to the terms.
    * @param {string} id
-   * @return {!Promise<>}
+   * @return {!Promise<!AmpUserNotification>}
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
