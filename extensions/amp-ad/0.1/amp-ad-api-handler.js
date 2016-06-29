@@ -107,6 +107,9 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = 'hidden';
     }
     listenForOnce(this.iframe_, 'render-start', () => {
+      if (!this.iframe_) {
+        return;
+      }
       this.iframe_.style.visibility = '';
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }, this.is3p_);
