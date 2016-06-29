@@ -101,6 +101,15 @@ describe('Viewer', () => {
     expect(viewer.getParam('other')).to.equal('something');
   });
 
+  it('should expose viewer capabilities', () => {
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.location.hash = '#paddingTop=17&cap=foo,bar';
+    const viewer = new Viewer(windowApi);
+    expect(viewer.hasCapability('foo')).to.be.true;
+    expect(viewer.hasCapability('bar')).to.be.true;
+    expect(viewer.hasCapability('other')).to.be.false;
+  });
+
   it('should not clear fragment in non-embedded mode', () => {
     windowApi.parent = windowApi;
     windowApi.location.href = 'http://www.example.com#test=1';
@@ -108,6 +117,7 @@ describe('Viewer', () => {
     const viewer = new Viewer(windowApi);
     expect(windowApi.history.replaceState.callCount).to.equal(0);
     expect(viewer.getParam('test')).to.equal('1');
+    expect(viewer.hasCapability('foo')).to.be.false;
   });
 
   it('should clear fragment in embedded mode', () => {
@@ -1014,6 +1024,45 @@ describe('Viewer', () => {
       });
       clock.tick(1010);
       return result;
+    });
+  });
+
+  describe('navigateTo', () => {
+    const ampUrl = 'https://cdn.ampproject.org/test/123';
+    it('should initiate a2a navigation', () => {
+      windowApi.location.hash = '#cap=a2a';
+      windowApi.top = {
+        location: {},
+      };
+      const viewer = new Viewer(windowApi);
+      const send = sandbox.stub(viewer, 'sendMessage');
+      viewer.navigateTo(ampUrl, 'abc123');
+      expect(send.lastCall.args[0]).to.equal('a2a');
+      expect(send.lastCall.args[1]).to.jsonEqual({
+        url: ampUrl,
+        requestedBy: 'abc123',
+      });
+      expect(windowApi.top.location.href).to.be.undefined;
+    });
+
+    it('should fail for non-amp url', () => {
+      windowApi.location.hash = '#cap=a2a';
+      const viewer = new Viewer(windowApi);
+      sandbox.stub(viewer, 'sendMessage');
+      expect(() => {
+        viewer.navigateTo('http://www.test.com', 'abc123');
+      }).to.throw(/Invalid A2A URL/);
+    });
+
+    it('should perform fallback navigation', () => {
+      windowApi.top = {
+        location: {},
+      };
+      const viewer = new Viewer(windowApi);
+      const send = sandbox.stub(viewer, 'sendMessage');
+      viewer.navigateTo(ampUrl, 'abc123');
+      expect(send.callCount).to.equal(0);
+      expect(windowApi.top.location.href).to.equal(ampUrl);
     });
   });
 });

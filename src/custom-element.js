@@ -421,8 +421,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      // For a never-added resource, the build will be done automatically
+      // via `resources.add` on the first attach.
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**

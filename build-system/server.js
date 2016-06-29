@@ -20,6 +20,7 @@
  */
 var BBPromise = require('bluebird');
 var app = require('express')();
+var bacon = require('baconipsum');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var fs = BBPromise.promisifyAll(require('fs'));
@@ -31,6 +32,35 @@ var url = require('url');
 
 app.use(bodyParser.json());
 app.use(morgan('dev'));
+
+app.use('/pwa', function(req, res, next) {
+  var file;
+  var contentType;
+  if (!req.url || req.url == '/') {
+    // pwa.html
+    contentType = 'text/html';
+    file = '/examples/pwa/pwa.html';
+  } else if (req.url == '/pwa.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa/pwa.js';
+  } else if (req.url == '/pwa-sw.js') {
+    // pwa.js
+    contentType = 'application/javascript';
+    file = '/examples/pwa/pwa-sw.js';
+  } else {
+    // Redirect to the underlying resource.
+    // TODO(dvoytenko): would be nicer to do forward instead of redirect.
+    res.writeHead(302, {'Location': req.url});
+    res.end();
+    return;
+  }
+  res.statusCode = 200;
+  res.setHeader('Content-Type', contentType);
+  fs.readFileAsync(process.cwd() + file).then((file) => {
+    res.end(file);
+  });
+});
 
 app.use('/examples', function(req, res) {
   res.redirect('/examples.build');
@@ -110,7 +140,8 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
-app.use('/examples.build/live-list.amp.max.html', function(req, res) {
+// Match max/min/none (using \*)
+app.use('/examples.build/live-list.amp.\*html', function(req, res) {
   res.setHeader('Content-Type', 'text/html');
   res.statusCode = 200;
   fs.readFileAsync(process.cwd() +
@@ -188,6 +219,74 @@ function liveListTombstone(liveList) {
     }
   }
 }
+
+function getLiveBlogItem() {
+  var now = Date.now();
+  // Value is inclusive of both min and max values.
+  function range(min, max) {
+    var values = Array.apply(null, Array(max - min + 1)).map((_, i) => min + i);
+    return values[Math.round(Math.random() * (max - min))]
+  }
+  function flip() {
+    return !!Math.floor(Math.random() * 2);
+  }
+  // Generate a 3 to 7 worded headline
+  var headline = bacon(range(3, 7));
+  var numOfParagraphs = range(1, 2);
+  var body = Array.apply(null, Array(numOfParagraphs)).map(x => {
+    return `<p>${bacon(range(50, 90))}</p>`;
+  }).join('\n');
+
+  var img =  `<amp-img
+        src="${flip() ? 'https://placekitten.com/300/350' : 'https://baconmockup.com/300/350'}"
+        layout="responsive"
+         height="300" width="350">
+      </amp-img>`;
+  return `<!doctype html>
+    <html amp><body>
+    <amp-live-list id="live-blog-1">
+    <div items>
+      <div id="live-blog-item-${now}" data-sort-time="${now}">
+        <h3 class="headline">
+          <a href="#live-blog-item-${now}">${headline}</a>
+        </h3>
+        <div class="author">
+          <div class="byline">
+            <p>
+              by <span itemscope itemtype="http://schema.org/Person"
+              itemprop="author"><b>Lorem Ipsum</b>
+              <a class="mailto" href="mailto:lorem.ipsum@">
+              lorem.ipsum@</a></span>
+            </p>
+            <p class="brand">PublisherName News Reporter<p>
+            <p><span itemscope itemtype="http://schema.org/Date"
+                itemprop="Date">${Date(now).replace(/ GMT.*$/, '')}<span></p>
+          </div>
+        </div>
+        <div class="article-body">${body}</div>
+        ${img}
+        <div class="social-box">
+          <amp-social-share type="facebook"
+              data-param-text="Hello world"
+              data-param-href="https://example.com/?ref=URL"
+              data-param-app_id="145634995501895"></amp-social-share>
+          <amp-social-share type="twitter"></amp-social-share>
+        </div>
+      </div>
+    </div>
+    </amp-live-list></body></html>`;
+}
+
+// Will match live-blog max/min/none
+app.use('/examples.build/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+  function(req, res, next) {
+    if ('amp_latest_update_time' in req.query) {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(getLiveBlogItem());
+      return;
+    }
+    next();
+});
 
 // Proxy with unminified JS.
 // Example:

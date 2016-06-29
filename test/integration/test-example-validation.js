@@ -74,6 +74,7 @@ describe('example', function() {
   const errorWhitelist = [
     /amp-a4a/,
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
+    /DISALLOWED_TAG content/,  // Experiments with shadow slots
   ];
 
   const usedWhitelist = [];

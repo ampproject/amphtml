@@ -15,7 +15,8 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {getServiceForDoc} from '../service';
+import {getMode} from '../mode';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
@@ -86,17 +87,17 @@ export class ActionInvocation {
 export class ActionService {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = vsyncFor(ampdoc.getWin());
 
     // Add core events.
     this.addEvent('tap');
@@ -111,7 +112,7 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', event => {
+      this.ampdoc.getRootNode().addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
@@ -200,7 +201,7 @@ export class ActionService {
       return;
     }
 
-    const target = this.win.document.getElementById(action.actionInfo.target);
+    const target = this.ampdoc.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
@@ -398,7 +399,7 @@ export function parseActionMap(s, context) {
         event,
         target,
         method,
-        args: (args && window.AMP_TEST && Object.freeze) ?
+        args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
         str: s,
       };
@@ -603,11 +604,11 @@ function isNum(c) {
 
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!ActionService}
  */
-export function installActionService(win) {
-  return getService(win, 'action', () => {
-    return new ActionService(win);
+export function installActionServiceForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'action', ampdoc => {
+    return new ActionService(ampdoc);
   });
 };

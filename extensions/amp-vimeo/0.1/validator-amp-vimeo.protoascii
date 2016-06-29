@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-vimeo
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-vimeo extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-vimeo
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
 }
 tags: {  # <amp-vimeo>
-  tag_name: "amp-vimeo"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-VIMEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-vimeo extension .js script"
   attrs: {
     name: "data-videoid"

@@ -78,7 +78,7 @@ export const ANALYTICS_CONFIG = {
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${extraUrlParams}${suffix}',
+        's2=${level2}&${extraUrlParams}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -300,15 +300,39 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'cxense': {
+    'requests': {
+      'host': 'https://scomcluster.cxense.com',
+      'base': '${host}/Repo/rep.gif',
+      'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+          'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+          'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+          'bln=${browserLanguage}&chs=${documentCharset}&' +
+          'col=${screenColorDepth}&tzo=${timezone}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'dataSource': 'AMP',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
+      'basePrefix': 'v=1&_v=a1&ds=${dataSource}&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
           'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
@@ -326,6 +350,16 @@ export const ANALYTICS_CONFIG = {
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
     },
     'extraUrlParamsReplaceMap': {
       'dimension': 'cd',
@@ -622,6 +656,37 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'segment': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'anonymousId': 'CLIENT_ID(segment_amp_id)',
+    },
+    'requests': {
+      'host': 'https://api.segment.io/v1/pixel',
+      'base': '?writeKey=${writeKey}' +
+        '&anonymousId=${anonymousId}' +
+        '&context.locale=${browserLanguage}' +
+        '&context.page.path=${canonicalPath}' +
+        '&context.page.url=${canonicalUrl}' +
+        '&context.page.referrer=${documentReferrer}' +
+        '&context.page.title=${title}' +
+        '&context.screen.width=${screenWidth}' +
+        '&context.screen.height=${screenHeight}',
+      'page': '${host}/page${base}&name=${name}',
+      'track': '${host}/track${base}&event=${event}',
+    },
+    'triggers': {
+      'page': {
+        'on': 'visible',
+        'request': 'page',
+      },
+    },
+  },
+
   'snowplow': {
     'requests': {
       'aaVersion': 'amp-0.1',
@@ -820,4 +885,3 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
 
 ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
-

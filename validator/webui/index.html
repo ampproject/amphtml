@@ -19,10 +19,11 @@
   <title>The AMP Validator</title>
   <meta charset="utf-8"/>
   <link rel="shortcut icon" href="/amp_favicon.png">
-  <script src="webcomponents-lite/webcomponents-lite.js"></script>
+  <script src="webcomponents.js/webcomponents.min.js"></script>
   <link rel="import" href="@polymer/paper-styles/demo-pages.html">
   <link rel="import" href="@polymer/webui-mainpage/webui-mainpage.html">
   <link rel="import" href="@polymer/polymer/polymer.html">
+  <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nmoffdblmcmgeicmolmhobpoocbbmknc">
   <script src="webui.js"></script>
   <script src="https://cdn.ampproject.org/v0/validator.js"></script>
   <style is="custom-style">
@@ -40,6 +41,15 @@
 </head>
 <body unresolved>
   <webui-mainpage></webui-mainpage>
+<script>
+if (location.href.match(/^https:\/\/validator.ampproject.org\/.*/)) {
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-79737099-1', 'auto');
+  ga('send', 'pageview');
+}
 </script>
 </body>
 </html>

@@ -24,6 +24,7 @@ describe('Animation', () => {
   let vsyncTasks;
   let anim;
   let clock;
+  let contextNode;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -31,13 +32,14 @@ describe('Animation', () => {
     vsyncTasks = [];
     vsync = {
       canAnimate: () => true,
-      createAnimTask: task => {
+      createAnimTask: (unusedContextNode, task) => {
         return () => {
           vsyncTasks.push(task);
         };
       },
     };
-    anim = new Animation(vsync);
+    contextNode = document.createElement('div');
+    anim = new Animation(contextNode, vsync);
   });
 
   afterEach(() => {

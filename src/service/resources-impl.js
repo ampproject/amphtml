@@ -21,7 +21,7 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
@@ -125,6 +125,9 @@ export class Resources {
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
+
+    /** @const */
+    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
 
    /**
     * @private {!Array<!ChangeSizeRequestDef>}
@@ -271,8 +274,10 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    this.vsync_.mutate(() => {
-      this.win.document.body.classList.toggle(clazz, on);
+    waitForBody(this.win.document, () => {
+      this.vsync_.mutate(() => {
+        this.win.document.body.classList.toggle(clazz, on);
+      });
     });
   }
 
@@ -1002,16 +1007,13 @@ export class Resources {
     const now = timer.now();
     const visibility = this.viewer_.getVisibilityState();
 
-    const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
-        this.getScrollDirection());
-
     let timeout = -1;
-    let task = this.queue_.peek(scorer);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev.fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
-          'score', scorer(task),
+          'score', this.boundTaskScorer_(task),
           'timeout', timeout);
       if (timeout > 16) {
         break;
@@ -1039,7 +1041,7 @@ export class Resources {
         }
       }
 
-      task = this.queue_.peek(scorer);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
@@ -1078,20 +1080,20 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
-   * @param {!../layout-rect.LayoutRectDef} viewportRect
-   * @param {number} dir
    * @param {!TaskDef} task
    * @private
    */
-  calcTaskScore_(viewportRect, dir, task) {
-    const box = task.resource.getLayoutBox();
+  calcTaskScore_(task) {
+    let posPriority = 0;
     // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
     // layers. This is currently a short-term fix to the problem that
     // the fixed elements get incorrect top coord.
-    const isFixed = task.resource.isFixed();
-    let posPriority = isFixed ? 0 :
-        Math.floor((box.top - viewportRect.top) / viewportRect.height);
-    if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
+    if (!task.resource.isFixed()) {
+      const viewport = this.viewport_.getRect();
+      const box = task.resource.getLayoutBox();
+      posPriority = Math.floor((box.top - viewport.top) / viewport.height);
+    }
+    if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;
     }
     posPriority = Math.abs(posPriority);

@@ -2,7 +2,7 @@
   "atinternet": {
     "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&ref=_document_referrer_",
-    "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2$extraUrlParams&ref=_document_referrer_",
+    "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&$extraUrlParams&ref=_document_referrer_",
     "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&ref=_document_referrer_"
   },
   "burt": {
@@ -34,14 +34,19 @@
     "base": "https://sb.scorecardresearch.com/b?",
     "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=$c2&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
+  "cxense": {
+    "host": "https://scomcluster.cxense.com",
+    "base": "https://scomcluster.cxense.com/Repo/rep.gif" ,
+    "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=$siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_"
+  },
   "googleanalytics": {
     "host": "https://www.google-analytics.com",
-    "basePrefix": "v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "basePrefix": "v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
     "baseSuffix": "&a=_page_view_id_&z=_random_",
-    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&_r=1&a=_page_view_id_&z=_random_",
-    "event": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=$eventValue&a=_page_view_id_&z=_random_",
-    "social": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=$eventValue&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
@@ -92,6 +97,12 @@
     "baseParams": "amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
     "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
     "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&t=5000&e=5000"
+  },
+  "segment": {
+    "host": "https://api.segment.io/v1/pixel",
+    "base": "?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_",
+    "page": "https://api.segment.io/v1/pixel/page?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&name=$name",
+    "track": "https://api.segment.io/v1/pixel/track?writeKey=$writeKey&anonymousId=$anonymousId&context.locale=_browser_language_&context.page.path=_canonical_path_&context.page.url=_canonical_url_&context.page.referrer=_document_referrer_&context.page.title=_title_&context.screen.width=_screen_width_&context.screen.height=_screen_height_&event=$event"
   },
   "snowplow": {
     "aaVersion": "amp-0.1",

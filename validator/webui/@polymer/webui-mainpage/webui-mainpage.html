@@ -25,7 +25,6 @@
   <template>
     <ampproject-toolbar></ampproject-toolbar>
     <webui-urlform id="urlForm"></webui-urlform>
-
     <amphtml-editor id="amphtmlEditor"></amphtml-editor>
     <webui-statusbar id="statusBar"></webui-statusbar>
     <webui-errorlist id="errorListBox"></webui-errorlist>
@@ -34,6 +33,9 @@
     Polymer({
       is: 'webui-mainpage',
       ready: function() {
+        // The URL form at the top of the screen.
+        var urlForm = this.$.urlForm;
+
         // The editor control in the center of the screen.
         var editor = this.$.amphtmlEditor;
 
@@ -55,7 +57,7 @@
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
-        editor.addEventListener('amphtml-editor-changes', function(e) {
+        var refreshEditorAndErrors = function(e) {
           clearTimeout(validationTimeout);
           validationTimeout = setTimeout(function() {
 
@@ -87,6 +89,11 @@
               error.isError = error.severity === 'ERROR';
               error.isWarning = error.severity === 'WARNING';
               listbox.addError(error);
+
+              if (listbox.getFilter() !== undefined &&
+                  listbox.getFilter() !== error.category) {
+                continue;
+              }
 
               // Create a dom element for the inline display of errors
               // inside the editor. TODO(powdercloud): Make this a Polymer
@@ -127,7 +134,11 @@
               removeParamFromLocationHashParams('errno');
             }
           }, e.detail.validationDelayMs);
-        });
+        };
+
+        editor.addEventListener('amphtml-editor-changes', refreshEditorAndErrors);
+        listbox.addEventListener('webui-errorlist-filter-changes',
+                                        refreshEditorAndErrors);
 
         // Clicking in the error list at the bottom of the screen moves
         // the editor cursor.
@@ -153,8 +164,12 @@
             setLocationHashParams(params);
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
-              if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
+              if (xmlHttp.readyState == 4) {
+                if (xmlHttp.status == 200) {
+                  editor.setEditorValue(JSON.parse(xmlHttp.responseText).Contents);
+                } else {
+                  urlForm.displayToast();
+                }
               }
             };
             xmlHttp.open('POST', '/fetch', true);

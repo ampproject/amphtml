@@ -159,8 +159,8 @@ export class Xhr {
     setupJson_(init);
 
     return this.fetchAmpCors_(input, init).then(response => {
-      return assertSuccess(response).json();
-    });
+      return assertSuccess(response);
+    }).then(response => response.json());
   }
 
   /**
@@ -179,8 +179,8 @@ export class Xhr {
     init.headers['Accept'] = 'text/html';
 
     return this.fetchAmpCors_(input, init).then(response => {
-      return assertSuccess(response).document_();
-    });
+      return assertSuccess(response);
+    }).then(response => response.document_());
   }
 
   /**
@@ -216,7 +216,7 @@ export class Xhr {
    */
   sendSignal(input, opt_init) {
     return this.fetchAmpCors_(input, opt_init).then(response => {
-      assertSuccess(response);
+      return assertSuccess(response);
     });
   }
 
@@ -399,17 +399,32 @@ function isRetriable(status) {
 /**
  * Returns the response if successful or otherwise throws an error.
  * @paran {!FetchResponse} response
- * @return {!FetchResponse}
+ * @return {!Promise<!FetchResponse>}
+ * @private Visible for testing
  */
-function assertSuccess(response) {
-  if (!(response.status >= 200 && response.status < 300)) {
-    const err = user.createError(`HTTP error ${response.status}`);
-    if (isRetriable(response.status)) {
-      err.retriable = true;
+export function assertSuccess(response) {
+  return new Promise((resolve, reject) => {
+    if (response.status < 200 || response.status >= 300) {
+      const err = user.createError(`HTTP error ${response.status}`);
+      if (isRetriable(response.status)) {
+        err.retriable = true;
+      }
+      if (response.headers.get('Content-Type') == 'application/json') {
+        response.json().then(json => {
+          err.responseJson = json;
+          reject(err);
+        }, () => {
+          // Ignore a failed json parsing and just throw the error without
+          // setting responseJson.
+          reject(err);
+        });
+      } else {
+        reject(err);
+      }
+    } else {
+      resolve(response);
     }
-    throw err;
-  }
-  return response;
+  });
 }
 
 

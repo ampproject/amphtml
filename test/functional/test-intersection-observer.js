@@ -109,7 +109,6 @@ describe('IntersectionObserver', () => {
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
-  const testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -123,9 +122,6 @@ describe('IntersectionObserver', () => {
     }
     firstAttachedCallback() {
       testElementFirstAttachedCallback();
-    }
-    isReadyToBuild() {
-      return testElementIsReadyToBuild;
     }
     buildCallback() {
       testElementBuildCallback();

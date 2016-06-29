@@ -30,7 +30,7 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 - We welcome pull requests by all ad networks for inclusion into AMP.
 - All ads and all sub resources must be served from HTTPS.
 - Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
-- Direct iframe embeds not using our 3p iframe mechanism (used by most ads) are preferred.
+- For display ads support, always implement amp-ad and instruct your client to use your amp-ad implementation instead of using amp-iframe. Althought amp-iframe will render the ad, ad clicks will break and viewability information is not available.
 - Providing an optional image only zero-iframe embed is appreciated.
 - Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
 - Try to keep overall iframe count at one per ad. Explain why more are needed.

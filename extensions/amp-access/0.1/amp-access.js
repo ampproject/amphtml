@@ -18,7 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {actionServiceFor} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
@@ -280,7 +280,9 @@ export class AccessService {
     dev.fine(TAG, 'config:', this.type_, this.loginConfig_,
         this.adapter_.getConfig());
 
-    actionServiceFor(this.win).installActionHandler(
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
+    actionServiceForDoc(this.win.document.documentElement).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.

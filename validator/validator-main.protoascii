@@ -25,7 +25,7 @@ min_validator_revision_required: 135
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 228
+spec_file_revision: 231
 
 # Validator extensions.
 # =====================
@@ -38,7 +38,7 @@ spec_file_revision: 228
 # (https://www.ampproject.org/docs/reference/spec.html)
 
 tags: {
-  tag_name: "!doctype"
+  tag_name: "!DOCTYPE"
   spec_name: "html doctype"
   mandatory_parent: "$ROOT"
   mandatory: true
@@ -57,10 +57,10 @@ tags: {
 # 4.1 The root element
 # 4.1.1 The html element
 tags: {
-  tag_name: "html"
+  tag_name: "HTML"
   spec_name: "html ⚡ for top-level html"
   mandatory: true
-  mandatory_parent: "!doctype"
+  mandatory_parent: "!DOCTYPE"
   unique: true
   attrs: {
     name: "⚡"
@@ -74,20 +74,20 @@ tags: {
 # 4.2 Document metadata
 # 4.2.1 The head element
 tags: {
-  tag_name: "head"
+  tag_name: "HEAD"
   mandatory: true
-  mandatory_parent: "html"
+  mandatory_parent: "HTML"
   unique: true
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.2.2 The title element
 tags: {
-  tag_name: "title"
+  tag_name: "TITLE"
   spec_name: "title"
 }
 # 4.2.3 the base element
 tags: {
-  tag_name: "base"
+  tag_name: "BASE"
   # Currently the amp cache doesn't correctly rewrite URLs for documents
   # with <base href>. When it does, we will add support for href attributes.
   # attrs: {
@@ -116,9 +116,9 @@ attr_lists: {
   attrs: { name: "color" }
 }
 tags: {
-  tag_name: "link"
+  tag_name: "LINK"
   spec_name: "link rel="
-  disallowed_ancestor: "template"
+  disallowed_ancestor: "TEMPLATE"
   attrs: { name: "href" }
   attr_lists: "common-link-attrs"
   attrs: {
@@ -141,7 +141,7 @@ tags: {
         "components|"
         "dns-prefetch|"
         "import|"
-        "manifest|"
+        "manifest|"  # Handled separately below, has specific requirements.
         "preconnect|"
         "prefetch|"
         "preload|"
@@ -155,9 +155,9 @@ tags: {
   attrs: { name: "type" }
 }
 tags: {
-  tag_name: "link"
+  tag_name: "LINK"
   spec_name: "link rel=canonical"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   mandatory: true
   unique: true
   attrs: {
@@ -178,11 +178,33 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel=manifest"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allow_relative: true
+    }
+  }
+  attr_lists: "common-link-attrs"
+  attrs: {
+    name: "rel"
+    value: "manifest"
+    mandatory: true
+    dispatch_key: true
+  }
+}
 # Whitelisted font providers
 tags: {
-  tag_name: "link"
+  tag_name: "LINK"
   spec_name: "link rel=stylesheet for fonts"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "href"
     mandatory: true
@@ -206,7 +228,7 @@ tags: {
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
-  tag_name: "link"
+  tag_name: "LINK"
   spec_name: "link itemprop=sameAs"
   attrs: {
     name: "href"
@@ -222,7 +244,7 @@ tags: {
 }
 # rel= isn't mandatory when itemprop= is present.
 tags: {
-  tag_name: "link"
+  tag_name: "LINK"
   spec_name: "link itemprop="
   attrs: {
     name: "href"
@@ -237,10 +259,10 @@ tags: {
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta charset=utf-8"
   mandatory: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   unique: true
   attrs: {
     dispatch_key: true
@@ -251,10 +273,10 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta name=viewport"
   mandatory: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   unique: true
   attrs: {
     name: "content"
@@ -280,7 +302,7 @@ tags: {
 # This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
 # to the IE8 engine. So it's explicitly allowed.
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=X-UA-Compatible"
   attrs: {
     name: "http-equiv"
@@ -298,7 +320,7 @@ tags: {
   }
 }
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta name= and content="
   # The validator accepts any name="..." attribute values except
   # for a few specific name values which have more specific rules above or
@@ -315,7 +337,7 @@ tags: {
 # This is redundant with meta charset, but also harmless as long as it's
 # set to utf-8.
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=content-type"
   attrs: {
     name: "http-equiv"
@@ -331,7 +353,7 @@ tags: {
 }
 # Identical to the above, but a common case variant of content-type.
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=Content-Type"
   attrs: {
     name: "http-equiv"
@@ -347,7 +369,7 @@ tags: {
 }
 # http-equiv content-language tag
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=content-language"
   attrs: {
     name: "http-equiv"
@@ -363,7 +385,7 @@ tags: {
 # http-equiv pics-label tag
 # https://www.w3.org/PICS/
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=pics-label"
   attrs: {
     name: "http-equiv"
@@ -379,7 +401,7 @@ tags: {
 # http-equiv imagetoolbar tag
 # https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=imagetoolbar"
   attrs: {
     name: "http-equiv"
@@ -395,7 +417,7 @@ tags: {
 # http-equiv content-style-type
 # https://www.w3.org/TR/REC-html40/present/styles.html#h-14.2.1
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=Content-Style-Type"
   attrs: {
     name: "http-equiv"
@@ -412,7 +434,7 @@ tags: {
 # http-equiv content-script-type
 # https://www.w3.org/TR/html4/interact/scripts.html#h-18.2.2.1
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=Content-Script-Type"
   attrs: {
     name: "http-equiv"
@@ -429,7 +451,7 @@ tags: {
 # http-equiv resource-type
 # http://www.metatags.info/meta_http_equiv_resource_type
 tags: {
-  tag_name: "meta"
+  tag_name: "META"
   spec_name: "meta http-equiv=resource-type"
   attrs: {
     name: "http-equiv"
@@ -446,10 +468,10 @@ tags: {
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet.
-  tag_name: "style"
+  tag_name: "STYLE"
   spec_name: "style amp-custom"
   unique: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "amp-custom"
     mandatory: true
@@ -534,11 +556,11 @@ tags: {  # Special custom 'author' spreadsheet.
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
 }
 tags: {
-  tag_name: "style"
+  tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] - old variant"
   mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   deprecation: "head > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   cdata: {
@@ -547,11 +569,11 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
-  tag_name: "style"
+  tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] - old variant"
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
-  mandatory_parent: "noscript"
+  mandatory_parent: "NOSCRIPT"
   deprecation: "noscript > style[amp-boilerplate]"
   deprecation_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
   cdata {
@@ -560,11 +582,11 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
-  tag_name: "style"
+  tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   mandatory_alternatives: "head > style[amp-boilerplate]"
   unique: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   also_requires_tag: "noscript > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
@@ -580,11 +602,11 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
-  tag_name: "style"
+  tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
   unique: true
-  mandatory_parent: "noscript"
+  mandatory_parent: "NOSCRIPT"
   also_requires_tag: "head > style[amp-boilerplate]"
   attrs: {
     name: "amp-boilerplate"
@@ -601,80 +623,80 @@ tags: {
 # 4.3 Sections
 # 4.3.1 The body element
 tags: {
-  tag_name: "body"
+  tag_name: "BODY"
   mandatory: true
   unique: true
-  mandatory_parent: "html"
+  mandatory_parent: "HTML"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.3.2 The article element
 tags: {
-  tag_name: "article"
+  tag_name: "ARTICLE"
 }
 # 4.3.3 The section element
 tags: {
-  tag_name: "section"
-  disallowed_ancestor: "amp-accordion"
+  tag_name: "SECTION"
+  disallowed_ancestor: "AMP-ACCORDION"
 }
 # 4.3.4 The nav element
 tags: {
-  tag_name: "nav"
+  tag_name: "NAV"
 }
 # 4.3.5 The aside element
 tags: {
-  tag_name: "aside"
+  tag_name: "ASIDE"
 }
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
 tags: {
-  tag_name: "h1"
+  tag_name: "H1"
   attrs: { name: "align" }
 }
 tags: {
-  tag_name: "h2"
+  tag_name: "H2"
   attrs: { name: "align" }
 }
 tags: {
-  tag_name: "h3"
+  tag_name: "H3"
   attrs: { name: "align" }
 }
 tags: {
-  tag_name: "h4"
+  tag_name: "H4"
   attrs: { name: "align" }
 }
 tags: {
-  tag_name: "h5"
+  tag_name: "H5"
   attrs: { name: "align" }
 }
 tags: {
-  tag_name: "h6"
+  tag_name: "H6"
   attrs: { name: "align" }
 }
 # 4.3 7 The header element
 tags: {
-  tag_name: "header"
+  tag_name: "HEADER"
 }
 # 4.3 7 The footer element
 tags: {
-  tag_name: "footer"
+  tag_name: "FOOTER"
 }
 # 4.3 7 The address element
 tags: {
-  tag_name: "address"
+  tag_name: "ADDRESS"
 }
 
 # 4.4 Grouping Content
 # 4.4.1 The p element
 tags: {
-  tag_name: "p"
+  tag_name: "P"
   attrs: { name: "align" }
 }
 # 4.4.2 The hr element
 tags: {
-  tag_name: "hr"
+  tag_name: "HR"
 }
 # 4.4.3 The pre element
 tags: {
-  tag_name: "pre"
+  tag_name: "PRE"
 }
 # 4.4.4 The blockquote element
 attr_lists: {
@@ -700,13 +722,13 @@ attr_lists: {
   }
 }
 tags: {
-  tag_name: "blockquote"
+  tag_name: "BLOCKQUOTE"
   attrs: { name: "align" }
   attr_lists: "cite-attr"
 }
 # 4.4.5 The ol element
 tags: {
-  tag_name: "ol"
+  tag_name: "OL"
   attrs: {
     name: "reversed"
     value: ""
@@ -722,11 +744,11 @@ tags: {
 }
 # 4.4.6 The ul element
 tags: {
-  tag_name: "ul"
+  tag_name: "UL"
 }
 # 4.4.7 The li element
 tags: {
-  tag_name: "li"
+  tag_name: "LI"
   attrs: {
     name: "value"
     value_regex: "[0-9]*"
@@ -734,38 +756,38 @@ tags: {
 }
 # 4.4.8 The dl element
 tags: {
-  tag_name: "dl"
+  tag_name: "DL"
 }
 # 4.4.9 The dt element
 tags: {
-  tag_name: "dt"
+  tag_name: "DT"
 }
 # 4.4.10 The dd element
 tags: {
-  tag_name: "dd"
+  tag_name: "DD"
 }
 # 4.4.11 The figure element
 tags: {
-  tag_name: "figure"
+  tag_name: "FIGURE"
 }
 # 4.4.12 The figcaption element
 tags: {
-  tag_name: "figcaption"
+  tag_name: "FIGCAPTION"
 }
 # 4.4.13 The div element
 tags: {
-  tag_name: "div"
+  tag_name: "DIV"
   attrs: { name: "align" }
 }
 # 4.4.14 The main element
 tags: {
-  tag_name: "main"
+  tag_name: "MAIN"
 }
 
 # 4.5 Text-level semantics
 # 4.5.1 The a element
 tags: {
-  tag_name: "a"
+  tag_name: "A"
   attrs: {
     name: "href"
     value_url: {
@@ -835,133 +857,133 @@ tags: {
 }
 # 4.5.2 The em element
 tags: {
-  tag_name: "em"
+  tag_name: "EM"
 }
 # 4.5.3 The strong element
 tags: {
-  tag_name: "strong"
+  tag_name: "STRONG"
 }
 # 4.5.4 The small element
 tags: {
-  tag_name: "small"
+  tag_name: "SMALL"
 }
 # 4.5.5 The s element
 tags: {
-  tag_name: "s"
+  tag_name: "S"
 }
 # 4.5.6 The cite element
 tags: {
-  tag_name: "cite"
+  tag_name: "CITE"
 }
 # 4.5.7 The q element
 tags: {
-  tag_name: "q"
+  tag_name: "Q"
   attr_lists: "cite-attr"
 }
 # 4.5.8 The dfn element
 tags: {
-  tag_name: "dfn"
+  tag_name: "DFN"
 }
 # 4.5.9 The abbr element
 tags: {
-  tag_name: "abbr"
+  tag_name: "ABBR"
 }
 # 4.5.10 The data element
 tags: {
-  tag_name: "data"
+  tag_name: "DATA"
 }
 # 4.5.11 The time element
 tags: {
-  tag_name: "time"
+  tag_name: "TIME"
   attrs: {
     name: "datetime"
   }
 }
 # 4.5.12 The code element
 tags: {
-  tag_name: "code"
+  tag_name: "CODE"
 }
 # 4.5.13 The var element
 tags: {
-  tag_name: "var"
+  tag_name: "VAR"
 }
 # 4.5.14 The samp element
 tags: {
-  tag_name: "samp"
+  tag_name: "SAMP"
 }
 # 4.5.15 The kbd element
 tags: {
-  tag_name: "kbd"
+  tag_name: "KBD"
 }
 # 4.5.16 The sub and sup elements
 tags: {
-  tag_name: "sub"
+  tag_name: "SUB"
 }
 tags: {
-  tag_name: "sup"
+  tag_name: "SUP"
 }
 # 4.5.17 The i element
 tags: {
-  tag_name: "i"
+  tag_name: "I"
 }
 # 4.5.18 The b element
 tags: {
-  tag_name: "b"
+  tag_name: "B"
 }
 # 4.5.19 The u element
 tags: {
-  tag_name: "u"
+  tag_name: "U"
 }
 # 4.5.20 The mark element
 tags: {
-  tag_name: "mark"
+  tag_name: "MARK"
 }
 # 4.5.21 The ruby element
 tags: {
-  tag_name: "ruby"
+  tag_name: "RUBY"
 }
 # 4.5.22 The rb element
 tags: {
-  tag_name: "rb"
+  tag_name: "RB"
 }
 # 4.5.23 The rt element
 tags: {
-  tag_name: "rt"
+  tag_name: "RT"
 }
 # 4.5.24 The rtc element
 tags: {
-  tag_name: "rtc"
+  tag_name: "RTC"
 }
 # 4.5.25 The rp element
 tags: {
-  tag_name: "rp"
+  tag_name: "RP"
 }
 # 4.5.26 The bdi element
 tags: {
-  tag_name: "bdi"
+  tag_name: "BDI"
 }
 # 4.5.27 The bdo element
 tags: {
-  tag_name: "bdo"
+  tag_name: "BDO"
   attrs: { name: "dir" }
 }
 # 4.5.28 The span element
 tags: {
-  tag_name: "span"
+  tag_name: "SPAN"
 }
 # 4.5.29 The br element
 tags: {
-  tag_name: "br"
+  tag_name: "BR"
 }
 # 4.5.30 The wbr element
 tags: {
-  tag_name: "wbr"
+  tag_name: "WBR"
 }
 
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: {
-  tag_name: "ins"
+  tag_name: "INS"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
@@ -971,7 +993,7 @@ tags: {
 }
 # 4.6.2 The del element
 tags: {
-  tag_name: "del"
+  tag_name: "DEL"
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
@@ -985,9 +1007,9 @@ tags: {
 # the exception of tags inside of a <noscript> ancestor.
 # 4.7.1 The img element
 tags: {
-  tag_name: "img"
-  mandatory_ancestor: "noscript"
-  mandatory_ancestor_suggested_alternative: "amp-img"
+  tag_name: "IMG"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-IMG"
   spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
   attrs: { name: "alt" }
   attrs: { name: "ismap" }
@@ -1019,9 +1041,9 @@ tags: {
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
 tags: {
-  tag_name: "video"
-  mandatory_ancestor: "noscript"
-  mandatory_ancestor_suggested_alternative: "amp-video"
+  tag_name: "VIDEO"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-VIDEO"
   attrs: { name: "autoplay" }
   attrs: { name: "controls" }
   attrs: { name: "height" }
@@ -1043,9 +1065,9 @@ tags: {
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
 tags: {
-  tag_name: "audio"
-  mandatory_ancestor: "noscript"
-  mandatory_ancestor_suggested_alternative: "amp-audio"
+  tag_name: "AUDIO"
+  mandatory_ancestor: "NOSCRIPT"
+  mandatory_ancestor_suggested_alternative: "AMP-AUDIO"
   attrs: { name: "autoplay" }
   attrs: { name: "controls" }
   attrs: { name: "loop" }
@@ -1063,9 +1085,9 @@ tags: {
 }
 # 4.7.8 The source element
 tags: {
-  tag_name: "source"
+  tag_name: "SOURCE"
   spec_name: "amp-video > source"
-  mandatory_parent: "amp-video"
+  mandatory_parent: "AMP-VIDEO"
   attrs: {
     name: "src"
     value_url: {
@@ -1078,9 +1100,9 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 tags: {
-  tag_name: "source"
+  tag_name: "SOURCE"
   spec_name: "amp-audio > source"
-  mandatory_parent: "amp-audio"
+  mandatory_parent: "AMP-AUDIO"
   attrs: {
     name: "src"
     value_url: {
@@ -1093,9 +1115,9 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 tags: {
-  tag_name: "source"
+  tag_name: "SOURCE"
   spec_name: "audio > source"
-  mandatory_parent: "audio"
+  mandatory_parent: "AUDIO"
   attrs: {
     name: "src"
     mandatory: true
@@ -1111,9 +1133,9 @@ tags: {
   attrs: { name: "media" }
 }
 tags: {
-  tag_name: "source"
+  tag_name: "SOURCE"
   spec_name: "video > source"
-  mandatory_parent: "video"
+  mandatory_parent: "VIDEO"
   attrs: {
     name: "src"
     mandatory: true
@@ -1175,51 +1197,51 @@ attr_lists: {
   }
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "audio > track"
-  mandatory_parent: "audio"
+  mandatory_parent: "AUDIO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "audio > track[kind=subtitles]"
-  mandatory_parent: "audio"
+  mandatory_parent: "AUDIO"
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "video > track"
-  mandatory_parent: "video"
+  mandatory_parent: "VIDEO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "video > track[kind=subtitles]"
-  mandatory_parent: "video"
+  mandatory_parent: "VIDEO"
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "amp-audio > track"
-  mandatory_parent: "amp-audio"
+  mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "amp-audio > track[kind=subtitles]"
-  mandatory_parent: "amp-audio"
+  mandatory_parent: "AMP-AUDIO"
   attr_lists: "track-attrs-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "amp-video > track"
-  mandatory_parent: "amp-video"
+  mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-no-subtitles"
 }
 tags: {
-  tag_name: "track"
+  tag_name: "TRACK"
   spec_name: "amp-video > track[kind=subtitles]"
-  mandatory_parent: "amp-video"
+  mandatory_parent: "AMP-VIDEO"
   attr_lists: "track-attrs-subtitles"
 }
 
@@ -1337,8 +1359,8 @@ attr_lists: {
 }
 # Basics
 tags: {
-  tag_name: "g"
-  mandatory_ancestor: "svg"
+  tag_name: "G"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
@@ -1348,8 +1370,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "glyph"
-  mandatory_ancestor: "svg"
+  tag_name: "GLYPH"
+  mandatory_ancestor: "SVG"
   attrs: { name: "arabic-form" }
   attrs: { name: "class" }
   attrs: { name: "d" }
@@ -1365,8 +1387,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "glyphref"
-  mandatory_ancestor: "svg"
+  tag_name: "GLYPHREF"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "dx" }
   attrs: { name: "dy" }
@@ -1380,8 +1402,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "marker"
-  mandatory_ancestor: "svg"
+  tag_name: "MARKER"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "markerunits" }
@@ -1398,8 +1420,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "path"
-  mandatory_ancestor: "svg"
+  tag_name: "PATH"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "d" }
   attrs: { name: "externalresourcesrequired" }
@@ -1412,8 +1434,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "svg"
-  disallowed_ancestor: "svg"
+  tag_name: "SVG"
+  disallowed_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
@@ -1432,8 +1454,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "view"
-  mandatory_ancestor: "svg"
+  tag_name: "VIEW"
+  mandatory_ancestor: "SVG"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
@@ -1444,8 +1466,8 @@ tags: {
 }
 # Shapes
 tags: {
-  tag_name: "circle"
-  mandatory_ancestor: "svg"
+  tag_name: "CIRCLE"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "cx" }
   attrs: { name: "cy" }
@@ -1459,8 +1481,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "line"
-  mandatory_ancestor: "svg"
+  tag_name: "LINE"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "sketch:type" }
@@ -1475,8 +1497,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "polygon"
-  mandatory_ancestor: "svg"
+  tag_name: "POLYGON"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "points" }
@@ -1488,8 +1510,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "polyline"
-  mandatory_ancestor: "svg"
+  tag_name: "POLYLINE"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "points" }
@@ -1501,8 +1523,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "rect"
-  mandatory_ancestor: "svg"
+  tag_name: "RECT"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
@@ -1520,8 +1542,8 @@ tags: {
 }
 # Text
 tags: {
-  tag_name: "text"
-  mandatory_ancestor: "svg"
+  tag_name: "TEXT"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "dx" }
   attrs: { name: "dy" }
@@ -1539,8 +1561,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "textpath"
-  mandatory_ancestor: "svg"
+  tag_name: "TEXTPATH"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "method" }
@@ -1553,8 +1575,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "tref"
-  mandatory_ancestor: "svg"
+  tag_name: "TREF"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attr_lists: "svg-conditional-processing-attributes"
@@ -1564,8 +1586,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "tspan"
-  mandatory_ancestor: "svg"
+  tag_name: "TSPAN"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "dx" }
   attrs: { name: "dy" }
@@ -1582,8 +1604,8 @@ tags: {
 }
 # Rendering
 tags: {
-  tag_name: "clippath"
-  mandatory_ancestor: "svg"
+  tag_name: "CLIPPATH"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "clippathunits" }
   attrs: { name: "externalresourcesrequired" }
@@ -1594,8 +1616,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "filter"
-  mandatory_ancestor: "svg"
+  tag_name: "FILTER"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "filterres" }
@@ -1611,8 +1633,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "hkern"
-  mandatory_ancestor: "svg"
+  tag_name: "HKERN"
+  mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
@@ -1622,8 +1644,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "lineargradient"
-  mandatory_ancestor: "svg"
+  tag_name: "LINEARGRADIENT"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "gradientunits" }
@@ -1639,8 +1661,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "mask"
-  mandatory_ancestor: "svg"
+  tag_name: "MASK"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
@@ -1655,8 +1677,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "pattern"
-  mandatory_ancestor: "svg"
+  tag_name: "PATTERN"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
@@ -1675,8 +1697,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "radialgradient"
-  mandatory_ancestor: "svg"
+  tag_name: "RADIALGRADIENT"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "cx" }
   attrs: { name: "cy" }
@@ -1693,26 +1715,26 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "stop"
+  tag_name: "STOP"
   spec_name: "lineargradient > stop"
-  mandatory_ancestor: "lineargradient"
+  mandatory_ancestor: "LINEARGRADIENT"
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "stop"
+  tag_name: "STOP"
   spec_name: "radialgradient > stop"
-  mandatory_ancestor: "radialgradient"
+  mandatory_ancestor: "RADIALGRADIENT"
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "vkern"
-  mandatory_ancestor: "svg"
+  tag_name: "VKERN"
+  mandatory_ancestor: "SVG"
   attrs: { name: "g1" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
@@ -1723,8 +1745,8 @@ tags: {
 }
 # Special
 tags: {
-  tag_name: "defs"
-  mandatory_ancestor: "svg"
+  tag_name: "DEFS"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
@@ -1734,8 +1756,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "symbol"
-  mandatory_ancestor: "svg"
+  tag_name: "SYMBOL"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
@@ -1745,8 +1767,8 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "use"
-  mandatory_ancestor: "svg"
+  tag_name: "USE"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
@@ -1763,8 +1785,8 @@ tags: {
 # HTML inside SVG, esp. to allow amp-img.
 # See https://github.com/ampproject/amphtml/issues/717
 tags: {
-  tag_name: "foreignobject"
-  mandatory_ancestor: "svg"
+  tag_name: "FOREIGNOBJECT"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "height" }
@@ -1779,28 +1801,28 @@ tags: {
 }
 # ARIA
 tags: {
-  tag_name: "desc"
-  mandatory_ancestor: "svg"
+  tag_name: "DESC"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attr_lists: "svg-core-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
-  tag_name: "title"
+  tag_name: "TITLE"
   spec_name: "svg title"
-  mandatory_ancestor: "svg"
+  mandatory_ancestor: "SVG"
   attrs: { name: "class" }
   attr_lists: "svg-core-attributes"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 
 # 4.8 Links
-# Links are a concept, rather than a tag. See tagspecs for "link", "a", etc.
+# Links are a concept, rather than a tag. See tagspecs for "LINK", "A", etc.
 
 # 4.9 Tabular data
 # 4.9.1 The table element
 tags: {
-  tag_name: "table"
+  tag_name: "TABLE"
   attrs: { name: "sortable" }
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
@@ -1813,33 +1835,33 @@ tags: {
 }
 # 4.9.2 The caption element
 tags: {
-  tag_name: "caption"
+  tag_name: "CAPTION"
 }
 # 4.9.3 The colgroup element
 tags: {
-  tag_name: "colgroup"
+  tag_name: "COLGROUP"
   attrs: { name: "span" }
 }
 # 4.9.4 The col element
 tags: {
-  tag_name: "col"
+  tag_name: "COL"
   attrs: { name: "span" }
 }
 # 4.9.5 The tbody element
 tags: {
-  tag_name: "tbody"
+  tag_name: "TBODY"
 }
 # 4.9.6 The thead element
 tags: {
-  tag_name: "thead"
+  tag_name: "THEAD"
 }
 # 4.9.7 The tfoot element
 tags: {
-  tag_name: "tfoot"
+  tag_name: "TFOOT"
 }
 # 4.9.8 The tr element
 tags: {
-  tag_name: "tr"
+  tag_name: "TR"
   # These attributes are not supported in HTML5, but are widely supported and
   # commonly found.
   attrs: { name: "align" }
@@ -1849,7 +1871,7 @@ tags: {
 }
 # 4.9.9 The td element
 tags: {
-  tag_name: "td"
+  tag_name: "TD"
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
@@ -1863,7 +1885,7 @@ tags: {
 }
 # 4.9.10 The th element
 tags: {
-  tag_name: "th"
+  tag_name: "TH"
   attrs: { name: "abbr" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
@@ -1882,7 +1904,7 @@ tags: {
 # 4.10 Forms
 # Not allowed, except for button.
 tags: {
-  tag_name: "button"
+  tag_name: "BUTTON"
   attrs: {
     name: "disabled"
     value: ""
@@ -1905,11 +1927,11 @@ tags: {
 # Only the amphtml script, custom extensions and the LD/JSON description are
 # allowed.
 tags: {
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amphtml engine v0.js script"
   mandatory: true
   unique: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -1935,7 +1957,7 @@ tags: {
 }
 # JSON Linked Data
 tags: {
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "script type=application/ld+json"
   attrs: {
     name: "type"
@@ -1953,20 +1975,20 @@ tags: {
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
-  tag_name: "noscript"
+  tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
   mandatory: true
   unique: true
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
-  tag_name: "noscript"
+  tag_name: "NOSCRIPT"
   # Noscript inside of noscript has strange parsing semantics in browsers and
   # isn't really helping anyone anyway.
-  mandatory_ancestor: "body"
-  disallowed_ancestor: "noscript"
+  mandatory_ancestor: "BODY"
+  disallowed_ancestor: "NOSCRIPT"
 }
 # 4.11.3 The template element
 # See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
@@ -1974,43 +1996,43 @@ tags: {
 # 11 Obsolute features
 # 11.2 Non-conforming features
 tags: {
-  tag_name: "acronym"
+  tag_name: "ACRONYM"
 }
 tags: {
-  tag_name: "big"
+  tag_name: "BIG"
 }
 tags: {
-  tag_name: "center"
+  tag_name: "CENTER"
 }
 tags: {
-  tag_name: "dir"
+  tag_name: "DIR"
 }
 tags: {
-  tag_name: "hgroup"
+  tag_name: "HGROUP"
 }
 tags: {
-  tag_name: "listing"
+  tag_name: "LISTING"
 }
 tags: {
-  tag_name: "multicol"
+  tag_name: "MULTICOL"
 }
 tags: {
-  tag_name: "nextid"
+  tag_name: "NEXTID"
 }
 tags: {
-  tag_name: "nobr"
+  tag_name: "NOBR"
 }
 tags: {
-  tag_name: "spacer"
+  tag_name: "SPACER"
 }
 tags: {
-  tag_name: "strike"
+  tag_name: "STRIKE"
 }
 tags: {
-  tag_name: "tt"
+  tag_name: "TT"
 }
 tags: {
-  tag_name: "xmp"
+  tag_name: "XMP"
 }
 
 # Some additional tags, microformats, allowances.
@@ -2018,7 +2040,7 @@ tags: {
 # This tag is a preserved indicator for documents created in microsoft word.
 # They do not render.
 tags: {
-  tag_name: "o:p"
+  tag_name: "O:P"
 }
 
 # Tags and attributes specific to AMP HTML.
@@ -2047,8 +2069,8 @@ attr_lists: {
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {  # <amp-ad>
-  tag_name: "amp-ad"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-AD"
+  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: {
@@ -2073,8 +2095,8 @@ tags: {  # <amp-ad>
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-embed consider changing amp-ad as well.
 tags: {  # <amp-embed>
-  tag_name: "amp-embed"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-EMBED"
+  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "json" }
   attrs: {
@@ -2097,9 +2119,9 @@ tags: {  # <amp-embed>
   }
 }
 tags: {  # <amp-img>
-  tag_name: "amp-img"
+  tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
-  # disallowed_ancestor: "amp-sidebar"
+  # disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -2116,8 +2138,8 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
-  tag_name: "amp-pixel"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-PIXEL"
+  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
     name: "src"
     mandatory: true
@@ -2136,8 +2158,8 @@ tags: {  # <amp-pixel>
   }
 }
 tags: {  # <amp-video>
-  tag_name: "amp-video"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-VIDEO"
+  disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "autoplay" value: "" }

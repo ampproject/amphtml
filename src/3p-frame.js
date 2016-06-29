@@ -32,6 +32,8 @@ import {viewerFor} from './viewer';
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
 
+/** @type {string} */
+let overrideBootstrapBaseUrl;
 
 /**
  * Produces the attributes for the ad template.
@@ -191,14 +193,21 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   });
 }
 
+export function setDefaultBootstrapBaseUrlForTesting(url) {
+  overrideBootstrapBaseUrl = url;
+}
+
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  if (getMode().localDev || parentWindow.AMP_TEST) {
-    const prefix = parentWindow.AMP_TEST ? '/base' : '';
+  if (getMode().localDev || getMode().test) {
+    if (overrideBootstrapBaseUrl) {
+      return overrideBootstrapBaseUrl;
+    }
+    const prefix = getMode().test ? '/base' : '';
     return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
         prefix + '/dist.3p/current' +

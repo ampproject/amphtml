@@ -63,6 +63,15 @@ var forbiddenTerms = {
       'validator/validator.js',
     ]
   },
+  // Match `getMode` that is not followed by a "()." and is assigned
+  // as a variable.
+  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
+    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
+        ' Use explicitly like "getMode().localDev" instead.',
+    whitelist: [
+      'dist.3p/current/integration.js'
+    ]
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -71,12 +80,12 @@ var forbiddenTerms = {
     ],
   },
   // Service factories that should only be installed once.
-  'installActionService': {
+  'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
-      'src/amp-core-service.js',
+      'src/runtime.js',
     ],
   },
   'installActionHandler': {
@@ -101,6 +110,14 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installDocService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/service/ampdoc-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -115,17 +132,24 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
+  'installTemplatesService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/template-impl.js',
+    ],
+  },
   'installUrlReplacementsService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/history-impl.js',
       'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
@@ -136,7 +160,7 @@ var forbiddenTerms = {
   'installViewportService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
@@ -144,7 +168,7 @@ var forbiddenTerms = {
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -153,7 +177,7 @@ var forbiddenTerms = {
   'installResourcesService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
@@ -161,7 +185,7 @@ var forbiddenTerms = {
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/xhr-impl.js',
     ],
   },
@@ -236,7 +260,7 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
-  'isTrusted': {
+  'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
@@ -301,6 +325,7 @@ var forbiddenTerms = {
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/tasks/csvify-size/index.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],
@@ -340,6 +365,7 @@ var forbiddenTerms = {
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
+      'examples/pwa/pwa.js',
       'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',

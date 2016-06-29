@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 tags: {  # amp-audio
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-audio extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -46,9 +46,8 @@ tags: {  # amp-audio
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 tags: {  # <amp-audio>
-  tag_name: "amp-audio"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-AUDIO"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-audio extension .js script"
   attrs: {
     name: "autoplay"

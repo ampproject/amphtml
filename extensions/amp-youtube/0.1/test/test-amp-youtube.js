@@ -210,8 +210,9 @@ describe('amp-youtube', function() {
       'data-param-my-param': 'hello world',
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
-      expect(iframe.src).to.contain('autoplay=1');
       expect(iframe.src).to.contain('myParam=hello%20world');
+      // autoplay is temporarily black listed.
+      expect(iframe.src).to.not.contain('autoplay=1');
     });
   });
 });

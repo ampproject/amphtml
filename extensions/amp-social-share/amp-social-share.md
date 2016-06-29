@@ -95,7 +95,9 @@ The element provides [some pre-configured providers](0.1/amp-social-share-config
     - url `optional` (defaults: `rel=canonical` URL)
     - text `optional` (defaults: Current page title)
 - facebook
-    - url `optional` (defaults: `rel=canonical` URL)
+    - href `optional` (defaults: `rel=canonical` URL)
+    - text `optional` (defaults: none)
+    - app_id `required` (defaults: none) Required by [Facebook share dialog](https://developers.facebook.com/docs/sharing/reference/share-dialog).
 - pinterest
     - url `optional` (defaults: `rel=canonical` URL)
 - linkedin
