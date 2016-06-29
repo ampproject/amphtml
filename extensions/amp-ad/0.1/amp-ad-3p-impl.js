@@ -112,6 +112,13 @@ export function incrementLoadingAds(win) {
  * anyway.
  */
 export function isPositionFixed(el, win) {
+  // TODO(@cramforce): Figure out why test comes here with the window
+  // removed. This is somehow related to the resource framework running
+  // on a timer that is not bound to the lifetime of the iframe.
+  // See https://github.com/ampproject/amphtml/issues/3709
+  if (!win) {
+    return false;
+  }
   let hasFixedAncestor = false;
   do {
     if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
