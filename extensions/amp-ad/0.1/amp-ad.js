@@ -20,13 +20,17 @@ import {insertAmpExtensionScript} from '../../../src/insert-extension';
 
 
 /**
- * Template to construct ad network type-specific tag and script name.  Note
- * that this omits the version number and '.js' suffix for the extension script,
- * which will be handled by the extension loader.
+ * Construct ad network type-specific tag and script name.  Note that this
+ * omits the version number and '.js' suffix for the extension script, which
+ * will be handled by the extension loader.
  *
- * @private @const {!string}
+ * @param {!string} type
+ * @return !string
+ * @private
  */
-const TAG_NETWORK_CUSTOM_IMPL_ = 'amp-ad-network-${TYPE}-impl';
+function networkImplementationTag(type) {
+  return `amp-ad-network-${type}-impl`;
+}
 
 /** @private @enum {!number} */
 const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
@@ -40,8 +44,9 @@ const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
  * @param {!Element} targetElement  Element to copy attributes to.
  */
 function copyAttributes(sourceElement, targetElement) {
-  for (let i = sourceElement.attributes.length - 1; i >= 0; --i) {
-    const attr = sourceElement.attributes[i];
+  const attrs = sourceElement.attributes;
+  for (let i = attrs.length - 1; i >= 0; --i) {
+    const attr = attrs[i];
     if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
       targetElement.setAttribute(attr.name, attr.value);
     }
@@ -78,7 +83,7 @@ export class AmpAd extends AMP.BaseElement {
       // If we ever reach a point at which there are different extensions with
       // different version numbers at play simultaneously, we'll have to make sure
       // that the loader can handle the case.
-      const extensionTag = TAG_NETWORK_CUSTOM_IMPL_.replace('${TYPE}', type);
+      const extensionTag = networkImplementationTag(type);
       newChild = this.element.ownerDocument.createElement(extensionTag);
       /*REVIEW*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
     }
