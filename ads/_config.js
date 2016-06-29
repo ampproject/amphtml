@@ -64,6 +64,7 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
 };
 
 /**
