@@ -31,7 +31,7 @@ export class AmpAdApiHandler {
   /**
    * @param {!BaseElement} baseInstance
    * @param {!Element} element
-   * @param {function=} opt_noContentCallback
+   * @param {function()=} opt_noContentCallback
    */
   constructor(baseInstance, element, opt_noContentCallback) {
     /** @private {!BaseElement} */
@@ -49,7 +49,7 @@ export class AmpAdApiHandler {
     /** @private {boolean} */
     this.is3p_ = false;
 
-    /** @param {?function} opt_noContentHandler */
+    /** @param {?function()} opt_noContentHandler */
     this.noContentCallback_ = opt_noContentCallback;
 
     /** @private {!Array<!Function>} functions to unregister listeners */

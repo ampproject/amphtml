@@ -146,7 +146,7 @@ const TRUNC_PARAM_ = '&trunc=1';
  * @param {number} slotNumber
  * @param {!Window} global
  * @param {!Object} data
- * @param {number) isAmp
+ * @param {number} isAmp
  * @param {string} canonicalUrl
  * @param {number} correlator
  * @param {!IntersectionObserverEntry} intersectionRecord
@@ -289,7 +289,7 @@ function adsenseRequestUrl(startTime, slotNumber, global, data, isAmp,
 }
 
 /**
- * @param {!Window}
+ * @param {!Window} global
  * @return {number}
  */
 function getHistoryLength_(global) {

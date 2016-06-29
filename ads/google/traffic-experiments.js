@@ -25,7 +25,7 @@
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {getMode} from '../../src/mode';
 
-/** @typedef {{string: {branches: control: string, experiment: string}} */
+/** @typedef {{string: {branches: control: string, experiment: string}}} */
 export let ExperimentInfo;
 
 // TODO(tdrl): New test case: Invoke setupPageExperiments twice for different
