@@ -41,8 +41,8 @@ let PublicKeyInfoDef;
  * @return {!Promise<!PublicKeyInfoDef>}
  */
 export function importPublicKey(publicKey) {
-  const lenMod = lenPrefix(base64urlDecode(publicKey['n']));
-  const lenPubExp = lenPrefix(base64urlDecode(publicKey['e']));
+  const lenMod = lenPrefix(base64UrlDecode(publicKey['n']));
+  const lenPubExp = lenPrefix(base64UrlDecode(publicKey['e']));
   const data = new Uint8Array(lenMod.length + lenPubExp.length);
   data.set(lenMod);
   data.set(lenPubExp, lenMod.length);
@@ -58,16 +58,10 @@ export function importPublicKey(publicKey) {
       const hash = new Uint8Array(digest, 0, 4);
 
       // Now Get the CryptoKey.
-      let jsonPublicKey = publicKey;
-      if (isWebkit) {
-        // Webkit wants this as an ArrayBuffer.
-        const keyString = JSON.stringify(jsonPublicKey);
-        jsonPublicKey = new Uint8Array(keyString.length);
-        for (let i = 0; i < keyString.length; i++) {
-          // keyString is ASCII, so charCodeAt will fit in a byte.
-          jsonPublicKey[i] = keyString.charCodeAt(i);
-        }
-      }
+      const jsonPublicKey = isWebkit ?
+            // Webkit wants this as an ArrayBuffer.
+            stringToByteArray(JSON.stringify(publicKey)) :
+            publicKey;
       // Convert the key to internal CryptoKey format.
       return crossCrypto.importKey(
         'jwk',
@@ -184,6 +178,13 @@ function hashesEqual(signature, keyHash) {
   return true;
 }
 
+/**
+ * Converts a string which holds 8-bit code points, such as the result of atob,
+ * into an ArrayBuffer with the corresponding bytes.
+ * @param {string} str
+ * @return {!ArrayBuffer}
+ * @visibleForTesting
+ */
 export function stringToByteArray(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
@@ -193,9 +194,19 @@ export function stringToByteArray(str) {
 };
 
 
+/**
+ * Character mapping from base64url to base64.
+ */
 const atobSubs = {'-': '+', '_': '/', '.': '='};
 
-export function base64urlDecode(str) {
+/**
+ * Converts a string which is in base64url encoding into an ArrayBuffer
+ * with the decoded value.
+ * @param {string} str
+ * @return {!ArrayBuffer}
+ * @visibleForTesting
+ */
+export function base64UrlDecode(str) {
   return stringToByteArray(atob(str.replace(/[-_.]/g,
                                             ch => atobSubs[ch])));
 }

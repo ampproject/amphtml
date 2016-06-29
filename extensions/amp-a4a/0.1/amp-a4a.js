@@ -37,6 +37,9 @@ import {
 } from './crypto-verifier';
 
 
+// This is the public key currently used by our test signing server.
+// It will be replaced with code which queries the server to get the
+// current set of active keys. (See further comments below.)
 const modulus =
       'z43rjaJ9PLk1FHMEL31_ILXGtUTN03rxJ9amD9y3BRDpbTA-GkUKiQM07xAd8OXP' +
       'UZRqcjvXQfc7b1RCEtwrcfx9oBRdF78QMA4tLLCqSHP0tSuqYF0fA7-GyTFWDcYz' +

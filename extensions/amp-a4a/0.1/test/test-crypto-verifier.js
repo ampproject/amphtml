@@ -16,6 +16,7 @@
 
 import * as sinon from 'sinon';
 import {
+  base64UrlDecode,
   importPublicKey,
   stringToByteArray,
   verifySignature,
@@ -136,4 +137,14 @@ describe('verifySignature', function() {
   it('should not validate with 2 wrong keys', () =>
     verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1])
       .then(isvalid => expect(isvalid).to.be.false));
+});
+
+describe('base64UrlDecode', function() {
+  it('should map a sample string appropriately', () => {
+    const ab = base64UrlDecode('AQAB');
+    expect(ab.length).to.equal(3);
+    expect(ab[0]).to.equal(1);
+    expect(ab[1]).to.equal(0);
+    expect(ab[2]).to.equal(1);
+  });
 });
