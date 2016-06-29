@@ -54,7 +54,8 @@ import {vsyncFor} from './vsync';
  *           ||
  *           || buildCallback
  *           || !getPlaceholder() => createPlaceholderCallback
- *           || preconnectCallback may be called N times after this.
+ *           || preconnectCallback may be called N times after this, but only
+ *           || after the doc becomes visible.
  *           || pauseCallback may be called N times after this.
  *           || resumeCallback may be called N times after this.
  *           ||
