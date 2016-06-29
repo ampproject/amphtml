@@ -23,7 +23,11 @@ import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
-import {removeElement, childElementByAttr} from '../../../src/dom';
+import {
+    removeElement,
+    childElementByAttr,
+    ancestorElementsByTag,
+} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
@@ -84,6 +88,17 @@ export class AmpForm {
           this.form_);
     }
 
+    /** @const @private {boolean} */
+    this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
+    // Need to disable browser validation in order to allow us to take full
+    // control of this. This allows us to trigger validation APIs and reporting
+    // when we need to.
+    this.form_.setAttribute('novalidate', '');
+    if (!this.shouldValidate_) {
+      this.form_.setAttribute('-amp-novalidate', '');
+    }
+    this.form_.classList.add('-amp-form');
+
     const submitButtons = this.form_.querySelectorAll('input[type=submit]');
     user.assert(submitButtons && submitButtons.length > 0,
         'form requires at least one <input type=submit>: %s', this.form_);
@@ -100,6 +115,11 @@ export class AmpForm {
   /** @private */
   installSubmitHandler_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
+    // Add 'focus' event on all inputs.
+    const inputs = this.form_.querySelectorAll('input,select,textarea');
+    for (let i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('focus', onInputFocus_);
+    }
   }
 
   /**
@@ -120,17 +140,17 @@ export class AmpForm {
       return;
     }
 
-    const shouldValidate = !this.form_.hasAttribute('novalidate');
-    const isInvalid = shouldValidate &&
-        this.form_.checkValidity && !this.form_.checkValidity();
-    if (isInvalid) {
-      e.stopImmediatePropagation();
-      // TODO(#3776): Use .mutate method when it supports passing state.
-      this.vsync_.run({
-        measure: undefined,
-        mutate: reportValidity,
-      }, {form: this.form_});
-      return;
+    if (this.shouldValidate_) {
+      checkUserValidityOnSubmission_(this.form_);
+      if (this.form_.checkValidity && !this.form_.checkValidity()) {
+        e.stopImmediatePropagation();
+        // TODO(#3776): Use .mutate method when it supports passing state.
+        this.vsync_.run({
+          measure: undefined,
+          mutate: reportValidity,
+        }, {form: this.form_});
+        return;
+      }
     }
 
     if (this.xhrAction_) {
@@ -218,7 +238,7 @@ function reportValidity(state) {
 
 
 /**
- * Reports validity for the first invalid input - if any.
+ * Reports validity for the first invainputnput - if any.
  * @param {!HTMLFormElement} form
  */
 function reportFormValidity(form) {
@@ -261,17 +281,113 @@ function onInvalidInputBlur_(event) {
  * @param {!HTMLInputElement} input
  */
 function reportInputValidity(input) {
-  input./*OK*/focus();
+  if (input.reportValidity) {
+    input.reportValidity();
+  } else {
+    input./*OK*/focus();
 
-  // Remove any previous listeners on the same input. This avoids adding many
-  // listeners on the same element when the user submit pressing Enter or any
-  // other method to submit the form without the element losing focus.
-  input.removeEventListener('blur', onInvalidInputBlur_);
-  input.removeEventListener('keyup', onInvalidInputKeyUp_);
+    // Remove any previous listeners on the same input. This avoids adding many
+    // listeners on the same element when the user submit pressing Enter or any
+    // other method to submit the form without the element losing focus.
+    input.removeEventListener('blur', onInvalidInputBlur_);
+    input.removeEventListener('keyup', onInvalidInputKeyUp_);
 
-  input.addEventListener('keyup', onInvalidInputKeyUp_);
-  input.addEventListener('blur', onInvalidInputBlur_);
-  validationBubble.show(input, input.validationMessage);
+    input.addEventListener('keyup', onInvalidInputKeyUp_);
+    input.addEventListener('blur', onInvalidInputBlur_);
+    validationBubble.show(input, input.validationMessage);
+  }
+}
+
+
+/**
+ * Checks user validity for all inputs, fieldsets and the form.
+ * @param {!HTMLFormElement} form
+ */
+function checkUserValidityOnSubmission_(form) {
+  const inputs = form.querySelectorAll('input,select,textarea,fieldset');
+  for (let i = 0; i < inputs.length; i++) {
+    checkUserValidity(inputs[i]);
+  }
+  checkUserValidity(form);
+}
+
+
+/**
+ * Checks user validity which applies .user-valid and .user-invalid AFTER the user
+ * interacts with the input by moving away from the input (blur) or by changing its
+ * value (input).
+ *
+ * See :user-invalid spec for more details:
+ *   https://drafts.csswg.org/selectors-4/#user-pseudos
+ *
+ * The specs are still not fully specified. The current solution tries to follow a common
+ * sense approach for when to apply these classes. As the specs gets clearer, we should
+ * strive to match it as much as possible.
+ *
+ * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @returns {boolean} true to indicate that validity should propagate to ancestors.
+ */
+function checkUserValidity(element) {
+  const currentUserValid = element.classList.contains('user-valid');
+  const currentUserInvalid = element.classList.contains('user-invalid');
+  if (!currentUserValid && element.checkValidity()) {
+    element.classList.add('user-valid');
+    element.classList.remove('user-invalid');
+    return currentUserInvalid;
+  } else if (!currentUserInvalid && !element.checkValidity()) {
+    element.classList.add('user-invalid');
+    element.classList.remove('user-valid');
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+/**
+ * Responds to user interaction with an input by checking user validity of the input
+ * and possibly its input-related ancestors (e.g. feildset, form).
+ * @param {!Event} e
+ */
+function onInputInteraction_(e) {
+  const input = e.target;
+  const shouldPropagate = checkUserValidity(input);
+  if (!shouldPropagate) {
+    return;
+  }
+
+  // Propagate user validity to ancestor fieldsets.
+  const ancestors = ancestorElementsByTag(input, 'fieldset');
+  for (let i = 0; i < ancestors.length; i++) {
+    checkUserValidity(ancestors[i]);
+  }
+  // Also update the form user validity.
+  if (input.form) {
+    checkUserValidity(input.form);
+  }
+}
+
+
+/**
+ * Removes event listeners from input.
+ * @param {!Event} e
+ */
+function onInputBlur_(e) {
+  const input = e.target;
+  input.removeEventListener('blur', onInputInteraction_);
+  input.removeEventListener('input', onInputInteraction_);
+  input.removeEventListener('blur', onInputBlur_)
+}
+
+
+/**
+ * Adds blur and input event listeners to react to interactions on the input.
+ * @param {!Event} e
+ */
+function onInputFocus_(e) {
+  const input = e.target;
+  input.addEventListener('blur', onInputInteraction_);
+  input.addEventListener('input', onInputInteraction_);
 }
 
 

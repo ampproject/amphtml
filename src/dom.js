@@ -438,6 +438,38 @@ export function hasNextNodeInDocumentOrder(element) {
 
 
 /**
+ * Finds all ancestor elements that satisfies the callback.
+ * @param {!Element} child
+ * @param {function(!Element):boolean} callback
+ * @return {!Array<!Element>}
+ */
+export function ancestorElements(child, callback) {
+  const ancestors = [];
+  for (let ancestor = child.parentElement; ancestor;
+       ancestor = ancestor.parentElement) {
+    if (callback(ancestor)) {
+      ancestors.push(ancestor);
+    }
+  }
+  return ancestors;
+}
+
+
+/**
+ * Finds all ancestor elements that has the specified tag name.
+ * @param {!Element} child
+ * @param {string} attr
+ * @return {!Array.<!Element>}
+ */
+export function ancestorElementsByTag(child, tagName) {
+  const upperTagName = tagName.toUpperCase();
+  return ancestorElements(child, el => {
+    return el.tagName == upperTagName;
+  });
+}
+
+
+/**
  * This method wraps around window's open method. It first tries to execute
  * `open` call with the provided target and if it fails, it retries the call
  * with the `_top` target. This is necessary given that in some embedding

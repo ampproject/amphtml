@@ -105,7 +105,7 @@ function measureTargetElement(state) {
 function showBubbleElement(state) {
   state.bubbleElement.textContent = state.message;
   setStyles(state.bubbleElement, {
-    display: '',
+    display: 'block',
     top: `${state.targetRect.top - 10}px`,
     left: `${state.targetRect.left + state.targetRect.width / 2}px`,
   });
