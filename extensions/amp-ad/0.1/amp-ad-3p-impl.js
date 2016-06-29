@@ -15,17 +15,15 @@
  */
 
 import {removeElement} from '../../../src/dom';
-import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getAdCid} from '../../../src/ad-cid';
 import {prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
+import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
 
 /** @const These tags are allowed to have fixed positioning */
@@ -194,6 +192,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
+
+    setupA2AListener(this.getWin());
   }
 
   /**
