@@ -14,24 +14,27 @@
  * limitations under the License.
  */
 
+/**
+ * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
+ */
+
 import './polyfills';
+import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {performanceFor} from './performance';
-import {templatesFor} from './template';
-import {installCoreServices} from './amp-core-service';
-import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
-import {installImg} from '../builtins/amp-img';
-import {installVideo} from '../builtins/amp-video';
-import {installPixel} from '../builtins/amp-pixel';
-import {installEmbed} from '../builtins/amp-embed';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
+import {installDocService} from './service/ampdoc-impl';
 import {stubElements} from './custom-element';
-import {adopt} from './runtime';
+import {
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
+  adopt,
+} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
-import {waitForExtensions} from './render-delaying-extensions';
+import {maybeTrackImpression} from './impression';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -39,22 +42,27 @@ import {waitForExtensions} from './render-delaying-extensions';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
-  const perf = performanceFor(window);
 
+  // Declare that this runtime will support a single root doc. Should happen
+  // as early as possible.
+  const ampdocService = installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+
+  const perf = installPerformanceService(window);
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      installCoreServices(window);
+      // Core services.
+      installRuntimeServices(window);
+      installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
-      templatesFor(window);
+      maybeTrackImpression(window);
 
-      installImg(window);
-      installAd(window);
-      installPixel(window);
-      installVideo(window);
-      installEmbed(window);
+      // Builtins.
+      installBuiltins(window);
 
+      // Final configuration and stubbing.
       adopt(window);
       stubElements(window);
 
@@ -62,7 +70,7 @@ try {
       installGlobalClickListener(window);
 
       maybeValidate(window);
-      makeBodyVisible(document, waitForExtensions(window));
+      makeBodyVisible(document, /* waitForExtensions */ true);
     } catch (e) {
       makeBodyVisible(document);
       throw e;
@@ -86,5 +94,5 @@ if (window.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-document.documentElement.setAttribute('amp-version',
+window.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

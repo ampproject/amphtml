@@ -42,6 +42,16 @@ When the same `var` is defined in multiple locations, the value is picked in the
 
 The remainder of this doc lists and describes the variables supported in `amp-analytics`.
 
+| Table of Contents  |
+|---|
+| [Device and Browser](#device-and-browser) |
+| [Interaction](#interaction) |
+| [Miscellaneous](#miscellaneous) |
+| [Page and content](#page-and-content) |
+| [Performance](#performance) |
+| [Visibility](#visibility-variables) |
+
+
 ## Page and content
 
 ### ampdocHost
@@ -206,6 +216,42 @@ is unloaded. The value is in milliseconds.
 
 Example value: `40`
 
+### navRedirectCount
+
+Provides the number of redirects since the last non-redirect navigation.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+Example value: `0`
+
+### navTiming
+
+Provides access to metrics from the browser's PerformanceTiming interface.
+If both `startEvent` and `endEvent` arguments are passed, the value will be the time elapsed between the two events.
+Otherwise, if only `startEvent` argument is passed, the value will be the timestamp of the given event.
+The value is in milliseconds.
+
+See the W3C Navigation Timing API [PerformanceTiming interface](https://www.w3.org/TR/navigation-timing/#sec-navigation-timing-interface) documentation for attribute names and definitions.
+
+Please see below for the required and optional arguments you may pass into `navTiming` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**:
+
+  - `startEvent` (Required) - Name of the PerformanceTiming interface attribute corresponding to the start event.
+
+  - `endEvent` (Optional) - Optional name of the PerformanceTiming interface attribute corresponding to the end event. If `endEvent` is passed, the value will be the time difference between the start and end events.
+
+
+Example 1: `${navTiming(navigationStart)}` results in value: `1451606400000`
+
+Example 2: `${navTiming(navigationStart,responseStart)}` results in value: `10`
+
+### navType
+
+Provides the type of the last non-redirect navigation in the current browsing context.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+Example value: `1`
+
 ### pageDownloadTime
 
 Provides the time between receiving the first and the last byte of response. The value is in milliseconds.
@@ -214,7 +260,7 @@ Example value: `100`
 
 ### pageLoadTime
 
-Provides the time taken to load the whole page. The value is calculated from the time `unload` event handler on previous page ends to the time `load` event for the current page is fired. If there is no previous page, the duration starts from the time the user agent is ready to fetch the document using an HTTP requesti. The value is in milliseconds.
+Provides the time taken to load the whole page. The value is calculated from the time `unload` event handler on previous page ends to the time `load` event for the current page is fired. If there is no previous page, the duration starts from the time the user agent is ready to fetch the document using an HTTP request. The value is in milliseconds.
 
 Example value: `220`
 
@@ -236,7 +282,37 @@ Provides the time it took for HTTP connection to be setup. The duration includes
 
 Example value `10`
 
+## Interaction
+
+### horizontalScrollBoundary
+
+Provides the horizontal scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
+
+### totalEngagedTime
+
+Provides the total time (in seconds) the user has been engaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
+
+Example value: `36`
+
+### verticalScrollBoundary
+
+Provides the vertical scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
+
 ## Miscellaneous
+
+### ampVersion
+
+Provides a string with the AMP release version.
+
+Example value: `1460655576651`
 
 ### clientId
 
@@ -254,6 +330,14 @@ Please see below the required and optional arguments you may pass into `clientId
 Example usage: `${clientId(foo)}`
 
 Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynbUWtIodJxP5TEIYBic4qcV`
+
+### extraUrlParams
+
+Provides all the params defined in extraUrlParams block of the config as a variable. If this variable is used, the parameters are not appended to the end of the URL.
+
+Example usage: `${extraUrlParams}`
+
+Example value: 'foo=bar&baz=something'
 
 ### pageViewId
 
@@ -293,11 +377,75 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
-### totalEngagedTime
+## Visibility Variables
 
-Provides the total time (in seconds) the user has been enagaged with the page since the page
-first became visible in the viewport. Total engaged time will be 0 until the
-page first becomes visible.
+### backgrounded
 
-Example value: `36`
+A binary variable with possible values of 1 and 0 to indicate that the page/tab was sent to background at any point before the hit was sent. 1 indicates that the page was backgrounded while 0 indicates that the page has always been in the foreground. This variable does not count prerender as a backgrounded state.
+
+### backgroundedAtStart
+
+A binary variable with possible values of 1 and 0 to indicate that the page/tab was backgrounded at the time when the page was loaded. 1 indicates that the page was loaded in the background while 0 indicates otherwise. This variable does not count prerender as a backgrounded state.
+
+### maxContinuousVisibleTime
+
+Provides the maximum amount of continuous time an element has met the `visibilitySpec` conditions at the time this ping is sent. Note that a ping with a continuousTimeMin=1000 and totalTimeMin=5000 that is visible for 1000ms, then not visible, then visible
+for 2000ms, then not, then visible for 1000ms, then not, then visible for 1020ms
+will report 2000 for this number as that is the max continuous visible time,
+even if it is not the current continuous visible time (1020 in this example).
+
+### elementHeight
+
+Provides the height of the element specified by `visibilitySpec`.
+
+### elementWidth
+
+Provides the width of the element specified by `visibilitySpec`.
+
+### elementX
+
+Provides the X coordinate of the left edge of the element specified by `visibilitySpec`.
+
+### elementY
+
+Provides the Y coordinate of the top edge of the element specified by `visibilitySpec`.
+
+### firstSeenTime
+
+Provides the time when at least 1px of the element is on the screen for the first time since the trigger is registered by `amp-analytics`.
+
+### firstVisibleTime
+
+Provides the time when the element met visibility conditions for the first time since
+the trigger is registered by `amp-analytics`.
+
+### lastSeenTime
+
+Provides the time when at least 1px of the element is on the screen for the last time since javascript load.
+
+### lastVisibleTime
+
+Provides the time when the element met visibility conditions for the last time since
+javascript load.
+
+### loadTimeVisibility
+
+Provides the percentage of element visible in the viewport at load time. This variable assumes that the page is scrolled to top.
+
+### maxVisiblePercentage
+
+Provides the maximum visible percentage over the time that `visibilitySpec` conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 100. A ping with visiblePercentageMax=50 undergoing the same transitions would report somewhere between 0 and 50 since any time when the element was 100% on the page would not be counted.
+
+### minVisiblePercentage
+
+Provides the minimum visible percentage over the time that visibilitySpec conditions were met. For example, a ping where the element was 100%, then off the page, then 100% will report this value as 0. A ping with visiblePercentageMin=50 condition undergoing the same transitions would report somewhere between 50 and 100 since any time when the element was 0% to 50% on the page would not be counted.
+
+### totalTime
+
+Provides the total time from the time page was loaded to the time a ping was sent out. The value is calculated from the time document became interactive.
+
+### totalVisibleTime
+
+Provides the total time for which the element has met the visiblitySpec conditions at time this ping is sent.
+
 

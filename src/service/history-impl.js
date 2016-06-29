@@ -15,8 +15,8 @@
  */
 
 import {Pass} from '../pass';
-import {assert} from '../asserts';
 import {getService} from '../service';
+import {getMode} from '../mode';
 import {dev} from '../log';
 import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
@@ -60,7 +60,7 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise>, resolve:!Function,reject:!Function}} */
+    /** @private {!Array<!{callback:function():!Promise, resolve:!Function,reject:!Function}>} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -151,7 +151,7 @@ export class History {
       reject = aReject;
     });
 
-    this.queue_.push({callback: callback, resolve: resolve, reject: reject});
+    this.queue_.push({callback, resolve, reject});
     if (this.queue_.length == 1) {
       this.deque_();
     }
@@ -444,7 +444,7 @@ export class HistoryBindingNatural_ {
 
   /** @private */
   assertReady_() {
-    assert(!this.waitingState_,
+    dev.assert(!this.waitingState_,
         'The history must not be in the waiting state');
   }
 
@@ -474,11 +474,7 @@ export class HistoryBindingNatural_ {
           resolve = aResolve;
           reject = aReject;
         }));
-    this.waitingState_ = {
-      promise: promise,
-      resolve: resolve,
-      reject: reject,
-    };
+    this.waitingState_ = {promise, resolve, reject};
     return promise;
   }
 
@@ -569,10 +565,10 @@ export class HistoryBindingNatural_ {
 export class HistoryBindingVirtual_ {
 
   /**
-   * @param {!Viewer} viewer
+   * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(viewer) {
-    /** @private @const {!Viewer} */
+    /** @private @const */
     this.viewer_ = viewer;
 
     /** @private {number} */
@@ -615,7 +611,7 @@ export class HistoryBindingVirtual_ {
   }
 
   /**
-   * @param {!ViewerHistoryPoppedEvent} event
+   * @param {!./viewer-impl.ViewerHistoryPoppedEventDef} event
    * @private
    */
   onHistoryPopped_(event) {
@@ -647,7 +643,7 @@ export class HistoryBindingVirtual_ {
 function createHistory_(window) {
   const viewer = installViewerService(window);
   let binding;
-  if (viewer.isOvertakeHistory()) {
+  if (viewer.isOvertakeHistory() || getMode().test) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
     binding = new HistoryBindingNatural_(window);

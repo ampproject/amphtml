@@ -17,18 +17,17 @@
 checkMinVersion();
 
 var $$ = require('gulp-load-plugins')();
-var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
-var cssnano = require('cssnano');
+var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
+var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
+var minimatch = require('minimatch');
 var minimist = require('minimist');
-var postcss = require('postcss');
-var postcssImport = require('postcss-import');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
@@ -39,24 +38,6 @@ var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
 require('./build-system/tasks');
-
-// NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-var cssprefixer = autoprefixer({
-  browsers: [
-    'last 5 ChromeAndroid versions',
-    'last 5 iOS versions',
-    'last 3 FirefoxAndroid versions',
-    'last 5 Android versions',
-    'last 2 ExplorerMobile versions',
-    'last 2 OperaMobile versions',
-    'last 2 OperaMini versions'
-  ]
-});
-
-cssnano = cssnano({
-  convertValues: false,
-  zindex: false
-});
 
 
 /**
@@ -70,24 +51,37 @@ function buildExtensions(options) {
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
+  buildExtension('amp-ad', '0.1', false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
+  buildExtension('amp-brid-player', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
+  buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
+  buildExtension('amp-experiment', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
+  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
+  buildExtension('amp-form', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
+  buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
+  buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-reach-player', '0.1', false, options);
+  buildExtension('amp-share-tracking', '0.1', false, options);
+  buildExtension('amp-sidebar', '0.1', true, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
+  buildExtension('amp-springboard-player', '0.1', false, options);
+  buildExtension('amp-sticky-ad', '0.1', true, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -116,16 +110,34 @@ function polyfillsForTests() {
  *
  * @param {boolean} watch
  * @param {boolean} shouldMinify
+ * @param {boolean=} opt_preventRemoveAndMakeDir
+ * @param {boolean=} opt_checkTypes
  */
-function compile(watch, shouldMinify) {
+function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
+    opt_checkTypes) {
   compileCss();
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+    minifiedName: 'f.js',
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    minify: shouldMinify,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
+  });
+  // The main binary does not yet compile successfully with type checking
+  // turned on. Skip for now.
+  if (opt_checkTypes && !argv.more) {
+    return;
+  }
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
     toName: 'amp.js',
     minifiedName: 'v0.js',
     includePolyfills: true,
+    checkTypes: opt_checkTypes,
     watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
@@ -138,10 +150,16 @@ function compile(watch, shouldMinify) {
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
   });
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
-    minifiedName: 'f.js',
+  // Entry point for shadow runtime.
+  compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+    toName: 'amp-shadow.js',
+    minifiedName: 'shadow-v0.js',
+    includePolyfills: true,
+    checkTypes: opt_checkTypes,
     watch: watch,
-    minify: shouldMinify
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: windowConfig.getTemplate() + '<%= contents %>'
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -153,36 +171,11 @@ function compile(watch, shouldMinify) {
  */
 function compileCss() {
   console.info('Recompiling CSS.');
-  return jsifyCssPromise('css/amp.css').then(function(css) {
+  return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
         .pipe(gulp.dest('build'));
   });
-}
-
-/**
- * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
- * compresses the file, removes the copyright comment, and adds the sourceURL
- * to the stylesheet
- *
- * @param {string} filename css file
- * @return {!Promise} that resolves with the css content after processing
- */
-function jsifyCssPromise(filename) {
-  var css = fs.readFileSync(filename, 'utf8');
-  var transformers = [cssprefixer, cssnano];
-  // Remove copyright comment. Crude hack to get our own copyright out
-  // of the string.
-  return postcss(transformers).use(postcssImport).process(css.toString(), {
-        'from': filename
-      })
-      .then(function(result) {
-        result.warnings().forEach(function(warn) {
-          console.warn(warn.toString());
-        });
-        var css = result.css;
-        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-      });
 }
 
 /**
@@ -192,8 +185,11 @@ function watch() {
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
+  buildAlp({
+    watch: true,
+  });
   buildExtensions({
-    watch: true
+    watch: true,
   });
   buildExamples(true);
   compile(true);
@@ -219,9 +215,19 @@ function watch() {
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
-  console.log('Bundling ' + name);
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
+  var jsTestPath = path + '/test/' + 'test-' + name + '.js';
+  if (argv.files && options.bundleOnlyIfListedInFiles) {
+    const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
+    const shouldBundle = passedFiles.some(glob => {
+      return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
+    });
+    if (!shouldBundle) {
+      return;
+    }
+  }
+  console.log('Bundling ' + name);
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -235,7 +241,7 @@ function buildExtension(name, version, hasCss, options) {
   }
   if (hasCss) {
     mkdirSync('build');
-    return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
+    return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
       var jsCss = 'export const CSS = ' + css + ';\n';
       var builtName = 'build/' + name + '-' + version + '.css.js';
       fs.writeFileSync(builtName, jsCss, 'utf-8');
@@ -260,6 +266,7 @@ function buildExtension(name, version, hasCss, options) {
 function buildExtensionJs(path, name, version, options) {
   compileJs(path + '/', name + '.js', './dist/v0', {
     watch: options.watch,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
@@ -275,7 +282,8 @@ function buildExtensionJs(path, name, version, options) {
 function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
-  buildExtensions();
+  buildAlp();
+  buildExtensions({bundleOnlyIfListedInFiles: true});
   buildExamples(false);
   compile();
 }
@@ -285,10 +293,33 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  compile(false, true);
-  buildExtensions({minify: true});
-  buildExperiments({minify: true, watch: false});
-  buildLoginDone({minify: true, watch: false});
+  cleanupBuildDir();
+  compile(false, true, true);
+  buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildExtensions({minify: true, preventRemoveAndMakeDir: true});
+  buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
+}
+
+/**
+ * Dedicated type check path.
+ */
+function checkTypes() {
+  process.env.NODE_ENV = 'production';
+  cleanupBuildDir();
+  buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildExperiments({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+      /* check types */ true);
+  // These are not turned on on Travis.
 }
 
 /**
@@ -313,15 +344,24 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('ads.with.script.amp.html');
+  buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('brid-player.amp.html');
   buildExample('brightcove.amp.html');
+  buildExample('kaltura.amp.html');
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('dailymotion.amp.html');
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
+  buildExample('layout-flex-item.amp.html');
+  buildExample('live-blog-non-floating-button.amp.html');
+  buildExample('live-blog.amp.html');
+  buildExample('live-list-update.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -332,18 +372,24 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
+  buildExample('forms.amp.html');
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
+  buildExample('jwplayer.amp.html');
   buildExample('pinterest.amp.html');
+  buildExample('reach-player.amp.html');
   buildExample('released.amp.html');
   buildExample('social-share.amp.html');
   buildExample('twitter.amp.html');
   buildExample('soundcloud.amp.html');
+  buildExample('springboard-player.amp.html');
+  buildExample('sticky.ads.amp.html');
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');
+  buildExample('openx.amp.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.
@@ -588,7 +634,10 @@ function buildExperiments(options) {
         compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
+          includePolyfills: true,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          checkTypes: options.checkTypes,
         });
       });
 }
@@ -663,11 +712,33 @@ function buildLoginDoneVersion(version, options) {
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
+          includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildAlp(options) {
+  options = options || {};
+  console.log('Bundling alp.js');
+
+  compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+    toName: 'alp.max.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    includeWindowConfig: true,
+    includePolyfills: true,
+    minifiedName: 'alp.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
 }
 
 /**
@@ -699,6 +770,7 @@ function mkdirSync(path) {
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
+gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist);

@@ -85,4 +85,8 @@
       throw new TypeError("Cannot call a class as a function");
     }
   };
+
+  babelHelpers.defineProperty = function(obj, key, value) {
+      obj[key] = value;
+  };
 })(typeof global === "undefined" ? self : global);

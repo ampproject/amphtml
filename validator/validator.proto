@@ -17,6 +17,17 @@ syntax = "proto2";
 
 package amp.validator;
 
+// Used for validating attributes that require another attribute for some
+// given set of conditions.
+// E.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role"
+message AttrTriggerSpec {
+  optional string if_value_regex = 1;       // case sensitive
+
+  // If set, other attributes - identified by their name string - must
+  // be present as well.
+  repeated string also_requires_attr = 2;
+}
+
 // Used for validating properties in attribute values. Our validator
 // (via parse-viewport.h) implements the parsing algorithm as described here:
 // https://drafts.csswg.org/css-device-adapt/#parsing-algorithm
@@ -43,12 +54,14 @@ message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
   optional bool allow_relative = 2 [default = true];
+  // Whether the empty string '' is allowed for this URL value.
+  optional bool allow_empty = 3;
 }
 
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 15
+// NEXT AVAILABLE TAG: 18
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -63,18 +76,20 @@ message AttrSpec {
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
   // begin oneof {
 
-  // If none of value, value_regex, value_url, value_properties are set,
-  // any value is accepted unless blacklisted_value_regex is set.
-  // Note that prior to comparing, the attributes in a given HTML document
-  // will be unescaped.
+  // If none of these are set, any value is accepted unless
+  // blacklisted_value_regex is set. Note that prior to comparing, the
+  // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
-  optional string value = 4;
-  optional string value_regex = 5;
+  optional string value = 4;              // case sensitive
+  optional string value_regex = 15;       // case sensitive
+  optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;
   // validates against a list of properties (see PropertySpec).
   optional PropertySpecList value_properties = 11;
   // } end oneof
+
+  optional AttrTriggerSpec trigger = 16;
 
   // If set, then the attribute value may not match this regex, which is
   // always applied case-insensitively and as a partial match.
@@ -91,6 +106,10 @@ message AttrSpec {
   // May only be set for an AttrSpec where mandatory=true and the value field
   // is set.
   optional bool dispatch_key = 13;
+
+  // If set to true, the TagSpec containing this AttrSpec implicitly has this
+  // attribute and the attribute is considered valid.
+  optional bool implicit = 17 [default = false];
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -129,20 +148,14 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
-message CssRuleSpec {
-  // TODO: Add fields such as
-  // optional bool top_level_only = 1;
-  // optional bool mandatory = 2;
-  // optional string selector_tag_regex = 3;
-  // optional string selector_id_regex = 4;
-  // repeated string pseudo_selector = 5;
-}
-
+// NEXT AVAILABLE TAG: 5
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
-  repeated CssRuleSpec css_rule = 2;
+  // urls within the CSS are checked against this spec.
+  optional UrlSpec image_url_spec = 3;
+  optional UrlSpec font_url_spec = 4;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -187,6 +200,7 @@ message AmpLayout {
     RESPONSIVE = 4;
     CONTAINER = 5;
     FILL = 6;
+    FLEX_ITEM = 7;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
@@ -197,21 +211,43 @@ message AmpLayout {
   optional bool defines_default_height = 3;
 }
 
+// TagSpec::child_tags uses this configuration to specify which child tags
+// are expected for a specific tag.
+//
+// Matching child tags is done by tag name, while the parent is
+// matched by TagSpec. The reason for this is that matching by tag
+// spec name would produce less useful error messages, because we want
+// to be able to produce a good message even if the tag spec name
+// could not be determined because the enclosed child tag is invalid
+// (no TagSpec matches). By doing a tag name match, we can produce a
+// reasonable error regardless if a child tag was misplaced.
+message ChildTagSpec {
+  // Unless set to -1 (the default), the parent tag must have exactly
+  // |mandatory_num_child_tags| immediate child tags.
+  optional int32 mandatory_num_child_tags = 1 [ default = -1 ];
+  // If at least one tag name is specified, then the first child of the
+  // parent tag must have one of the provided names.
+  repeated string first_child_tag_name_oneof = 2;
+  // If at least one tag name is specified, then the child tags of
+  // the parent tag must have one of the provided tag names.
+  repeated string child_tag_name_oneof = 3;
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 20
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
-  // also have a detail string which is unique throughout all detail.
-  optional string name = 1;
+  // also have a spec_name string which is unique throughout all detail.
+  optional string tag_name = 1;
 
-  // The detail will be copied as is into ValidationError::detail for
-  // MANDATORY_TAG_MISSING and other errors. It is especially useful
-  // when the tag name by itself isn't sufficient to uniquely identify
-  // the tag spec, and itself must be unique.
-  optional string detail = 2;
+  // If provided, the spec_name must be unique within the validator
+  // rules. It will be used with preference over the tag_name in
+  // parameters for error messages and other usages that require or
+  // benefit from a unique identifier.
+  optional string spec_name = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
   // within the document.
@@ -239,7 +275,7 @@ message TagSpec {
 
   // If set, other tags - identified by their detail string - must be
   // present as well.
-  repeated string also_requires = 14;
+  repeated string also_requires_tag = 14;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -258,6 +294,10 @@ message TagSpec {
   // has been evaluated. Unlike other checks in this TagSpec, we
   // no longer have the ability to fall back on a different TagSpec.
   optional CdataSpec cdata = 12;
+
+  // Specifies which tags can be the child tags, that is, immediately children
+  // of this tag in the document.
+  optional ChildTagSpec child_tags = 19;
 
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
@@ -320,9 +360,11 @@ message ErrorCategory {
     // a given AMP element, and responsiveness.
     // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
     AMP_LAYOUT_PROBLEM = 8;
-    // AMP supports Mustache templates; the validator generates errors
-    // for misplaced template syntax.
-    AMP_MUSTACHE_TEMPLATE_PROBLEM = 9;
+    // AMP supports the HTML template tag (e.g. within amp-list) and interprets
+    // Mustache syntax within such templates. To help with debugging, the AMP
+    // Validator generates errors for misplaced Mustache template syntax.
+    // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md
+    AMP_HTML_TEMPLATE_PROBLEM = 9;
     // This is currently still allowed but may soon be disallowed. Usually
     // a recommendation for a replacement is rendered as part of the error.
     DEPRECATION = 10;
@@ -346,12 +388,14 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 51
+  // NEXT AVAILABLE TAG: 62
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
+    ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
+    GENERAL_DISALLOWED_TAG = 51;
     DISALLOWED_ATTR = 3;
     INVALID_ATTR_VALUE = 4;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
@@ -359,6 +403,7 @@ message ValidationError {
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
@@ -385,6 +430,9 @@ message ValidationError {
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
     ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
     ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
+    INCORRECT_NUM_CHILD_TAGS = 56;
+    DISALLOWED_CHILD_TAG_NAME = 57;
+    DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
@@ -399,6 +447,11 @@ message ValidationError {
     CSS_SYNTAX_MISSING_SELECTOR = 46;
     CSS_SYNTAX_NOT_A_SELECTOR_START = 47;
     CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR = 48;
+    CSS_SYNTAX_MISSING_URL = 52;
+    CSS_SYNTAX_INVALID_URL = 53;
+    CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
+    CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
+    CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -410,6 +463,13 @@ message ValidationError {
   // amp.validator.categorizeError and
   // amp.validator.annotateWithErrorCategories if you need this.
   optional ErrorCategory.Code category = 8;
+
+  // Used only in JavaScript, if an error is emitted for a specific HTML tag and
+  // if that HTML tag has an attribute named data-amp-report-test, this string
+  // will be set and contain the value found for that attribute. This is used
+  // in tests to match specific errors to specific tags in the test cases. It
+  // is not a rendered value.
+  optional string data_amp_report_test_value = 9;
 }
 
 message ErrorFormat {

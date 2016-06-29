@@ -143,6 +143,11 @@
     amp-img {
       background-color: #f4f4f4;
     }
+
+    .slot-fallback {
+      padding: 16px;
+      background: yellow;
+    }
   </style>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -154,6 +159,17 @@
       PublisherLogo
     </div>
   </header>
+
+  <!--
+  Slots spec is not implemented yet by any browser. Will use an older version via `<content>` tag.
+  <slot name="slot1"></slot>
+  -->
+  <content>
+    <div class="slot-fallback">
+      This is a slot fallback.
+    </div>
+  </content>
+
   <main role="main">
     <article>
       <figure>
@@ -162,7 +178,7 @@
             srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox">
+            height="216" on="tap:headline-img-lightbox" role="img" tabindex="0">
         </amp-img>
       </figure>
 
@@ -172,7 +188,7 @@
         <div class="lightbox-content">
           <amp-img id="floating-headline-img"
               src="img/hero@1x.jpg"
-              srcset="hero@1x.jpg 1x, img/hero@2x.jpg 2x"
+              srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
               placeholder
               width="360" height="216" layout="responsive">
           </amp-img>

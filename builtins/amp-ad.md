@@ -28,6 +28,14 @@ limitations under the License.
     <td>Stable</td>
   </tr>
   <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
   </tr>
@@ -51,25 +59,62 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
 
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
+- [Adblade](../ads/adblade.md)
+- [ADITION](../ads/adition.md)
 - [Adform](../ads/adform.md)
+- [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
-- [AdSense](../ads/adsense.md)
+- [AdSense](../ads/google/adsense.md)
+- [AdStir](../ads/adstir.md)
 - [AdTech](../ads/adtech.md)
+- [Ad Generation](../ads/adgeneration.md)
+- [Ad Up Technology](../ads/aduptech.md)
+- [AppNexus](../ads/appnexus.md)
+- [Chargeads](../ads/chargeads.md)
+- [Colombia](../ads/colombia.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
-- [Doubleclick](../ads/doubleclick.md)
+- [Doubleclick](../ads/google/doubleclick.md)
+- [E-Planning](../ads/eplanning.md)
 - [Flite](../ads/flite.md)
+- [GenieeSSP](../ads/genieessp.md)
+- [GMOSSP](../ads/gmossp.md)
+- [I-Mobile](../ads/imobile.md)
+- [Improve Digital](../ads/improvedigital.md)
+- [Industrybrains](../ads/industrybrains.md)
+- [MANTIS](../ads/mantis.md)
+- [MediaImpact](../ads/mediaimpact.md)
+- [Nend](../ads/nend.md)
+- [Open AdStream (OAS)](../ads/openadstream.md)
+- [MicroAd](../ads/microad.md)
+- [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
-- [Smart AdServer](../ads/smartadserver.md)
-- [Yieldmo](../ads/yieldmo.md)
+- [PubMatic](../ads/pubmatic.md)
 - [Revcontent](../ads/revcontent.md)
+- [Rubicon Project](../ads/rubicon.md)
+- [Sharethrough](../ads/sharethrough.md)
+- [Smart AdServer](../ads/smartadserver.md)
+- [Sortable](../ads/sortable.md)
 - [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
-- [I-Mobile](../ads/imobile.md)
+- [Webediads](../ads/webediads.md)
+- [Weborama](../ads/weborama.md)
+- [Yieldbot](../ads/yieldbot.md)
+- [Yieldmo](../ads/yieldmo.md)
+- [YahooJP](../ads/yahoojp.md)
 
 ## Styling
 
@@ -146,7 +191,7 @@ Iframes should also enforce that they are only iframed into origins that they ex
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
-Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the (allow-from)[https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options] directive for full browser support.
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
 
 ### Enhance incoming ad configuration
 
@@ -166,42 +211,11 @@ draw3p(function(config, done) {
   }, 100)
 }, ['allowed-ad-type'], ['your-domain.com']);
 ```
-## Validation errors
 
-The following lists validation errors specific to the `amp-ad` tag
-(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+## Validation
 
-<table>
-  <tr>
-    <th class="col-fourty"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>type</code> attribute missing.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
-  </tr>
-  <tr>
-  <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
-  </tr>
-</table>
+See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+
+## Notes
+
+To use `<amp-ad>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.

@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('transport', () => {
+describe('amp-analytics.transport', () => {
 
   let sandbox;
   beforeEach(() => {
@@ -98,8 +98,6 @@ describe('transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    beaconRetval = false;
-    xhrRetval = false;
     sendRequest(window, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });

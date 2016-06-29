@@ -7,11 +7,12 @@ parent.parent./*OK*/postMessage('loaded-iframe', '*');
 window.addEventListener('message', function(event) {
   if (event.data && event.data.sentinel == 'amp-test') {
     if (event.data.type == 'requestHeight') {
-      var sentinel = event.data.is3p ? 'amp-$internalRuntimeToken$': 'amp';
+      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
       parent./*OK*/postMessage({
         sentinel: sentinel,
         type: 'embed-size',
-        height: event.data.height
+        height: event.data.height,
+        width: event.data.width,
       }, '*');
     }
   }

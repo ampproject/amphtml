@@ -17,9 +17,16 @@
 /**
  * Horizontal scrolling interferes with embedded scenarios and predominantly
  * the result of the non-responsive design.
+ *
+ * Notice that it's critical that `overflow-x: hidden` is only set on `html`
+ * and not `body`. Otherwise, adding `overflow-x: hidden` forces `overflow-y`
+ * to be computed to `auto` on both the `body` and `html` elements so they both
+ * potentially get a scrolling box. See #3108 for more details.
  */
-html, body {
+html {
   overflow-x: hidden !important;
+}
+html, body {
   height: auto !important;
 }
 
@@ -76,6 +83,12 @@ body {
   left: 0;
   bottom: 0;
   right: 0;
+}
+
+.-amp-layout-flex-item {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
 }
 
 .-amp-layout-size-defined {
@@ -371,5 +384,22 @@ amp-analytics {
  * can be provided before AMP Access JS has been loaded.
  */
 [amp-access][amp-access-hide] {
+  display: none;
+}
+
+
+/**
+ * Forms error/success messaging containers should be hidden at first.
+ */
+form [submit-success],
+form [submit-error] {
+  display: none;
+}
+
+/**
+ * Hide the update reference point of amp-live-list by default. This is
+ * reset by the `amp-live-list > .amp-active[update]` selector.
+ */
+amp-live-list > [update] {
   display: none;
 }

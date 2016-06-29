@@ -205,50 +205,50 @@
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
-      data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
+      data-show-if-href="/api/show?timestamp=TIMESTAMP"
+      data-dismiss-href="/api/echo/post">
       This site uses cookies to personalize content.
       <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification1.dismiss">I accept</button>
+     <button on="tap:amp-user-notification1.dismiss" role="button" tabindex="0">I accept</button>
   </amp-user-notification>
 
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification2"
-      data-show-if-href="http://localhost:8000/api/dont-show"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
+      data-show-if-href="/api/dont-show"
+      data-dismiss-href="/api/echo/post">
       notify 2
       <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification2.dismiss">I accept</button>
+     <button on="tap:amp-user-notification2.dismiss" role="button" tabindex="1">I accept</button>
   </amp-user-notification>
 
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification3">
       This notification doesn't need remote endpoints.
-     <button on="tap:amp-user-notification3.dismiss">I accept</button>
+     <button on="tap:amp-user-notification3.dismiss" role="button" tabindex="2">I accept</button>
   </amp-user-notification>
 
   <amp-user-notification
           layout=nodisplay
           id="amp-user-notification4"
           data-persist-dismissal="false"
-          data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-          data-dismiss-href="http://localhost:8000/api/echo/post">
+          data-show-if-href="/api/show?timestamp=TIMESTAMP"
+          data-dismiss-href="/api/echo/post">
     This notification should ALWAYS show.
     <a href="#learn-more">Learn more.</a>
-    <button on="tap:amp-user-notification4.dismiss">Dismiss</button>
+    <button on="tap:amp-user-notification4.dismiss" role="button" tabindex="3">Dismiss</button>
   </amp-user-notification>
 
   <amp-user-notification
           layout=nodisplay
           id="amp-user-notification5"
           data-persist-dismissal="false"
-          data-show-if-href="http://localhost:8000/api/dont-show"
-          data-dismiss-href="http://localhost:8000/api/echo/post">
+          data-show-if-href="/api/dont-show"
+          data-dismiss-href="/api/echo/post">
     This notification should NEVER show.
     <a href="#learn-more">Learn more.</a>
-    <button on="tap:amp-user-notification5.dismiss">Dismiss</button>
+    <button on="tap:amp-user-notification5.dismiss" role="button" tabindex="4">Dismiss</button>
   </amp-user-notification>
 
   <amp-user-notification
@@ -257,7 +257,7 @@
           data-persist-dismissal="false">
     This notification should ALSO ALWAYS show.
     <a href="#learn-more">Learn more.</a>
-    <button on="tap:amp-user-notification6.dismiss">Dismiss</button>
+    <button on="tap:amp-user-notification6.dismiss" role="button" tabindex="5">Dismiss</button>
   </amp-user-notification>
 
   <header>
@@ -273,7 +273,7 @@
             srcset="./img/hero@1x.jpg 1x, ./img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
-            height="216" on="tap:headline-img-lightbox">
+            height="216" on="tap:headline-img-lightbox" role="img" tabindex="6">
         </amp-img>
       </figure>
 

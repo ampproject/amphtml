@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import {computeInMasterFrame, validateSrcPrefix, validateSrcContains,
-    checkData, validateData, validateDataExists, validateExactlyOne,}
-    from '../../src/3p';
+import {
+  computeInMasterFrame,
+  validateSrcPrefix,
+  validateSrcContains,
+  checkData,
+  nextTick,
+  validateData,
+  validateDataExists,
+  validateExactlyOne,
+} from '../../3p/3p';
 import * as sinon from 'sinon';
 
 describe('3p', () => {
@@ -72,8 +79,6 @@ describe('3p', () => {
     checkData({
       width: '',
       height: false,
-      initialWindowWidth: 1,
-      initialWindowHeight: 2,
       type: true,
       referrer: true,
       canonicalUrl: true,
@@ -95,8 +100,6 @@ describe('3p', () => {
     validateDataExists({
       width: '',
       height: false,
-      initialWindowWidth: 1,
-      initialWindowHeight: 2,
       type: 'taboola',
       referrer: true,
       canonicalUrl: true,
@@ -135,7 +138,6 @@ describe('3p', () => {
       clock.tick(1);
     }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
 
-
     expect(() => {
       // Sync throw, not validateData vs. checkData
       validateData({
@@ -168,6 +170,28 @@ describe('3p', () => {
         /xxxxxx must contain exactly one of attributes: red, green, blue./);
   });
 
+  it('should run in next tick', () => {
+    let called = 0;
+    nextTick(window, () => {
+      called++;
+    });
+    return Promise.resolve(() => {
+      expect(called).to.equal(1);
+    });
+  });
+
+  it('should run in next tick (setTimeout)', () => {
+    let called = 0;
+    nextTick({
+      setTimeout: fn => {
+        fn();
+      },
+    }, () => {
+      called++;
+    });
+    expect(called).to.equal(1);
+  });
+
   it('should do work only in master', () => {
     const taskId = 'exampleId';
     const master = {
@@ -179,19 +203,19 @@ describe('3p', () => {
     const slave0 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     const slave1 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     const slave2 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     let done;

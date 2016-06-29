@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
-
+import {Animation} from '../../../../src/animation';
 
 describe('Slides functional', () => {
 
@@ -27,6 +27,14 @@ describe('Slides functional', () => {
   let slide0, slide1, slide2;
   let slides;
   let prepareCallback, switchCallback, resetCallback;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function setupElements() {
     element = document.createElement('div');
@@ -52,9 +60,9 @@ describe('Slides functional', () => {
   }
 
   function setupSpies() {
-    slides.prepareSlide_ = prepareCallback = sinon.spy();
-    slides.commitSwitch_ = switchCallback = sinon.spy();
-    slides.resetSlide_ = resetCallback = sinon.spy();
+    slides.prepareSlide_ = prepareCallback = sandbox.spy();
+    slides.commitSwitch_ = switchCallback = sandbox.spy();
+    slides.resetSlide_ = resetCallback = sandbox.spy();
   }
 
   function teardownElements() {
@@ -191,8 +199,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in neg direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -202,8 +210,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: -32});
       expect(slides.swipeState_.pos).to.equal(0.1);
@@ -214,8 +222,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in pos direction', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 1;
       slides.swipeState_ = {
         currentIndex: 1,
@@ -225,8 +233,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(-0.1);
@@ -237,8 +245,8 @@ describe('Slides functional', () => {
     });
 
     it('should stay in-bounds on swipe', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -248,8 +256,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(0);
@@ -276,8 +284,8 @@ describe('Slides functional', () => {
     });
 
     it.skip('should go next after threshold', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -287,8 +295,8 @@ describe('Slides functional', () => {
         pos: 0.55,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -309,8 +317,8 @@ describe('Slides functional', () => {
     it('should not go past first item with a negative value when not ' +
        ' looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -320,8 +328,8 @@ describe('Slides functional', () => {
         pos: -0.6,
         min: 0,
         max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -337,8 +345,8 @@ describe('Slides functional', () => {
 
     it('should go past first item with a negative value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -348,8 +356,8 @@ describe('Slides functional', () => {
         pos: -0.6,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -363,8 +371,8 @@ describe('Slides functional', () => {
     it('should not go past last item with a positive value when ' +
        'not looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -374,8 +382,8 @@ describe('Slides functional', () => {
         pos: 0.6,
         min: 0,
         max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -387,8 +395,8 @@ describe('Slides functional', () => {
 
     it('should go past last item with a positive value when looping', () => {
       slides.isLooping_ = true;
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
       const s = {
         currentIndex: 2,
@@ -398,8 +406,8 @@ describe('Slides functional', () => {
         pos: 0.6,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -413,8 +421,8 @@ describe('Slides functional', () => {
     });
 
     it('should go next before threshold but with velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -424,8 +432,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: -0.5});
@@ -444,8 +452,8 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and no velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -455,8 +463,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -475,8 +483,8 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and opposite velocity', () => {
-      const prevTr = sinon.spy();
-      const nextTr = sinon.spy();
+      const prevTr = sandbox.spy();
+      const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
       const s = {
         currentIndex: 0,
@@ -486,8 +494,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0.5});
@@ -533,14 +541,8 @@ describe('Slides functional', () => {
           .returns(inViewport);
     }
 
-    beforeEach(() => {
-      sandbox = sinon.sandbox.create();
-    });
-
     afterEach(() => {
       teardownElements();
-      sandbox.restore();
-      sandbox = null;
     });
 
     it('should call setupAutoplay_', () => {
@@ -749,6 +751,113 @@ describe('Slides functional', () => {
       index = AmpSlides.getRelativeIndex(4, 0, slides.length);
       expect(index).to.equal(4);
       expect(slides[index]).to.equal('e');
+    });
+  });
+
+  describe('scheduling slides and updating viewport', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+
+      Animation.animate = () => {
+        return {
+          thenAlways: cb => cb(),
+        };
+      };
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should update viewport before scheduling slides', () => {
+      slides.goCallback(1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, false)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, true)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, true)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, false)).to.be.true;
+    });
+  });
+
+  describe('Navigating slides', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should hide slides that are not the current one', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+    });
+
+    it('should preload slides in direction of navigation', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ true);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide1)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide0)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
     });
   });
 });

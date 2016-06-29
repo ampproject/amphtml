@@ -18,7 +18,7 @@ import {cidFor} from '../../src/cid';
 import {
   installCidService,
   getProxySourceOrigin,
-} from '../../src/service/cid-impl';
+} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
@@ -26,19 +26,23 @@ import * as sinon from 'sinon';
 
 describe('cid', () => {
 
-  let isEmbedded;
+  let isIframed;
   let sandbox;
   let clock;
   let fakeWin;
   let storage;
+  let cid;
+  let viewerBaseCidStub;
+  let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
 
   beforeEach(() => {
     let call = 1;
-    isEmbedded = false;
+    isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    whenFirstVisible = Promise.resolve();
     storage = {};
     fakeWin = {
       localStorage: {
@@ -69,10 +73,13 @@ describe('cid', () => {
       },
     };
     const viewer = installViewerService(fakeWin);
-    sandbox.stub(viewer, 'isEmbedded', function() {
-      return isEmbedded;
+    sandbox.stub(viewer, 'isIframed', function() {
+      return isIframed;
     });
-    sandbox.stub(viewer, 'getBaseCid', function() {
+    sandbox.stub(viewer, 'whenFirstVisible', function() {
+      return whenFirstVisible;
+    });
+    viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
     });
     installCidService(fakeWin);
@@ -175,14 +182,24 @@ describe('cid', () => {
   });
 
   it('should retrieve cid from viewer if embedded', () => {
-    isEmbedded = true;
+    isIframed = true;
     return compare(
         'e2',
-        'sha384(from-viewerhttp://www.origin.come2)');
+        'sha384(from-viewerhttp://www.origin.come2)')
+        .then(() => {
+          expect(cid.baseCid_).to.equal('from-viewer');
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+
+          // Ensure it's called only once.
+          return compare('e3', 'sha384(from-viewerhttp://www.origin.come3)');
+        })
+        .then(() => {
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+        });
   });
 
   it('should prefer value in storage if present', () => {
-    isEmbedded = true;
+    isIframed = true;
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
       time: timer.now(),
@@ -205,7 +222,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
-    installViewerService(win).isEmbedded = () => false;
+    installViewerService(win).isIframed = () => false;
     installCidService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
@@ -260,6 +277,18 @@ describe('cid', () => {
         });
       });
     });
+  });
+
+  it('should wait until after pre-rendering', () => {
+    let nonce = 'not visible';
+    whenFirstVisible = timer.promise(100).then(() => {
+      nonce = 'visible';
+    });
+    const p = cid.get('test', hasConsent).then(unusedC => {
+      expect(nonce).to.equal('visible');
+    });
+    clock.tick(100);
+    return p;
   });
 
   it('should wait for consent', () => {
@@ -379,6 +408,34 @@ describe('cid', () => {
 
     return cid.get('cookie_name', hasConsent).then(() => {
       expect(fakeWin.document.cookie).to.equal('cookie_name=12345');
+    });
+  });
+
+  it('should return same value for multiple calls on non-proxied urls', () => {
+    fakeWin.location.href = 'https://abc.org/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    const cid1 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    return cid1.then(c1 => {
+      return cid2.then(c2 => {
+        expect(c1).to.equal(c2);
+      });
+    });
+  });
+
+  it('should return same value for multiple calls on proxied urls', () => {
+    fakeWin.location.href = 'https://cdn.ampproject.org/v/abc.org/foo/?f=0';
+    fakeWin.location.hostname = 'cdn.ampproject.org';
+    const cid1 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    return cid1.then(c1 => {
+      return cid2.then(c2 => {
+        expect(c1).to.equal(c2);
+      });
     });
   });
 

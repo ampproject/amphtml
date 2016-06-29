@@ -16,15 +16,13 @@
 
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {log} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
-const TAG = 'AmpAccessLogin';
-
-/** @const {!Function} */
-const assert = AMP.assert;
+const TAG = 'amp-access-login';
 
 /** @const {!RegExp} */
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
@@ -79,7 +77,7 @@ class ViewerLoginDialog {
     }
     return urlPromise.then(url => {
       const loginUrl = buildLoginUrl(url, 'RETURN_URL');
-      log.fine(TAG, 'Open viewer dialog: ', loginUrl);
+      dev.fine(TAG, 'Open viewer dialog: ', loginUrl);
       return this.viewer.sendMessage('openDialog', {
         'url': loginUrl,
       }, true);
@@ -129,7 +127,7 @@ class WebLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    assert(!this.resolve_, 'Dialog already opened');
+    user.assert(!this.resolve_, 'Dialog already opened');
     return new Promise((resolve, reject) => {
       this.resolve_ = resolve;
       this.reject_ = reject;
@@ -176,24 +174,25 @@ class WebLoginDialog {
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);
     const y = Math.floor((screen.height - h) / 2);
-    const options = `height=${h},width=${w},left=${x},top=${y}`;
+    const sizing = `height=${h},width=${w},left=${x},top=${y}`;
+    const options = `${sizing},resizable=yes,scrollbars=yes`;
     const returnUrl = this.getReturnUrl_();
 
     let dialogReadyPromise = null;
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
-      log.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
-      this.dialog_ = this.win.open(loginUrl, '_blank', options);
+      dev.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
+      this.dialog_ = openWindowDialog(this.win, loginUrl, '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = Promise.resolve();
       }
     } else {
-      log.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
-      this.dialog_ = this.win.open('', '_blank', options);
+      dev.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
+      this.dialog_ = openWindowDialog(this.win, '', '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = this.urlOrPromise.then(url => {
           const loginUrl = buildLoginUrl(url, returnUrl);
-          log.fine(TAG, 'Set dialog url: ', loginUrl);
+          dev.fine(TAG, 'Set dialog url: ', loginUrl);
           this.dialog_.location.replace(loginUrl);
         }, error => {
           throw new Error('failed to resolve url: ' + error);
@@ -232,14 +231,14 @@ class WebLoginDialog {
     }, 500);
 
     this.messageUnlisten_ = listen(this.win, 'message', e => {
-      log.fine(TAG, 'MESSAGE:', e);
+      dev.fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
       }
       if (!e.data || e.data.sentinel != 'amp') {
         return;
       }
-      log.fine(TAG, 'Received message from dialog: ', e.data);
+      dev.fine(TAG, 'Received message from dialog: ', e.data);
       if (e.data.type == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/postMessage({
@@ -261,7 +260,7 @@ class WebLoginDialog {
     if (!this.resolve_) {
       return;
     }
-    log.fine(TAG, 'Login done: ', result, opt_error);
+    dev.fine(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
       this.reject_(opt_error);
     } else {

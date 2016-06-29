@@ -15,6 +15,7 @@
  */
 
 import {ActionService, parseActionMap} from '../../src/service/action-impl';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 
@@ -258,13 +259,11 @@ describe('Action findAction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should create action map in getActionMap_', () => {
@@ -322,8 +321,8 @@ describe('Action method', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
-    onEnqueue = sinon.spy();
+    action = new ActionService(new AmpDocSingle(window));
+    onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -341,9 +340,7 @@ describe('Action method', () => {
 
   afterEach(() => {
     document.body.removeChild(parent);
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -418,16 +415,13 @@ describe('Action interceptor', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
   });
 
   afterEach(() => {
-    action = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function getQueue() {
@@ -467,7 +461,7 @@ describe('Action interceptor', () => {
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getQueue()).to.have.length(2);
 
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     action.installActionHandler(target, handler);
     expect(Array.isArray(getQueue())).to.be.false;
     expect(handler.callCount).to.equal(0);
@@ -507,7 +501,7 @@ describe('Action common handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new ActionService(window);
+    action = new ActionService(new AmpDocSingle(window));
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
 
@@ -515,9 +509,7 @@ describe('Action common handler', () => {
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should execute actions registered', () => {

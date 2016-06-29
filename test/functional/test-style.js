@@ -15,6 +15,7 @@
  */
 
 import * as st from '../../src/style';
+import * as sinon from 'sinon';
 
 describe('Style', () => {
 
@@ -26,7 +27,6 @@ describe('Style', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('toggle', () => {

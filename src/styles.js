@@ -16,6 +16,9 @@
 
 import {setStyles, setStyle} from './style';
 import {platformFor} from './platform';
+import {waitForBody} from './dom';
+import {waitForExtensions} from './render-delaying-extensions';
+import {dev} from './log';
 
 
 /**
@@ -50,7 +53,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
     style.setAttribute('amp-extension', opt_ext || '');
     afterElement = doc.querySelector('style[amp-runtime]');
   }
-  insertAfterOrAtStart(doc.head, style, afterElement);
+  insertAfterOrAtStart(dev.assert(doc.head), style, afterElement);
   // Styles aren't always available synchronously. E.g. if there is a
   // pending style download, it will have to finish before the new
   // style is visible.
@@ -84,31 +87,26 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {?Promise=} extensionsPromise A loading promise for special extensions
- *     which must load before the body can be made visible
+ * @param {boolean=} opt_waitForExtensions Whether the body visibility should
+ *     be blocked on key extensions being loaded.
  */
-export function makeBodyVisible(doc, extensionsPromise) {
-  let interval;
+export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    if (doc.body) {
-      setStyles(doc.body, {
-        opacity: 1,
-        visibility: 'visible',
-        animation: 'none',
-      });
-      clearInterval(interval);
+    setStyles(dev.assert(doc.body), {
+      opacity: 1,
+      visibility: 'visible',
+      animation: 'none',
+    });
+  };
+  waitForBody(doc, () => {
+    const extensionsPromise = opt_waitForExtensions ?
+        waitForExtensions(doc.defaultView) : null;
+    if (extensionsPromise) {
+      extensionsPromise.then(set, set);
+    } else {
+      set();
     }
-  };
-  const poll = () => {
-    interval = setInterval(set, 4);
-    set();
-  };
-
-  if (extensionsPromise) {
-    extensionsPromise.then(poll, poll);
-  } else {
-    poll();
-  }
+  });
 }
 
 

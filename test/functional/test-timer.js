@@ -15,6 +15,7 @@
  */
 
 import {Timer} from '../../src/timer';
+import * as sinon from 'sinon';
 
 describe('Timer', () => {
 
@@ -34,11 +35,8 @@ describe('Timer', () => {
   });
 
   afterEach(() => {
-    timer = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('delay', () => {

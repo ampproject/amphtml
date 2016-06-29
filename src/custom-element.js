@@ -19,16 +19,14 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
-import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
+import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
-import {log} from './log';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
-import {getServicePromise, getServicePromiseOrNull} from './service';
 import * as dom from './dom';
 
 
@@ -64,13 +62,15 @@ const knownElements = {};
  * Whether this platform supports template tags.
  * @const {boolean}
  */
-const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
+const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
+  'template'
+);
 
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
@@ -78,9 +78,10 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     registerElement(win, name, toClass);
     return;
   }
-  assert(knownElements[name] == ElementStub,
+  user.assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
+  knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
     // There are 3 possible states here:
@@ -108,7 +109,17 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  win.ampExtendedElements = {};
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+    // If amp-ad and amp-embed haven't been registered, manually register them
+    // with ElementStub, in case the script to the element is not included.
+    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
+      win.ampExtendedElements['amp-ad'] = true;
+      registerElement(win, 'amp-ad', ElementStub);
+      win.ampExtendedElements['amp-embed'] = true;
+      registerElement(win, 'amp-embed', ElementStub);
+    }
+  }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
@@ -117,6 +128,10 @@ export function stubElements(win) {
       continue;
     }
     registerElement(win, name, ElementStub);
+  }
+  // Repeat stubbing when HEAD is complete.
+  if (!win.document.body) {
+    dom.waitForBody(win.document, () => stubElements(win));
   }
 }
 
@@ -134,12 +149,13 @@ export function applyLayout_(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  user.assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
       parseLength(widthAttr) : widthAttr;
-  assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  user.assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   const inputHeight = heightAttr ? parseLength(heightAttr) : null;
-  assert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
+  user.assert(inputHeight !== undefined, 'Invalid height value: %s',
+      heightAttr);
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -152,7 +168,7 @@ export function applyLayout_(element) {
       (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
     // Default width and height: handle elements that do not specify a
     // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element.tagName);
+    const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
         dimensions.width;
     height = inputHeight || dimensions.height;
@@ -177,24 +193,24 @@ export function applyLayout_(element) {
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE) {
-    assert(height, 'Expected height to be available: %s', heightAttr);
+    user.assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
-    assert(!width || width == 'auto',
+    user.assert(!width || width == 'auto',
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
   if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
-    assert(width && width != 'auto',
+    user.assert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
   if (layout == Layout.RESPONSIVE) {
-    assert(getLengthUnits(width) == getLengthUnits(height),
+    user.assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
   } else {
-    assert(heightsAttr === null,
+    user.assert(heightsAttr === null,
         'Unexpected "heights" attribute for none-responsive layout');
   }
 
@@ -223,6 +239,15 @@ export function applyLayout_(element) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
+  } else if (layout == Layout.FLEX_ITEM) {
+    // Set height and width to a flex item if they exist.
+    // The size set to a flex item could be overridden by `display: flex` later.
+    if (width) {
+      element.style.width = width;
+    }
+    if (height) {
+      element.style.height = height;
+    }
   }
   return layout;
 }
@@ -263,10 +288,11 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
- * @return {!AmpElement.prototype}
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
+ *     testing only.
+ * @return {!Object} Prototype of element.
  */
-export function createAmpElementProto(win, name, implementationClass) {
+export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
    * @lends {AmpElement.prototype}
    */
@@ -275,7 +301,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Called when elements is created. Sets instance vars since there is no
    * constructor.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.createdCallback = function() {
     this.classList.add('-amp-element');
@@ -290,7 +316,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!Resources}  */
+    /** @private @const {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(win);
 
     /** @private {!Layout} */
@@ -308,10 +334,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {string|null|undefined} */
     this.mediaQuery_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.sizeList_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.heightsList_ = undefined;
 
     /**
@@ -336,14 +362,17 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
-    /** @private {!BaseElement} */
-    this.implementation_ = new implementationClass(this);
+    // `opt_implementationClass` is only used for tests.
+    const Ctor = opt_implementationClass || knownElements[name];
+
+    /** @private {!./base-element.BaseElement} */
+    this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
      * Action queue is initially created and kept around until the element
      * is ready to send actions directly to the implementation.
-     * @private {?Array<!ActionInvocation>}
+     * @private {?Array<!./service/action-impl.ActionInvocation>}
      */
     this.actionQueue_ = [];
 
@@ -354,15 +383,15 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.isInTemplate_ = undefined;
   };
 
-  /** @private */
+  /** @private @this {!Element} */
   ElementProto.assertNotTemplate_ = function() {
-    assert(!this.isInTemplate_, 'Must never be called in template');
+    dev.assert(!this.isInTemplate_, 'Must never be called in template');
   };
 
   /**
    * Whether the element has been upgraded yet.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.isUpgraded = function() {
     return !(this.implementation_ instanceof ElementStub);
@@ -372,8 +401,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Upgrades the element to the provided new implementation. If element
    * has already been attached, it's layout validation and attachment flows
    * are repeated for the new implementation.
-   * @param {function(new:BaseElement, !Element)} newImplClass
-   * @final @package
+   * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
+   * @final @package @this {!Element}
    */
   ElementProto.upgrade = function(newImplClass) {
     if (this.isInTemplate_) {
@@ -392,49 +421,45 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      // For a never-added resource, the build will be done automatically
+      // via `resources.add` on the first attach.
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**
    * Whether the element has been built. A built element had its
    * {@link buildCallback} method successfully invoked.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.isBuilt = function() {
     return this.built_;
   };
 
   /**
+   * Get the priority to load the element.
+   * @return {number} @this {!Element}
+   */
+  ElementProto.getPriority = function() {
+    dev.assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
+    return this.implementation_.getPriority();
+  };
+
+  /**
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *
-   * If the "force" argument is "false", the element will first check if
-   * implementation is ready to build by calling
-   * {@link BaseElement.isReadyToBuild} method. If this method returns "true"
-   * the build proceeds, otherwise no build is done.
-   *
-   * If the "force" argument is "true", the element performs build regardless
-   * of what {@link BaseElement.isReadyToBuild} would return.
-   *
-   * Returned value indicates whether or not build has been performed.
-   *
    * This method can only be called on a upgraded element.
    *
-   * @param {boolean} force Whether or not force the build.
-   * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
-  ElementProto.build = function(force) {
+  ElementProto.build = function() {
     this.assertNotTemplate_();
     if (this.isBuilt()) {
-      return true;
+      return;
     }
-    assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force && !this.implementation_.isReadyToBuild()) {
-      return false;
-    }
+    dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
@@ -457,13 +482,19 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.actionQueue_ = null;
       }
     }
-    return true;
+    if (!this.getPlaceholder()) {
+      const placeholder = this.createPlaceholder();
+      if (placeholder) {
+        this.appendChild(placeholder);
+      }
+    }
   };
 
   /**
    * Called to instruct the element to preconnect to hosts it uses during
    * layout.
    * @param {boolean} onLayout Whether this was called after a layout.
+   * @this {!Element}
    */
   ElementProto.preconnect = function(onLayout) {
     if (onLayout) {
@@ -479,17 +510,27 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * @return {!Vsync}
-   * @private
+   * @return {!./service/vsync-impl.Vsync}
+   * @private @this {!Element}
    */
   ElementProto.getVsync_ = function() {
     return vsyncFor(this.ownerDocument.defaultView);
   };
 
   /**
+   * Whether the custom element declares that it has to be fixed.
+   * @return {boolean}
+   * @private @this {!Element}
+   */
+  ElementProto.isAlwaysFixed = function() {
+    return this.implementation_.isAlwaysFixed();
+  };
+
+  /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
-   * @param {!LayoutRect} layoutBox
+   * @param {!./layout-rect.LayoutRectDef} layoutBox
+   * @this {!Element}
    */
   ElementProto.updateLayoutBox = function(layoutBox) {
     this.layoutWidth_ = layoutBox.width;
@@ -524,7 +565,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * This method is called by Resources and shouldn't be called by anyone else.
    *
    * @final
-   * @package
+   * @package @this {!Element}
    */
   ElementProto.applySizesAndMediaQuery = function() {
     this.assertNotTemplate_();
@@ -561,29 +602,35 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * Changes the height of the element.
+   * Changes the size of the element.
    *
    * This method is called by Resources and shouldn't be called by anyone else.
    * This method must always be called in the mutation context.
    *
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @final
-   * @package
+   * @package @this {!Element}
    */
-  ElementProto./*OK*/changeHeight = function(newHeight) {
+  ElementProto./*OK*/changeSize = function(newHeight, newWidth) {
     if (this.sizerElement_) {
       // From the moment height is changed the element becomes fully
       // responsible for managing its height. Aspect ratio is no longer
       // preserved.
       this.sizerElement_.style.paddingTop = '0';
     }
-    this.style.height = newHeight + 'px';
+    if (newHeight !== undefined) {
+      this.style.height = newHeight + 'px';
+    }
+    if (newWidth !== undefined) {
+      this.style.width = newWidth + 'px';
+    }
   };
 
   /**
    * Called when the element is first attached to the DOM. Calls
    * {@link firstAttachedCallback} if this is the first attachment.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
     if (!TEMPLATE_TAG_SUPPORTED) {
@@ -605,18 +652,19 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Called when the element is detached from the DOM.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.detachedCallback = function() {
     if (this.isInTemplate_) {
       return;
     }
     this.resources_.remove(this);
+    this.implementation_.detachedCallback();
   };
 
   /**
    * Called when the element is attached to the DOM for the first time.
-   * @private @final
+   * @private @final @this {!Element}
    */
   ElementProto.firstAttachedCallback_ = function() {
     if (!this.isUpgraded()) {
@@ -647,7 +695,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * @param {string} name
    * @param {!Object=} opt_data Event data.
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
     const data = opt_data || {};
@@ -662,24 +710,33 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the element can pre-render.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.prerenderAllowed = function() {
     return this.implementation_.prerenderAllowed();
   };
 
   /**
+   * Creates a placeholder for the element.
+   * @returns {?Element}
+   * @final @this {!Element}
+   */
+  ElementProto.createPlaceholder = function() {
+    return this.implementation_.createPlaceholderCallback();
+  };
+
+  /**
    * Whether the element should ever render when it is not in viewport.
    * @return {boolean}
-   * @final
+   * @final @this {!Element}
    */
   ElementProto.renderOutsideViewport = function() {
     return this.implementation_.renderOutsideViewport();
   };
 
   /**
-   * @return {!LayoutRect}
-   * @final
+   * @return {!./layout-rect.LayoutRectDef}
+   * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
     return this.resources_.getResourceForElement(this).getLayoutBox();
@@ -689,7 +746,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   * Returns a change entry for that should be compatible with
   * IntersectionObserverEntry.
   * @return {!IntersectionObserverEntry} A change entry.
-  * @final
+  * @final @this {!Element}
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
@@ -704,7 +761,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * The runtime calls this method to determine if {@link layoutCallback}
    * should be called again when layout changes.
    * @return {boolean}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.isRelayoutNeeded = function() {
     return this.implementation_.isRelayoutNeeded();
@@ -722,11 +779,11 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Can only be called on a upgraded and built element.
    *
    * @return {!Promise}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.layoutCallback = function() {
     this.assertNotTemplate_();
-    assert(this.isUpgraded() && this.isBuilt(),
+    dev.assert(this.isUpgraded() && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
@@ -752,7 +809,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    *
    * @param {boolean} inViewport Whether the element has entered or exited
    *   the visible viewport.
-   * @final @package
+   * @final @package @this {!Element}
    */
   ElementProto.viewportCallback = function(inViewport) {
     this.assertNotTemplate_();
@@ -777,7 +834,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * @param {boolean} inViewport
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.updateInViewport_ = function(inViewport) {
     this.implementation_.inViewport_ = inViewport;
@@ -788,20 +845,63 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Requests the resource to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
-   * The component must return `true` if it'd like to later receive
-   * {@link layoutCallback} in case document becomes active again.
+   *
+   * @package @final @this {!Element}
+   */
+  ElementProto.pauseCallback = function() {
+    this.assertNotTemplate_();
+    if (!this.isBuilt() || !this.isUpgraded()) {
+      return;
+    }
+    this.implementation_.pauseCallback();
+  };
+
+  /**
+   * Requests the resource to resume its activity when the document returns from
+   * an inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content may be resumed.
+   *
+   * @package @final @this {!Element}
+   */
+  ElementProto.resumeCallback = function() {
+    this.assertNotTemplate_();
+    if (!this.isBuilt() || !this.isUpgraded()) {
+      return;
+    }
+    this.implementation_.resumeCallback();
+  };
+
+  /**
+   * Requests the element to unload any expensive resources when the element
+   * goes into non-visible state. The scope is up to the actual component.
    *
    * Calling this method on unbuilt ot unupgraded element has no effect.
    *
-   * @return {!Promise}
-   * @package @final
+   * @return {boolean}
+   * @package @final @this {!Element}
    */
-  ElementProto.documentInactiveCallback = function() {
+  ElementProto.unlayoutCallback = function() {
     this.assertNotTemplate_();
     if (!this.isBuilt() || !this.isUpgraded()) {
       return false;
     }
-    return this.implementation_.documentInactiveCallback();
+    const isReLayoutNeeded = this.implementation_.unlayoutCallback();
+    if (isReLayoutNeeded) {
+      this.layoutCount_ = 0;
+    }
+    return isReLayoutNeeded;
+  };
+
+  /**
+   * Whether to call {@link unlayoutCallback} when pausing the element.
+   * Certain elements cannot properly pause (like amp-iframes with unknown
+   * video content), and so we must unlayout to stop playback.
+   *
+   * @return {boolean}
+   * @package @final @this {!Element}
+   */
+  ElementProto.unlayoutOnPause = function() {
+    return this.implementation_.unlayoutOnPause();
   };
 
   /**
@@ -809,13 +909,13 @@ export function createAmpElementProto(win, name, implementationClass) {
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready
    * to receive actions.
-   * @param {!ActionInvocation} invocation
-   * @final
+   * @param {!./service/action-impl.ActionInvocation} invocation
+   * @final @this {!Element}
    */
   ElementProto.enqueAction = function(invocation) {
     this.assertNotTemplate_();
     if (!this.isBuilt()) {
-      assert(this.actionQueue_).push(invocation);
+      dev.assert(this.actionQueue_).push(invocation);
     } else {
       this.executionAction_(invocation, false);
     }
@@ -824,14 +924,14 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Dequeues events from the queue and dispatches them to the implementation
    * with "deferred" flag.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.dequeueActions_ = function() {
     if (!this.actionQueue_) {
       return;
     }
 
-    const actionQueue = assert(this.actionQueue_);
+    const actionQueue = dev.assert(this.actionQueue_);
     this.actionQueue_ = null;
 
     // TODO(dvoytenko, #1260): dedupe actions.
@@ -842,16 +942,17 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Executes the action immediately. All errors are consumed and reported.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @param {boolean} deferred
    * @final
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.executionAction_ = function(invocation, deferred) {
     try {
       this.implementation_.executeAction(invocation, deferred);
     } catch (e) {
-      log.error(TAG_, 'Action execution failed:', invocation, e);
+      rethrowAsync('Action execution failed:', e,
+          invocation.target.tagName, invocation.method);
     }
   };
 
@@ -861,61 +962,81 @@ export function createAmpElementProto(win, name, implementationClass) {
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
    * @return {!Array<!Node>}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getRealChildNodes = function() {
-    const nodes = [];
-    for (let n = this.firstChild; n; n = n.nextSibling) {
-      if (!isInternalOrServiceNode(n)) {
-        nodes.push(n);
-      }
-    }
-    return nodes;
+    return dom.childNodes(this, node => !isInternalOrServiceNode(node));
   };
 
   /**
    * Returns the original children of the custom element without any service
    * nodes that could have been added for markup.
    * @return {!Array<!Element>}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getRealChildren = function() {
-    const elements = [];
-    for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i];
-      if (!isInternalOrServiceNode(child)) {
-        elements.push(child);
-      }
-    }
-    return elements;
+    return dom.childElements(this, element =>
+        !isInternalOrServiceNode(element));
   };
 
   /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getPlaceholder = function() {
-    return dom.childElementByAttr(this, 'placeholder');
+    return dom.lastChildElementByAttr(this, 'placeholder');
   };
 
   /**
    * Hides or shows the placeholder, if available.
-   * @param {boolean} state
-   * @package @final
+   * @param {boolean} show
+   * @package @final @this {!Element}
    */
-  ElementProto.togglePlaceholder = function(state) {
+  ElementProto.togglePlaceholder = function(show) {
     this.assertNotTemplate_();
+    if (show) {
+      this.showLastPlaceholder_();
+    } else {
+      this.hideAllPlaceholders_();
+    }
+  };
+
+  /**
+   * Returns an optional placeholder element for this custom element.
+   * @return {!Array.<!Element>}
+   * @private @this {!Element}
+   */
+  ElementProto.getAllPlaceholders_ = function() {
+    return dom.childElementsByAttr(this, 'placeholder');
+  };
+
+  /**
+   * Hides all placeholders in an element.
+   * @private @this {!Element}
+   */
+  ElementProto.hideAllPlaceholders_ = function() {
+    const placeholders = this.getAllPlaceholders_();
+    for (let i = 0; i < placeholders.length; i++) {
+      placeholders[i].classList.add('amp-hidden');
+    }
+  };
+
+  /**
+   * Shows the last placeholder in an element.
+   * @private @this {!Element}
+   */
+  ElementProto.showLastPlaceholder_ = function() {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
-      placeholder.classList.toggle('amp-hidden', !state);
+      placeholder.classList.remove('amp-hidden');
     }
   };
 
   /**
    * Returns an optional fallback element for this custom element.
    * @return {?Element}
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.getFallback = function() {
     return dom.childElementByAttr(this, 'fallback');
@@ -925,7 +1046,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Hides or shows the fallback, if available. This function must only
    * be called inside a mutate context.
    * @param {boolean} state
-   * @package @final
+   * @package @final @this {!Element}
    */
   ElementProto.toggleFallback = function(state) {
     this.assertNotTemplate_();
@@ -945,7 +1066,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Whether the loading can be shown for this element.
    * @return {boolean}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.isLoadingEnabled_ = function() {
     // No loading indicator will be shown if either one of these
@@ -972,16 +1093,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Creates a loading object. The caller must ensure that loading can
    * actually be shown. This method must also be called in the mutate
    * context.
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.prepareLoading_ = function() {
     if (!this.loadingContainer_) {
-      const container = document.createElement('div');
+      const container = win.document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');
       container.classList.add('amp-hidden');
 
-      const element = createLoaderElement();
+      const element = createLoaderElement(win.document);
       container.appendChild(element);
 
       this.appendChild(container);
@@ -994,7 +1115,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Turns the loading indicator on or off.
    * @param {boolean} state
    * @param {boolean=} opt_cleanup
-   * @private @final
+   * @private @final @this {!Element}
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
     this.assertNotTemplate_();
@@ -1040,7 +1161,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional overflow element for this custom element.
    * @return {?Element}
-   * @private
+   * @private @this {!Element}
    */
   ElementProto.getOverflowElement = function() {
     if (this.overflowElement_ === undefined) {
@@ -1061,31 +1182,36 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Hides or shows the overflow, if available. This function must only
    * be called inside a mutate context.
    * @param {boolean} overflown
-   * @param {number} requestedHeight
-   * @package @final
+   * @param {number|undefined} requestedHeight
+   * @param {number|undefined} requestedWidth
+   * @package @final @this {!Element}
    */
-  ElementProto.overflowCallback = function(overflown, requestedHeight) {
+  ElementProto.overflowCallback = function(
+      overflown, requestedHeight, requestedWidth) {
     this.getOverflowElement();
     if (!this.overflowElement_) {
       if (overflown) {
-        log.warn(TAG_,
-            'Cannot resize element and overlfow is not available', this);
+        user.warn(TAG_,
+            'Cannot resize element and overflow is not available', this);
       }
     } else {
       this.overflowElement_.classList.toggle('amp-visible', overflown);
 
       if (overflown) {
         this.overflowElement_.onclick = () => {
-          this.resources_./*OK*/changeHeight(this, requestedHeight);
+          this.resources_./*OK*/changeSize(
+              this, requestedHeight, requestedWidth);
           this.getVsync_().mutate(() => {
-            this.overflowCallback(/* overflown */ false, requestedHeight);
+            this.overflowCallback(
+                /* overflown */ false, requestedHeight, requestedWidth);
           });
         };
       } else {
         this.overflowElement_.onclick = null;
       }
     }
-    this.implementation_.overflowCallback(overflown, requestedHeight);
+    this.implementation_.overflowCallback(
+        overflown, requestedHeight, requestedWidth);
   };
 
   return ElementProto;
@@ -1095,24 +1221,14 @@ export function createAmpElementProto(win, name, implementationClass) {
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
+ * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
   win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name, implementationClass),
+    prototype: createAmpElementProto(win, name),
   });
-}
-
-/**
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @return {boolean} Whether this element is scheduled to be loaded.
- */
-function isElementScheduled(win, elementName) {
-  assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
-  return !!win.ampExtendedElements[elementName];
 }
 
 /**
@@ -1127,8 +1243,10 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
 
   if (implementationClass) {
+    // Update on the knownElements to prevent register again.
+    knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
-      prototype: createAmpElementProto(win, aliasName, implementationClass),
+      prototype: createAmpElementProto(win, aliasName),
     });
   } else {
     throw new Error(`Element name is unknown: ${sourceName}.` +
@@ -1142,6 +1260,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * This makes it possible to mark an element as loaded in a test.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
   if (!win.ampExtendedElements) {
@@ -1154,54 +1273,21 @@ export function markElementScheduledForTesting(win, elementName) {
  * Resets our scheduled elements.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
     win.ampExtendedElements[elementName] = null;
   }
-}
-
-
-/**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * viewportFor(win)) for type safety and because the factory should not be
- * passed around.
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
- *     the implementation of this service.
- * @return {!Promise<*>}
- */
-export function getElementService(win, id, providedByElement) {
-  return Promise.resolve().then(() => {
-    assert(isElementScheduled(win, providedByElement),
-        'Service %s was requested to be provided through %s, ' +
-        'but %s is not loaded in the current page. To fix this ' +
-        'problem load the JavaScript file for %s in this page.',
-        id, providedByElement, providedByElement, providedByElement);
-    return getServicePromise(win, id);
-  });
+  delete knownElements[elementName];
 }
 
 /**
- * Same as getElementService but produces null if the given element is not
- * actually available on the current page.
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
- *     the implementation of this service.
- * @return {!Promise<*>}
+ * Returns a currently registered element class.
+ * @param {string} elementName Name of an extended custom element.
+ * @return {?function()}
+ * @visibleForTesting
  */
-export function getElementServiceIfAvailable(win, id, providedByElement) {
-  const s = getServicePromiseOrNull(win, id);
-  if (s) {
-    return s;
-  }
-  if (!isElementScheduled(win, providedByElement)) {
-    return Promise.resolve(null);
-  }
-  return getElementService(win, id, providedByElement);
+export function getElementClassForTesting(elementName) {
+  return knownElements[elementName] || null;
 }

@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
+import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
+import {visibilityFor} from '../../../src/visibility';
 
-/** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-
-/** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
-
-/** @private {number} */
 const SCROLL_PRECISION_PERCENT = 5;
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 
 /**
- * This type signifies a callback that gets called when an analytics event that
- * the listener subscribed to fires.
+ * Type to define a callback that is called when an instrumented event fires.
  * @typedef {function(!AnalyticsEvent)}
  */
 let AnalyticsEventListenerDef;
 
 /**
  * @param {!Window} window Window object to listen on.
- * @param {!JSONObject} config Configuration for instrumentation.
+ * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *          fires.
  */
@@ -66,9 +65,11 @@ class AnalyticsEvent {
 
   /**
    * @param {!AnalyticsEventType} type The type of event.
+   * @param {!Object<string, string>} A map of vars and their values.
    */
-  constructor(type) {
+  constructor(type, vars) {
     this.type = type;
+    this.vars = vars || Object.create(null);
   }
 }
 
@@ -120,26 +121,17 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!JSONObject} config Configuration for instrumentation.
+   * @param {!JSONType} config Configuration for instrumentation.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    */
   addListener(config, listener) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
-      if (this.viewer_.isVisible()) {
-        listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
-            listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-          }
-        });
-      }
+      this.createVisibilityListener_(listener, config);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
-        console./*OK*/error(this.TAG_,
-            'Missing required selector on click trigger');
+        user.error(this.TAG_, 'Missing required selector on click trigger');
         return;
       }
 
@@ -148,8 +140,7 @@ export class InstrumentationService {
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
-        console./*OK*/error(this.TAG_,
-            'Missing scrollSpec on scroll trigger.');
+        user.error(this.TAG_, 'Missing scrollSpec on scroll trigger.');
         return;
       }
       this.registerScrollTrigger_(config['scrollSpec'], listener);
@@ -213,6 +204,50 @@ export class InstrumentationService {
   }
 
   /**
+   * Creates listeners for visibility conditions or calls the callback if all
+   * the conditions are met.
+   * @param {!AnalyticsEventListenerDef} The callback to call when the event
+   *   occurs.
+   * @param {!JSONType} config Configuration for instrumentation.
+   * @private
+   */
+  createVisibilityListener_(callback, config) {
+    if (config['visibilitySpec']) {
+      if (!isVisibilitySpecValid(config)) {
+        return;
+      }
+
+      this.runOrSchedule_(() => {
+        visibilityFor(this.win_).then(visibility => {
+          visibility.listenOnce(config['visibilitySpec'], vars => {
+            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
+          });
+        });
+      });
+    } else {
+      this.runOrSchedule_(() => {
+        callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+      });
+    }
+  }
+
+  /**
+   * @param {function()} fn function to run or schedule.
+   * @private
+   */
+  runOrSchedule_(fn) {
+    if (this.viewer_.isVisible()) {
+      fn();
+    } else {
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          fn();
+        }
+      });
+    }
+  }
+
+  /**
    * Ensure we have a click listener registered on the document.
    * @private
    */
@@ -270,14 +305,14 @@ export class InstrumentationService {
   /**
    * Register for a listener to be called when the boundaries specified in
    * config are reached.
-   * @param {!JSONObject} config the config that specifies the boundaries.
+   * @param {!JSONType} config the config that specifies the boundaries.
    * @param {Function} listener
    * @private
    */
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      console./*OK*/error(this.TAG_, 'Boundaries are required for the scroll ' +
+      user.error(this.TAG_, 'Boundaries are required for the scroll ' +
           'trigger to work.');
       return;
     }
@@ -289,11 +324,13 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object.<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds.
      * @param {number} scrollPos Number representing the current scroll
+     * @param {string} varName variable name to assign to the bound that
+     * triggers the event
      * position.
      */
-    const triggerScrollEvents = function(bounds, scrollPos) {
+    const triggerScrollEvents = function(bounds, scrollPos, varName) {
       if (!scrollPos) {
         return;
       }
@@ -304,7 +341,9 @@ export class InstrumentationService {
           continue;
         }
         bounds[b] = true;
-        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL));
+        const vars = Object.create(null);
+        vars[varName] = b;
+        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL, vars));
       }
     };
 
@@ -314,9 +353,11 @@ export class InstrumentationService {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.top + e.height) * 100 / this.viewport_.getScrollHeight());
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.left + e.width) * 100 / this.viewport_.getScrollWidth());
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          VAR_H_SCROLL_BOUNDARY);
     });
   }
 
@@ -325,8 +366,8 @@ export class InstrumentationService {
    * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
    * as keys and false as values.
    *
-   * @param {!Array.<number>} bounds array of bounds.
-   * @return {!Object.<number,boolean>} Object with normalized bounds as keys
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
    * and false as value.
    * @private
    */
@@ -339,8 +380,7 @@ export class InstrumentationService {
     for (let b = 0; b < bounds.length; b++) {
       let bound = bounds[b];
       if (typeof bound !== 'number' || !isFinite(bound)) {
-        console./*OK*/error(this.TAG_,
-            'Scroll trigger boundaries must be finite.');
+        user.error(this.TAG_, 'Scroll trigger boundaries must be finite.');
         return result;
       }
 
@@ -372,31 +412,30 @@ export class InstrumentationService {
       while (i-- > 0 && matches.item(i) != el) {};
       return i > -1;
     } catch (selectorError) {
-      console./*OK*/error(this.TAG_, 'Bad query selector.', selector,
-          selectorError);
+      user.error(this.TAG_, 'Bad query selector.', selector, selectorError);
     }
     return false;
   }
 
   /**
-   * @param {JSONObject} timerSpec
+   * @param {JSONType} timerSpec
    * @private
    */
   isTimerSpecValid_(timerSpec) {
     if (!timerSpec) {
-      console./*OK*/error(this.TAG_, 'Bad timer specification');
+      user.error(this.TAG_, 'Bad timer specification');
       return false;
     } else if (!timerSpec.hasOwnProperty('interval')) {
-      console./*OK*/error(this.TAG_, 'Timer interval specification required');
+      user.error(this.TAG_, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      console./*OK*/error(this.TAG_, 'Bad timer interval specification');
+      user.error(this.TAG_, 'Bad timer interval specification');
       return false;
     } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
-      console./*OK*/error(this.TAG_, 'Bad maxTimerLength specification');
+      user.error(this.TAG_, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;
@@ -405,7 +444,7 @@ export class InstrumentationService {
 
   /**
    * @param {!Function} listener
-   * @param {JSONObject} timerSpec
+   * @param {JSONType} timerSpec
    * @private
    */
   createTimerListener_(listener, timerSpec) {
@@ -430,4 +469,3 @@ export function instrumentationServiceFor(window) {
     return new InstrumentationService(window);
   });
 }
-

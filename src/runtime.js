@@ -15,23 +15,83 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './template';
-import {assert} from './asserts';
+import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {dev} from './log';
 import {getMode} from './mode';
+import {getService} from './service';
+import {installActionServiceForDoc} from './service/action-impl';
+import {installFramerateService} from './service/framerate-impl';
+import {installGlobalSubmitListener} from './document-submit';
+import {installHistoryService} from './service/history-impl';
+import {installImg} from '../builtins/amp-img';
+import {installPixel} from '../builtins/amp-pixel';
+import {installResourcesService} from './service/resources-impl';
+import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles} from './styles';
-import {installCoreServices} from './amp-core-service';
+import {installTemplatesService} from './service/template-impl';
+import {installUrlReplacementsService} from './service/url-replacements-impl';
+import {installVideo} from '../builtins/amp-video';
+import {installViewerService} from './service/viewer-impl';
+import {installViewportService} from './service/viewport-impl';
+import {installVsyncService} from './service/vsync-impl';
+import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
-import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
-import {getService} from './service';
+import {waitForBody} from './dom';
 
+
+/** @const @private {string} */
+const TAG = 'runtime';
 
 /** @type {!Array} */
 const elementsForTesting = [];
+
+
+/**
+ * Install runtime-level services.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function installRuntimeServices(global) {
+  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installViewerService(global);
+  installViewportService(global);
+  installHistoryService(global);
+  installVsyncService(global);
+  installResourcesService(global);
+  installFramerateService(global);
+  installUrlReplacementsService(global);
+  installXhrService(global);
+  installTemplatesService(global);
+  if (isExperimentOn(global, 'form-submit')) {
+    installGlobalSubmitListener(global);
+  }
+}
+
+
+/**
+ * Install ampdoc-level services.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installAmpdocServices(ampdoc) {
+  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installActionServiceForDoc(ampdoc);
+  installStandardActionsForDoc(ampdoc);
+}
+
+
+/**
+ * Install builtins.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function installBuiltins(global) {
+  installImg(global);
+  installPixel(global);
+  installVideo(global);
+}
 
 
 /**
@@ -64,8 +124,9 @@ export function adopt(global) {
     const register = function() {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
-        name: name,
-        implementationClass: implementationClass,
+        name,
+        implementationClass,
+        css: opt_css,
       });
       // Resolve this extension's Service Promise.
       getService(global, name, () => {
@@ -95,10 +156,7 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  /** @const */
-  global.AMP.assert = assert;
-
-  installCoreServices(global);
+  installRuntimeServices(global);
   const viewer = viewerFor(global);
 
   /** @const */
@@ -127,36 +185,42 @@ export function adopt(global) {
 
   /**
    * Registers a new custom element.
-   * @param {GlobalAmp} fn
+   * @param {function(!Object)} fn
    */
   global.AMP.push = function(fn) {
-    fn(global.AMP);
+    // Extensions are only processed once HEAD is complete.
+    waitForBody(global.document, () => {
+      fn(global.AMP);
+    });
   };
 
   /**
    * Sets the function to forward tick events to.
-   * @param {funtion(string,?string=,number=)} fn
+   * @param {function(string,?string=,number=)} fn
    * @param {function()=} opt_flush
    * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = () => {};
+  global.AMP.setTickFunction = (fn, opt_flush) => {};
 
   // Execute asynchronously scheduled elements.
-  for (let i = 0; i < preregisteredElements.length; i++) {
-    const fn = preregisteredElements[i];
-    try {
-      fn(global.AMP);
-    } catch (e) {
-      // Throw errors outside of loop in its own micro task to
-      // avoid on error stopping other extensions from loading.
-      timer.delay(() => {throw e;}, 1);
+  // Extensions are only processed once HEAD is complete.
+  waitForBody(global.document, () => {
+    for (let i = 0; i < preregisteredElements.length; i++) {
+      const fn = preregisteredElements[i];
+      try {
+        fn(global.AMP);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev.error(TAG, 'Extension failed: ', e);
+      }
     }
-  }
-  // Make sure we empty the array of preregistered extensions.
-  // Technically this is only needed for testing, as everything should
-  // go out of scope here, but just making sure.
-  preregisteredElements.length = 0;
+    // Make sure we empty the array of preregistered extensions.
+    // Technically this is only needed for testing, as everything should
+    // go out of scope here, but just making sure.
+    preregisteredElements.length = 0;
+  });
 }
 
 
@@ -170,6 +234,12 @@ export function adopt(global) {
 export function registerForUnitTest(win) {
   for (let i = 0; i < elementsForTesting.length; i++) {
     const element = elementsForTesting[i];
-    registerElement(win, element.name, element.implementationClass);
+    if (element.css) {
+      installStyles(win.document, element.css, () => {
+        registerElement(win, element.name, element.implementationClass);
+      }, false, element.name);
+    } else {
+      registerElement(win, element.name, element.implementationClass);
+    }
   }
 }

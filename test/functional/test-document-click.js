@@ -73,7 +73,6 @@ describe('test-document-click onDocumentElementClick_', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   describe('when linking to a different origin or path', () => {
@@ -256,6 +255,27 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
   });
 
+  describe('when linking to ftp: protocol', () => {
+    beforeEach(() => {
+      win.open = sandbox.spy();
+      win.parent = {};
+      win.top = {
+        location: {
+          href: 'https://google.com',
+        },
+      };
+      tgt.href = 'ftp://example.com/a';
+    });
+
+    it('should always open in _blank when embedded', () => {
+      onDocumentElementClick_(evt, viewport, history);
+      expect(win.open.called).to.be.true;
+      expect(win.open.calledWith(
+          'ftp://example.com/a', '_blank')).to.be.true;
+      expect(preventDefaultSpy.callCount).to.equal(1);
+    });
+  });
+
   describe('when linking to custom protocols e.g. whatsapp:', () => {
     beforeEach(() => {
       win.open = sandbox.spy();
@@ -268,13 +288,13 @@ describe('test-document-click onDocumentElementClick_', () => {
       tgt.href = 'whatsapp://send?text=hello';
     });
 
-    it('should set top.location.href on Safari iOS when embedded', () => {
+    it('should open link in _top on Safari iOS when embedded', () => {
       sandbox.stub(platform, 'isIos').returns(true);
       sandbox.stub(platform, 'isSafari').returns(true);
       onDocumentElementClick_(evt, viewport, history);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
-          'whatsapp://send?text=hello', '_blank')).to.be.true;
+          'whatsapp://send?text=hello', '_top')).to.be.true;
       expect(preventDefaultSpy.callCount).to.equal(1);
     });
 
@@ -300,15 +320,6 @@ describe('test-document-click onDocumentElementClick_', () => {
       sandbox.stub(platform, 'isSafari').returns(false);
       onDocumentElementClick_(evt, viewport, history);
       expect(win.top.location.href).to.equal('https://google.com');
-      expect(preventDefaultSpy.callCount).to.equal(0);
-    });
-
-    it('should not do anything if not embedded', () => {
-      sandbox.stub(platform, 'isIos').returns(true);
-      sandbox.stub(platform, 'isSafari').returns(true);
-      win.parent = undefined;
-      onDocumentElementClick_(evt, viewport, history);
-      expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
   });

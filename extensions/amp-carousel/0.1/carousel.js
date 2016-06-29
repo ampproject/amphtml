@@ -41,7 +41,7 @@ export class AmpCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',
@@ -89,7 +89,7 @@ export class AmpCarousel extends BaseCarousel {
       if (!animate) {
         this.commitSwitch_(oldPos, newPos);
       } else {
-        Animation.animate(tr.setStyles(this.container_, {
+        Animation.animate(this.element, tr.setStyles(this.container_, {
           transform: tr.translateX(tr.numeric(-oldPos, -newPos)),
         }), 200, 'ease-out').thenAlways(() => {
           this.commitSwitch_(oldPos, newPos);
@@ -107,9 +107,9 @@ export class AmpCarousel extends BaseCarousel {
     st.setStyles(this.container_, {
       transform: st.translateX(-newPos),
     });
+    this.updateInViewport_(newPos, oldPos);
     this.doLayout_(newPos);
     this.preloadNext_(newPos, Math.sign(newPos - oldPos));
-    this.updateInViewport_(newPos, oldPos);
     this.setControlsState();
   }
 
@@ -256,7 +256,8 @@ export class AmpCarousel extends BaseCarousel {
   onSwipeEnd_(swipe) {
     let promise;
     if (Math.abs(swipe.velocityX) > 0.1) {
-      this.motion_ = continueMotion(this.pos_, 0, -swipe.velocityX, 0,
+      this.motion_ = continueMotion(this.element,
+          this.pos_, 0, -swipe.velocityX, 0,
           (x, unusedY) => {
             const newPos = (this.boundPos_(x, true) +
                 this.boundPos_(x, false)) * 0.5;
@@ -280,7 +281,7 @@ export class AmpCarousel extends BaseCarousel {
         return undefined;
       }
       const posFunc = tr.numeric(this.pos_, newPos);
-      return Animation.animate(time => {
+      return Animation.animate(this.element, time => {
         this.pos_ = posFunc(time);
         st.setStyles(this.container_, {
           transform: st.translateX(-this.pos_),

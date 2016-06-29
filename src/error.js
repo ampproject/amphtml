@@ -17,8 +17,6 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
-// TODO(dvoytenko, #2527): Remove ASSERT_SENTINEL and isAssertErrorMessage.
-import {ASSERT_SENTINEL, isAssertErrorMessage} from './asserts';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
 
@@ -78,7 +76,6 @@ export function reportError(error, opt_associatedElement) {
 
 /**
  * Returns an error for a cancellation of a promise.
- * @param {string} message
  * @return {!Error}
  */
 export function cancellation() {
@@ -103,14 +100,14 @@ export function installErrorReporting(win) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
+ * @this {!Window|undefined}
  */
 function reportErrorToServer(message, filename, line, col, error) {
   // Make an attempt to unhide the body.
   if (this && this.document) {
     makeBodyVisible(this.document);
   }
-  const mode = getMode();
-  if (mode.localDev || mode.development || mode.test) {
+  if (getMode().localDev || getMode().development || getMode().test) {
     return;
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
@@ -149,11 +146,8 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(
-          message.replace(ASSERT_SENTINEL, '')
-              .replace(USER_ERROR_SENTINEL, '')) +
-      '&a=' + (isAssertErrorMessage(message) ||
-          isUserErrorMessage(message) ? 1 : 0);
+      '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
+      '&a=' + (isUserErrorMessage(message) ? 1 : 0);
   if (window.context && window.context.location) {
     url += '&3p=1';
   }
@@ -165,6 +159,21 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   }
   if (window.viewerState) {
     url += '&vs=' + encodeURIComponent(window.viewerState);
+  }
+  // Is embedded?
+  if (window.parent && window.parent != window) {
+    url += '&iem=1';
+  }
+
+  if (window.AMP.viewer) {
+    const resolvedViewerUrl = window.AMP.viewer.getResolvedViewerUrl();
+    const messagingOrigin = window.AMP.viewer.maybeGetMessagingOrigin();
+    if (resolvedViewerUrl) {
+      url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
+    }
+    if (messagingOrigin) {
+      url += `&mso=${encodeURIComponent(messagingOrigin)}`;
+    }
   }
 
   if (error) {

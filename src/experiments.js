@@ -37,6 +37,9 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
+/** @const {!Object<string, boolean>} */
+const EXPERIMENT_TOGGLES = Object.create(null);
+
 
 /**
  * Whether the scripts come from a dev channel.
@@ -57,7 +60,6 @@ export function isDevChannel(win) {
 /**
  * Whether the version corresponds to the dev-channel binary.
  * @param {!Window} win
- * @param {string} version
  * @return {boolean}
  * @private Visible for testing only!
  */
@@ -73,29 +75,62 @@ export function isDevChannelVersionDoNotUse_(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  return getExperimentIds(win).indexOf(experimentId) != -1;
+  if (experimentId in EXPERIMENT_TOGGLES) {
+    return EXPERIMENT_TOGGLES[experimentId];
+  }
+  return EXPERIMENT_TOGGLES[experimentId] = calcExperimentOn(win, experimentId);
+}
+
+/**
+ * Calculate whether the specified experiment is on or off based off of the
+ * cookieFlag or the global config frequency given.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function calcExperimentOn(win, experimentId) {
+  const cookieFlag = getExperimentIds(win).indexOf(experimentId) != -1;
+  if (cookieFlag) {
+    return true;
+  }
+
+  if (win.AMP_CONFIG && win.AMP_CONFIG.hasOwnProperty(experimentId)) {
+    const frequency = win.AMP_CONFIG[experimentId];
+    return Math.random() < frequency;
+  }
+  return false;
 }
 
 
 /**
- * Toggles the expriment on or off. Returns the actual value of the expriment
+ * Toggles the experiment on or off. Returns the actual value of the experiment
  * after toggling is done.
  * @param {!Window} win
  * @param {string} experimentId
  * @param {boolean=} opt_on
- * @return {boolean}
+ * @param {boolean=} opt_transientExperiment  Whether to toggle the
+ *     experiment state "transiently" (i.e., for this page load only) or
+ *     durably (by saving the experiment IDs to the cookie after toggling).
+ *     Default: false (save durably).
+ * @return {boolean} New state for experimentId.
  */
-export function toggleExperiment(win, experimentId, opt_on) {
+export function toggleExperiment(win, experimentId, opt_on,
+    opt_transientExperiment) {
   const experimentIds = getExperimentIds(win);
-  const currentlyOn = experimentIds.indexOf(experimentId) != -1;
+  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
+      (experimentId in EXPERIMENT_TOGGLES && EXPERIMENT_TOGGLES[experimentId]);
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
     if (on) {
       experimentIds.push(experimentId);
+      EXPERIMENT_TOGGLES[experimentId] = true;
     } else {
       experimentIds.splice(experimentIds.indexOf(experimentId), 1);
+      EXPERIMENT_TOGGLES[experimentId] = false;
     }
-    saveExperimentIds(win, experimentIds);
+    if (!opt_transientExperiment) {
+      saveExperimentIds(win, experimentIds);
+    }
   }
   return on;
 }
@@ -120,4 +155,14 @@ function getExperimentIds(win) {
 function saveExperimentIds(win, experimentIds) {
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
       timer.now() + COOKIE_EXPIRATION_INTERVAL);
+}
+
+/**
+ * Resets the experimentsToggle cache for testing purposes.
+ * @visibleForTesting
+ */
+export function resetExperimentToggles_() {
+  Object.keys(EXPERIMENT_TOGGLES).forEach(key => {
+    delete EXPERIMENT_TOGGLES[key];
+  });
 }

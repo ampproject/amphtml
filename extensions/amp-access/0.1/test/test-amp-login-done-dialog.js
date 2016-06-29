@@ -85,7 +85,6 @@ describe('LoginDoneDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {

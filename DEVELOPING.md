@@ -57,12 +57,15 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp watch`                  | Watches for changes in files, re-build.                               |
 | `gulp test`                   | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
+| `gulp test --nobuild`         | Runs tests without re-build.                                          |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
+| `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
+| `npm run node-test` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 
 #### Saucelabs
@@ -76,9 +79,9 @@ export SAUCE_ACCESS_KEY=access-key
 
 Also for local testing, download [saucelabs connect](https://docs.saucelabs.com/reference/sauce-connect/) (If you are having trouble, downgrade to 4.3.10) and establish a tunnel by running the `sc` before running tests.
 
-Because of the user name and password requirement pull requests do not directly run on Travis. If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically build by our bot [@ampsauce](https://github.com/ampsauce/amphtml). Builds can be seen on [@ampsauce's Travis](https://travis-ci.org/ampsauce/amphtml/builds) and after they finished their state will be logged to your PR.
+If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically built and tested on [Travis](https://travis-ci.org/ampproject/amphtml/builds). After the travis run completes, the result will be logged to your PR.
 
-If a test flaked on a pull request you can ask for a retry by sending the comment `@ampsauce retry`. This will only be accepted if you are a member of the "ampproject" org. Ping us if you'd like to be added. You may also need to publicly reveal your membership.
+If a test flaked on a pull request you can ask a project owner to restart the tests for you. Use [`this.retries(x)`](https://mochajs.org/#retry-tests) as the last resort.
 
 ### Manual testing
 
@@ -109,6 +112,10 @@ If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/out
 #### Chrome extension
 
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
+
+#### Deploying AMP on Cloud for testing on devices
+
+For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
 ## Repository Layout
 <pre>

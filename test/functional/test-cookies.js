@@ -76,7 +76,7 @@ describe('getCookie', () => {
           return cookie;
         },
       };
-      setCookie({document: doc, location: {hostname: hostname}},
+      setCookie({document: doc, location: {hostname}},
           'c&1', 'v&1', 1447383159853, {
             highestAvailableDomain: true,
           });

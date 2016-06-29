@@ -17,7 +17,8 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
+import {getDataParamsFromAttributes, removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
@@ -32,10 +33,16 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /** @override */
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const account = AMP.assert(
+    const account = user.assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
@@ -43,9 +50,8 @@ class AmpBrightcove extends AMP.BaseElement {
       this.element.getAttribute('data-player-id') ||
       'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
-    const params = {};
 
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
@@ -56,16 +62,7 @@ class AmpBrightcove extends AMP.BaseElement {
     }
 
     // Pass through data-param-* attributes as params for plugin use
-    for (let i = 0; i < this.element.attributes.length; i++) {
-      const attr = this.element.attributes[i];
-      const matches = attr.nodeName.match(/^data-param-(.+)/);
-      if (matches) {
-        const param = dashToCamelCase(matches[1]);
-        params[param] = attr.nodeValue;
-      }
-    }
-
-    src = addParamsToUrl(src, params);
+    src = addParamsToUrl(src, getDataParamsFromAttributes(this.element));
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
@@ -90,7 +87,7 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     /*
     This stops playback with the postMessage API.
     Add this script to the player in the player configuration in the Studio
@@ -105,7 +102,28 @@ class AmpBrightcove extends AMP.BaseElement {
       this.iframe_.contentWindow./*OK*/postMessage(
           'pause', 'https://players.brightcove.net');
     }
-    return false;
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /**
+   * To prevent improperly setup videos (do not include the pauseCallback
+   * listener script) from playing after being told to pause, we destroy the
+   * iframe. Once the listener script is updated to inform AMP that it is listening,
+   * we can prevent the unlayout.
+   *
+   * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   * @override
+   */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 

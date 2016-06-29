@@ -16,6 +16,7 @@
 
 import {Pass} from '../../src/pass';
 import {timer} from '../../src/timer';
+import * as sinon from 'sinon';
 
 describe('Pass', () => {
 
@@ -34,12 +35,9 @@ describe('Pass', () => {
   });
 
   afterEach(() => {
-    pass = null;
     expect(handlerCalled).to.equal(0);
     timerMock.verify();
-    timerMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('handler called', () => {

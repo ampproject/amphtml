@@ -30,6 +30,7 @@
 
 import {Layout} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -50,12 +51,12 @@ class AmpSoundcloud extends AMP.BaseElement {
     const color = this.element.getAttribute('data-color');
     const visual = this.element.getAttribute('data-visual');
     const url = 'https://api.soundcloud.com/tracks/';
-    const trackid = AMP.assert(
+    const trackid = user.assert(
         (this.element.getAttribute('data-trackid')),
         'The data-trackid attribute is required for <amp-soundcloud> %s',
         this.element);
 
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
@@ -79,14 +80,12 @@ class AmpSoundcloud extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
         JSON.stringify({method: 'pause'}),
         'https://w.soundcloud.com');
     }
-
-    return true;
   }
 };
 

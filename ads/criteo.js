@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../src/3p';
+import {loadScript} from '../3p/3p';
+
+/* global Criteo: false */
 
 /**
  * @param {!Window} global
@@ -22,6 +24,6 @@ import {loadScript} from '../src/3p';
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
-    Criteo.DisplayAd({'zoneid': data.zone});
+    Criteo.DisplayAd({'zoneid': data.zone, 'async': true, 'containerid': 'c'});
   });
 }

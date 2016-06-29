@@ -34,6 +34,9 @@ export class Preconnect {
    * @param {!Window} win
    */
   constructor(win) {
+    /** @private @const {!Document} */
+    this.document_ = win.document;
+
     /** @private @const {!Element} */
     this.head_ = win.document.head;
     /**
@@ -47,7 +50,7 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!Platform}  */
+    /** @private @const {!./platform.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
@@ -87,10 +90,10 @@ export class Preconnect {
         ? ACTIVE_CONNECTION_TIMEOUT_MS
         : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
-    const dns = document.createElement('link');
+    const dns = this.document_.createElement('link');
     dns.setAttribute('rel', 'dns-prefetch');
     dns.setAttribute('href', origin);
-    const preconnect = document.createElement('link');
+    const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
     this.head_.appendChild(dns);
@@ -126,12 +129,15 @@ export class Preconnect {
     const command = this.preloadSupported_ ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = document.createElement('link');
+    const prefetch = this.document_.createElement('link');
     prefetch.setAttribute('rel', command);
     prefetch.setAttribute('href', url);
-    if (opt_preloadAs) {
-      prefetch.setAttribute('as', opt_preloadAs);
-    }
+    // Do not set 'as' attribute for now, for 2 reasons
+    // - document value is not yet supported and dropped
+    // - script is blocked due to CSP.
+    // if (opt_preloadAs) {
+    //  prefetch.setAttribute('as', opt_preloadAs);
+    // }
     this.head_.appendChild(prefetch);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
@@ -146,7 +152,7 @@ export class Preconnect {
 
   /** @private */
   isPreloadSupported_() {
-    const tokenList = document.createElement('link').relList;
+    const tokenList = this.document_.createElement('link').relList;
     if (!tokenList || !tokenList.supports) {
       this.preloadSupported_ = false;
       return this.preloadSupported_;

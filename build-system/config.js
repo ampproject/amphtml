@@ -24,24 +24,28 @@ var commonTestPaths = [
   {
     pattern: 'dist/**/*.js',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.tools/**/*.js',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'examples/**/*',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
   {
     pattern: 'dist.3p/**/*',
     included: false,
-    nocache: true,
+    nocache: false,
+    watched: true,
   },
-]
+];
 
 var testPaths = commonTestPaths.concat([
   'test/**/*.js',
@@ -53,38 +57,27 @@ var integrationTestPaths = commonTestPaths.concat([
   'extensions/**/test/integration/**/*.js',
 ]);
 
+var karmaDefault = {
+  configFile: karmaConf,
+  singleRun: true,
+  client: {
+    mocha: {
+      // Longer timeout on Travis; fail quickly at local.
+      timeout: process.env.TRAVIS ? 10000 : 2000
+    },
+    captureConsole: false,
+  },
+  browserDisconnectTimeout: 10000,
+  browserDisconnectTolerance: 2,
+  browserNoActivityTimeout: 4 * 60 * 1000,
+  captureTimeout: 4 * 60 * 1000,
+};
+
 var karma = {
-  default: {
-    configFile: karmaConf,
-    singleRun: true,
-    client: {
-      captureConsole: false,
-    }
-  },
-  firefox: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  safari: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  saucelabs: {
-    configFile: karmaConf,
+  default: karmaDefault,
+  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
+  safari: extend(karmaDefault, {browsers: ['Safari']}),
+  saucelabs: extend(karmaDefault, {
     reporters: ['dots', 'saucelabs'],
     browsers: [
       'SL_Chrome_android',
@@ -98,26 +91,18 @@ var karma = {
       //'SL_iOS_9_1',
       //'SL_IE_11',
     ],
-    singleRun: true,
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false,
-    },
-    captureTimeout: 120000,
-    browserDisconnectTimeout: 120000,
-    browserNoActivityTimeout: 120000,
-  }
+  })
 };
 
 /** @const  */
 module.exports = {
+  commonTestPaths: commonTestPaths,
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
   karma: karma,
   lintGlobs: [
     '**/*.js',
+    '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
     '!{testing,examples,examples.build}/**/*.*',
@@ -144,3 +129,7 @@ module.exports = {
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
+
+function extend(orig, add) {
+  return Object.assign({}, orig, add);
+}

@@ -27,11 +27,6 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return this.element.firstChild != null;
-  }
-
-  /** @override */
   buildCallback() {
     /** @private @const {!Element} */
     this.img_ = new Image();
@@ -77,7 +72,7 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = '';
     return true;

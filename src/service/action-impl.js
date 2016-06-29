@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assert} from '../asserts';
-import {getService} from '../service';
-import {dev} from '../log';
+import {dev, user} from '../log';
+import {getServiceForDoc} from '../service';
+import {getMode} from '../mode';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
@@ -39,7 +39,7 @@ const DEFAULT_METHOD_ = 'activate';
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONObject,
+ *   args: ?JSONType,
  *   str: string
  * }}
  */
@@ -51,12 +51,13 @@ let ActionInfoDef;
  * @struct
  * @const
  * TODO(dvoytenko): add action arguments here as well.
+ * @package For type.
  */
-class ActionInvocation {
+export class ActionInvocation {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -65,7 +66,7 @@ class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONObject} */
+    /** @const {?JSONType} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -86,17 +87,17 @@ class ActionInvocation {
 export class ActionService {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
 
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
-    /** @param {!Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    /** @private {!./vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(ampdoc.getWin());
 
     // Add core events.
     this.addEvent('tap');
@@ -111,7 +112,7 @@ export class ActionService {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', event => {
+      this.ampdoc.getRootNode().addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
@@ -142,7 +143,7 @@ export class ActionService {
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -157,12 +158,12 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-    assert(target.id && target.id.substring(0, 4) == 'amp-',
+    user.assert(target.id && target.id.substring(0, 4) == 'amp-',
         'AMP element is expected: %s', debugid);
 
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
-      assert(
+      dev.assert(
         isArray(currentQueue),
         'Expected queue to be an array: %s',
         debugid
@@ -200,7 +201,7 @@ export class ActionService {
       return;
     }
 
-    const target = document.getElementById(action.actionInfo.target);
+    const target = this.ampdoc.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
@@ -213,13 +214,13 @@ export class ActionService {
   /**
    * The errors that are a result of action definition.
    * @param {string} s
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    * @param {?Element} target
    * @private
    */
   actionInfoError_(s, actionInfo, target) {
     // Method not found "activate" on ' + target
-    assert(false, 'Action Error: ' + s +
+    user.assert(false, 'Action Error: ' + s +
         (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
         (target ? ' on [' + target + ']' : ''));
   }
@@ -227,10 +228,10 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
@@ -282,7 +283,7 @@ export class ActionService {
     while (n) {
       actionInfo = this.matchActionInfo_(n, actionEventType);
       if (actionInfo) {
-        return {node: n, actionInfo: actionInfo};
+        return {node: n, actionInfo};
       }
       n = n.parentElement;
     }
@@ -395,10 +396,10 @@ export function parseActionMap(s, context) {
       }
 
       const action = {
-        event: event,
-        target: target,
-        method: method,
-        args: (args && window.AMP_TEST && Object.freeze) ?
+        event,
+        target,
+        method,
+        args: (args && getMode().test && Object.freeze) ?
             Object.freeze(args) : args,
         str: s,
       };
@@ -426,15 +427,15 @@ export function parseActionMap(s, context) {
  * @private
  */
 function assertActionForParser(s, context, condition, opt_message) {
-  return assert(condition, 'Invalid action definition in %s: [%s] %s',
+  return user.assert(condition, 'Invalid action definition in %s: [%s] %s',
       context, s, opt_message || '');
 }
 
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: string, value: *}} token
- * @param {string} token
+ * @param {!{type: string, value: *}} tok
+ * @param {string} type
  * @param {*=} opt_value
  * @return {!{type: string, value: *}}
  * @private
@@ -552,7 +553,7 @@ class ParserTokenizer {
       const s = this.str_.substring(newIndex, end);
       const value = hasFraction ? parseFloat(s) : parseInt(s, 10);
       newIndex = end - 1;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // Different separators.
@@ -574,7 +575,7 @@ class ParserTokenizer {
       }
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // A key
@@ -588,7 +589,7 @@ class ParserTokenizer {
     const value = convertValues && (s == 'true' || s == 'false') ?
         s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.LITERAL, value: value, index: newIndex};
+    return {type: TokenType.LITERAL, value, index: newIndex};
   }
 }
 
@@ -603,11 +604,11 @@ function isNum(c) {
 
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!ActionService}
  */
-export function installActionService(win) {
-  return getService(win, 'action', () => {
-    return new ActionService(win);
+export function installActionServiceForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'action', ampdoc => {
+    return new ActionService(ampdoc);
   });
 };

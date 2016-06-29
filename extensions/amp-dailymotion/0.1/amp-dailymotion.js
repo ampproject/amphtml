@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 
 class AmpDailymotion extends AMP.BaseElement {
@@ -36,11 +37,11 @@ class AmpDailymotion extends AMP.BaseElement {
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const videoid = AMP.assert(
+    const videoid = user.assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
         this.element);
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.dailymotion.com/embed/video/' + encodeURIComponent(
@@ -89,13 +90,10 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 };
 

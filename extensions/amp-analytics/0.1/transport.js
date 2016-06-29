@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {assert} from '../../../src/asserts';
 import {assertHttpsUrl, parseUrl} from '../../../src/url';
-import {log} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {timer} from '../../../src/timer';
 import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
-const TAG_ = 'AmpAnalytics.Transport';
+const TAG_ = 'amp-analytics.Transport';
 
 /**
  * @param {!Window} win
@@ -43,7 +42,7 @@ export function sendRequest(win, request, transportOptions) {
     Transport.sendRequestUsingImage(win, request);
     return;
   }
-  log.warn(TAG_, 'Failed to send request', request, transportOptions);
+  user.warn(TAG_, 'Failed to send request', request, transportOptions);
 }
 
 /**
@@ -61,9 +60,9 @@ export class Transport {
     image.width = 1;
     image.height = 1;
     loadPromise(image).then(() => {
-      log.fine(TAG_, 'Sent image request', request);
+      dev.fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      log.warn(TAG_, 'Failed to send image request', request);
+      user.warn(TAG_, 'Failed to send image request', request);
     });
   }
 
@@ -77,7 +76,7 @@ export class Transport {
       return false;
     }
     win.navigator.sendBeacon(request, '');
-    log.fine(TAG_, 'Sent beacon request', request);
+    dev.fine(TAG_, 'Sent beacon request', request);
     return true;
   }
 
@@ -102,7 +101,7 @@ export class Transport {
 
     xhr.onreadystatechange = () => {
       if (xhr.readystate == 4) {
-        log.fine(TAG_, 'Sent XHR request', request);
+        dev.fine(TAG_, 'Sent XHR request', request);
       }
     };
 
@@ -121,17 +120,17 @@ export class Transport {
  */
 export function sendRequestUsingIframe(win, request) {
   assertHttpsUrl(request);
-  const iframe = document.createElement('iframe');
+  const iframe = win.document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.onload = iframe.onerror = () => {
     timer.delay(() => {
       removeElement(iframe);
     }, 5000);
   };
-  assert(
+  user.assert(
       parseUrl(request).origin != parseUrl(win.location.href).origin,
-      'Origin of iframe request must not be equal to the document origin. ' +
-      'See https://github.com/ampproject/' +
+      'Origin of iframe request must not be equal to the doc' +
+      'ument origin. See https://github.com/ampproject/' +
       'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
   iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');

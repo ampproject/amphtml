@@ -34,7 +34,17 @@ For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=AMPDOC_HOST"></amp-pixel>
 ```
-may make a request to something like `https://foo.com/pixel?host=example.com`.
+may make a request to something like `https://foo.com/pixel?host=example.com:8080`.
+
+### AMPDOC_HOSTNAME
+
+Use the special string `AMPDOC_HOSTNAME` to add the AMP document's URL hostname.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?hostname=AMPDOC_HOSTNAME"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?hostname=example.com`.
 
 ### AMPDOC_URL
 
@@ -53,6 +63,16 @@ Use the special string `CANONICAL_HOST` to add the canonical URL's host of the c
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=CANONICAL_HOST"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
+
+### CANONICAL_HOSTNAME
+
+Use the special string `CANONICAL_HOSTNAME` to add the canonical URL's hostname of the current document to the URL
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?hostname=CANONICAL_HOSTNAME"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
@@ -95,6 +115,16 @@ Use the special string `SOURCE_HOST` to add the source URL's host of the current
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=SOURCE_HOST"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
+
+### SOURCE_HOSTNAME
+
+Use the special string `SOURCE_HOSTNAME` to add the source URL's hostname of the current document to the URL. See the description of `SOURCE_URL` for more details.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?host=SOURCE_HOSTNAME"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
@@ -172,6 +202,49 @@ is unloaded. The value is in milliseconds.
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?domInteractiveTime=DOM_INTERACTIVE_TIME"></amp-pixel>
+```
+
+### NAV_REDIRECT_COUNT
+
+Provides the number of redirects since the last non-redirect navigation.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?nrc=NAV_REDIRECT_COUNT"></amp-pixel>
+```
+
+### NAV_TIMING
+
+Provides access to metrics from the browser's PerformanceTiming interface.
+If both `startEvent` and `endEvent` arguments are passed, the value will be the time elapsed between the two events.
+Otherwise, if only `startEvent` argument is passed, the value will be the timestamp of the given event.
+The value is in milliseconds.
+
+See the W3C Navigation Timing API [PerformanceTiming interface](https://www.w3.org/TR/navigation-timing/#sec-navigation-timing-interface) documentation for attribute names and definitions.
+
+Please see below for the required and optional arguments you may pass into `NAV_TIMING` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**:
+
+  - `startEvent` (Required) - Name of the PerformanceTiming interface attribute corresponding to the start event.
+
+  - `endEvent` (Optional) - Optional name of the PerformanceTiming interface attribute corresponding to the end event. If `endEvent` is passed, the value will be the time difference between the start and end events.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?navStart=NAV_TIMING(navigationStart)&amp;pageLoadTime=NAV_TIMING(navigationStart,loadEventStart)"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?navStart=1451606400000&pageLoadTime=100`.
+
+### NAV_TYPE
+
+Provides the type of the last non-redirect navigation in the current browsing context.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?nt=NAV_TYPE"></amp-pixel>
 ```
 
 ### PAGE_DOWNLOAD_TIME
@@ -277,6 +350,12 @@ For instance:
 
 ## Miscellaneous
 
+### AMP_VERSION
+
+Provides a string with the AMP release version.
+
+Example value: `1460655576651`
+
 ### CLIENT_ID
 
 Use the special string `CLIENT_ID` to add a per document-source-origin (The origin of the website where you publish your AMP doc) and user identifier. The `CLIENT_ID` will be the same for the same user if they visit again within one year. It should behave roughly similar to a cookie storing a session id for one year. If the AMP document is not served through the Google AMP Cache, the `CLIENT_ID` will be replaced with a cookie of the name of the cid scope below. If it is not present a cookie will be set with the same name. These cookies will always have the prefix "amp-" followed by a random base64 encoded string.
@@ -353,7 +432,7 @@ For instance:
 
 Provides the total time the user has been enagaged with the page since the page
 first became visible in the viewport. Total engaged time will be 0 until the
-page first becomes visible.
+page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 ## Access
 

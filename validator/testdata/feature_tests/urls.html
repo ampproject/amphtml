@@ -41,16 +41,33 @@
   <a href="javascript&colon;alert(1)">Invalid protocol</a>
   <a href="vbscript:bar">Invalid protocol</a>
   <a href="data:baz">Invalid protocol</a>
-  <a href="ftp://google.com/">Invalid protocol</a>
+  <a href="ftp://google.com/">Valid protocol</a>
   <a href="http://site:80808/%AFpage">Malformed URL</a>
+  <!-- invalid (javascript is not an allowed protocol: singluar src element) -->
   <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
+  <!-- invalid (javascript is not an allwoed protocol: second src element) -->
   <amp-img srcset="image-1.png 1x, javascript:alert(1)" layout="fill"></amp-img>
+  <!-- valid -->
   <amp-img srcset="image-1x.png 1x, image-2x.png 2x" layout="fill"></amp-img>
+  <!-- valid -->
   <amp-img srcset="image-1x.png 1x, image-2x.png 2x," layout="fill"></amp-img>
+  <!-- valid (commas are valid in URLs) -->
+  <amp-img srcset="image-1,x.png 1x, image-2,x.png 2x" layout="fill"></amp-img>
+  <!-- invalid (javascript is not an allowed protocol: multi src element) -->
   <amp-img srcset="javascript:alert('boo') 1x, foo 2x" layout="fill"></amp-img>
+  <!-- invalid (javascript is not an allowed protocol: case insensitive) -->
   <amp-img srcset="image-1x.png 1x, JavaScript:baz 2x" layout="fill"></amp-img>
+  <!-- invalid (not a valid URL) -->
   <amp-img srcset="http://site:80808/%AFimg 1x, img 2x" layout="fill"></amp-img>
+  <!-- invalid (empty) -->
   <amp-img srcset="" layout="fill"></amp-img>
+  <!-- invalid (duplicate pixel density) -->
+  <amp-img srcset="image-1x.png 1x, image-2x.png 1x" layout="fill"></amp-img>
+  <!-- invalid (URL has spaces that are not encoded) -->
+  <amp-img srcset="image 1x.png 1x, image 2x.png 2x" layout="fill"></amp-img>
+  <!-- valid (URL has encoded spaces) -->
+  <amp-img srcset=", image%201x.png 1x, image%202x.png 2x" layout="fill"></amp-img>
+
   <!-- Missing src -->
   <amp-ad src="" width="42" height="42" type=""></amp-ad>
   <amp-anim src="" width="42" height="42"></amp-anim>
@@ -64,5 +81,6 @@
   <amp-iframe src="http://amp-iframe" width="42" height="42"></amp-iframe>
   <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
   <amp-video src="http://amp-video" width="42" height="42"></amp-video>
+  <a href=" j a v a s c r i p t :alert(1)">Invalid protocol</a>
 </body>
 </html>

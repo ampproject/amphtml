@@ -15,10 +15,9 @@
  */
 
 import {Observable} from './observable';
-import {assert} from './asserts';
+import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listen, postMessage} from './iframe-helper';
-import {parseUrl} from './url';
+import {listenFor, postMessageToWindows} from './iframe-helper';
 import {timer} from './timer';
 
 /**
@@ -28,8 +27,8 @@ import {timer} from './timer';
  * Mutates passed in rootBounds to have x and y according to spec.
  *
  * @param {number} time Time when values below were measured.
- * @param {!LayoutRect} rootBounds Equivalent to viewport.getRect()
- * @param {!LayoutRect} elementLayoutBox Layout box of the element
+ * @param {!./layout-rect.LayoutRectDef} rootBounds Equivalent to viewport.getRect()
+ * @param {!./layout-rect.LayoutRectDef} elementLayoutBox Layout box of the element
  *     that may intersect with the rootBounds.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
@@ -45,7 +44,7 @@ export function getIntersectionChangeEntry(
 
   const boundingClientRect =
       moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  assert(boundingClientRect.width >= 0 &&
+  dev.assert(boundingClientRect.width >= 0 &&
       boundingClientRect.height >= 0, 'Negative dimensions in ad.');
   boundingClientRect.x = boundingClientRect.left;
   boundingClientRect.y = boundingClientRect.top;
@@ -88,11 +87,9 @@ export function getIntersectionChangeEntry(
 export class IntersectionObserver extends Observable {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element to which would request intersection
+   * @param {!Element} iframe Iframe element which requested the intersection
    *    data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
-   * @constructor
-   * @extends {Observable}
    */
   constructor(baseElement, iframe, opt_is3p) {
     super();
@@ -100,6 +97,8 @@ export class IntersectionObserver extends Observable {
     this.baseElement_ = baseElement;
     /** @private {?Element} */
     this.iframe_ = iframe;
+    /** @private {!Array<{win: !Window, origin: string}>} */
+    this.clientWindows_ = [];
     /** @private {boolean} */
     this.is3p_ = opt_is3p || false;
     /** @private {boolean} */
@@ -126,9 +125,17 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    listen(this.iframe_, 'send-intersections', () => {
+    listenFor(this.iframe_, 'send-intersections', (data, source, origin) => {
+      // This message might be from any window within the iframe, we need
+      // to keep track of which windows want to be sent updates.
+      if (!this.clientWindows_.some(entry => entry.win == source)) {
+        this.clientWindows_.push({win: source, origin});
+      }
       this.startSendingIntersectionChanges_();
-    }, this.is3p_);
+    }, this.is3p_,
+    // For 3P frames we also allow nested frames within them to listen to
+    // the intersection changes.
+    this.is3p_ /* opt_includingNestedWindows */);
 
     this.add(() => {
       this.sendElementIntersection_();
@@ -201,23 +208,27 @@ export class IntersectionObserver extends Observable {
     }
     this.pendingChanges_.push(change);
     if (!this.flushTimeout_) {
-      // Send a maximum of 10 postMessages per second.
+      // Send one immediately, …
+      this.flush_();
+      // but only send a maximum of 10 postMessages per second.
       this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
     }
   }
 
+  /**
+   * @private
+   */
   flush_() {
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;
     }
-    const targetOrigin =
-        this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-    postMessage(
+    // Note that we multicast the update to all interested windows.
+    postMessageToWindows(
         this.iframe_,
+        this.clientWindows_,
         'intersection',
         {changes: this.pendingChanges_},
-        targetOrigin,
         this.is3p_);
     this.pendingChanges_.length = 0;
   }

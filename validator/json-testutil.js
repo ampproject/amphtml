@@ -55,7 +55,8 @@ function objToJsonSegments(obj, out, cmpFn) {
       }
       out.push(']');
       return;
-    } else if (obj instanceof String || obj instanceof Number ||
+    } else if (
+        obj instanceof String || obj instanceof Number ||
         obj instanceof Boolean) {
       obj = obj.valueOf();
       // Fall through to switch below.
@@ -64,7 +65,7 @@ function objToJsonSegments(obj, out, cmpFn) {
       const keys = [];
       for (const key in obj) {
         if (Object.prototype.hasOwnProperty.call(
-            /** @type {Object}*/(obj), key)) {
+                /** @type {Object}*/ (obj), key)) {
           keys.push(key);
         }
       }
@@ -95,13 +96,14 @@ function objToJsonSegments(obj, out, cmpFn) {
         // We hack the non-standard "'" into place here because the
         // Javascript style guide prefers them (and git5 lint reports
         // double quotes as errors).
-        out.push("'" + candidate.slice(1, -1).replace("'", "\\'") + "'");
+        out.push('\'' + candidate.slice(1, -1).replace('\'', '\\\'') + '\'');
       } else {
         out.push(candidate);
       }
       return;
     }
-    default: goog.asserts.fail('Unknown type: ' + typeof obj);
+    default:
+      goog.asserts.fail('Unknown type: ' + typeof obj);
   }
 }
 
@@ -109,12 +111,10 @@ function objToJsonSegments(obj, out, cmpFn) {
  * Default key comparator for ordering the json output.
  * @param {string} a
  * @param {string} b
- * @return {!number} */
+ * @return {number} */
 json_testutil.defaultCmpFn = function(a, b) {
-  if (a < b)
-    return -1;
-  if (a > b)
-    return 1;
+  if (a < b) return -1;
+  if (a > b) return 1;
   return 0;
 };
 
@@ -122,9 +122,9 @@ json_testutil.defaultCmpFn = function(a, b) {
  * Determines whether the provided string starts with a particular character.
  * Note: In ES6, there's string::startsWith but we want to make this work
  * for some interpreters < ES6.
- * @param {!string} str
- * @param {!string} ch
- * @return {!boolean}
+ * @param {string} str
+ * @param {string} ch
+ * @return {boolean}
  */
 function startsWithChar(str, ch) {
   return str.length > 0 && str.charAt(0) === ch;
@@ -134,9 +134,9 @@ function startsWithChar(str, ch) {
  * Determines whether the provided string ends with a particular character.
  * Note: In ES6, there's string::endsWith but we want to make this work
  * for some interpreters < ES6.
- * @param {!string} str
- * @param {!string} ch
- * @return {!boolean}
+ * @param {string} str
+ * @param {string} ch
+ * @return {boolean}
  */
 function endsWithChar(str, ch) {
   return str.length > 0 && str.charAt(str.length - 1) === ch;
@@ -154,13 +154,11 @@ function endsWithChar(str, ch) {
  * @param {function(string, string):number=} [cmpFn=json_testutil.defaultCmpFn]
  * json key comparator
  * @param {number=} [offset=0] Offset number of characters.
- * @return {!string}
+ * @return {string}
  */
 json_testutil.renderJSON = function(obj, cmpFn, offset) {
-  if (cmpFn === undefined)
-    cmpFn = json_testutil.defaultCmpFn;
-  if (offset === undefined)
-    offset = 0;
+  if (cmpFn === undefined) cmpFn = json_testutil.defaultCmpFn;
+  if (offset === undefined) offset = 0;
   // First, let objToJsonSegments emit the json into
   // segments. Conveniently, special characters such as '{', ',',
   // etc. are - unless inside a string - emitted as individual strings
@@ -169,7 +167,7 @@ json_testutil.renderJSON = function(obj, cmpFn, offset) {
   objToJsonSegments(obj, segments, cmpFn);
 
   const lines = [];
-  let current = '';  // current line
+  let current = '';      // current line
   let nesting = offset;  // Keep track of how deep inside {[]} etc.
 
   // Walk over the segments emitted by objToJsonSegments.
@@ -179,9 +177,9 @@ json_testutil.renderJSON = function(obj, cmpFn, offset) {
     // with an opening block character (but keep multiple opening blocks
     // together).
     if (current.length > 60 &&
-        (endsWithChar(current, ',') || endsWithChar(current, ':')) ||
-        (segment === '{' || segment === '[') &&
-        !endsWithChar(current, '{') && !endsWithChar(current, '[')) {
+            (endsWithChar(current, ',') || endsWithChar(current, ':')) ||
+        (segment === '{' || segment === '[') && !endsWithChar(current, '{') &&
+            !endsWithChar(current, '[')) {
       lines.push(current);
       current = '';
       for (let i = 0; i < nesting; i++) {  // Emit indentation.

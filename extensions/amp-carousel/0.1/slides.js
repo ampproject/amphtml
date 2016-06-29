@@ -23,6 +23,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 
 
 export class AmpSlides extends BaseCarousel {
@@ -48,7 +49,7 @@ export class AmpSlides extends BaseCarousel {
     this.slides_.forEach((slide, i) => {
       this.setAsOwner(slide);
       // Only the first element is initially visible.
-      slide.style.display = i > 0 ? 'none' : 'block';
+      slide.style.visibility = i > 0 ? 'hidden' : 'visible';
       this.applyFillContent(slide);
     });
 
@@ -58,7 +59,7 @@ export class AmpSlides extends BaseCarousel {
     /** @private {?number} */
     this.autoplayTimeoutId_ = null;
 
-    AMP.assert(this.slides_.length >= 1,
+    user.assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
 
     this.setupAutoplay_();
@@ -100,7 +101,8 @@ export class AmpSlides extends BaseCarousel {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
+        Animation.animate(this.element,
+            this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);
@@ -176,7 +178,7 @@ export class AmpSlides extends BaseCarousel {
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
-      display: 'block',
+      visibility: 'visible',
     });
 
     this.scheduleLayout(slide);
@@ -196,7 +198,7 @@ export class AmpSlides extends BaseCarousel {
       });
     } else {
       st.setStyles(slide, {
-        display: 'none',
+        visibility: 'hidden',
         zIndex: 0,
         transform: '',
         opacity: 1,
@@ -231,20 +233,20 @@ export class AmpSlides extends BaseCarousel {
    */
   commitSwitch_(oldSlide, newSlide) {
     st.setStyles(oldSlide, {
-      display: 'none',
+      visibility: 'hidden',
       zIndex: 0,
       transform: '',
       opacity: 1,
     });
     st.setStyles(newSlide, {
-      display: 'block',
+      visibility: 'visible',
       zIndex: 0,
       transform: '',
       opacity: 1,
     });
-    this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
+    this.scheduleLayout(newSlide);
     this.setControlsState();
     this.schedulePause(oldSlide);
   }
@@ -344,11 +346,11 @@ export class AmpSlides extends BaseCarousel {
       maxDelta = 1;
     }
     this.swipeState_ = {
-      containerWidth: containerWidth,
-      prevTr: prevTr,
-      nextTr: nextTr,
-      prevIndex: prevIndex,
-      nextIndex: nextIndex,
+      containerWidth,
+      prevTr,
+      nextTr,
+      prevIndex,
+      nextIndex,
       min: minDelta,
       max: maxDelta,
       pos: 0,
@@ -399,7 +401,7 @@ export class AmpSlides extends BaseCarousel {
     let promise;
     if (newPos != s.pos) {
       const posFunc = tr.numeric(s.pos, newPos);
-      promise = Animation.animate(time => {
+      promise = Animation.animate(this.element, time => {
         const pos = posFunc(time);
         s.nextTr(pos > 0 ? pos : 0);
         s.prevTr(pos < 0 ? -pos : 0);

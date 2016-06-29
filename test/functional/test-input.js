@@ -54,10 +54,7 @@ describe('Input', () => {
   });
 
   afterEach(() => {
-    input = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize in touch mode', () => {

@@ -1,3 +1,3 @@
 FAIL
-feature_tests/new_and_old_boilerplate_mixed2.html:28:2 The tag 'head > style : boilerplate - old variant' is deprecated - use 'head > style : boilerplate' instead. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [DEPRECATION]
-feature_tests/new_and_old_boilerplate_mixed2.html:35:7 The tag 'head > style : boilerplate' is missing or incorrect, but required by 'noscript > style : boilerplate'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [GENERIC]
+feature_tests/new_and_old_boilerplate_mixed2.html:28:2 The tag 'head > style[amp-boilerplate] - old variant' is deprecated - use 'head > style[amp-boilerplate]' instead. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [DEPRECATION]
+feature_tests/new_and_old_boilerplate_mixed2.html:35:7 The tag 'head > style[amp-boilerplate]' is missing or incorrect, but required by 'noscript > style[amp-boilerplate]'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md) [GENERIC]

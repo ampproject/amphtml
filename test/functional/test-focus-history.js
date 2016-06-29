@@ -26,6 +26,7 @@ describe('FocusHistory', () => {
   let eventListeners;
   let testWindow;
   let windowEventListeners;
+  let focusHistory;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -52,9 +53,7 @@ describe('FocusHistory', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should subscribe to focus events', () => {

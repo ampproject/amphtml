@@ -16,6 +16,7 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
+import * as sinon from 'sinon';
 
 describe('amp-video', () => {
 
@@ -27,7 +28,6 @@ describe('amp-video', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function getFooVideoSrc(mediatype) {
@@ -58,7 +58,6 @@ describe('amp-video', () => {
       height: 90,
     }).then(v => {
       const video = v.querySelector('video');
-      expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
       expect(video.hasAttribute('controls')).to.be.false;
@@ -76,7 +75,6 @@ describe('amp-video', () => {
       'loop': '',
     }).then(v => {
       const video = v.querySelector('video');
-      expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
       expect(video.hasAttribute('autoplay')).to.be.true;
@@ -154,7 +152,6 @@ describe('amp-video', () => {
     }).then(v => {
       // Should set appropriate attributes in layoutCallback.
       const video = v.querySelector('video');
-      expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('preload')).to.equal('auto');
       expect(video.getAttribute('poster')).to.equal('img.png');
@@ -175,7 +172,6 @@ describe('amp-video', () => {
     }).then(v => {
       // Should set appropriate attributes in layoutCallback.
       const video = v.querySelector('video');
-      expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('preload')).to.be.false;
       expect(video.getAttribute('poster')).to.equal('img.png');
@@ -233,7 +229,6 @@ describe('amp-video', () => {
       expect(video.hasAttribute('src')).to.be.false;
     }).then(v => {
       const video = v.querySelector('video');
-      expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('preload')).to.equal('auto');
       expect(video.getAttribute('poster')).to.equal('img.png');
@@ -249,7 +244,7 @@ describe('amp-video', () => {
       const impl = v.implementation_;
       const video = v.querySelector('video');
       sandbox.spy(video, 'pause');
-      impl.documentInactiveCallback();
+      impl.pauseCallback();
       expect(video.pause.called).to.be.true;
     });
   });

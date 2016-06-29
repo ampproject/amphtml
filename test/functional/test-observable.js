@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../src/observable';
+import * as sinon from 'sinon';
 
 describe('Observable', () => {
 
@@ -27,9 +28,7 @@ describe('Observable', () => {
   });
 
   afterEach(() => {
-    observable = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('add-remove-fire', () => {

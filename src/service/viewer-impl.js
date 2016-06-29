@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../observable';
-import {assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getService} from '../service';
@@ -24,6 +23,7 @@ import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 import {timer} from '../timer';
 import {reportError} from '../error';
+import {VisibilityState} from '../visibility-state';
 
 
 const TAG_ = 'Viewer';
@@ -49,11 +49,6 @@ export const ViewportType = {
   NATURAL: 'natural',
 
   /**
-   * Viewer sets and updates sizing and scrolling.
-   */
-  VIRTUAL: 'virtual',
-
-  /**
    * This is AMP-specific type and doesn't come from viewer. This is the type
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
@@ -62,40 +57,6 @@ export const ViewportType = {
    * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed',
-};
-
-
-/**
- * Visibility state of the AMP document.
- * @enum {string}
- */
-export const VisibilityState = {
-  /**
-   * The AMP document is being pre-rendered before being shown.
-   */
-  PRERENDER: 'prerender',
-
-  /**
-   * The AMP document is currently active and visible.
-   */
-  VISIBLE: 'visible',
-
-  /**
-   * The AMP document is active but the browser tab or AMP app is not.
-   */
-  HIDDEN: 'hidden',
-
-  /**
-   * The AMP document is visible, but the user has started swiping away from
-   * it. The runtime may stop active playback.
-   */
-  PAUSED: 'paused',
-
-  /**
-   * The AMP document is no longer active because the user swiped away or
-   * closed the viewer. The document may become visible again later.
-   */
-  INACTIVE: 'inactive',
 };
 
 
@@ -109,7 +70,20 @@ export const VisibilityState = {
  * @export {!Array<!RegExp>}
  */
 export const TRUSTED_VIEWER_HOSTS = [
-  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/,
+  /**
+   * Google domains, including country-codes and subdomains:
+   * - google.com
+   * - www.google.com
+   * - google.co
+   * - www.google.co
+   * - google.az
+   * - www.google..az
+   * - google.com.az
+   * - www.google.com.az
+   * - google.co.az
+   * - www.google.co.az
+   */
+  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2})$/,
 ];
 
 
@@ -118,6 +92,7 @@ export const TRUSTED_VIEWER_HOSTS = [
  * but instead delegates everything to the actual viewer. This class and the
  * actual Viewer are connected via "AMP.viewer" using three methods:
  * {@link getParam}, {@link receiveMessage} and {@link setMessageDeliverer}.
+ * @package Visible for type.
  */
 export class Viewer {
 
@@ -129,9 +104,9 @@ export class Viewer {
     this.win = win;
 
     /** @private @const {boolean} */
-    this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
+    this.isIframed_ = (this.win.parent && this.win.parent != this.win);
 
-    /** @const {!DocumentState} */
+    /** @const {!../document-state.DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */
@@ -153,15 +128,6 @@ export class Viewer {
     this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
-    this.viewportWidth_ = 0;
-
-    /** @private {number} */
-    this.viewportHeight_ = 0;
-
-    /** @private {number} */
-    this./*OK*/scrollTop_ = 0;
-
-    /** @private {number} */
     this.paddingTop_ = 0;
 
     /** @private {!Observable<boolean>} */
@@ -176,7 +142,7 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
     this.historyPoppedObservable_ = new Observable();
 
-    /** @private {!Observable<!JSONObject>} */
+    /** @private {!Observable<!JSONType>} */
     this.broadcastObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
@@ -193,6 +159,9 @@ export class Viewer {
 
     /** @private {?function()} */
     this.whenFirstVisibleResolve_ = null;
+
+    /** @private {?time} */
+    this.firstVisibleTime_ = null;
 
     /**
      * This promise might be resolved right away if the current
@@ -230,8 +199,8 @@ export class Viewer {
     dev.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
-    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
+    // Configure scrolling parameters when AMP is iframed on iOS.
+    if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
@@ -244,18 +213,6 @@ export class Viewer {
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
 
-    this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
-        this.viewportWidth_;
-    dev.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
-
-    this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
-        this.viewportHeight_;
-    dev.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
-
-    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
-        this./*OK*/scrollTop_;
-    dev.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
-
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
     dev.fine(TAG_, '- padding-top:', this.paddingTop_);
@@ -263,6 +220,13 @@ export class Viewer {
     /** @private @const {boolean} */
     this.performanceTracking_ = this.params_['csi'] === '1';
     dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+
+    /**
+     * Whether the AMP document is embedded in a viewer, such as an iframe or
+     * a web view.
+     * @private @const {boolean}
+     */
+    this.isEmbedded_ = this.isIframed_ || this.params_['webview'] === '1';
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -361,11 +325,9 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              this.win.setTimeout(() => {
-                throw new Error('Untrusted viewer referrer override: ' +
-                    this.unconfirmedReferrerUrl_ + ' at ' +
-                    this.messagingOrigin_);
-              });
+              dev.error(TAG_, 'Untrusted viewer referrer override: ' +
+                  this.unconfirmedReferrerUrl_ + ' at ' +
+                  this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
             }
           }
@@ -388,11 +350,9 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            this.win.setTimeout(() => {
-              throw new Error('Untrusted viewer url override: ' +
-                  viewerUrlOverride + ' at ' +
-                  this.messagingOrigin_);
-            });
+            dev.error(TAG_, 'Untrusted viewer url override: ' +
+                viewerUrlOverride + ' at ' +
+                this.messagingOrigin_);
           }
           resolve(this.resolvedViewerUrl_);
         });
@@ -401,8 +361,9 @@ export class Viewer {
       }
     });
 
-    // Remove hash - no reason to keep it around, but only when embedded.
-    if (this.isEmbedded_) {
+    // Remove hash - no reason to keep it around, but only when embedded or we have
+    // an incoming click tracking string (see impression.js).
+    if (this.isEmbedded_ || this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -425,6 +386,9 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
+      if (!this.firstVisibleTime_) {
+        this.firstVisibleTime_ = timer.now();
+      }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();
     }
@@ -443,7 +407,52 @@ export class Viewer {
   }
 
   /**
+   * Viewers can communicate their "capabilities" and this method allows
+   * checking them.
+   * @param {string} name Of the capability.
+   * @return {boolean}
+   */
+  hasCapability(name) {
+    const capabilities = this.params_['cap'];
+    if (!capabilities) {
+      return false;
+    }
+    // TODO(@cramforce): Consider caching the split.
+    return capabilities.split(',').indexOf(name) != -1;
+  }
+
+  /**
+   * Requests A2A navigation to the given destination. If the viewer does
+   * not support this operation, will navigate the top level window
+   * to the destination.
+   * The URL is assumed to be in AMP Cache format already.
+   * @param {string} url An AMP article URL.
+   * @param {string} requestedBy Informational string about the entity that
+   *     requested the navigation.
+   */
+  navigateTo(url, requestedBy) {
+    dev.assert(url.indexOf('https://cdn.ampproject.org/') == 0,
+        'Invalid A2A URL %s %s', url, requestedBy);
+    if (this.hasCapability('a2a')) {
+      this.sendMessage('a2a', {
+        url,
+        requestedBy,
+      }, /* awaitResponse */ false);
+    } else {
+      this.win.top.location.href = url;
+    }
+  }
+
+  /**
    * Whether the document is embedded in a iframe.
+   * @return {boolean}
+   */
+  isIframed() {
+    return this.isIframed_;
+  }
+
+  /**
+   * Whether the document is embedded in a viewer.
    * @return {boolean}
    */
   isEmbedded() {
@@ -459,10 +468,15 @@ export class Viewer {
 
   /**
    * Identifies if the viewer is recording instrumentation.
+   * Will also return false if no messaging channel is established, this
+   * means the AMP page is not embedded.
    * @return {boolean}
    */
   isPerformanceTrackingOn() {
-    return this.performanceTracking_;
+    // If there is no messagingMaybePromise_, then document is not
+    // embedded and no performance tracking is needed since there is nobody
+    // to forward the events.
+    return this.performanceTracking_ && !!this.messagingMaybePromise_;
   }
 
   /**
@@ -475,7 +489,7 @@ export class Viewer {
 
   /**
    * @param {function(boolean)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onRuntimeState(handler) {
     return this.runtimeOnObservable_.add(handler);
@@ -513,7 +527,7 @@ export class Viewer {
       return;
     }
     const oldState = this.visibilityState_;
-    state = assertEnumValue(VisibilityState, state, 'VisibilityState');
+    state = dev.assertEnumValue(VisibilityState, state, 'VisibilityState');
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
@@ -573,6 +587,15 @@ export class Viewer {
   }
 
   /**
+   * Returns the time when the document has become visible for the first time.
+   * If document has not yet become visible, the returned value is `null`.
+   * @return {?time}
+   */
+  getFirstVisibleTime() {
+    return this.firstVisibleTime_;
+  }
+
+  /**
    * How much the viewer has requested the runtime to prerender the document.
    * The values are in number of screens.
    * @return {number}
@@ -582,41 +605,12 @@ export class Viewer {
   }
 
   /**
-   * There are two types of viewports: "natural" and "virtual". "Natural" is
-   * the viewport of the AMP document's window. "Virtual" is the viewport
-   * provided by the viewer.
+   * See `ViewportType` enum for the set of allowed values.
    * See {@link Viewport} and {@link ViewportBinding} for more details.
    * @return {!ViewportType}
    */
   getViewportType() {
     return this.viewportType_;
-  }
-
-  /**
-   * Returns the width of the viewport provided by the viewer. This value only
-   * used when viewport type is "virtual."
-   * @return {number}
-   */
-  getViewportWidth() {
-    return this.viewportWidth_;
-  }
-
-  /**
-   * Returns the height of the viewport provided by the viewer. This value only
-   * used when viewport type is "virtual."
-   * @return {number}
-   */
-  getViewportHeight() {
-    return this.viewportHeight_;
-  }
-
-  /**
-   * Returns the scroll position of the viewport provided by the viewer. This
-   * value only used when viewport type is "virtual."
-   * @return {number}
-   */
-  getScrollTop() {
-    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -644,6 +638,15 @@ export class Viewer {
    */
   getViewerUrl() {
     return this.viewerUrl_;
+  }
+
+  /**
+   * Possibly return the messaging origin if set. This would be the origin
+   * of the parent viewer.
+   * @return {?string}
+   */
+  maybeGetMessagingOrigin() {
+    return this.messagingOrigin_;
   }
 
   /**
@@ -704,7 +707,7 @@ export class Viewer {
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
    * @param {function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
     return this.visibilityObservable_.add(handler);
@@ -713,7 +716,7 @@ export class Viewer {
   /**
    * Adds a "viewport" event listener for viewer events.
    * @param {function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
     return this.viewportObservable_.add(handler);
@@ -722,7 +725,7 @@ export class Viewer {
   /**
    * Adds a "history popped" event listener for viewer events.
    * @param {function(ViewerHistoryPoppedEventDef)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onHistoryPoppedEvent(handler) {
     return this.historyPoppedObservable_.add(handler);
@@ -730,25 +733,20 @@ export class Viewer {
 
   /**
    * Triggers "documentLoaded" event for the viewer.
-   * @param {number} width
-   * @param {number} height
    */
-  postDocumentReady(width, height) {
+  postDocumentReady() {
     this.sendMessageUnreliable_('documentLoaded', {
-      width: width,
-      height: height,
       title: this.win.document.title,
     }, false);
   }
 
   /**
-   * Triggers "documentResized" event for the viewer.
-   * @param {number} width
-   * @param {number} height
+   * Triggers "scroll" event for the viewer.
+   * @param {number} scrollTop
    */
-  postDocumentResized(width, height) {
+  postScroll(scrollTop) {
     this.sendMessageUnreliable_(
-        'documentResized', {width: width, height: height}, false);
+        'scroll', {scrollTop}, false);
   }
 
   /**
@@ -776,7 +774,7 @@ export class Viewer {
    */
   postPushHistory(stackIndex) {
     return this.sendMessageUnreliable_(
-        'pushHistory', {stackIndex: stackIndex}, true);
+        'pushHistory', {stackIndex}, true);
   }
 
   /**
@@ -786,7 +784,7 @@ export class Viewer {
    */
   postPopHistory(stackIndex) {
     return this.sendMessageUnreliable_(
-        'popHistory', {stackIndex: stackIndex}, true);
+        'popHistory', {stackIndex}, true);
   }
 
   /**
@@ -799,7 +797,7 @@ export class Viewer {
 
   /**
    * Triggers "tick" event for the viewer.
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   tick(message) {
     this.sendMessageUnreliable_('tick', message, false);
@@ -814,10 +812,18 @@ export class Viewer {
 
   /**
    * Triggers "setFlushParams" event for the viewer.
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   setFlushParams(message) {
     this.sendMessageUnreliable_('setFlushParams', message, false);
+  }
+
+  /**
+   * Triggers "prerenderComplete" event for the viewer.
+   * @param {!JSONType} message
+   */
+  prerenderComplete(message) {
+    this.sendMessageUnreliable_('prerenderComplete', message, false);
   }
 
   /**
@@ -830,17 +836,8 @@ export class Viewer {
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'viewport') {
-      if (data['width'] !== undefined) {
-        this.viewportWidth_ = data['width'];
-      }
-      if (data['height'] !== undefined) {
-        this.viewportHeight_ = data['height'];
-      }
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
-      }
-      if (data['scrollTop'] !== undefined) {
-        this./*OK*/scrollTop_ = data['scrollTop'];
       }
       this.viewportObservable_.fire();
       return undefined;
@@ -930,7 +927,7 @@ export class Viewer {
    * will attempt to deliver messages when the messaging channel has been
    * established, but it will not fail if the channel is timed out.
    *
-   * @param {!JSONObject} message
+   * @param {!JSONType} message
    */
   broadcast(message) {
     this.maybeSendMessage_('broadcast', message);
@@ -938,8 +935,8 @@ export class Viewer {
 
   /**
    * Registers receiver for the broadcast events.
-   * @param {function(!JSONObject)} handler
-   * @return {!Unlisten}
+   * @param {function(!JSONType)} handler
+   * @return {!UnlistenDef}
    */
   onBroadcast(handler) {
     return this.broadcastObservable_.add(handler);
@@ -972,7 +969,7 @@ export class Viewer {
     if (found) {
       found.data = data;
     } else {
-      this.messageQueue_.push({eventType: eventType, data: data});
+      this.messageQueue_.push({eventType, data});
     }
     if (awaitResponse) {
       // TODO(dvoytenko): This is somewhat questionable. What do we return
@@ -997,6 +994,15 @@ export class Viewer {
         this.sendMessageUnreliable_(eventType, data, false);
       }
     });
+  }
+
+  /**
+   * Resolves when there is a messaging channel established with the viewer.
+   * Will be null if no messaging is needed like in an non-embedded document.
+   * @return {?Promise}
+   */
+  whenMessagingReady() {
+    return this.messagingMaybePromise_;
   }
 }
 
@@ -1037,7 +1043,7 @@ function getChannelError(opt_reason) {
  *   newStackIndex: number
  * }}
  */
-let ViewerHistoryPoppedEventDef;
+export let ViewerHistoryPoppedEventDef;
 
 
 /**

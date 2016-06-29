@@ -24,7 +24,6 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
-import {assert} from '../../../src/asserts';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
@@ -36,6 +35,7 @@ import {
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -72,11 +72,11 @@ export class ImageViewer {
     this.lightbox_ = lightbox;
 
     /** @private {!Element} */
-    this.viewer_ = document.createElement('div');
+    this.viewer_ = lightbox.element.ownerDocument.createElement('div');
     this.viewer_.classList.add('-amp-image-lightbox-viewer');
 
     /** @private {!Element} */
-    this.image_ = document.createElement('img');
+    this.image_ = lightbox.element.ownerDocument.createElement('img');
     this.image_.classList.add('-amp-image-lightbox-viewer-image');
     this.viewer_.appendChild(this.image_);
 
@@ -270,6 +270,10 @@ export class ImageViewer {
    * @private
    */
   updateSrc_() {
+    if (!this.srcset_) {
+      // Do not update source if the lightbox has already exited.
+      return Promise.resolve();
+    }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
     const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
@@ -456,7 +460,8 @@ export class ImageViewer {
     }
 
     // Continue motion.
-    this.motion_ = continueMotion(this.posX_, this.posY_, veloX, veloY,
+    this.motion_ = continueMotion(this.image_,
+        this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
           const newPosX = this.boundX_(x, true);
           const newPosY = this.boundY_(y, true);
@@ -540,10 +545,12 @@ export class ImageViewer {
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
     } else {
-      promise = continueMotion(deltaX, deltaY, veloX, veloY, (x, y) => {
-        this.onZoomInc_(centerClientX, centerClientY, x, y);
-        return true;
-      }).thenAlways();
+      promise = continueMotion(this.image_,
+          deltaX, deltaY, veloX, veloY,
+          (x, y) => {
+            this.onZoomInc_(centerClientX, centerClientY, x, y);
+            return true;
+          }).thenAlways();
     }
 
     const relayout = this.scale_ > this.startScale_;
@@ -584,7 +591,7 @@ export class ImageViewer {
       const scaleFunc = tr.numeric(this.scale_, newScale);
       const xFunc = tr.numeric(this.posX_, newPosX);
       const yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate(time => {
+      promise = Animation.animate(this.image_, time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
         this.posY_ = yFunc(time);
@@ -642,11 +649,6 @@ class AmpImageLightbox extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return true;
-  }
-
-  /** @override */
   buildCallback() {
 
     /** @private {number} */
@@ -668,7 +670,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.unlistenViewport_ = null;
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('-amp-image-lightbox-container');
     this.element.appendChild(this.container_);
 
@@ -677,7 +679,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.imageViewer_.getElement());
 
     /** @private {!Element} */
-    this.captionElement_ = document.createElement('div');
+    this.captionElement_ = this.element.ownerDocument.createElement('div');
     this.captionElement_.classList.add('amp-image-lightbox-caption');
     this.captionElement_.classList.add('-amp-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
@@ -706,7 +708,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     const source = invocation.source;
-    assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    user.assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;
@@ -719,9 +721,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
 
     // Prepare to enter in lightbox
-    this.requestFullOverlay();
-    this.getViewport().disableTouchZoom();
-    this.getViewport().hideFixedLayer();
+    this.getViewport().enterLightboxMode();
 
     this.enter_();
 
@@ -764,9 +764,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       this.unlistenViewport_ = null;
     }
 
-    this.cancelFullOverlay();
-    this.getViewport().showFixedLayer();
-    this.getViewport().restoreOriginalTouchZoom();
+    this.getViewport().leaveLightboxMode();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
@@ -813,7 +811,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     // 2. Check "aria-describedby".
     if (!caption) {
       const describedBy = sourceElement.getAttribute('aria-describedby');
-      caption = document.getElementById(describedBy);
+      caption = this.element.ownerDocument.getElementById(describedBy);
     }
 
     if (caption) {
@@ -844,7 +842,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
     this.imageViewer_.measure();
 
-    const anim = new Animation();
+    const anim = new Animation(this.element);
     const dur = 500;
 
     // Lightbox background fades in.
@@ -856,9 +854,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let transLayer = null;
     if (this.sourceImage_ && isLoaded(this.sourceImage_) &&
             this.sourceImage_.src) {
-      transLayer = document.createElement('div');
+      transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('-amp-image-lightbox-trans');
-      document.body.appendChild(transLayer);
+      this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -902,7 +900,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       st.setStyles(this.element, {opacity: ''});
       st.setStyles(this.container_, {opacity: ''});
       if (transLayer) {
-        document.body.removeChild(transLayer);
+        this.element.ownerDocument.body.removeChild(transLayer);
       }
     });
   }
@@ -915,7 +913,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     const image = this.imageViewer_.getImage();
     const imageBox = this.imageViewer_.getImageBoxWithOffset();
 
-    const anim = new Animation();
+    const anim = new Animation(this.element);
     let dur = 500;
 
     // Lightbox background fades out.
@@ -926,9 +924,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     // Try to transition to the source image.
     let transLayer = null;
     if (isLoaded(image) && image.src && this.sourceImage_) {
-      transLayer = document.createElement('div');
+      transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('-amp-image-lightbox-trans');
-      document.body.appendChild(transLayer);
+      this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -987,13 +985,13 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       st.setStyles(this.container_, {opacity: ''});
       if (transLayer) {
-        document.body.removeChild(transLayer);
+        this.element.ownerDocument.body.removeChild(transLayer);
       }
       this.reset_();
     });
   }
 
-  /** @private {!History} */
+  /** @private @return {!History} */
   getHistory_() {
     return historyFor(this.element.ownerDocument.defaultView);
   }

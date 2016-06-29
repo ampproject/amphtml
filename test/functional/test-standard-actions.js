@@ -15,7 +15,9 @@
  */
 
 import {StandardActions} from '../../src/service/standard-actions-impl';
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
+
 
 describe('StandardActions', () => {
 
@@ -25,14 +27,13 @@ describe('StandardActions', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    actions = new StandardActions(window);
+    actions = new StandardActions(new AmpDocSingle(window));
     mutateElementStub = sandbox.stub(actions.resources_, 'mutateElement',
         (unusedElement, mutator) => mutator());
   });
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should handle "hide" action', () => {

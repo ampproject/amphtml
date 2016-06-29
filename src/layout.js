@@ -19,7 +19,7 @@
  * details.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 
 
 /**
@@ -32,6 +32,7 @@ export const Layout = {
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
   FILL: 'fill',
+  FLEX_ITEM: 'flex-item',
 };
 
 
@@ -39,7 +40,7 @@ export const Layout = {
  * CSS Length type. E.g. "1px" or "20vh".
  * @typedef {string}
  */
-let LengthDef;
+export let LengthDef;
 
 
 /**
@@ -66,6 +67,7 @@ export const naturalDimensions_ = {
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
+  'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
 
@@ -85,6 +87,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
 };
 
 
@@ -121,7 +124,8 @@ export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL);
+      layout == Layout.FILL ||
+      layout == Layout.FLEX_ITEM);
 }
 
 
@@ -149,7 +153,7 @@ export function parseLength(s) {
   if (!s) {
     return undefined;
   }
-  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/.test(s)) {
+  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/.test(s)) {
     return undefined;
   }
   if (/^\d+(\.\d+)?$/.test(s)) {
@@ -166,7 +170,8 @@ export function parseLength(s) {
  * @return {!LengthDef}
  */
 export function assertLength(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
+  user.assert(
+      /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }
@@ -181,7 +186,7 @@ export function assertLength(length) {
  * @return {!LengthDef}
  */
 export function assertLengthOrPercent(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
       'Invalid length or percent value: %s', length);
   return length;
 }
@@ -194,7 +199,7 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  const m = assert(length.match(/[a-z]+/i),
+  const m = user.assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
 }
@@ -227,25 +232,26 @@ export function hasNaturalDimensions(tagName) {
  * different browser implementations, like <audio> for instance.
  * This operation can only be completed for an element whitelisted by
  * `hasNaturalDimensions`.
- * @param {string} tagName The element tag name.
+ * @param {!Element} element
  * @return {DimensionsDef}
  */
-export function getNaturalDimensions(tagName) {
-  tagName = tagName.toUpperCase();
-  assert(naturalDimensions_[tagName] !== undefined);
+export function getNaturalDimensions(element) {
+  const tagName = element.tagName.toUpperCase();
+  dev.assert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
+    const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = document.createElement(naturalTagName);
+    const temp = doc.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;
     temp.style.position = 'absolute';
     temp.style.visibility = 'hidden';
-    document.body.appendChild(temp);
+    doc.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',
       height: (temp./*OK*/offsetHeight || 1) + 'px',
     };
-    document.body.removeChild(temp);
+    doc.body.removeChild(temp);
   }
   return naturalDimensions_[tagName];
 }

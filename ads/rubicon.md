@@ -108,10 +108,12 @@ By default the ad size is based on the `width` and `height` attributes of the `a
 
 Supported via `json` attribute (DFP parameters):
 
-- `categoryExclusions`
-- `cookieOptions`
-- `tagForChildDirectedTreatment`
 - `targeting`
+- `categoryExclusions`
+- `tagForChildDirectedTreatment`
+- `cookieOptions`
+
+For the most up-to-date list of Doubleclick supported parameters and usage please refer to Doubleclick reference guide [here](google/doubleclick.md).
 
 ##### First Party Data & Keywords
 - `data-kw`

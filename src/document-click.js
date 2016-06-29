@@ -16,8 +16,9 @@
 
 import {closestByTag} from './dom';
 import {getService} from './service';
-import {log} from './log';
+import {dev} from './log';
 import {historyFor} from './history';
+import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -60,17 +61,17 @@ export class ClickHandler {
     /** @private @const {!Window} */
     this.win = window;
 
-    /** @private @const {!Viewport} */
+    /** @private @const {!./service/viewport-impl.Viewport} */
     this.viewport_ = viewportFor(this.win);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
-    /** @private @const {!History} */
+    /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
     // Only intercept clicks when iframed.
-    if (this.viewer_.isEmbedded() && this.viewer_.isOvertakeHistory()) {
+    if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
       this.boundHandle_ = this.handle_.bind(this);
       this.win.document.documentElement.addEventListener(
@@ -107,8 +108,8 @@ export class ClickHandler {
  * on iOS Safari.
  *
  * @param {!Event} e
- * @param {!Viewport} viewport
- * @param {!History} history
+ * @param {!./service/viewport-impl.Viewport} viewport
+ * @param {!./service/history-impl.History} history
  */
 export function onDocumentElementClick_(e, viewport, history) {
   if (e.defaultPrevented) {
@@ -130,10 +131,17 @@ export function onDocumentElementClick_(e, viewport, history) {
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
   const isSafariIOS = platform.isIos() && platform.isSafari();
-  const isEmbedded = win.parent && win.parent != win;
+  const isFTP = tgtLoc.protocol == 'ftp:';
+
+  // In case of FTP Links in embedded documents always open then in _blank.
+  if (isFTP) {
+    openWindowDialog(win, target.href, '_blank');
+    e.preventDefault();
+  }
+
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
-  if (isSafariIOS && isEmbedded && !isNormalProtocol) {
-    win.open(target.href, '_blank');
+  if (isSafariIOS && !isNormalProtocol) {
+    openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
     e.preventDefault();
@@ -188,7 +196,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
   } else {
-    log.warn('documentElement',
+    dev.warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 

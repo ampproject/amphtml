@@ -52,7 +52,7 @@ describe('Gestures', () => {
       },
     };
 
-    onGesture = sinon.spy();
+    onGesture = sandbox.spy();
 
     gestures = new Gestures(element);
     gestures.onGesture(TestRecognizer, onGesture);
@@ -63,10 +63,7 @@ describe('Gestures', () => {
 
   afterEach(() => {
     recognizerMock.verify();
-    recognizerMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function sendEvent(event) {
@@ -77,7 +74,7 @@ describe('Gestures', () => {
 
 
   it('onPointerDown should be called', () => {
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
     expect(handler.callCount).to.equal(1);
@@ -281,8 +278,8 @@ describe('Gestures', () => {
   it('should allow event to propagate when nothing happening', () => {
     const event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(0);
@@ -293,8 +290,8 @@ describe('Gestures', () => {
     gestures.eventing_ = recognizer;
     const event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
@@ -309,8 +306,8 @@ describe('Gestures', () => {
 
     const event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
@@ -322,8 +319,8 @@ describe('Gestures', () => {
     gestures.ready_[0] = 1;
     const event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
@@ -334,8 +331,8 @@ describe('Gestures', () => {
     gestures.pending_[0] = 1;
     let event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
@@ -344,8 +341,8 @@ describe('Gestures', () => {
     clock.tick(10);
     event = {
       type: 'touchend',
-      preventDefault: sinon.spy(),
-      stopPropagation: sinon.spy(),
+      preventDefault: sandbox.spy(),
+      stopPropagation: sandbox.spy(),
     };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(0);

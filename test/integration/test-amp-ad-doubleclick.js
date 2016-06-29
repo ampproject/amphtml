@@ -27,20 +27,13 @@ describe('Rendering of one ad', () => {
   function replaceUrl(win) {
     // TODO(#2402) Support glade as well.
     const path = '/test/fixtures/doubleclick.html?google_glade=0';
-    try {
-      win.location.hash = 'google_glade=0';
-      win.history.replaceState(null, null, path);
-    } catch (e) {
-      // Browsers are weird. Firefox gets here. We do, however, also in
-      // firefox pass down the parent URL. So we change that, which we
-      // can. We just need to change it back after the test.
-      beforeHref = win.parent.location.href;
-      win.parent.history.replaceState(null, null, path);
-    }
+    // We pass down the parent URL. So we change that, which we
+    // can. We just need to change it back after the test.
+    beforeHref = win.parent.location.href;
+    win.parent.history.replaceState(null, null, path);
   }
 
   beforeEach(() => {
-    replaceParentHref = false;
     return createFixtureIframe('test/fixtures/doubleclick.html', 3000, win => {
       replaceUrl(win);
     }).then(f => {
@@ -54,7 +47,8 @@ describe('Rendering of one ad', () => {
     }
   });
 
-  it('should create an iframe loaded', function() {
+  // TODO(#3561): unmute the test.
+  it.skipper().skipEdge().run('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;
@@ -87,6 +81,8 @@ describe('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
+      expect(context.initialIntersection).to.be.defined;
+      expect(context.initialIntersection.rootBounds).to.be.defined;
       expect(context.data.tagForChildDirectedTreatment).to.equal(0);
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
@@ -125,8 +121,12 @@ describe('Rendering of one ad', () => {
       expect(iframe.contentWindow.context.hidden).to.be.false;
       return new Promise(resolve => {
         iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
-        fixture.win.AMP.viewer.visibilityState_ = 'hidden';
-        fixture.win.AMP.viewer.onVisibilityChange_();
+        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
+          state: 'hidden',
+        });
+        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
+          state: 'visible',
+        });
       });
     }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('320');

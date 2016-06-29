@@ -17,7 +17,10 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
@@ -59,7 +62,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
-    this.videoid_ = AMP.assert(
+    this.videoid_ = user.assert(
         (this.element.getAttribute('data-videoid') ||
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
@@ -74,11 +77,20 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
+
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
+
+    const params = getDataParamsFromAttributes(this.element);
+    if ('autoplay' in params) {
+      delete params['autoplay'];
+      user.warn('Autoplay is currently not support with amp-youtube.');
+    }
+    src = addParamsToUrl(src, params);
+
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        this.videoid_) + '?enablejsapi=1';
+    iframe.src = src;
     this.applyFillContent(iframe);
     iframe.width = this.width_;
     iframe.height = this.height_;
@@ -109,7 +121,7 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     // Only send pauseVideo command if the player is playing. Otherwise
     // The player breaks if the user haven't played the video yet specially
     // on mobile.
@@ -117,9 +129,6 @@ class AmpYoutube extends AMP.BaseElement {
         this.playerState_ == YT_PLAYER_STATE_PLAYING) {
       this.pauseVideo_();
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 
   /** @private */
@@ -138,7 +147,7 @@ class AmpYoutube extends AMP.BaseElement {
       return;
     }
     let data;
-    if (event.data.indexOf('{') != 0) {
+    if (!event.data || event.data.indexOf('{') != 0) {
       return;  // Doesn't look like JSON.
     }
     try {
@@ -166,7 +175,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
+    const imgPlaceholder = this.element.ownerDocument.createElement('img');
     const videoid = this.videoid_;
 
     setStyles(imgPlaceholder, {

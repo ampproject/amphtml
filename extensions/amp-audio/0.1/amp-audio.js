@@ -31,7 +31,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const audio = document.createElement('audio');
+    const audio = this.element.ownerDocument.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
       return Promise.resolve();
@@ -60,13 +60,10 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 }
 

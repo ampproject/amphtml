@@ -50,11 +50,8 @@ describe('PullToRefreshBlocker', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
     blocker.cleanup();
-    blocker = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function sendEvent(event, opt_prevetDefault) {
@@ -133,7 +130,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sinon.spy();
+    const preventDefault = sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
@@ -149,7 +146,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sinon.spy();
+    const preventDefault = sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
@@ -165,7 +162,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sinon.spy();
+    const preventDefault = sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(true);

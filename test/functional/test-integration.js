@@ -25,7 +25,7 @@ import {
   validateAllowedTypes,
   parseFragment,
 } from '../../3p/integration';
-import {registrations, register} from '../../src/3p';
+import {registrations, register} from '../../3p/3p';
 
 describe('3p integration.js', () => {
 
@@ -35,6 +35,8 @@ describe('3p integration.js', () => {
 
   it('should register integrations', () => {
     expect(registrations).to.include.key('a9');
+    expect(registrations).to.include.key('adblade');
+    expect(registrations).to.include.key('adition');
     expect(registrations).to.include.key('adform');
     expect(registrations).to.include.key('adsense');
     expect(registrations).to.include.key('adtech');
@@ -42,11 +44,27 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
     expect(registrations).to.include.key('flite');
+    expect(registrations).to.include.key('mantis-display');
+    expect(registrations).to.include.key('mantis-recommend');
+    expect(registrations).to.include.key('industrybrains');
+    expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
     expect(registrations).to.include.key('yieldmo');
+    expect(registrations).to.include.key('sortable');
     expect(registrations).to.include.key('triplelift');
     expect(registrations).to.include.key('_ping_');
     expect(registrations).to.include.key('imobile');
+    expect(registrations).to.include.key('gmossp');
+    expect(registrations).to.include.key('weborama-display');
+    expect(registrations).to.include.key('yieldbot');
+    expect(registrations).to.include.key('adstir');
+    expect(registrations).to.include.key('colombia');
+    expect(registrations).to.include.key('microad');
+    expect(registrations).to.include.key('yahoojp');
+    expect(registrations).to.include.key('chargeads');
+    expect(registrations).to.include.key('nend');
+    expect(registrations).to.include.key('adgeneration');
+    expect(registrations).to.include.key('genieessp');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
@@ -94,7 +112,7 @@ describe('3p integration.js', () => {
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +
-        '"height":50,"initialWindowWidth":1290,"initialWindowHeight":165,' +
+        '"height":50,' +
         '"type":"twitter","_context":{"referrer":"http://localhost:8000/' +
         'examples.build/","canonicalUrl":"http://localhost:8000/' +
         'examples.build/amps.html","location":{"href":"http://' +
@@ -137,7 +155,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -160,7 +178,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -192,7 +210,7 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {},
-        data: data,
+        data,
       },
     };
     expect(() => {
@@ -209,7 +227,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
         tagName: 'AMP-EMBED',
       },
     };

@@ -16,8 +16,7 @@
 
 
 import {Timer} from '../src/timer';
-import {installCoreServices} from '../src/amp-core-service';
-import {registerForUnitTest} from '../src/runtime';
+import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
 
@@ -71,12 +70,17 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
+      win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data && /^amp/.test(event.data.sentinel)) {
+        if (event.data &&
+            // Either non-3P or 3P variant of the sentinel.
+            (/^amp/.test(event.data.sentinel) ||
+             /^\d+-\d+$/.test(event.data.sentinel))) {
           messages.push(event.data);
         }
       })
@@ -115,6 +119,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
+      let setTimeout = win.setTimeout;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -182,15 +187,14 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<script src="/base/build/polyfills.js"></script>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST = true;
+      iframe.contentWindow.AMP_TEST_IFRAME = true;
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      installCoreServices(iframe.contentWindow);
+      installRuntimeServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
@@ -199,13 +203,17 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.getElementById('parent')
-              .appendChild(element);
-          // Wait for mutation observer to fire.
-          return new Timer(window).promise(16).then(() => {
+          const iWin = iframe.contentWindow;
+          const p = onInsert(iWin).then(() => {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
             element.build(true);
+            if (!element.getPlaceholder()) {
+              const placeholder = element.createPlaceholder();
+              if (placeholder) {
+                element.appendChild(placeholder);
+              }
+            }
             if (element.layoutCount_ == 0) {
               if (opt_beforeLayoutCallback) {
                 opt_beforeLayoutCallback(element);
@@ -216,6 +224,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             }
             return element;
           });
+          iWin.document.getElementById('parent')
+              .appendChild(element);
+          return p;
         }
       });
     };
@@ -231,8 +242,9 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
-      installCoreServices(win);
+      installRuntimeServices(win);
       registerForUnitTest(win);
       resolve({
         win: win,
@@ -314,6 +326,73 @@ export function expectBodyToBecomeVisible(win) {
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
   });
+}
+
+/**
+ * For the given iframe, makes the creation of iframes and images
+ * create elements that do not actually load their underlying
+ * resources.
+ * Calling `triggerLoad` makes the respective resource appear loaded.
+ * Calling `triggerError` on the respective resources makes them
+ * appear in error state.
+ * @param {!Window} win
+ */
+export function doNotLoadExternalResourcesInTest(win) {
+  const createElement = win.document.createElement;
+  win.document.createElement = function(tagName) {
+    const element = createElement.apply(this, arguments);
+    tagName = tagName.toLowerCase();
+    if (tagName == 'iframe' || tagName == 'img') {
+      // Make get/set write to a fake property instead of
+      // triggering invocation.
+      Object.defineProperty(element, 'src', {
+        set: function(val) {
+          this.fakeSrc = val;
+        },
+        get: function() {
+          return this.fakeSrc;
+        }
+      });
+      // Triggers a load event on the element in the next micro task.
+      element.triggerLoad = function() {
+        const e = new Event('load');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      // Triggers an error event on the element in the next micro task.
+      element.triggerError = function() {
+        const e = new Event('error');
+        Promise.resolve().then(() => {
+          this.dispatchEvent(e);
+        });
+      };
+      if (tagName == 'iframe') {
+        element.srcdoc = '<h1>Fake iframe</h1>';
+      }
+    }
+    return element;
+  };
+}
+
+/**
+ * Returns a promise for when an element has been added to the given
+ * window. This is for use in tests to wait until after the
+ * attachment of an element to the DOM should have been registered.
+ * @param {!Window} win
+ * @return {!Promise<undefined>}
+ */
+function onInsert(win) {
+  return new Promise(resolve => {
+    const observer = new win.MutationObserver(() => {
+      observer.disconnect();
+      resolve();
+    });
+    observer.observe(win.document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  })
 }
 
 /**

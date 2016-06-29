@@ -1,4 +1,4 @@
 FAIL
-feature_tests/link_meta_values.html:32:2 The attribute 'name' in tag 'meta name=viewport' is set to the invalid value 'content-disposition'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [DISALLOWED_HTML]
-feature_tests/link_meta_values.html:33:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'unknown'. [DISALLOWED_HTML]
-feature_tests/link_meta_values.html:43:2 The relative URL 'foo' for attribute 'href' in tag 'link rel=mask-icon' is disallowed. [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:29:2 The attribute 'rel' in tag 'link rel=' is set to the invalid value 'manifest foo'. [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:34:2 The attribute 'name' in tag 'meta name= and content=' is set to the invalid value 'content-disposition'. [DISALLOWED_HTML]
+feature_tests/link_meta_values.html:45:2 The mandatory attribute 'rel' is missing in tag 'link rel='. [DISALLOWED_HTML]

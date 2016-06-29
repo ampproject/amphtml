@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 class AmpVimeo extends AMP.BaseElement {
 
@@ -38,13 +39,13 @@ class AmpVimeo extends AMP.BaseElement {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     // The video-id is supported only for backward compatibility.
-    const videoid = AMP.assert(
+    const videoid = user.assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);
     // See
     // https://developer.vimeo.com/player/embedding
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(
@@ -59,7 +60,7 @@ class AmpVimeo extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // See
       // https://developer.vimeo.com/player/js-api
@@ -68,9 +69,6 @@ class AmpVimeo extends AMP.BaseElement {
         'value': '',
       }), '*');
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 };
 

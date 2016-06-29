@@ -1,3 +1,0 @@
-FAIL
-feature_tests/amp_brightcove.html:46:2 The mandatory attribute 'data-account' is missing in tag 'amp-brightcove'. (see https://www.ampproject.org/docs/reference/extended/amp-brightcove.html) [AMP_TAG_PROBLEM]
-feature_tests/amp_brightcove.html:50:7 The tag 'amp-brightcove extension .js script' is missing or incorrect, but required by 'amp-brightcove'. (see https://www.ampproject.org/docs/reference/extended/amp-brightcove.html) [AMP_TAG_PROBLEM]

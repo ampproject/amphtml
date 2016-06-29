@@ -16,7 +16,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {assert} from '../../src/asserts';
+import {dev} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
@@ -50,21 +50,62 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
   },
-
-  // Dynamic CSS Classes
   {
-    id: 'dynamic-css-classes',
-    name: 'Dynamic CSS Classes',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
+    id: 'alp',
+    name: 'Activates support for measuring incoming clicks.',
+    spec: 'https://github.com/ampproject/amphtml/issues/2934',
   },
-
-  // Amp Accordion
   {
-    id: 'amp-accordion',
-    name: 'Amp Accordion',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-accordion/amp-accordion.md',
+    id: 'amp-experiment',
+    name: 'AMP Experiment',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-experiment/amp-experiment.md',
+  },
+  {
+    id: 'amp-fx-flying-carpet',
+    name: 'AMP Flying Carpet',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
+  },
+  {
+    id: 'amp-sticky-ad',
+    name: 'AMP Sticky Ad',
+    spec: 'https://github.com/ampproject/amphtml/issues/2472',
+  },
+  {
+    id: 'amp-live-list',
+    name: 'AMP Live List/Blog',
+    spec: 'https://github.com/ampproject/amphtml/issues/2762',
+  },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+  },
+  {
+    id: 'amp-slidescroll',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+  },
+  {
+    id: 'form-submit',
+    name: 'Global document form submit handler',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
+  {
+    id: 'amp-form',
+    name: 'AMP Form Extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
+  {
+    id: 'no-auth-in-prerender',
+    name: 'Delay amp-access auth request until doc becomes visible.',
+    spec: '',
+  },
+  {
+    id: 'amp-share-tracking',
+    name: 'AMP Share Tracking',
+    spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
 ];
 
@@ -208,10 +249,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = assert(document.getElementById('popup-container'));
-  const messageElement = assert(document.getElementById('popup-message'));
-  const confirmButton = assert(document.getElementById('popup-button-ok'));
-  const cancelButton = assert(document.getElementById('popup-button-cancel'));
+  const container = dev.assert(document.getElementById('popup-container'));
+  const messageElement = dev.assert(document.getElementById('popup-message'));
+  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
+  const cancelButton = dev.assert(
+      document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');

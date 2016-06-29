@@ -50,22 +50,19 @@ import {vsyncFor} from './vsync';
  *           || firstAttachedCallback
  *           ||
  *           \/
- *    State: <NOT BUILT>             <=
- *           ||                       ||
- *           || isReadyToBuild?  ======
- *           ||
- *           \/
  *    State: <NOT BUILT>
  *           ||
  *           || buildCallback
+ *           || !getPlaceholder() => createPlaceholderCallback
  *           || preconnectCallback may be called N times after this.
- *           || documentInactiveCallback may be called N times after this.
+ *           || pauseCallback may be called N times after this.
+ *           || resumeCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
  *           ||
  *           || layoutCallback        <==
-             || (firstLayoutCompleted)  ||
+ *           || (firstLayoutCompleted)  ||
  *           ||                         ||
  *           \/                         || isRelayoutNeeded?
  *    State: <LAID OUT>                 ||
@@ -73,6 +70,7 @@ import {vsyncFor} from './vsync';
  *           ||                 =========
  *           ||
  *           || viewportCallback
+ *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <IN VIEWPORT>
@@ -82,9 +80,25 @@ import {vsyncFor} from './vsync';
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
  *
- * The documentInactiveCallback is called when the document becomes
- * inactive. E.g. when the user swipes away from the document or
- * focuses a different tab.
+ * The pauseCallback is called when when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or when the element is no
+ * longer being displayed, e.g. when the carousel slide slides out of view.
+ * In these situations, any actively playing media should pause.
+ *
+ * The resumeCallback is called when when the document becomes active again
+ * after becoming inactive, e.g. when the user swipes away from the document
+ * and swipes back. In these situations, any paused media may begin playing
+ * again, if user interaction is not required.
+ * TODO(jridgewell) slide slides into view
+ *
+ * The createPlaceholderCallback is called if AMP didn't detect a provided
+ * placeholder for the element, subclasses can override this to build and
+ * return a dynamically created placeholder that AMP would append to the
+ * element.
+ *
+ * The unlayoutCallback is called when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or another tab is focused.
+ * In these situations, expensive memory and CPU resources should be freed.
  *
  * Additionally whenever the dimensions of an element might have changed
  * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
@@ -101,6 +115,18 @@ export class BaseElement {
   constructor(element) {
     /** @public @const */
     this.element = element;
+    /*
+         \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
+     \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
+      \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
+       \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
+        \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
+
+    Any private property for BaseElement should be declared in
+    build-system/amp.extern.js, this is so closure compiler doesn't reuse the
+    same symbol it would use in the core compilation unit for the private
+    property in the extensions compilation unit's private properties.
+     */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -111,14 +137,24 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
-    /** @private {!Object<string, function(!ActionInvocation)>} */
+    /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
     this.actionMap_ = this.getWin().Object.create(null);
 
-    /** @protected {!Preconnect} */
+    /** @protected {!./preconnect.Preconnect} */
     this.preconnect = preconnectFor(this.getWin());
 
-    /** @private {!Resources}  */
+    /** @private {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(this.getWin());
+  }
+
+  /**
+  * This is the priority of loading elements (layoutCallback).
+  * The lower the number, the higher the priority.
+  * The default priority for base elements is 0.
+  * @return {number}
+  */
+  getPriority() {
+    return 0;
   }
 
   /** @return {!Layout} */
@@ -131,7 +167,7 @@ export class BaseElement {
     return this.element.ownerDocument.defaultView;
   }
 
-  /** @protected @return {!Vsync} */
+  /** @protected @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.getWin());
   }
@@ -160,6 +196,16 @@ export class BaseElement {
   }
 
   /**
+   * Intended to be implemented by subclasses. Tests whether the element
+   * requires fixed positioning.
+   * @return {boolean}
+   * @protected
+   */
+  isAlwaysFixed() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    */
   isInViewport() {
@@ -184,32 +230,13 @@ export class BaseElement {
   }
 
   /**
-   * Override in subclass to indicate if the element is ready to rebuild its
-   * DOM subtree.  If the element can proceed with building the content return
-   * "true" and return "false" otherwise. The element may not be ready to build
-   * e.g. because its children are not available yet.
-   *
-   * See {@link buildCallback} for more details.
-   *
-   * @return {boolean}
-   */
-  isReadyToBuild() {
-    // Subclasses may override.
-    return true;
-  }
-
-  /**
    * Override in subclass if the element needs to rebuilt its DOM content.
    * Until the element has been rebuilt its content are not shown with an only
    * exception of [placeholder] elements. From the moment the element is created
    * and until the building phase is complete it will have "amp-notbuilt" CSS
    * class set on it.
    *
-   * This callback is executed early after the element has been attached to DOM
-   * if "isReadyToBuild" callback returns "true" or its called later upon the
-   * determination of Resources manager but definitely before first
-   * "layoutCallback" is called. Notice that "isReadyToBuild" call is not
-   * consulted in the later case.
+   * This callback is executed early after the element has been attached to DOM.
    */
   buildCallback() {
     // Subclasses may override.
@@ -221,6 +248,14 @@ export class BaseElement {
    * multiple times because connections can time out.
    */
   preconnectCallback() {
+    // Subclasses may override.
+  }
+
+  /**
+   * Override in subclass to adjust the element when it is being removed from
+   * the DOM. Could e.g. be used to remove a listener.
+   */
+  detachedCallback() {
     // Subclasses may override.
   }
 
@@ -246,12 +281,26 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to create a dynamic placeholder
+   * element and return it to be appended to the element. This will only
+   * be called if the element doesn't already have a placeholder.
+   * @returns {?Element}
+   */
+  createPlaceholderCallback() {
+    return null;
+  }
+
+  /**
    * Subclasses can override this method to opt-out of rendering the element
    * when it is not currently visible.
-   * @return {boolean}
+   * Returning a boolean allows or prevents rendering outside the viewport at
+   * any distance, while returning a positive number allows rendering only when
+   * the element is within X viewports of the current viewport. Returning a
+   * zero causes the element to only render inside the viewport.
+   * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return true;
+    return 3;
   }
 
   /**
@@ -302,21 +351,46 @@ export class BaseElement {
   }
 
   /**
-   * Requests the resource to stop its activity when the document goes into
+   * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
+   */
+  pauseCallback() {
+  }
+
+  /**
+   * Requests the element to resume its activity when the document returns from
+   * an inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content may be resumed.
+   */
+  resumeCallback() {
+  }
+
+  /**
+   * Requests the element to unload any expensive resources when the element
+   * goes into non-visible state. The scope is up to the actual component.
    * The component must return `true` if it'd like to later receive
    * {@link layoutCallback} in case document becomes active again.
+   *
    * @return {boolean}
    */
-  documentInactiveCallback() {
+  unlayoutCallback() {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into calling
+   * {@link unlayoutCallback} when paused.
+   * @return {boolean}
+   */
+  unlayoutOnPause() {
     return false;
   }
 
   /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
-   * @param {!ActionInvocation} unusedInvocation
+   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
    */
   activate(unusedInvocation) {
   }
@@ -324,7 +398,7 @@ export class BaseElement {
   /**
    * Registers the action handler for the method with the specified name.
    * @param {string} method
-   * @param {function(!ActionInvocation)} handler
+   * @param {function(!./service/action-impl.ActionInvocation)} handler
    * @protected
    */
   registerAction(method, handler) {
@@ -335,7 +409,7 @@ export class BaseElement {
    * Requests the element to execute the specified method. If method must have
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
-   * @param {!ActionInvocation} invocation The invocation data.
+   * @param {!./service/action-impl.ActionInvocation} invocation The invocation data.
    * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
@@ -474,7 +548,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!Viewport}
+   * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
     return viewportFor(this.getWin());
@@ -482,7 +556,7 @@ export class BaseElement {
 
  /**
   * Returns a previously measured layout box of the element.
-  * @return {!LayoutRect}
+  * @return {!./layout-rect.LayoutRectDef}
   */
   getIntersectionElementLayoutBox() {
     return this.resources_.getResourceForElement(this.element).getLayoutBox();
@@ -537,11 +611,12 @@ export class BaseElement {
    * as soon as possible.
    * When the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   changeHeight(newHeight, opt_callback) {
-    this.resources_./*OK*/changeHeight(this.element, newHeight, opt_callback);
+    this.resources_./*OK*/changeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
 
   /**
@@ -554,12 +629,32 @@ export class BaseElement {
    * requested height is greater than 0.)
    * If the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
-   * @param {function=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeHeight(this.element, newHeight, opt_callback);
+    this.resources_.attemptChangeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
+
+ /**
+  * Requests the runtime to update the size of this element to the specified
+  * values. The runtime will schedule this request and attempt to process it
+  * as soon as possible. However, unlike in {@link changeSize}, the runtime
+  * may refuse to make a change in which case it will show the element's
+  * overflow element if provided, which is supposed to provide the reader with
+  * the necessary user action. (The overflow element is shown only if the
+  * requested height is greater than 0.)
+  * If the height is successfully updated then the opt_callback is called.
+  * @param {number|undefined} newHeight
+  * @param {number|undefined} newWidth
+  * @param {function()=} opt_callback A callback function.
+  * @protected
+  */
+ attemptChangeSize(newHeight, newWidth, opt_callback) {
+   this.resources_.attemptChangeSize(
+       this.element, newHeight, newWidth, opt_callback);
+ }
 
  /**
   * Runs the specified mutation on the element and ensures that measures
@@ -576,7 +671,7 @@ export class BaseElement {
   * @return {!Promise}
   */
   mutateElement(mutator, opt_element) {
-    this.resources_.mutateElement(opt_element || this.element, mutator);
+    return this.resources_.mutateElement(opt_element || this.element, mutator);
   }
 
   /**
@@ -591,6 +686,8 @@ export class BaseElement {
   /**
    * Requests full overlay mode from the viewer.
    * @protected
+   * @deprecated Use `Viewport.enterLightboxMode`.
+   * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   requestFullOverlay() {
     viewerFor(this.getWin()).requestFullOverlay();
@@ -599,6 +696,8 @@ export class BaseElement {
   /**
    * Requests to cancel full overlay mode from the viewer.
    * @protected
+   * @deprecated Use `Viewport.leaveLightboxMode`.
+   * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   cancelFullOverlay() {
     viewerFor(this.getWin()).cancelFullOverlay();
@@ -616,7 +715,11 @@ export class BaseElement {
   /**
    * Called after a overflowCallback is triggered on an element.
    * @param {boolean} unusedOverflown
-   * @param {number} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedWidth
    */
-  overflowCallback(unusedOverflown, unusedRequestedHeight) {}
+  overflowCallback(
+      unusedOverflown,
+      unusedRequestedHeight,
+      unusedRequestedWidth) {}
 };

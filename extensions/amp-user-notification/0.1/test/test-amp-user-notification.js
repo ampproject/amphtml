@@ -20,6 +20,9 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 
 
 describe('amp-user-notification', () => {
@@ -47,13 +50,13 @@ describe('amp-user-notification', () => {
   afterEach(() => {
     storageMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
+      installUrlReplacementsService(iframe.win);
       return buildElement(iframe.doc, attrs);
     });
   }
@@ -61,7 +64,7 @@ describe('amp-user-notification', () => {
   function buildElement(doc, attrs = {}) {
     const elem = doc.createElement('amp-user-notification');
 
-    for (attr in attrs) {
+    for (const attr in attrs) {
       elem.setAttribute(attr, attrs[attr]);
     }
     const button = doc.createElement('button');
@@ -344,9 +347,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should have class `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -370,9 +373,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should not have `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -394,12 +397,12 @@ describe('amp-user-notification', () => {
   });
 
   it('should have `amp-hidden` and no `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
-    stub2 = sandbox.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
-        .returns(Promise.resolve());
+    sandbox.stub(AmpUserNotification.prototype,
+        'getShowEndpoint_').returns(Promise.resolve({showNotification: true}));
+    const stub2 = sandbox.stub(AmpUserNotification.prototype,
+        'postDismissEnpoint_').returns(Promise.resolve());
 
     return getUserNotification(dftAttrs).then(el => {
       const impl = el.implementation_;

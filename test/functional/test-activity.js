@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {installActivityService} from '../../src/service/activity-impl';
+import {installActivityService,} from
+    '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityFor} from '../../src/activity';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {viewerFor} from '../../src/viewer';
@@ -100,15 +101,6 @@ describe('Activity getTotalEngagedTime', () => {
   });
 
   afterEach(() => {
-    fakeDoc = null;
-    fakeWin = null;
-    viewer = null;
-    viewport = null;
-    activity = null;
-    whenFirstVisibleResolve = null;
-    visibilityObservable = null;
-    mousedownObservable = null;
-    scrollObservable = null;
     sandbox.restore();
   });
 

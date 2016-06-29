@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
-import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
-    getSubDomain, prefetchBootstrap} from '../../src/3p-frame';
-import {validateData} from '../../src/3p';
+import {
+  addDataAndJsonAttributes_,
+  getIframe,
+  getBootstrapBaseUrl,
+  getSubDomain,
+  prefetchBootstrap,
+  resetCountForTesting,
+} from '../../src/3p-frame';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {setModeForTesting} from '../../src/mode';
+import {preconnectFor} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
+import {setModeForTesting} from '../../src/mode';
+import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
+import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
 
+  let clock;
+  let sandbox;
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
   });
 
   afterEach(() => {
+    sandbox.restore();
     resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetCountForTesting();
     setModeForTesting(null);
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
     if (m) {
       m.parentElement.removeChild(m);
     }
-    sandbox.restore();
-    sandbox = null;
   });
 
   function addCustomBootstrap(url) {
@@ -72,7 +84,15 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
+    setModeForTesting({
+      localDev: true,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    });
 
+    clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');
@@ -104,15 +124,27 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoFor(window);
     expect(docInfo.pageViewId).to.not.be.empty;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
+        '"type":"_ping_"' +
         ',"_context":{"referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
-        '"mode":{"localDev":true,"development":false,"minified":false}' +
-        ',"hidden":false}}';
+        '"mode":{"localDev":true,"development":false,"minified":false,' +
+        '"test":false,"version":"$internalRuntimeVersion$"}' +
+        ',"hidden":false' +
+        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        ',"initialIntersection":{"time":1234567888,' +
+        '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
+        height + ',"bottom":' + height + ',"right":' + width +
+        ',"x":0,"y":0},"boundingClientRect":' +
+        '{"width":100,"height":200},"intersectionRect":{' +
+        '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
+        '"right":0,"x":0,"y":0}},"startTime":1234567888}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);
@@ -145,9 +177,17 @@ describe('3p-frame', () => {
     });
   });
 
-  it('should pick the right bootstrap url (test default)', () => {
+
+  it('should pick the right bootstrap url for local-dev mode', () => {
+    setModeForTesting({localDev: true});
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should pick the right bootstrap url for testing mode', () => {
+    setModeForTesting({test: true});
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
@@ -177,16 +217,19 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+    setModeForTesting({localDev: true});
+    const preconnect = preconnectFor(window);
+    const origPreloadSupportValue = preconnect.preloadSupported_;
+    preconnect.preloadSupported_ = false;
     prefetchBootstrap(window);
     const fetches = document.querySelectorAll(
         'link[rel=prefetch]');
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(fetches[0].getAttribute('as')).to.equal('document');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-    expect(fetches[1].getAttribute('as')).to.equal('script');
+    preconnect.preloadSupported_ = origPreloadSupportValue;
   });
 
   it('should make sub domains (unique)', () => {
@@ -195,16 +238,13 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (Math)', () => {
-    const fakeWin = {
-      document: document,
-      Math: Math,
-    };
+    const fakeWin = {document, Math};
     expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
   });
 
   it('should make sub domains (crypto)', () => {
     const fakeWin = {
-      document: document,
+      document,
       crypto: {
         getRandomValues: function(arg) {
           arg[0] = 123;
@@ -217,7 +257,7 @@ describe('3p-frame', () => {
 
   it('should make sub domains (fallback)', () => {
     const fakeWin = {
-      document: document,
+      document,
       Math: {
         random: function() {
           return 0.567;
@@ -225,5 +265,34 @@ describe('3p-frame', () => {
       },
     };
     expect(getSubDomain(fakeWin)).to.equal('d-5670');
+  });
+
+  it('uses a unique name based on domain', () => {
+    const viewerMock = sandbox.mock(viewerFor(window));
+    viewerMock.expects('getUnconfirmedReferrerUrl')
+        .returns('http://acme.org/').twice();
+
+    setModeForTesting({});
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', 'https://foo.bar/baz');
+    document.head.appendChild(link);
+
+    const div = document.createElement('div');
+    div.setAttribute('type', '_ping_');
+    div.getLayoutBox = function() {
+      return {
+        width: 100,
+        height: 200,
+      };
+    };
+
+    const name = getIframe(window, div).name;
+    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetCountForTesting();
+    const newName = getIframe(window, div).name;
+    expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
+    expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
+    expect(newName).not.to.equal(name);
   });
 });

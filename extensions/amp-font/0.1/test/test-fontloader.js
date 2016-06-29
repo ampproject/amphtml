@@ -63,6 +63,7 @@ describe('FontLoader', () => {
   let setupFontLoadSpy;
   let setupLoadWithPolyfillSpy;
   let setupDisposeSpy;
+  let setupCreateElementsSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -75,8 +76,6 @@ describe('FontLoader', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    fontloader = null;
   });
 
   function getIframe() {
@@ -163,6 +162,10 @@ describe('FontLoader', () => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
         const finalElementsCount = iframe.doc.getElementsByTagName('*').length;
         expect(initialElementsCount).to.be.below(finalElementsCount);
+        const createdContainer = iframe.doc.querySelectorAll('body > div')[1];
+        expect(createdContainer.fontStyle).to.equal('normal');
+        expect(createdContainer.fontWeight).to.equal('400');
+        expect(createdContainer.fontVariant).to.equal('normal');
       }).catch(() => {
         assert.fail('Font load failed');
       });
@@ -197,7 +200,13 @@ describe('FontLoader', () => {
       iframe.doc.body.appendChild(fontDiv);
       fontloader.defaultFontElements_ = [defaultDiv];
       fontloader.customFontElement_ = fontDiv;
-      expect(fontloader.compareMeasurements_()).to.be.true;
+      return fontloader.load(FONT_CONFIG, 3000).then(() => {
+        fontloader.defaultFontElements_ = [defaultDiv];
+        fontloader.customFontElement_ = fontDiv;
+        expect(fontloader.compareMeasurements_()).to.be.true;
+      }).catch(() => {
+        assert.fail('Font load failed');
+      });
     });
   });
 });
