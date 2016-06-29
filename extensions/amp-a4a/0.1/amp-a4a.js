@@ -24,7 +24,6 @@ import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
-import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
@@ -591,15 +590,15 @@ export class AmpA4A extends AMP.BaseElement {
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev.warn("A4A",
-        "Could not locate start index for amp meta data in: %s", creative);
+      dev.warn('A4A',
+        'Could not locate start index for amp meta data in: %s', creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev.warn("A4A",
-        "Could not locate closing script tag for amp meta data in: %s",
+      dev.warn('A4A',
+        'Could not locate closing script tag for amp meta data in: %s',
         creative);
       return null;
     }
@@ -607,7 +606,7 @@ export class AmpA4A extends AMP.BaseElement {
       return this.buildCreativeMetaData_(JSON.parse(
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
     } catch (err) {
-      dev.warn("A4A", "Invalid amp metadata: %s",
+      dev.warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }
@@ -688,10 +687,8 @@ export class AmpA4A extends AMP.BaseElement {
   formatBody_(creative, metaData) {
     const body = creative.substring(metaData.bodyUtf16CharOffsets[0],
         metaData.bodyUtf16CharOffsets[1]);
-    let bodyAttrString = '';
-    if (metaData.bodyAttributes) {
-      bodyAttrString = ' ' + metaData.bodyAttributes;
-    }
+    const bodyAttrString = metaData.bodyAttributes ?
+          ' ' + metaData.bodyAttributes : '';
     return `<${AMP_BODY_STRING}${bodyAttrString}>${body}</${AMP_BODY_STRING}>`;
   }
 
@@ -735,7 +732,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(tdrl): How to test for existence already?
       const doc = this.element.ownerDocument;
       const linkElem = doc.createElement('link');
-      for (let attr in s) {
+      for (const attr in s) {
         if (s.hasOwnProperty(attr)) {
           linkElem.setAttribute(attr, s[attr]);
         }

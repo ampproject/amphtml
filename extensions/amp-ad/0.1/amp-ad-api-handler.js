@@ -16,8 +16,11 @@
 
 import {removeElement} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
-import {listenFor, listenForOnce, postMessage}
-    from '../../../src/iframe-helper';
+import {
+  listenFor,
+  listenForOnce,
+  postMessage,
+} from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';

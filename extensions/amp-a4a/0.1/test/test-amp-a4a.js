@@ -50,7 +50,6 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let viewerForMock;
-  let mutateMock;
   const mockResponse = {
     arrayBuffer: function() {
       return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
