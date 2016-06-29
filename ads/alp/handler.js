@@ -226,7 +226,7 @@ export function getA2AAncestor(win) {
     return null;
   }
   const amp = origins[origins.length - 2];
-  if (!ampOrigins.hasOwnProperty(amp)) {
+  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
     return null;
   }
   return {
@@ -243,7 +243,7 @@ export function getA2AAncestor(win) {
 function getNthParentWindow(win, distance) {
   let parent = win;
   for (let i = 0; i < distance; i++) {
-    parent = win.parent;
+    parent = parent.parent;
   }
   return parent;
 }
