@@ -69,7 +69,8 @@ export class LiveListManager {
       if (getMode().localDev && (this.win.location.pathname == '/examples' +
             '.build/live-list-update.amp.max.html' ||
             this.win.location.pathname == '/examples.build/live-blog.amp' +
-            '.max.html')) {
+            '.max.html' || this.win.location.pathname == '/examples.build/' +
+            'live-blog-non-floating-button.amp.max.html')) {
         this.interval_ = 5000;
       }
 

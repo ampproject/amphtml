@@ -22,14 +22,14 @@ amp-live-list > [update] {
   z-index: 1000 !important;
 }
 
+/* Reset the `display: none` set in amp.css */
+amp-live-list > .amp-active[update] {
+  display: block;
+}
+
 amp-live-list > [items] > [data-tombstone] {
   display: none;
 }
-
-amp-live-list > .amp-hidden[update] {
-  display: none;
-}
-
 
 .amp-live-list-item {
 }

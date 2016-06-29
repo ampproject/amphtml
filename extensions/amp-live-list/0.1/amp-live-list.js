@@ -192,7 +192,8 @@ export class AmpLiveList extends AMP.BaseElement {
      */
     this.curNumOfLiveItems_ = 0;
 
-    this.updateSlot_.classList.add('amp-hidden');
+    // Make sure we hide the button
+    this.toggleUpdateButton_(false);
     this.eachChildElement_(this.itemsSlot_, item => {
       item.classList.add(classes.ITEM);
     });
@@ -235,7 +236,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // top of the component.
     if (this.pendingItemsInsert_.length > 0) {
       this.deferMutate(() => {
-        this.updateSlot_.classList.remove('amp-hidden');
+        this.toggleUpdateButton_(true);
       });
     } else if (this.pendingItemsReplace_.length > 0 ||
         this.pendingItemsTombstone_.length > 0) {
@@ -283,7 +284,7 @@ export class AmpLiveList extends AMP.BaseElement {
       }
 
       // Always hide update slot after mutation operation.
-      this.updateSlot_.classList.add('amp-hidden');
+      this.toggleUpdateButton_(false);
 
       // Insert and tombstone operations must happen first before we measure
       // number of items to delete down to `data-max-items-per-page`.
@@ -297,6 +298,18 @@ export class AmpLiveList extends AMP.BaseElement {
       });
     }
     return promise;
+  }
+
+  /**
+   * Sets the `amp-hidden` and `amp-active` classes on the `update` reference
+   * point.
+   *
+   * @param {boolean} visible
+   * @private
+   */
+  toggleUpdateButton_(visible) {
+    this.updateSlot_.classList.toggle('amp-hidden', !visible);
+    this.updateSlot_.classList.toggle('amp-active', visible);
   }
 
   /**

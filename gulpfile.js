@@ -358,6 +358,7 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
+  buildExample('live-blog-non-floating-button.amp.html');
   buildExample('live-blog.amp.html');
   buildExample('live-list-update.amp.html');
   buildExample('live-list.amp.html');
