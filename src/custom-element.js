@@ -426,6 +426,9 @@ function createBaseAmpElementProto(win) {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
+
+    /** @private {boolean} */
+    this.loadingError_ = false;
   };
 
   /**
@@ -878,6 +881,7 @@ function createBaseAmpElementProto(win) {
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
+      this.loadingError_ = true;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -1168,7 +1172,7 @@ function createBaseAmpElementProto(win) {
    * @private @this {!Element}
    */
   ElementProto.prepareLoading_ = function() {
-    if (!this.loadingContainer_) {
+    if (!this.loadingContainer_ && !this.loadingError_) {
       const container = win.document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');
