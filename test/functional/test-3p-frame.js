@@ -222,14 +222,17 @@ describe('3p-frame', () => {
     const origPreloadSupportValue = preconnect.preloadSupported_;
     preconnect.preloadSupported_ = false;
     prefetchBootstrap(window);
-    const fetches = document.querySelectorAll(
-        'link[rel=prefetch]');
-    expect(fetches).to.have.length(2);
-    expect(fetches[0].href).to.equal(
-        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(fetches[1].href).to.equal(
-        'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-    preconnect.preloadSupported_ = origPreloadSupportValue;
+    // Wait for visible promise
+    return Promise.resolve().then(() => {
+      const fetches = document.querySelectorAll(
+          'link[rel=prefetch]');
+      expect(fetches).to.have.length(2);
+      expect(fetches[0].href).to.equal(
+          'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+      expect(fetches[1].href).to.equal(
+          'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+      preconnect.preloadSupported_ = origPreloadSupportValue;
+    });
   });
 
   it('should make sub domains (unique)', () => {
