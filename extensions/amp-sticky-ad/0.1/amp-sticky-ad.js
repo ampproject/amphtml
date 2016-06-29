@@ -155,7 +155,6 @@ class AmpStickyAd extends AMP.BaseElement {
     const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
     closeButton.addEventListener('click', boundOnCloseButtonClick);
     this.element.appendChild(closeButton);
-    this.closeButton_ = closeButton;
   }
 
   /**

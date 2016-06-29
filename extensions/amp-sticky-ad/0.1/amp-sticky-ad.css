@@ -24,7 +24,7 @@ amp-sticky-ad {
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
   box-sizing: border-box;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .-amp-sticky-ad-layout {
@@ -61,7 +61,7 @@ amp-sticky-ad {
   background-size: 26px 26px;
   background-position: center;
   background-color: #fff;
-  border: 1px, solid, #c8c8c8;
+  border: 1px solid #c8c8c8;
 }
 
 .amp-sticky-ad-loaded .amp-sticky-ad-close-button {
