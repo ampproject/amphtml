@@ -1,22 +1,26 @@
+version: 1
 runtime: go
 api_version: go1
 
 handlers:
 - url: /fetch
   script: _go_app
+  secure: always
 
 - url: /$
   static_files: index.html
   upload: index.html
+  secure: always
 
-- url: /cm/(.*\.(js|css))$
-  static_files: ../node_modules/codemirror/\1
-  upload: ../node_modules/codemirror/.*\.(js|css)$
+- url: /amp_favicon.png$
+  static_files: amp_favicon.png
+  upload: amp_favicon\.png$
+  secure: always
 
-- url: /pm/(.*\.html)$
-  static_files: ../node_modules/@polymer/\1
-  upload: ../node_modules/@polymer/.*\.html$
+- url: /logo-blue.svg$
+  static_files: logo-blue.svg
+  upload: logo-blue\.svg$
+  secure: always
 
-- url: /webcomponents-lite.js$
-  static_files: ../node_modules/webcomponents-lite/webcomponents-lite.js
-  upload: ../node_modules/webcomponents-lite/webcomponents-lite\.js$
+skip_files:
+  serve-standalone.go

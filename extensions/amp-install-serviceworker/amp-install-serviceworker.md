@@ -30,6 +30,10 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>NODISPLAY</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>None</td>
   </tr>
@@ -69,38 +73,6 @@ URL of a HTML document that install a ServiceWorker.
 
 Must have the value `nodisplay`.
 
-## Validation errors
+## Validation
 
-The following lists validation errors specific to the `amp-install-serviceworker` tag
-(see also `amp-install-serviceworker` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-install-serviceworker</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
-  </tr>
-</table>
+See [amp-install-serviceworker rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/0.1/validator-amp-install-serviceworker.protoascii) in the AMP validator specification.

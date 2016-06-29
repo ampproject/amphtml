@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-anim
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-anim extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-anim
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
 }
 tags: {  # <amp-anim>
-  tag_name: "amp-anim"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-ANIM"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-anim extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }

@@ -19,41 +19,78 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
+import {platform} from '../src/platform';
+import {setModeForTesting} from '../src/mode';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 adopt(window);
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
-
-// Hack for skipping tests on Travis that don't work there.
-// Get permission before use!
 /**
- * @param {string} desc
- * @param {function()} fn
- */
-it.skipOnTravis = function(desc, fn) {
-  if (navigator.userAgent.match(/Chromium/)) {
-    it.skip(desc, fn);
-    return;
+ * Helper class to skip tests under specific environment.
+ * Should be instantiated via describe.skipper() or it.skipper().
+ * Get permission before use!
+ *
+ * Example usages:
+ * describe.skipper().skipFirefox().skipSafari().run('Bla bla ...', ... );
+ * it.skipper().skipEdge().run('Should ...', ...);
+*/
+class TestSkipper {
+
+  constructor(runner) {
+    this.runner = runner;
+    this.skippedUserAgents = [];
   }
-  it(desc, fn);
+
+  skipOnTravis() {
+    this.skippedUserAgents.push('Chromium');
+    return this;
+  }
+
+  skipChrome() {
+    this.skippedUserAgents.push('Chrome');
+    return this;
+  }
+
+  skipEdge() {
+    this.skippedUserAgents.push('Edge');
+    return this;
+  }
+
+  skipFirefox() {
+    this.skippedUserAgents.push('Firefox');
+    return this;
+  }
+
+  skipSafari() {
+    this.skippedUserAgents.push('Safari');
+    return this;
+  }
+
+  /**
+   * @param {string} desc
+   * @param {function()} fn
+   */
+  run(desc, fn) {
+    for (let i = 0; i < this.skippedUserAgents.length; i++) {
+      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+    this.runner(desc, fn);
+  }
+}
+
+describe.skipper = function() {
+  return new TestSkipper(describe);
 };
 
-// Hack for skipping tests on Travis that don't work there.
-// Get permission before use!
-/**
- * @param {string} desc
- * @param {function()} fn
- */
-it.skipOnFirefox = function(desc, fn) {
-  if (navigator.userAgent.match(/Firefox/)) {
-    it.skip(desc, fn);
-    return;
-  }
-  it(desc, fn);
+it.skipper = function() {
+  return new TestSkipper(it);
 };
-
 
 // Used to check if an unrestored sandbox exists
 const sandboxes = [];
@@ -73,10 +110,20 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+beforeEach(() => {
+  setModeForTesting(null);
+  window.AMP_TEST = true;
+});
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta');
+  const cleanupTagNames = ['link', 'meta'];
+  if (!platform.isSafari()) {
+    // TODO(#3315): Removing test iframes break tests on Safari.
+    cleanupTagNames.push('iframe');
+  }
+  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
@@ -99,6 +146,7 @@ afterEach(() => {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
+  setDefaultBootstrapBaseUrlForTesting(null);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

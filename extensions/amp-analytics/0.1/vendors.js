@@ -15,7 +15,7 @@
  */
 
 /**
- * @const {!JSONObject}
+ * @const {!JSONType}
  */
 export const ANALYTICS_CONFIG = {
 
@@ -26,6 +26,7 @@ export const ANALYTICS_CONFIG = {
       'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocUrl': 'AMPDOC_URL',
+      'ampVersion': 'AMP_VERSION',
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -77,7 +78,7 @@ export const ANALYTICS_CONFIG = {
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${suffix}',
+        's2=${level2}${extraUrlParams}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -201,6 +202,48 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'clicky': {
+    'vars': {
+      'site_id': '',
+    },
+    'requests': {
+      'base': 'https://in.getclicky.com/in.php?' +
+        'site_id=${site_id}',
+      'baseSuffix': '&mime=${contentType}&' +
+        'x=${random}',
+      'pageview': '${base}&' +
+        'res=${screenWidth}x${screenHeight}&' +
+        'lang=${browserLanguage}&' +
+        'secure=1&' +
+        'type=pageview&' +
+        'href=${canonicalPath}&' +
+        'title=${title}' +
+        '${baseSuffix}',
+      'interval': '${base}&' +
+        'type=ping' +
+        '${baseSuffix}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'interval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 60,
+          'maxTimerLength': 600,
+        },
+        'request': 'interval',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': true,
+      'image': true,
+    },
+  },
+
   'colanalytics': {
     'requests': {
       'host': 'https://ase.clmbtech.com',
@@ -257,15 +300,39 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'cxense': {
+    'requests': {
+      'host': 'https://scomcluster.cxense.com',
+      'base': '${host}/Repo/rep.gif',
+      'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+          'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+          'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+          'bln=${browserLanguage}&chs=${documentCharset}&' +
+          'col=${screenColorDepth}&tzo=${timezone}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'dataSource': 'AMP',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
+      'basePrefix': 'v=1&_v=a1&ds=${dataSource}&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
           'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
@@ -283,6 +350,16 @@ export const ANALYTICS_CONFIG = {
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
     },
     'extraUrlParamsReplaceMap': {
       'dimension': 'cd',
@@ -377,6 +454,35 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'oewadirect': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': 'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
+  'oewa': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?s=${s}' +
+        '&amp=1' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
@@ -448,6 +554,7 @@ export const ANALYTICS_CONFIG = {
   },
 
   'adobeanalytics': {
+    'transport': {'xhrpost': false, 'beacon': false, 'image': true},
     'vars': {
       'pageName': 'TITLE',
       'host': '',
@@ -475,6 +582,15 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'adobeanalytics_nativeConfig': {
+    'triggers': {
+      'pageLoad': {
+        'on': 'visible',
+        'request': 'iframeMessage',
+      },
+    },
+  },
+
   'infonline': {
     'vars': {
       'sv': 'ke',
@@ -497,7 +613,6 @@ export const ANALYTICS_CONFIG = {
       },
     },
   },
-
   'simplereach': {
     'vars': {
       'pid': '',
@@ -537,6 +652,37 @@ export const ANALYTICS_CONFIG = {
           'max-timer-length': 1200,
         },
         'request': 'timer',
+      },
+    },
+  },
+
+  'segment': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'anonymousId': 'CLIENT_ID(segment_amp_id)',
+    },
+    'requests': {
+      'host': 'https://api.segment.io/v1/pixel',
+      'base': '?writeKey=${writeKey}' +
+        '&anonymousId=${anonymousId}' +
+        '&context.locale=${browserLanguage}' +
+        '&context.page.path=${canonicalPath}' +
+        '&context.page.url=${canonicalUrl}' +
+        '&context.page.referrer=${documentReferrer}' +
+        '&context.page.title=${title}' +
+        '&context.screen.width=${screenWidth}' +
+        '&context.screen.height=${screenHeight}',
+      'page': '${host}/page${base}&name=${name}',
+      'track': '${host}/track${base}&event=${event}',
+    },
+    'triggers': {
+      'page': {
+        'on': 'visible',
+        'request': 'page',
       },
     },
   },
@@ -661,7 +807,81 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'linkpulse': {
+    'vars': {
+      'id': '',
+      'pageUrl': 'CANONICAL_URL',
+      'title': 'TITLE',
+      'section': '',
+      'channel': 'amp',
+      'type': '',
+      'host': 'pp.lp4.io',
+      'empty': '',
+    },
+    'requests': {
+      'base': 'https://${host}',
+      'pageview': '${base}/p?i=${id}' +
+                '&r=${documentReferrer}' +
+                '&p=${pageUrl}' +
+                '&s=${section}' +
+                '&t=${type}' +
+                '&c=${channel}' +
+                '&mt=${title}' +
+                '&_t=amp' +
+                '&_r=${random}',
+      'pageload': '${base}/pl?i=${id}' +
+                '&ct=${domInteractiveTime}' +
+                '&rt=${pageDownloadTime}' +
+                '&pt=${pageLoadTime}' +
+                '&p=${pageUrl}' +
+                '&c=${channel}' +
+                '&t=${type}' +
+                '&s=${section}' +
+                '&_t=amp' +
+                '&_r=${random}',
+      'ping': '${base}/u?i=${id}' +
+                '&u=${clientId(_lp4_u)}' +
+                '&p=${pageUrl}' +
+                '&uActive=true' +
+                '&isPing=yes' +
+                '&c=${channel}' +
+                '&t=${type}' +
+                '&s=${section}' +
+                '&_t=amp' +
+                '&_r=${random}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'pageload': {
+        'on': 'visible',
+        'request': 'pageload',
+      },
+      'ping': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 30,
+          'maxTimerLength': 7200,
+        },
+        'request': 'ping',
+
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
+ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
+  ['triggers']['pageLoad']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;

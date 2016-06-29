@@ -59,17 +59,19 @@ describe('Motion continueMotion', () => {
   let clock;
   let vsync;
   let vsyncTasks;
+  let contextNode;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
-      runAnimMutateSeries: mutator => {
+      runAnimMutateSeries: (unusedContextNode, mutator) => {
         vsyncTasks.push(mutator);
         return new Promise((unusedResolve, unusedReject) => {});
       },
     };
+    contextNode = document.createElement('div');
   });
 
   afterEach(() => {
@@ -79,7 +81,8 @@ describe('Motion continueMotion', () => {
   function testContinuation(maxVelocity, haltAfterTime) {
     let resultX = null;
     let resultY = null;
-    const motion = continueMotion(141, 104, maxVelocity, maxVelocity,
+    const motion = continueMotion(contextNode,
+        141, 104, maxVelocity, maxVelocity,
         (x, y) => {
           resultX = x;
           resultY = y;

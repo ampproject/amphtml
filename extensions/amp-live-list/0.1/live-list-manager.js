@@ -15,6 +15,8 @@
  */
 
 import {Poller} from './poller';
+import {addParamToUrl} from '../../../src/url';
+import {getMode} from '../../../src/mode';
 import {getService} from '../../../src/service';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
@@ -26,8 +28,6 @@ import {xhrFor} from '../../../src/xhr';
  * Manages registered AmpLiveList components.
  * Primarily handles network requests and updates the components
  * if necessary.
- *
- * @visibleForTesting
  */
 export class LiveListManager {
 
@@ -52,20 +52,47 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.win.location.href;
 
+    /** @private {number} */
+    this.latestUpdateTime_ = 0;
+
     /** @private @const {function(): Promise} */
-    this.work_ = this.fetchDocument_.bind(this, this.url_);
+    this.work_ = this.fetchDocument_.bind(this);
 
     // Only start polling when doc is ready and when the viewer is visible.
     this.whenDocReady_().then(() => {
       // Switch out the poller interval if we can find a lower one and
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
+
+      // For testing purposes only, we speed up the interval of the update.
+      // This should NEVER be allowed in production.
+      if (getMode().localDev && (this.win.location.pathname == '/examples' +
+            '.build/live-list-update.amp.max.html' ||
+            this.win.location.pathname == '/examples.build/live-blog.amp' +
+            '.max.html' || this.win.location.pathname == '/examples.build/' +
+            'live-blog-non-floating-button.amp.max.html')) {
+        this.interval_ = 5000;
+      }
+
       this.poller_ = new Poller(this.win, this.interval_, this.work_);
 
-      if (this.viewer_.isVisible()) {
+      // If no live-list is active on dom ready, we don't need to poll at all.
+      if (this.viewer_.isVisible() && this.hasActiveLiveLists_()) {
         this.poller_.start();
       }
       this.setupVisibilityHandler_();
+    });
+  }
+
+  /**
+   * Checks if any of the registered amp-live-list components is active/
+   *
+   * @return {boolean}
+   * @private
+   */
+  hasActiveLiveLists_() {
+    return Object.keys(this.liveLists_).some(key => {
+      return this.liveLists_[key].isEnabled();
     });
   }
 
@@ -75,7 +102,12 @@ export class LiveListManager {
    * @param {string} url
    * @private
    */
-  fetchDocument_(url) {
+  fetchDocument_() {
+    let url = this.url_;
+    if (this.latestUpdateTime_ > 0) {
+      url = addParamToUrl(url, 'amp_latest_update_time',
+          this.latestUpdateTime_);
+    }
     return xhrFor(this.win)
         // TODO(erwinm): add update time here when possible.
         .fetchDocument(url)
@@ -90,20 +122,36 @@ export class LiveListManager {
   getLiveLists_(doc) {
     const lists = Array.prototype.slice.call(
         doc.getElementsByTagName('amp-live-list'));
-    lists.forEach(this.updateLiveList_.bind(this));
+    const updateTimes = lists.map(this.updateLiveList_.bind(this));
+    const latestUpdateTime = Math.max.apply(Math, [0].concat(updateTimes));
+    if (latestUpdateTime > 0) {
+      this.latestUpdateTime_ = latestUpdateTime;
+    }
+    // We need to do this after calling `updateLiveList` since that
+    // would apply the disabled attribute if any exist from the server.
+    if (!this.hasActiveLiveLists_()) {
+      this.poller_.stop();
+    }
   }
 
   /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
    * @param {!HTMLElement} liveList
+   * @return {number}
    */
   updateLiveList_(liveList) {
     const id = liveList.getAttribute('id');
     user.assert(id, 'amp-live-list must have an id.');
-    user.assert(id in this.liveLists_, `amp-live-ist#${id} found but did not ` +
-        `exist on original page load`);
-    this.liveLists_[id].update(liveList);
+    user.assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
+        `not exist on original page load.`);
+    const inClientDomLiveList = this.liveLists_[id];
+    inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
+
+    if (inClientDomLiveList.isEnabled()) {
+      return inClientDomLiveList.update(liveList);
+    }
+    return 0;
   }
 
   /**
@@ -144,6 +192,25 @@ export class LiveListManager {
         this.poller_.stop();
       }
     });
+  }
+
+  /**
+   * Default minimum data poll interval value.
+   *
+   * @return {number}
+   */
+  static getMinDataPollInterval() {
+    // TODO(erwinm): determine if value is too low
+    return 15000;
+  }
+
+  /**
+   * Default minimum data max items per page value.
+   *
+   * @return {number}
+   */
+  static getMinDataMaxItemsPerPage() {
+    return 1;
   }
 }
 

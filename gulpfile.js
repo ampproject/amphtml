@@ -51,6 +51,7 @@ function buildExtensions(options) {
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
+  buildExtension('amp-ad', '0.1', false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -60,18 +61,23 @@ function buildExtensions(options) {
   buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
+  buildExtension('amp-experiment', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
+  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
+  buildExtension('amp-form', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
+  buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
+  buildExtension('amp-share-tracking', '0.1', false, options);
   buildExtension('amp-sidebar', '0.1', true, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-springboard-player', '0.1', false, options);
@@ -105,15 +111,31 @@ function polyfillsForTests() {
  * @param {boolean} watch
  * @param {boolean} shouldMinify
  * @param {boolean=} opt_preventRemoveAndMakeDir
+ * @param {boolean=} opt_checkTypes
  */
-function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
+function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
+    opt_checkTypes) {
   compileCss();
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+    minifiedName: 'f.js',
+    checkTypes: opt_checkTypes,
+    watch: watch,
+    minify: shouldMinify,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
+  });
+  // The main binary does not yet compile successfully with type checking
+  // turned on. Skip for now.
+  if (opt_checkTypes && !argv.more) {
+    return;
+  }
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
     toName: 'amp.js',
     minifiedName: 'v0.js',
     includePolyfills: true,
+    checkTypes: opt_checkTypes,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
@@ -128,11 +150,16 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
   });
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
-    minifiedName: 'f.js',
+  // Entry point for shadow runtime.
+  compileJs('./src/', 'amp-shadow-babel.js', './dist', {
+    toName: 'amp-shadow.js',
+    minifiedName: 'shadow-v0.js',
+    includePolyfills: true,
+    checkTypes: opt_checkTypes,
     watch: watch,
-    minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    minify: shouldMinify,
+    wrapper: windowConfig.getTemplate() + '<%= contents %>'
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -275,6 +302,27 @@ function dist() {
 }
 
 /**
+ * Dedicated type check path.
+ */
+function checkTypes() {
+  process.env.NODE_ENV = 'production';
+  cleanupBuildDir();
+  buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildExperiments({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+      /* check types */ true);
+  // These are not turned on on Travis.
+}
+
+/**
  * Build the examples
  *
  * @param {boolean} watch
@@ -296,6 +344,7 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('ads.with.script.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
@@ -309,6 +358,10 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
+  buildExample('live-blog-non-floating-button.amp.html');
+  buildExample('live-blog.amp.html');
+  buildExample('live-list-update.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -319,6 +372,7 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
+  buildExample('forms.amp.html');
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
@@ -583,6 +637,7 @@ function buildExperiments(options) {
           includePolyfills: true,
           minifiedName: minifiedName,
           preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+          checkTypes: options.checkTypes,
         });
       });
 }
@@ -679,6 +734,7 @@ function buildAlp(options) {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
+    includeWindowConfig: true,
     includePolyfills: true,
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
@@ -714,6 +770,7 @@ function mkdirSync(path) {
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
+gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist);
@@ -721,4 +778,3 @@ gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
-

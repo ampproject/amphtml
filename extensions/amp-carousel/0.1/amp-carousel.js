@@ -16,13 +16,20 @@
 
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
+import {AmpSlideScroll} from './slidescroll';
 import {CSS} from '../../../build/amp-carousel-0.1.css';
+import {isExperimentOn} from '../../../src/experiments';
 
 class CarouselSelector {
 
   constructor(element) {
     if (element.hasAttribute('type') &&
         element.getAttribute('type') == 'slides') {
+      const slideScrollExpt =
+          isExperimentOn(element.ownerDocument.defaultView, 'amp-slidescroll');
+      if (slideScrollExpt) {
+        return new AmpSlideScroll(element);
+      }
       return new AmpSlides(element);
     }
     return new AmpCarousel(element);

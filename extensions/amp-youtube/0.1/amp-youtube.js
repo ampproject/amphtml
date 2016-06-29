@@ -17,6 +17,8 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {addParamsToUrl} from '../../../src/url';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
@@ -76,10 +78,19 @@ class AmpYoutube extends AMP.BaseElement {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
+
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
+
+    const params = getDataParamsFromAttributes(this.element);
+    if ('autoplay' in params) {
+      delete params['autoplay'];
+      user.warn('Autoplay is currently not support with amp-youtube.');
+    }
+    src = addParamsToUrl(src, params);
+
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        this.videoid_) + '?enablejsapi=1';
+    iframe.src = src;
     this.applyFillContent(iframe);
     iframe.width = this.width_;
     iframe.height = this.height_;

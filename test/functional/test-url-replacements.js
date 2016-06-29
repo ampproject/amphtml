@@ -83,7 +83,7 @@ describe('UrlReplacements', () => {
         loadObservable.add(callback);
       },
       complete: false,
-      Object: Object,
+      Object,
       performance: {
         timing: {
           navigationStart: 100,
@@ -392,6 +392,12 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace AMP_VERSION', () => {
+    return expand('?sh=AMP_VERSION').then(res => {
+      expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
@@ -613,6 +619,26 @@ describe('UrlReplacements', () => {
       .then(res => {
         expect(res).to.match(/sh=default_value&s/);
       });
+  });
+
+  it('should collect vars', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com?p1=foo');
+    return installUrlReplacementsService(win)
+        .collectVars('?SOURCE_HOST&QUERY_PARAM(p1)&SIMPLE&FUNC&PROMISE', {
+          'SIMPLE': 21,
+          'FUNC': () => 22,
+          'PROMISE': () => Promise.resolve(23),
+        })
+        .then(res => {
+          expect(res).to.deep.equal({
+            'SOURCE_HOST': 'example.com',
+            'QUERY_PARAM(p1)': 'foo',
+            'SIMPLE': 21,
+            'FUNC': 22,
+            'PROMISE': 23,
+          });
+        });
   });
 
   describe('access values', () => {

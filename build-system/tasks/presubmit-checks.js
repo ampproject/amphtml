@@ -55,10 +55,21 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
+      'build-system/server.js',
       'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
+      'validator/validator-full.js',
       'validator/validator-in-browser.js',
       'validator/validator.js',
+    ]
+  },
+  // Match `getMode` that is not followed by a "()." and is assigned
+  // as a variable.
+  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
+    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
+        ' Use explicitly like "getMode().localDev" instead.',
+    whitelist: [
+      'dist.3p/current/integration.js'
     ]
   },
   'iframePing': {
@@ -69,12 +80,12 @@ var forbiddenTerms = {
     ],
   },
   // Service factories that should only be installed once.
-  'installActionService': {
+  'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
-      'src/amp-core-service.js',
+      'src/runtime.js',
     ],
   },
   'installActionHandler': {
@@ -99,6 +110,21 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installDocService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/service/ampdoc-impl.js',
+    ],
+  },
+  'installPerformanceService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/service/performance-impl.js',
+    ],
+  },
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
@@ -106,17 +132,24 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
+  'installTemplatesService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/template-impl.js',
+    ],
+  },
   'installUrlReplacementsService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/history-impl.js',
       'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
@@ -127,7 +160,7 @@ var forbiddenTerms = {
   'installViewportService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
@@ -135,7 +168,7 @@ var forbiddenTerms = {
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -144,7 +177,7 @@ var forbiddenTerms = {
   'installResourcesService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
@@ -152,7 +185,7 @@ var forbiddenTerms = {
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/xhr-impl.js',
     ],
   },
@@ -227,7 +260,7 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
-  'isTrusted': {
+  'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
@@ -248,7 +281,12 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
-  'sessionStorage': requiresReviewPrivacy,
+  'sessionStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-accordion/0.1/amp-accordion.js',
+    ],
+  },
   'indexedDB': requiresReviewPrivacy,
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -278,12 +316,16 @@ var forbiddenTerms = {
     whitelist: [
       'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
+      'validator/validator-full.js',
       'validator/validator.js',
+      // exports.startsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
     ]
   },
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/tasks/csvify-size/index.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],
@@ -322,11 +364,14 @@ var forbiddenTerms = {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
-      'validator/validator.js',
+      'build-system/server.js',
+      'examples/pwa/pwa.js',
+      'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'examples/viewer-integr.js',
+      'validator/validator-full.js',
+      'validator/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -341,6 +386,12 @@ var forbiddenTerms = {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
       'src/log.js',
+    ],
+  },
+  '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
+    message: 'Use dom.openWindowDialog',
+    whitelist: [
+      'src/dom.js',
     ],
   },
 };
@@ -413,6 +464,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
   '\\.changeSize(?!_)': bannedTermsHelpString,
+  'insertAmpExtensionScript': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/insert-extension.js',
+      'src/element-stub.js',
+    ],
+  },
   'reject\\(\\)': {
     message: 'Always supply a reason in rejections. ' +
         'error.cancellation() may be applicable.',

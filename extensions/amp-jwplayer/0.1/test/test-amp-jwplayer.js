@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-jwplayer');
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
+import '../amp-jwplayer';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -24,6 +27,7 @@ describe('amp-jwplayer', () => {
 
   function getjwplayer(attributes) {
     return createIframePromise().then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const jw = iframe.doc.createElement('amp-jwplayer');
       for (const key in attributes) {
         jw.setAttribute(key, attributes[key]);

@@ -83,6 +83,11 @@ class NotificationInterface {
 export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
+  isAlwaysFixed() {
+    return true;
+  }
+
+  /** @override */
   createdCallback() {
 
     /** @private @const {!Window} */
@@ -103,7 +108,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private {?string} */
     this.ampUserId_ = null;
 
-    /** @private {function} */
+    /** @private {function()} */
     this.dialogResolve_ = null;
 
     /** @private {!Promise} */
@@ -153,7 +158,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.urlReplacements_.expand(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
-        ampUserId: ampUserId,
+        ampUserId,
       });
     });
   }
@@ -193,7 +198,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /**
    * Success handler for `getShowEndpoint_`.
-   * @param {!PostResponseMetadataDef}
+   * @param {!PostResponseMetadataDef} data
    * @return {!Promise<boolean>}
    * @private
    */
@@ -395,10 +400,7 @@ export class UserNotificationManager {
       resolve = r;
     });
 
-    return this.deferRegistry_[id] = {
-      promise: promise,
-      resolve: resolve,
-    };
+    return this.deferRegistry_[id] = {promise, resolve};
   }
 }
 

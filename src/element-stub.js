@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-
+import {insertAmpExtensionScript} from './insert-extension';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -23,6 +23,8 @@ export const stubbedElements = [];
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
+    // Fetch amp-ad script if it is not present.
+    insertAmpExtensionScript(this.getWin(), element, 'amp-ad');
     stubbedElements.push(this);
   }
 

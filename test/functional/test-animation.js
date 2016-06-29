@@ -24,6 +24,7 @@ describe('Animation', () => {
   let vsyncTasks;
   let anim;
   let clock;
+  let contextNode;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -31,13 +32,14 @@ describe('Animation', () => {
     vsyncTasks = [];
     vsync = {
       canAnimate: () => true,
-      createAnimTask: task => {
+      createAnimTask: (unusedContextNode, task) => {
         return () => {
           vsyncTasks.push(task);
         };
       },
     };
-    anim = new Animation(vsync);
+    contextNode = document.createElement('div');
+    anim = new Animation(contextNode, vsync);
   });
 
   afterEach(() => {
@@ -259,8 +261,8 @@ describe('Animation', () => {
   });
 
   it('should halt-freeze animation when cannot animate', () => {
-    anim.add(0, time => {tr1 = time;}, 0.8);
-    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    anim.add(0, () => {}, 0.8);
+    anim.add(0.2, () => {}, 0.8);
 
     const ap = anim.start(1000);
     let rejectCalled = false;

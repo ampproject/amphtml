@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-install-serviceworker
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-install-serviceworker extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-install-serviceworker
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
 }
 tags: {  # <amp-install-serviceworker>
-  tag_name: "amp-install-serviceworker"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-INSTALL-SERVICEWORKER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-install-serviceworker extension .js script"
   attrs: {
     name: "src"

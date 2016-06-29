@@ -19,6 +19,7 @@ import {
   installXhrService,
   fetchPolyfill,
   FetchResponse,
+  assertSuccess,
 } from '../../src/service/xhr-impl';
 
 describe('XHR', function() {
@@ -29,14 +30,19 @@ describe('XHR', function() {
   this.timeout(5000);
 
   const scenarios = [
-    {xhr: installXhrService({
-      fetch: window.fetch,
-      location: {href: 'https://acme.com/path'},
-    }), desc: 'Native'},
-    {xhr: installXhrService({
-      fetch: fetchPolyfill,
-      location: {href: 'https://acme.com/path'},
-    }), desc: 'Polyfill'},
+    {
+      xhr: installXhrService({
+        fetch: window.fetch,
+        location: {href: 'https://acme.com/path'},
+      }),
+      desc: 'Native',
+    }, {
+      xhr: installXhrService({
+        fetch: fetchPolyfill,
+        location: {href: 'https://acme.com/path'},
+      }),
+      desc: 'Polyfill',
+    },
   ];
 
   function setupMockXhr() {
@@ -107,6 +113,19 @@ describe('XHR', function() {
           expect(put).to.throw();
           expect(patch).to.throw();
           expect(deleteMethod).to.throw();
+        });
+
+        it('should allow FormData as body', () => {
+          const formData = new FormData();
+          sandbox.stub(JSON, 'stringify');
+          formData.append('name', 'John Miller');
+          formData.append('age', 56);
+          const post = xhr.fetchJson.bind(xhr, '/post', {
+            method: 'POST',
+            body: formData,
+          });
+          expect(post).to.not.throw();
+          expect(JSON.stringify.called).to.be.false;
         });
 
         it('should do `GET` as default method', () => {
@@ -204,6 +223,61 @@ describe('XHR', function() {
 
     describe(test.desc, () => {
 
+      describe('assertSuccess', () => {
+        function createResponseInstance(body, init) {
+          if (test.desc == 'Native') {
+            return new Response(body, init);
+          } else {
+            init.responseText = body;
+            return new FetchResponse(init);
+          }
+        }
+        const mockXhr = {
+          status: 200,
+          headers: {
+            'Content-Type': 'plain/text',
+          },
+          getResponseHeader: () => '',
+        };
+
+        it('should resolve if success', () => {
+          mockXhr.status = 200;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .then(response => {
+                expect(response.status).to.equal(200);
+              }).should.not.be.rejected;
+        });
+
+        it('should reject if error', () => {
+          mockXhr.status = 500;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .then(response => {
+                expect(response.status).to.equal(500);
+              }).should.be.rejectedWith(/HTTP error 500/);
+        });
+
+        it('should parse json content when error', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json';
+          mockXhr.getResponseHeader = () => 'application/json';
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .catch(error => {
+                expect(error.responseJson).to.be.defined;
+                expect(error.responseJson.a).to.equal(2);
+              });
+        });
+
+        it('should not resolve after rejecting promise', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json';
+          mockXhr.getResponseHeader = () => 'application/json';
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .should.not.be.fulfilled;
+        });
+      });
+
       it('should do simple JSON fetch', () => {
         return xhr.fetchJson('https://httpbin.org/get?k=v1').then(res => {
           expect(res).to.exist;
@@ -259,6 +333,12 @@ describe('XHR', function() {
           expect(res).to.exist;
           expect(res['cookies'][cookieName]).to.equal('v1');
         });
+      });
+
+      it('should NOT succeed CORS with invalid credentials', () => {
+        expect(() => {
+          xhr.fetchJson('https://acme.org/', {credentials: null});
+        }).to.throw(/Only credentials=include support: null/);
       });
 
       it('should expose HTTP headers', () => {

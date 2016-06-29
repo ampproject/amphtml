@@ -41,13 +41,13 @@ export function installPullToRefreshBlocker(win) {
 export class PullToRefreshBlocker {
   /**
    * @param {!Document} doc
-   * @param {!Viewport} viewport
+   * @param {!./service/viewport-impl.Viewport} viewport
    */
   constructor(doc, viewport) {
     /** @private {!Document} */
     this.doc_ = doc;
 
-    /** @private {!Viewport} */
+    /** @private @const */
     this.viewport_ = viewport;
 
     /** @private {boolean} */

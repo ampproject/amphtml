@@ -18,6 +18,7 @@ import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
+import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
 
 
@@ -26,12 +27,6 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  isReadyToBuild() {
-    // Always defer building until DOMReady.
-    return false;
   }
 
   /** @override */
@@ -77,20 +72,20 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.getWin().document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.requestFullOverlay();
-    this.getViewport().resetTouchZoom();
-    this.getViewport().hideFixedLayer();
-    this.element.style.display = '';
-    this.element.style.opacity = 0;
+    this.getViewport().enterLightboxMode();
 
-    // TODO(dvoytenko): use new animations support instead.
-    this.element.style.transition = 'opacity 0.1s ease-in';
-    requestAnimationFrame(() => {
-      this.element.style.opacity = '';
+    this.mutateElement(() => {
+      this.element.style.display = '';
+      this.element.style.opacity = 0;
+      // TODO(dvoytenko): use new animations support instead.
+      this.element.style.transition = 'opacity 0.1s ease-in';
+      vsyncFor(this.getWin()).mutate(() => {
+        this.element.style.opacity = '';
+      });
+    }).then(() => {
+      this.updateInViewport(this.container_, true);
+      this.scheduleLayout(this.container_);
     });
-
-    this.scheduleLayout(this.container_);
-    this.updateInViewport(this.container_, true);
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
@@ -109,8 +104,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   close() {
-    this.cancelFullOverlay();
-    this.getViewport().showFixedLayer();
+    this.getViewport().leaveLightboxMode();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);

@@ -84,6 +84,14 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
+    setModeForTesting({
+      localDev: true,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    });
+
     clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
@@ -118,6 +126,7 @@ describe('3p-frame', () => {
     expect(docInfo.pageViewId).to.not.be.empty;
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"type":"_ping_"' +
@@ -126,8 +135,10 @@ describe('3p-frame', () => {
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
-        '"version":"$internalRuntimeVersion$"}' +
-        ',"hidden":false,"initialIntersection":{"time":1234567888,' +
+        '"test":false,"version":"$internalRuntimeVersion$"}' +
+        ',"hidden":false' +
+        ',"amp3pSentinel":"' + amp3pSentinel + '"' +
+        ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
         ',"x":0,"y":0},"boundingClientRect":' +
@@ -166,9 +177,17 @@ describe('3p-frame', () => {
     });
   });
 
-  it('should pick the right bootstrap url (test default)', () => {
+
+  it('should pick the right bootstrap url for local-dev mode', () => {
+    setModeForTesting({localDev: true});
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should pick the right bootstrap url for testing mode', () => {
+    setModeForTesting({test: true});
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
@@ -198,6 +217,7 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+    setModeForTesting({localDev: true});
     const preconnect = preconnectFor(window);
     const origPreloadSupportValue = preconnect.preloadSupported_;
     preconnect.preloadSupported_ = false;
@@ -207,10 +227,8 @@ describe('3p-frame', () => {
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(fetches[0].getAttribute('as')).to.equal('document');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-    expect(fetches[1].getAttribute('as')).to.equal('script');
     preconnect.preloadSupported_ = origPreloadSupportValue;
   });
 
@@ -220,16 +238,13 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (Math)', () => {
-    const fakeWin = {
-      document: document,
-      Math: Math,
-    };
+    const fakeWin = {document, Math};
     expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
   });
 
   it('should make sub domains (crypto)', () => {
     const fakeWin = {
-      document: document,
+      document,
       crypto: {
         getRandomValues: function(arg) {
           arg[0] = 123;
@@ -242,7 +257,7 @@ describe('3p-frame', () => {
 
   it('should make sub domains (fallback)', () => {
     const fakeWin = {
-      document: document,
+      document,
       Math: {
         random: function() {
           return 0.567;

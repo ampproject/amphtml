@@ -50,7 +50,7 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!Platform}  */
+    /** @private @const {!./platform.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
@@ -132,9 +132,12 @@ export class Preconnect {
     const prefetch = this.document_.createElement('link');
     prefetch.setAttribute('rel', command);
     prefetch.setAttribute('href', url);
-    if (opt_preloadAs) {
-      prefetch.setAttribute('as', opt_preloadAs);
-    }
+    // Do not set 'as' attribute for now, for 2 reasons
+    // - document value is not yet supported and dropped
+    // - script is blocked due to CSP.
+    // if (opt_preloadAs) {
+    //  prefetch.setAttribute('as', opt_preloadAs);
+    // }
     this.head_.appendChild(prefetch);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.

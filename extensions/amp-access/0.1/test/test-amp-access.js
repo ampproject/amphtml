@@ -16,11 +16,19 @@
 
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
+import {AccessServerAdapter} from '../amp-access-server';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
+import {installActionServiceForDoc,} from
+    '../../../../src/service/action-impl';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
+import {installDocService,} from
+    '../../../../src/service/ampdoc-impl';
+import {installPerformanceService,} from
+    '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
+import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
 describe('AccessService', () => {
@@ -32,7 +40,10 @@ describe('AccessService', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     element = document.createElement('script');
     element.setAttribute('id', 'amp-access');
@@ -46,6 +57,7 @@ describe('AccessService', () => {
       document.body.removeChild(element);
     }
     sandbox.restore();
+    toggleExperiment(window, 'amp-access-server', false);
   });
 
   it('should disable service when no config', () => {
@@ -134,9 +146,16 @@ describe('AccessService', () => {
 
     config['type'] = 'server';
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).type_).to.equal('client');
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'server';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerAdapter);
 
     config['type'] = 'other';
     element.textContent = JSON.stringify(config);
@@ -229,7 +248,10 @@ describe('AccessService adapter context', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -300,6 +322,8 @@ describe('AccessService authorization', () => {
   let cidMock;
   let analyticsMock;
   let adapterMock;
+  let performanceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -307,7 +331,10 @@ describe('AccessService authorization', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -368,6 +395,8 @@ describe('AccessService authorization', () => {
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
+
+    performanceMock = sandbox.mock(service.performance_);
   });
 
   afterEach(() => {
@@ -385,6 +414,7 @@ describe('AccessService authorization', () => {
     }
     adapterMock.verify();
     analyticsMock.verify();
+    performanceMock.verify();
     sandbox.restore();
   });
 
@@ -536,6 +566,12 @@ describe('AccessService authorization', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-authorization-received')
         .once();
+    performanceMock.expects('tick')
+        .withExactArgs('aaa')
+        .once();
+    performanceMock.expects('tickSinceVisible')
+        .withExactArgs('aaav')
+        .once();
     expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
       return service.whenFirstAuthorized();
@@ -597,12 +633,16 @@ describe('AccessService applyAuthorizationToElement_', () => {
   let configElement, elementOn, elementOff;
   let templatesMock;
   let mutateElementStub;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -742,13 +782,17 @@ describe('AccessService pingback', () => {
   let analyticsMock;
   let visibilityChanged;
   let scrolled;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1076,13 +1120,17 @@ describe('AccessService login', () => {
   let cidMock;
   let analyticsMock;
   let serviceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1127,7 +1175,7 @@ describe('AccessService login', () => {
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login', event: event});
+    service.handleAction_({method: 'login', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
@@ -1136,7 +1184,7 @@ describe('AccessService login', () => {
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login-other', event: event});
+    service.handleAction_({method: 'login-other', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
@@ -1396,12 +1444,16 @@ describe('AccessService analytics', () => {
 
   let sandbox;
   let configElement;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
+    installPerformanceService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -1419,7 +1471,7 @@ describe('AccessService analytics', () => {
     service.getReaderId_ = () => {
       return Promise.resolve('reader1');
     };
-    service.setAuthResponse_({views: 3, child: {type: 'premium'}});
+    service.setAuthResponse_({views: 3, child: {type: 'premium'}, zero: 0});
   });
 
   afterEach(() => {
@@ -1448,11 +1500,13 @@ describe('AccessService analytics', () => {
       service.getAuthdataField('child.type'),
       service.getAuthdataField('other'),
       service.getAuthdataField('child.other'),
+      service.getAuthdataField('zero'),
     ]).then(res => {
       expect(res[0]).to.equal(3);
       expect(res[1]).to.equal('premium');
       expect(res[2]).to.be.null;
       expect(res[3]).to.be.null;
+      expect(res[4]).to.equal(0);
     });
   });
 

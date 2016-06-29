@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-instagram');
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
+import '../amp-instagram';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -24,10 +27,12 @@ describe('amp-instagram', () => {
 
   function getIns(shortcode, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
+      doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
+      ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
@@ -40,6 +45,7 @@ describe('amp-instagram', () => {
     expect(image.getAttribute('src')).to.equal(
         'https://www.instagram.com/p/fBwFP/media/?size=l');
     expect(image.getAttribute('layout')).to.equal('fill');
+    expect(image.getAttribute('alt')).to.equal('Testing');
   }
 
   function testIframe(iframe) {
@@ -47,6 +53,7 @@ describe('amp-instagram', () => {
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
     expect(iframe.getAttribute('width')).to.equal('111');
     expect(iframe.getAttribute('height')).to.equal('222');
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   it('renders', () => {

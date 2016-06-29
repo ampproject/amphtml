@@ -32,110 +32,245 @@
  * </pre>
  */
 
-goog.provide('amp.htmlparser');
-goog.provide('amp.htmlparser.DocLocator');
 goog.provide('amp.htmlparser.HtmlParser');
 goog.provide('amp.htmlparser.HtmlParser.EFlags');
 goog.provide('amp.htmlparser.HtmlParser.Elements');
 goog.provide('amp.htmlparser.HtmlParser.Entities');
-goog.provide('amp.htmlparser.HtmlSaxHandler');
-goog.provide('amp.htmlparser.HtmlSaxHandlerWithLocation');
+goog.require('amp.htmlparser.DocLocator');
+goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
 
 /**
- * An interface to the {@code amp.htmlparser.HtmlParser} visitor, that gets
- * called while the HTML is being parsed.
+ * Some tags have no end tags as per HTML5 spec. These were extracted
+ * from the single page spec by looking for "no end tag" with CTRL+F.
+ * @type {Object<string, ?>}
+ * @private
  */
-amp.htmlparser.HtmlSaxHandler = class {
-
-  /**
-   * Handler called when the parser found a new tag.
-   * @param {string} name The name of the tag that is starting.
-   * @param {Array<string>} attributes The attributes of the tag.
-   */
-  startTag(name, attributes) {}
-
-  /**
-   * Handler called when the parser found a closing tag.
-   * @param {string} name The name of the tag that is ending.
-   */
-  endTag(name) {}
-
-  /**
-   * Handler called when PCDATA is found.
-   * @param {string} text The PCDATA text found.
-   */
-  pcdata(text) {}
-
-  /**
-   * Handler called when RCDATA is found.
-   * @param {string} text The RCDATA text found.
-   */
-  rcdata(text) {}
-
-  /**
-   * Handler called when CDATA is found.
-   * @param {string} text The CDATA text found.
-   */
-  cdata(text) {}
-
-  /**
-   * Handler called when the parser is starting to parse the document.
-   */
-  startDoc() {}
-
-  /**
-   * Handler called when the parsing is done.
-   */
-  endDoc() {}
+const ElementsWithNoEndElements = {
+  'BASE': 0,
+  'LINK': 0,
+  'META': 0,
+  'HR': 0,
+  'BR': 0,
+  'WBR': 0,
+  'IMG': 0,
+  'EMBED': 0,
+  'PARAM': 0,
+  'SOURCE': 0,
+  'TRACK': 0,
+  'AREA': 0,
+  'COL': 0,
+  'INPUT': 0,
+  'KEYGEN': 0,
 };
-
 
 /**
- * An interface for determining the line/column information for SAX events that
- * are being received by a {@code amp.htmlparser.HtmlSaxHandler}. Please see
- * the {@code amp.htmlparser.HtmlSaxHandler#setDocLocator} method.
+ * Set of HTML tags which should never trigger an implied open of a <head>
+ * or <body> element.
+ * @type {Object<string,?>}
+ * @private
  */
-amp.htmlparser.DocLocator = class {
-  constructor() {}
-
-  /**
-   * The current line in the HTML source from which the most recent SAX event
-   * was generated. This value is only sensible once an event has been
-   * generated, that is, in practice from within the context of the
-   * HtmlSaxHandler methods - e.g., startTag, pcdata, etc.
-   * @return {number} line The current line.
-   */
-  getLine() {}
-
-  /**
-   * The current column in the HTML source from which the most recent SAX event
-   * was generated. This value is only sensible once an event has been
-   * generated, that is, in practice from within the context of the
-   * HtmlSaxHandler methods - e.g., startTag, pcdata, etc.
-   * @return {number} line The current column.
-   */
-  getCol() {}
+const HtmlStructureElements = {
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  '!DOCTYPE': 0,
+  'HTML': 0,
+  'HEAD': 0,
+  'BODY': 0,
 };
-
 
 /**
- * Handler with a setDocLocator method in addition to the parser callbacks.
- * @extends {amp.htmlparser.HtmlSaxHandler}
- */
-amp.htmlparser.HtmlSaxHandlerWithLocation = class
-extends amp.htmlparser.HtmlSaxHandler {
-  constructor() { super(); }
-
-  /**
-   * Called prior to parsing a document, that is, before {@code startTag}.
-   * @param {amp.htmlparser.DocLocator} locator A locator instance which
-   *   provides access to the line/column information while SAX events
-   *   are being received by the handler.
-   */
-  setDocLocator(locator) {}
+* The set of HTML tags which are legal in the HTML document <head> and
+* the 'HEAD' tag itself.
+* @type {Object<string,?>}
+* @private
+*/
+const HeadElements = {
+  'HEAD': 0,
+  // See https://www.w3.org/TR/html5/document-metadata.html
+  'TITLE': 0,
+  'BASE': 0,
+  'LINK': 0,
+  'META': 0,
+  'STYLE': 0,
+  // Also legal in the document <head>, though not per spec.
+  'NOSCRIPT': 0,
+  'SCRIPT': 0,
 };
 
+/**
+ * @enum {number}
+ */
+const TagRegion = {
+  PRE_HEAD: 0,
+  IN_HEAD: 1,
+  PRE_BODY: 2,  // After closing head tag, but before open body tag.
+  IN_BODY: 3,
+  // We don't track the region after the closing body tag.
+};
+
+/**
+ * This abstraction keeps track of which tags have been opened / closed as we
+ * traverse the tags in the document. Closing tags is tricky:
+ * - Some tags have no end tag per spec. For example, there is no </img> tag per
+ *   spec. Since we are making startTag/endTag calls, we manufacture endTag
+ *   calls for these immediately after the startTag.
+ * - We assume all end tags are optional and we pop tags off our stack as we
+ *   encounter parent closing tags. This part differs slightly from the behavior
+ *   per spec: instead of closing an <option> tag when a following <option> tag
+ *   is seen, we close it when the parent closing tag (in practice <select>) is
+ *   encountered
+ * @private
+ */
+class TagNameStack {
+  /** Creates an empty instance.
+   * @param {amp.htmlparser.HtmlSaxHandler|
+   *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+   *         HtmlSaxHandler that will receive the events.
+   */
+  constructor(handler) {
+    /**
+     * The current tag name and its parents.
+     * @type {!Array<string>}
+     * @private
+     */
+    this.stack_ = [];
+
+    /**
+     * The current tag name and its parents.
+     * @type {amp.htmlparser.HtmlSaxHandler|
+     *     amp.htmlparser.HtmlSaxHandlerWithLocation} handler The
+     *         HtmlSaxHandler that will receive the events.
+     * @private
+     */
+    this.handler_ = handler;
+
+    /**
+     * @type {number}
+     * @private
+     */
+    this.region_ = TagRegion.PRE_HEAD;
+
+    /**
+     * Tracks when the start <head> tag has been encountered or manufactured.
+     * @type {boolean}
+     * @private
+     */
+    this.isHeadStarted_ = false;
+
+    /**
+     * Tracks when the start <body> tag has been encountered or manufactured.
+     * @type {boolean}
+     * @private
+     */
+    this.isBodyStarted_ = false;
+  }
+
+  /**
+   * Enter a tag, opening a scope for child tags. Entering a tag can close the
+   * previous tag or enter other tags (such as opening a <body> tag when
+   * encountering a tag not allowed outside the body.
+   * @param {!string} tagName
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   */
+  startTag(tagName, encounteredAttrs) {
+    // This section deals with manufacturing <head>, </head>, and <body> tags
+    // if the document has left them out or placed them in the wrong location.
+    switch (this.region_) {
+      case TagRegion.PRE_HEAD:
+        if (tagName === 'HEAD') {
+          this.region_ = TagRegion.IN_HEAD;
+        } else if (tagName === 'BODY') {
+          this.region_ = TagRegion.IN_BODY;
+        } else if (!HtmlStructureElements.hasOwnProperty(tagName)) {
+          if (HeadElements.hasOwnProperty(tagName)) {
+            this.startTag('HEAD', []);
+          } else {
+            this.startTag('BODY', []);
+          }
+        }
+        break;
+      case TagRegion.IN_HEAD:
+        if (!HeadElements.hasOwnProperty(tagName)) {
+          this.endTag('HEAD');
+          if (tagName !== 'BODY') this.startTag('BODY', []);
+        }
+        break;
+      case TagRegion.PRE_BODY:
+        if (tagName !== 'BODY') {
+          this.startTag('BODY', []);
+        } else {
+          this.region_ = TagRegion.IN_BODY;
+        }
+        break;
+      case TagRegion.IN_BODY:
+        if (tagName === 'BODY') {
+          // If we've manufactured a body, then ignore the later body.
+          return;
+        }
+        break;
+      default:
+        break;
+    }
+
+    if (this.handler_.startTag) {
+      this.handler_.startTag(tagName, encounteredAttrs);
+    }
+    if (ElementsWithNoEndElements.hasOwnProperty(tagName)) {
+      if (this.handler_.endTag) {
+        this.handler_.endTag(tagName);
+      }
+    } else {
+      this.stack_.push(tagName);
+    }
+  }
+
+  /**
+   * Upon exiting a tag, validation for the current matcher is triggered,
+   * e.g. for checking that the tag had some specified number of children.
+   * @param {!string} tagName
+   */
+  endTag(tagName) {
+    if (this.region_ == TagRegion.IN_HEAD && tagName === 'HEAD')
+      this.region_ = TagRegion.PRE_BODY;
+
+    // We ignore close body tags (</body) and instead insert them when their
+    // outer scope is closed (/html). This is closer to how a browser parser
+    // works. The idea here is if other tags are found after the <body>,
+    // (ex: <div>) which are only allowed in the <body>, we will effectively
+    // move them into the body section.
+    if (tagName === 'BODY') return;
+
+    // We look for tagName from the end. If we can find it, we pop
+    // everything from thereon off the stack. If we can't find it,
+    // we don't bother with closing the tag, since it doesn't have
+    // a matching open tag, though in practice the HtmlParser class
+    // will have already manufactured a start tag.
+    for (let idx = this.stack_.length - 1; idx >= 0; idx--) {
+      if (this.stack_[idx] === tagName) {
+        while (this.stack_.length > idx) {
+          if (this.handler_.endTag) {
+            this.handler_.endTag(this.stack_.pop());
+          }
+        }
+        return;
+      }
+    }
+  }
+
+  /**
+   * This method is called when we're done with the
+   * document. Normally, the parser should actually close the tags,
+   * but just in case it doesn't this easy-enough method will take care of it.
+   */
+  exitRemainingTags() {
+    while (this.stack_.length > 0) {
+      if (this.handler_.endTag) {
+        this.handler_.endTag(this.stack_.pop());
+      }
+    }
+  }
+}
 
 /**
  * An Html parser: {@code parse} takes a string and calls methods on
@@ -160,12 +295,13 @@ amp.htmlparser.HtmlParser = class {
    * @param {string} htmlText The html text.
    */
   parse(handler, htmlText) {
-    let htmlLower = null;
-    let inTag = false;  // True iff we're currently processing a tag.
+    let htmlUpper = null;
+    let inTag = false;   // True iff we're currently processing a tag.
     const attribs = [];  // Accumulates attribute names and values.
-    let tagName;  // The name of the tag currently being processed.
-    let eflags;  // The element flags for the current tag.
-    let openTag;  // True if the current tag is an open tag.
+    let tagName;         // The name of the tag currently being processed.
+    let eflags;          // The element flags for the current tag.
+    let openTag;         // True if the current tag is an open tag.
+    let tagStack = new TagNameStack(handler);
 
     // Only provide location information if the handler implements the
     // setDocLocator method.
@@ -178,11 +314,11 @@ amp.htmlparser.HtmlParser = class {
     // Lets the handler know that we are starting to parse the document.
     handler.startDoc();
 
-    // Consumes tokens from the htmlText and stops once all tokens are processed.
+    // Consumes tokens from the htmlText and stops once all tokens are
+    // processed.
     while (htmlText) {
-      const regex = inTag ?
-          amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
-          amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
+      const regex = inTag ? amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
+                            amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
       // Gets the next token
       const m = htmlText.match(regex);
       if (locator) {
@@ -193,48 +329,44 @@ amp.htmlparser.HtmlParser = class {
 
       // TODO(goto): cleanup this code breaking it into separate methods.
       if (inTag) {
-        if (m[1]) { // Attribute.
+        if (m[1]) {  // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
           const attribName = amp.htmlparser.toLowerCase(m[1]);
           // Use empty string as value for valueless attribs, so
           //   <input type=checkbox checked>
           // gets attributes ['type', 'checkbox', 'checked', '']
-          let decodedValue = "";
+          let decodedValue = '';
           if (m[2]) {
             let encodedValue = m[3];
             switch (encodedValue.charCodeAt(0)) {  // Strip quotes.
-              case 34:  // double quote "
-              case 39:  // single quote '
-              encodedValue = encodedValue.substring(
-                  1, encodedValue.length - 1);
-              break;
+              case 34:                             // double quote "
+              case 39:                             // single quote '
+                encodedValue =
+                    encodedValue.substring(1, encodedValue.length - 1);
+                break;
             }
-            decodedValue = this.unescapeEntities_(this.stripNULs_(encodedValue));
+            decodedValue =
+                this.unescapeEntities_(this.stripNULs_(encodedValue));
           }
           attribs.push(attribName, decodedValue);
         } else if (m[4]) {
           if (eflags !== void 0) {  // False if not in whitelist.
             if (openTag) {
-              if (handler.startTag) {
-                handler.startTag(/** @type {string} */ (tagName), attribs);
-              }
+              tagStack.startTag(/** @type {string} */ (tagName), attribs);
             } else {
-              if (handler.endTag) {
-                handler.endTag(/** @type {string} */ (tagName));
-              }
+              tagStack.endTag(/** @type {string} */ (tagName));
             }
           }
 
-          if (openTag && (eflags &
-              (amp.htmlparser.HtmlParser.EFlags.CDATA |
-              amp.htmlparser.HtmlParser.EFlags.RCDATA))) {
-            if (htmlLower === null) {
-              htmlLower = amp.htmlparser.toLowerCase(htmlText);
+          if (openTag && (eflags & (amp.htmlparser.HtmlParser.EFlags.CDATA |
+                                    amp.htmlparser.HtmlParser.EFlags.RCDATA))) {
+            if (htmlUpper === null) {
+              htmlUpper = amp.htmlparser.toUpperCase(htmlText);
             } else {
-              htmlLower = htmlLower.substring(
-                  htmlLower.length - htmlText.length);
+              htmlUpper =
+                  htmlUpper.substring(htmlUpper.length - htmlText.length);
             }
-            let dataEnd = htmlLower.indexOf('</' + tagName);
+            let dataEnd = htmlUpper.indexOf('</' + tagName);
             if (dataEnd < 0) {
               dataEnd = htmlText.length;
             }
@@ -268,7 +400,7 @@ amp.htmlparser.HtmlParser = class {
             locator.snapshotPos();
           }
           inTag = true;
-          tagName = amp.htmlparser.toLowerCase(m[3]);
+          tagName = amp.htmlparser.toUpperCase(m[3]);
           eflags = amp.htmlparser.HtmlParser.Elements.hasOwnProperty(tagName) ?
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
@@ -276,9 +408,15 @@ amp.htmlparser.HtmlParser = class {
           handler.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
-            case '<': handler.pcdata('&lt;'); break;
-            case '>': handler.pcdata('&gt;'); break;
-            default: handler.pcdata('&amp;'); break;
+            case '<':
+              handler.pcdata('&lt;');
+              break;
+            case '>':
+              handler.pcdata('&gt;');
+              break;
+            default:
+              handler.pcdata('&amp;');
+              break;
           }
         }
       }
@@ -288,6 +426,7 @@ amp.htmlparser.HtmlParser = class {
       locator.snapshotPos();
     }
     // Lets the handler know that we are done parsing the document.
+    tagStack.exitRemainingTags();
     handler.endDoc();
   }
 
@@ -301,16 +440,15 @@ amp.htmlparser.HtmlParser = class {
   lookupEntity_(entity) {
     // TODO(goto): use {amp.htmlparserDecode} instead ?
     // TODO(goto): &pi; is different from &Pi;
-    const name = amp.htmlparser.toLowerCase(
-        entity.substring(1, entity.length - 1));
+    const name =
+        amp.htmlparser.toLowerCase(entity.substring(1, entity.length - 1));
     if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
       return amp.htmlparser.HtmlParser.Entities[name];
     }
     let m = name.match(amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_);
     if (m) {
       return String.fromCharCode(parseInt(m[1], 10));
-    } else if (
-        !!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
+    } else if (!!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
       return String.fromCharCode(parseInt(m[1], 16));
     }
     // If unable to decode, return the name.
@@ -323,9 +461,7 @@ amp.htmlparser.HtmlParser = class {
    * @return {string} A string without null characters.
    * @private
    */
-  stripNULs_(s) {
-    return s.replace(amp.htmlparser.HtmlParser.NULL_RE_, '');
-  }
+  stripNULs_(s) { return s.replace(amp.htmlparser.HtmlParser.NULL_RE_, ''); }
 
   /**
    * The plain text of a chunk of HTML CDATA which possibly containing.
@@ -349,10 +485,9 @@ amp.htmlparser.HtmlParser = class {
    * @private
    */
   normalizeRCData_(rcdata) {
-    return rcdata.
-        replace(amp.htmlparser.HtmlParser.LOOSE_AMP_RE_, '&amp;$1').
-        replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;').
-        replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
+    return rcdata.replace(amp.htmlparser.HtmlParser.LOOSE_AMP_RE_, '&amp;$1')
+        .replace(amp.htmlparser.HtmlParser.LT_RE, '&lt;')
+        .replace(amp.htmlparser.HtmlParser.GT_RE, '&gt;');
   }
 }
 
@@ -387,87 +522,86 @@ amp.htmlparser.HtmlParser.EFlags = {
   UNKNOWN_OR_CUSTOM: 64
 };
 
-
 /**
  * A map of element to a bitmap of flags it has, used internally on the parser.
- * @type {Object<string,number>}
+ * @type {Object<string,?>}
  */
 amp.htmlparser.HtmlParser.Elements = {
-  'a': 0,
-  'abbr': 0,
-  'acronym': 0,
-  'address': 0,
-  'applet': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'area': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'b': 0,
-  'base': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'A': 0,
+  'ABBR': 0,
+  'ACRONYM': 0,
+  'ADDRESS': 0,
+  'APPLET': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'AREA': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'B': 0,
+  'BASE': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'basefont': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'BASEFONT': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'bdo': 0,
-  'big': 0,
-  'blockquote': 0,
-  'body': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
+  'BDO': 0,
+  'BIG': 0,
+  'BLOCKQUOTE': 0,
+  'BODY': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
-  'br': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'button': 0,
-  'canvas': 0,
-  'caption': 0,
-  'center': 0,
-  'cite': 0,
-  'code': 0,
-  'col': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'colgroup': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'dd': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'del': 0,
-  'dfn': 0,
-  'dir': 0,
-  'div': 0,
-  'dl': 0,
-  'dt': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'em': 0,
-  'fieldset': 0,
-  'font': 0,
-  'form': 0,
-  'frame': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'BR': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'BUTTON': 0,
+  'CANVAS': 0,
+  'CAPTION': 0,
+  'CENTER': 0,
+  'CITE': 0,
+  'CODE': 0,
+  'COL': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'COLGROUP': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'DD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'DEL': 0,
+  'DFN': 0,
+  'DIR': 0,
+  'DIV': 0,
+  'DL': 0,
+  'DT': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'EM': 0,
+  'FIELDSET': 0,
+  'FONT': 0,
+  'FORM': 0,
+  'FRAME': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'frameset': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'h1': 0,
-  'h2': 0,
-  'h3': 0,
-  'h4': 0,
-  'h5': 0,
-  'h6': 0,
-  'head': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
+  'FRAMESET': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'H1': 0,
+  'H2': 0,
+  'H3': 0,
+  'H4': 0,
+  'H5': 0,
+  'H6': 0,
+  'HEAD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
-  'hr': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'html': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
+  'HR': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'HTML': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.FOLDABLE,
-  'i': 0,
-  'iframe': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
+  'I': 0,
+  'IFRAME': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.CDATA,
-  'img': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'input': amp.htmlparser.HtmlParser.EFlags.EMPTY,
-  'ins': 0,
-  'isindex': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'IMG': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'INPUT': amp.htmlparser.HtmlParser.EFlags.EMPTY,
+  'INS': 0,
+  'ISINDEX': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'kbd': 0,
-  'label': 0,
-  'legend': 0,
-  'li': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'link': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'KBD': 0,
+  'LABEL': 0,
+  'LEGEND': 0,
+  'LI': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'LINK': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'map': 0,
-  'menu': 0,
-  'meta': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'MAP': 0,
+  'MENU': 0,
+  'META': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'noframes': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
+  'NOFRAMES': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.CDATA,
   // TODO(johannes): This used to read:
-  // 'noscript': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
+  // 'NOSCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
   //  amp.htmlparser.HtmlParser.EFlags.CDATA,
   //
   // It appears that the effect of that is that anything inside is
@@ -478,43 +612,43 @@ amp.htmlparser.HtmlParser.Elements = {
   // On a broader note this also means we may be missing other start/end
   // tag events inside elements marked as CDATA which our parser
   // should better reject. Yikes.
-  'noscript': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'object': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'ol': 0,
-  'optgroup': 0,
-  'option': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'p': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'param': amp.htmlparser.HtmlParser.EFlags.EMPTY |
+  'NOSCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'OBJECT': amp.htmlparser.HtmlParser.EFlags.UNSAFE,
+  'OL': 0,
+  'OPTGROUP': 0,
+  'OPTION': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'P': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'PARAM': amp.htmlparser.HtmlParser.EFlags.EMPTY |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'pre': 0,
-  'q': 0,
-  's': 0,
-  'samp': 0,
-  'script': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
+  'PRE': 0,
+  'Q': 0,
+  'S': 0,
+  'SAMP': 0,
+  'SCRIPT': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.CDATA,
-  'select': 0,
-  'small': 0,
-  'span': 0,
-  'strike': 0,
-  'strong': 0,
-  'style': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
+  'SELECT': 0,
+  'SMALL': 0,
+  'SPAN': 0,
+  'STRIKE': 0,
+  'STRONG': 0,
+  'STYLE': amp.htmlparser.HtmlParser.EFlags.UNSAFE |
       amp.htmlparser.HtmlParser.EFlags.CDATA,
-  'sub': 0,
-  'sup': 0,
-  'table': 0,
-  'tbody': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'td': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'textarea': amp.htmlparser.HtmlParser.EFlags.RCDATA,
-  'tfoot': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'th': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'thead': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'title': amp.htmlparser.HtmlParser.EFlags.RCDATA |
+  'SUB': 0,
+  'SUP': 0,
+  'TABLE': 0,
+  'TBODY': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TEXTAREA': amp.htmlparser.HtmlParser.EFlags.RCDATA,
+  'TFOOT': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TH': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'THEAD': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TITLE': amp.htmlparser.HtmlParser.EFlags.RCDATA |
       amp.htmlparser.HtmlParser.EFlags.UNSAFE,
-  'tr': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
-  'tt': 0,
-  'u': 0,
-  'ul': 0,
-  'var': 0
+  'TR': amp.htmlparser.HtmlParser.EFlags.OPTIONAL_ENDTAG,
+  'TT': 0,
+  'U': 0,
+  'UL': 0,
+  'VAR': 0
 };
 
 
@@ -612,36 +746,36 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
         // interpreters are inconsistent in whether a group that matches nothing
         // is null, undefined, or the empty string.
         ('(?:' +
-        // Allow attribute names to start with /, avoiding assigning the / in
-        // close-tag syntax */>.
-        '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' + // e.g. "href"
-         '[^\\t\\r\\n =>]+[^ >]|' +            // e.g. "/asdfs/asd"
-         '\/+(?!>))' +                         // e.g. "/"
-        // Optionally followed by:
-        ('(' +
-        '\\s*=\\s*' +
-        ('(' +
-        // A double quoted string.
-        '\"[^\"]*\"' +
-        // A single quoted string.
-        '|\'[^\']*\'' +
-        // The positive lookahead is used to make sure that in
-        // <foo bar= baz=boo>, the value for bar is blank, not "baz=boo".
-        '|(?=[a-z][a-z-]*\\s*=)' +
-        // An unquoted value that is not an attribute name.
-        // We know it is not an attribute name because the previous
-        // zero-width match would've eliminated that possibility.
-        '|[^>\"\'\\s]*' +
-        ')'
-        ) +
-            ')'
-        ) + '?' +
-            ')'
-        ) +
-            // End of tag captured in group 3.
-            '|(/?>)' +
-            // Don't capture cruft
-            '|[^a-z\\s>]+)',
+         // Allow attribute names to start with /, avoiding assigning the / in
+         // close-tag syntax */>.
+         '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' +  // e.g. "href"
+         '[^\\t\\r\\n =>]+[^ >]|' +              // e.g. "/asdfs/asd"
+         '\/+(?!>))' +                           // e.g. "/"
+         // Optionally followed by:
+         ('(' +
+          '\\s*=\\s*' +
+          ('(' +
+           // A double quoted string.
+           '\"[^\"]*\"' +
+           // A single quoted string.
+           '|\'[^\']*\'' +
+           // The positive lookahead is used to make sure that in
+           // <foo bar= baz=boo>, the value for bar is blank, not "baz=boo".
+           // Note that <foo bar=baz=boo zik=zak>, the value for bar is
+           // "baz=boo" and the value for zip is "zak".
+           '|(?=[a-z][a-z-]*\\s+=)' +
+           // An unquoted value that is not an attribute name.
+           // We know it is not an attribute name because the previous
+           // zero-width match would've eliminated that possibility.
+           '|[^>\"\'\\s]*' +
+           ')') +
+          ')') +
+         '?' +
+         ')') +
+        // End of tag captured in group 3.
+        '|(/?>)' +
+        // Don't capture cruft
+        '|[^a-z\\s>]+)',
     'i');
 
 
@@ -670,8 +804,8 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
  * An implementation of the {@code amp.htmlparser.DocLocator} interface
  * for use within the {@code amp.htmlparser.HtmlParser}.
  */
-amp.htmlparser.HtmlParser.DocLocatorImpl = class
-extends amp.htmlparser.DocLocator {
+amp.htmlparser.HtmlParser.DocLocatorImpl =
+    class extends amp.htmlparser.DocLocator {
   /**
    * @param {string} htmlText text of the entire HTML document to be processed.
    */
@@ -740,7 +874,6 @@ extends amp.htmlparser.DocLocator {
   getCol() { return this.col_; }
 };
 
-
 /**
  * @param {string} str The string to lower case.
  * @return {string} The str in lower case format.
@@ -760,3 +893,35 @@ amp.htmlparser.toLowerCase = function(str) {
     return String.fromCharCode(ch.charCodeAt(0) | 32);
   });
 };
+
+/**
+ * @param {string} str The string to upper case.
+ * @return {string} The str in upper case format.
+ */
+amp.htmlparser.toUpperCase = function(str) {
+  // htmlparser.js heavily relies on the length of the strings, and
+  // unfortunately some characters change their length when
+  // lowercased; for instance, the Turkish İ has a length of 1, but
+  // when lower-cased, it has a length of 2. So, as a workaround we
+  // check that the length be the same as before upper-casing, and if
+  // not, we only upper-case the letters A-Z.
+  const upperCased = str.toUpperCase();
+  if (upperCased.length == str.length) {
+    return upperCased;
+  }
+  return str.replace(/[a-z]/g, function(ch) {
+    return String.fromCharCode(ch.charCodeAt(0) & 223);
+  });
+};
+
+/**
+ * This function gets eliminated by closure compiler. It's purpose in life
+ * is to work around a bug wherein the compiler renames the object keys
+ * for objects never accessed using an array ([]) operator. We need the keys
+ * to remain unchanged for these objects.
+ */
+function unusedHtmlParser() {
+  console./*OK*/log(ElementsWithNoEndElements['']);
+  console./*OK*/log(HtmlStructureElements['']);
+  console./*OK*/log(HeadElements['']);
+}

@@ -31,7 +31,7 @@ export class AccessClientAdapter {
 
   /**
    * @param {!Window} win
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(win, configJson, context) {
@@ -64,6 +64,13 @@ export class AccessClientAdapter {
       'authorizationUrl': this.authorizationUrl_,
       'pingbackUrl': this.pingbackUrl_,
     };
+  }
+
+  /**
+   * @return {string}
+   */
+  getAuthorizationUrl() {
+    return this.authorizationUrl_;
   }
 
   /** @override */

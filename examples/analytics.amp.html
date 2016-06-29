@@ -36,7 +36,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
     "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
     "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}"
+    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}"
   },
   "vars": {
     "title": "Example Request"
@@ -55,6 +55,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "eventName": "page-loaded",
         "eventId": "42"
+      },
+      "extraUrlParams": {
+        "param1": "Another value"
       }
     },
     "visibility": {
@@ -144,6 +147,18 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End Chartbeat example -->
 
+<!-- Clicky tracking -->
+<amp-analytics type="clicky">
+<script type="application/json">
+{
+  "vars": {
+    "site_id": "12345"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Clicky example -->
+
 <!-- ColAnalytics pageview tracking -->
 <amp-analytics type="colanalytics">
 <script type="application/json">
@@ -167,6 +182,18 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End comScore example -->
+
+<!-- Cxense tracking -->
+<amp-analytics type="cxense">
+<script type="application/json">
+{
+  "vars": {
+    "siteId": "1234567890"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Cxense example -->
 
 <amp-analytics type="googleanalytics" id="googleanalytics">
 <script type="application/json">
@@ -264,6 +291,35 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Mediametrie example -->
+
+<!-- OEWA example -->
+<amp-analytics type="oewa">
+<script type="application/json">
+{
+  "vars": {
+    "s": "offer",
+    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
+  },
+  "requests": {
+    "url": "https://subdomain.domain.example/amp-analytics-oewa.html"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End OEWA example -->
+
+<!-- OEWADIRECT example -->
+<amp-analytics type="oewadirect">
+<script type="application/json">
+{
+  "vars": {
+    "s": "offer",
+    "cp": "RedCont/Nachrichten/NachrichtenUeberblick"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End OEWADIRECT example -->
 
 <!-- Parsely tracking -->
 <amp-analytics type="parsely">
@@ -389,6 +445,31 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End SimpleReach Example -->
 
+<!-- Segment analytics tracking -->
+<amp-analytics type="segment">
+<script type="application/json">
+{
+  "vars": {
+    "writeKey": "p74lml96co",
+    "name": "Page name"
+  },
+  "extraUrlParams": {
+    "properties.author.name": "John"
+  },
+  "triggers": {
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "track",
+      "vars": {
+        "event": "click"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
 <!-- Snowplow Analytics tracking -->
 <amp-analytics type="snowplow" id="snowplow">
 <script type="application/json">
@@ -463,6 +544,72 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End SOASTA mPulse example -->
+
+<!-- Adobe Analytics example -->
+<!--
+For complete documentation and additional examples please see: https://marketing.adobe.com/resources/help/en_US/sc/implement/accelerated-mobile-pages.html
+-->
+<amp-analytics type=adobeanalytics>
++<!-- adobeanalytics type -->
+<script type="application/json">
+{
+  "requests": {
+    "myClick": "${click}&v1=${eVar1}"
+  },
+  "vars": {
+    "host": "metrics.example.com",
+    "reportSuites": "reportSuiteID"
+  },
+  "triggers": {
+    "pageLoad": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "click": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "myClick",
+      "vars": {
+        "eVar1": "button clicked"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
+<!-- adobeanalytics_nativeConfig type -->
+<amp-analytics type="adobeanalytics_nativeConfig">
+<script type="application/json">
+{
+  "requests": {
+    "base": "https://${host}",
+    "iframeMessage": "${base}/stats.html?campaign=${queryParam(campaign)}&pageURL=${ampdocUrl}"
+  },
+  "vars": {
+    "host": "example.publishersite.com"
+  },
+  "extraUrlParams": {
+    "pageName": "Adobe Analytics using amp-analytics adobeanalytics_nativeConfig",
+    "v1": "eVar1 test value"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Adobe Analytics example -->
+
+<!-- Linkpulse example - please replace id with your Linkpulse id -->
+<amp-analytics type="linkpulse">
+<script type="application/json">
+{
+  "vars": {
+    "id": "aabbcceedd00000000000000"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Linkpulse example -->
+
 </div>
 
 <div class="logo"></div>
@@ -529,4 +676,3 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
     </amp-anim>
 </body>
 </html>
-

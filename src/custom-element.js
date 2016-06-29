@@ -70,7 +70,7 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
@@ -81,6 +81,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   user.assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
+  knownElements[name] = toClass;
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
     // There are 3 possible states here:
@@ -110,6 +111,14 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 export function stubElements(win) {
   if (!win.ampExtendedElements) {
     win.ampExtendedElements = {};
+    // If amp-ad and amp-embed haven't been registered, manually register them
+    // with ElementStub, in case the script to the element is not included.
+    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
+      win.ampExtendedElements['amp-ad'] = true;
+      registerElement(win, 'amp-ad', ElementStub);
+      win.ampExtendedElements['amp-embed'] = true;
+      registerElement(win, 'amp-embed', ElementStub);
+    }
   }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
@@ -279,10 +288,11 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
- * @return {!AmpElement.prototype}
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
+ *     testing only.
+ * @return {!Object} Prototype of element.
  */
-export function createAmpElementProto(win, name, implementationClass) {
+export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
    * @lends {AmpElement.prototype}
    */
@@ -306,7 +316,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!Resources}  */
+    /** @private @const {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(win);
 
     /** @private {!Layout} */
@@ -324,10 +334,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {string|null|undefined} */
     this.mediaQuery_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.sizeList_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.heightsList_ = undefined;
 
     /**
@@ -352,14 +362,17 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {?Element|undefined} */
     this.overflowElement_ = undefined;
 
-    /** @private {!BaseElement} */
-    this.implementation_ = new implementationClass(this);
+    // `opt_implementationClass` is only used for tests.
+    const Ctor = opt_implementationClass || knownElements[name];
+
+    /** @private {!./base-element.BaseElement} */
+    this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
      * Action queue is initially created and kept around until the element
      * is ready to send actions directly to the implementation.
-     * @private {?Array<!ActionInvocation>}
+     * @private {?Array<!./service/action-impl.ActionInvocation>}
      */
     this.actionQueue_ = [];
 
@@ -388,7 +401,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Upgrades the element to the provided new implementation. If element
    * has already been attached, it's layout validation and attachment flows
    * are repeated for the new implementation.
-   * @param {function(new:BaseElement, !Element)} newImplClass
+   * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
    * @final @package @this {!Element}
    */
   ElementProto.upgrade = function(newImplClass) {
@@ -408,8 +421,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      // For a never-added resource, the build will be done automatically
+      // via `resources.add` on the first attach.
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**
@@ -435,31 +450,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *
-   * If the "force" argument is "false", the element will first check if
-   * implementation is ready to build by calling
-   * {@link BaseElement.isReadyToBuild} method. If this method returns "true"
-   * the build proceeds, otherwise no build is done.
-   *
-   * If the "force" argument is "true", the element performs build regardless
-   * of what {@link BaseElement.isReadyToBuild} would return.
-   *
-   * Returned value indicates whether or not build has been performed.
-   *
    * This method can only be called on a upgraded element.
    *
-   * @param {boolean} force Whether or not force the build.
-   * @return {boolean}
    * @final @this {!Element}
    */
-  ElementProto.build = function(force) {
+  ElementProto.build = function() {
     this.assertNotTemplate_();
     if (this.isBuilt()) {
-      return true;
+      return;
     }
     dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force && !this.implementation_.isReadyToBuild()) {
-      return false;
-    }
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
@@ -488,7 +488,6 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.appendChild(placeholder);
       }
     }
-    return true;
   };
 
   /**
@@ -511,7 +510,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * @return {!Vsync}
+   * @return {!./service/vsync-impl.Vsync}
    * @private @this {!Element}
    */
   ElementProto.getVsync_ = function() {
@@ -519,9 +518,18 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Whether the custom element declares that it has to be fixed.
+   * @return {boolean}
+   * @private @this {!Element}
+   */
+  ElementProto.isAlwaysFixed = function() {
+    return this.implementation_.isAlwaysFixed();
+  };
+
+  /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
-   * @param {!LayoutRect} layoutBox
+   * @param {!./layout-rect.LayoutRectDef} layoutBox
    * @this {!Element}
    */
   ElementProto.updateLayoutBox = function(layoutBox) {
@@ -651,6 +659,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       return;
     }
     this.resources_.remove(this);
+    this.implementation_.detachedCallback();
   };
 
   /**
@@ -726,7 +735,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * @return {!LayoutRect}
+   * @return {!./layout-rect.LayoutRectDef}
    * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
@@ -900,7 +909,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready
    * to receive actions.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @final @this {!Element}
    */
   ElementProto.enqueAction = function(invocation) {
@@ -933,7 +942,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Executes the action immediately. All errors are consumed and reported.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @param {boolean} deferred
    * @final
    * @private @this {!Element}
@@ -1212,13 +1221,13 @@ export function createAmpElementProto(win, name, implementationClass) {
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
+ * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
   win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name, implementationClass),
+    prototype: createAmpElementProto(win, name),
   });
 }
 
@@ -1234,8 +1243,10 @@ export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
 
   if (implementationClass) {
+    // Update on the knownElements to prevent register again.
+    knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {
-      prototype: createAmpElementProto(win, aliasName, implementationClass),
+      prototype: createAmpElementProto(win, aliasName),
     });
   } else {
     throw new Error(`Element name is unknown: ${sourceName}.` +
@@ -1249,6 +1260,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
  * This makes it possible to mark an element as loaded in a test.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function markElementScheduledForTesting(win, elementName) {
   if (!win.ampExtendedElements) {
@@ -1261,6 +1273,7 @@ export function markElementScheduledForTesting(win, elementName) {
  * Resets our scheduled elements.
  * @param {!Window} win
  * @param {string} elementName Name of an extended custom element.
+ * @visibleForTesting
  */
 export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
@@ -1269,3 +1282,12 @@ export function resetScheduledElementForTesting(win, elementName) {
   delete knownElements[elementName];
 }
 
+/**
+ * Returns a currently registered element class.
+ * @param {string} elementName Name of an extended custom element.
+ * @return {?function()}
+ * @visibleForTesting
+ */
+export function getElementClassForTesting(elementName) {
+  return knownElements[elementName] || null;
+}

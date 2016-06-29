@@ -56,27 +56,56 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
   },
   {
-    id: 'amp-social-share',
-    name: 'AMP Social Share',
+    id: 'amp-experiment',
+    name: 'AMP Experiment',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-social-share/amp-social-share.md',
-  },
-  // Amp Sidebar
-  {
-    id: 'amp-sidebar',
-    name: 'AMP Sidebar',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-sidebar/amp-sidebar.md',
+        'extensions/amp-experiment/amp-experiment.md',
   },
   {
-    id: 'amp-analytics-viewability',
-    name: 'Viewability APIs for amp-analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
+    id: 'amp-fx-flying-carpet',
+    name: 'AMP Flying Carpet',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
   },
   {
     id: 'amp-sticky-ad',
     name: 'AMP Sticky Ad',
     spec: 'https://github.com/ampproject/amphtml/issues/2472',
+  },
+  {
+    id: 'amp-live-list',
+    name: 'AMP Live List/Blog',
+    spec: 'https://github.com/ampproject/amphtml/issues/2762',
+  },
+  {
+    id: 'amp-access-server',
+    name: 'AMP Access server side prototype',
+    spec: '',
+  },
+  {
+    id: 'amp-slidescroll',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+  },
+  {
+    id: 'form-submit',
+    name: 'Global document form submit handler',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
+  {
+    id: 'amp-form',
+    name: 'AMP Form Extension',
+    spec: 'https://github.com/ampproject/amphtml/issues/3343',
+  },
+  {
+    id: 'no-auth-in-prerender',
+    name: 'Delay amp-access auth request until doc becomes visible.',
+    spec: '',
+  },
+  {
+    id: 'amp-share-tracking',
+    name: 'AMP Share Tracking',
+    spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
 ];
 

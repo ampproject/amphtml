@@ -19,7 +19,6 @@ import {
   addParamsToUrl,
   assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
-  getOrigin,
   getSourceOrigin,
   getSourceUrl,
   isProxyOrigin,
@@ -30,7 +29,7 @@ import {
   resolveRelativeUrlFallback_,
 } from '../../src/url';
 
-describe('url', () => {
+describe('parseUrl', () => {
 
   const currentPort = location.port;
 
@@ -73,6 +72,32 @@ describe('url', () => {
       search: '?123',
       hash: '#foo',
       origin: 'https://foo.com:123',
+    });
+  });
+  it('should omit HTTP default port', () => {
+    compareParse('http://foo.com:80/abc?123#foo', {
+      href: 'http://foo.com/abc?123#foo',
+      protocol: 'http:',
+      host: 'foo.com',
+      hostname: 'foo.com',
+      port: '',
+      pathname: '/abc',
+      search: '?123',
+      hash: '#foo',
+      origin: 'http://foo.com',
+    });
+  });
+  it('should omit HTTPS default port', () => {
+    compareParse('https://foo.com:443/abc?123#foo', {
+      href: 'https://foo.com/abc?123#foo',
+      protocol: 'https:',
+      host: 'foo.com',
+      hostname: 'foo.com',
+      port: '',
+      pathname: '/abc',
+      search: '?123',
+      hash: '#foo',
+      origin: 'https://foo.com',
     });
   });
   it('should support http', () => {
@@ -127,7 +152,15 @@ describe('url', () => {
       origin: 'http://foo.com:123',
     });
   });
+  it('should parse origin https://twitter.com/path#abc', () => {
+    expect(parseUrl('https://twitter.com/path#abc').origin)
+        .to.equal('https://twitter.com');
+  });
 
+  it('should parse origin data:12345', () => {
+    expect(parseUrl('data:12345').origin)
+        .to.equal('data:12345');
+  });
 });
 
 
@@ -265,22 +298,6 @@ describe('removeFragment', () => {
   });
 });
 
-describe('getOrigin', () => {
-  it('should parse https://twitter.com/path#abc', () => {
-    expect(getOrigin(parseUrl('https://twitter.com/path#abc')))
-        .to.equal('https://twitter.com');
-    expect(parseUrl('https://twitter.com/path#abc').origin)
-        .to.equal('https://twitter.com');
-  });
-
-  it('should parse data:12345', () => {
-    expect(getOrigin(parseUrl('data:12345')))
-        .to.equal('data:12345');
-    expect(parseUrl('data:12345').origin)
-        .to.equal('data:12345');
-  });
-});
-
 describe('addParamToUrl', () => {
   let url;
 
@@ -303,6 +320,16 @@ describe('addParamToUrl', () => {
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar&elementId=n1');
     url = addParamToUrl(url, 'ampUserId', '12345');
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar&elementId=n1&ampUserId=12345');
+  });
+
+  it('should optionally add params to the front', () => {
+    let url = addParamToUrl('https://www.ampproject.org/get/here?hello=world&foo=bar',
+        'elementId', 'n1', /* addToFront */ true);
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1&hello=world&foo=bar');
+
+    url = addParamToUrl('https://www.ampproject.org/get/here',
+        'elementId', 'n1', /* addToFront */ true);
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1');
   });
 
   it('should encode uri values', () => {
@@ -370,7 +397,7 @@ describe('getSourceOrigin/Url', () => {
   function testOrigin(href, sourceHref) {
     it('should return the source origin/url from ' + href, () => {
       expect(getSourceUrl(href)).to.equal(sourceHref);
-      expect(getSourceOrigin(href)).to.equal(getOrigin(sourceHref));
+      expect(getSourceOrigin(href)).to.equal(parseUrl(sourceHref).origin);
     });
   }
 

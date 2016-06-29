@@ -12,6 +12,21 @@
     "es6": true,
     "browser": true
   },
+  "globals": {
+    "it": false,
+    "chai": false,
+    "expect": false,
+    "describe": false,
+    "beforeEach": false,
+    "afterEach": false,
+    "before": false,
+    "after": false,
+    "AMP": false,
+    "assert": false,
+    "sinon": true,
+    "sandbox": true,
+    "context": false
+  },
   "rules": {
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
@@ -55,12 +70,14 @@
     }],
     "no-useless-call": 2,
     "no-useless-concat": 2,
+    "no-undef": 2,
     "no-var": 2,
     "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
     "object-curly-spacing": [2, "never", {
       "objectsInObjects": false,
       "arraysInObjects": false
     }],
+    "object-shorthand": [2, "properties"],
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "radix": 2,

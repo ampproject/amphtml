@@ -40,7 +40,7 @@ export const Layout = {
  * CSS Length type. E.g. "1px" or "20vh".
  * @typedef {string}
  */
-let LengthDef;
+export let LengthDef;
 
 
 /**
@@ -87,6 +87,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-VIDEO': true,
+  'AMP-YOUTUBE': true,
 };
 
 

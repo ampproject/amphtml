@@ -30,34 +30,12 @@ limitations under the License.
     <td><code>&lt;script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/jwplayer.amp.html">jwplayer.amp.html</a></td>
-  </tr>
-</table>
-
-The following lists validation errors specific to the `amp-jwplayer` tag
-(see also `amp-jwplayer` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
-    <td>Error thrown when required <code>amp-jwplayer</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
-    <td>Error thrown when <code>data-player-id</code> attribute is missing.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ONEOF_ATTR_MISSING</a></td>
-    <td>Error thrown when either the <code>data-media-id</code> or <code>data-playlist-id</code> attributes are missing.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
 
@@ -101,3 +79,6 @@ The JW Platform media id. This is an 8-digit alphanumeric sequence that can be f
 **data-playlist-id**
 
 The JW Platform playlist id. This is an 8-digit alphanumeric sequence that can be found in the [Playlists](https://dashboard.jwplayer.com/#/content/playlists) section in your JW Player Dashboard.  If both `data-playlist-id` and `data-media-id` are specified, `data-playlist-id` takes precedence.  (**Required if `data-media-id` is not defined.**)
+
+## Validation
+See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii) in the AMP validator specification.

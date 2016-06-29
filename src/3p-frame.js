@@ -32,6 +32,8 @@ import {viewerFor} from './viewer';
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
 
+/** @type {string} */
+let overrideBootstrapBaseUrl;
 
 /**
  * Produces the attributes for the ad template.
@@ -76,11 +78,12 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
         timer.now(),
         viewportFor(parentWindow).getRect(),
         element.getLayoutBox()),
-    startTime: startTime,
+    startTime,
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -122,6 +125,8 @@ export function getIframe(parentWindow, element, opt_type) {
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
+  iframe.setAttribute(
+      'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
   return iframe;
 }
 
@@ -187,16 +192,24 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   });
 }
 
+export function setDefaultBootstrapBaseUrlForTesting(url) {
+  overrideBootstrapBaseUrl = url;
+}
+
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  if (getMode().localDev) {
+  if (getMode().localDev || getMode().test) {
+    if (overrideBootstrapBaseUrl) {
+      return overrideBootstrapBaseUrl;
+    }
+    const prefix = getMode().test ? '/base' : '';
     return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
-        '/dist.3p/current' +
+        prefix + '/dist.3p/current' +
         (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
@@ -212,6 +225,15 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
  * @visibleForTesting
  */
 export function getSubDomain(win) {
+  return 'd-' + getRandom(win);
+}
+
+/**
+ * Generates a random non-negative integer.
+ * @param {!Window} win
+ * @return {string}
+ */
+function getRandom(win) {
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.
@@ -222,7 +244,7 @@ export function getSubDomain(win) {
     // Fall back to Math.random.
     rand = String(win.Math.random()).substr(2) + '0';
   }
-  return 'd-' + rand;
+  return rand;
 }
 
 /**
@@ -253,6 +275,22 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
       parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+/**
+ * Returns a randomized sentinel value for 3p iframes.
+ * The format is "%d-%d" with the first value being the depth of current
+ * window in the window hierarchy and the second a random integer.
+ * @param {!Window} parentWindow
+ * @return {string}
+ * @visibleForTesting
+ */
+export function generateSentinel(parentWindow) {
+  let windowDepth = 0;
+  for (let win = parentWindow; win && win != win.parent; win = win.parent) {
+    windowDepth++;
+  }
+  return String(windowDepth) + '-' + getRandom(parentWindow);
 }
 
 /**

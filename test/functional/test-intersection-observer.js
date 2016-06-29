@@ -109,7 +109,6 @@ describe('IntersectionObserver', () => {
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
-  const testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -123,9 +122,6 @@ describe('IntersectionObserver', () => {
     }
     firstAttachedCallback() {
       testElementFirstAttachedCallback();
-    }
-    isReadyToBuild() {
-      return testElementIsReadyToBuild;
     }
     buildCallback() {
       testElementBuildCallback();
@@ -160,6 +156,7 @@ describe('IntersectionObserver', () => {
   let onScrollSpy;
   let onChangeSpy;
   let clock;
+  let testElementGetInsersectionElementLayoutBox;
 
   function getIframe(src) {
     const i = document.createElement('iframe');
@@ -226,7 +223,8 @@ describe('IntersectionObserver', () => {
   it('should not send intersection', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
-    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
+    const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
+        'postMessage');
     ioInstance.sendElementIntersection_();
     expect(postMessageSpy.callCount).to.equal(0);
     expect(ioInstance.pendingChanges_).to.have.length(0);
@@ -241,6 +239,7 @@ describe('IntersectionObserver', () => {
       messages.push(JSON.parse(JSON.stringify(message)));
     });
     clock.tick(33);
+    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(messages).to.have.length(1);
@@ -257,6 +256,7 @@ describe('IntersectionObserver', () => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     });
+    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(messages).to.have.length(1);

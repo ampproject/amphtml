@@ -270,6 +270,10 @@ export class ImageViewer {
    * @private
    */
   updateSrc_() {
+    if (!this.srcset_) {
+      // Do not update source if the lightbox has already exited.
+      return Promise.resolve();
+    }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
     const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;
@@ -456,7 +460,8 @@ export class ImageViewer {
     }
 
     // Continue motion.
-    this.motion_ = continueMotion(this.posX_, this.posY_, veloX, veloY,
+    this.motion_ = continueMotion(this.image_,
+        this.posX_, this.posY_, veloX, veloY,
         (x, y) => {
           const newPosX = this.boundX_(x, true);
           const newPosY = this.boundY_(y, true);
@@ -540,10 +545,12 @@ export class ImageViewer {
     if (veloX == 0 && veloY == 0) {
       promise = Promise.resolve();
     } else {
-      promise = continueMotion(deltaX, deltaY, veloX, veloY, (x, y) => {
-        this.onZoomInc_(centerClientX, centerClientY, x, y);
-        return true;
-      }).thenAlways();
+      promise = continueMotion(this.image_,
+          deltaX, deltaY, veloX, veloY,
+          (x, y) => {
+            this.onZoomInc_(centerClientX, centerClientY, x, y);
+            return true;
+          }).thenAlways();
     }
 
     const relayout = this.scale_ > this.startScale_;
@@ -584,7 +591,7 @@ export class ImageViewer {
       const scaleFunc = tr.numeric(this.scale_, newScale);
       const xFunc = tr.numeric(this.posX_, newPosX);
       const yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate(time => {
+      promise = Animation.animate(this.image_, time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
         this.posY_ = yFunc(time);
@@ -639,11 +646,6 @@ class AmpImageLightbox extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  isReadyToBuild() {
-    return true;
   }
 
   /** @override */
@@ -719,9 +721,7 @@ class AmpImageLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
 
     // Prepare to enter in lightbox
-    this.requestFullOverlay();
-    this.getViewport().disableTouchZoom();
-    this.getViewport().hideFixedLayer();
+    this.getViewport().enterLightboxMode();
 
     this.enter_();
 
@@ -764,9 +764,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       this.unlistenViewport_ = null;
     }
 
-    this.cancelFullOverlay();
-    this.getViewport().showFixedLayer();
-    this.getViewport().restoreOriginalTouchZoom();
+    this.getViewport().leaveLightboxMode();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
@@ -844,7 +842,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     });
     this.imageViewer_.measure();
 
-    const anim = new Animation();
+    const anim = new Animation(this.element);
     const dur = 500;
 
     // Lightbox background fades in.
@@ -915,7 +913,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     const image = this.imageViewer_.getImage();
     const imageBox = this.imageViewer_.getImageBoxWithOffset();
 
-    const anim = new Animation();
+    const anim = new Animation(this.element);
     let dur = 500;
 
     // Lightbox background fades out.

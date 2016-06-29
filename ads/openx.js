@@ -17,6 +17,8 @@
 import {loadScript, writeScript, checkData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
+/* global OX: false */
+
 /**
  * @param {!Window} global
  * @param {!Object} data

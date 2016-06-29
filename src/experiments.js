@@ -60,7 +60,6 @@ export function isDevChannel(win) {
 /**
  * Whether the version corresponds to the dev-channel binary.
  * @param {!Window} win
- * @param {string} version
  * @return {boolean}
  * @private Visible for testing only!
  */
