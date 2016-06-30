@@ -754,7 +754,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     metaData.forEach(extension => {
-      /*REVIEW*/insertAmpExtensionScript(this.getWin(), extension, true);
+      /*OK*/insertAmpExtensionScript(this.getWin(), extension, true);
     });
   }
 }
