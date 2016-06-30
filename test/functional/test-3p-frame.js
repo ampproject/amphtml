@@ -152,7 +152,7 @@ describe('3p-frame', () => {
     expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
-    iframe.src = '/base/dist.3p/current/frame.max.html' + '#' + fragment;
+    iframe.src = '/base/dist.3p/current/frame.max.html#' + fragment;
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
