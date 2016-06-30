@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -275,11 +275,10 @@ export class AmpUserNotification extends AMP.BaseElement {
     }
     return this.storagePromise_
         .then(storage => storage.get(this.storageKey_))
-        .catch(reason => {
+        .then(persistedValue => !!persistedValue, reason => {
           dev.error(TAG, 'Failed to read storage', reason);
           return false;
-        })
-        .then(persistedValue => !!persistedValue);
+        });
   }
 
   /**
