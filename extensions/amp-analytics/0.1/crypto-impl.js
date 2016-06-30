@@ -25,7 +25,7 @@ export class Crypto {
 
   constructor(win) {
     /** @private @const {?SubtleCrypto} */
-    this.subtle = getSubtle(win);
+    this.subtle_ = getSubtle(win);
   }
 
   /**
@@ -36,9 +36,9 @@ export class Crypto {
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(str) {
-    if (this.subtle) {
+    if (this.subtle_) {
       try {
-        return this.subtle.digest('SHA-384', str2ab(str))
+        return this.subtle_.digest('SHA-384', str2ab(str))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
                 e => {

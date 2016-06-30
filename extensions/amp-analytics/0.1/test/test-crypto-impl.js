@@ -31,7 +31,7 @@ describe('crypto-impl', () => {
           expect(buffer[47]).to.equal(167);
         });
       });
-      
+
       it('should hash "abc" in sha384Base64', () => {
         return expect(crypto.sha384Base64('abc')).to.eventually.equal(
             'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
@@ -75,7 +75,7 @@ describe('crypto-impl', () => {
           expect(results[0]).to.jsonEqual(results[1]);
         });
   });
-  
+
   it('should not call closure lib when native API is available', () => {
     const platform = new Platform(window);
     if (!platform.isChrome() || platform.getMajorVersion() < 48) {
