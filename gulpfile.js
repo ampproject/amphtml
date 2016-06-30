@@ -344,7 +344,6 @@ function buildExamples(watch) {
       });
 
   // Also update test-example-validation.js
-  buildExample('a4a.amp.html');
   buildExample('ads.amp.html');
   buildExample('ads.with.script.amp.html');
   buildExample('adsense.amp.html');

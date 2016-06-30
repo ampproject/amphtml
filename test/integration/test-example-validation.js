@@ -47,7 +47,6 @@ describe('example', function() {
     'metadata-examples/review-microdata.amp.html',
     'metadata-examples/video-json-ld.amp.html',
     'metadata-examples/video-microdata.amp.html',
-    'a4a.amp.html',
     'article.amp.html',
     'analytics.amp.html',
     'analytics-notification.amp.html',
@@ -72,7 +71,6 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /amp-a4a/,
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
   ];
