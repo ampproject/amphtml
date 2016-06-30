@@ -16,13 +16,16 @@
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {getService} from '../../../src/service';
+import {dev} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'Crypto';
 
 export class Crypto {
 
   constructor(win) {
-    if (win.crypto) {
-      this.subtle = win.crypto.subtle || win.crypto.webkitSubtle;
-    }
+    /** @private @const {?SubtleCrypto} */
+    this.subtle = getSubtle(win);
   }
 
   /**
@@ -38,9 +41,13 @@ export class Crypto {
         return this.subtle.digest('SHA-384', str2ab(str))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
-                () => lib.sha384(str));
+                e => {
+                  dev.info(TAG, 'Crypto digest promise has rejected, ' +
+                      'fallback to closure lib.', e);
+                  return lib.sha384(str);
+                });
       } catch (e) {
-        // ignore, fallback to closure lib.
+        dev.info(TAG, 'Crypto digest has thrown, fallback to closure lib.', e);
       }
     }
     return Promise.resolve(lib.sha384(str));
@@ -61,17 +68,23 @@ export class Crypto {
   }
 }
 
+function getSubtle(win) {
+  if (!win.crypto) {
+    return null;
+  }
+  return win.crypto.subtle || win.crypto.webkitSubtle || null;
+}
+
 // A shim for TextEncoder
 function str2ab(str) {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
+  const buf = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     // Apply the same check as in closure lib:
     // https://github.com/google/closure-library/blob/master/closure/goog/crypt/sha2_64bit.js#L169
     if (str.charCodeAt(i) > 255) {
       throw Error('Characters must be in range [0,255]');
     }
-    bufView[i] = str.charCodeAt(i);
+    buf[i] = str.charCodeAt(i);
   }
   return buf;
 }

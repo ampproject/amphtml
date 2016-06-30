@@ -15,6 +15,9 @@
  */
 
 import {Crypto} from '../crypto-impl';
+import {Platform} from '../../../../src/platform';
+import * as lib from '../../../../third_party/closure-library/sha384-generated';
+import * as sinon from 'sinon';
 
 describe('crypto-impl', () => {
 
@@ -69,7 +72,25 @@ describe('crypto-impl', () => {
     return Promise
         .all([new Crypto(window).sha384('abc'), new Crypto({}).sha384('abc')])
         .then(results => {
-          expect(results[0]).to.deep.equal(results[1]);
+          expect(results[0]).to.jsonEqual(results[1]);
         });
+  });
+  
+  it('should not call closure lib when native API is available', () => {
+    const platform = new Platform(window);
+    if (!platform.isChrome() || platform.getMajorVersion() < 48) {
+      // Run this test only on browsers that we're confident about the existence
+      // of native Crypto API.
+      return this.skip();
+    }
+
+    const nativeApiSpy = sinon.spy(window.crypto.subtle, 'digest');
+    const libSpy = sinon.spy(lib, 'sha384');
+    return new Crypto(window).sha384Base64('abc').then(hash => {
+      expect(hash).to.equal(
+          'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
+      expect(nativeApiSpy).to.have.been.calledOnce;
+      expect(libSpy).to.not.have.been.called;
+    });
   });
 });
