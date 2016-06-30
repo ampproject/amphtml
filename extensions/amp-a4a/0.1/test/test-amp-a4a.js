@@ -302,8 +302,8 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
-        a4a.bytes_ = buildCreativeArrayBuffer();
-        a4a.maybeRenderAmpAd_(false).then(rendered => {
+        const bytes = buildCreativeArrayBuffer();
+        a4a.maybeRenderAmpAd_(false, bytes).then(rendered => {
           expect(rendered).to.be.false;
           expect(a4aElement.shadowRoot).to.be.null;
           expect(a4a.rendered_).to.be.false;
@@ -316,8 +316,8 @@ describe('amp-a4a', () => {
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
-        a4a.bytes_ = buildCreativeArrayBuffer();
-        a4a.maybeRenderAmpAd_(true).then(rendered => {
+        const bytes = buildCreativeArrayBuffer();
+        a4a.maybeRenderAmpAd_(true, bytes).then(rendered => {
           expect(a4aElement.shadowRoot).to.not.be.null;
           expect(rendered).to.be.true;
           const root = a4aElement.shadowRoot;
