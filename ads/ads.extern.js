@@ -129,3 +129,7 @@ data.ybSlot;
 yieldbot.nextPageview;
 yieldbot.getSlotCriteria;
 data.ymid;
+var PostRelease;
+PostRelease.Start;
+PostRelease.checkIsAdVisible;
+var _prx;

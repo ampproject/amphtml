@@ -16,11 +16,8 @@
 import {loadScript} from '../3p/3p';
 export function nativo(global, data) {
   let ntvAd;
-  (function(ntvAd, global, data) {
-    global
-      .frames
-      .location
-      .hash = global.frames.location.hash.replace(/({).*(})/,'');
+  (function(ntvAd, global, data) {    
+    global.frames.history.replaceState(null, null, location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
