@@ -16,7 +16,7 @@
 
 /**
  * Get social share configurations by supported type.
- * @param  {!string}
+ * @param  {!string} type
  * @return {!Object}
  */
 export function getSocialConfig(type) {
@@ -37,7 +37,7 @@ const BUILTINS = {
   facebook: {
     shareEndpoint: 'https://www.facebook.com/dialog/share',
     defaultParams: {
-      url: 'CANONICAL_URL',
+      href: 'CANONICAL_URL',
     },
   },
   pinterest: {

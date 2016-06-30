@@ -19,14 +19,14 @@
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined)
+ *   filter: (string|undefined),
  *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),
  *   version: string,
  * }}
  */
-let ModeDef;
+export let ModeDef;
 
 /** @typedef {?ModeDef} */
 let mode = null;
@@ -68,7 +68,7 @@ function getMode_() {
   if (window.context && window.context.mode) {
     return window.context.mode;
   }
-  const isLocalDev = (location.hostname == 'localhost' ||
+  const isLocalDev = !!(location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
@@ -88,12 +88,14 @@ function getMode_() {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: developmentQuery['development'] == '1' || window.AMP_DEV_MODE,
+    development: !!(developmentQuery['development'] == '1' ||
+        window.AMP_DEV_MODE),
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
+    /* global process: false */
     minified: process.env.NODE_ENV == 'production',
-    test: window.AMP_TEST,
+    test: !!(window.AMP_TEST),
     log: developmentQuery['log'],
     version: fullVersion,
   };

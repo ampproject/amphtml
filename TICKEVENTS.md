@@ -25,7 +25,7 @@ As an example if we executed `perf.tick('label')` we assume we have a counterpar
 | Name                | id                | Description                        |
 ----------------------|-------------------|------------------------------------|
 | Install Styles      | `is`              | Set when the styles are installed. |
-| Window load event   | `ol`              | Window load even fired.            |
+| Window load event   | `ol`              | Window load event fired.           |
 | Prerender Complete  | `pc`              | The runtime completes prerending a single document. |
 | Frames per second   | `fps`             | Tick to measure fps.               |
 | Frames per second during ad load | `fal`| Tick to measure fps when at least one ad is on the page. |

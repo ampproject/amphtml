@@ -43,11 +43,8 @@ function tests(name) {
       return getAd({
         width: 300,
         height: 250,
-        type: 'a9',
+        type: '_ping_',
         src: 'https://testsrc',
-        'data-aax_size': '300x250',
-        'data-aax_pubname': 'test123',
-        'data-aax_src': '302',
         // Test precedence
         'data-width': '6666',
       }, 'https://schema.org').then(ad => {
@@ -63,12 +60,11 @@ function tests(name) {
         const fragment = url.substr(url.indexOf('#') + 1);
         const data = JSON.parse(fragment);
 
-        expect(data.type).to.equal('a9');
+        expect(data.type).to.equal('_ping_');
         expect(data.src).to.equal('https://testsrc');
         expect(data.width).to.equal(300);
         expect(data.height).to.equal(250);
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
-        expect(data.aax_size).to.equal('300x250');
 
         const doc = iframe.ownerDocument;
         let fetches = doc.querySelectorAll(
@@ -77,20 +73,20 @@ function tests(name) {
           fetches = doc.querySelectorAll(
               'link[rel=preload]');
         }
-        expect(fetches).to.have.length(3);
+        expect(fetches).to.have.length(2);
         expect(fetches[0].href).to.equal(
             'http://ads.localhost:' + location.port +
-            '/dist.3p/current/frame.max.html');
+            '/base/dist.3p/current/frame.max.html');
         expect(fetches[1].href).to.equal(
             'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-        expect(fetches[2].href).to.equal(
-            'https://c.amazon-adsystem.com/aax2/assoc.js');
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(
             'https://testsrc/');
         // Make sure we run tests without CID available by default.
-        expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
+        const win = ad.ownerDocument.defaultView;
+        expect(win.services.cid).to.be.undefined;
+        expect(win.a2alistener).to.be.true;
       });
     });
 
@@ -101,12 +97,12 @@ function tests(name) {
         return getAd({
           width: 100,
           height: 100,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
-            impl = element.implementation_;
+            const impl = element.implementation_;
             impl.layoutCallback();
             impl.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
@@ -120,6 +116,8 @@ function tests(name) {
                 is3p: true,
                 height: 217,
                 width: 114,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
@@ -136,12 +134,12 @@ function tests(name) {
         return getAd({
           width: 100,
           height: 100,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
-            impl = element.implementation_;
+            const impl = element.implementation_;
             impl.layoutCallback();
             impl.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
@@ -154,6 +152,8 @@ function tests(name) {
                 type: 'requestHeight',
                 is3p: true,
                 height: 217,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
@@ -167,11 +167,11 @@ function tests(name) {
         return getAd({
           width: 100,
           height: 100,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
-          impl = element.implementation_;
+          const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217, 114);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
@@ -184,11 +184,11 @@ function tests(name) {
         return getAd({
           width: 100,
           height: 100,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
-          impl = element.implementation_;
+          const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
@@ -201,7 +201,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-        type: 'a9',
+        type: '_ping_',
       }, null)).to.be.rejectedWith(/canonical/);
     });
 
@@ -216,7 +216,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-        type: 'a9',
+        type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
         ad.style.position = 'fixed';
@@ -228,7 +228,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-        type: 'a9',
+        type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
         const s = document.createElement('style');
@@ -244,7 +244,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-        type: 'a9',
+        type: '_ping_',
         src: 'testsrc',
       }, 'https://schema.org', function(ad) {
         const lightbox = document.createElement('amp-lightbox');
@@ -262,7 +262,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 250,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
           const fallback = document.createElement('div');
@@ -284,7 +284,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 750,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
           return ad;
@@ -312,7 +312,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 750,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
           const placeholder = document.createElement('div');
@@ -339,7 +339,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 750,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
           const placeholder = document.createElement('div');
@@ -367,7 +367,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 750,
-          type: 'a9',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', ad => {
           const placeholder = document.createElement('div');
@@ -397,11 +397,8 @@ function tests(name) {
         const attributes = {
           width: 300,
           height: 250,
-          type: 'a9',
+          type: '_ping_',
           src: 'https://testsrc',
-          'data-aax_size': '300x250',
-          'data-aax_pubname': 'test123',
-          'data-aax_src': '302',
           // Test precedence
           'data-width': '6666',
         };

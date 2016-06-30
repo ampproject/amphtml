@@ -70,6 +70,7 @@ describe('DOM', () => {
     element.appendChild(child);
 
     expect(dom.closest(child, () => true)).to.equal(child);
+    expect(dom.closestNode(child, () => true)).to.equal(child);
     expect(dom.closestByTag(child, 'div')).to.equal(child);
     expect(dom.closestByTag(child, 'DIV')).to.equal(child);
   });
@@ -84,13 +85,31 @@ describe('DOM', () => {
     element.appendChild(child);
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
+    expect(dom.closestNode(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestByTag(child, 'child')).to.equal(child);
 
     expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
+    expect(dom.closestNode(child, e => e.tagName == 'ELEMENT'))
+        .to.equal(element);
     expect(dom.closestByTag(child, 'element')).to.equal(element);
 
     expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
+    expect(dom.closestNode(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestByTag(child, 'parent')).to.equal(parent);
+  });
+
+  it('closestNode should find nodes as well as elements', () => {
+    const fragment = document.createDocumentFragment();
+
+    const element = document.createElement('div');
+    fragment.appendChild(element);
+
+    const text = document.createTextNode('abc');
+    element.appendChild(text);
+
+    expect(dom.closestNode(text, () => true)).to.equal(text);
+    expect(dom.closestNode(text, n => n.nodeType == 1)).to.equal(element);
+    expect(dom.closestNode(text, n => n.nodeType == 11)).to.equal(fragment);
   });
 
   it('closest should find first match', () => {
@@ -465,6 +484,7 @@ describe('DOM', () => {
       const sibling = document.createElement('div');
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
       parent.appendChild(element);
+      expect(dom.hasNextNodeInDocumentOrder(element)).to.be.false;
       parent.appendChild(sibling);
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
     });
@@ -479,6 +499,117 @@ describe('DOM', () => {
       ancestor.appendChild(uncle);
       parent.appendChild(element);
       expect(dom.hasNextNodeInDocumentOrder(element)).to.be.true;
+    });
+  });
+
+  describe('openWindowDialog', () => {
+    let windowApi;
+    let windowMock;
+
+    beforeEach(() => {
+      windowApi = {
+        open: () => {throw new Error('not mocked');},
+      };
+      windowMock = sandbox.mock(windowApi);
+    });
+
+    afterEach(() => {
+      windowMock.verify();
+    });
+
+    it('should return on first success', () => {
+      const dialog = {};
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .returns(dialog)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_blank', 'width=1');
+      expect(res).to.equal(dialog);
+    });
+
+    it('should retry on first null', () => {
+      const dialog = {};
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .returns(null)
+          .once();
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top')
+          .returns(dialog)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_blank', 'width=1');
+      expect(res).to.equal(dialog);
+    });
+
+    it('should retry on first undefined', () => {
+      const dialog = {};
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .returns(undefined)
+          .once();
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top')
+          .returns(dialog)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_blank', 'width=1');
+      expect(res).to.equal(dialog);
+    });
+
+    it('should retry on first exception', () => {
+      const dialog = {};
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .throws(new Error('intentional'))
+          .once();
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top')
+          .returns(dialog)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_blank', 'width=1');
+      expect(res).to.equal(dialog);
+    });
+
+    it('should return the final result', () => {
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .returns(undefined)
+          .once();
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top')
+          .returns(null)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_blank', 'width=1');
+      expect(res).to.be.null;
+    });
+
+    it('should return the final exception', () => {
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_blank', 'width=1')
+          .throws(new Error('intentional1'))
+          .once();
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top')
+          .throws(new Error('intentional2'))
+          .once();
+      expect(() => {
+        dom.openWindowDialog(windowApi, 'https://example.com/',
+            '_blank', 'width=1');
+      }).to.throw(/intentional2/);
+    });
+
+    it('should retry only non-top target', () => {
+      windowMock.expects('open')
+          .withExactArgs('https://example.com/', '_top', 'width=1')
+          .returns(null)
+          .once();
+      const res = dom.openWindowDialog(windowApi, 'https://example.com/',
+          '_top', 'width=1');
+      expect(res).to.be.null;
     });
   });
 });

@@ -38,6 +38,7 @@ export function maybeValidate(win) {
   s.src = 'https://cdn.ampproject.org/v0/validator.js';
   s.onload = () => {
     win.document.head.removeChild(s);
+    /* global amp: false */
     amp.validator.validateUrlAndLog(filename, win.document, getMode().filter);
   };
   win.document.head.appendChild(s);

@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-brid-player
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-brid-player extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -48,9 +48,8 @@ tags: {  # amp-brid-player
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
 }
 tags: {  # <amp-brid-player>
-  tag_name: "amp-brid-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-BRID-PLAYER"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-brid-player extension .js script"
   attrs: {
     name: "data-partner"

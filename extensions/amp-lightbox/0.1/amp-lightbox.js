@@ -30,12 +30,6 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // Always defer building until DOMReady.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     st.setStyles(this.element, {
       position: 'fixed',
@@ -78,9 +72,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.getWin().document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
-    this.requestFullOverlay();
-    this.getViewport().resetTouchZoom();
-    this.getViewport().hideFixedLayer();
+    this.getViewport().enterLightboxMode();
 
     this.mutateElement(() => {
       this.element.style.display = '';
@@ -112,8 +104,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   close() {
-    this.cancelFullOverlay();
-    this.getViewport().showFixedLayer();
+    this.getViewport().leaveLightboxMode();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);

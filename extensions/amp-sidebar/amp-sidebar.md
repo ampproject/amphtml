@@ -78,7 +78,7 @@ Alternatively pressing the escape key on the keyboard will also close the lightb
 
 Example:
 ```html
-<div class="hamburger" on='tap:sidebar1.toggle'></button>
+<button class="hamburger" on='tap:sidebar1.toggle'></button>
 <button on='tap:sidebar1'>Open</button>
 <button on='tap:sidebar1.open'>Open</button>
 <button on='tap:sidebar1.close'>x</button>
@@ -105,6 +105,12 @@ The `amp-sidebar` component can be styled with standard CSS.
 - The `width` of the `amp-sidebar` may be set to adjust the width of the sidebar between the pre-set min(45px) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar if required. If the height exceeds 100vw then the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
 - The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.
+
+## UX considerations
+
+When using `<amp-sidebar>`, bear in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
+
+For this reason, we recommend that affordances to open the sidebar are not placed in a fixed, full-width header.
 
 ## Validation
 

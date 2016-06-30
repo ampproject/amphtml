@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import {
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
+} from '../../testing/iframe';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetExtensionScriptInsertedOrPresentForTesting,
     calculateExtensionScriptUrl, insertAmpExtensionScript,}
     from '../../src/insert-extension';
+import '../../extensions/amp-ad/0.1/amp-ad';
+import '../../extensions/amp-analytics/0.1/amp-analytics';
 
 
 describe('test-insert-extension', () => {
@@ -31,8 +36,9 @@ describe('test-insert-extension', () => {
 
   function getAdIframe(name) {
     return createIframePromise().then(f => {
+      doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
-      testElement = iframe.doc.createElement(name);
+      const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
       testElement.setAttribute('type', 'a9');
@@ -50,7 +56,7 @@ describe('test-insert-extension', () => {
   function getAnalyticsIframe() {
     return createIframePromise().then(f => {
       iframe = f;
-      testElement = iframe.doc.createElement('amp-analytics');
+      const testElement = iframe.doc.createElement('amp-analytics');
       return iframe.addElement(testElement);
     });
   }
@@ -86,7 +92,6 @@ describe('test-insert-extension', () => {
     return getAnalyticsIframe().then(() => {
       const ampTestScript = iframe.doc.createElement('script');
       ampTestScript.setAttribute('custom-element', 'amp-analytics');
-      scriptSrc = 'http://localhost:8000/dist/v0/amp-analytics-0.1.max.js';
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(0);
       iframe.doc.head.appendChild(ampTestScript);
@@ -173,12 +178,20 @@ describe('test-insert-extension', () => {
   });
 
   describe('get correct script source', () => {
-    it('with local mode for testing', () => {
+    it('with local mode for testing with compiled js', () => {
       setModeForTesting({localDev: true});
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
-          'amp-ad', true);
+          'amp-ad', true, true);
       expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+    });
+
+    it('with local mode for testing without compiled js', () => {
+      setModeForTesting({localDev: true});
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
+        'amp-ad', true, false);
+      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with local mode normal pathname', () => {

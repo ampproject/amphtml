@@ -57,6 +57,7 @@ if (GITHUB_ACCESS_TOKEN) {
  *  logs: !Array<!LogMetadataDef>,
  *  tag: (string|undefined),
  *  changelog: (string|undefined)
+ *  baseTag: (string|undefined)
  * }}
  */
 var GitMetadataDef;
@@ -104,11 +105,12 @@ function getGitMetadata() {
     throw new Error('no version value passed in. See --version flag option.');
   }
 
-  var gitMetadata = { logs: [], tag: undefined };
+  var gitMetadata = { logs: [], tag: undefined, baseTag: undefined };
   return getLastGitTag(gitMetadata)
       .then(getGitLog)
       .then(getGithubPullRequestsMetadata)
       .then(getGithubFilesMetadata)
+      .then(getBaseCanaryVersion)
       .then(buildChangelog)
       .then(function(gitMetadata) {
         util.log(util.colors.blue('\n' + gitMetadata.changelog));
@@ -120,6 +122,39 @@ function getGitMetadata() {
         );
       })
       .catch(errHandler);
+}
+
+
+/**
+ * When creating a special `amp-release-*` branch always find its root
+ * canary version so we can add it to the changelog. We do this by
+ * cross referencing the refs/remotes/origin/canary sha to all the
+ * tags' sha and look for the matching once. This should only be done on
+ * none canary branches since this assumes our baseTag should be whatever
+ * is currently in canary.
+ *
+ * To be more accurate we need to query github for list of current
+ * pre-release tags, but this is a cheaper operation than that and will
+ * only be wrong if somebody pushes new changes to canary and had not
+ * tagged it yet during the build/release process.
+ *
+ * @param {!GitMetadataDef} gitMetadata
+ * @return {!GitMetadataDef}
+ */
+function getBaseCanaryVersion(gitMetadata) {
+  var command = `git show-ref --tags | ` +
+      `grep $(git show-ref refs/remotes/origin/canary | cut -d ' ' -f 1) | ` +
+      `cut -d '/' -f 3`;
+
+  if (isAmpRelease(argv.branch)) {
+    return exec(command).then((baseCanaryVersion) => {
+      if (baseCanaryVersion) {
+        gitMetadata.baseTag = baseCanaryVersion.trim();
+      }
+      return gitMetadata;
+    });
+  }
+  return gitMetadata;
 }
 
 /**
@@ -174,6 +209,13 @@ function getCurrentSha() {
  */
 function buildChangelog(gitMetadata) {
   var changelog = `## Version: ${argv.version}\n\n`;
+
+  if (gitMetadata.baseTag && isAmpRelease(argv.branch)) {
+    changelog += `## Based on original release: [${gitMetadata.baseTag}]` +
+        `(https://github.com/ampproject/amphtml/releases/` +
+        `tag/${gitMetadata.baseTag})\n\n`;
+  }
+
   // Append all titles
   changelog += gitMetadata.logs.filter(function(log) {
         var pr = log.pr;
@@ -296,8 +338,8 @@ function getGitLog(gitMetadata) {
   };
   return gitExec(options).then(function(logs) {
     if (!logs) {
-      throw new Error('No logs found "git log ' + branch +
-          '...' + tag + '".\nIs it possible that there is no delta?\n' +
+      throw new Error('No logs found "git log ' + branch + '...' +
+          gitMetadata.tag + '".\nIs it possible that there is no delta?\n' +
           'Make sure to fetch and rebase (or reset --hard) the latest ' +
           'from remote upstream.');
     }
@@ -465,6 +507,15 @@ function isJs(str) {
 }
 
 /**
+ * Checks if amp-release-* branch
+ * @param {?string|undefined} str
+ * @return {boolean}
+ */
+function isAmpRelease(str) {
+  return !!(str && str.indexOf('amp-release') == 0);
+}
+
+/**
  * @param {!JSONValue} pr
  * @return {!PrMetadata}
  */
@@ -478,10 +529,87 @@ function buildPrMetadata(pr) {
   };
 }
 
+function changelogUpdate() {
+  if (!GITHUB_ACCESS_TOKEN) {
+    util.log(util.colors.red('Warning! You have not set the ' +
+        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
+    util.log(util.colors.green('See https://help.github.com/articles/' +
+        'creating-an-access-token-for-command-line-use/ ' +
+        'for instructions on how to create a github access token. We only ' +
+        'need `public_repo` scope.'));
+    return;
+  }
+  if (!argv.message) {
+    util.log(util.colors.red('--message flag must be set.'));
+  }
+  return update();
+}
+
+function update() {
+  var url = `https://api.github.com/repos/ampproject/amphtml/releases/tags/` +
+      `${argv.version}`;
+  var tagsOptions = {
+    url: url,
+    method: 'GET',
+    headers: {
+      'User-Agent': 'amp-changelog-gulp-task',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+  };
+
+  var releasesOptions = {
+    url: 'https://api.github.com/repos/ampproject/amphtml/releases/',
+    method: 'PATCH',
+    body: {},
+    json: true,
+    headers: {
+      'User-Agent': 'amp-changelog-gulp-task',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+  };
+
+  if (GITHUB_ACCESS_TOKEN) {
+    tagsOptions.qs = {
+      access_token: GITHUB_ACCESS_TOKEN
+    }
+    releasesOptions.qs = {
+      access_token: GITHUB_ACCESS_TOKEN
+    }
+  }
+
+  return request(tagsOptions).then(res => {
+    var release = JSON.parse(res.body);
+    if (!release.body) {
+      return;
+    }
+    var id = release.id;
+    releasesOptions.url += id;
+    if (argv.suffix) {
+      releasesOptions.body['body'] = release.body + argv.message;
+    } else {
+      releasesOptions.body['body'] = argv.message + release.body;
+    }
+    return request(releasesOptions).then(() => {
+      util.log(util.colors.green('Update Successful.'));
+    })
+    .catch((e) => {
+      util.log(util.colors.red('Update Failed. ' + e.message));
+    });
+  });
+}
+
 gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
+    version: '  The git tag and github release label',
+  }
+});
+
+gulp.task('changelog:update', 'Update github release. Ex. prepend ' +
+    'canary percentage changes to release', changelogUpdate, {
+  options: {
+    dryrun: '  Generate changelog but dont push it out',
     version: '  The git tag and github release label',
   }
 });

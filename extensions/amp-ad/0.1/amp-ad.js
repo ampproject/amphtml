@@ -26,6 +26,8 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {removeElement} from '../../../src/dom';
+import {setupA2AListener} from './a2a-listener';
+
 
 
 /** @const These tags are allowed to have fixed positioning */
@@ -89,14 +91,8 @@ class AmpAd extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
-    // Wait until DOMReady.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
+    const win = this.getWin();
     /** @private {?Element} */
     this.iframe_ = null;
 
@@ -129,7 +125,8 @@ class AmpAd extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.viewer_ = viewerFor(this.getWin());
+    this.viewer_ = viewerFor(win);
+    setupA2AListener(win);
   }
 
   /**
@@ -212,13 +209,21 @@ class AmpAd extends AMP.BaseElement {
    * anyway.
    */
   isPositionFixed() {
+    const win = this.getWin();
+    // TODO(@cramforce): Figure out why test comes here with the window
+    // removed. This is somehow related to the resource framework running
+    // on a timer that is not bound to the lifetime of the iframe.
+    // See https://github.com/ampproject/amphtml/issues/3709
+    if (!win) {
+      return false;
+    }
     let el = this.element;
     let hasFixedAncestor = false;
     do {
       if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
         return false;
       }
-      if (this.getWin()/*because only called from onLayoutMeasure */
+      if (win/*because only called from onLayoutMeasure */
           ./*OK*/getComputedStyle(el).position == 'fixed') {
         // Because certain blessed elements may contain a position fixed
         // container (which contain an ad), we continue to search the
@@ -282,6 +287,9 @@ class AmpAd extends AMP.BaseElement {
         }, /* opt_is3P */ true);
         this.iframe_.style.visibility = 'hidden';
         listenForOnce(this.iframe_, 'render-start', () => {
+          if (!this.iframe_) {
+            return;
+          }
           this.iframe_.style.visibility = '';
           this.sendEmbedInfo_(this.isInViewport());
         }, /* opt_is3P */ true);
@@ -333,7 +341,7 @@ class AmpAd extends AMP.BaseElement {
       const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
       postMessage(this.iframe_, 'embed-state', {
-        inViewport: inViewport,
+        inViewport,
         pageHidden: !this.viewer_.isVisible(),
       }, targetOrigin, /* opt_is3P */ true);
     }
@@ -347,7 +355,7 @@ class AmpAd extends AMP.BaseElement {
       postMessage(
           this.iframe_,
           'embed-size-denied',
-          {requestedHeight: requestedHeight, requestedWidth: requestedWidth},
+          {requestedHeight, requestedWidth},
           targetOrigin,
           /* opt_is3P */ true);
     }
@@ -379,6 +387,10 @@ class AmpAd extends AMP.BaseElement {
    * @private
    */
   noContentHandler_() {
+    // If iframe is null nothing to do.
+    if (!this.iframe_) {
+      return;
+    }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
       this.attemptChangeHeight(0, () => {
@@ -386,6 +398,9 @@ class AmpAd extends AMP.BaseElement {
       });
     }
     this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
       if (this.fallback_) {
         // Hide placeholder when falling back.
         if (this.placeholder_) {

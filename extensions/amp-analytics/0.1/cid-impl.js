@@ -121,6 +121,8 @@ class Cid {
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
+      return viewerFor(this.win).whenFirstVisible();
+    }).then(() => {
       return getExternalCid(this, getCidStruct,
           opt_persistenceConsent || consent);
     });
@@ -252,11 +254,12 @@ function getBaseCid(cid, persistenceConsent) {
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isIframed()) {
-    return viewer.getBaseCid().then(cid => {
-      if (!cid) {
+    return viewer.getBaseCid().then(cidValue => {
+      if (!cidValue) {
         throw new Error('No CID');
       }
-      return cid;
+      cid.baseCid_ = cidValue;
+      return cidValue;
     });
   }
 

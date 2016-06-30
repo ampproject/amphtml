@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
+import {toggle, setStyle} from '../../../src/style';
 
 /** @const */
 const EXPERIMENT = 'amp-fx-flying-carpet';
@@ -30,33 +31,44 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // Wait for all our children to be parsed.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
       dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      toggle(this.element, false);
       return;
     }
+
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
 
     const children = this.getRealChildNodes();
     const doc = this.element.ownerDocument;
 
+    /**
+     * A cached reference to the container, used to set its width to match
+     * the flying carpet's.
+     * @private @const
+     */
+    this.container_ = doc.createElement('div');
+
     const clip = doc.createElement('div');
     clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    const container = doc.createElement('div');
-    container.setAttribute('class', '-amp-fx-flying-carpet-container');
+    this.container_.setAttribute('class', '-amp-fx-flying-carpet-container');
 
     for (let i = 0; i < children.length; i++) {
-      container.appendChild(children[i]);
+      this.container_.appendChild(children[i]);
     }
-    clip.appendChild(container);
+    clip.appendChild(this.container_);
 
     this.element.appendChild(clip);
+  }
+
+  onLayoutMeasure() {
+    const width = this.getLayoutWidth();
+    this.vsync_.mutate(() => {
+      setStyle(this.container_, 'width', width, 'px');
+    });
   }
 
   assertPosition() {
@@ -84,7 +96,13 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   layoutCallback() {
-    this.assertPosition();
+    try {
+      this.assertPosition();
+    } catch (e) {
+      // Collapse the element if the effect is broken by the viewport location.
+      toggle(this.element, false);
+      throw e;
+    }
     return Promise.resolve();
   }
 }

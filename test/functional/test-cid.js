@@ -31,6 +31,9 @@ describe('cid', () => {
   let clock;
   let fakeWin;
   let storage;
+  let cid;
+  let viewerBaseCidStub;
+  let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
 
@@ -39,6 +42,7 @@ describe('cid', () => {
     isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    whenFirstVisible = Promise.resolve();
     storage = {};
     fakeWin = {
       localStorage: {
@@ -72,7 +76,10 @@ describe('cid', () => {
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
     });
-    sandbox.stub(viewer, 'getBaseCid', function() {
+    sandbox.stub(viewer, 'whenFirstVisible', function() {
+      return whenFirstVisible;
+    });
+    viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
     });
     installCidService(fakeWin);
@@ -178,7 +185,17 @@ describe('cid', () => {
     isIframed = true;
     return compare(
         'e2',
-        'sha384(from-viewerhttp://www.origin.come2)');
+        'sha384(from-viewerhttp://www.origin.come2)')
+        .then(() => {
+          expect(cid.baseCid_).to.equal('from-viewer');
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+
+          // Ensure it's called only once.
+          return compare('e3', 'sha384(from-viewerhttp://www.origin.come3)');
+        })
+        .then(() => {
+          expect(viewerBaseCidStub.callCount).to.equal(1);
+        });
   });
 
   it('should prefer value in storage if present', () => {
@@ -260,6 +277,18 @@ describe('cid', () => {
         });
       });
     });
+  });
+
+  it('should wait until after pre-rendering', () => {
+    let nonce = 'not visible';
+    whenFirstVisible = timer.promise(100).then(() => {
+      nonce = 'visible';
+    });
+    const p = cid.get('test', hasConsent).then(unusedC => {
+      expect(nonce).to.equal('visible');
+    });
+    clock.tick(100);
+    return p;
   });
 
   it('should wait for consent', () => {

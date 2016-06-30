@@ -18,14 +18,21 @@
 
 'use strict';
 
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const path = require('path');
-const program = require('commander');
-const vm = require('vm');
-const url = require('url');
-const util = require('util');
+var Promise = require('promise');
+var colors = require('colors');
+var fs = require('fs');
+var http = require('http');
+var https = require('https');
+var path = require('path');
+var program = require('commander');
+var querystring = require('querystring');
+var url = require('url');
+var util = require('util');
+var vm = require('vm');
+
+function hasPrefix(str, prefix) {
+  return str.indexOf(prefix) == 0;
+}
 
 /**
  * Convenience function to detect whether an argument is a URL. If not,
@@ -34,7 +41,7 @@ const util = require('util');
  * @returns {!boolean}
  */
 function isHttpOrHttpsUrl(url) {
-  return url.startsWith('http://') || url.startsWith('https://');
+  return hasPrefix(url, 'http://') || hasPrefix(url, 'https://');
 }
 
 /**
@@ -44,7 +51,7 @@ function isHttpOrHttpsUrl(url) {
  */
 function readFromFile(name) {
   return new Promise(function(resolve, reject) {
-    fs.readFile(name, 'utf8', (err, data) => {
+    fs.readFile(name, 'utf8', function(err, data) {
       if (err) {
         reject(err);
       } else {
@@ -62,11 +69,11 @@ function readFromFile(name) {
  */
 function readFromReadable(name, readable) {
   return new Promise(function(resolve, reject) {
-    const chunks = [];
+    var chunks = [];
     readable.setEncoding('utf8');
-    readable.on('data', (chunk) => { chunks.push(chunk); });
-    readable.on('end', () => { resolve(chunks.join('')); });
-    readable.on('error', (error) => {
+    readable.on('data', function(chunk) { chunks.push(chunk); });
+    readable.on('end', function() { resolve(chunks.join('')); });
+    readable.on('error', function(error) {
       reject(new Error('Could not read from ' + name + ' - ' + error.message));
     });
   });
@@ -79,7 +86,7 @@ function readFromReadable(name, readable) {
  * @returns {!Promise<!string>}
  */
 function readFromStdin() {
-  return readFromReadable('stdin', process.stdin).then((data) => {
+  return readFromReadable('stdin', process.stdin).then(function(data) {
     process.stdin.resume();
     return data;
   });
@@ -94,9 +101,9 @@ function readFromStdin() {
  */
 function readFromUrl(url) {
   return new Promise(function(resolve, reject) {
-           const clientModule = url.startsWith('http://') ? http : https;
-           const req = clientModule.request(url, (response) => {
-             if (response.statusCode != 200) {
+           var clientModule = hasPrefix(url, 'http://') ? http : https;
+           var req = clientModule.request(url, function(response) {
+             if (response.statusCode !== 200) {
                // https://nodejs.org/api/http.html says: "[...] However, if
                // you add a 'response' event handler, then you must consume
                // the data from the response object, either by calling
@@ -111,7 +118,7 @@ function readFromUrl(url) {
                resolve(response);
              }
            });
-           req.on('error', (error) => {  // E.g., DNS resolution errors.
+           req.on('error', function(error) {  // E.g., DNS resolution errors.
              reject(
                  new Error('Unable to fetch ' + url + ' - ' + error.message));
            });
@@ -126,17 +133,16 @@ function readFromUrl(url) {
  * errors, if any. This class corresponds to the ValidationResult
  * message in validator.proto in this directory.
  * @export
+ * @constructor
  */
-class ValidationResult {
-  constructor() {
-    /**
-     * Possible values are 'UNKNOWN', 'PASS', and 'FAIL'.
-     * @type {!string}
-     */
-    this.status = 'UNKNOWN';
-    /** @type {!Array<!ValidationError>} */
-    this.errors = [];
-  }
+function ValidationResult() {
+  /**
+   * Possible values are 'UNKNOWN', 'PASS', and 'FAIL'.
+   * @type {!string}
+   */
+  this.status = 'UNKNOWN';
+  /** @type {!Array<!ValidationError>} */
+  this.errors = [];
 }
 
 /**
@@ -144,65 +150,64 @@ class ValidationResult {
  * document. This class corresponds to the ValidationError message in
  * validator.proto in this directory.
  * @export
+ * @constructor
  */
-class ValidationError {
-  constructor() {
-    /**
-     * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
-     * 'ERROR', and 'WARNING'.
-     */
-    this.severity = 'UNKNOWN_SEVERITY';
-    /**
-     * The line number at which the error was seen (1 is the first line).
-     */
-    this.line = 1;
-    /**
-     * The column number at which the error was seen (0 is the first column).
-     */
-    this.col = 0;
-    /**
-     * A human-readable error message for the validation error.
-     * If you find yourself trying to write a parser against this string
-     * to scrape out some detail, consider looking at the code and params
-     * fields below.
-     * @type {!string}
-     */
-    this.message = '';
-    /**
-     * The spec URL is often added by the validator to provide additional
-     * context for the error. In a user interface this would be shown
-     * as a "Learn more" link.
-     * @type {!string}
-     */
-    this.specUrl = null;
-    /**
-     * Categorizes error messages into higher-level groups. This makes it
-     * easier to create error statistics across a site and give advice based
-     * on the most common problems for a set of pages.
-     * See the ErrorCategory.Code enum in validator.proto for possible values.
-     * @type {!string}
-     */
-    this.category = 'UNKNOWN';
-    /**
-     * This field is only useful when scripting against the validator,
-     * it should not be displayed in a user interface as it adds nothing
-     * for humans to read over the message field (see above).
-     * Possible values are the codes listed in ValidationError.Code - see
-     * validator.proto. Examples: 'UNKNOWN_CODE', 'MANDATORY_TAG_MISSING',
-     * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
-     * format string in validator-main.protoascii (look for error_formats),
-     * which is used to assemble the message from the strings in params.
-     * @type {!string}
-     */
-    this.code = 'UNKNOWN_CODE';
-    /**
-     * This field is only useful when scripting against the validator,
-     * it should not be displayed in a user interface as it adds nothing
-     * for humans to read over the message field (see above).
-     * @type {!Array<!string>}
-     */
-    this.params = [];
-  }
+function ValidationError() {
+  /**
+   * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
+   * 'ERROR', and 'WARNING'.
+   */
+  this.severity = 'UNKNOWN_SEVERITY';
+  /**
+   * The line number at which the error was seen (1 is the first line).
+   */
+  this.line = 1;
+  /**
+   * The column number at which the error was seen (0 is the first column).
+   */
+  this.col = 0;
+  /**
+   * A human-readable error message for the validation error.
+   * If you find yourself trying to write a parser against this string
+   * to scrape out some detail, consider looking at the code and params
+   * fields below.
+   * @type {!string}
+   */
+  this.message = '';
+  /**
+   * The spec URL is often added by the validator to provide additional
+   * context for the error. In a user interface this would be shown
+   * as a "Learn more" link.
+   * @type {!string}
+   */
+  this.specUrl = null;
+  /**
+   * Categorizes error messages into higher-level groups. This makes it
+   * easier to create error statistics across a site and give advice based
+   * on the most common problems for a set of pages.
+   * See the ErrorCategory.Code enum in validator.proto for possible values.
+   * @type {!string}
+   */
+  this.category = 'UNKNOWN';
+  /**
+   * This field is only useful when scripting against the validator,
+   * it should not be displayed in a user interface as it adds nothing
+   * for humans to read over the message field (see above).
+   * Possible values are the codes listed in ValidationError.Code - see
+   * validator.proto. Examples: 'UNKNOWN_CODE', 'MANDATORY_TAG_MISSING',
+   * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
+   * format string in validator-main.protoascii (look for error_formats),
+   * which is used to assemble the message from the strings in params.
+   * @type {!string}
+   */
+  this.code = 'UNKNOWN_CODE';
+  /**
+   * This field is only useful when scripting against the validator,
+   * it should not be displayed in a user interface as it adds nothing
+   * for humans to read over the message field (see above).
+   * @type {!Array<!string>}
+   */
+  this.params = [];
 }
 
 /**
@@ -210,57 +215,54 @@ class ValidationError {
  * validator.js script - in practice the script was either downloaded
  * from 'https://cdn.ampproject.org/v0/validator.js' or read from a
  * local file.
+ * @param {!string} scriptContents
+ * @throws {!Error}
+ * @constructor
  */
-class Validator {
-  /**
-   * @param {!string} scriptContents
-   * @throws {!Error}
-   */
-  constructor(scriptContents) {
-    // The 'sandbox' is a Javascript object (dictionary) which holds
-    // the results of evaluating the validatorJs / scriptContents, so
-    // basically, it holds functions, prototypes, etc. As a
-    // side-effect of evaluating, the VM will compile this code and
-    // it's worth holding onto it. Hence, this validate function is
-    // reached via 2 codepaths - either the sandbox came from the
-    // cache, precompiledByValidatorJs - or we just constructed it
-    // after downloading and evaluating the script. The API is fancier
-    // here, vm.Script / vm.createContext / vm.runInContext and all
-    // that, but it's quite similar to a Javascript eval.
-    this.sandbox = vm.createContext();
-    try {
-      new vm.Script(scriptContents).runInContext(this.sandbox);
-    } catch (error) {
-      throw new Error('Could not instantiate validator.js - ' + error.message);
-    }
+function Validator(scriptContents) {
+  // The 'sandbox' is a Javascript object (dictionary) which holds
+  // the results of evaluating the validatorJs / scriptContents, so
+  // basically, it holds functions, prototypes, etc. As a
+  // side-effect of evaluating, the VM will compile this code and
+  // it's worth holding onto it. Hence, this validate function is
+  // reached via 2 codepaths - either the sandbox came from the
+  // cache, precompiledByValidatorJs - or we just varructed it
+  // after downloading and evaluating the script. The API is fancier
+  // here, vm.Script / vm.createContext / vm.runInContext and all
+  // that, but it's quite similar to a Javascript eval.
+  this.sandbox = vm.createContext();
+  try {
+    new vm.Script(scriptContents).runInContext(this.sandbox);
+  } catch (error) {
+    throw new Error('Could not instantiate validator.js - ' + error.message);
   }
+}
 
-  /**
-   * @param {!string} inputString
-   * @returns {!ValidationResult}
-   * @export
-   */
-  validateString(inputString) {
-    const internalResult =
-        this.sandbox.amp.validator.validateString(inputString);
-    const result = new ValidationResult();
-    result.status = internalResult.status;
-    for (const internalError of internalResult.errors) {
-      const error = new ValidationError();
-      error.severity = internalError.severity;
-      error.line = internalError.line;
-      error.col = internalError.col;
-      error.message =
-          this.sandbox.amp.validator.renderErrorMessage(internalError);
-      error.specUrl = internalError.specUrl;
-      error.code = internalError.code;
-      error.params = internalError.params;
-      error.category =
-          this.sandbox.amp.validator.categorizeError(internalError);
-      result.errors.push(error);
-    }
-    return result;
+/**
+ * @param {!string} inputString
+ * @returns {!ValidationResult}
+ * @export
+ */
+Validator.prototype.validateString =
+    function(inputString) {
+  var internalResult = this.sandbox.amp.validator.validateString(inputString);
+  var result = new ValidationResult();
+  result.status = internalResult.status;
+  for (var ii = 0; ii < internalResult.errors.length; ii++) {
+    var internalError = internalResult.errors[ii];
+    var error = new ValidationError();
+    error.severity = internalError.severity;
+    error.line = internalError.line;
+    error.col = internalError.col;
+    error.message =
+        this.sandbox.amp.validator.renderErrorMessage(internalError);
+    error.specUrl = internalError.specUrl;
+    error.code = internalError.code;
+    error.params = internalError.params;
+    error.category = this.sandbox.amp.validator.categorizeError(internalError);
+    result.errors.push(error);
   }
+  return result;
 }
 
 /**
@@ -268,7 +270,7 @@ class Validator {
  * AMP Validators more than once.
  * @type {!Object<string, Validator>}
  */
-const instanceByValidatorJs = {};
+var instanceByValidatorJs = {};
 
 /**
  * @param {string=} opt_validatorJs
@@ -276,22 +278,22 @@ const instanceByValidatorJs = {};
  * @export
  */
 function getInstance(opt_validatorJs) {
-  const validatorJs =
+  var validatorJs =
       opt_validatorJs || 'https://cdn.ampproject.org/v0/validator.js';
   if (instanceByValidatorJs.hasOwnProperty(validatorJs)) {
     return Promise.resolve(instanceByValidatorJs[validatorJs]);
   }
-  const validatorJsPromise =
+  var validatorJsPromise =
       (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
-  return validatorJsPromise.then((scriptContents) => {
-    let instance;
+  return validatorJsPromise.then(function(scriptContents) {
+    var instance;
     try {
       instance = new Validator(scriptContents);
     } catch (error) {
       // It may be useful to cache errors and exceptions encountered
       // here, but for now we don't do this for e.g. http errors when
       // fetching the validator, so we shouldn't do it for syntax
-      // errors etc. either (which lead to the constructor throwing an error).
+      // errors etc. either (which lead to the varructor throwing an error).
       throw error;
     }
     instanceByValidatorJs[validatorJs] = instance;
@@ -301,140 +303,25 @@ function getInstance(opt_validatorJs) {
 exports.getInstance = getInstance;
 
 /**
- * Maps from file extension to a mime-type.
- * @param {!string} extension
- * @returns {!string}
- */
-function extToMime(extension) {
-  if (extension === '.html') {
-    return 'text/html';
-  } else if (extension === '.js') {
-    return 'text/javascript';
-  } else if (extension === '.css') {
-    return 'text/css';
-  }
-  return 'text/plain';
-}
-
-/**
- * Serves a web UI for validation.
- * @param {!number} port
- * @param {!string} validatorScript
- */
-function serve(port, validatorScript) {
-  // By default, validatorScript will point at the latest published validator,
-  // a https:// URL. So in that case, we'll just use it. But if it's a file,
-  // then we need to also serve the file. So, we load it into RAM and make it
-  // available as /validator.js.
-  let validatorScriptContents = '';
-  if (!validatorScript.startsWith('http://') &&
-      !validatorScript.startsWith('https://')) {
-    validatorScriptContents = fs.readFileSync(validatorScript, 'utf-8');
-    validatorScript = '/validator.js';
-  }
-  http.createServer((request, response) => {
-        if (request.method !== 'GET') {
-          return;
-        }
-        //
-        // Handle '/'.
-        //
-        if (request.url === '/') {
-          response.writeHead(200, {'Content-Type': 'text/html'});
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'webui/index.html'), 'utf-8');
-          if ('https://cdn.ampproject.org/v0/validator.js' == validatorScript) {
-            response.end(contents);
-            return;
-          }
-          response.end(contents.replace(
-              new RegExp(
-                  'https://cdn\\.ampproject\\.org/v0/validator\\.js', 'g'),
-              validatorScript));
-          return;
-        }
-        //
-        // Handle '/validator.js'.
-        //
-        if (request.url === '/validator.js') {
-          response.writeHead(200, {'Content-Type': 'text/javascript'});
-          response.end(validatorScriptContents);
-          return;
-        }
-        //
-        // Handle '/amp_favicon.png'
-        //
-        if (request.url == '/amp_favicon.png') {
-          const contents = fs.readFileSync(
-              path.join(__dirname, 'webui/amp_favicon.png'), 'binary');
-          response.writeHead(200, {'Content-Type': 'image/png'});
-          response.end(contents, 'binary');
-          return;
-        }
-        //
-        // Handle fetch?, a request to fetch an arbitrary doc from the
-        // internet. It presents the results as JSON.
-        //
-        if (request.url.startsWith('/fetch?')) {
-          const parsedUrl = url.parse(request.url, true);
-          const urlToFetch = parsedUrl['query']['url'];
-          if (!urlToFetch.startsWith('https://') &&
-              !urlToFetch.startsWith('http://')) {
-            response.writeHead(400, {'Content-Type': 'text/plain'});
-            response.end('Bad request.');
-            return;
-          }
-          readFromUrl(urlToFetch)
-              .then((contents) => {
-                response.writeHead(200, {'Content-Type': 'application/json'});
-                response.end(JSON.stringify({'Contents': contents}));
-              })
-              .catch((error) => {
-                response.writeHead(502, {'Content-Type': 'text/plain'});
-                response.end('Bad gateway (' + error.message + ').');
-              });
-          return;
-        }
-        // Look up any other resources relative to node_modules.
-        const relative_path = request.url.substr(1);  // Strip leading '/'.
-        const node_modules_path =
-            path.join(__dirname, 'node_modules', relative_path);
-
-        // Only serve .js .html .css below node_modules.
-        if (path.resolve(node_modules_path)
-                .startsWith(path.resolve(__dirname)) &&
-            ['.js', '.html', '.css'].indexOf(path.extname(node_modules_path)) !=
-                -1) {
-          try {
-            const contents = fs.readFileSync(node_modules_path, 'utf-8');
-            response.writeHead(
-                200,
-                {'Content-Type': extToMime(path.extname(node_modules_path))});
-            response.end(contents);
-          } catch (error) {
-            // Fall through for 404 below.
-          }
-        }
-        response.writeHead(404, {'Content-Type': 'text/plain'});
-        response.end('Not found.');
-      })
-      .listen(port);
-  console.log('Serving at http://127.0.0.1:' + port + '/');
-}
-
-/**
  * Logs a validation result to the console using console.log, console.warn,
  * and console.error as is appropriate.
  * @param {!string} filename
  * @param {!ValidationResult} validationResult
+ * @param {boolean} color
  */
-function logValidationResult(filename, validationResult) {
+function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
-    console.log(filename + ': PASS');
+    console.log(filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
   }
-  for (const error of validationResult.errors) {
-    let msg =
-        filename + ':' + error.line + ':' + error.col + ' ' + error.message;
+  for (var ii = 0; ii < validationResult.errors.length; ii++) {
+    var error = validationResult.errors[ii];
+    var msg = filename + ':' + error.line + ':' + error.col + ' ';
+    if (color) {
+      msg += (error.severity === 'ERROR' ? colors.red : colors.magenta)(
+          error.message);
+    } else {
+      msg += error.message
+    }
     if (error.specUrl) {
       msg += ' (see ' + error.specUrl + ')';
     }
@@ -452,73 +339,76 @@ function logValidationResult(filename, validationResult) {
 function main() {
   program.version('0.1.0')
       .usage(
-          '<fileOrUrlOrMinus...>\n\n' +
-          '  By default, validates the files or urls provided as arguments.\n' +
-          '  If "-" is specified, reads from stdin instead.\n' +
-          '  Note the --validator_js option for selecting the Validator to\n' +
-          '  run.')
+          '[options] <fileOrUrlOrMinus...>\n\n' +
+          '  Validates the files or urls provided as arguments. If "-" is ' +
+          '  specified, reads from stdin instead.')
       .option(
-          '--validator_js <fileOrUrl>', 'The Validator Javascript. \n' +
-              '  Latest published version by default, or \n' +
-              '  dist/validator_minified.js (built with build.py) \n' +
+          '--validator_js <fileOrUrl>', 'The Validator Javascript.\n' +
+              '  Latest published version by default, or\n' +
+              '  dist/validator_minified.js (built with build.py)\n' +
               '  for development.',
-          'https://cdn.ampproject.org/v0/validator.js');
-
-  program.command('* <fileOrUrlOrMinus...>')
-      .description('Validates list of files or urls (default).')
-      .action((fileOrUrlOrMinus) => {
-        if (fileOrUrlOrMinus.length == 0) {
-          program.outputHelp();
-          process.exit(1);
-        }
-        for (const item of fileOrUrlOrMinus) {
-          let input;
-          if (item === '-') {
-            input = readFromStdin();
-          } else if (isHttpOrHttpsUrl(item)) {
-            input = readFromUrl(item);
-          } else {
-            input = readFromFile(item);
-          }
-          input
-              .then((data) => {
-                getInstance(program.validator_js)
-                    .then((validator) => {
-                      const validationResult = validator.validateString(data);
-                      logValidationResult(item, validationResult);
-                      if (validationResult.status !== 'PASS') {
-                        process.exitCode = 1;
-                      }
-                    })
-                    .catch((error) => {
-                      console.error(error.message);
-                      process.exitCode = 1;
-                    });
-
-              })
-              .catch((error) => {
-                console.error(error.message);
-                process.exitCode = 1;
-              });
-        }
-      });
-
-  program.command('webui')
-      .description('Serves a web UI for validation.')
+          'https://cdn.ampproject.org/v0/validator.js')
       .option(
-          '--port <number>', 'Port number',
-          (arg) => {
-            const n = parseInt(arg);
-            return isNaN(n) ? null : n;
-          },
-          8765)
-      .action((options) => { serve(options.port, program.validator_js); });
-
-  program.parse(process.argv);
-  if (program.args == 0) {
+          '--format <color|text|json>', 'How to format the output.\n' +
+              '  "color" displays errors/warnings/success in\n' +
+              '          red/orange/green.\n' +
+              '  "text"  avoids color (e.g., useful in terminals not\n' +
+              '          supporting color).\n' +
+              '  "json"  emits json corresponding to the ValidationResult\n' +
+              '          message in validator.proto.',
+          'color')
+      .parse(process.argv);
+  if (program.args.length === 0) {
     program.outputHelp();
     process.exit(1);
   }
+  var inputs = [];
+  for (var ii = 0; ii < program.args.length; ii++) {
+    var item = program.args[ii];
+    if (item === '-') {
+      inputs.push(readFromStdin());
+    } else if (isHttpOrHttpsUrl(item)) {
+      inputs.push(readFromUrl(item));
+    } else {
+      inputs.push(readFromFile(item));
+    }
+  }
+  getInstance(program.validator_js)
+      .then(function(validator) {
+        Promise.all(inputs)
+            .then(function(resolvedInputs) {
+              var jsonOut = {};
+              for (var ii = 0; ii < resolvedInputs.length; ii++) {
+                var validationResult =
+                    validator.validateString(resolvedInputs[ii]);
+                if (program.format === 'json') {
+                  jsonOut[program.args[ii]] = validationResult;
+                } else {
+                  logValidationResult(
+                      program.args[ii], validationResult,
+                      program.format === 'color' ? true : false);
+                }
+                if (validationResult.status !== 'PASS') {
+                  process.exitCode = 1;
+                }
+              }
+              if (program.format === 'json') {
+                console.log(JSON.stringify(jsonOut))
+              }
+            })
+            .catch(function(error) {
+              console.error(
+                  program.format == 'color' ? colors.red(error.message) :
+                                              error.message);
+              process.exitCode = 1;
+            });
+      })
+      .catch(function(error) {
+        console.error(
+            program.format == 'color' ? colors.red(error.message) :
+                                        error.message);
+        process.exitCode = 1;
+      });
 }
 
 if (require.main === module) {

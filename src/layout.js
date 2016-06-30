@@ -40,7 +40,7 @@ export const Layout = {
  * CSS Length type. E.g. "1px" or "20vh".
  * @typedef {string}
  */
-let LengthDef;
+export let LengthDef;
 
 
 /**

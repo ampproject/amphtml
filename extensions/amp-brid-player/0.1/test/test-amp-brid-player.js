@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-brid-player');
+import '../amp-brid-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

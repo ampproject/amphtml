@@ -45,6 +45,31 @@
     header {
       font-size: 2rem;
     }
+
+    #live-list-update-button {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .button {
+      border: none;
+      border-radius: 2px;
+
+      color: #fafafa;
+      height: 26px;
+      min-width: 32px;
+      padding: 0 16px;
+      margin: 0 16px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      cursor: pointer;
+      vertical-align: middle;
+      line-height: 26px;
+      text-align: center;
+      background: #3f51b5;
+    }
   </style>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
   <script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js"></script>
@@ -53,20 +78,20 @@
 </head>
 <body>
   <header>
-    Scoreboard refresh takes 15 seconds.
+    Scoreboard refresh takes 3 seconds.
   </header>
   <amp-live-list
     layout="container"
     data-poll-interval="15000"
     data-max-items-per-page="5"
     id="my-live-list">
-    <button id="btn" update on="tap:my-live-list.update">You have updates</button>
+    <button id="live-list-update-button" update class="button" on="tap:my-live-list.update">You have updates</button>
     <div items>
       <div id="list-item-2" data-sort-time="1462814963693">
         <div class="card">
           <div class="side side-left">
             <div class="logo">
-              <amp-img src="/examples/img/ampicon.png"
+              <amp-img src="img/ampicon.png"
                   layout="fixed" height="50" width="50">
               </amp-img>
             </div>
@@ -75,7 +100,7 @@
           <div class="side side-right">
             <div class="content">2</div>
             <div class="logo">
-              <amp-img src="/examples/img/ampicon.png"
+              <amp-img src="img/ampicon.png"
                   layout="fixed" height="50" width="50">
               </amp-img>
             </div>
@@ -86,7 +111,7 @@
         <div class="card">
           <div class="side side-left">
             <div class="logo">
-              <amp-img src="/examples/img/ampicon.png"
+              <amp-img src="img/ampicon.png"
                   layout="fixed" height="50" width="50">
               </amp-img>
             </div>
@@ -95,7 +120,7 @@
           <div class="side side-right">
             <div class="content">2</div>
             <div class="logo">
-              <amp-img src="/examples/img/ampicon.png"
+              <amp-img src="img/ampicon.png"
                   layout="fixed" height="50" width="50">
               </amp-img>
             </div>

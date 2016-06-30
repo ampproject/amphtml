@@ -56,6 +56,14 @@ export const adPrefetch = {
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
   microad: 'https://j.microad.net/js/camp.js',
+  yahoojp: [
+    'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
+    'https://yads.c.yimg.jp/js/yads.js',
+  ],
+  nend: 'https://js1.nend.net/js/amp.js',
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
+  genieessp: 'https://js.gsspcln.jp/l/amp.js',
 };
 
 /**
@@ -151,6 +159,22 @@ export const adPreconnect = {
   microad: [
     'https://s-rtb.send.microad.jp',
     'https://cache.send.microad.jp',
+  ],
+  yahoojp: [
+    'https://s.yimg.jp',
+    'https://yads.yahoo.co.jp',
+  ],
+  chargeads: [
+    'https://www.chargeplatform.com',
+  ],
+  nend: [
+    'https://js1.nend.net',
+    'https://output.nend.net',
+    'https://img1.nend.net',
+  ],
+  adtech: [
+    'https://mads.at.atwola.com',
+    'https://aka-cdn.adtechus.com',
   ],
 };
 

@@ -24,6 +24,7 @@ import {getService} from './service';
 import {parseUrl} from './url';
 import {timer} from './timer';
 import {platformFor} from './platform';
+import {viewerFor} from './viewer';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -50,13 +51,16 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!Platform}  */
+    /** @private @const {!./platform.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
 
     /** @private {boolean} */
     this.preloadSupported_ = this.isPreloadSupported_();
+
+    /** @private @const {!./service/viewer-impl.Viewer} */
+    this.viewer_ = viewerFor(win);
   }
 
   /**
@@ -96,6 +100,7 @@ export class Preconnect {
     const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
+    preconnect.setAttribute('referrerpolicy', 'origin');
     this.head_.appendChild(dns);
     this.head_.appendChild(preconnect);
 
@@ -129,15 +134,21 @@ export class Preconnect {
     const command = this.preloadSupported_ ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = this.document_.createElement('link');
-    prefetch.setAttribute('rel', command);
-    prefetch.setAttribute('href', url);
-    if (opt_preloadAs) {
-      prefetch.setAttribute('as', opt_preloadAs);
-    }
-    this.head_.appendChild(prefetch);
-    // As opposed to preconnect we do not clean this tag up, because there is
-    // no expectation as to it having an immediate effect.
+    this.viewer_.whenFirstVisible().then(() => {
+      const prefetch = this.document_.createElement('link');
+      prefetch.setAttribute('rel', command);
+      prefetch.setAttribute('href', url);
+      prefetch.setAttribute('referrerpolicy', 'origin');
+      // Do not set 'as' attribute for now, for 2 reasons
+      // - document value is not yet supported and dropped
+      // - script is blocked due to CSP.
+      // if (opt_preloadAs) {
+      //  prefetch.setAttribute('as', opt_preloadAs);
+      // }
+      this.head_.appendChild(prefetch);
+      // As opposed to preconnect we do not clean this tag up, because there is
+      // no expectation as to it having an immediate effect.
+    });
   }
 
   isInterestingUrl_(url) {
@@ -182,18 +193,22 @@ export class Preconnect {
     if (!this.platform_.isSafari()) {
       return;
     }
-    // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
-    // we effectively create an active connection.
-    // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-    this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
-    const url = origin +
-        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-        '_Do_not_worry_about_it?' + Math.random();
-    // We use an XHR without withCredentials(true), so we do not send cookies
-    // to the host and the host cannot set cookies.
-    const xhr = new XMLHttpRequest();
-    xhr.open('HEAD', url, true);
-    xhr.send();
+
+    this.viewer_.whenFirstVisible().then(() => {
+      // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
+      // we effectively create an active connection.
+      // TODO(@cramforce): Confirm actual http2 timeout in Safari.
+      this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+      const url = origin +
+          '/amp_preconnect_polyfill_404_or_other_error_expected.' +
+          '_Do_not_worry_about_it?' + Math.random();
+      // We use an XHR without withCredentials(true), so we do not send cookies
+      // to the host and the host cannot set cookies.
+      const xhr = new XMLHttpRequest();
+      xhr.open('HEAD', url, true);
+
+      xhr.send();
+    });
   }
 }
 

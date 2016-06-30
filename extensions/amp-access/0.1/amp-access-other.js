@@ -26,7 +26,7 @@ export class AccessOtherAdapter {
 
   /**
    * @param {!Window} win
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(win, configJson, context) {
@@ -36,7 +36,7 @@ export class AccessOtherAdapter {
     /** @const @private {!AccessTypeAdapterContextDef} */
     this.context_ = context;
 
-    /** @private {?JSONObject} */
+    /** @private {?JSONType} */
     this.authorizationResponse_ =
         configJson['authorizationFallbackResponse'] || null;
 

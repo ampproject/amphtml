@@ -63,7 +63,7 @@ For example:
 
 **src**
 
-Required if no <source> children are present. Must be HTTPS.
+Required if no &lt;source&gt; children are present. Must be HTTPS.
 
 **poster**
 
@@ -72,9 +72,7 @@ default the first frame is displayed.
 
 **autoplay**
 
-The `autoplay` attribute allows the author to specify when - if ever - the animated image will autoplay.
-
-The presence of the attribute alone implies that the animated image will always autoplay. The author may specify values to limit when the animations will autoplay. Allowable values are `desktop`, `tablet`, or `mobile`, with multiple values separated by a space. The runtime makes a best-guess approximation to the device type to apply this value.
+If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
 
 **controls**
 
