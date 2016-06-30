@@ -190,7 +190,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   }
 
   const newCookiePromise = cryptoFor(win)
-      .then(crypto => crypto.sha384base64(getEntropy(win)))
+      .then(crypto => crypto.sha384Base64(getEntropy(win)))
       // Create new cookie, always prefixed with "amp-", so that we can see from
       // the value whether we created it.
       .then(randomStr => 'amp-' + randomStr);

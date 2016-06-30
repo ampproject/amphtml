@@ -27,7 +27,7 @@ export class Crypto {
     return Promise.resolve(lib.sha384(str));
   }
 
-  sha384base64(str) {
+  sha384Base64(str) {
     return Promise.resolve(lib.sha384Base64(str));
   }
 }
