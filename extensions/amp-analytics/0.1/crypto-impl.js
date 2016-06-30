@@ -20,27 +20,60 @@ import {getService} from '../../../src/service';
 export class Crypto {
 
   constructor(win) {
-    this.win = win;
+    if (win.crypto) {
+      this.subtle = win.crypto.subtle || win.crypto.webkitSubtle;
+    }
   }
 
   /**
-   * Returns the SHA-384 hash of the input string in an ArrayBuffer.
+   * Returns the SHA-384 hash of the input string in a number array.
+   * Input string cannot contain chars out of range [0,255].
    * @param {string} str
-   * @returns {!Promise<!ArrayBuffer>}
+   * @returns {!Promise<!Array<number>>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(str) {
+    if (this.subtle) {
+      try {
+        return this.subtle.digest('SHA-384', str2ab(str))
+            // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+            .then(buffer => [].slice.call(new Uint8Array(buffer)),
+                () => lib.sha384(str));
+      } catch (e) {
+        // ignore, fallback to closure lib.
+      }
+    }
     return Promise.resolve(lib.sha384(str));
   }
 
   /**
    * Returns the SHA-384 hash of the input string in the format of web safe
-   * base64 string (using -_. instead of +/=).
+   * base64 (using -_. instead of +/=).
+   * Input string cannot contain chars out of range [0,255].
    * @param {string} str
    * @returns {!Promise<string>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(str) {
-    return Promise.resolve(lib.sha384Base64(str));
+    return this.sha384(str).then(buffer => {
+      return lib.base64(buffer);
+    });
   }
+}
+
+// A shim for TextEncoder
+function str2ab(str) {
+  const buf = new ArrayBuffer(str.length);
+  const bufView = new Uint8Array(buf);
+  for (let i = 0; i < str.length; i++) {
+    // Apply the same check as in closure lib:
+    // https://github.com/google/closure-library/blob/master/closure/goog/crypt/sha2_64bit.js#L169
+    if (str.charCodeAt(i) > 255) {
+      throw Error('Characters must be in range [0,255]');
+    }
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
 }
 
 export function installCryptoService(win) {
