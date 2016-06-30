@@ -31,9 +31,7 @@ import {
 } from '../../../src/url';
 import {timer} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
-import {
-  sha384Base64,
-} from '../../../third_party/closure-library/sha384-generated';
+import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
 
 
@@ -68,20 +66,17 @@ class Cid {
     /** @const */
     this.win = win;
 
-    /** @private @const Instance for testing. */
-    this.sha384Base64_ = sha384Base64;
-
     /**
      * Cached base cid once read from storage to avoid repeated
      * reads.
-     * @private {?string}
+     * @private {?Promise<string>}
      */
     this.baseCid_ = null;
 
     /**
      * Cache to store external cids. Scope is used as the key and cookie value
      * is the value.
-     * @private {!Object.<string, string>}
+     * @private {!Object<string, !Promise<string>>}
      */
     this.externalCidCache_ = Object.create(null);
   }
@@ -143,12 +138,13 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
   }
-  return getBaseCid(cid, persistenceConsent).then(baseCid => {
-    return cid.sha384Base64_(
-        baseCid +
-        getProxySourceOrigin(url) +
-        getCidStruct.scope);
-  });
+  return Promise.all([getBaseCid(cid, persistenceConsent), cryptoFor(cid.win)])
+      .then(results => {
+        const baseCid = results[0];
+        const crypto = results[1];
+        return crypto.sha384Base64(
+            baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
+      });
 }
 
 /**
@@ -183,7 +179,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   }
 
   if (cid.externalCidCache_[scope]) {
-    return Promise.resolve(cid.externalCidCache_[scope]);
+    return cid.externalCidCache_[scope];
   }
 
   if (existingCookie) {
@@ -194,21 +190,24 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     return Promise.resolve(existingCookie);
   }
 
-  // Create new cookie, always prefixed with "amp-", so that we can see from
-  // the value whether we created it.
-  const newCookie = 'amp-' + cid.sha384Base64_(getEntropy(win));
+  const newCookiePromise = cryptoFor(win)
+      .then(crypto => crypto.sha384Base64(getEntropy(win)))
+      // Create new cookie, always prefixed with "amp-", so that we can see from
+      // the value whether we created it.
+      .then(randomStr => 'amp-' + randomStr);
 
-  cid.externalCidCache_[scope] = newCookie;
   // Store it as a cookie based on the persistence consent.
-  persistenceConsent.then(() => {
-    // The initial CID generation is inherently racy. First one that gets
-    // consent wins.
-    const relookup = getCookie(win, scope);
-    if (!relookup) {
-      setCidCookie(win, scope, newCookie);
-    }
-  });
-  return Promise.resolve(newCookie);
+  Promise.all([newCookiePromise, persistenceConsent])
+      .then(results => {
+        // The initial CID generation is inherently racy. First one that gets
+        // consent wins.
+        const newCookie = results[0];
+        const relookup = getCookie(win, scope);
+        if (!relookup) {
+          setCidCookie(win, scope, newCookie);
+        }
+      });
+  return cid.externalCidCache_[scope] = newCookiePromise;
 }
 
 /**
@@ -236,7 +235,7 @@ export function getProxySourceOrigin(url) {
  */
 function getBaseCid(cid, persistenceConsent) {
   if (cid.baseCid_) {
-    return Promise.resolve(cid.baseCid_);
+    return cid.baseCid_;
   }
   const win = cid.win;
   const stored = read(win);
@@ -247,38 +246,38 @@ function getBaseCid(cid, persistenceConsent) {
       // Once per interval we mark the cid as used.
       store(win, stored.cid);
     }
-    cid.baseCid_ = stored.cid;
-    return Promise.resolve(stored.cid);
+    return cid.baseCid_ = Promise.resolve(stored.cid);
   }
   // If we are being embedded, try to get the base cid from the viewer.
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isIframed()) {
-    return viewer.getBaseCid().then(cidValue => {
+    return cid.baseCid_ = viewer.getBaseCid().then(cidValue => {
       if (!cidValue) {
         throw new Error('No CID');
       }
-      cid.baseCid_ = cidValue;
       return cidValue;
     });
   }
 
   // We need to make a new one.
   const seed = getEntropy(win);
-  const newVal = cid.sha384Base64_(seed);
+  cid.baseCid_ = cryptoFor(win)
+      .then(crypto => crypto.sha384Base64(seed));
 
-  cid.baseCid_ = newVal;
   // Storing the value may require consent. We wait for the respective
   // promise.
-  persistenceConsent.then(() => {
-    // The initial CID generation is inherently racy. First one that gets
-    // consent wins.
-    const relookup = read(win);
-    if (!relookup) {
-      store(win, newVal);
-    }
-  });
-  return Promise.resolve(newVal);
+  Promise.all([cid.baseCid_, persistenceConsent])
+      .then(results => {
+        // The initial CID generation is inherently racy. First one that gets
+        // consent wins.
+        const newVal = results[0];
+        const relookup = read(win);
+        if (!relookup) {
+          store(win, newVal);
+        }
+      });
+  return cid.baseCid_;
 }
 
 /**
@@ -386,4 +385,4 @@ export function installCidService(window) {
   return getService(window, 'cid', () => {
     return new Cid(window);
   });
-};
+}
