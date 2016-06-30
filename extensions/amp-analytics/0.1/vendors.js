@@ -249,6 +249,7 @@ export const ANALYTICS_CONFIG = {
       'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
+        '&val_101=${id}' +
         '&val_101=${canonicalPath}' +
         '&ch=${canonicalHost}' +
         '&uuid=${uid}' +
@@ -262,7 +263,8 @@ export const ANALYTICS_CONFIG = {
         '&tet=${totalEngagedTime}' +
         '&dr=${documentReferrer}' +
         '&plt=${pageLoadTime}' +
-        '&val_108=${title}',
+        '&val_108=${title}' +
+        '&val_120=3',
     },
     'triggers': {
       'defaultPageview': {
