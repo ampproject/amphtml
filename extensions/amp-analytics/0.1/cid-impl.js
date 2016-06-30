@@ -143,7 +143,7 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
         const baseCid = results[0];
         const crypto = results[1];
         return crypto.sha384Base64(
-            baseCid + getProxySourceOrigin(url) + getCidStruct.scope)
+            baseCid + getProxySourceOrigin(url) + getCidStruct.scope);
       });
 }
 
