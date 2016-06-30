@@ -146,10 +146,10 @@ describe('3p-frame', () => {
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
         '"right":0,"x":0,"y":0}}}}';
-    const [srcOrigin, srcData] = src.split('#');
-    expect(srcOrigin).to.equal(
+    const srcParts = src.split('#');
+    expect(srcParts[0]).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-    expect(JSON.parse(srcData)).to.deep.equal(JSON.parse(fragment));
+    expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
     iframe.src = '/base/dist.3p/current/frame.max.html' + '#' + fragment;
