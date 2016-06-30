@@ -110,6 +110,13 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installCryptoService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/crypto-impl.js',
+    ],
+  },
   'installDocService': {
     message: privateServiceFactory,
     whitelist: [

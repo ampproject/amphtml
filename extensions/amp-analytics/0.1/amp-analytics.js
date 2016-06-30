@@ -20,6 +20,7 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
+import {installCryptoService} from './crypto-impl';
 import {installStorageService} from './storage-impl';
 import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
@@ -27,12 +28,13 @@ import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
+import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
-import {sha384} from '../../../third_party/closure-library/sha384-generated';
 
 installActivityService(AMP.win);
 installCidService(AMP.win);
+installCryptoService(AMP.win);
 installStorageService(AMP.win);
 installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
@@ -66,9 +68,6 @@ export class AmpAnalytics extends AMP.BaseElement {
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
-
-    /** @private @const Instance for testing. */
-    this.sha384_ = sha384;
   }
 
   /** @override */
@@ -415,13 +414,16 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const key = this.expandTemplate_(spec['sampleOn'], trigger);
 
-    return urlReplacementsFor(this.getWin()).expand(key).then(key => {
-      const digest = this.sha384_(key);
-      if (digest[0] % 100 < spec['threshold']) {
-        return resolve;
-      }
-      return Promise.resolve(false);
-    });
+    const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
+    const cryptoPromise = cryptoFor(this.getWin());
+    return Promise.all([keyPromise, cryptoPromise])
+        .then(results => {
+          const key = results[0];
+          const crypto = results[1];
+          return crypto.sha384(key);
+        }).then(digest => {
+          return Promise.resolve(digest[0] % 100 < spec['threshold']);
+        });
   }
 
   /**

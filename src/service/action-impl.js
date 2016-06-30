@@ -101,6 +101,7 @@ export class ActionService {
 
     // Add core events.
     this.addEvent('tap');
+    this.addEvent('submit');
   }
 
   /**
@@ -116,6 +117,10 @@ export class ActionService {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
+      });
+    } else if (name == 'submit') {
+      this.ampdoc.getRootNode().addEventListener('submit', event => {
+        this.trigger(event.target, 'submit', event);
       });
     }
   }

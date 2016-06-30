@@ -18,6 +18,7 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {waitForBody} from '../../../src/dom';
+import {allocateVariant} from './variant';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
@@ -43,7 +44,7 @@ export class AmpExperiment extends AMP.BaseElement {
     const results = Object.create(null);
     this.experimentVariants = Promise.all(
         Object.keys(config).map(experimentName => {
-          return this.getVariantAllocation_(config[experimentName])
+          return allocateVariant(this.getWin(), config[experimentName])
               .then(variantName => {
                 if (variantName) {
                   results[experimentName] = variantName;
@@ -63,18 +64,6 @@ export class AmpExperiment extends AMP.BaseElement {
         '<script type="application/json"> child.');
 
     return JSON.parse(children[0].textContent);
-  }
-
-  /**
-   * Allocates the current page view to a variant according to the given
-   * experiment config.
-   * @param {!JSONType} config experiment config
-   * @returns {!Promise<?string>} the name of the allocated variant
-   * @private
-   */
-  getVariantAllocation_(config) {
-    // TODO(@lannka, #1411): wire up with real variant allocation code.
-    return Promise.resolve(Object.keys(config.variants)[0]);
   }
 
   /**
