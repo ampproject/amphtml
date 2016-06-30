@@ -33,27 +33,33 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
     <td>NODISPLAY</td>
   </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-sticky-ad/">amp-sticky-ad.html</a><br /></td>
+  </tr>
 </table>
 
 ## Behavior
 
 - There can be only one `<amp-sticky-ad>` in an AMP document. The `<amp-sticky-ad>` should only have one direct child of `<amp-ad>`.
 - The sticky ad will appear on the bottom of a page.
+- The sticky ad introduces a full width blank container and then fills the sticky ad based on the width and height of the amp-ad.
 - The height of the sticky-ad is whatever its child needs up to its max-height.
 - The max-height of the sticky-ad is 100px, if the height exceeds 100px then the height would be 100px and overflow content will be hidden.
 - The width of the sticky-ad is set to 100% using CSS and cannot be overridden.
-- The sticky-ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
+- The sticky ad will display after scroll one viewport height from top provided there is at least one more viewport of content available.
+- When scrolled to the bottom of the page, the viewport is automatically padded with the additional height of the sticky ad, so that no content is ever hidden.
+- The sticky adjust to landscape mode, will center align ad.
 - There is an intermediate state for sticky-ad, after it is set to visible and before ad is expected to load. Background can be set to transparent to enhance user experience.
-- Swipe to dismiss (TBD)
+- The sticky ad can be dismissed and removed by a close button.
 
 Example:
 ```html
 <amp-sticky-ad layout="nodisplay">
-  <amp-ad width="300" height="65"
-    type="adman"
-    data-ws="17342"
-    data-s="300x65"
-    data-host="talos.adman.gr">
+  <amp-ad width="320"
+        height="50"
+        type="doubleclick"
+        data-slot="/35096353/amptesting/formats/sticky">
   </amp-ad>
 </amp-sticky-ad>
 ```
@@ -69,3 +75,4 @@ The only permissible value for the `layout` attribute in `amp-sticky-ad` is `nod
 The `amp-sticky-ad` component can be styled with standard CSS.
 
 - If different styles need to be applied to intermediate state and final state. The intermediate state style can be set through css class `amp-sticky-ad` and final state style can set through css class `amp-sticky-ad-loaded`. For example different `background-color` for these two states.
+- Close button style can be set through css class `amp-sticky-ad-close-button`.
