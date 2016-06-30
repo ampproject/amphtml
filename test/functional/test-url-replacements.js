@@ -24,7 +24,7 @@ import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
-  installUrlReplacementsService,
+  installUrlReplacementsService, getExpandAnchorHref,
 } from '../../src/service/url-replacements-impl';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
@@ -76,6 +76,12 @@ describe('UrlReplacements', () => {
     });
   }
 
+  function expandClickEvent(evt, withCid, withActivity) {
+    return getReplacements(withCid, withActivity).then(replacements => {
+      return replacements.getExpandAnchorHref_(evt);
+    });
+  }
+
   function getFakeWindow() {
     loadObservable = new Observable();
     const win = {
@@ -95,6 +101,25 @@ describe('UrlReplacements', () => {
       },
     };
     return win;
+  }
+
+  function buildClickEvent() {
+    return {
+      target: {
+        tagName: 'A',
+        nodeType: 1,
+        getAttribute: function(name) {
+          expect(name).to.equal('href');
+          return 'http://foo.com/bar?nx=CLICK_X&ny=CLICK_Y&' +
+                 'a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)';
+        }
+      },
+      defaultPrevented: false,
+      preventDefault: function() {
+        this.defaultPrevented = true;
+      },
+      clientX: 123, clientY: 456
+    };
   }
 
   it('should replace RANDOM', () => {
@@ -698,6 +723,90 @@ describe('UrlReplacements', () => {
       return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
         expect(res).to.match(/a=;/);
         expect(userErrorStub.callCount).to.equal(1);
+      });
+    });
+  });
+
+  describe('expand click event', () => {
+    it('validate getExpandAnchorHref with click x/y & CID', () => {
+      setCookie(window, 'url-abc', 'cid-for-abc');
+      setCookie(window, 'url-xyz', '');
+      const evt = buildClickEvent();
+      return expandClickEvent(evt, true).then(href => {
+        expect(href).to.match(
+          /^http:\/\/foo.com\/bar\?nx=123\&ny=456\&a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}$/);
+        expect(evt.defaultPrevented).to.be.true;
+      });
+    });
+
+    it('validate getExpandAnchorHref without expansion key', () => {
+      const evt = buildClickEvent();
+      evt.target.getAttribute = function(name) {
+        return 'http://foo.com/bar?nx=1&ny=2&a=3&b=4';
+      };
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.be.null;
+        expect(evt.defaultPrevented).to.be.false;
+      });
+    });
+
+    it('validate getExpandAnchorHref with click x/y & shadowRoot', () => {
+      const evt = buildClickEvent();
+      evt.target.parentNode = {
+        parentNode: {
+          nodeType: 11,
+          host: {
+            offsetTop: 11,
+            offsetLeft: 12
+          }
+        }
+      };
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.equal('http://foo.com/bar?nx=111&ny=445&a=&b=');
+        expect(evt.defaultPrevented).to.be.true;
+      });
+    });
+
+    it('validate getExpandAnchorHref missing click x/y', () => {
+      const evt = buildClickEvent();
+      evt.clientX = undefined;
+      evt.clientY = undefined
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.equal('http://foo.com/bar?nx=&ny=&a=&b=');
+        expect(evt.defaultPrevented).to.be.true;
+      });
+    });
+
+    it('validate getExpandAnchorHref non-anchor', () => {
+      const evt = buildClickEvent();
+      evt.target.tagName = 'SPAN';
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.be.null;
+        expect(evt.defaultPrevented).to.be.false;
+      });
+    });
+
+    it('validate getExpandAnchorHref missing href', () => {
+      const evt = buildClickEvent();
+      evt.target.getAttribute = function(name) {
+        expect(name).to.equal('href');
+        return undefined;
+      }
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.be.null;
+        expect(evt.defaultPrevented).to.be.false;
+      });
+    });
+
+    it('validate getExpandAnchorHref hash href', () => {
+      const evt = buildClickEvent();
+      evt.target.getAttribute = function(name) {
+        expect(name).to.equal('href');
+        return '#somehash';
+      }
+      return expandClickEvent(evt).then(href => {
+        expect(href).to.be.null;
+        expect(evt.defaultPrevented).to.be.false;
       });
     });
   });

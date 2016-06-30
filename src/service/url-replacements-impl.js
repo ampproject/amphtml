@@ -19,13 +19,14 @@ import {cidFor} from '../cid';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
 import {getService} from '../service';
-import {loadPromise} from '../event-helper';
+import {loadPromise, listen} from '../event-helper';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {timer} from '../timer';
 
 
 /** @private @const {string} */
@@ -51,6 +52,10 @@ export class UrlReplacements {
 
     /** @private @const {function():!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull.bind(null);
+
+    // NOTE: getService prevents multiple instances of same service across
+    // binaries (e.g. extensions) therefore ensures only one click listener.
+    this.registerClickListener_();
 
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
@@ -337,6 +342,28 @@ export class UrlReplacements {
   }
 
   /**
+   * Registers click listener on document that will expand the href of clicked
+   * anchors that will cause navigation (preventDefault has not been called)
+   * with additional support for CLICK_X & CLICK_Y based on clientX & clientY.
+   * If the target is within a shadowRoot, the x/y location is offset by the
+   * shadowRoot host's offset.
+   * @private
+   */
+  registerClickListener_() {
+    if (!this.win_.document) {
+      dev.warn('no document?!  testing?');
+      return;
+    }
+    listen(this.win_.document, 'click', evt => {
+      this.getExpandAnchorHref_(evt).then((href, error) => {
+        if (href) {
+          this.win_.location.href = href;
+        }
+      });
+    });
+  }
+
+  /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
    * @param {function(!AccessService):*} getter
@@ -442,11 +469,12 @@ export class UrlReplacements {
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
+   * @param {!RegExp=} opt_regexp
    * @return {!Promise<string>}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars) {
-    const expr = this.getExpr_(opt_bindings);
+  expand_(url, opt_bindings, opt_collectVars, opt_regexp) {
+    const expr = opt_regexp || this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
       if (val == null) {
@@ -563,6 +591,100 @@ export class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+  }
+
+
+  /**
+   * Determines the offset of an element's shadowRoot host if it has one.
+   * @param {!Element}
+   * @return {!{top: number, left: number}}
+   * @private
+   */
+  getShadowHostOffset_(element) {
+    while(element && element.nodeType != 11) {
+      element = element.parentNode; // 11 = DOCUMENT_FRAGMENT_NODE
+    }
+    if (element && element.host) {
+      return {top: element.host./*OK*/offsetTop,
+        left: element.host./*OK*/offsetLeft};
+    }
+    return {top: 0, left: 0};
+  }
+
+  /**
+   * For testing purpose only.
+   * @param {Event} evt click event
+   * @param {!function(!string, Error):void} callback upon expansion or
+   *    timeout/error given current expansion value from click target anchor
+   *    href and optional error.
+   * @param {Promise<string>}
+   * @private
+   */
+  getExpandAnchorHref_(evt) {
+    // Expansion allows for promise based insertion therefore we need to
+    // prevent navigation and then later redirect once we have the result.
+    // In order to ensure this is "brief", we will set a timeout with max
+    // value of 50 ms.  Non-promise based expansion keys replace the value
+    // immediately so timeout will only effect those whose promise did not
+    // return in time.
+    if (!evt || !evt.preventDefault || evt.defaultPrevented || !evt.target ||
+        evt.target.tagName !== 'A') {
+      return Promise.resolve(null);
+    }
+    let href = evt.target.getAttribute('href');
+    // Ensure href is present and not hash
+    if (!href || !href.indexOf('#')) {
+      return Promise.resolve(null);
+    }
+    let vars = {'CLICK_X': '', 'CLICK_Y': ''};
+    // As optimization, do not bother continuing if current href does not
+    // contain an expansion key.  It is possible the href could be modified by
+    // a later listener but we will assume it is unlikely to add a key.
+    let regExp = this.getExpr_(vars);
+    if (!regExp.test(href)) {
+      return Promise.resolve(null);
+    }
+    // Allow for other click listeners to execute via setTimeout and
+    // inspect result to determine if navigation will occur.  Overwrite
+    // preventDefault in order to determine if later click listeners
+    // prevent navigation.  It is possible other listeners may look at
+    // evt.defaultPrevented and differ their behavior as it will now
+    // return true but there is no way to override it.
+    evt.preventDefault();
+    let ampDefaultPrevented = false;
+    evt.preventDefault = function() {
+      ampDefaultPrevented = true;
+    }
+    return timer.promise().then(() => {
+      if (ampDefaultPrevented) {
+        return Promise.resolve(null);
+      }
+      // It is possible that later click listener modified href so use
+      // current value.
+      const currHref = evt.target.getAttribute('href');
+      if (currHref != href) {
+        href = currHref;
+        if (!href || !href.indexOf('#')) {
+          return Promise.resolve(null);
+        }
+      }
+      let shadowHostOffset;
+      if (evt.clientX !== undefined) {
+        shadowHostOffset = this.getShadowHostOffset_(evt.target);
+        vars['CLICK_X'] = evt.clientX - shadowHostOffset.left;
+      }
+      if (evt.clientY !== undefined) {
+        shadowHostOffset =
+          shadowHostOffset || this.getShadowHostOffset_(evt.target);
+        vars['CLICK_Y'] = evt.clientY - shadowHostOffset.top;
+      }
+      return timer.timeoutPromise(50, this.expand_(href, vars, null, regExp))
+          .catch(() => {
+            // On error (either due to timeout or error resolving field)
+            // return href to allow for redirect.
+            return href;
+          });
+    });
   }
 }
 
