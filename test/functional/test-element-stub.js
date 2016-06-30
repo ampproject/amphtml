@@ -51,14 +51,6 @@ describe('test-element-stub', () => {
     });
   }
 
-  function getAnalyticsIframe() {
-    return createIframePromise().then(f => {
-      iframe = f;
-      const testElement = iframe.doc.createElement('amp-analytics');
-      return iframe.addElement(testElement);
-    });
-  }
-
   it('insert script for amp-ad when script is not included', () => {
     return getElementStubIframe('amp-ad').then(() => {
       expect(iframe.doc.querySelectorAll('amp-ad')).to.have.length(1);
@@ -83,21 +75,6 @@ describe('test-element-stub', () => {
           .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
-    });
-  });
-
-  it('not insert script when element is not amp-ad amp-embed', () => {
-    return getAnalyticsIframe().then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-analytics');
-      expect(iframe.doc.querySelectorAll('amp-analytics')).to.have.length(1);
-      expect(iframe.doc.head.querySelectorAll(
-          '[custom-element="amp-analytics"]')).to.have.length(0);
-      new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(0);
-      expect(iframe.doc.head.querySelectorAll(
-          '[custom-element="amp-analytics"]')).to.have.length(0);
     });
   });
 });

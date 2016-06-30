@@ -24,8 +24,16 @@ import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
 
 
-describe('ad-cid', tests('amp-ad'));
-describe('ad-cid-embed', tests('amp-embed'));
+// TODO: I'm not sure if this is fully kosher.  This test asks, 'does the
+// CID get written to the element properly?'  When amp-ad is actually a delegate
+// to either amp-a4a or amp-ad-3p-impl, the CID gets written only to the
+// 3p-impl child Element.  Changing the test in this way checks that the CID
+// appears on the 3p-impl child, rather than the (delegating) parent.  That
+// should (?) be enough to ensure that it's propagated forward to the ad in the
+// 3p iframe.
+// describe('ad-cid', tests('amp-ad'));
+// describe('ad-cid-embed', tests('amp-embed'));
+describe('ad-cid', tests('amp-ad-3p-impl'));
 
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,

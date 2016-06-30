@@ -128,7 +128,7 @@ describe('3p-frame', () => {
     const height = window.innerHeight;
     const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
-        '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
+        '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"type":"_ping_"' +
         ',"_context":{"referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
@@ -137,6 +137,7 @@ describe('3p-frame', () => {
         '"mode":{"localDev":true,"development":false,"minified":false,' +
         '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"hidden":false' +
+        ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
@@ -144,13 +145,14 @@ describe('3p-frame', () => {
         ',"x":0,"y":0},"boundingClientRect":' +
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
-        '"right":0,"x":0,"y":0}},"startTime":1234567888}}';
-    expect(src).to.equal(
-        'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
-        fragment);
+        '"right":0,"x":0,"y":0}}}}';
+    const [srcOrigin, srcData] = src.split('#');
+    expect(srcOrigin).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+    expect(JSON.parse(srcData)).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
-    iframe.src = '/base/dist.3p/current/frame.max.html' + fragment;
+    iframe.src = '/base/dist.3p/current/frame.max.html' + '#' + fragment;
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
