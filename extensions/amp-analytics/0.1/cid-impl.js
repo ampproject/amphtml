@@ -138,12 +138,9 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
   if (!isProxyOrigin(url)) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
   }
-  return getBaseCid(cid, persistenceConsent).then(baseCid => {
-    return cid.sha384Base64_(
-        baseCid +
-        getProxySourceOrigin(url) +
-        getCidStruct.scope);
-  });
+  return Promise.all([getBaseCid(cid, persistenceConsent), cryptoFor(cid.win)])
+      .then(([baseCid, crypto]) => crypto.sha384Base64(
+          baseCid + getProxySourceOrigin(url) + getCidStruct.scope));
 }
 
 /**
@@ -260,7 +257,8 @@ function getBaseCid(cid, persistenceConsent) {
 
   // We need to make a new one.
   const seed = getEntropy(win);
-  cid.baseCid_ = cryptoFor(win).sha384Base64(seed);
+  cid.baseCid_ = cryptoFor(win)
+      .then(crypto => crypto.sha384Base64(seed));
 
   // Storing the value may require consent. We wait for the respective
   // promise.
