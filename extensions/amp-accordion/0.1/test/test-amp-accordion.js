@@ -15,6 +15,7 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-accordion';
 
 
@@ -115,7 +116,6 @@ describes.sandboxed('amp-accordion', {}, () => {
           'section > *:first-child');
       const clickEventExpandElement = {
         currentTarget: headerElements[0],
-        //elementId = currentTarget.getAttribute('id');
         preventDefault: sandbox.spy(),
       };
       const clickEventCollapseElement = {
@@ -168,6 +168,32 @@ describes.sandboxed('amp-accordion', {}, () => {
       expect(headerElements[0].getAttribute('aria-expanded')).to.equal('true');
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(headerElements[2].parentNode.hasAttribute('expanded')).to.be.false;
+    });
+  });
+
+  it('should disable sessionStorage when opt-out', () => {
+    return getAmpAccordion().then(obj => {
+      const iframe = obj.iframe;
+      const ampAccordion = obj.ampAccordion;
+      const impl = obj.ampAccordion.implementation_;
+      const setSessionStateSpy = sandbox.spy(impl, 'setSessionState_');
+      const getSessionStateSpy = sandbox.spy(impl, 'getSessionState_');
+      const getSessionStorageKeySpy =
+          sandbox.spy(impl, 'getSessionStorageKey_');
+      toggleExperiment(iframe.win, 'amp-accordion-store-state-opt-out', true);
+      ampAccordion.setAttribute('store-state-opt-out', null);
+      impl.buildCallback();
+      expect(setSessionStateSpy).to.not.have.been.called;
+      expect(getSessionStateSpy).to.not.have.been.called;
+      expect(getSessionStorageKeySpy).to.not.have.been.called;
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEventExpandElement = {
+        currentTarget: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
+      impl.onHeaderClick_(clickEventExpandElement);
+      expect(Object.keys(impl.currentState_)).to.have.length(0);
     });
   });
 });
