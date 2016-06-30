@@ -292,6 +292,55 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End Mediametrie example -->
 
+
+<!-- mParticle tracking
+  Ensure you replace AppKey with your Application key
+-->
+<amp-analytics type="mparticle" id="mparticle">
+<script type="application/json">
+  {
+    "vars": {
+      "apiKey": "AppKey"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      },
+      "trackPageviewWithCustomTitleAndUrl": {
+        "on": "visible",
+        "request": "pageview",
+        "vars": {
+          "title": "Custom Title",
+          "ampdocUrl" : "http://www.example.com"
+        }
+      },
+      "trackAppEvent": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "event",
+        "vars": {
+          "eventName": "AMP Test 1 button clicked",
+          "eventType": "Unknown",
+          "eventAttributes_Keys": ["test key1","test key2"],
+          "eventAttributes_Values": ["test value1","test value2"],
+          "userAttributes_Keys": ["test user attr key1","test user attr key2"],
+          "userAttributes_Values": ["test user attr value1","test user attr value2"],
+          "userIdentities_Types" : ["facebook", "twitter"],
+          "userIdentities_Values" : ["example@facebook.com", "@example"],
+          "debug": "true",
+          "location": [26.4619396, -80.0691996],
+          "customFlags_Keys": ["custom flag1", "custom flag2"],
+          "customFlags_Values": ["[100, 200]", "[test val1, test val2]"],
+          "appVersion": "1.0"
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End mParticle example -->
+
 <!-- OEWA example -->
 <amp-analytics type="oewa">
 <script type="application/json">
