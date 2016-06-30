@@ -16,8 +16,12 @@
 import {loadScript} from '../3p/3p';
 export function nativo(global, data) {
   let ntvAd;
-  (function(ntvAd, global, data) {    
-    global.history.replaceState(null, null, location.pathname + location.hash.replace(/({).*(})/, ''));
+  (function(ntvAd, global, data) {
+    global
+      .history
+      .replaceState(null,
+        null,
+        location.pathname + location.hash.replace(/({).*(})/, ''));
     // Private
     let delayedAdLoad = false;
     let percentageOfadViewed;
@@ -40,7 +44,8 @@ export function nativo(global, data) {
       const g = global;
       global.context.observeIntersection(function(positions) {
         const coordinates = getLastPositionCoordinates(positions);
-        if ((coordinates
+        if (typeof coordinates.rootBounds != 'undefined'
+            && (coordinates
               .intersectionRect
               .top == (coordinates
               .rootBounds.top + coordinates
@@ -91,9 +96,9 @@ export function nativo(global, data) {
         switch (key) {
           case 'premium': global._prx.push(['cfg.SetUserPremium']); break;
           case 'debug': global._prx.push(['cfg.Debug']); break;
-          case 'delay': (isValidDelayTime(data.delayByTime))
-            ? global._prx.push(['cfg.SetNoAutoStart'])
-            : ''; break;
+          case 'delay': if (isValidDelayTime(data.delayByTime)) {
+            global._prx.push(['cfg.SetNoAutoStart']);
+          } break;
         }
       }
     };
