@@ -417,13 +417,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
     const cryptoPromise = cryptoFor(this.getWin());
     return Promise.all([keyPromise, cryptoPromise])
-        .then(results => {
-          const key = results[0];
-          const crypto = results[1];
-          return crypto.sha384(key);
-        }).then(digest => {
-          return Promise.resolve(digest[0] % 100 < spec['threshold']);
-        });
+        .then(results => results[1].sha384(results[0]))
+        .then(digest => digest[0] % 100 < spec['threshold']);
   }
 
   /**
