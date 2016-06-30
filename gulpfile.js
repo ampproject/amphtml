@@ -49,6 +49,7 @@ function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
+  buildExtension('amp-a4a', '0.1', false, options);
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-ad', '0.1', false, options);
@@ -345,6 +346,7 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
   buildExample('ads.with.script.amp.html');
+  buildExample('adsense.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');

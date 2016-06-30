@@ -127,6 +127,9 @@ module.exports = {
     '!gulpfile.js',
     '!third_party/**/*.*',
     '!validator/chromeextension/*.*',
+    // Files in this testdata dir are machine-generated and are not part
+    // of the AMP runtime, so shouldn't be checked.
+    '!extensions/amp-a4a/*/test/testdata/*.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };

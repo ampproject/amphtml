@@ -78,6 +78,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    startTime,
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
         timer.now(),
