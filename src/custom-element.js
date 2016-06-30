@@ -428,7 +428,7 @@ function createBaseAmpElementProto(win) {
     this.isInTemplate_ = undefined;
 
     /** @private {boolean} */
-    this.loadingError_ = false;
+    this.hadLoadingError_ = false;
   };
 
   /**
@@ -597,8 +597,12 @@ function createBaseAmpElementProto(win) {
           layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
-        getVsync(this).mutate(() => {
-          this.prepareLoading_();
+        this.getVsync_().mutate(() => {
+          // Repeat "loading enabled" check because it could have changed while
+          // waiting for vsync.
+          if (this.isLoadingEnabled_()) {
+            this.prepareLoading_();
+          }
         });
       }
     }
@@ -881,7 +885,7 @@ function createBaseAmpElementProto(win) {
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
-      this.loadingError_ = true;
+      this.hadLoadingError_ = true;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -1152,14 +1156,16 @@ function createBaseAmpElementProto(win) {
     // 3. The element is too small or has not yet been measured;
     // 4. The element has already been laid out;
     // 5. The element is a `placeholder` or a `fallback`;
-    // 6. The element's layout is not a size-defining layout.
+    // 6. The element's layout is not a size-defining layout;
+    // 7. The element has loading error.
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }
     if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
         this.layoutCount_ > 0 ||
-        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
+        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_) ||
+        this.hadLoadingError_) {
       return false;
     }
     return true;
@@ -1172,7 +1178,7 @@ function createBaseAmpElementProto(win) {
    * @private @this {!Element}
    */
   ElementProto.prepareLoading_ = function() {
-    if (!this.loadingContainer_ && !this.loadingError_) {
+    if (!this.loadingContainer_) {
       const container = win.document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');

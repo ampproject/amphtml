@@ -1439,6 +1439,23 @@ describe('CustomElement Loading Indicator', () => {
     });
   });
 
+  it('should disable toggle loading on after layout failed', () => {
+    const prepareLoading = sandbox.spy(element, 'prepareLoading_');
+    const implMock = sandbox.mock(element.implementation_);
+    implMock.expects('layoutCallback').returns(Promise.reject());
+    element.build();
+    expect(element.hadLoadingError_).to.equal(false);
+    expect(element.isLoadingEnabled_()).to.equal(true);
+    return element.layoutCallback().then(() => {
+      throw new Error('Should never happen.');
+    }, () => {
+      expect(element.hadLoadingError_).to.equal(true);
+      expect(element.isLoadingEnabled_()).to.equal(false);
+      element.toggleLoading_(true);
+      expect(prepareLoading).to.not.have.been.called;
+    });
+  });
+
   it('should ignore loading "on" if layout completed before vsync', () => {
     resourcesMock.expects('deferMutate').once();
     element.tryUpgrade_();
