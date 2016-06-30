@@ -89,7 +89,6 @@ function adsenseDirectRequest(global, data) {
  * @param {!Object} data
  * @param {number} slotNumber
  * @param {!IntersectionObserverEntry} change
- * @return {string}
  */
 function makeAdsenseAd(global, data, slotNumber, change) {
   const iframe = global.document.createElement('iframe');

@@ -182,8 +182,8 @@ function adsenseRequestUrl(startTime, slotNumber, global, data, isAmp,
     experimentIds = data['experimentId'];
   }
 
-  const encodedWidth = encodeURIComponent(width);
-  const encodedHeight = encodeURIComponent(height);
+  const encodedWidth = encodeURIComponent(width.toString());
+  const encodedHeight = encodeURIComponent(height.toString());
 
   let url = `https://googleads.g.doubleclick.net/pagead/ads?is_amp=${isAmp}` +
     // Protect against wildly long client and slot ids.
