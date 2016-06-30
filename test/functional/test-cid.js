@@ -88,9 +88,9 @@ describe('cid', () => {
 
     return Promise
         .all([installCidService(fakeWin), installCryptoService(fakeWin)])
-        .then(([cidService, cryptoService]) => {
-          cid = cidService;
-          crypto = cryptoService;
+        .then(results => {
+          cid = results[0];
+          crypto = results[1];
           crypto.sha384Base64 = val => {
             if (val instanceof Array) {
               val = '[' + val + ']';

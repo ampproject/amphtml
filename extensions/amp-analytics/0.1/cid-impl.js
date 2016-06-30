@@ -139,8 +139,12 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
     return getOrCreateCookie(cid, getCidStruct, persistenceConsent);
   }
   return Promise.all([getBaseCid(cid, persistenceConsent), cryptoFor(cid.win)])
-      .then(([baseCid, crypto]) => crypto.sha384Base64(
-          baseCid + getProxySourceOrigin(url) + getCidStruct.scope));
+      .then(results => {
+        const baseCid = results[0];
+        const crypto = results[1];
+        return crypto.sha384Base64(
+            baseCid + getProxySourceOrigin(url) + getCidStruct.scope)
+      });
 }
 
 /**
@@ -194,9 +198,10 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
 
   // Store it as a cookie based on the persistence consent.
   Promise.all([newCookiePromise, persistenceConsent])
-      .then(([newCookie]) => {
+      .then(results => {
         // The initial CID generation is inherently racy. First one that gets
         // consent wins.
+        const newCookie = results[0];
         const relookup = getCookie(win, scope);
         if (!relookup) {
           setCidCookie(win, scope, newCookie);
@@ -263,9 +268,10 @@ function getBaseCid(cid, persistenceConsent) {
   // Storing the value may require consent. We wait for the respective
   // promise.
   Promise.all([cid.baseCid_, persistenceConsent])
-      .then(([newVal]) => {
+      .then(results => {
         // The initial CID generation is inherently racy. First one that gets
         // consent wins.
+        const newVal = results[0];
         const relookup = read(win);
         if (!relookup) {
           store(win, newVal);
