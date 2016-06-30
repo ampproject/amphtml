@@ -126,6 +126,7 @@ module.exports = {
     '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
+    '!validator/chromeextension/*.*',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
