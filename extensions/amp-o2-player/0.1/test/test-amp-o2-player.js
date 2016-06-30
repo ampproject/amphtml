@@ -18,7 +18,7 @@ import {
     createIframePromise,
     doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-o2-player');
+import '../amp-o2-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
