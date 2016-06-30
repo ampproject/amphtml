@@ -189,7 +189,7 @@ export function mergeExperimentIds(newId, currentIdString) {
   if (newId && !isNaN(parseInt(newId, 10))) {
     return currentIdString ? (currentIdString + ',' + newId) : newId;
   }
-  return currentIdString;
+  return currentIdString || '';
 }
 
 /**

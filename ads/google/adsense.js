@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getAdsenseInfo, adsenseRequestURLForAmpAd} from './utils';
+import {getAdsenseInfo, adsenseRequestUrlForAmpAd} from './utils';
 import {checkData} from '../../3p/3p';
 
 /**
@@ -108,7 +108,7 @@ function makeAdsenseAd(global, data, slotNumber, change) {
     this.readyState = 'complete';
   };
 
-  iframe.src = adsenseRequestURLForAmpAd(slotNumber, global, data, change);
+  iframe.src = adsenseRequestUrlForAmpAd(slotNumber, global, data, change);
 
   global.document.getElementById('c').appendChild(iframe);
 }

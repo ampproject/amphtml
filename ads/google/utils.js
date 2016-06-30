@@ -36,10 +36,11 @@ export function getCorrelator(global) {
  * @return {number}
  */
 export function getAmpCorrelator(clientId, pageViewId) {
+  const pageViewIdNumeric = Number(pageViewId || 0);
   if (clientId) {
-    return pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
+    return pageViewIdNumeric + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
   } else {
-    return pageViewId;
+    return pageViewIdNumeric;
   }
 }
 
