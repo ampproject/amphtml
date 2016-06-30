@@ -23,10 +23,21 @@ export class Crypto {
     this.win = win;
   }
 
+  /**
+   * Returns the SHA-384 hash of the input string in an ArrayBuffer.
+   * @param {string} str
+   * @returns {!Promise<!ArrayBuffer>}
+   */
   sha384(str) {
     return Promise.resolve(lib.sha384(str));
   }
 
+  /**
+   * Returns the SHA-384 hash of the input string in the format of web safe
+   * base64 string (using -_. instead of +/=).
+   * @param {string} str
+   * @returns {!Promise<string>}
+   */
   sha384Base64(str) {
     return Promise.resolve(lib.sha384Base64(str));
   }
