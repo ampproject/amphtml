@@ -401,6 +401,7 @@ function buildExamples(watch) {
   buildExample('released.amp.html');
   buildExample('social-share.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('share-tracking.amp.html');
   buildExample('soundcloud.amp.html');
   buildExample('springboard-player.amp.html');
   buildExample('sticky.ads.amp.html');

@@ -204,6 +204,27 @@ describe('Viewer', () => {
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
+  it('should configure shareTrackingIncomingFragment from url', () => {
+    windowApi.location.hash = '#share-tracking=12345';
+    const viewer = new Viewer(windowApi);
+    return viewer.getShareTrackingIncomingFragment().then(fragment => {
+      expect(fragment).to.be.equal('12345');
+    });
+  });
+
+  it('should configure shareTrackingIncomingFragment from viewer ' +
+      'if it is not provided in url', () => {
+    windowApi.location.hash = '';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('shareTrackingIncomingFragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getShareTrackingIncomingFragment().then(fragment => {
+      expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};

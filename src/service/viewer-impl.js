@@ -221,6 +221,10 @@ export class Viewer {
     this.performanceTracking_ = this.params_['csi'] === '1';
     dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
+    this.shareTrackingIncomingFragment_ = this.params_['share-tracking'];
+    dev.fine(TAG_, '- shareTrackingIncomingFragment:',
+        this.shareTrackingIncomingFragment_);
+
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
      * a web view.
@@ -799,6 +803,18 @@ export class Viewer {
       }
       return this.sendMessage('cid', undefined, true);
     });
+  }
+
+  /**
+   * Retrieves the share-tracking identifier from the viewer
+   * @return {!Promise<string>}
+   */
+  getShareTrackingIncomingFragment() {
+    if (this.shareTrackingIncomingFragment_) {
+      return Promise.resolve(this.shareTrackingIncomingFragment_);
+    }
+    return this.sendMessageUnreliable_(
+        'shareTrackingIncomingFragment', undefined, true);
   }
 
   /**
