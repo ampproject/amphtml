@@ -133,4 +133,4 @@ Current list of extended templates:
 
 | Component                                     | Description                                                                                 |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------
-| [`amp-mustache`](amp-mustache/amp-mustache.md) | Mustache(https://github.com/janl/mustache.js/) templates. |
+| [`amp-mustache`](amp-mustache/amp-mustache.md) | [Mustache](https://github.com/janl/mustache.js/) templates. |
