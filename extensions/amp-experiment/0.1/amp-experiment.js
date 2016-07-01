@@ -49,10 +49,12 @@ export class AmpExperiment extends AMP.BaseElement {
             results[experimentName] = variantName;
           });
     });
-    this.experimentVariants = Promise.all(variants).then(() => results);
-    this.experimentVariants.then(this.addToBody_.bind(this));
 
-    getService(this.getWin(), 'variant', () => this.experimentVariants);
+    /** @private @const {!Promise<Object<string, ?string>>} */
+    this.experimentVariants_ = Promise.all(variants).then(() => results);
+    this.experimentVariants_.then(this.addToBody_.bind(this));
+
+    getService(this.getWin(), 'variant', () => this.experimentVariants_);
   }
 
   getConfig_() {
