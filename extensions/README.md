@@ -19,6 +19,7 @@ Current list of extended components:
 | --------- | ----------- |
 | [`amp-access`](amp-access/amp-access.md) | Provides AMP paywall and subscription support.  |
 | [`amp-accordion`](amp-accordion/amp-accordion.md) | Provides a way for viewers to have a glance at the outline of the content and jump to a section of their choice at will. |
+| [`amp-ad`](amp-ad/amp-ad.md) | Container to display an ad. |
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
 | [`amp-anim`](amp-anim/amp-anim.md) | Manages an animated image, typically a GIF. |
 | [`amp-audio`](amp-audio/amp-audio.md) | Replaces the HTML5 `audio` tag. |
@@ -27,6 +28,7 @@ Current list of extended components:
 | [`amp-carousel`](amp-carousel/amp-carousel.md) | Displays multiple similar pieces of content along a horizontal axis. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
 | [`amp-dynamic-css-classes`](amp-dynamic-css-classes/amp-dynamic-css-classes.md) | Adds several dynamic CSS class names onto the HTML element. |
+| [`amp-embed`](amp-ad/amp-embed.md) | An alias to the `amp-ad` tag. |
 | [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md) | Expands or shrinks font size to fit the content within the space given. |
 | [`amp-font`](amp-font/amp-font.md) | Triggers and monitors the loading of custom fonts. |
