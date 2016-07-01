@@ -49,6 +49,11 @@ describe('crypto-impl', () => {
     });
   }
 
+  function isModernChrome() {
+    const platform = new Platform(window);
+    return platform.isChrome() && platform.getMajorVersion() >= 45;
+  }
+
   testSuite('with native crypto API', new Crypto(window));
   testSuite('with crypto lib', new Crypto({}));
   testSuite('with native crypto API rejects', new Crypto({
@@ -76,21 +81,18 @@ describe('crypto-impl', () => {
         });
   });
 
-  it('should not call closure lib when native API is available', () => {
-    const platform = new Platform(window);
-    if (!platform.isChrome() || platform.getMajorVersion() < 48) {
-      // Run this test only on browsers that we're confident about the existence
-      // of native Crypto API.
-      return this.skip();
-    }
-
-    const nativeApiSpy = sinon.spy(window.crypto.subtle, 'digest');
-    const libSpy = sinon.spy(lib, 'sha384');
-    return new Crypto(window).sha384Base64('abc').then(hash => {
-      expect(hash).to.equal(
-          'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
-      expect(nativeApiSpy).to.have.been.calledOnce;
-      expect(libSpy).to.not.have.been.called;
+  // Run this test only on browsers that we're confident about the existence
+  // of native Crypto API.
+  if (isModernChrome()) {
+    it('should not call closure lib when native API is available', () => {
+      const nativeApiSpy = sinon.spy(window.crypto.subtle, 'digest');
+      const libSpy = sinon.spy(lib, 'sha384');
+      return new Crypto(window).sha384Base64('abc').then(hash => {
+        expect(hash).to.equal(
+            'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
+        expect(nativeApiSpy).to.have.been.calledOnce;
+        expect(libSpy).to.not.have.been.called;
+      });
     });
-  });
+  }
 });
