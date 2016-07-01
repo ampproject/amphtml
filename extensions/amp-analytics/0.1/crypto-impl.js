@@ -16,31 +16,81 @@
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {getService} from '../../../src/service';
+import {dev} from '../../../src/log';
+
+/** @const {string} */
+const TAG = 'Crypto';
 
 export class Crypto {
 
   constructor(win) {
-    this.win = win;
+    /** @private @const {?SubtleCrypto} */
+    this.subtle_ = getSubtle(win);
   }
 
   /**
-   * Returns the SHA-384 hash of the input string in an ArrayBuffer.
+   * Returns the SHA-384 hash of the input string in a number array.
+   * Input string cannot contain chars out of range [0,255].
    * @param {string} str
-   * @returns {!Promise<!ArrayBuffer>}
+   * @returns {!Promise<!Array<number>>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384(str) {
+    if (this.subtle_) {
+      try {
+        return this.subtle_.digest('SHA-384', str2ab(str))
+            // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
+            .then(buffer => [].slice.call(new Uint8Array(buffer)),
+                e => {
+                  dev.info(TAG, 'Crypto digest promise has rejected, ' +
+                      'fallback to closure lib.', e);
+                  return lib.sha384(str);
+                });
+      } catch (e) {
+        dev.info(TAG, 'Crypto digest has thrown, fallback to closure lib.', e);
+      }
+    }
     return Promise.resolve(lib.sha384(str));
   }
 
   /**
    * Returns the SHA-384 hash of the input string in the format of web safe
-   * base64 string (using -_. instead of +/=).
+   * base64 (using -_. instead of +/=).
+   * Input string cannot contain chars out of range [0,255].
    * @param {string} str
    * @returns {!Promise<string>}
+   * @throws {!Error} when input string contains chars out of range [0,255]
    */
   sha384Base64(str) {
-    return Promise.resolve(lib.sha384Base64(str));
+    return this.sha384(str).then(buffer => {
+      return lib.base64(buffer);
+    });
   }
+}
+
+function getSubtle(win) {
+  if (!win.crypto) {
+    return null;
+  }
+  return win.crypto.subtle || win.crypto.webkitSubtle || null;
+}
+
+/**
+ * Convert a string to Unit8Array. A shim for TextEncoder.
+ * @param {string} str
+ * @returns {!Uint8Array}
+ */
+function str2ab(str) {
+  const buf = new Uint8Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    // Apply the same check as in closure lib:
+    // https://github.com/google/closure-library/blob/master/closure/goog/crypt/sha2_64bit.js#L169
+    if (str.charCodeAt(i) > 255) {
+      throw Error('Characters must be in range [0,255]');
+    }
+    buf[i] = str.charCodeAt(i);
+  }
+  return buf;
 }
 
 export function installCryptoService(win) {
