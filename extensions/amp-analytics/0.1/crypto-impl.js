@@ -75,7 +75,11 @@ function getSubtle(win) {
   return win.crypto.subtle || win.crypto.webkitSubtle || null;
 }
 
-// A shim for TextEncoder
+/**
+ * Convert a string to Unit8Array. A shim for TextEncoder.
+ * @param {string} str
+ * @returns {!Uint8Array}
+ */
 function str2ab(str) {
   const buf = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
