@@ -1,0 +1,4 @@
+{
+  "canary": true,
+  "no-auth-in-prerender": 1
+}
