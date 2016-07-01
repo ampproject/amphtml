@@ -636,11 +636,25 @@ export class UrlReplacements {
     if (!href || !href.indexOf('#')) {
       return Promise.resolve(null);
     }
-    let vars = {'CLICK_X': '', 'CLICK_Y': ''};
+    const vars = {
+      'CLICK_X': (function() {
+        if (evt.clientX === undefined) {
+          return '';
+        }
+        return evt.clientX - this.getShadowHostOffset_(evt.target).left;
+      }).bind(this),
+      'CLICK_Y': (function() {
+        if (evt.clientY === undefined) {
+          return '';
+        }
+        return evt.clientY - this.getShadowHostOffset_(evt.target).top;
+      }).bind(this)
+    };
+
     // As optimization, do not bother continuing if current href does not
     // contain an expansion key.  It is possible the href could be modified by
     // a later listener but we will assume it is unlikely to add a key.
-    let regExp = this.getExpr_(vars);
+    const regExp = this.getExpr_(vars);
     if (!regExp.test(href)) {
       return Promise.resolve(null);
     }
@@ -667,16 +681,6 @@ export class UrlReplacements {
         if (!href || !href.indexOf('#')) {
           return Promise.resolve(null);
         }
-      }
-      let shadowHostOffset;
-      if (evt.clientX !== undefined) {
-        shadowHostOffset = this.getShadowHostOffset_(evt.target);
-        vars['CLICK_X'] = evt.clientX - shadowHostOffset.left;
-      }
-      if (evt.clientY !== undefined) {
-        shadowHostOffset =
-          shadowHostOffset || this.getShadowHostOffset_(evt.target);
-        vars['CLICK_Y'] = evt.clientY - shadowHostOffset.top;
       }
       return timer.timeoutPromise(50, this.expand_(href, vars, null, regExp))
           .catch(() => {
