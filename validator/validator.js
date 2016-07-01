@@ -935,13 +935,24 @@ class ParsedUrlSpec {
     this.spec_ = spec;
 
     /**
-     * @type {!Object<string, ?>}
+     * @type {!Object<string, int>}
      * @private
      */
     this.allowedProtocols_ = {};
     if (this.spec_ !== null) {
       for (const protocol of this.spec_.allowedProtocol) {
         this.allowedProtocols_[protocol] = 0;
+      }
+    }
+
+    /**
+     * @type {!Object<string, int>}
+     * @private
+     */
+    this.disallowedDomains_ = {};
+    if (this.spec_ !== null) {
+      for (const domain of this.spec_.disallowedDomain) {
+        this.disallowedDomains_[domain] = 0;
       }
     }
   }
@@ -1018,6 +1029,17 @@ class ParsedUrlSpec {
       }
       return;
     }
+    const domain = urlComponents[goog.uri.utils.ComponentIndex.DOMAIN];
+    if (domain &&
+        this.disallowedDomains_.hasOwnProperty(domain.toLowerCase())) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        adapter.disallowedDomain(
+            context, domain.toLowerCase(), tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
   }
 }
 
@@ -1069,6 +1091,21 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {string} domain
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedDomain(context, domain, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
+        context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
         tagSpec.specUrl, result);
   }
 
@@ -1144,6 +1181,20 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
         this.lineCol_,
         /* params */[getTagSpecName(tagSpec), protocol], tagSpec.specUrl,
         result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {string} domain
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedDomain(context, domain, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN,
+        this.lineCol_,
+        /* params */[getTagSpecName(tagSpec), domain], tagSpec.specUrl, result);
   }
 
   /**
@@ -1889,7 +1940,7 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
  */
 class ParsedTagSpec {
   /**
-   * @param {string} templateSpecUrl
+   * @param {?string} templateSpecUrl
    * @param {!ParsedAttrLists} parsedAttrLists
    * @param {!Object<string, number>} tagspecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
@@ -1934,7 +1985,7 @@ class ParsedTagSpec {
      */
     this.mandatoryOneofs_ = [];
     /**
-     * @type {string}
+     * @type {?string}
      * @private
      */
     this.templateSpecUrl_ = templateSpecUrl;
@@ -2836,50 +2887,54 @@ function specificity(code) {
       return 35;
     case amp.validator.ValidationError.Code.MISSING_URL:
       return 36;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.DISALLOWED_DOMAIN:
       return 37;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 38;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 42;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 43;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 45;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 46;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 47;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 48;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 49;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 49;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 50;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 51;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN:
       return 52;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
       return 53;
-    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
       return 54;
-    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
       return 55;
-    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
       return 56;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
       return 57;
+    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+      return 58;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+      return 59;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
       return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
@@ -2959,7 +3014,8 @@ class ParsedValidatorRules {
 
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
-      goog.asserts.assert(rules.templateSpecUrl != null);
+      if (amp.validator.GENERATE_DETAILED_ERRORS)
+        goog.asserts.assert(rules.templateSpecUrl != null);
       const parsedTagSpec = new ParsedTagSpec(
           rules.templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
