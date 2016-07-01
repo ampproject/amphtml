@@ -19,6 +19,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {waitForBody} from '../../../src/dom';
 import {allocateVariant} from './variant';
+import {getService} from '../../../src/service';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
@@ -46,12 +47,12 @@ export class AmpExperiment extends AMP.BaseElement {
         Object.keys(config).map(experimentName => {
           return allocateVariant(this.getWin(), config[experimentName])
               .then(variantName => {
-                if (variantName) {
-                  results[experimentName] = variantName;
-                }
+                results[experimentName] = variantName;
               });
         })).then(() => results);
     this.experimentVariants.then(this.addToBody_.bind(this));
+
+    getService(this.getWin(), 'variant', () => this.experimentVariants);
   }
 
   getConfig_() {
@@ -68,15 +69,17 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /**
    * Adds the given experiment and variant pairs to body element as attributes
-   * and values.
-   * @param {!Object<string, string>} experiments
+   * and values. Experiment with no variant assigned (null) will be skipped.
+   * @param {!Object<string, ?string>} experiments
    * @private
    */
   addToBody_(experiments) {
     const doc = this.getWin().document;
     waitForBody(doc, () => {
       for (const name in experiments) {
-        doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+        if (experiments[name]) {
+          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+        }
       }
     });
   }
