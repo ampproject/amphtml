@@ -159,7 +159,10 @@ export const adPreconnect = {
   appnexus: 'https://ib.adnxs.com',
   microad: [
     'https://s-rtb.send.microad.jp',
+    'https://s-rtb.send.microadinc.com',
     'https://cache.send.microad.jp',
+    'https://cache.send.microadinc.com',
+    'https://deb.send.microad.jp',
   ],
   yahoojp: [
     'https://s.yimg.jp',
