@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A stickyAd provides a way to fix ad at bottom of a page. The stickyAs serves as a container and the ad as its child will display as sticky-ad</td>
+    <td>Provides a way to fix an ad at the bottom of a page. The `sticky-ad` serves as a container and the ad as its child will display as sticky-ad</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
