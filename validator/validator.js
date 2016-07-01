@@ -31,10 +31,10 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
-goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
+goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
@@ -990,10 +990,8 @@ class ParsedUrlSpec {
       }
       return;
     }
-    let uri;
-    try {
-      uri = goog.Uri.parse(url);
-    } catch (ex) {
+    const urlComponents = goog.uri.utils.split(url);
+    if (urlComponents === null) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrl(context, url, tagSpec, result);
       } else {
@@ -1001,17 +999,18 @@ class ParsedUrlSpec {
       }
       return;
     }
-    if (uri.hasScheme() &&
-        !this.allowedProtocols_.hasOwnProperty(uri.getScheme().toLowerCase())) {
+    const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
+    if (scheme &&
+        !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrlProtocol(
-            context, uri.getScheme().toLowerCase(), tagSpec, result);
+            context, scheme.toLowerCase(), tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
       return;
     }
-    if (!this.spec_.allowRelative && !uri.hasScheme()) {
+    if (!this.spec_.allowRelative && (scheme === undefined)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.disallowedRelativeUrl(context, url, tagSpec, result);
       } else {
