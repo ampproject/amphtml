@@ -85,14 +85,16 @@ describe('crypto-impl', () => {
   // of native Crypto API.
   if (isModernChrome()) {
     it('should not call closure lib when native API is available', () => {
-      const nativeApiSpy = sinon.spy(window.crypto.subtle, 'digest');
-      const libSpy = sinon.spy(lib, 'sha384');
+      const sandbox = sinon.sandbox.create();
+      const nativeApiSpy = sandbox.spy(window.crypto.subtle, 'digest');
+      const libSpy = sandbox.spy(lib, 'sha384');
       return new Crypto(window).sha384Base64('abc').then(hash => {
         expect(hash).to.equal(
             'ywB1P0WjXou1oD1pmsZQBycsMqsO3tFjGotgWkP_W-2AhgcroefMI1i67KE0yCWn');
         expect(nativeApiSpy).to.have.been.calledOnce;
         expect(libSpy).to.not.have.been.called;
       });
+      sandbox.restore();
     });
   }
 });
