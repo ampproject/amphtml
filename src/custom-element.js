@@ -363,6 +363,9 @@ function createBaseAmpElementProto(win) {
     /** @private {number} */
     this.layoutCount_ = 0;
 
+    /** @private {number} */
+    this.layoutAttemptCount_ = 0;
+
     /** @private {boolean} */
     this.isInViewport_ = false;
 
@@ -426,9 +429,6 @@ function createBaseAmpElementProto(win) {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
-
-    /** @private {boolean} */
-    this.isFirstLayout_ = true;
   };
 
   /**
@@ -880,16 +880,16 @@ function createBaseAmpElementProto(win) {
     return promise.then(() => {
       this.readyState = 'complete';
       this.layoutCount_++;
+      this.layoutAttemptCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       // Check if this is the first success layout that needs to call
       // to call firstLayoutCompleted.
-      if (this.isFirstLayout_) {
-        this.isFirstLayout_ = false;
+      if (this.layoutCount_ == 1) {
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not
-      this.layoutCount_++;
+      this.layoutAttemptCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -907,7 +907,7 @@ function createBaseAmpElementProto(win) {
   ElementProto.viewportCallback = function(inViewport) {
     assertNotTemplate(this);
     this.isInViewport_ = inViewport;
-    if (this.layoutCount_ == 0) {
+    if (this.layoutAttemptCount_ == 0) {
       if (!inViewport) {
         this.toggleLoading_(false);
       } else {
@@ -981,7 +981,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
-      this.isFirstLayout_ = true;
+      this.layoutAttemptCount_ = 0;
     }
     return isReLayoutNeeded;
   };
@@ -1161,13 +1161,13 @@ function createBaseAmpElementProto(win) {
     // 3. The element is too small or has not yet been measured;
     // 4. The element has already been laid out (include having loading error);
     // 5. The element is a `placeholder` or a `fallback`;
-    // 6. The element's layout is not a size-defining layout.
+    // 6. The element's layout is not a size-defining layout;
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }
     if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
-        this.layoutCount_ > 0 ||
+        this.layoutAttemptCount_ > 0 ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
       return false;
     }
