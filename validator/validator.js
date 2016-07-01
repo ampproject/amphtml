@@ -2427,6 +2427,13 @@ class ParsedTagSpec {
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
+        if (hasTemplateAncestor) {
+          this.validateAttrValueBelowTemplateTag(
+              context, attrName, attrValue, result);
+          if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+            return;
+          }
+        }
         continue;
       }
       if (hasTemplateAncestor) {
