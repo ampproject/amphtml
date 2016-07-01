@@ -16,6 +16,7 @@ include the following script in the `<head>`:
 Current list of extended components by category:
 
 - [Access](#access)
+- [Ads](#ads)
 - [Analytics](#analytics)
 - [Audio/Video](#audiovideo)
 - [Dynamic lists](#dynamic-lists)
@@ -89,7 +90,6 @@ Current list of extended components by category:
 | [`amp-anim`](amp-anim/amp-anim.md) | Manages an animated image, typically a GIF. |
 | [`amp-carousel`](amp-carousel/amp-carousel.md) | Displays multiple similar pieces of content along a horizontal axis. |
 | [`amp-dynamic-css-classes`](amp-dynamic-css-classes/amp-dynamic-css-classes.md) | Adds several dynamic CSS class names onto the HTML element. |
-| [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md) | Expands or shrinks font size to fit the content within the space given. |
 | [`amp-font`](amp-font/amp-font.md) | Triggers and monitors the loading of custom fonts. |
 | [`amp-fx-flying-carpet`](amp-fx-flying-carpet/amp-fx-flying-carpet.md) | Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport. |
