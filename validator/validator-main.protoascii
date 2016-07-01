@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 135
+min_validator_revision_required: 143
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 231
+spec_file_revision: 233
 
 # Validator extensions.
 # =====================
@@ -716,6 +716,7 @@ attr_lists: {
       allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
+      allowed_protocol: "threema"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
     }
@@ -800,6 +801,7 @@ tags: {
       allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
+      allowed_protocol: "threema"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
       allow_relative: true
