@@ -1272,7 +1272,7 @@ describe('CustomElement Loading Indicator', () => {
   });
 
   it('should disable when element has already been laid out', () => {
-    element.layoutCount_ = 1;
+    element.layoutAttemptCount_ = 1;
     expect(element.isLoadingEnabled_()).to.be.false;
   });
 
@@ -1370,7 +1370,7 @@ describe('CustomElement Loading Indicator', () => {
 
   it('should NOT turn off when exits viewport but already laid out', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
-    element.layoutCount_ = 1;
+    element.layoutAttemptCount_ = 1;
     element.viewportCallback(false);
     expect(toggle.callCount).to.equal(0);
   });
@@ -1385,7 +1385,7 @@ describe('CustomElement Loading Indicator', () => {
 
   it('should NOT turn on when enters viewport but already laid out', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
-    element.layoutCount_ = 1;
+    element.layoutAttemptCount_ = 1;
     element.viewportCallback(true);
     clock.tick(1000);
     expect(toggle.callCount).to.equal(0);

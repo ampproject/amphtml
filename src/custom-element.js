@@ -888,7 +888,7 @@ function createBaseAmpElementProto(win) {
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
-      // add layoutCount_ by 1 despite load fails or not
+      // add layoutAttemptCount_ by 1 despite load fails or not
       this.layoutAttemptCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
@@ -1161,7 +1161,7 @@ function createBaseAmpElementProto(win) {
     // 3. The element is too small or has not yet been measured;
     // 4. The element has already been laid out (include having loading error);
     // 5. The element is a `placeholder` or a `fallback`;
-    // 6. The element's layout is not a size-defining layout;
+    // 6. The element's layout is not a size-defining layout.
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }
