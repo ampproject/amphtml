@@ -881,15 +881,15 @@ function createBaseAmpElementProto(win) {
       this.readyState = 'complete';
       this.layoutCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
-      /* what to do here, if load fail, but layout for the second time. */
-      /* TODO: zhouyx, still need a way to figure out how to call firstLayoutCompleted() */
+      // Check if this is the first success layout that needs to call
+      // to call firstLayoutCompleted.
       if (this.isFirstLayout_) {
         this.isFirstLayout_ = false;
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
+      // add layoutCount_ by 1 despite load fails or not
       this.layoutCount_++;
-      this.hadLoadingError_ = true;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -981,7 +981,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
-      this.isFirstLayout_ = false;
+      this.isFirstLayout_ = true;
     }
     return isReLayoutNeeded;
   };
@@ -1159,10 +1159,9 @@ function createBaseAmpElementProto(win) {
     // 1. `noloading` attribute is specified;
     // 2. The element has not been whitelisted;
     // 3. The element is too small or has not yet been measured;
-    // 4. The element has already been laid out;
+    // 4. The element has already been laid out (include having loading error);
     // 5. The element is a `placeholder` or a `fallback`;
-    // 6. The element's layout is not a size-defining layout;
-    // 7. The element has loading error.
+    // 6. The element's layout is not a size-defining layout.
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }

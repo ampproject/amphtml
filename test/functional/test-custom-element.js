@@ -1439,17 +1439,17 @@ describe('CustomElement Loading Indicator', () => {
     });
   });
 
-  it('should disable toggle loading on after layout failed', () => {
+  it.only('should disable toggle loading on after layout failed', () => {
     const prepareLoading = sandbox.spy(element, 'prepareLoading_');
     const implMock = sandbox.mock(element.implementation_);
     implMock.expects('layoutCallback').returns(Promise.reject());
     element.build();
-    expect(element.hadLoadingError_).to.equal(false);
+    expect(element.layoutCount_).to.equal(0);
     expect(element.isLoadingEnabled_()).to.equal(true);
     return element.layoutCallback().then(() => {
       throw new Error('Should never happen.');
     }, () => {
-      expect(element.hadLoadingError_).to.equal(true);
+      expect(element.layoutCount_).to.equal(1);
       expect(element.isLoadingEnabled_()).to.equal(false);
       element.toggleLoading_(true);
       expect(prepareLoading).to.not.have.been.called;
