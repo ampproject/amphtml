@@ -640,9 +640,6 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
         }
         this.implementation_.layout_ = this.layout_;
         this.implementation_.firstAttachedCallback();
-      } catch (e) {
-        reportError(e, this);
-      } finally {
         if (!isUpgraded(this)) {
           // amp:attached is dispatched from the ElementStub class when it replayed
           // the firstAttachedCallback call.
@@ -650,6 +647,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
         } else {
           this.dispatchCustomEvent('amp:attached');
         }
+      } catch (e) {
+        reportError(e, this);
       }
     }
     this.resources_.add(this);
@@ -1249,8 +1248,8 @@ function assertNotTemplate(element) {
 };
 
 /**
+ * @param {!Element} element
  * @return {!./service/vsync-impl.Vsync}
- * param {!Element} element
  */
 function getVsync(element) {
   return vsyncFor(element.ownerDocument.defaultView);
@@ -1258,8 +1257,8 @@ function getVsync(element) {
 
 /**
  * Whether the element has been upgraded yet.
+ * @param {!Element} element
  * @return {boolean}
- * @final @this {!Element}
  */
 function isUpgraded(element) {
   return !(element.implementation_ instanceof ElementStub);
