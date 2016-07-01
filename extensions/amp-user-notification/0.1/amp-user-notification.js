@@ -65,6 +65,14 @@ class NotificationInterface {
    * @return {!Promise}
    */
   show() {}
+
+  /**
+   * Returns whether this notification has been dismissed and the dismissal
+   * has been persisted in storage. Returns false if storage throws error or
+   * 'data-persist-dismissal' is disabled.
+   * @return {!Promise<boolean>}
+   */
+  isDismissed() {}
 }
 
 /**
@@ -263,12 +271,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.dialogPromise_;
   }
 
-  /**
-   * Returns whether this notification has been dismissed and the dismissal
-   * has been persisted in storage. Returns false if storage throws error or
-   * 'data-persist-dismissal' is disabled.
-   * @return {!Promise<boolean>}
-   */
+  /** @override */
   isDismissed() {
     if (!this.persistDismissal_) {
       return Promise.resolve(false);
@@ -334,7 +337,7 @@ export class UserNotificationManager {
    * Retrieve a promise associated to an `amp-user-notification` component
    * that is resolved when user agrees to the terms.
    * @param {string} id
-   * @return {!Promise<!AmpUserNotification>}
+   * @return {!Promise<!NotificationInterface>}
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
@@ -348,7 +351,7 @@ export class UserNotificationManager {
   /**
    * Register an instance of `amp-user-notification`.
    * @param {string} id
-   * @param {!AmpUserNotification} userNotification
+   * @param {!NotificationInterface} userNotification
    * @return {!Promise}
    * @package
    */
