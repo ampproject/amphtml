@@ -398,10 +398,12 @@ export class AmpIframe extends AMP.BaseElement {
 
     if (newHeight !== undefined || newWidth !== undefined) {
       this.attemptChangeSize(newHeight, newWidth, () => {
-        this.iframe_.height = height;
-        this.element.setAttribute('height', newHeight);
-        this.iframe_.width = width;
-        this.element.setAttribute('width', newWidth);
+        if (newHeight !== undefined) {
+          this.element.setAttribute('height', newHeight);
+        }
+        if (newWidth !== undefined) {
+          this.element.setAttribute('width', newWidth);
+        }
       });
     } else {
       user.warn(TAG_,
