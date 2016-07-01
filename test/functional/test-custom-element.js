@@ -1439,7 +1439,7 @@ describe('CustomElement Loading Indicator', () => {
     });
   });
 
-  it.only('should disable toggle loading on after layout failed', () => {
+  it('should disable toggle loading on after layout failed', () => {
     const prepareLoading = sandbox.spy(element, 'prepareLoading_');
     const implMock = sandbox.mock(element.implementation_);
     implMock.expects('layoutCallback').returns(Promise.reject());
