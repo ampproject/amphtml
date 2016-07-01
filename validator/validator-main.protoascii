@@ -25,7 +25,7 @@ min_validator_revision_required: 143
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 233
+spec_file_revision: 234
 
 # Validator extensions.
 # =====================
@@ -2067,58 +2067,6 @@ attr_lists: {
   name: "extended-amp-global"
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
-}
-# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
-# so if you're changing amp-ad consider changing amp-embed as well.
-tags: {  # <amp-ad>
-  tag_name: "AMP-AD"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  attrs: { name: "alt" }
-  attrs: { name: "json" }
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  attrs: { name: "type" mandatory: true }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/amp-ad.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
-# so if you're changing amp-embed consider changing amp-ad as well.
-tags: {  # <amp-embed>
-  tag_name: "AMP-EMBED"
-  disallowed_ancestor: "AMP-SIDEBAR"
-  attrs: { name: "alt" }
-  attrs: { name: "json" }
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  attrs: { name: "type" mandatory: true }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/amp-embed.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
 }
 tags: {  # <amp-img>
   tag_name: "AMP-IMG"
