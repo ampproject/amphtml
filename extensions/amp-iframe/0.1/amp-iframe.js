@@ -353,6 +353,14 @@ export class AmpIframe extends AMP.BaseElement {
     }
   }
 
+  /** @override  */
+  getPriority() {
+    if (isAdLike(this.element)) {
+      return 2; // See AmpAd3PImpl.
+    }
+    return super.getPriority();
+  }
+
   /**
    * Makes the iframe visible.
    * @private
@@ -434,6 +442,36 @@ function makeIOsScrollable(element) {
     return wrapper;
   }
   return element;
+}
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const height = parseInt(element.getAttribute('height'), 10);
+  const width = parseInt(element.getAttribute('width'), 10);
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
