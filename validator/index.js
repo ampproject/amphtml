@@ -30,6 +30,12 @@ var url = require('url');
 var util = require('util');
 var vm = require('vm');
 
+/**
+ * Determines if str begins with prefix.
+ * @param {!string} str
+ * @param {!string} prefix
+ * @returns {!boolean}
+ */
 function hasPrefix(str, prefix) {
   return str.indexOf(prefix) == 0;
 }
@@ -263,7 +269,7 @@ Validator.prototype.validateString =
     result.errors.push(error);
   }
   return result;
-}
+};
 
 /**
  * A global static map used by the getInstance function to avoid loading
@@ -320,7 +326,7 @@ function logValidationResult(filename, validationResult, color) {
       msg += (error.severity === 'ERROR' ? colors.red : colors.magenta)(
           error.message);
     } else {
-      msg += error.message
+      msg += error.message;
     }
     if (error.specUrl) {
       msg += ' (see ' + error.specUrl + ')';
@@ -393,7 +399,7 @@ function main() {
                 }
               }
               if (program.format === 'json') {
-                console.log(JSON.stringify(jsonOut))
+                console.log(JSON.stringify(jsonOut));
               }
             })
             .catch(function(error) {
