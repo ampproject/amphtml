@@ -176,8 +176,8 @@ export class UrlReplacements {
         user.assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
         user.assert(variants[experiment] !== undefined,
-              `The value passed to VARIANT() is not a valid experiment name:
-             ${experiment}`);
+            'The value passed to VARIANT() is not a valid experiment name:' +
+                experiment);
         const variant = variants[experiment];
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : variant;
