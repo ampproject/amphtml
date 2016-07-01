@@ -617,7 +617,8 @@ export class UrlReplacements {
    * @param {!function(!string, Error):void} callback upon expansion or
    *    timeout/error given current expansion value from click target anchor
    *    href and optional error.
-   * @param {Promise<string>}
+   * @param {Promise<string>} if value resolves to string then redirect to its
+   *    value
    * @private
    */
   getExpandAnchorHref_(evt) {
@@ -679,9 +680,13 @@ export class UrlReplacements {
       if (currHref != href) {
         href = currHref;
         if (!href || !href.indexOf('#')) {
+          // Href no longer a valid destination so return null to indicate
+          // no redirect.
           return Promise.resolve(null);
         }
       }
+      // Return expansion result promise out timeout depending on which
+      // resolves first.
       return timer.timeoutPromise(50, this.expand_(href, vars, null, regExp))
           .catch(() => {
             // On error (either due to timeout or error resolving field)
