@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  adsenseIsA4AEnabled,
+} from '../extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config';
+import {
+  doubleclickIsA4AEnabled,
+} from
+'../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+
 /**
  * URLs to prefetch for a given ad type.
  *
@@ -213,6 +221,9 @@ export const clientIdScope = {
  *
  * @type {!Object<!string, !function(!Window, !Element): boolean>}
  */
+// TODO(bobcassels): look into moving this to a different file with fewer
+// dependency restrictions
 export const a4aRegistry = {
-  // Add mappings for specific ad networks here.
+  'adsense': adsenseIsA4AEnabled,
+  'doubleclick': doubleclickIsA4AEnabled,
 };

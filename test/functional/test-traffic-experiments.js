@@ -16,19 +16,19 @@
 
 
 import {
-  setupPageExperiments,
+  EXPERIMENT_ATTRIBUTE,
   RANDOM_NUMBER_GENERATORS,
+  addExperimentIdToElement,
   getPageExperimentBranch,
   mergeExperimentIds,
+  setupPageExperiments,
   validateExperimentIds,
-  addExperimentIdToElement,
-  EXPERIMENT_ATTRIBUTE,
-} from '../../ads/google/traffic-experiments';
-import {dev} from '../../src/log';
+} from '../../ads/google/a4a/traffic-experiments';
 import {
   isExperimentOn,
   resetExperimentToggles_,
 } from '../../src/experiments';
+import {dev} from '../../src/log';
 import * as sinon from 'sinon';
 
 /** @private @const Tag used in dev log messages */

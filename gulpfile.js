@@ -53,6 +53,8 @@ function buildExtensions(options) {
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-ad', '0.1', false, options);
+  buildExtension('amp-ad-network-adsense-impl', 0.1, false, options);
+  buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -345,6 +347,7 @@ function buildExamples(watch) {
       });
 
   // Also update test-example-validation.js
+  buildExample('a4a.amp.html');
   buildExample('ads.amp.html');
   buildExample('ads.with.script.amp.html');
   buildExample('adsense.amp.html');

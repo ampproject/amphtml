@@ -196,6 +196,17 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
+   * Returns true if this element is the child of an amp-ad element.  For use by
+   * network-specific implementations that don't want to allow themselves to be
+   * embedded directly into a page.
+   * @return {boolean}
+   */
+  isInAmpAdTag() {
+    return !!this.element.parentElement &&
+        this.element.parentElement.tagName == 'AMP-AD';
+  }
+
+  /**
    * Prefetches and preconnects URLs related to the ad using adPreconnect
    * registration which assumes ad request domain used for 3p is applicable.
    * @override
@@ -357,7 +368,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.adUrl_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      this.intersectionObserver_ = null;
       if (this.apiHandler_) {
         this.apiHandler_.unlayoutCallback();
         this.apiHandler_ = null;

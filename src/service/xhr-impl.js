@@ -184,9 +184,7 @@ export class Xhr {
   }
 
   /**
-   * @param {!string} input URL
-   * @param {Array<string>} opt_responseHeaderNames List of response headers to
-   * extract and return.
+   * @param {string} input URL
    * @param {FetchInitDef} opt_init Fetch options object.
    * @return {!Promise<!FetchResponse>}
    */
@@ -253,6 +251,7 @@ export class Xhr {
       reader.readAsText(new Blob([bytes]));
     });
   }
+
 }
 
 
@@ -527,6 +526,24 @@ class FetchResponseHeaders {
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
+}
+
+
+/**
+ * @param {!ArrayBuffer} bytes
+ * @return {!Promise<string>}
+ */
+export function utf8FromArrayBuffer(bytes) {
+  if (window.TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  }
+  return new Promise(function(resolve, unusedReject) {
+    const reader = new FileReader();
+    reader.onloadend = function(unusedEvent) {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
 }
 
 

@@ -47,6 +47,7 @@ describe('example', function() {
     'metadata-examples/review-microdata.amp.html',
     'metadata-examples/video-json-ld.amp.html',
     'metadata-examples/video-microdata.amp.html',
+    'a4a.amp.html',
     'article.amp.html',
     'analytics.amp.html',
     'analytics-notification.amp.html',

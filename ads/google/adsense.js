@@ -17,11 +17,13 @@
 import {checkData} from '../../3p/3p';
 
 /**
+ * Make an adsense iframe.
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsense(global, data) {
-  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']);
+  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
+                   'experimentId']);
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
@@ -41,7 +43,7 @@ export function adsense(global, data) {
   if (data['adHost']) {
     i.setAttribute('data-ad-host', data['adHost']);
   }
-  if (data['adtest']) {
+  if (data['adtest'] != null) {
     i.setAttribute('data-adtest', data['adtest']);
   }
   if (data['tagOrigin']) {
@@ -50,6 +52,7 @@ export function adsense(global, data) {
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
+  const initializer = {};
   global.document.getElementById('c').appendChild(i);
-  (global.adsbygoogle = global.adsbygoogle || []).push({});
+  (global.adsbygoogle = global.adsbygoogle || []).push(initializer);
 }
