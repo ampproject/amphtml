@@ -935,7 +935,7 @@ class ParsedUrlSpec {
     this.spec_ = spec;
 
     /**
-     * @type {!Object<string, int>}
+     * @type {!Object<string, number>}
      * @private
      */
     this.allowedProtocols_ = {};
@@ -946,7 +946,7 @@ class ParsedUrlSpec {
     }
 
     /**
-     * @type {!Object<string, int>}
+     * @type {!Object<string, number>}
      * @private
      */
     this.disallowedDomains_ = {};
