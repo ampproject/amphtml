@@ -428,7 +428,7 @@ function createBaseAmpElementProto(win) {
     this.isInTemplate_ = undefined;
 
     /** @private {boolean} */
-    this.hadLoadingError_ = false;
+    this.isFirstLayout_ = true;
   };
 
   /**
@@ -881,10 +881,14 @@ function createBaseAmpElementProto(win) {
       this.readyState = 'complete';
       this.layoutCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
-      if (this.layoutCount_ == 1) {
+      /* what to do here, if load fail, but layout for the second time. */
+      /* TODO: zhouyx, still need a way to figure out how to call firstLayoutCompleted() */
+      if (this.isFirstLayout_) {
+        this.isFirstLayout_ = false;
         this.implementation_.firstLayoutCompleted();
       }
     }, reason => {
+      this.layoutCount_++;
       this.hadLoadingError_ = true;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
@@ -977,6 +981,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
+      this.isFirstLayout_ = false;
     }
     return isReLayoutNeeded;
   };
@@ -1164,8 +1169,7 @@ function createBaseAmpElementProto(win) {
     if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
         this.layoutCount_ > 0 ||
-        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_) ||
-        this.hadLoadingError_) {
+        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
       return false;
     }
     return true;
