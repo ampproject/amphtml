@@ -23,7 +23,7 @@ import {loadScript, checkData} from '../3p/3p';
  * @param {!Object} data
  */
 export function microad(global, data) {
-  const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo']
+  const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo'];
   checkData(data, microadData);
 
   global.document.getElementById('c').setAttribute('id', data.spot);
