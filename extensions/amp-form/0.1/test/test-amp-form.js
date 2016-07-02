@@ -551,7 +551,7 @@ describe('amp-form', () => {
         sandbox.spy(fieldset, 'checkValidity');
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
-        const event = { target: emailInput };
+        const event = {target: emailInput};
         onInputInteraction_(event);
 
         expect(form.checkValidity.called).to.be.true;
@@ -586,7 +586,7 @@ describe('amp-form', () => {
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
         emailInput.value = 'cool@bea.ns';
-        const event = { target: emailInput };
+        const event = {target: emailInput};
         onInputInteraction_(event);
 
         expect(emailInput.checkValidity.called).to.be.true;

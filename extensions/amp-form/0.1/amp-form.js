@@ -78,7 +78,7 @@ export function setReportValiditySupported(isSupported) {
  */
 function isReportValiditySupported() {
   if (reportValiditySupported === undefined) {
-    reportValiditySupported = element.reportValidity;
+    reportValiditySupported = !!document.createElement('form').reportValidity;
   }
   return reportValiditySupported;
 }
