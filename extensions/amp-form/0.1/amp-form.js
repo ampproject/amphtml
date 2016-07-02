@@ -59,7 +59,7 @@ const UserValidityState = {
 let validationBubble;
 
 
-/** @const {boolean} */
+/** @type {boolean|undefined} */
 let reportValiditySupported;
 
 
