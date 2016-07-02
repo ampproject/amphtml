@@ -66,6 +66,23 @@ export class Crypto {
       return lib.base64(buffer);
     });
   }
+
+  /**
+   * Returns a uniform hash of the input string as a float number in the range
+   * of [0, 1).
+   * Input string cannot contain chars out of range [0,255].
+   * @param {string} str
+   * @returns {!Promise<number>}
+   */
+  uniform(str) {
+    return this.sha384(str).then(buffer => {
+      let result = 0;
+      for (let i = 0; i < 3; i++) {
+        result = (result + buffer[i]) / 256;
+      }
+      return result;
+    });
+  }
 }
 
 function getSubtle(win) {
