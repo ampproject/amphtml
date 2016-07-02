@@ -108,7 +108,7 @@ export class Vsync {
     this.boundRunScheduledTasks_ = this.runScheduledTasks_.bind(this);
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(this.boundRunScheduledTasks_, FRAME_TIME);
+    this.pass_ = new Pass(this.win, this.boundRunScheduledTasks_, FRAME_TIME);
 
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
