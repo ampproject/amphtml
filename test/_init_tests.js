@@ -23,6 +23,8 @@ import {platform} from '../src/platform';
 import {setModeForTesting} from '../src/mode';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
+// Needs to be called before the custom elements are first made.
+beforeTest();
 adopt(window);
 
 // Make amp section in karma config readable by tests.
@@ -110,10 +112,12 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
-beforeEach(() => {
+beforeEach(beforeTest);
+
+function beforeTest() {
   setModeForTesting(null);
   window.AMP_TEST = true;
-});
+}
 
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
