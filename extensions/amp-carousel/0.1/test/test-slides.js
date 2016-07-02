@@ -773,12 +773,11 @@ describe('Slides functional', () => {
       slides.updateInViewport = sandbox.spy();
       slides.schedulePause = sandbox.spy();
       slides.schedulePreload = sandbox.spy();
-
-      Animation.animate = () => {
+      sandbox.stub(Animation, 'animate', () => {
         return {
           thenAlways: cb => cb(),
         };
-      };
+      });
     });
     afterEach(() => {
       sandbox.restore();
@@ -819,6 +818,11 @@ describe('Slides functional', () => {
       slides.updateInViewport = sandbox.spy();
       slides.schedulePause = sandbox.spy();
       slides.schedulePreload = sandbox.spy();
+      sandbox.stub(Animation, 'animate', () => {
+        return {
+          thenAlways: cb => cb(),
+        };
+      });
     });
     afterEach(() => {
       sandbox.restore();

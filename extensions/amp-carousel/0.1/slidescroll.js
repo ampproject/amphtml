@@ -92,6 +92,12 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {?number}*/
     this.scrollTimeout_ = null;
 
+    /** @private {number}*/
+    // 0 - not in an elastic state.
+    // -1 - elastic scrolling (back) to the left of scrollLeft 0.
+    // 1 - elastic scrolling (fwd) to the right of the max scrollLeft possible.
+    this.elasticScrollState_ = 0;
+
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
   }
@@ -182,23 +188,26 @@ export class AmpSlideScroll extends BaseCarousel {
    */
   handleCustomElasticScroll_(currentScrollLeft) {
     const scrollWidth = this.slidesContainer_./*REVIEW*/scrollWidth;
-    if (this.isElasticScrollingBack_ && currentScrollLeft >= 0) {
+    if (this.elasticScrollState_ == -1 &&
+        currentScrollLeft >= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
-        this.isElasticScrollingBack_ = false;
+        this.elasticScrollState_ = 0;
       });
-    } else if (this.isElasticScrollFwd_ &&
-          (currentScrollLeft + this.slideWidth_) <= scrollWidth) {
+    } else if (this.elasticScrollState_ == 1 &&
+          currentScrollLeft <= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
       this.customSnap_(currentScrollLeft).then(() => {
-        this.isElasticScrollFwd_ = false;
+        this.elasticScrollState_ = 0;
       });
     } else if (currentScrollLeft < 0) {
       // Direction = -1.
-      this.isElasticScrollingBack_ = true;
+      this.elasticScrollState_ = -1;
     } else if ((currentScrollLeft + this.slideWidth_) >= scrollWidth) {
       // Direction = +1.
-      this.isElasticScrollFwd_ = true;
+      this.elasticScrollState_ = 1;
+    } else {
+      this.elasticScrollState_ = 0;
     }
   }
 
@@ -212,13 +221,14 @@ export class AmpSlideScroll extends BaseCarousel {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     let toScrollLeft;
     const diff = newIndex - this.slideIndex_;
+    const hasPrev_ = this.hasPrev();
 
     if (diff == 0) {
       // Snap and stay.
-      toScrollLeft = this.hasPrev() ? this.slideWidth_ : 0;
+      toScrollLeft = hasPrev_ ? this.slideWidth_ : 0;
     } else if (diff == 1 || diff == -1 * (this.noOfSlides_ - 1)) {
       // Move fwd.
-      toScrollLeft = this.hasPrev() ? this.slideWidth_ * 2 : this.slideWidth_;
+      toScrollLeft = hasPrev_ ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
       // Move backward.
       toScrollLeft = 0;

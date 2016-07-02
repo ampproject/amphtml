@@ -19,7 +19,7 @@ import '../amp-carousel';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 
-describe.only('SlideScroll', () => {
+describe('SlideScroll', () => {
   const SHOW_CLASS = '-amp-slide-item-show';
   let sandbox;
 
@@ -416,7 +416,35 @@ describe.only('SlideScroll', () => {
       expect(animateScrollLeftSpy).to.have.been.calledWith(200, 400);
       impl.customSnap_(400);
       expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+    });
+  });
 
+  it('should handle custom elastic scroll', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const customSnapSpy = sandbox.stub(impl, 'customSnap_', () => {
+        return {
+          then: cb => {
+            cb();
+          },
+        };
+      });
+      impl.slideWidth_ = 400;
+
+      impl.handleCustomElasticScroll_(-10);
+      expect(impl.elasticScrollState_).to.equal(-1);
+      impl.previousScrollLeft_ = -10;
+      impl.handleCustomElasticScroll_(-5);
+      expect(customSnapSpy).to.have.been.calledWith(-5);
+
+      impl.previousScrollLeft_ = null;
+
+      impl.handleCustomElasticScroll_(410);
+      expect(impl.elasticScrollState_).to.equal(1);
+      impl.previousScrollLeft_ = 410;
+      impl.handleCustomElasticScroll_(405);
+      expect(customSnapSpy).to.have.been.calledWith(405);
     });
   });
 
@@ -706,7 +734,7 @@ describe.only('SlideScroll', () => {
         expect(impl.getNextSlideIndex_(400)).to.equal(0);
         expect(impl.getNextSlideIndex_(500)).to.equal(0);
         expect(impl.getNextSlideIndex_(600)).to.equal(1);
-        expect(impl.getNextSlideIndex_(800)).to.equal(1)
+        expect(impl.getNextSlideIndex_(800)).to.equal(1);
 
         impl.showSlide_(3);
 
@@ -725,7 +753,7 @@ describe.only('SlideScroll', () => {
         expect(impl.getNextSlideIndex_(400)).to.equal(4);
         expect(impl.getNextSlideIndex_(500)).to.equal(4);
         expect(impl.getNextSlideIndex_(600)).to.equal(0);
-        expect(impl.getNextSlideIndex_(800)).to.equal(0)
+        expect(impl.getNextSlideIndex_(800)).to.equal(0);
       });
     });
 
