@@ -50,7 +50,7 @@ describe('crypto-impl', () => {
 
       it('should hash "abc" to uniform number', () => {
         return crypto.uniform('abc').then(result => {
-          expect(result.toFixed(6)).to.equal('0.457043');
+          expect(result.toFixed(6)).to.equal('0.792976');
         });
       });
     });
