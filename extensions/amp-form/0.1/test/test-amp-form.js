@@ -353,7 +353,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonResolver();
-      return timer.promise(20).then(() => {
+      return timer.promise(0).then(() => {
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
@@ -516,6 +516,7 @@ describe('amp-form', () => {
 
         const event = {
           target: ampForm.form_,
+          stopImmediatePropagation: sandbox.spy(),
           preventDefault: sandbox.spy(),
         };
         ampForm.handleSubmit_(event);
