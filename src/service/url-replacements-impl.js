@@ -50,8 +50,17 @@ export class UrlReplacements {
     this.replacements_ = this.win_.Object.create(null);
 
     /** @private @const {function():!Promise<?AccessService>} */
-    this.getAccessService_ = accessServiceForOrNull.bind(null);
+    this.getAccessService_ = accessServiceForOrNull;
 
+    /** @private {boolean} */
+    this.initialized_ = false;
+  }
+
+  /**
+   * Lazily initialize the default replacements.
+   */
+  initialize_() {
+    this.initialized_ = true;
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
       return Math.random();
@@ -158,7 +167,7 @@ export class UrlReplacements {
           return service.get(opt_userNotificationId);
         });
       }
-      return cidFor(win).then(cid => {
+      return cidFor(this.win_).then(cid => {
         return cid.get({
           scope,
           createCookieIfNotPresent: true,
@@ -449,6 +458,9 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars) {
+    if (!this.initialized_) {
+      this.initialize_();
+    }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
@@ -520,6 +532,7 @@ export class UrlReplacements {
   }
 
   /**
+   * Method exists to assist stubbing in tests.
    * @param {string} name
    * @return {function(*):*}
    */
