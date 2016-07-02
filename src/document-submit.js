@@ -68,7 +68,7 @@ export function onDocumentFormSubmit_(e) {
   const isAmpFormMarked = form.classList.contains('-amp-form');
   let shouldValidate;
   if (isAmpFormMarked) {
-    shouldValidate = !form.hasAttribute('-amp-novalidate');
+    shouldValidate = !form.hasAttribute('amp-novalidate');
   } else {
     shouldValidate = !form.hasAttribute('novalidate');
   }

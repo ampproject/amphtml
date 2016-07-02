@@ -38,6 +38,7 @@ import {urls} from '../../../src/config';
 /** @type {string} */
 const TAG = 'amp-form';
 
+
 /** @const @enum {string} */
 const FormState_ = {
   SUBMITTING: 'submitting',
@@ -56,6 +57,32 @@ const UserValidityState = {
 
 /** @type {?./validation-bubble.ValidationBubble|undefined} */
 let validationBubble;
+
+
+/** @const {boolean} */
+let reportValiditySupported;
+
+
+/**
+ * @param {boolean} isSupported
+ * @private visible for testing.
+ */
+export function setReportValiditySupported(isSupported) {
+  reportValiditySupported = isSupported;
+}
+
+
+/**
+ * Returns whether reportValidity API is supported.
+ * @return {boolean}
+ */
+function isReportValiditySupported() {
+  if (reportValiditySupported === undefined) {
+    reportValiditySupported = element.reportValidity;
+  }
+  return reportValiditySupported;
+}
+
 
 export class AmpForm {
 
@@ -104,7 +131,7 @@ export class AmpForm {
     // when we need to.
     this.form_.setAttribute('novalidate', '');
     if (!this.shouldValidate_) {
-      this.form_.setAttribute('-amp-novalidate', '');
+      this.form_.setAttribute('amp-novalidate', '');
     }
     this.form_.classList.add('-amp-form');
 
@@ -149,17 +176,17 @@ export class AmpForm {
       return;
     }
 
-    if (this.shouldValidate_) {
-      checkUserValidityOnSubmission_(this.form_);
-      if (this.form_.checkValidity && !this.form_.checkValidity()) {
-        e.stopImmediatePropagation();
-        // TODO(#3776): Use .mutate method when it supports passing state.
-        this.vsync_.run({
-          measure: undefined,
-          mutate: reportValidity,
-        }, {form: this.form_});
-        return;
-      }
+    // Validity checking should always occur, novalidate only circumvent
+    // reporting and blocking submission on non-valid forms.
+    const isValid = checkUserValidityOnSubmission(this.form_);
+    if (this.shouldValidate_ && !isValid) {
+      e.stopImmediatePropagation();
+      // TODO(#3776): Use .mutate method when it supports passing state.
+      this.vsync_.run({
+        measure: undefined,
+        mutate: reportValidity,
+      }, {form: this.form_});
+      return;
     }
 
     if (this.xhrAction_) {
@@ -290,7 +317,7 @@ function onInvalidInputBlur_(event) {
  * @param {!HTMLInputElement} input
  */
 function reportInputValidity(input) {
-  if (input.reportValidity) {
+  if (isReportValiditySupported()) {
     input.reportValidity();
   } else {
     input./*OK*/focus();
@@ -311,13 +338,14 @@ function reportInputValidity(input) {
 /**
  * Checks user validity for all inputs, fieldsets and the form.
  * @param {!HTMLFormElement} form
+ * @return {boolean} Whether the form is currently valid or not.
  */
-function checkUserValidityOnSubmission_(form) {
+function checkUserValidityOnSubmission(form) {
   const inputs = form.querySelectorAll('input,select,textarea,fieldset');
   for (let i = 0; i < inputs.length; i++) {
     checkUserValidity(inputs[i]);
   }
-  checkUserValidity(form);
+  return checkUserValidity(form);
 }
 
 
@@ -350,25 +378,41 @@ function getUserValidityStateFor(element) {
  * strive to match it as much as possible.
  *
  * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
- * @returns {boolean} true to indicate that validity should propagate to ancestors.
+ * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
+ * @returns {boolean} Whether the element is valid or not.
  */
-function checkUserValidity(element) {
+function checkUserValidity(element, propagate = false) {
+  let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
-  const isCurrentlyValid = element.checkValidity();
+  const isCurrentlyValid = element.checkValidity && element.checkValidity();
   if (previousValidityState != UserValidityState.USER_VALID &&
       isCurrentlyValid) {
     element.classList.add('user-valid');
     element.classList.remove('user-invalid');
-    // Don't propagate user-valid if this was unmarked before.
-    return previousValidityState != UserValidityState.NONE;
+    // Don't propagate user-valid unless it was marked invalid before.
+    shouldPropagate = previousValidityState == UserValidityState.USER_INVALID;
   } else if (previousValidityState != UserValidityState.USER_INVALID &&
       !isCurrentlyValid) {
     element.classList.add('user-invalid');
     element.classList.remove('user-valid');
-    // Always propagate an invalid state change.
-    return true;
+    // Always propagate an invalid state change. One invalid input field is
+    // guaranteed to make the fieldset and form invalid as well.
+    shouldPropagate = true;
   }
-  return false;
+
+  if (propagate && shouldPropagate) {
+    // Propagate user validity to ancestor fieldsets.
+    const ancestors = ancestorElementsByTag(element, 'fieldset');
+    for (let i = 0; i < ancestors.length; i++) {
+      checkUserValidity(ancestors[i]);
+    }
+    // Also update the form user validity.
+    if (element.form) {
+      checkUserValidity(element.form);
+    }
+  }
+
+  return isCurrentlyValid;
 }
 
 
@@ -376,23 +420,11 @@ function checkUserValidity(element) {
  * Responds to user interaction with an input by checking user validity of the input
  * and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Event} e
+ * @private visible for testing.
  */
-function onInputInteraction_(e) {
+export function onInputInteraction_(e) {
   const input = e.target;
-  const shouldPropagate = checkUserValidity(input);
-  if (!shouldPropagate) {
-    return;
-  }
-
-  // Propagate user validity to ancestor fieldsets.
-  const ancestors = ancestorElementsByTag(input, 'fieldset');
-  for (let i = 0; i < ancestors.length; i++) {
-    checkUserValidity(ancestors[i]);
-  }
-  // Also update the form user validity.
-  if (input.form) {
-    checkUserValidity(input.form);
-  }
+  checkUserValidity(input, /** propagate */ true);
 }
 
 
