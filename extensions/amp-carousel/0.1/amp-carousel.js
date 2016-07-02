@@ -27,7 +27,7 @@ class CarouselSelector {
         element.getAttribute('type') == 'slides') {
       const slideScrollExpt =
           isExperimentOn(element.ownerDocument.defaultView, 'amp-slidescroll');
-      if (slideScrollExpt || true) {
+      if (slideScrollExpt) {
         return new AmpSlideScroll(element);
       }
       return new AmpSlides(element);
