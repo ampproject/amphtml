@@ -35,7 +35,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    * Identifies if the runner only needs to do type checking.
    */
   private boolean typecheck_only = false;
-  
+
+  private boolean pseudo_names = false;
+
   private boolean is_production_env = true;
 
   /**
@@ -72,6 +74,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
+    options.setGeneratePseudoNames(pseudo_names);
     return options;
   }
 
@@ -90,23 +93,17 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     return options;
   }
 
-  protected void setTypeCheckOnly(boolean value) {
-    typecheck_only = value;
-  }
-  
-  protected void setProductionFlag(boolean value) {
-    is_production_env = value;
-  }
-
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
 
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
       if (arg.contains("--define=TYPECHECK_ONLY=true")) {
-        runner.setTypeCheckOnly(true);
+        runner.typecheck_only = true;
       } else if (arg.contains("--define=FORTESTING=true")) {
-        runner.setProductionFlag(false);
+        runner.is_production_env = false;
+      } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
+        runner.pseudo_names = true;
       }
     }
 
