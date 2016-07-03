@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-amp-app-banner {
-    display: block;
-    background: #fefefe;
-}
 
-amp-app-banner a {
-    text-decoration: none;
-    color: black;
+amp-app-banner {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0;
+  width: 100%;
+  max-height: 150px !important;
+  box-sizing: border-box;
+  background: #fefefe;
+  z-index: 11;
 }
