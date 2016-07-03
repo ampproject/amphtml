@@ -165,17 +165,17 @@ export function addDataAndJsonAttributes_(element, attributes) {
 }
 
 /**
- * Prefetches URLs related to the bootstrap iframe.
+ * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} parentWindow
  * @return {string}
  */
-export function prefetchBootstrap(window) {
+export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
-  preconnect.prefetch(url, 'document');
+  preconnect.preload(url, 'document');
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.prefetch(
+  preconnect.preload(
       'https://3p.ampproject.net/$internalRuntimeVersion$/f.js', 'script');
 }
 
