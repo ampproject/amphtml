@@ -17,7 +17,6 @@ limitations under the License.
 # 4w Premium Publisher Network
 
 Please refer to [4w Marketplace](mailto:4winfo@4wmarketplace.com) for more
-information on how to get required ad tag or placement IDs.
 
 ## Examples
 
