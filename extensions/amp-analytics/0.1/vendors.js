@@ -329,6 +329,7 @@ export const ANALYTICS_CONFIG = {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
+      'documentPath': 'SOURCE_PATH',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
       'dataSource': 'AMP',
     },
@@ -341,6 +342,7 @@ export const ANALYTICS_CONFIG = {
           'ul=${browserLanguage}&de=${documentCharset}' ,
       'baseSuffix': '&a=${pageViewId}&z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
+          'dp=${documentPath}&' +
           '_r=1${baseSuffix}',
       'event': '${host}/collect?${basePrefix}&t=event&' +
           'ec=${eventCategory}&ea=${eventAction}&el=${eventLabel}&' +
