@@ -23,7 +23,6 @@ limitations under the License.
     width=320
     height=50
     type="kargo"
-    layout="responsive"
     data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
     data-slot="_vypM8bkVCf"
     data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
