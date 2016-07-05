@@ -65,6 +65,7 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  mixpo: 'https://cdn.mixpo.com/js/loader.js',
 };
 
 /**
@@ -179,6 +180,10 @@ export const adPreconnect = {
   adtech: [
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
+  ],
+  mixpo: [
+    'https://player1.mixpo.com',
+    'https://player2.mixpo.com',
   ],
 };
 
