@@ -25,6 +25,7 @@ before_script:
   - npm install -g gulp
   - pip install --user protobuf
 script:
+  - npm run node-test
   - gulp lint
   - gulp build --fortesting
   - gulp check-types

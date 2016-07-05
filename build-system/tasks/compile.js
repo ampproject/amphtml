@@ -139,6 +139,7 @@ function compile(entryModuleFilename, outputDir,
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
+      '!**/*.extern.js',
     ];
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -166,6 +167,14 @@ function compile(entryModuleFilename, outputDir,
       }
     });
 
+    var externs = [
+      'build-system/amp.extern.js',
+      'third_party/closure-compiler/externs/intersection_observer.js',
+    ];
+    if (options.externs) {
+      externs = externs.concat(options.externs);
+    }
+
     /*eslint "google-camelcase/google-camelcase": 0*/
     var compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
@@ -181,10 +190,7 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        externs: [
-          'build-system/amp.extern.js',
-          'third_party/closure-compiler/externs/intersection_observer.js',
-        ],
+        externs: externs,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
@@ -200,10 +206,16 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        define: [],
         hide_warnings_for: [
-          'ads/',  // TODO(@cramforce): Remove when we are better at typing.
           'node_modules/',
           'build/patched-module/',
+          // TODO: The following three are whitelisted only because they're
+          // blocking an unrelated PR.  But they appear to contain real type
+          // errors and should be fixed at some point.
+          'src/service.js',
+          '3p/environment.js',
+          'src/document-state.js'
         ],
       }
     };
@@ -212,8 +224,16 @@ function compile(entryModuleFilename, outputDir,
     if (argv.typecheck_only || checkTypes) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
-      compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
+      compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+    }
+
+    if (argv.fortesting) {
+      compilerOptions.compilerFlags.define.push('FORTESTING=true');
+    }
+
+    if (compilerOptions.compilerFlags.define.length == 0) {
+      delete compilerOptions.compilerFlags.define;
     }
 
     var stream = gulp.src(srcs)

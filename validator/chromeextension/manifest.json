@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extensionName__",
+  "version": "1.0.7",
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "19": "no-amp-128.png",
+      "38": "no-amp-38.png"
+    }
+  },
+  "background": {
+    "page": "background.html",
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "js": [ "content_script.js" ],
+      "matches": [ "<all_urls>" ],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": "script-src 'self' https://cdn.ampproject.org; object-src 'self'",
+  "homepage_url": "https://www.ampproject.org",
+  "permissions": [
+    "tabs",
+    "<all_urls>"
+  ]
+}

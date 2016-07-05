@@ -147,9 +147,6 @@ describe('CustomElement', () => {
     firstAttachedCallback() {
       testElementFirstAttachedCallback();
     }
-    isReadyToBuild() {
-      return true;
-    }
     buildCallback() {
       testElementBuildCallback();
     }

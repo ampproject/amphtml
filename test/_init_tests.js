@@ -20,6 +20,8 @@ import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {platform} from '../src/platform';
+import {setModeForTesting} from '../src/mode';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 adopt(window);
 
@@ -108,6 +110,11 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+beforeEach(() => {
+  setModeForTesting(null);
+  window.AMP_TEST = true;
+});
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
@@ -139,6 +146,7 @@ afterEach(() => {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
+  setDefaultBootstrapBaseUrlForTesting(null);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

@@ -22,7 +22,13 @@ import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
-
+import {templatesFor} from '../../../src/template';
+import {removeElement, childElementByAttr} from '../../../src/dom';
+import {installStyles} from '../../../src/styles';
+import {CSS} from '../../../build/amp-form-0.1.css';
+import {ValidationBubble} from './validation-bubble';
+import {vsyncFor} from '../../../src/vsync';
+import {actionServiceForDoc} from '../../../src/action';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -34,6 +40,9 @@ const FormState_ = {
   SUBMIT_SUCCESS: 'submit-success',
 };
 
+/** @type {?./validation-bubble.ValidationBubble|undefined} */
+let validationBubble;
+
 export class AmpForm {
 
   /**
@@ -44,11 +53,20 @@ export class AmpForm {
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
 
-    /** @const @private {!Element} */
+    /** @const @private {!HTMLFormElement} */
     this.form_ = element;
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win_);
+
+    /** @const @private {!Templates} */
+    this.templates_ = templatesFor(this.win_);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
+
+    /** @const @private {!../../../src/service/action-impl.Action} */
+    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
@@ -80,58 +98,179 @@ export class AmpForm {
 
   /** @private */
   installSubmitHandler_() {
-    this.form_.addEventListener('submit', e => this.handleSubmit_(e));
+    this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
   }
 
   /**
+   * Note on stopImmediatePropagation usage here, it is important to emulate native
+   * browser submit event blocking. Otherwise any other submit listeners would get the
+   * event.
+   *
+   * For example, action service shouldn't trigger 'submit' event if form is actually
+   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
+   *
+   *
    * @param {!Event} e
    * @private
    */
   handleSubmit_(e) {
-    if (e.defaultPrevented) {
+    if (this.state_ == FormState_.SUBMITTING) {
+      e.stopImmediatePropagation();
       return;
     }
 
-    if (this.state_ == FormState_.SUBMITTING) {
-      e.preventDefault();
+    const shouldValidate = !this.form_.hasAttribute('novalidate');
+    const isInvalid = shouldValidate &&
+        this.form_.checkValidity && !this.form_.checkValidity();
+    if (isInvalid) {
+      e.stopImmediatePropagation();
+      // TODO(#3776): Use .mutate method when it supports passing state.
+      this.vsync_.run({
+        measure: undefined,
+        mutate: reportValidity,
+      }, {form: this.form_});
       return;
     }
 
     if (this.xhrAction_) {
       e.preventDefault();
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
       this.xhr_.fetchJson(this.xhrAction_, {
         body: new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
-      }).then(() => this.setState_(FormState_.SUBMIT_SUCCESS))
-          .catch(error => {
-            this.setState_(FormState_.SUBMIT_ERROR);
-            rethrowAsync('Form submission failed:', error);
-          });
+      }).then(response => {
+        this.actions_.trigger(this.form_, 'submit-success', null);
+        this.setState_(FormState_.SUBMIT_SUCCESS);
+        this.renderTemplate_(response || {});
+      }).catch(error => {
+        this.actions_.trigger(this.form_, 'submit-error', null);
+        this.setState_(FormState_.SUBMIT_ERROR);
+        this.renderTemplate_(error.responseJson || {});
+        rethrowAsync('Form submission failed:', error);
+      });
     } else if (this.target_ == '_top' && this.method_ == 'POST') {
+      this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
     }
   }
 
   /**
    * Adds proper classes for the state passed.
-   * @param {string} state
+   * @param {string} newState
    * @private
    */
-  setState_(state) {
-    this.form_.classList.remove(`amp-form-${this.state_}`);
-    this.form_.classList.add(`amp-form-${state}`);
-    this.state_ = state;
+  setState_(newState) {
+    const previousState = this.state_;
+    this.form_.classList.remove(`amp-form-${previousState}`);
+    this.form_.classList.add(`amp-form-${newState}`);
+    this.state_ = newState;
     this.submitButtons_.forEach(button => {
-      if (state == FormState_.SUBMITTING) {
+      if (newState == FormState_.SUBMITTING) {
         button.setAttribute('disabled', '');
       } else {
         button.removeAttribute('disabled');
       }
     });
   }
+
+  /**
+   * @param {!Object=} data
+   * @private
+   */
+  renderTemplate_(data = {}) {
+    const container = this.form_.querySelector(`[${this.state_}]`);
+    if (container) {
+      return this.templates_.findAndRenderTemplate(container, data)
+          .then(rendered => {
+            rendered.setAttribute('i-amp-rendered', '');
+            container.appendChild(rendered);
+          });
+    }
+  }
+
+  /**
+   * @private
+   */
+  cleanupRenderedTemplate_() {
+    const container = this.form_.querySelector(`[${this.state_}]`);
+    if (!container) {
+      return;
+    }
+    const previousRender = childElementByAttr(container, 'i-amp-rendered');
+    if (previousRender) {
+      removeElement(previousRender);
+    }
+  }
+}
+
+
+/**
+ * Reports validity of the form passed through state object.
+ * @param {!Object} state
+ */
+function reportValidity(state) {
+  reportFormValidity(state.form);
+}
+
+
+/**
+ * Reports validity for the first invalid input - if any.
+ * @param {!HTMLFormElement} form
+ */
+function reportFormValidity(form) {
+  const inputs = form.querySelectorAll('input,select,textarea');
+  for (let i = 0; i < inputs.length; i++) {
+    if (!inputs[i].checkValidity()) {
+      reportInputValidity(inputs[i]);
+      break;
+    }
+  }
+}
+
+
+/**
+ * Revalidates the currently focused input after a change.
+ * @param {!KeyboardEvent} event
+ */
+function onInvalidInputKeyUp_(event) {
+  if (event.target.checkValidity()) {
+    validationBubble.hide();
+  } else {
+    validationBubble.show(event.target, event.target.validationMessage);
+  }
+}
+
+
+/**
+ * Hides validation bubble and removes listeners on the invalid input.
+ * @param {!Event} event
+ */
+function onInvalidInputBlur_(event) {
+  validationBubble.hide();
+  event.target.removeEventListener('blur', onInvalidInputBlur_);
+  event.target.removeEventListener('keyup', onInvalidInputKeyUp_);
+}
+
+
+/**
+ * Focuses and reports the invalid message of the input in a message bubble.
+ * @param {!HTMLInputElement} input
+ */
+function reportInputValidity(input) {
+  input./*OK*/focus();
+
+  // Remove any previous listeners on the same input. This avoids adding many
+  // listeners on the same element when the user submit pressing Enter or any
+  // other method to submit the form without the element losing focus.
+  input.removeEventListener('blur', onInvalidInputBlur_);
+  input.removeEventListener('keyup', onInvalidInputKeyUp_);
+
+  input.addEventListener('keyup', onInvalidInputKeyUp_);
+  input.addEventListener('blur', onInvalidInputBlur_);
+  validationBubble.show(input, input.validationMessage);
 }
 
 
@@ -148,10 +287,17 @@ function installSubmissionHandlers(win) {
 }
 
 
-function installAmpForm(win) {
+/**
+ * @param {!Window} win
+ * @private visible for testing.
+ */
+export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
-      installSubmissionHandlers(win);
+      installStyles(win.document, CSS, () => {
+        validationBubble = new ValidationBubble(win);
+        installSubmissionHandlers(win);
+      });
     }
     return {};
   });

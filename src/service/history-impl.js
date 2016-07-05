@@ -16,6 +16,7 @@
 
 import {Pass} from '../pass';
 import {getService} from '../service';
+import {getMode} from '../mode';
 import {dev} from '../log';
 import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
@@ -642,7 +643,7 @@ export class HistoryBindingVirtual_ {
 function createHistory_(window) {
   const viewer = installViewerService(window);
   let binding;
-  if (viewer.isOvertakeHistory() || window.AMP_TEST) {
+  if (viewer.isOvertakeHistory() || getMode().test) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
     binding = new HistoryBindingNatural_(window);

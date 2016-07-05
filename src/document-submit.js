@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-import {startsWith} from '../src/string';
-import {user} from '../src/log';
-import {assertHttpsUrl} from '../src/url';
+import {startsWith} from './string';
+import {user} from './log';
+import {assertHttpsUrl} from './url';
+
+
+/** @const {string} */
+const PROP = '__AMP_SUBMIT';
 
 
 /**
  * @param {!Window} window
  */
 export function installGlobalSubmitListener(window) {
-  window.document.documentElement.addEventListener(
-      'submit', onDocumentFormSubmit_, true);
+  if (!window[PROP]) {
+    window[PROP] = true;
+    window.document.documentElement.addEventListener(
+        'submit', onDocumentFormSubmit_, true);
+  }
 }
 
 

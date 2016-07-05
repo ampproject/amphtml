@@ -30,12 +30,6 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // Always defer building until DOMReady.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     st.setStyles(this.element, {
       position: 'fixed',

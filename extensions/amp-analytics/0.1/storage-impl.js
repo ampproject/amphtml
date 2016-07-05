@@ -288,6 +288,13 @@ export class LocalStorageBinding {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {boolean} */
+    this.isLocalStorageSupported_ = !!this.win.localStorage;
+
+    if (!this.isLocalStorageSupported_) {
+      dev.error(TAG, 'localStorage not supported.');
+    }
   }
 
   /**
@@ -302,6 +309,10 @@ export class LocalStorageBinding {
   /** @override */
   loadBlob(origin) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve(null);
+        return;
+      }
       resolve(this.win.localStorage.getItem(this.getKey_(origin)));
     });
   }
@@ -309,6 +320,10 @@ export class LocalStorageBinding {
   /** @override */
   saveBlob(origin, blob) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve();
+        return;
+      }
       this.win.localStorage.setItem(this.getKey_(origin), blob);
       resolve();
     });
