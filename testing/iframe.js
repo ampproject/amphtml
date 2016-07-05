@@ -16,8 +16,7 @@
 
 
 import {Timer} from '../src/timer';
-import {installCoreServices} from '../src/amp-core-service';
-import {registerForUnitTest} from '../src/runtime';
+import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
 
@@ -71,13 +70,17 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
       win.addEventListener('message', (event) => {
-        if (event.data && /^amp/.test(event.data.sentinel)) {
+        if (event.data &&
+            // Either non-3P or 3P variant of the sentinel.
+            (/^amp/.test(event.data.sentinel) ||
+             /^\d+-\d+$/.test(event.data.sentinel))) {
           messages.push(event.data);
         }
       })
@@ -187,11 +190,11 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST = true;
+      iframe.contentWindow.AMP_TEST_IFRAME = true;
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
-      installCoreServices(iframe.contentWindow);
+      installRuntimeServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
@@ -200,10 +203,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.getElementById('parent')
-              .appendChild(element);
-          // Wait for mutation observer to fire.
-          return new Timer(window).promise(16).then(() => {
+          const iWin = iframe.contentWindow;
+          const p = onInsert(iWin).then(() => {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
             element.build(true);
@@ -223,6 +224,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             }
             return element;
           });
+          iWin.document.getElementById('parent')
+              .appendChild(element);
+          return p;
         }
       });
     };
@@ -238,8 +242,9 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
+      win.AMP_TEST_IFRAME = true;
       win.AMP_TEST = true;
-      installCoreServices(win);
+      installRuntimeServices(win);
       registerForUnitTest(win);
       resolve({
         win: win,
@@ -368,6 +373,26 @@ export function doNotLoadExternalResourcesInTest(win) {
     }
     return element;
   };
+}
+
+/**
+ * Returns a promise for when an element has been added to the given
+ * window. This is for use in tests to wait until after the
+ * attachment of an element to the DOM should have been registered.
+ * @param {!Window} win
+ * @return {!Promise<undefined>}
+ */
+function onInsert(win) {
+  return new Promise(resolve => {
+    const observer = new win.MutationObserver(() => {
+      observer.disconnect();
+      resolve();
+    });
+    observer.observe(win.document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  })
 }
 
 /**

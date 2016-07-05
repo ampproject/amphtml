@@ -21,6 +21,8 @@ import {setStyle, setStyles} from '../style';
 
 const TAG = 'FixedLayer';
 
+const DECLARED_FIXED_PROP = '__AMP_DECLFIXED';
+
 
 /**
  * The fixed layer is a *sibling* of the body element. I.e. it's a direct
@@ -36,7 +38,7 @@ const TAG = 'FixedLayer';
 export class FixedLayer {
   /**
    * @param {!Document} doc
-   * @param {!Vsync} vsync
+   * @param {!./vsync-impl.Vsync} vsync
    * @param {number} paddingTop
    * @param {boolean} transfer
    */
@@ -44,7 +46,7 @@ export class FixedLayer {
     /** @const {!Document} */
     this.doc = doc;
 
-    /** @private @const {!Vsync} */
+    /** @private @const */
     this.vsync_ = vsync;
 
     /** @private {number} */
@@ -159,6 +161,16 @@ export class FixedLayer {
         this.returnFromFixedLayer_(element);
       });
     }
+  }
+
+  /**
+   * Whether the element is declared as fixed in any of the user's stylesheets.
+   * Will include any matches, not necessarily currently fixed elements.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  isDeclaredFixed(element) {
+    return !!element[DECLARED_FIXED_PROP];
   }
 
   /**
@@ -277,7 +289,7 @@ export class FixedLayer {
           state[fe.id] = {
             fixed: isFixed,
             transferrable: isTransferrable,
-            top: top,
+            top,
             zIndex: styles.getPropertyValue('z-index'),
           };
         });
@@ -335,9 +347,10 @@ export class FixedLayer {
       // A new entry.
       const fixedId = 'F' + (this.counter_++);
       element.setAttribute('i-amp-fixedid', fixedId);
+      element[DECLARED_FIXED_PROP] = true;
       fe = {
         id: fixedId,
-        element: element,
+        element,
         selectors: [selector],
       };
       this.fixedElements_.push(fe);
@@ -565,7 +578,7 @@ export class FixedLayer {
 /**
  * @typedef {{
  *   id: string,
- *   selectors: [],
+ *   selectors: !Array,
  *   element: !Element,
  *   placeholder: ?Element,
  *   fixedNow: boolean,

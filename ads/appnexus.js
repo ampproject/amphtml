@@ -43,12 +43,12 @@ export function appnexus(global, data) {
 
   /**
    * Construct the TTJ URL. Note params should be properly encoded first (use encodeURIComponent);
-   * @param  {[String]} args query string params to add to the base URL.
-   * @return {String}      Formated TTJ URL.
+   * @param  {!Array<string>} args query string params to add to the base URL.
+   * @return {string}      Formated TTJ URL.
    */
   function constructTtj(args) {
     let url = 'https://ib.adnxs.com/ttj?';
-    for (i = 0; i < args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
       //append arg to query. Please encode arg first.
       url += args[i] + '&';
     }

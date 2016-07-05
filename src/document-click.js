@@ -61,13 +61,13 @@ export class ClickHandler {
     /** @private @const {!Window} */
     this.win = window;
 
-    /** @private @const {!Viewport} */
+    /** @private @const {!./service/viewport-impl.Viewport} */
     this.viewport_ = viewportFor(this.win);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
-    /** @private @const {!History} */
+    /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
     // Only intercept clicks when iframed.
@@ -108,8 +108,8 @@ export class ClickHandler {
  * on iOS Safari.
  *
  * @param {!Event} e
- * @param {!Viewport} viewport
- * @param {!History} history
+ * @param {!./service/viewport-impl.Viewport} viewport
+ * @param {!./service/history-impl.History} history
  */
 export function onDocumentElementClick_(e, viewport, history) {
   if (e.defaultPrevented) {

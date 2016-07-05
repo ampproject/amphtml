@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-reach-player');
+import '../amp-reach-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

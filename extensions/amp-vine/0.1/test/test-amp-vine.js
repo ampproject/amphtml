@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-vine');
+import '../amp-vine';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

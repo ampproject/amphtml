@@ -24,6 +24,7 @@ describe('vsync', () => {
   let vsync;
   let viewer;
   let saveVisibilityChangedHandler;
+  let contextNode;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -34,6 +35,7 @@ describe('vsync', () => {
       onVisibilityChanged: handler => saveVisibilityChangedHandler = handler,
     };
     vsync = new Vsync(window, viewer);
+    contextNode = document.createElement('div');
   });
 
   afterEach(() => {
@@ -41,8 +43,14 @@ describe('vsync', () => {
   });
 
   it('should init correctly', () => {
-    expect(vsync.canAnimate()).to.be.true;
+    expect(vsync.canAnimate(contextNode)).to.be.true;
     expect(saveVisibilityChangedHandler).to.exist;
+  });
+
+  it('should fail canAnimate without node', () => {
+    expect(() => {
+      vsync.canAnimate();
+    }).to.throw(/Assertion failed/);
   });
 
   it('should generate a frame and run callbacks', () => {
@@ -281,7 +289,7 @@ describe('vsync', () => {
     viewer.isVisible = () => true;
 
     let result = '';
-    const res = vsync.runAnim({
+    const res = vsync.runAnim(contextNode, {
       mutate: () => {
         result += 'mu1';
       },
@@ -301,7 +309,7 @@ describe('vsync', () => {
     viewer.isVisible = () => true;
 
     let result = '';
-    const task = vsync.createAnimTask({
+    const task = vsync.createAnimTask(contextNode, {
       mutate: () => {
         result += 'mu1';
       },
@@ -322,7 +330,7 @@ describe('vsync', () => {
     viewer.isVisible = () => false;
 
     let result = '';
-    const res = vsync.runAnim({
+    const res = vsync.runAnim(contextNode, {
       mutate: () => {
         result += 'mu1';
       },
@@ -339,7 +347,7 @@ describe('vsync', () => {
     viewer.isVisible = () => false;
 
     let result = '';
-    const task = vsync.createAnimTask({
+    const task = vsync.createAnimTask(contextNode, {
       mutate: () => {
         result += 'mu1';
       },
@@ -355,7 +363,7 @@ describe('vsync', () => {
     viewer.isVisible = () => false;
     const mutatorSpy = sandbox.spy();
 
-    const promise = vsync.runAnimMutateSeries(mutatorSpy);
+    const promise = vsync.runAnimMutateSeries(contextNode, mutatorSpy);
     return promise.then(() => {
       return 'SUCCESS';
     }, error => {

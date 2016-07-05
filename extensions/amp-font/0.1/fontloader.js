@@ -114,6 +114,10 @@ export class FontLoader {
         } else {
           // Load font with native api if supported.
           this.document_.fonts.load(fontString).then(() => {
+            // Workaround for chrome bug
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=347460
+            return this.document_.fonts.load(fontString);
+          }).then(() => {
             if (this.document_.fonts.check(fontString)) {
               resolve();
             } else {
@@ -183,6 +187,8 @@ export class FontLoader {
       // Use larger font-size to better detect font load.
       fontSize: '40px',
       fontVariant: this.fontConfig_.variant,
+      fontWeight: this.fontConfig_.weight,
+      fontStyle: this.fontConfig_.style,
       left: '-999px',
       lineHeight: 'normal',
       margin: 0,

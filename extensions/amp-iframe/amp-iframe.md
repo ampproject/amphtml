@@ -58,6 +58,19 @@ Example:
 </amp-iframe>
 ```
 
+## Usage of amp-iframe for advertising
+
+`amp-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
+
+Advertising use cases should use [`amp-ad`](../amp-ad/amp-ad.md) instead.
+
+The reasons for this policy are that:
+
+- `amp-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
+- `amp-iframe` does not provide any mechanism to pass configuration to the iframe.
+- `amp-iframe` has no fully iframe controlled resize mechanism.
+- Viewability information may not be available to `amp-iframe`.
+
 ## Attributes
 
 ### src, srcdoc, frameborder, allowfullscreen, allowtransparency

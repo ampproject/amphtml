@@ -66,19 +66,33 @@ export class LiveListManager {
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
-      const isUpdateExample = this.win.location.pathname == '/examples.build/' +
-          'live-list-update.amp.max.html' ||
-          this.win.location.pathname == '/examples/live-list-update.amp.html';
-      if (getMode().localDev && isUpdateExample) {
+      if (getMode().localDev && (this.win.location.pathname == '/examples' +
+            '.build/live-list-update.amp.max.html' ||
+            this.win.location.pathname == '/examples.build/live-blog.amp' +
+            '.max.html' || this.win.location.pathname == '/examples.build/' +
+            'live-blog-non-floating-button.amp.max.html')) {
         this.interval_ = 5000;
       }
 
       this.poller_ = new Poller(this.win, this.interval_, this.work_);
 
-      if (this.viewer_.isVisible()) {
+      // If no live-list is active on dom ready, we don't need to poll at all.
+      if (this.viewer_.isVisible() && this.hasActiveLiveLists_()) {
         this.poller_.start();
       }
       this.setupVisibilityHandler_();
+    });
+  }
+
+  /**
+   * Checks if any of the registered amp-live-list components is active/
+   *
+   * @return {boolean}
+   * @private
+   */
+  hasActiveLiveLists_() {
+    return Object.keys(this.liveLists_).some(key => {
+      return this.liveLists_[key].isEnabled();
     });
   }
 
@@ -113,6 +127,11 @@ export class LiveListManager {
     if (latestUpdateTime > 0) {
       this.latestUpdateTime_ = latestUpdateTime;
     }
+    // We need to do this after calling `updateLiveList` since that
+    // would apply the disabled attribute if any exist from the server.
+    if (!this.hasActiveLiveLists_()) {
+      this.poller_.stop();
+    }
   }
 
   /**
@@ -126,7 +145,13 @@ export class LiveListManager {
     user.assert(id, 'amp-live-list must have an id.');
     user.assert(id in this.liveLists_, `amp-live-list#${id} found but did ` +
         `not exist on original page load.`);
-    return this.liveLists_[id].update(liveList);
+    const inClientDomLiveList = this.liveLists_[id];
+    inClientDomLiveList.toggle(!liveList.hasAttribute('disabled'));
+
+    if (inClientDomLiveList.isEnabled()) {
+      return inClientDomLiveList.update(liveList);
+    }
+    return 0;
   }
 
   /**
@@ -185,7 +210,7 @@ export class LiveListManager {
    * @return {number}
    */
   static getMinDataMaxItemsPerPage() {
-    return 10;
+    return 1;
   }
 }
 

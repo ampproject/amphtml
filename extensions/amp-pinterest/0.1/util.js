@@ -57,7 +57,7 @@ function filter(str) {
 
 /**
  * Create a DOM element with attributes
- * @param {!Document}
+ * @param {!Document} doc
  * @param {Object} data - the string to filter
  * @returns {DOMElement}
  */
@@ -89,10 +89,4 @@ function set(el, attr, value) {
   }
 };
 
-export const Util = {
-  filter: filter,
-  guid: guid,
-  log: log,
-  make: make,
-  set: set,
-};
+export const Util = {filter, guid, log, make, set};

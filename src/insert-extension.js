@@ -34,18 +34,17 @@ export function resetExtensionScriptInsertedOrPresentForTesting() {
 /**
  * Check script info in HTML head and make update if necessary
  * @param {!Window} win
- * @param {!Element} element
  * @param {string} extension
  */
-export function insertAmpExtensionScript(win, element, extension) {
+export function insertAmpExtensionScript(win, extension) {
   if (extension == 'amp-embed') {
     extension = 'amp-ad';
   }
-  if (isAmpExtensionScriptRequired(win, element, extension)) {
+  if (isAmpExtensionScriptRequired(win, extension)) {
     const ampExtensionScript = createAmpExtensionScript(win, extension);
     win.document.head.appendChild(ampExtensionScript);
   }
-};
+}
 
 /**
  * Create the missing amp extension HTML script element.
@@ -59,8 +58,10 @@ function createAmpExtensionScript(win, extension) {
   ampExtensionScript.setAttribute('custom-element', extension);
   ampExtensionScript.setAttribute('data-script', extension);
   const pathStr = win.location.pathname;
+  const useCompiledJs = getMode().test && window.ampTestRuntimeConfig &&
+      window.ampTestRuntimeConfig.useCompiledJs;
   const scriptSrc = calculateExtensionScriptUrl(pathStr, extension,
-      win.AMP_TEST);
+      getMode().test, useCompiledJs);
   ampExtensionScript.src = scriptSrc;
   return ampExtensionScript;
 };
@@ -68,24 +69,17 @@ function createAmpExtensionScript(win, extension) {
 /**
  * Determine the need to add amp extension script to document.
  * @param {!Window} win
- * @param {!Element} element
  * @param {string} extension
  * @return {boolean} Whether the action of adding an ampExtensionScript is required.
  */
-function isAmpExtensionScriptRequired(win, element, extension) {
+function isAmpExtensionScriptRequired(win, extension) {
   if (ampExtensionScriptInsertedOrPresent[extension]) {
     return false;
   }
-  const tag = element.tagName.toLowerCase();
-  if (tag == extension || (tag == 'amp-embed' && extension == 'amp-ad')) {
-    const ampExtensionScriptInHead = win.document.head.querySelector(
-        `[custom-element="${extension}"]`);
-    ampExtensionScriptInsertedOrPresent[extension] = true;
-    if (!ampExtensionScriptInHead) {
-      return true;
-    }
-  }
-  return false;
+  const ampExtensionScriptInHead = win.document.head.querySelector(
+      `[custom-element="${extension}"]`);
+  ampExtensionScriptInsertedOrPresent[extension] = true;
+  return !ampExtensionScriptInHead;
 };
 
 /**
@@ -93,13 +87,15 @@ function isAmpExtensionScriptRequired(win, element, extension) {
  * @visibleForTesting
  * @param {string} path Location path of the window
  * @param {string} extension
- * @param {bool=} isTest
+ * @param {boolean=} isTest
+ * @param {boolean=} isUsingCompiledJs
  * @return {string}
  */
-export function calculateExtensionScriptUrl(path, extension, isTest) {
+export function calculateExtensionScriptUrl(path, extension, isTest,
+  isUsingCompiledJs) {
   if (getMode().localDev) {
     if (isTest) {
-      if (window.ampTestRuntimeConfig.useCompiledJs) {
+      if (isUsingCompiledJs) {
         return `/base/dist/v0/${extension}-0.1.js`;
       }
       return `/base/dist/v0/${extension}-0.1.max.js`;

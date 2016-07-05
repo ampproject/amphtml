@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
+/**
+ * The entry point for AMP Runtime (v0.js) when AMP Runtime = AMP Doc.
+ */
+
 import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {templatesFor} from './template';
-import {installCoreServices} from './amp-core-service';
 import {installGlobalClickListener} from './document-click';
-import {installImg} from '../builtins/amp-img';
-import {installVideo} from '../builtins/amp-video';
-import {installPixel} from '../builtins/amp-pixel';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
+import {installDocService} from './service/ampdoc-impl';
 import {stubElements} from './custom-element';
-import {adopt} from './runtime';
+import {
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
+  adopt,
+} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
@@ -37,21 +42,27 @@ import {maybeTrackImpression} from './impression';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
-  const perf = installPerformanceService(window);
 
+  // Declare that this runtime will support a single root doc. Should happen
+  // as early as possible.
+  const ampdocService = installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+
+  const perf = installPerformanceService(window);
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      installCoreServices(window);
+      // Core services.
+      installRuntimeServices(window);
+      installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(window);
-      templatesFor(window);
 
-      installImg(window);
-      installPixel(window);
-      installVideo(window);
+      // Builtins.
+      installBuiltins(window);
 
+      // Final configuration and stubbing.
       adopt(window);
       stubElements(window);
 

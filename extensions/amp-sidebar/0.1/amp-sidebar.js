@@ -35,11 +35,6 @@ export class AmpSidebar extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     /** @private @const {!Window} */
     this.win_ = this.getWin();

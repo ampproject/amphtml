@@ -20,6 +20,7 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
+import {installCryptoService} from './crypto-impl';
 import {installStorageService} from './storage-impl';
 import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
@@ -27,12 +28,13 @@ import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
+import {cryptoFor} from '../../../src/crypto';
 import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
-import {sha384} from '../../../third_party/closure-library/sha384-generated';
 
 installActivityService(AMP.win);
 installCidService(AMP.win);
+installCryptoService(AMP.win);
 installStorageService(AMP.win);
 installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
@@ -48,6 +50,11 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
+  isAlwaysFixed() {
+    return true;
+  }
+
+  /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
   }
@@ -57,13 +64,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   createdCallback() {
     /**
-     * @const {!JSONObject} Copied here for tests.
+     * @const {!JSONType} Copied here for tests.
      * @private
      */
     this.predefinedConfig_ = ANALYTICS_CONFIG;
-
-    /** @private @const Instance for testing. */
-    this.sha384_ = sha384;
   }
 
   /** @override */
@@ -104,7 +108,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.requests_ = {};
 
     /**
-     * @private {JSONObject}
+     * @private {JSONType}
      */
     this.remoteConfig = {};
 
@@ -120,7 +124,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   onFetchRemoteConfigSuccess_() {
     /**
-     * @private {!JSONObject} The analytics config associated with the tag
+     * @private {!JSONType} The analytics config associated with the tag
      */
     this.config_ = this.mergeConfigs_();
 
@@ -161,8 +165,18 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!result) {
             return;
           }
-          addListener(this.getWin(), trigger,
-              this.handleEvent_.bind(this, trigger));
+
+          if (trigger['selector']) {
+            // Expand the selector using variable expansion.
+            trigger['selector'] = this.expandTemplate_(trigger['selector'],
+                trigger);
+            addListener(this.getWin(), trigger, this.handleEvent_.bind(this,
+                  trigger));
+
+          } else {
+            addListener(this.getWin(), trigger,
+                this.handleEvent_.bind(this, trigger));
+          }
         }));
       }
     }
@@ -210,7 +224,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Returns a promise that resolves when remote config is ready (or
    * immediately if no remote config is specified.)
    * @private
-   * @return {!Promise<>}
+   * @return {!Promise<undefined|JSONType>}
    */
   fetchRemoteConfig_() {
     let remoteConfigUrl = this.element.getAttribute('config');
@@ -249,7 +263,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @private
-   * @return {!JSONObject}
+   * @return {!JSONType}
    */
   mergeConfigs_() {
     let inlineConfig = {};
@@ -344,7 +358,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * Callback for events that are registered by the config's triggers. This
    * method generates the request and sends the request out.
    *
-   * @param {!JSONObject} trigger JSON config block that resulted in this event.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
    * @return {!Promise.<string|undefined>} The request that was sent out.
    * @private
@@ -381,7 +395,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /**
-   * @param {!JSONObject} trigger The config to use to determine sampling.
+   * @param {!JSONType} trigger The config to use to determine sampling.
    * @return {!Promise.<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
@@ -400,23 +414,30 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const key = this.expandTemplate_(spec['sampleOn'], trigger);
 
-    return urlReplacementsFor(this.getWin()).expand(key).then(key => {
-      const digest = this.sha384_(key);
-      if (digest[0] % 100 < spec['threshold']) {
-        return resolve;
-      }
-      return Promise.resolve(false);
-    });
+    const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
+    const cryptoPromise = cryptoFor(this.getWin());
+    return Promise.all([keyPromise, cryptoPromise])
+        .then(results => results[1].sha384(results[0]))
+        .then(digest => digest[0] % 100 < spec['threshold']);
   }
 
   /**
    * @param {string} template The template to expand.
-   * @param {!JSONObject} The object to use for variable value lookups.
+   * @param {!JSONType} The object to use for variable value lookups.
    * @param {!Object} event Object with details about the event.
+   * @param {number} opt_iterations Number of recursive expansions to perform.
+   *    Defaults to 2 substitutions.
    * @return {string} The expanded string.
    * @private
    */
-  expandTemplate_(template, trigger, event) {
+  expandTemplate_(template, trigger, event, opt_iterations) {
+    opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
+    if (opt_iterations < 0) {
+      user.error('Maximum depth reached while expanding variables. Please ' +
+          'ensure that the variables are not recursive.');
+      return template;
+    }
+
     // Replace placeholders with URI encoded values.
     // Precedence is event.vars > trigger.vars > config.vars.
     // Nested expansion not supported.
@@ -424,9 +445,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const raw = (event && event['vars'] && event['vars'][name]) ||
+      let raw = (event && event['vars'] && event['vars'][name]) ||
           (trigger['vars'] && trigger['vars'][name]) ||
           (this.config_['vars'] && this.config_['vars'][name]);
+      if (typeof raw == 'string') {
+        raw = this.expandTemplate_(raw, trigger, event, opt_iterations - 1);
+      }
       const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;
     });
@@ -446,7 +470,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {string} request The full request string to send.
-   * @param {!JSONObject} trigger
+   * @param {!JSONType} trigger
    * @private
    */
   sendRequest_(request, trigger) {

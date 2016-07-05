@@ -59,7 +59,7 @@ export class AmpImg extends BaseElement {
 
     this.element.appendChild(this.img_);
 
-    /** @private @const {!Srcset} */
+    /** @private @const {!../src/srcset.Srcset} */
     this.srcset_ = srcsetFromElement(this.element);
   }
 

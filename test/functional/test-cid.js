@@ -19,6 +19,8 @@ import {
   installCidService,
   getProxySourceOrigin,
 } from '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCryptoService, Crypto,}
+    from '../../extensions/amp-analytics/0.1/crypto-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
@@ -32,7 +34,9 @@ describe('cid', () => {
   let fakeWin;
   let storage;
   let cid;
+  let crypto;
   let viewerBaseCidStub;
+  let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
 
@@ -41,6 +45,7 @@ describe('cid', () => {
     isIframed = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    whenFirstVisible = Promise.resolve();
     storage = {};
     fakeWin = {
       localStorage: {
@@ -74,21 +79,26 @@ describe('cid', () => {
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
     });
+    sandbox.stub(viewer, 'whenFirstVisible', function() {
+      return whenFirstVisible;
+    });
     viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
       return Promise.resolve('from-viewer');
     });
-    installCidService(fakeWin);
-    return cidFor(fakeWin).then(c => {
-      cid = c;
-      cid.origSha384Base64_ = cid.sha384Base64_;
-      cid.sha384Base64_ = val => {
-        if (val instanceof Array) {
-          val = '[' + val + ']';
-        }
 
-        return 'sha384(' + val + ')';
-      };
-    });
+    return Promise
+        .all([installCidService(fakeWin), installCryptoService(fakeWin)])
+        .then(results => {
+          cid = results[0];
+          crypto = results[1];
+          crypto.sha384Base64 = val => {
+            if (val instanceof Array) {
+              val = '[' + val + ']';
+            }
+
+            return Promise.resolve('sha384(' + val + ')');
+          };
+        });
   });
 
   afterEach(() => {
@@ -143,7 +153,7 @@ describe('cid', () => {
   });
 
   it('should produce golden value', () => {
-    cid.sha384Base64_ = cid.origSha384Base64_;
+    crypto.sha384Base64 = new Crypto(fakeWin).sha384Base64;
     return compare(
         'e2',
         'q0pPfZTWGruPrtURDJHexzs-MgOkt9SJAsAZodzr8tx8hKv8BS62AVpbttaFX8fK');
@@ -178,11 +188,8 @@ describe('cid', () => {
 
   it('should retrieve cid from viewer if embedded', () => {
     isIframed = true;
-    return compare(
-        'e2',
-        'sha384(from-viewerhttp://www.origin.come2)')
+    return compare('e2', 'sha384(from-viewerhttp://www.origin.come2)')
         .then(() => {
-          expect(cid.baseCid_).to.equal('from-viewer');
           expect(viewerBaseCidStub.callCount).to.equal(1);
 
           // Ensure it's called only once.
@@ -190,6 +197,7 @@ describe('cid', () => {
         })
         .then(() => {
           expect(viewerBaseCidStub.callCount).to.equal(1);
+          return expect(cid.baseCid_).to.eventually.equal('from-viewer');
         });
   });
 
@@ -203,7 +211,6 @@ describe('cid', () => {
         'e2',
         'sha384(in-storagehttp://www.origin.come2)');
   });
-
 
   it('should work without mocking', () => {
     const win = {
@@ -219,6 +226,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installViewerService(win).isIframed = () => false;
     installCidService(win);
+    installCryptoService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
         return cid.get('foo', hasConsent).then(c2 => {
@@ -274,6 +282,18 @@ describe('cid', () => {
     });
   });
 
+  it('should wait until after pre-rendering', () => {
+    let nonce = 'not visible';
+    whenFirstVisible = timer.promise(100).then(() => {
+      nonce = 'visible';
+    });
+    const p = cid.get('test', hasConsent).then(unusedC => {
+      expect(nonce).to.equal('visible');
+    });
+    clock.tick(100);
+    return p;
+  });
+
   it('should wait for consent', () => {
     let nonce = 'before';
     const consent = timer.promise(100).then(() => {
@@ -302,12 +322,21 @@ describe('cid', () => {
       resolve = r;
     });
 
+    let sha384Promise;
+    crypto.sha384Base64 = val => {
+      if (val instanceof Array) {
+        val = '[' + val + ']';
+      }
+
+      return sha384Promise = Promise.resolve('sha384(' + val + ')');
+    };
+
     return cid.get('e2', hasConsent, persistencePromise).then(c => {
       expect(c).to.equal('sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)');
       expect(storage['amp-cid']).to.be.undefined;
       clock.tick(777);
       resolve();
-      return persistencePromise.then(() => {
+      return Promise.all([persistencePromise, sha384Promise]).then(() => {
         expect(storage['amp-cid']).to.be.string;
         const stored = JSON.parse(storage['amp-cid']);
         expect(stored.cid).to.equal(

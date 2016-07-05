@@ -20,6 +20,8 @@ import {user} from '../../src/log';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCryptoService,} from
+    '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
@@ -58,6 +60,7 @@ describe('UrlReplacements', () => {
       if (withCid) {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installCidService(iframe.win);
+        installCryptoService(iframe.win);
       }
       if (withActivity) {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
@@ -83,7 +86,7 @@ describe('UrlReplacements', () => {
         loadObservable.add(callback);
       },
       complete: false,
-      Object: Object,
+      Object,
       performance: {
         timing: {
           navigationStart: 100,
@@ -389,6 +392,12 @@ describe('UrlReplacements', () => {
   it('should replace TOTAL_ENGAGED_TIME', () => {
     return expand('?sh=TOTAL_ENGAGED_TIME', false, true).then(res => {
       expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AMP_VERSION', () => {
+    return expand('?sh=AMP_VERSION').then(res => {
+      expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
     });
   });
 

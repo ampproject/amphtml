@@ -153,7 +153,7 @@ describe('FixedLayer', () => {
     const attrs = {};
     const children = [];
     const elem = {
-      id: id,
+      id,
       autoOffsetTop: 17,
       toString: () => {
         return id;
@@ -227,7 +227,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {position: 'fixed'},
-      elements: elements,
+      elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -241,7 +241,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {},
-      elements: elements,
+      elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -294,6 +294,9 @@ describe('FixedLayer', () => {
           '#other-rule2',
         ],
       });
+      expect(fixedLayer.isDeclaredFixed(element1)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element2)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element3)).to.be.false;
     });
 
     it('should add and remove element directly', () => {

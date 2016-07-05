@@ -15,8 +15,8 @@
 #
 
 tags: {  # amp-sidebar
-  tag_name: "script"
-  mandatory_parent: "head"
+  tag_name: "SCRIPT"
+  mandatory_parent: "HEAD"
   spec_name: "amp-sidebar extension .js script"
   attrs: {
     name: "async"
@@ -47,11 +47,10 @@ tags: {  # amp-sidebar
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
 }
 tags: {  # <amp-sidebar>
-  tag_name: "amp-sidebar"
+  tag_name: "AMP-SIDEBAR"
   unique: true
-  mandatory_parent: "body"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  mandatory_parent: "BODY"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-sidebar extension .js script"
   attrs: {
     name: "side"

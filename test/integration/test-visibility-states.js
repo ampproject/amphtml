@@ -22,16 +22,28 @@ import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
 import {viewerFor} from '../../src/viewer';
 import {resourcesFor} from '../../src/resources';
-import {VisibilityState} from '../../src/service/viewer-impl';
+import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 
 describe('Viewer Visibility State', () => {
+
+  // This test only works with uncompiled JS, because it stubs out
+  // private properties.
+  let origUseCompiledJs;
+  beforeEach(() => {
+    origUseCompiledJs = window.ampTestRuntimeConfig.useCompiledJs;
+    window.ampTestRuntimeConfig.useCompiledJs = false;
+  });
+  afterEach(() => {
+    window.ampTestRuntimeConfig.useCompiledJs = origUseCompiledJs;
+  });
 
   let sandbox;
 
   function noop() {}
 
-  describe('Element Transitions', () => {
+  // TODO(#3561): unmute the test.
+  describe.skipper().skipSafari().run('Element Transitions', () => {
     let fixture;
     let resources;
     let viewer;

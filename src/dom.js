@@ -16,6 +16,7 @@
 
 import {dashToCamelCase} from './string';
 import {dev} from './log';
+import {toArray} from './types';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -153,6 +154,23 @@ export function closest(element, callback) {
   for (let el = element; el; el = el.parentElement) {
     if (callback(el)) {
       return el;
+    }
+  }
+  return null;
+}
+
+
+/**
+ * Finds the closest node that satisfies the callback from this node
+ * up the DOM subtree.
+ * @param {!Node} node
+ * @param {function(!Node):boolean} callback
+ * @return {?Node}
+ */
+export function closestNode(node, callback) {
+  for (let n = node; n; n = n.parentNode) {
+    if (callback(n)) {
+      return n;
     }
   }
   return null;
@@ -328,13 +346,7 @@ export function childElementsByAttr(parent, attr) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
-    // Convert NodeList into Array.<Element>.
-    const children = [];
-    for (let i = 0; i < nodeList.length; i++) {
-      children.push(nodeList[i]);
-    }
-    return children;
+    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
   }
   return childElements(parent, el => {
     return el.hasAttribute(attr);

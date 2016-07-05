@@ -25,17 +25,19 @@ before_script:
   - npm install -g gulp
   - pip install --user protobuf
 script:
+  - npm run node-test
   - gulp lint
   - gulp build --fortesting
+  - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit
   # dep-check needs to occur after build since we rely on build to generate
   # the css files into js files.
   - gulp dep-check
   # Unit tests with Travis' default chromium
-  - gulp test --compiled --fortesting
+  - gulp test --nobuild --compiled --fortesting
   # Integration tests with all saucelabs browsers
-  - gulp test --saucelabs --integration --compiled --fortesting
+  - gulp test --nobuild --saucelabs --integration --compiled --fortesting
   # All unit tests with an old chrome (best we can do right now to pass tests
   # and not start relying on new features).
   # Disabled because it regressed. Better to run the other saucelabs tests.

@@ -19,8 +19,12 @@ import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
+import {installActionServiceForDoc,} from
+    '../../../../src/service/action-impl';
 import {installCidService,} from
     '../../../../extensions/amp-analytics/0.1/cid-impl';
+import {installDocService,} from
+    '../../../../src/service/ampdoc-impl';
 import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
@@ -36,6 +40,8 @@ describe('AccessService', () => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -242,6 +248,8 @@ describe('AccessService adapter context', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -315,6 +323,7 @@ describe('AccessService authorization', () => {
   let analyticsMock;
   let adapterMock;
   let performanceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -322,6 +331,8 @@ describe('AccessService authorization', () => {
     clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -622,11 +633,14 @@ describe('AccessService applyAuthorizationToElement_', () => {
   let configElement, elementOn, elementOff;
   let templatesMock;
   let mutateElementStub;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -768,12 +782,15 @@ describe('AccessService pingback', () => {
   let analyticsMock;
   let visibilityChanged;
   let scrolled;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -1103,12 +1120,15 @@ describe('AccessService login', () => {
   let cidMock;
   let analyticsMock;
   let serviceMock;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 
@@ -1155,7 +1175,7 @@ describe('AccessService login', () => {
         .withExactArgs('')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login', event: event});
+    service.handleAction_({method: 'login', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
@@ -1164,7 +1184,7 @@ describe('AccessService login', () => {
         .withExactArgs('other')
         .once();
     const event = {preventDefault: sandbox.spy()};
-    service.handleAction_({method: 'login-other', event: event});
+    service.handleAction_({method: 'login-other', event});
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
@@ -1424,11 +1444,14 @@ describe('AccessService analytics', () => {
 
   let sandbox;
   let configElement;
+  let service;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
 
     markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
     installCidService(window);
     installPerformanceService(window);
 

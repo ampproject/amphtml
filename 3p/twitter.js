@@ -59,43 +59,20 @@ export function twitter(global, data) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
-    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(() => {
-      const iframe = global.document.querySelector('#c iframe');
-      // There is no iframe if the tweet was deleted. Thanks for resolving
-      // the promise, though :)
-      if (iframe && iframe.contentWindow) {
-        // Unfortunately the tweet isn't really done at this time.
-        // We listen for resize to learn when things are
-        // really done.
-        iframe.contentWindow.addEventListener('resize', function() {
-          resize(iframe.contentWindow.document.body);
-        }, true);
-        resize(iframe.contentWindow.document.body);
-      } else if (global.MutationObserver) {
-        // If no iframe is created, Twitter likely went into their ShadowDOM
-        // based pass. MutationObserver should definitely be available then.
-        // Because Twitter does not actually provide an event for when
-        // rendering is done, we use a MutationObserver and schedule a measure
-        // operation whenever any elements were added to the DOM.
-        let timeout;
-        function measure() {
-          // Throttle if multiple things happen at once.
-          clearTimeout(timeout);
-          timeout = setTimeout(function() {
-            const root = global.document.querySelector('#tweet *');
-            if (root) {
-              resize(root);
-            }
-          }, 0);
-        }
-        const observer = new MutationObserver(measure);
-        observer.observe(global.document.querySelector('#c'), {
-          subtree: true,
-          childList: true,
-        });
-        measure();
-      } else {
-        console./*OK*/error('No iframe or shadow root found for tweet.');
+
+    let twitterWidgetSandbox;
+    twttr.events.bind('resize', event => {
+      // To be safe, make sure the resize event was triggered for the widget we created below.
+      if (twitterWidgetSandbox === event.target) {
+        resize(twitterWidgetSandbox);
+      }
+    });
+
+    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(el => {
+      if (el) {
+        // Not a deleted tweet
+        twitterWidgetSandbox = el;
+        resize(twitterWidgetSandbox);
       }
     });
   });

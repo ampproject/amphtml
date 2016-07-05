@@ -26,7 +26,8 @@ limitations under the License.
       data-call="std"
       data-site="94612"
       data-page="629154"
-      data-format="38952">
+      data-format="38952"
+      data-domain="https://<YourSmartAdServerDomain>">
   </amp-ad>
 ```
 
@@ -39,10 +40,14 @@ limitations under the License.
       data-site="94612"
       data-page="629154"
       data-format="38952"
-      data-target="foo=bar">
+      data-target="foo=bar"
+      data-domain="https://<YourSmartAdServerDomain>">
   </amp-ad>
 ```
 
 ## Configuration
+
+For ``<YourSmartAdServerDomain>``, use the domain assigned to your network (e. g. www3.smartadserver.com); It can be found in Smart AdServer's config.js library (e. g. http://www3.smartadserver.com/config.js?nwid=1234).
+
 
 For semantics of configuration, please see [Smart AdServer help center](http://help.smartadserver.com/).

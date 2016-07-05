@@ -70,7 +70,7 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
@@ -288,9 +288,9 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} opt_implementationClass For
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
  *     testing only.
- * @return {!AmpElement.prototype}
+ * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
@@ -316,7 +316,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!Resources}  */
+    /** @private @const {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(win);
 
     /** @private {!Layout} */
@@ -334,10 +334,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     /** @private {string|null|undefined} */
     this.mediaQuery_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.sizeList_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.heightsList_ = undefined;
 
     /**
@@ -365,14 +365,14 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     // `opt_implementationClass` is only used for tests.
     const Ctor = opt_implementationClass || knownElements[name];
 
-    /** @private {!BaseElement} */
+    /** @private {!./base-element.BaseElement} */
     this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
      * Action queue is initially created and kept around until the element
      * is ready to send actions directly to the implementation.
-     * @private {?Array<!ActionInvocation>}
+     * @private {?Array<!./service/action-impl.ActionInvocation>}
      */
     this.actionQueue_ = [];
 
@@ -383,25 +383,20 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.isInTemplate_ = undefined;
   };
 
-  /** @private @this {!Element} */
-  ElementProto.assertNotTemplate_ = function() {
-    dev.assert(!this.isInTemplate_, 'Must never be called in template');
-  };
-
   /**
    * Whether the element has been upgraded yet.
    * @return {boolean}
    * @final @this {!Element}
    */
   ElementProto.isUpgraded = function() {
-    return !(this.implementation_ instanceof ElementStub);
+    return isUpgraded(this);
   };
 
   /**
    * Upgrades the element to the provided new implementation. If element
    * has already been attached, it's layout validation and attachment flows
    * are repeated for the new implementation.
-   * @param {function(new:BaseElement, !Element)} newImplClass
+   * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
    * @final @package @this {!Element}
    */
   ElementProto.upgrade = function(newImplClass) {
@@ -421,8 +416,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      // For a never-added resource, the build will be done automatically
+      // via `resources.add` on the first attach.
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**
@@ -440,7 +437,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @return {number} @this {!Element}
    */
   ElementProto.getPriority = function() {
-    dev.assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
+    dev.assert(isUpgraded(this), 'Cannot get priority of unupgraded element');
     return this.implementation_.getPriority();
   };
 
@@ -453,11 +450,11 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @final @this {!Element}
    */
   ElementProto.build = function() {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     if (this.isBuilt()) {
       return;
     }
-    dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
+    dev.assert(isUpgraded(this), 'Cannot build unupgraded element');
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
@@ -508,22 +505,23 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   };
 
   /**
-   * @return {!Vsync}
+   * Whether the custom element declares that it has to be fixed.
+   * @return {boolean}
    * @private @this {!Element}
    */
-  ElementProto.getVsync_ = function() {
-    return vsyncFor(this.ownerDocument.defaultView);
+  ElementProto.isAlwaysFixed = function() {
+    return this.implementation_.isAlwaysFixed();
   };
 
   /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
-   * @param {!LayoutRect} layoutBox
+   * @param {!./layout-rect.LayoutRectDef} layoutBox
    * @this {!Element}
    */
   ElementProto.updateLayoutBox = function(layoutBox) {
     this.layoutWidth_ = layoutBox.width;
-    if (this.isUpgraded()) {
+    if (isUpgraded(this)) {
       this.implementation_.layoutWidth_ = this.layoutWidth_;
     }
     // TODO(malteubl): Forward for stubbed elements.
@@ -537,7 +535,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
           layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
-        this.getVsync_().mutate(() => {
+        getVsync(this).mutate(() => {
           this.prepareLoading_();
         });
       }
@@ -557,7 +555,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @this {!Element}
    */
   ElementProto.applySizesAndMediaQuery = function() {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
 
     // Media query.
     if (this.mediaQuery_ === undefined) {
@@ -630,8 +628,25 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     }
     if (!this.everAttached) {
       this.everAttached = true;
+      if (!isUpgraded(this)) {
+        this.classList.add('amp-unresolved');
+        this.classList.add('-amp-unresolved');
+      }
       try {
-        this.firstAttachedCallback_();
+        this.layout_ = applyLayout_(this);
+        if (this.layout_ != Layout.NODISPLAY &&
+            !this.implementation_.isLayoutSupported(this.layout_)) {
+          throw new Error('Layout not supported for: ' + this.layout_);
+        }
+        this.implementation_.layout_ = this.layout_;
+        this.implementation_.firstAttachedCallback();
+        if (!isUpgraded(this)) {
+          // amp:attached is dispatched from the ElementStub class when it replayed
+          // the firstAttachedCallback call.
+          this.dispatchCustomEvent('amp:stubbed');
+        } else {
+          this.dispatchCustomEvent('amp:attached');
+        }
       } catch (e) {
         reportError(e, this);
       }
@@ -651,35 +666,6 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.implementation_.detachedCallback();
   };
 
-  /**
-   * Called when the element is attached to the DOM for the first time.
-   * @private @final @this {!Element}
-   */
-  ElementProto.firstAttachedCallback_ = function() {
-    if (!this.isUpgraded()) {
-      this.classList.add('amp-unresolved');
-      this.classList.add('-amp-unresolved');
-    }
-    try {
-      this.layout_ = applyLayout_(this);
-      if (this.layout_ != Layout.NODISPLAY &&
-          !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw new Error('Layout not supported for: ' + this.layout_);
-      }
-      this.implementation_.layout_ = this.layout_;
-      this.implementation_.firstAttachedCallback();
-    } catch (e) {
-      reportError(e, this);
-      throw e;
-    }
-    if (!this.isUpgraded()) {
-      // amp:attached is dispatched from the ElementStub class when it replayed
-      // the firstAttachedCallback call.
-      this.dispatchCustomEvent('amp:stubbed');
-    } else {
-      this.dispatchCustomEvent('amp:attached');
-    }
-  };
 
   /**
    * @param {string} name
@@ -724,7 +710,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   };
 
   /**
-   * @return {!LayoutRect}
+   * @return {!./layout-rect.LayoutRectDef}
    * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
@@ -771,8 +757,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.layoutCallback = function() {
-    this.assertNotTemplate_();
-    dev.assert(this.isUpgraded() && this.isBuilt(),
+    assertNotTemplate(this);
+    dev.assert(isUpgraded(this) && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
@@ -801,7 +787,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @final @package @this {!Element}
    */
   ElementProto.viewportCallback = function(inViewport) {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     this.isInViewport_ = inViewport;
     if (this.layoutCount_ == 0) {
       if (!inViewport) {
@@ -816,7 +802,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
         }, 100);
       }
     }
-    if (this.isUpgraded() && this.isBuilt()) {
+    if (isUpgraded(this) && this.isBuilt()) {
       this.updateInViewport_(inViewport);
     }
   };
@@ -838,8 +824,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.pauseCallback = function() {
-    this.assertNotTemplate_();
-    if (!this.isBuilt() || !this.isUpgraded()) {
+    assertNotTemplate(this);
+    if (!this.isBuilt() || !isUpgraded(this)) {
       return;
     }
     this.implementation_.pauseCallback();
@@ -853,8 +839,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.resumeCallback = function() {
-    this.assertNotTemplate_();
-    if (!this.isBuilt() || !this.isUpgraded()) {
+    assertNotTemplate(this);
+    if (!this.isBuilt() || !isUpgraded(this)) {
       return;
     }
     this.implementation_.resumeCallback();
@@ -870,8 +856,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.unlayoutCallback = function() {
-    this.assertNotTemplate_();
-    if (!this.isBuilt() || !this.isUpgraded()) {
+    assertNotTemplate(this);
+    if (!this.isBuilt() || !isUpgraded(this)) {
       return false;
     }
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
@@ -898,11 +884,11 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready
    * to receive actions.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @final @this {!Element}
    */
   ElementProto.enqueAction = function(invocation) {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     if (!this.isBuilt()) {
       dev.assert(this.actionQueue_).push(invocation);
     } else {
@@ -931,7 +917,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 
   /**
    * Executes the action immediately. All errors are consumed and reported.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @param {boolean} deferred
    * @final
    * @private @this {!Element}
@@ -983,42 +969,17 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.togglePlaceholder = function(show) {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     if (show) {
-      this.showLastPlaceholder_();
+      const placeholder = this.getPlaceholder();
+      if (placeholder) {
+        placeholder.classList.remove('amp-hidden');
+      }
     } else {
-      this.hideAllPlaceholders_();
-    }
-  };
-
-  /**
-   * Returns an optional placeholder element for this custom element.
-   * @return {!Array.<!Element>}
-   * @private @this {!Element}
-   */
-  ElementProto.getAllPlaceholders_ = function() {
-    return dom.childElementsByAttr(this, 'placeholder');
-  };
-
-  /**
-   * Hides all placeholders in an element.
-   * @private @this {!Element}
-   */
-  ElementProto.hideAllPlaceholders_ = function() {
-    const placeholders = this.getAllPlaceholders_();
-    for (let i = 0; i < placeholders.length; i++) {
-      placeholders[i].classList.add('amp-hidden');
-    }
-  };
-
-  /**
-   * Shows the last placeholder in an element.
-   * @private @this {!Element}
-   */
-  ElementProto.showLastPlaceholder_ = function() {
-    const placeholder = this.getPlaceholder();
-    if (placeholder) {
-      placeholder.classList.remove('amp-hidden');
+      const placeholders = dom.childElementsByAttr(this, 'placeholder');
+      for (let i = 0; i < placeholders.length; i++) {
+        placeholders[i].classList.add('amp-hidden');
+      }
     }
   };
 
@@ -1038,7 +999,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @package @final @this {!Element}
    */
   ElementProto.toggleFallback = function(state) {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     // This implementation is notably less efficient then placeholder toggling.
     // The reasons for this are: (a) "not supported" is the state of the whole
     // element, (b) some realyout is expected and (c) fallback condition would
@@ -1107,7 +1068,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * @private @final @this {!Element}
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
-    this.assertNotTemplate_();
+    assertNotTemplate(this);
     this.loadingState_ = state;
     if (!state && !this.loadingContainer_) {
       return;
@@ -1119,7 +1080,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       return;
     }
 
-    this.getVsync_().mutate(() => {
+    getVsync(this).mutate(() => {
       let state = this.loadingState_;
       // Repeat "loading enabled" check because it could have changed while
       // waiting for vsync.
@@ -1190,7 +1151,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
         this.overflowElement_.onclick = () => {
           this.resources_./*OK*/changeSize(
               this, requestedHeight, requestedWidth);
-          this.getVsync_().mutate(() => {
+          getVsync(this).mutate(() => {
             this.overflowCallback(
                 /* overflown */ false, requestedHeight, requestedWidth);
           });
@@ -1210,7 +1171,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
+ * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
@@ -1280,3 +1241,25 @@ export function resetScheduledElementForTesting(win, elementName) {
 export function getElementClassForTesting(elementName) {
   return knownElements[elementName] || null;
 }
+
+/** @param {!Element} element */
+function assertNotTemplate(element) {
+  dev.assert(!element.isInTemplate_, 'Must never be called in template');
+};
+
+/**
+ * @param {!Element} element
+ * @return {!./service/vsync-impl.Vsync}
+ */
+function getVsync(element) {
+  return vsyncFor(element.ownerDocument.defaultView);
+};
+
+/**
+ * Whether the element has been upgraded yet.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+function isUpgraded(element) {
+  return !(element.implementation_ instanceof ElementStub);
+};
