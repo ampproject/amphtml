@@ -62,6 +62,7 @@ export const adPrefetch = {
   ],
   nend: 'https://js1.nend.net/js/amp.js',
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+  pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js'
 };
 
 /**
@@ -170,6 +171,10 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
+  pulsepoint: [
+    'https://tag.contextweb.com',
+    'https://ads.contextweb.com'
+  ]
 };
 
 /**
