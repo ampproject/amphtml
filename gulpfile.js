@@ -49,6 +49,7 @@ function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
+  buildExtension('amp-a4a', '0.1', false, options);
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-ad', '0.1', false, options);
@@ -61,11 +62,12 @@ function buildExtensions(options) {
   buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
+  buildExtension('amp-experiment', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
-  buildExtension('amp-form', '0.1', false, options);
+  buildExtension('amp-form', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
@@ -76,6 +78,7 @@ function buildExtensions(options) {
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
+  buildExtension('amp-share-tracking', '0.1', false, options);
   buildExtension('amp-sidebar', '0.1', true, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-springboard-player', '0.1', false, options);
@@ -120,6 +123,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     watch: watch,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
+    externs: ['ads/ads.extern.js',],
   });
   // The main binary does not yet compile successfully with type checking
   // turned on. Skip for now.
@@ -342,6 +346,7 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
   buildExample('ads.with.script.amp.html');
+  buildExample('adsense.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
@@ -355,8 +360,10 @@ function buildExamples(watch) {
   buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('layout-flex-item.amp.html');
-  buildExample('live-list.amp.html');
+  buildExample('live-blog-non-floating-button.amp.html');
+  buildExample('live-blog.amp.html');
   buildExample('live-list-update.amp.html');
+  buildExample('live-list.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -773,4 +780,3 @@ gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
-

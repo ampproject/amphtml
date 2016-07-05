@@ -15,20 +15,28 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {AmpForm} from '../amp-form';
+import {AmpForm, installAmpForm} from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
+import {toggleExperiment} from '../../../../src/experiments';
+import {installDocService,} from
+    '../../../../src/service/ampdoc-impl';
+import {installActionServiceForDoc,} from
+    '../../../../src/service/action-impl';
 
 describe('amp-form', () => {
 
   let sandbox;
-  installTemplatesService(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
+      const docService = installDocService(iframe.win, /* isSingleDoc */ true);
+      installActionServiceForDoc(docService.getAmpDoc());
+      toggleExperiment(iframe.win, 'amp-form', true);
       installTemplatesService(iframe.win);
+      installAmpForm(iframe.win);
       const form = getForm(iframe.doc, button1, button2);
       const ampForm = new AmpForm(form);
       return ampForm;
@@ -37,6 +45,7 @@ describe('amp-form', () => {
 
   function getForm(doc = document, button1 = true, button2 = false) {
     const form = doc.createElement('form');
+    form.setAttribute('method', 'POST');
 
     const nameInput = doc.createElement('input');
     nameInput.setAttribute('name', 'name');
@@ -58,7 +67,12 @@ describe('amp-form', () => {
 
     return form;
   }
+
   beforeEach(() => {
+    installTemplatesService(window);
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
+
     sandbox = sinon.sandbox.create();
   });
 
@@ -95,26 +109,133 @@ describe('amp-form', () => {
     expect(form.addEventListener.calledWith('submit')).to.be.true;
   });
 
-  it('should do nothing if defaultPrevented', () => {
+  it('should do nothing if already submitted', () => {
     const form = getForm();
-    form.setAttribute('action-xhr', 'https://example.com');
     const ampForm = new AmpForm(form);
+    ampForm.state_ = 'submitting';
     const event = {
+      stopImmediatePropagation: sandbox.spy(),
       target: form,
       preventDefault: sandbox.spy(),
-      defaultPrevented: true,
     };
+    sandbox.spy(ampForm.xhr_, 'fetchJson');
+    sandbox.spy(form, 'checkValidity');
+    ampForm.handleSubmit_(event);
+    expect(event.stopImmediatePropagation.called).to.be.true;
+    expect(form.checkValidity.called).to.be.false;
+    expect(ampForm.xhr_.fetchJson.called).to.be.false;
+  });
+
+  it('should respect novalidate on a form', () => {
+    const form = getForm();
+    form.setAttribute('novalidate', '');
+    const ampForm = new AmpForm(form);
+    const event = {
+      stopImmediatePropagation: sandbox.spy(),
+      target: form,
+      preventDefault: sandbox.spy(),
+    };
+    sandbox.spy(form, 'checkValidity');
+    ampForm.xhrAction_ = null;
     ampForm.handleSubmit_(event);
     expect(event.preventDefault.called).to.be.false;
+    expect(form.checkValidity.called).to.be.false;
+  });
+
+  it('should check validity and report when invalid', () => {
+    return getAmpForm().then(ampForm => {
+      const form = ampForm.form_;
+      const emailInput = document.createElement('input');
+      emailInput.setAttribute('name', 'email');
+      emailInput.setAttribute('type', 'email');
+      emailInput.setAttribute('required', '');
+      form.appendChild(emailInput);
+      sandbox.spy(form, 'checkValidity');
+      sandbox.spy(ampForm.xhr_, 'fetchJson');
+
+      const event = {
+        stopImmediatePropagation: sandbox.spy(),
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+      };
+
+      ampForm.vsync_ = {
+        run: (task, state) => {
+          if (task.measure) {
+            task.measure(state);
+          }
+          if (task.mutate) {
+            task.mutate(state);
+          }
+        },
+      };
+
+      const bubbleEl = ampForm.win_.document.querySelector(
+          '.-amp-validation-bubble');
+      const validationBubble = bubbleEl['__BUBBLE_OBJ'];
+      sandbox.spy(validationBubble, 'show');
+      sandbox.spy(validationBubble, 'hide');
+      ampForm.handleSubmit_(event);
+      expect(event.stopImmediatePropagation.called).to.be.true;
+      expect(form.checkValidity.called).to.be.true;
+      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+
+      const showCall1 = validationBubble.show.getCall(0);
+      expect(showCall1.args[0]).to.equal(emailInput);
+      expect(showCall1.args[1]).to.not.be.null;
+
+      // Check bubble would show with a new message when user
+      // change its content.
+      emailInput.value = 'cool';
+      emailInput.dispatchEvent(new Event('keyup'));
+      const showCall2 = validationBubble.show.getCall(1);
+      expect(showCall2.args[0]).to.equal(emailInput);
+      expect(showCall2.args[1]).to.not.be.null;
+      expect(showCall2.args[1]).to.not.equal(showCall1.args[0]);
+      expect(ampForm.xhr_.fetchJson.called).to.be.false;
+
+      // Check bubble would hide when input becomes valid.
+      emailInput.value = 'cool@bea.ns';
+      emailInput.dispatchEvent(new Event('keyup'));
+      expect(validationBubble.hide.calledOnce).to.be.true;
+      expect(validationBubble.show.calledTwice).to.be.true;
+
+      // Check that we'd hide the bubble when user move out.
+      emailInput.dispatchEvent(new Event('blur'));
+      expect(validationBubble.hide.calledTwice).to.be.true;
+
+      // Check that we no longer have event listeners on the input.
+      emailInput.dispatchEvent(new Event('blur'));
+      expect(validationBubble.hide.calledThrice).to.be.false;
+      emailInput.dispatchEvent(new Event('keyup'));
+      expect(validationBubble.show.calledThrice).to.be.false;
+
+      // Check that we're removing previously added listeners
+      // everytime the form is submitted.
+      emailInput.value = 'cool';
+      sandbox.spy(emailInput, 'removeEventListener');
+      ampForm.handleSubmit_(event);
+      expect(emailInput.removeEventListener.calledTwice).to.be.true;
+      expect(emailInput.removeEventListener.calledWith('blur')).to.be.true;
+      expect(emailInput.removeEventListener.calledWith('keyup')).to.be.true;
+
+      ampForm.handleSubmit_(event);
+      expect(emailInput.removeEventListener.callCount).to.equal(4);
+
+      // Check xhr goes through when form is valid.
+      emailInput.value = 'cool@bea.ns';
+      ampForm.handleSubmit_(event);
+      expect(ampForm.xhr_.fetchJson.called).to.be.true;
+    });
   });
 
   it('should call fetchJson with the xhr action and form data', () => {
     return getAmpForm().then(ampForm => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: ampForm.form_,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
@@ -124,7 +245,7 @@ describe('amp-form', () => {
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
-      expect(config.method).to.equal('GET');
+      expect(config.method).to.equal('POST');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
     });
@@ -138,9 +259,9 @@ describe('amp-form', () => {
       }));
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       const button1 = form.querySelectorAll('input[type=submit]')[0];
       const button2 = form.querySelectorAll('input[type=submit]')[1];
@@ -154,7 +275,8 @@ describe('amp-form', () => {
       ampForm.handleSubmit_(event);
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
-      expect(event.preventDefault.callCount).to.equal(3);
+      expect(event.preventDefault.callCount).to.equal(1);
+      expect(event.stopImmediatePropagation.callCount).to.equal(2);
       expect(ampForm.xhr_.fetchJson.calledOnce).to.be.true;
       expect(form.className).to.contain('amp-form-submitting');
       expect(form.className).to.not.contain('amp-form-submit-error');
@@ -177,11 +299,12 @@ describe('amp-form', () => {
       sandbox.stub(ampForm.xhr_, 'fetchJson').returns(new Promise(resolve => {
         fetchJsonResolver = resolve;
       }));
+      sandbox.spy(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       expect(event.preventDefault.called).to.be.true;
@@ -195,6 +318,9 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
         expect(form.className).to.contain('amp-form-submit-success');
+        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger.calledWith(
+            form, 'submit-success', null)).to.be.true;
       });
     });
   });
@@ -206,11 +332,12 @@ describe('amp-form', () => {
           .returns(new Promise((unusedResolve, reject) => {
             fetchJsonRejecter = reject;
           }));
+      sandbox.spy(ampForm.actions_, 'trigger');
       const form = ampForm.form_;
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       const button1 = form.querySelectorAll('input[type=submit]')[0];
       const button2 = form.querySelectorAll('input[type=submit]')[1];
@@ -232,9 +359,13 @@ describe('amp-form', () => {
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-success');
         expect(form.className).to.contain('amp-form-submit-error');
+        expect(ampForm.actions_.trigger.called).to.be.true;
+        expect(ampForm.actions_.trigger.calledWith(
+            form, 'submit-error', null)).to.be.true;
       });
     });
   });
+
 
   it('should allow rendering responses through templates', () => {
     return getAmpForm(true).then(ampForm => {
@@ -260,9 +391,9 @@ describe('amp-form', () => {
             resolve(renderedTemplate);
           }));
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       fetchJsonRejecter({responseJson: {message: 'hello there'}});
@@ -293,6 +424,7 @@ describe('amp-form', () => {
       renderedTemplate.innerText = 'Success: hello';
       renderedTemplate.setAttribute('i-amp-rendered', '');
       successContainer.appendChild(renderedTemplate);
+      ampForm.state_ = 'submit-success';
 
       const newRender = document.createElement('div');
       newRender.innerText = 'New Success: What What';
@@ -307,9 +439,9 @@ describe('amp-form', () => {
             resolve(newRender);
           }));
       const event = {
+        stopImmediatePropagation: sandbox.spy(),
         target: form,
         preventDefault: sandbox.spy(),
-        defaultPrevented: false,
       };
       ampForm.handleSubmit_(event);
       fetchJsonResolver({'message': 'What What'});

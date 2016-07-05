@@ -120,7 +120,8 @@ class AmpSlides extends AMP.BaseElement {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
+        Animation.animate(this.element,
+            this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);

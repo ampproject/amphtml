@@ -21,6 +21,14 @@ import {
 import {closest, openWindowDialog} from '../../src/dom';
 
 
+/**
+ * Origins that are trusted to serve valid AMP documents.
+ */
+const ampOrigins = {
+  'https://cdn.ampproject.org': true,
+  'http://localhost:8000': true,
+};
+
 
 /**
  * Install a click listener that transforms navigation to the AMP cache
@@ -59,6 +67,9 @@ export function handleClick(e) {
 
   const link = getLinkInfo(e);
   if (!link || !link.eventualUrl) {
+    return;
+  }
+  if (e.isTrusted === false) {
     return;
   }
 
@@ -133,6 +144,13 @@ function getEventualUrl(a) {
  */
 function navigateTo(win, a, url) {
   const target = (a.target || '_top').toLowerCase();
+  const a2aAncestor = getA2AAncestor(win);
+  if (a2aAncestor) {
+    a2aAncestor.win./*OK*/postMessage('a2a;' + JSON.stringify({
+      url,
+    }), a2aAncestor.origin);
+    return;
+  }
   openWindowDialog(win, url, target);
 }
 
@@ -180,4 +198,52 @@ export function warmupDynamic(e) {
  */
 function getHeadOrFallback(doc) {
   return doc.head || doc.documentElement;
+}
+
+/**
+ * Returns info about an ancestor that can perform A2A navigations
+ * or null if none is present.
+ * @param {!Window} win
+ * @return {?{
+ *   win: !Window,
+ *   origin: string,
+ * }}
+ */
+export function getA2AAncestor(win) {
+  if (!win.location.ancestorOrigins) {
+    return null;
+  }
+  const origins = win.location.ancestorOrigins;
+  // We expect top, amp cache, ad (can be nested).
+  if (origins.length < 2) {
+    return null;
+  }
+  const top = origins[origins.length - 1];
+  // Not a security property. We just check whether the
+  // viewer might support A2A. More domains can be added to whitelist
+  // as needed.
+  if (top.indexOf('.google.') == -1) {
+    return null;
+  }
+  const amp = origins[origins.length - 2];
+  if (!ampOrigins[amp] && !ampOrigins.hasOwnProperty(amp)) {
+    return null;
+  }
+  return {
+    win: getNthParentWindow(win, origins.length - 1),
+    origin: amp,
+  };
+}
+
+/**
+ * Returns the Nth parent of the given window.
+ * @param {!Window} win
+ * @param {number} distance frames above us.
+ */
+function getNthParentWindow(win, distance) {
+  let parent = win;
+  for (let i = 0; i < distance; i++) {
+    parent = parent.parent;
+  }
+  return parent;
 }

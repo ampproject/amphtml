@@ -42,6 +42,10 @@ limitations under the License.
     <td>
       <ul>
         <li>
+          <a
+          href="https://github.com/ampproject/amphtml/blob/master/examples/live-blog.amp.html">live-blog.amp.html</a>
+        </li>
+        <li>
           <a href="https://github.com/ampproject/amphtml/blob/master/examples/live-list.amp.html">live-list.amp.html</a>
         </li>
         <li>
@@ -252,6 +256,20 @@ If present the entry is assumed to be deleted.
 
 ## Styling
 
+On very slow connections the javascript and styles of the component
+might arrive later than when the body is unhidden (the amp-boilerplate
+style timesout) so we highly recommend adding the following styles below
+in your own `amp-custom` styles.
+
+```css
+amp-live-list > [update] {
+  display: none;
+}
+```
+
+When we apply the `amp-active` class to the update reference point it will set
+`display: block`.
+
 An `amp-live-list-item` class is added to all the children of the `items`
 reference point.
 
@@ -283,8 +301,9 @@ amp-live-list > [items] > [data-tombstone] {
 }
 ```
 
-An `.amp-hidden` class is added to the `update` reference point, and you can
-hook into this class to add transitions. (see Examples below)
+An `.amp-hidden` and `.amp-active` class is added to the `update`
+reference point, and you can hook into this class to add transitions.
+(see Examples below)
 
 ## Examples
 
@@ -298,6 +317,10 @@ the lowest one.
 ```html
 
 <style amp-custom>
+  amp-live-list > [update] {
+    display: none;
+  }
+
   #fixed-button {
     position: fixed;
     top: 10px;
@@ -305,11 +328,11 @@ the lowest one.
     transform: translateX(-50%)
   }
 
-  .slide {
+  .slide.amp-active {
     overflow-y: hidden;
     height: 100px;
     max-height: 150px;
-    transition-property: all;
+    transition-property: height;
     transition-duration: .2s;
     transition-timing-function: ease-in;
     background: #3f51b5;

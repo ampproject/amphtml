@@ -76,6 +76,7 @@ import {yahoojp} from '../ads/yahoojp';
 import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 import {adgeneration} from '../ads/adgeneration';
+import {genieessp} from '../ads/genieessp';
 import {pulsepoint} from '../ads/pulsepoint';
 
 /**
@@ -139,7 +140,8 @@ register('yahoojp', yahoojp);
 register('chargeads', chargeads);
 register('nend', nend);
 register('adgeneration', adgeneration);
-register('pulsepoint', pulsepoint)
+register('genieessp', genieessp);
+register('pulsepoint', pulsepoint);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -270,8 +272,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
   } catch (e) {
-    lightweightErrorReport(e);
-    throw e;
+    if (!window.context.mode.test) {
+      lightweightErrorReport(e);
+      throw e;
+    }
   }
 };
 

@@ -78,7 +78,7 @@ export const ANALYTICS_CONFIG = {
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${extraUrlParams}${suffix}',
+        's2=${level2}&${extraUrlParams}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -249,6 +249,7 @@ export const ANALYTICS_CONFIG = {
       'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
+        '&val_101=${id}' +
         '&val_101=${canonicalPath}' +
         '&ch=${canonicalHost}' +
         '&uuid=${uid}' +
@@ -262,7 +263,8 @@ export const ANALYTICS_CONFIG = {
         '&tet=${totalEngagedTime}' +
         '&dr=${documentReferrer}' +
         '&plt=${pageLoadTime}' +
-        '&val_108=${title}',
+        '&val_108=${title}' +
+        '&val_120=3',
     },
     'triggers': {
       'defaultPageview': {
@@ -328,10 +330,11 @@ export const ANALYTICS_CONFIG = {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'dataSource': 'AMP',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
+      'basePrefix': 'v=1&_v=a1&ds=${dataSource}&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
           'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
@@ -349,6 +352,16 @@ export const ANALYTICS_CONFIG = {
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
     },
     'extraUrlParamsReplaceMap': {
       'dimension': 'cd',
@@ -435,6 +448,47 @@ export const ANALYTICS_CONFIG = {
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'mparticle': {
+    'vars': {
+      'eventType': 'Unknown',
+      'debug': false,
+      'amp_clientId': 'CLIENT_ID(mparticle_amp_id)',
+    },
+    'requests': {
+      'host': 'https://pixels.mparticle.com',
+      'endpointPath': '/v1/${apiKey}/Pixel',
+      'baseParams': 'et=${eventType}&' +
+          'amp_id=${amp_clientId}&' +
+          'attrs_k=${eventAttributes_Keys}&' +
+          'attrs_v=${eventAttributes_Values}&' +
+          'ua_k=${userAttributes_Keys}&' +
+          'ua_v=${userAttributes_Values}&' +
+          'ui_t=${userIdentities_Types}&' +
+          'ui_v=${userIdentities_Values}&' +
+          'flags_k=${customFlags_Keys}&' +
+          'flags_v=${customFlags_Values}&' +
+          'ct=${timestamp}&' +
+          'dbg=${debug}&' +
+          'lc=${location}&' +
+          'av=${appVersion}',
+      'pageview': '${host}${endpointPath}?' +
+          'dt=ScreenView&' +
+          'n=${canonicalPath}&' +
+          'hn=${ampdocUrl}&' +
+          'ttl=${title}&' +
+          '${baseParams}',
+      'event': '${host}${endpointPath}?' +
+          'dt=AppEvent&' +
+          'n=${eventName}&' +
+          '${baseParams}',
     },
     'transport': {
       'beacon': false,

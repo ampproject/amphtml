@@ -57,7 +57,7 @@
         // When the editor contents change, trigger validation (with a delay)
         // and propagate the validation errors into the editor (as line
         // widgets) and the listbox below the editor as clickable errors.
-        editor.addEventListener('amphtml-editor-changes', function(e) {
+        var refreshEditorAndErrors = function(e) {
           clearTimeout(validationTimeout);
           validationTimeout = setTimeout(function() {
 
@@ -89,6 +89,11 @@
               error.isError = error.severity === 'ERROR';
               error.isWarning = error.severity === 'WARNING';
               listbox.addError(error);
+
+              if (listbox.getFilter() !== undefined &&
+                  listbox.getFilter() !== error.category) {
+                continue;
+              }
 
               // Create a dom element for the inline display of errors
               // inside the editor. TODO(powdercloud): Make this a Polymer
@@ -129,7 +134,11 @@
               removeParamFromLocationHashParams('errno');
             }
           }, e.detail.validationDelayMs);
-        });
+        };
+
+        editor.addEventListener('amphtml-editor-changes', refreshEditorAndErrors);
+        listbox.addEventListener('webui-errorlist-filter-changes',
+                                        refreshEditorAndErrors);
 
         // Clicking in the error list at the bottom of the screen moves
         // the editor cursor.

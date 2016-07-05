@@ -2,7 +2,7 @@
   "atinternet": {
     "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&ref=_document_referrer_",
-    "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2$extraUrlParams&ref=_document_referrer_",
+    "pageview": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&p=_title_&s2=$level2&$extraUrlParams&ref=_document_referrer_",
     "click": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_&pclick=_title_&s2click=$level2&p=$label&s2=$level2Click&type=click&click=$type&ref=_document_referrer_"
   },
   "burt": {
@@ -21,7 +21,7 @@
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
     "base": "https://ase.clmbtech.com/message",
-    "pageview": "https://ase.clmbtech.com/message?cid=$id&val_101=_canonical_path_&ch=_canonical_host_&uuid=$uid&au=$authors&zo=$zone&sn=$sponsorName&ct=$contentType&st=_scroll_top_&sh=_scroll_height_&dct=$decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_"
+    "pageview": "https://ase.clmbtech.com/message?cid=$id&val_101=$id&val_101=_canonical_path_&ch=_canonical_host_&uuid=$uid&au=$authors&zo=$zone&sn=$sponsorName&ct=$contentType&st=_scroll_top_&sh=_scroll_height_&dct=$decayTime&tet=_total_engaged_time_&dr=_document_referrer_&plt=_page_load_time_&val_108=_title_&val_120=3"
   },
   "clicky": {
     "base": "https://in.getclicky.com/in.php?site_id=$site_id",
@@ -41,12 +41,12 @@
   },
   "googleanalytics": {
     "host": "https://www.google-analytics.com",
-    "basePrefix": "v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
+    "basePrefix": "v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_",
     "baseSuffix": "&a=_page_view_id_&z=_random_",
-    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&_r=1&a=_page_view_id_&z=_random_",
-    "event": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=$eventValue&a=_page_view_id_&z=_random_",
-    "social": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
-    "timing": "https://www.google-analytics.com/collect?v=1&_v=a0&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
+    "pageview": "https://www.google-analytics.com/r/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=pageview&_r=1&a=_page_view_id_&z=_random_",
+    "event": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=event&ec=$eventCategory&ea=$eventAction&el=$eventLabel&ev=$eventValue&a=_page_view_id_&z=_random_",
+    "social": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=social&sa=$socialAction&sn=$socialNetwork&st=$socialTarget&a=_page_view_id_&z=_random_",
+    "timing": "https://www.google-analytics.com/collect?v=1&_v=a1&ds=$dataSource&aip=true&_s=1&dt=_title_&sr=_screen_width_x_screen_height_&_utmht=_timestamp_&jid=&cid=_client_id_&tid=$account&dl=$documentLocation&dr=_document_referrer_&sd=_screen_color_depth_&ul=_browser_language_&de=_document_charset_&t=timing&plt=_page_load_time_&dns=_domain_lookup_time_&tcp=_tcp_connect_time_&rrt=_redirect_time_&srt=_server_response_time_&pdt=_page_download_time_&clt=_content_load_time_&dit=_dom_interactive_time_&a=_page_view_id_&z=_random_"
   },
   "lotame": {
     "pageview": "https://bcp.crwdcntrl.net/amp?c=$account&pv=y"
@@ -61,6 +61,13 @@
   "mediametrie": {
     "host": "https://prof.estat.com/m/web",
     "pageview": "https://prof.estat.com/m/web/$serial?c=$level1&dom=_ampdoc_url_&enc=_document_charset_&l3=$level3&l4=$level4&n=_random_&p=$level2&r=_document_referrer_&sch=_screen_height_&scw=_screen_width_&tn=amp&v=1&vh=_available_screen_height_&vw=_available_screen_width_"
+  },
+  "mparticle": {
+    "host": "https://pixels.mparticle.com",
+    "endpointPath": "/v1/$apiKey/Pixel",
+    "baseParams": "et=$eventType&amp_id=$amp_clientId&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
+    "pageview": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=ScreenView&n=_canonical_path_&hn=_ampdoc_url_&ttl=_title_&et=$eventType&amp_id=$amp_clientId&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion",
+    "event": "https://pixels.mparticle.com/v1/$apiKey/Pixel?dt=AppEvent&n=$eventName&et=$eventType&amp_id=$amp_clientId&attrs_k=$eventAttributes_Keys&attrs_v=$eventAttributes_Values&ua_k=$userAttributes_Keys&ua_v=$userAttributes_Values&ui_t=$userIdentities_Types&ui_v=$userIdentities_Values&flags_k=$customFlags_Keys&flags_v=$customFlags_Values&ct=_timestamp_&dbg=$debug&lc=$location&av=$appVersion"
   },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",

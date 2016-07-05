@@ -36,6 +36,24 @@ describe('alp-handler', () => {
       Image: function() {
         image = this;
       },
+      postMessage: sandbox.stub(),
+      _id: 'base-win',
+    };
+    win.parent = {
+      postMessage: sandbox.stub(),
+      _id: 'p0',
+    };
+    win.parent.parent = {
+      postMessage: sandbox.stub(),
+      _id: 'p1',
+    };
+    win.parent.parent.parent = {
+      postMessage: sandbox.stub(),
+      _id: 'p2',
+    };
+    win.parent.parent.parent.parent = {
+      postMessage: sandbox.stub(),
+      _id: 'p3',
     };
     open = sandbox.stub(win, 'open', () => {
       return {};
@@ -59,6 +77,7 @@ describe('alp-handler', () => {
       },
     };
     event = {
+      trusted: true,
       buttons: 0,
       target: anchor,
       preventDefault: sandbox.spy(),
@@ -83,6 +102,19 @@ describe('alp-handler', () => {
     expect(event.preventDefault.callCount).to.equal(1);
   }
 
+  function a2aSuccess(ampParent) {
+    handleClick(event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(ampParent.postMessage.callCount).to.equal(1);
+    expect(ampParent.postMessage.lastCall.args[0]).to.equal(
+        'a2a;{"url":"https://cdn.ampproject.org/c/www.example.com/amp.html' +
+        '#click=https%3A%2F%2Ftest.com%3Famp%3D1%26adurl%3Dhttps%253A%252F%' +
+        '252Fcdn.ampproject.org%252Fc%252Fwww.example.com%252Famp.html"}');
+    expect(ampParent.postMessage.lastCall.args[1]).to.equal(
+        'https://cdn.ampproject.org');
+    expect(open.callCount).to.equal(0);
+  }
+
   function noNavigation() {
     handleClick(event);
     expect(open.callCount).to.equal(0);
@@ -96,6 +128,78 @@ describe('alp-handler', () => {
   it('should navigate to correct destination (left mouse button)', () => {
     event.button = 1;
     simpleSuccess();
+  });
+
+  it('should perform a2a navigation if appropriate', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.google.com',
+    ];
+    a2aSuccess(win.parent);
+  });
+
+  it('should perform a2a navigation if appropriate (.de)', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.google.de',
+    ];
+    a2aSuccess(win.parent);
+  });
+
+  it('should perform a2a navigation if appropriate nested: 1', () => {
+    win.location.ancestorOrigins = [
+      'https://3p.ampproject.net',
+      'https://cdn.ampproject.org',
+      'https://www.google.de',
+    ];
+    a2aSuccess(win.parent.parent);
+  });
+
+  it('should perform a2a navigation if appropriate nested: 2', () => {
+    win.location.ancestorOrigins = [
+      'https://some-domain.com',
+      'https://3p.ampproject.net',
+      'https://cdn.ampproject.org',
+      'https://www.google.de',
+    ];
+    a2aSuccess(win.parent.parent.parent);
+  });
+
+  it('should perform a2a navigation if appropriate nested: 3', () => {
+    win.location.ancestorOrigins = [
+      'https://some-domain.com',
+      'https://some-domain.com',
+      'https://3p.ampproject.net',
+      'https://cdn.ampproject.org',
+      'https://www.google.de',
+    ];
+    a2aSuccess(win.parent.parent.parent.parent);
+  });
+
+  it('should not perform a2a for other origins', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject.org',
+      'https://www.other.com',
+    ];
+    simpleSuccess();
+  });
+
+  it('should not perform a2a for other origins (2)', () => {
+    win.location.ancestorOrigins = [
+      'https://cdn.ampproject2.org',
+      'https://www.google.com',
+    ];
+    simpleSuccess();
+  });
+
+  it('should navigate if trusted is not set.', () => {
+    delete event.trusted;
+    simpleSuccess();
+  });
+
+  it('should fail with trusted being false', () => {
+    event.isTrusted = false;
+    noNavigation();
   });
 
   it('should support custom arg name', () => {

@@ -21,21 +21,20 @@
 import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-import {installTemplatesService} from './service/template-impl';
-import {installCoreServices} from './amp-core-service';
 import {installGlobalClickListener} from './document-click';
-import {installGlobalSubmitListener} from './document-submit';
-import {installImg} from '../builtins/amp-img';
-import {installVideo} from '../builtins/amp-video';
-import {installPixel} from '../builtins/amp-pixel';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
+import {installDocService} from './service/ampdoc-impl';
 import {stubElements} from './custom-element';
-import {adopt} from './runtime';
+import {
+  installAmpdocServices,
+  installBuiltins,
+  installRuntimeServices,
+  adopt,
+} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
-import {isExperimentOn} from './experiments';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -43,29 +42,32 @@ import {isExperimentOn} from './experiments';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
-  const perf = installPerformanceService(window);
 
+  // Declare that this runtime will support a single root doc. Should happen
+  // as early as possible.
+  const ampdocService = installDocService(window, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+
+  const perf = installPerformanceService(window);
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      installCoreServices(window);
+      // Core services.
+      installRuntimeServices(window);
+      installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
       maybeTrackImpression(window);
-      installTemplatesService(window);
 
-      installImg(window);
-      installPixel(window);
-      installVideo(window);
+      // Builtins.
+      installBuiltins(window);
 
+      // Final configuration and stubbing.
       adopt(window);
       stubElements(window);
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
-      if (isExperimentOn(window, 'form-submit')) {
-        installGlobalSubmitListener(window);
-      }
 
       maybeValidate(window);
       makeBodyVisible(document, /* waitForExtensions */ true);

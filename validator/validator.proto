@@ -56,6 +56,8 @@ message UrlSpec {
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3;
+  // Must be lowercase.
+  repeated string disallowed_domain = 4;
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -388,7 +390,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 62
+  // NEXT AVAILABLE TAG: 64
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -418,6 +420,7 @@ message ValidationError {
     MISSING_URL = 35;
     INVALID_URL = 36;
     INVALID_URL_PROTOCOL = 37;
+    DISALLOWED_DOMAIN = 62;
     DISALLOWED_RELATIVE_URL = 49;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
@@ -450,6 +453,7 @@ message ValidationError {
     CSS_SYNTAX_MISSING_URL = 52;
     CSS_SYNTAX_INVALID_URL = 53;
     CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
+    CSS_SYNTAX_DISALLOWED_DOMAIN = 63;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }

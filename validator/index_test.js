@@ -22,6 +22,7 @@ global.assert = require('assert');
 var fs = require('fs');
 global.path = require('path');
 
+var execFile = require('child_process').execFile;
 var JasmineRunner = require('jasmine');
 var jasmine = new JasmineRunner();
 
@@ -122,6 +123,59 @@ it('handles syntax errors in validator file', function(done) {
         done();
       });
 });
+
+it('emits text if --format=text is specified on command line', function(done) {
+  var severalErrorsOut =
+      fs.readFileSync('testdata/feature_tests/several_errors.out', 'utf-8')
+          .split('\n')
+          .splice(1)  // trim 1st line
+          .join('\n')
+          .replace(/ \[[A-Z_]+\]/g, '');  // trim error categories
+  execFile(
+      process.execPath,
+      [
+        '../index.js', '--format=text',
+        '--validator_js=../dist/validator_minified.js',
+        'feature_tests/several_errors.html',
+        'feature_tests/minimum_valid_amp.html'
+      ],
+      {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
+      function (error, stdout, stderr) {
+        expect(error).toBeDefined();  // At least one file had errors.
+        expect(stderr).toBe(severalErrorsOut);
+        expect(stdout).toBe('feature_tests/minimum_valid_amp.html: PASS\n');
+        done();
+      });
+}, 5000);
+
+it('emits json if --format=json is specified on command line', function(done) {
+  execFile(
+      process.execPath,
+      [
+        '../index.js', '--format=json',
+        '--validator_js=../dist/validator_minified.js',
+        'feature_tests/several_errors.html',
+        'feature_tests/minimum_valid_amp.html'
+      ],
+      {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
+      function (error, stdout, stderr) {
+        expect(error).toBeDefined();  // At least one file had errors
+        expect(stderr).toBe('');      // entire json results will be on stdout
+
+        // We inspect the parsed JSON but not very deep, to keep this test
+        // relatively robust. We don't want it to churn if the validator
+        // changes its outputs slightly.
+        var parsedJson = JSON.parse(stdout);
+        expect(parsedJson['feature_tests/minimum_valid_amp.html'])
+            .toBeDefined();
+        expect(parsedJson['feature_tests/several_errors.html']).toBeDefined();
+        expect(parsedJson['feature_tests/minimum_valid_amp.html'].status)
+            .toBe('PASS');
+        expect(parsedJson['feature_tests/several_errors.html'].status)
+            .toBe('FAIL');
+        done();
+      });
+}, 5000);
 
 jasmine.onComplete(function(passed) { process.exit(passed ? 0 : 1); });
 jasmine.execute();

@@ -395,3 +395,11 @@ form [submit-success],
 form [submit-error] {
   display: none;
 }
+
+/**
+ * Hide the update reference point of amp-live-list by default. This is
+ * reset by the `amp-live-list > .amp-active[update]` selector.
+ */
+amp-live-list > [update] {
+  display: none;
+}

@@ -145,6 +145,10 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
       terminal.warn(errorLine(url, error));
     }
   }
+  if (errorCategoryFilter === null && errors.length !== 0) {
+    terminal.info('See also https://validator.ampproject.org/#url=' +
+        encodeURIComponent(goog.uri.utils.removeFragment(url)));
+  }
 };
 
 /**
@@ -338,6 +342,8 @@ amp.validator.categorizeError = function(error) {
        error.code ===
            amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL ||
        error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN ||
+       error.code ===
            amp.validator.ValidationError.Code
                .CSS_SYNTAX_DISALLOWED_RELATIVE_URL) &&
       error.params[0] === 'style amp-custom') {
@@ -519,6 +525,7 @@ amp.validator.categorizeError = function(error) {
   if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
       error.code == amp.validator.ValidationError.Code.INVALID_URL ||
       error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL ||
+      error.code == amp.validator.ValidationError.Code.DISALLOWED_DOMAIN ||
       error.code ==
           amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL) {
     if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {

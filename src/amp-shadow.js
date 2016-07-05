@@ -21,12 +21,27 @@
 
 import './polyfills';
 
-import {installTemplatesService} from './service/template-impl';
+import {installDocService} from './service/ampdoc-impl';
+import {
+  installBuiltins,
+  installRuntimeServices,
+  adopt,
+} from './runtime';
+import {stubElements} from './custom-element';
 
 
-// Register runtime-level services.
-installTemplatesService(window);
+// Declare that this runtime will support multiple shadow-root docs.
+installDocService(window, /* isSingleDoc */ false);
 
+// Core services.
+installRuntimeServices(window);
+
+// Builtins.
+installBuiltins(window);
+
+// Final configuration and stubbing.
+adopt(window);
+stubElements(window);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.

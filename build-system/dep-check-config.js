@@ -76,6 +76,10 @@ exports.rules = [
       'ads/**->src/types.js',
       'ads/**->src/string.js',
       'ads/**->src/url.js',
+      'ads/google/utils.js->src/document-state.js',
+      'ads/google/utils.js->src/timer.js',
+      'ads/google/traffic-experiments.js->src/mode.js',
+      'ads/google/traffic-experiments.js->src/experiments.js',
     ],
   },
   {
