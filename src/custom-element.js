@@ -597,7 +597,7 @@ function createBaseAmpElementProto(win) {
           layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
-        this.getVsync_().mutate(() => {
+        getVsync(this).mutate(() => {
           // Repeat "loading enabled" check because it could have changed while
           // waiting for vsync.
           if (this.isLoadingEnabled_()) {
@@ -882,7 +882,7 @@ function createBaseAmpElementProto(win) {
       this.layoutCount_++;
       this.layoutAttemptCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
-      // Check if this is the first success layout that needs to call
+      // Check if this is the first success layout that needs
       // to call firstLayoutCompleted.
       if (this.layoutCount_ == 1) {
         this.implementation_.firstLayoutCompleted();
