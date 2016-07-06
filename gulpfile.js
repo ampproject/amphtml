@@ -775,7 +775,13 @@ gulp.task('build', 'Builds the AMP library', build);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist);
+gulp.task('dist', 'Build production binaries', dist, {
+  options: {
+    pseudo_names: 'Compiles with readable names. ' +
+        'Great for profiling and debugging production code.',
+    fortesting: 'Compiles with `getMode().test` set to true',
+  }
+});
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
