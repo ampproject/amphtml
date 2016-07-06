@@ -16,7 +16,7 @@
 
 import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
-import {prefetchBootstrap} from '../../../src/3p-frame';
+import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
@@ -202,15 +202,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
-    prefetchBootstrap(this.getWin());
+    preloadBootstrap(this.getWin());
     const type = this.element.getAttribute('type');
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {
-      this.preconnect.prefetch(prefetch, 'script');
+      this.preconnect.preload(prefetch, 'script');
     } else if (prefetch) {
       prefetch.forEach(p => {
-        this.preconnect.prefetch(p, 'script');
+        this.preconnect.preload(p, 'script');
       });
     }
     if (typeof preconnect == 'string') {
