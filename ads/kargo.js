@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists, computeInMasterFrame} from '../3p/3p';
+import {
+  loadScript,
+  checkData,
+  validateDataExists,
+  computeInMasterFrame,
+} from '../3p/3p';
 
 const dataKeys = ['site', 'slot', 'options'];
 const requiredDataKeys = ['site', 'slot'];
