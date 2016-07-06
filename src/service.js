@@ -168,9 +168,6 @@ function getServiceInternal(holder, id, opt_factory) {
   if (!s.obj) {
     dev.assert(opt_factory, 'Factory not given and service missing %s', id);
     s.obj = opt_factory();
-    if (!s.promise) {
-      s.promise = Promise.resolve(s.obj);
-    }
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -186,11 +183,11 @@ function getServiceInternal(holder, id, opt_factory) {
  * @return {!Promise<*>}
  */
 function getServicePromiseInternal(holder, id) {
-  const services = getServices(holder);
-  const s = services[id];
-  if (s) {
-    return s.promise;
+  const cached = getServicePromiseOrNullInternal(holder, id);
+  if (cached) {
+    return cached;
   }
+  const services = getServices(holder);
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
@@ -214,8 +211,16 @@ function getServicePromiseInternal(holder, id) {
  */
 function getServicePromiseOrNullInternal(holder, id) {
   const services = getServices(holder);
-  if (services[id]) {
-    return services[id].promise;
+  const s = services[id];
+  if (s) {
+    const p = s.promise;
+    if (p) {
+      return p;
+    }
+    if (s.obj) {
+      return s.promise = Promise.resolve(s.obj);
+    }
+    dev.assert(false, 'Expected object or promise to be present');
   }
   return null;
 }

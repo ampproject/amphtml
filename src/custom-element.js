@@ -22,6 +22,7 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
+import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
@@ -668,11 +669,19 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 
 
   /**
+   * Dispatches a custom event.
+   *
+   * NOTE: This is currently only active for tests.
+   * Do not rely on this mechanism for production code.
+   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
+    if (!getMode().test) {
+      return;
+    }
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
