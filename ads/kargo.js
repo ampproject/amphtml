@@ -48,7 +48,9 @@ export function kargo(global, data) {
 
   computeInMasterFrame(global, 'kargo-load', function(done) {
     // load AdTag in Master window
-    loadScript(this, kargoScriptUrl, done);
+    loadScript(this, kargoScriptUrl, function() {
+        done();
+    });
   }, function() {
     // Add reference to Kargo api to this window if it's not the Master window
     if (!this.context.isMaster) {
