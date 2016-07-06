@@ -40,6 +40,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {nativo} from '../ads/nativo';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
@@ -109,6 +110,7 @@ register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
+register('nativo', nativo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
