@@ -19,7 +19,6 @@ var BBPromise = require('bluebird');
 var child_process = require('child_process');
 var exec = BBPromise.promisify(child_process.exec);
 var fs = BBPromise.promisifyAll(require('fs'));
-var git = require('gulp-git');
 var gulp = require('gulp-help')(require('gulp'));
 var util = require('gulp-util');
 
