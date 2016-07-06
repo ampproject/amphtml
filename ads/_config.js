@@ -177,11 +177,12 @@ export const adPreconnect = {
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
   ],
+  yieldone: [
+    'https://img.ak.impact-ad.jp'
+  ]
 };
-yieldone: [
-  'https://img.ak.impact-ad.jp'
-],
-};
+
+
 /**
  * The externalCidScope used to provide CIDs to ads of the given type.
  *
