@@ -20,7 +20,6 @@ import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
 import {installActionServiceForDoc} from './service/action-impl';
-import {installFramerateService} from './service/framerate-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
@@ -62,7 +61,6 @@ export function installRuntimeServices(global) {
   installHistoryService(global);
   installVsyncService(global);
   installResourcesService(global);
-  installFramerateService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
