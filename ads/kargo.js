@@ -51,9 +51,11 @@ export function kargo(global, data) {
 
   // Add Kargo AdTag to master window if it has not been loaded or started to load
   if (!top.__krg_load_started) {
-    if (!(top.Kargo || {}).loaded) loadScript(top, kargoScriptUrl, null);
+    if (!(top.Kargo || {}).loaded) {
+      loadScript(top, kargoScriptUrl);
+    }
 
-    top.__krg_load_started=true;
+    top.__krg_load_started = true;
   }
 
   // Add Ad call to Ad queue
@@ -61,7 +63,7 @@ export function kargo(global, data) {
   top.Kargo.ads.push(options);
 
   // Process Ad queue
-  (top.Kargo.loadAds || function(){})();
+  (top.Kargo.loadAds || function() {})();
 
   return;
 }
