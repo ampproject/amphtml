@@ -14,7 +14,7 @@
   * limitations under the License.
   */
 
- import {loadScript, checkData, validateDataExists} from '../3p/3p';
+ import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
  const yieldoneFields = ['yieldoneParam.pubid', 'yieldoneParam.pid','width', 'height'];
 
@@ -27,5 +27,5 @@
    validateDataExists(data, yieldoneFields);
 
    global.yieldoneParam = data;
-   loadScript(global, 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js');
+   writeScript(global, 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js');
  }
