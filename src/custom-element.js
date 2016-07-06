@@ -26,7 +26,7 @@ import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
 
@@ -499,7 +499,8 @@ function createBaseAmpElementProto(win) {
       if (this.actionQueue_.length > 0) {
         // Only schedule when the queue is not empty, which should be
         // the case 99% of the time.
-        timer.delay(this.dequeueActions_.bind(this), 1);
+        timerFor(this.ownerDocument.defaultView)
+            .delay(this.dequeueActions_.bind(this), 1);
       } else {
         this.actionQueue_ = null;
       }
@@ -525,7 +526,7 @@ function createBaseAmpElementProto(win) {
       // If we do early preconnects we delay them a bit. This is kind of
       // an unfortunate trade off, but it seems faster, because the DOM
       // operations themselves are not free and might delay
-      timer.delay(() => {
+      timerFor(this.ownerDocument.defaultView).delay(() => {
         this.implementation_.preconnectCallback(onLayout);
       }, 1);
     }
@@ -762,7 +763,7 @@ function createBaseAmpElementProto(win) {
     const box = this.implementation_.getIntersectionElementLayoutBox();
     const rootBounds = this.implementation_.getViewport().getRect();
     return getIntersectionChangeEntry(
-        timer.now(),
+        timerFor(this.ownerDocument.defaultView).now(),
         rootBounds,
         box);
   };
@@ -830,7 +831,7 @@ function createBaseAmpElementProto(win) {
       } else {
         // Set a minimum delay in case the element loads very fast or if it
         // leaves the viewport.
-        timer.delay(() => {
+        timerFor(this.ownerDocument.defaultView).delay(() => {
           if (this.layoutCount_ == 0 && this.isInViewport_) {
             this.toggleLoading_(true);
           }
