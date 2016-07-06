@@ -64,6 +64,4 @@ export function kargo(global, data) {
 
   // Process Ad queue
   (top.Kargo.loadAds || function() {})();
-
-  return;
 }
