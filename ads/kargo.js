@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, checkData, validateDataExists, computeInMasterFrame} from '../3p/3p';
 
 const dataKeys = ['site', 'slot', 'options'];
 const requiredDataKeys = ['site', 'slot'];
@@ -30,9 +30,6 @@ export function kargo(global, data) {
   checkData(data, dataKeys);
   validateDataExists(data, requiredDataKeys);
 
-  // get master amp-ad window
-  const top = global.context.master;
-
   // Kargo AdTag url
   const kargoScriptUrl = 'https://storage.cloud.kargo.com/ad/network/tag/v3/' + data.site + '.js';
 
@@ -44,24 +41,18 @@ export function kargo(global, data) {
     } catch (e) {}
   }
 
-  // Adding required ad call slot information
-  options.kargo_id = data.slot;
-  options.source_window = global;
-  options.source_element = global.document.body.firstChild;
-
-  // Add Kargo AdTag to master window if it has not been loaded or started to load
-  if (!top.__krg_load_started) {
-    if (!(top.Kargo || {}).loaded) {
-      loadScript(top, kargoScriptUrl);
+  computeInMasterFrame(global, 'kargo-load', function(done) {
+    // load AdTag in Master window
+    loadScript(this, kargoScriptUrl, done);
+  }, function() {
+    // Add reference to Kargo api to this window if it's not the Master window
+    if (!this.context.isMaster) {
+      this.Kargo = this.context.master.Kargo;
     }
 
-    top.__krg_load_started = true;
-  }
+    // Add window source reference to ad options
+    options.source_window = this;
 
-  // Add Ad call to Ad queue
-  (top.Kargo = top.Kargo || {}).ads = top.Kargo.ads || [];
-  top.Kargo.ads.push(options);
-
-  // Process Ad queue
-  (top.Kargo.loadAds || function() {})();
+    this.Kargo.getAd(data.slot, options);
+  });
 }
