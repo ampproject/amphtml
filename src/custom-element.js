@@ -281,7 +281,6 @@ class AmpElement {
   // TODO(dvoytenko): Add all exposed methods.
 }
 
-
 /**
  * Creates a new custom element class prototype.
  *
@@ -294,10 +293,34 @@ class AmpElement {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
+  const ElementProto = win.Object.create(createBaseAmpElementProto(win));
+  ElementProto.name = name;
+  if (getMode().test && opt_implementationClass) {
+    ElementProto.implementationClassForTesting = opt_implementationClass;
+  }
+  return ElementProto;
+}
+
+/**
+ * Creates a new custom element class prototype.
+ *
+ * The prototype is cached per window and meant to be sub classed for a
+ * concrete object.
+ *
+ * @param {!Window} win The window in which to register the elements.
+ * @return {!Object} Prototype of element.
+ */
+function createBaseAmpElementProto(win) {
+
+  if (win.BaseCustomElementProto) {
+    return win.BaseCustomElementProto;
+  }
+
   /**
    * @lends {AmpElement.prototype}
    */
   const ElementProto = win.Object.create(win.HTMLElement.prototype);
+  win.BaseCustomElementProto = ElementProto;
 
   /**
    * Called when elements is created. Sets instance vars since there is no
@@ -318,7 +341,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.everAttached = false;
 
     /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(win);
+    this.resources_ = resourcesFor(this.ownerDocument.defaultView);
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -364,7 +387,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.overflowElement_ = undefined;
 
     // `opt_implementationClass` is only used for tests.
-    const Ctor = opt_implementationClass || knownElements[name];
+    let Ctor = knownElements[this.name];
+    if (getMode().test && this.implementationClassForTesting) {
+      Ctor = this.implementationClassForTesting;
+    }
 
     /** @private {!./base-element.BaseElement} */
     this.implementation_ = new Ctor(this);
