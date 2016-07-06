@@ -117,7 +117,7 @@ export class Resources {
     this.lastVelocity_ = 0;
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(() => this.doPass_());
+    this.pass_ = new Pass(this.win, () => this.doPass_());
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();

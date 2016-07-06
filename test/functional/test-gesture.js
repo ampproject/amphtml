@@ -50,6 +50,9 @@ describe('Gestures', () => {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     onGesture = sandbox.spy();
