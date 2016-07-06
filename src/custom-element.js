@@ -363,8 +363,8 @@ function createBaseAmpElementProto(win) {
     /** @private {number} */
     this.layoutCount_ = 0;
 
-    /** @private {number} */
-    this.layoutAttemptCount_ = 0;
+    /** @private {boolean} */
+    this.isFirstLayoutCompleted = true;
 
     /** @private {boolean} */
     this.isInViewport_ = false;
@@ -880,16 +880,16 @@ function createBaseAmpElementProto(win) {
     return promise.then(() => {
       this.readyState = 'complete';
       this.layoutCount_++;
-      this.layoutAttemptCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       // Check if this is the first success layout that needs
       // to call firstLayoutCompleted.
-      if (this.layoutCount_ == 1) {
+      if (this.isFirstLayoutCompleted) {
         this.implementation_.firstLayoutCompleted();
+        this.isFirstLayoutCompleted = false;
       }
     }, reason => {
-      // add layoutAttemptCount_ by 1 despite load fails or not
-      this.layoutAttemptCount_++;
+      // add layoutCount_ by 1 despite load fails or not
+      this.layoutCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -907,13 +907,17 @@ function createBaseAmpElementProto(win) {
   ElementProto.viewportCallback = function(inViewport) {
     assertNotTemplate(this);
     this.isInViewport_ = inViewport;
-    if (this.layoutAttemptCount_ == 0) {
+    if (this.layoutCount_ == 0) {
       if (!inViewport) {
         this.toggleLoading_(false);
       } else {
         // Set a minimum delay in case the element loads very fast or if it
         // leaves the viewport.
+<<<<<<< f9e9854f0ce99c23c911f80b9091bd7bc452d556
         timerFor(this.ownerDocument.defaultView).delay(() => {
+=======
+        timer.delay(() => {
+>>>>>>> combine layoutCount_ and layoutAttemptCount_, introduce isFirstLayoutComplete
           if (this.layoutCount_ == 0 && this.isInViewport_) {
             this.toggleLoading_(true);
           }
@@ -981,7 +985,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
-      this.layoutAttemptCount_ = 0;
+      this.isFirstLayoutCompleted = true;
     }
     return isReLayoutNeeded;
   };
@@ -1167,7 +1171,7 @@ function createBaseAmpElementProto(win) {
     }
     if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
         this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
-        this.layoutAttemptCount_ > 0 ||
+        this.layoutCount_ > 0 ||
         isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
       return false;
     }

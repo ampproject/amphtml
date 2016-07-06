@@ -1272,7 +1272,7 @@ describe('CustomElement Loading Indicator', () => {
   });
 
   it('should disable when element has already been laid out', () => {
-    element.layoutAttemptCount_ = 1;
+    element.layoutCount_ = 1;
     expect(element.isLoadingEnabled_()).to.be.false;
   });
 
@@ -1370,7 +1370,7 @@ describe('CustomElement Loading Indicator', () => {
 
   it('should NOT turn off when exits viewport but already laid out', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
-    element.layoutAttemptCount_ = 1;
+    element.layoutCount_ = 1;
     element.viewportCallback(false);
     expect(toggle.callCount).to.equal(0);
   });
@@ -1385,7 +1385,7 @@ describe('CustomElement Loading Indicator', () => {
 
   it('should NOT turn on when enters viewport but already laid out', () => {
     const toggle = sandbox.spy(element, 'toggleLoading_');
-    element.layoutAttemptCount_ = 1;
+    element.layoutCount_ = 1;
     element.viewportCallback(true);
     clock.tick(1000);
     expect(toggle.callCount).to.equal(0);
@@ -1445,13 +1445,11 @@ describe('CustomElement Loading Indicator', () => {
     implMock.expects('layoutCallback').returns(Promise.reject());
     element.build();
     expect(element.layoutCount_).to.equal(0);
-    expect(element.layoutAttemptCount_).to.equal(0);
     expect(element.isLoadingEnabled_()).to.equal(true);
     return element.layoutCallback().then(() => {
       throw new Error('Should never happen.');
     }, () => {
-      expect(element.layoutCount_).to.equal(0);
-      expect(element.layoutAttemptCount_).to.equal(1);
+      expect(element.layoutCount_).to.equal(1);
       expect(element.isLoadingEnabled_()).to.equal(false);
       element.toggleLoading_(true);
       expect(prepareLoading).to.not.have.been.called;
