@@ -74,7 +74,10 @@ export const adPrefetch = {
   ],
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
-  caprofitx: 'https://cdn.caprofitx.com/pfx.min.js',
+  caprofitx: [
+    'https://cdn.caprofitx.com/pfx.min.js',
+    'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
+  ],
 };
 
 /**
