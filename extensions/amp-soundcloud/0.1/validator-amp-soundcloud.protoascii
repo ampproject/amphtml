@@ -52,6 +52,10 @@ tags: {  # <amp-soundcloud>
   also_requires_tag: "amp-soundcloud extension .js script"
   attrs: { name: "data-color" value_regex_casei: "([0-9a-f]{3}){1,2}" }
   attrs: {
+    name: "data-secret-token"
+    value_regex: "[A-Za-z0-9_-]+"
+  }
+  attrs: {
     name: "data-trackid"
     mandatory: true
     value_regex: "[0-9]+"
