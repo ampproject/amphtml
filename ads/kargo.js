@@ -38,9 +38,9 @@ export function kargo(global, data) {
 
   // parse extra ad call options (optional)
   let options = {};
-  if (global.JSON && data.options != null) {
+  if (data.options != null) {
     try {
-      options = global.JSON.parse(data.options);
+      options = JSON.parse(data.options);
     } catch (e) {}
   }
 
