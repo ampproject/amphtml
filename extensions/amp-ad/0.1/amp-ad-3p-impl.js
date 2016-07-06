@@ -186,6 +186,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private @const {function()} */
+    this.boundNoContentHandler_ = () => this.noContentHandler_();
+
     setupA2AListener(this.getWin());
   }
 
@@ -272,7 +275,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.noContentHandler_);
+          this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
