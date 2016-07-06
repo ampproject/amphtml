@@ -51,7 +51,7 @@ export class AmpImg extends BaseElement {
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
-    this.propagateAttributes(['alt'], this.img_);
+    this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
     this.applyFillContent(this.img_, true);
 
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
