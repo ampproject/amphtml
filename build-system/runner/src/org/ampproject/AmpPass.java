@@ -85,7 +85,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
     // mode.getMode().localDev
     // mode [property] ->
-    //   getMode [call] 
+    //   getMode [call]
     //   ${property} [string]
     if (!n.isGetProp()) {
       return false;

@@ -106,6 +106,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         runner.pseudo_names = true;
       }
     }
+    
 
     if (runner.shouldRunCompiler()) {
       runner.run();
