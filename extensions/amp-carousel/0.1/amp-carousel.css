@@ -87,12 +87,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
-  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch !important;
-}
-
-.-amp-slides-container::-webkit-scrollbar {
-  display: none;
 }
 
 .-amp-slides-container.no-scroll {

@@ -23,10 +23,10 @@ import {timer} from '../../../src/timer';
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
-/** @const {string} */
+/** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 40;
 
-/** @const {string} */
+/** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
 export class AmpSlideScroll extends BaseCarousel {
@@ -89,10 +89,10 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private @const {boolean} */
     this.snappingInProgress_ = false;
 
-    /** @private {?number}*/
+    /** @private {?number} */
     this.scrollTimeout_ = null;
 
-    /** @private {number}*/
+    /** @private {number} */
     // 0 - not in an elastic state.
     // -1 - elastic scrolling (back) to the left of scrollLeft 0.
     // 1 - elastic scrolling (fwd) to the right of the max scrollLeft possible.
@@ -123,6 +123,9 @@ export class AmpSlideScroll extends BaseCarousel {
   viewportCallback(inViewport) {
     if (inViewport) {
       this.hintControls();
+    }
+    if (inViewport == false) {
+      this.updateInViewport(this.slides_[this.slideIndex_], inViewport);
     }
   }
 
@@ -214,7 +217,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /**
    * Animate and snap to the correct slide for a given scrollLeft.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   customSnap_(currentScrollLeft) {
     this.snappingInProgress_ = true;
@@ -243,7 +246,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * Gets the slideIndex of the potential next slide based on the
    *    current scrollLeft.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @returns {number} a number representing the next slide index.
+   * @return {number} a number representing the next slide index.
    */
   getNextSlideIndex_(currentScrollLeft) {
     // This can be only 0, 1 or 2, since only a max of 3 slides are shown at
@@ -378,7 +381,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * Animate scrollLeft of the container.
    * @param {number} fromScrollLeft.
    * @param {number} toScrollLeft.
-   * @returns {!Promise}
+   * @return {!Promise}
    */
   animateScrollLeft_(fromScrollLeft, toScrollLeft) {
     if (fromScrollLeft == toScrollLeft) {
