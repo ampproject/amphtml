@@ -110,17 +110,6 @@ class AmpCxense extends AMP.BaseElement {
       this.getWin().addEventListener('message', this.handleFrameMessages_);
 
       return loadPromise(this.iframe_)
-              // todo: remove this timeout after OVP release
-              // that has the frame postMessage support
-              // for a more accurate loading time
-              // this resolves whether mpf.ready fires or not after 2s
-              .then(() => {
-                setTimeout(() => {
-                  if (!self.mpfReady_) {
-                    self.playerReadyResolver_(self.iframe_);
-                  }
-                }, 2000);
-              })
             .then(() => this.playerReadyPromise_)
             .then(ret => {
               self.loading_(false);
@@ -159,7 +148,7 @@ class AmpCxense extends AMP.BaseElement {
       } catch (unused) {
         return; // We only process valid JSON.
       }
-        // we only need this event for now
+      // for now, we only need this event
       if (data.type == 'mpf.ready') {
         this.playerReadyResolver_(this.iframe_);
       }
