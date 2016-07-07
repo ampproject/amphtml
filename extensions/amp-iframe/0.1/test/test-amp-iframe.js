@@ -354,8 +354,8 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
-        impl.updateSize_ = (newHeight, newWidth) => {
-          resolve({amp, newHeight, newWidth});
+        impl.updateSize_ = (height, width) => {
+          resolve({amp, height, width});
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -366,10 +366,8 @@ describe('amp-iframe', () => {
       }, '*');
       return p;
     }).then(res => {
-      expect(res.newHeight).to.equal(217);
-      expect(res.newWidth).to.equal(113);
-      expect(res.amp.iframe.height).to.equal('217');
-      expect(res.amp.iframe.width).to.equal('113');
+      expect(res.height).to.equal(217);
+      expect(res.width).to.equal(113);
     });
   });
 
@@ -384,8 +382,8 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
-        impl.updateSize_ = (newHeight, unusedNewWidth) => {
-          resolve({amp, newHeight});
+        impl.updateSize_ = (height, unusedWidth) => {
+          resolve({amp, height});
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -395,8 +393,7 @@ describe('amp-iframe', () => {
       }, '*');
       return p;
     }).then(res => {
-      expect(res.newHeight).to.equal(217);
-      expect(res.amp.iframe.height).to.equal('217');
+      expect(res.height).to.equal(217);
     });
   });
 
