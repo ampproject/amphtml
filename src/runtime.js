@@ -20,7 +20,6 @@ import {ampdocFor} from './ampdoc';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
-import {installActionService} from './service/action-impl';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
