@@ -46,20 +46,31 @@ export function kargo(global, data) {
     } catch (e) {}
   }
 
+  // Add window source reference to ad options
+  options.source_window = global;
+
   computeInMasterFrame(global, 'kargo-load', function(done) {
     // load AdTag in Master window
-    loadScript(this, kargoScriptUrl, function() {
-        done();
+    loadScript(this, kargoScriptUrl, () => {
+      let success = false;
+      if (this.Kargo != null && this.Kargo.loaded) {
+        success = true;
+      }
+
+      done(success);
     });
-  }, function() {
-    // Add reference to Kargo api to this window if it's not the Master window
-    if (!this.context.isMaster) {
-      this.Kargo = this.context.master.Kargo;
+  }, success => {
+    if (success) {
+      const w = options.source_window;
+
+      // Add reference to Kargo api to this window if it's not the Master window
+      if (!w.context.isMaster) {
+        w.Kargo = w.context.master.Kargo;
+      }
+
+      w.Kargo.getAd(data.slot, options);
+    } else {
+      throw new Error('Kargo AdTag failed to load');
     }
-
-    // Add window source reference to ad options
-    options.source_window = this;
-
-    this.Kargo.getAd(data.slot, options);
   });
 }
