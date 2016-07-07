@@ -98,8 +98,6 @@ describe('amp-analytics.transport', () => {
 
   it('does not send a request when no transport methods are enabled', () => {
     setupStubs(true, true);
-    beaconRetval = false;
-    xhrRetval = false;
     sendRequest(window, 'https://example.com/test', {});
     assertCallCounts(0, 0, 0);
   });

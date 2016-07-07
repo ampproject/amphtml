@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {openWindowDialog} from '../../../src/dom';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
@@ -62,7 +63,7 @@ export class PinItButton {
    */
   handleClick(event) {
     event.preventDefault();
-    window.open(this.href, '_pinit', POP);
+    openWindowDialog(window, this.href, '_pinit', POP);
     Util.log('&type=button_pinit');
   }
 

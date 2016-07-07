@@ -210,8 +210,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: -32});
       expect(slides.swipeState_.pos).to.equal(0.1);
@@ -233,8 +233,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(-0.1);
@@ -256,8 +256,8 @@ describe('Slides functional', () => {
         pos: 0,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(0);
@@ -295,8 +295,8 @@ describe('Slides functional', () => {
         pos: 0.55,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -328,8 +328,8 @@ describe('Slides functional', () => {
         pos: -0.6,
         min: 0,
         max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -356,8 +356,8 @@ describe('Slides functional', () => {
         pos: -0.6,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -382,8 +382,8 @@ describe('Slides functional', () => {
         pos: 0.6,
         min: 0,
         max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -406,8 +406,8 @@ describe('Slides functional', () => {
         pos: 0.6,
         min: -1,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -432,8 +432,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: -0.5});
@@ -463,8 +463,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -494,8 +494,8 @@ describe('Slides functional', () => {
         pos: 0.45,
         min: 0,
         max: 1,
-        prevTr: prevTr,
-        nextTr: nextTr,
+        prevTr,
+        nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0.5});

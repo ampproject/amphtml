@@ -55,11 +55,21 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
+      'build-system/server.js',
       'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-full.js',
       'validator/validator-in-browser.js',
       'validator/validator.js',
+    ]
+  },
+  // Match `getMode` that is not followed by a "()." and is assigned
+  // as a variable.
+  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
+    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
+        ' Use explicitly like "getMode().localDev" instead.',
+    whitelist: [
+      'dist.3p/current/integration.js'
     ]
   },
   'iframePing': {
@@ -70,12 +80,12 @@ var forbiddenTerms = {
     ],
   },
   // Service factories that should only be installed once.
-  'installActionService': {
+  'installActionServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/service/action-impl.js',
       'src/service/standard-actions-impl.js',
-      'src/amp-core-service.js',
+      'src/runtime.js',
     ],
   },
   'installActionHandler': {
@@ -100,6 +110,21 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installCryptoService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/crypto-impl.js',
+    ],
+  },
+  'installDocService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp.js',
+      'src/amp-shadow.js',
+      'src/service/ampdoc-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -114,17 +139,24 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
+  'installTemplatesService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/template-impl.js',
+    ],
+  },
   'installUrlReplacementsService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/url-replacements-impl.js',
     ],
   },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/history-impl.js',
       'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
@@ -135,7 +167,7 @@ var forbiddenTerms = {
   'installViewportService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
@@ -143,7 +175,7 @@ var forbiddenTerms = {
   'installVsyncService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -152,7 +184,7 @@ var forbiddenTerms = {
   'installResourcesService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
     ],
@@ -160,7 +192,7 @@ var forbiddenTerms = {
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/amp-core-service.js',
+      'src/runtime.js',
       'src/service/xhr-impl.js',
     ],
   },
@@ -235,7 +267,7 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
-  'isTrusted': {
+  'isTrustedViewer': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/viewer-impl.js',
@@ -256,7 +288,12 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
-  'sessionStorage': requiresReviewPrivacy,
+  'sessionStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-accordion/0.1/amp-accordion.js',
+    ],
+  },
   'indexedDB': requiresReviewPrivacy,
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -288,11 +325,14 @@ var forbiddenTerms = {
       'validator/tokenize-css.js',
       'validator/validator-full.js',
       'validator/validator.js',
+      // exports.startsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
     ]
   },
   '\\.endsWith': {
     message: es6polyfill,
     whitelist: [
+      'build-system/tasks/csvify-size/index.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],
@@ -327,11 +367,12 @@ var forbiddenTerms = {
       'src/dom.js',
     ],
   },
-  '\\sdocument(?![a-zA-Z0-9_])': {
+  '\\sdocument(?![a-zA-Z0-9_:])': {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
+      'examples/pwa/pwa.js',
       'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
@@ -352,6 +393,12 @@ var forbiddenTerms = {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
       'src/log.js',
+    ],
+  },
+  '(win|Win)(dow)?(\\(\\))?\\.open\\W': {
+    message: 'Use dom.openWindowDialog',
+    whitelist: [
+      'src/dom.js',
     ],
   },
 };
@@ -429,6 +476,8 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/insert-extension.js',
       'src/element-stub.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },
   'reject\\(\\)': {
@@ -550,7 +599,8 @@ function hasAnyTerms(file) {
   var is3pFile = /3p|ads/.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
-  if (is3pFile && !isTestFile) {
+  var isImplFile = basename == 'amp-ad-3p-impl.js';
+  if (is3pFile && !isTestFile &&!isImplFile) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

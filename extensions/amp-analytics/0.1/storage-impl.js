@@ -177,17 +177,17 @@ export class Storage {
  */
 export class Store {
   /**
-   * @param {!JSONObject} obj
+   * @param {!JSONType} obj
    * @param {number=} opt_maxValues
    */
   constructor(obj, opt_maxValues) {
-    /** @const {!JSONObject} */
+    /** @const {!JSONType} */
     this.obj = recreateNonProtoObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
-    /** @private @const {!Object<string, !JSONObject>} */
+    /** @private @const {!Object<string, !JSONType>} */
     this.values_ = this.obj['vv'] || Object.create(null);
     if (!this.obj['vv']) {
       this.obj['vv'] = this.values_;
@@ -288,6 +288,13 @@ export class LocalStorageBinding {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {boolean} */
+    this.isLocalStorageSupported_ = !!this.win.localStorage;
+
+    if (!this.isLocalStorageSupported_) {
+      dev.error(TAG, 'localStorage not supported.');
+    }
   }
 
   /**
@@ -302,6 +309,10 @@ export class LocalStorageBinding {
   /** @override */
   loadBlob(origin) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve(null);
+        return;
+      }
       resolve(this.win.localStorage.getItem(this.getKey_(origin)));
     });
   }
@@ -309,6 +320,10 @@ export class LocalStorageBinding {
   /** @override */
   saveBlob(origin, blob) {
     return new Promise(resolve => {
+      if (!this.isLocalStorageSupported_) {
+        resolve();
+        return;
+      }
       this.win.localStorage.setItem(this.getKey_(origin), blob);
       resolve();
     });
@@ -333,17 +348,14 @@ export class ViewerStorageBinding {
 
   /** @override */
   loadBlob(origin) {
-    return this.viewer_.sendMessage('loadStore', {
-      'origin': origin,
-    }, true).then(response => response['blob']);
+    return this.viewer_.sendMessage('loadStore', {origin}, true).then(
+      response => response['blob']
+    );
   }
 
   /** @override */
   saveBlob(origin, blob) {
-    return this.viewer_.sendMessage('saveStore', {
-      'origin': origin,
-      'blob': blob,
-    }, true);
+    return this.viewer_.sendMessage('saveStore', {origin, blob}, true);
   }
 }
 

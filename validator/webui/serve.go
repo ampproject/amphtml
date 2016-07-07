@@ -17,7 +17,7 @@
 // To use this:
 // (1) Install the App Engine SDK for Go from
 //     https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go
-// (2) Run build.py.
+// (2) Run build.py (in the parent directory).
 // (2) Type 'goapp serve .' in the dist/webui_appengine directory.
 // (3) Point your web browser at http://localhost:8080/
 
@@ -39,6 +39,11 @@ func init() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" ||
+		r.Header.Get("X-Requested-By") != "validator webui" {
+		http.Error(w, "Bad request.", http.StatusBadRequest)
+		return
+	}
 	param := r.FormValue("url")
 	u, err := url.Parse(param)
 	if param == "" || err != nil || (u.Scheme != "http" && u.Scheme != "https") {

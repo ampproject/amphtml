@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-var brotliSize = require('brotli-size');
 var del = require('del');
 var fs = require('fs');
 var gulp = require('gulp-help')(require('gulp'));
@@ -29,17 +28,16 @@ var tempFolderName = '__size-temp';
 
 var MIN_FILE_SIZE_POS = 0;
 var GZIP_POS = 1;
-var BROTLI_POS = 2;
-var FILENAME_POS = 3;
+var FILENAME_POS = 2;
 
 // normalized table headers
 var tableHeaders = [
-  ['max', 'min', 'gzip', 'brotli', 'file'],
-  ['---', '---', '---', '---', '---'],
+  ['max', 'min', 'gzip', 'file'],
+  ['---', '---', '---', '---'],
 ];
 
 var tableOptions = {
-  align: ['r', 'r', 'r', 'r', 'l'],
+  align: ['r', 'r', 'r', 'l'],
   hsep: '   |   ',
 };
 
@@ -102,6 +100,9 @@ function normalizeRows(rows) {
   // normalize alp.js
   normalizeRow(rows, 'alp.js', 'alp.max.js', true);
 
+  // normalize amp-shadow.js
+  normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
+
   // normalize extensions
   var curName = null;
   var i = rows.length;
@@ -161,7 +162,6 @@ function onFileThrough(rows, file, enc, cb) {
   rows.push([
     prettyBytes(file.contents.length),
     prettyBytes(gzipSize.sync(file.contents)),
-    prettyBytes(brotliSize.sync(file.contents)),
     file.relative,
   ]);
 

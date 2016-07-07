@@ -40,6 +40,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {nativo} from '../ads/nativo';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
@@ -72,11 +73,15 @@ import {colombia} from '../ads/colombia';
 import {sharethrough} from '../ads/sharethrough';
 import {eplanning} from '../ads/eplanning';
 import {microad} from '../ads/microad';
-
+import {yahoojp} from '../ads/yahoojp';
+import {chargeads} from '../ads/chargeads';
+import {nend} from '../ads/nend';
+import {adgeneration} from '../ads/adgeneration';
+import {genieessp} from '../ads/genieessp';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string: boolean>}
+ * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
@@ -105,6 +110,7 @@ register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
+register('nativo', nativo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
@@ -131,7 +137,11 @@ register('colombia', colombia);
 register('sharethrough', sharethrough);
 register('eplanning', eplanning);
 register('microad', microad);
-
+register('yahoojp', yahoojp);
+register('chargeads', chargeads);
+register('nend', nend);
+register('adgeneration', adgeneration);
+register('genieessp', genieessp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -262,8 +272,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
   } catch (e) {
-    lightweightErrorReport(e);
-    throw e;
+    if (!window.context.mode.test) {
+      lightweightErrorReport(e);
+      throw e;
+    }
   }
 };
 
@@ -272,17 +284,11 @@ function triggerNoContentAvailable() {
 }
 
 function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 /**
@@ -292,7 +298,7 @@ function triggerResizeRequest(width, height) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @returns {!function()} A function which removes the event listener that
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
@@ -322,8 +328,8 @@ function updateVisibilityState(global) {
 
 /**
  * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @param {function(number, number)} observerCallback
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
@@ -334,8 +340,8 @@ function onResizeSuccess(observerCallback) {
 
 /**
  * Registers a callback for communicating when a resize request is denied.
- * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @param {function(number, number)} observerCallback
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
@@ -460,7 +466,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONObject}
+ * @return {!JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -471,7 +477,7 @@ export function parseFragment(fragment) {
   if (json.indexOf('{%22') == 0) {
     json = decodeURIComponent(json);
   }
-  return json ? JSON.parse(json) : {};
+  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**

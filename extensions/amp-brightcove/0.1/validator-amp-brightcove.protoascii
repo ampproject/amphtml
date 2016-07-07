@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-brightcove
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-brightcove extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-brightcove
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
 }
 tags: {  # <amp-brightcove>
-  tag_name: "amp-brightcove"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-BRIGHTCOVE"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-brightcove extension .js script"
   attrs: { name: "data-account" mandatory: true }
   # If data-embed is missing, the default value is "default".

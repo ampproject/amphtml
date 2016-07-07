@@ -31,11 +31,6 @@ class AmpFitText extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return this.element.firstChild != null;
-  }
-
-  /** @override */
   buildCallback() {
 
     /** @private @const */

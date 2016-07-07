@@ -28,12 +28,12 @@ var digest = function(input) {
 }
 
 /**
- * @param {!Uint8Array|string} input The value to hash.
+ * @param {!Uint8Array} input The value to hash.
  * @return {string} Web safe base64 of the digest of the input string.
  */
-var base64Digest = function(input) {
-  return goog.crypt.base64.encodeByteArray(digest(input), /* websafe */ true);
+var base64 = function(input) {
+  return goog.crypt.base64.encodeByteArray(input, /* websafe */ true);
 }
 
-goog.exportSymbol('ampSha384', base64Digest, window);
+goog.exportSymbol('ampBase64', base64, window);
 goog.exportSymbol('ampSha384Digest', digest, window);

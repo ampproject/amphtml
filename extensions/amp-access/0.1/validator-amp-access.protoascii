@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 tags: {  # amp-access
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-access extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -46,9 +46,9 @@ tags: {  # amp-access
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
 }
 tags: {  # amp-access (json)
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-access extension .json script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   also_requires_tag: "amp-access extension .js script"
   also_requires_tag: "amp-analytics extension .js script"
   attrs: {

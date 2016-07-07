@@ -128,6 +128,8 @@ def InstallNodeDependencies():
   # Install the project dependencies specified in package.json into
   # node_modules.
   subprocess.check_call(['npm', 'install'])
+  logging.info('installing webui dependencies ...')
+  subprocess.check_call(['npm', 'install'], cwd='webui')
   logging.info('... done')
 
 
@@ -263,7 +265,8 @@ def CompileValidatorMinified(out_dir):
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js'],
+                'validator-in-browser.js', 'validator.js', 'validator-full.js',
+                'htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -330,15 +333,30 @@ def CompileValidatorTestMinified(out_dir):
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
                 'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator_test.js'],
+                'validator-in-browser.js', 'validator.js', 'validator-full.js',
+                'htmlparser-interface.js', 'validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
 
 
+def CompileValidatorLightTestMinified(out_dir):
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
+                'validator-in-browser.js', 'validator.js', 'validator-light.js',
+                'htmlparser-interface.js', 'dom-walker.js',
+                'validator-light_test.js'],
+      closure_entry_points=['amp.validator.ValidatorTest'],
+      output_file='%s/validator-light_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
 def CompileHtmlparserTestMinified(out_dir):
   logging.info('entering ...')
-  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser_test.js'],
+  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser-interface.js',
+                               'htmlparser_test.js'],
                      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
                      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
@@ -382,6 +400,7 @@ def GenerateTestRunner(out_dir):
              var jasmine = new JasmineRunner();
              process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
+             require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
              require('./parse-srcset_test_minified');
@@ -401,21 +420,30 @@ def RunTests(out_dir, nodejs_cmd):
 
 
 def CreateWebuiAppengineDist(out_dir):
-  """Generates the directory from which to deploy the Appengine WebUI."""
   logging.info('entering ...')
   try:
     tempdir = tempfile.mkdtemp()
-    shutil.copytree('webui', os.path.join(tempdir, 'webui'))
-    os.symlink(os.path.abspath('node_modules/codemirror'),
-               os.path.join(tempdir, 'webui/codemirror'))
-    os.symlink(os.path.abspath('node_modules/@polymer'),
-               os.path.join(tempdir, 'webui/@polymer'))
-    os.symlink(os.path.abspath('node_modules/webcomponents-lite'),
-               os.path.join(tempdir, 'webui/webcomponents-lite'))
+    # Merge the contents of webui with the installed node_modules into a
+    # common root (a temp directory). This lets us use the vulcanize tool.
+    for entry in os.listdir('webui'):
+      if entry != 'node_modules':
+        if os.path.isfile(os.path.join('webui', entry)):
+          shutil.copyfile(os.path.join('webui', entry),
+                          os.path.join(tempdir, entry))
+        else:
+          shutil.copytree(os.path.join('webui', entry),
+                          os.path.join(tempdir, entry))
+    for entry in os.listdir('webui/node_modules'):
+      if entry != '@polymer':
+        shutil.copytree(os.path.join('webui/node_modules', entry),
+                        os.path.join(tempdir, entry))
+    for entry in os.listdir('webui/node_modules/@polymer'):
+      shutil.copytree(os.path.join('webui/node_modules/@polymer', entry),
+                      os.path.join(tempdir, '@polymer', entry))
     vulcanized_index_html = subprocess.check_output([
-        'node_modules/vulcanize/bin/vulcanize',
+        'webui/node_modules/vulcanize/bin/vulcanize',
         '--inline-scripts', '--inline-css',
-        '-p', os.path.join(tempdir, 'webui'), 'index.html'])
+        '-p', tempdir, 'index.html'])
   finally:
     shutil.rmtree(tempdir)
   webui_out = os.path.join(out_dir, 'webui_appengine')
@@ -443,6 +471,7 @@ def Main():
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunIndexTest(nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
+  CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')

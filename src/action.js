@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getServiceForDoc} from './service';
 
 
 /**
- * @param {!Window} win
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!Action}
  */
-export function actionServiceFor(win) {
-  return getService(win, 'action');
-};
+export function actionServiceForDoc(nodeOrDoc) {
+  return getServiceForDoc(nodeOrDoc, 'action');
+}

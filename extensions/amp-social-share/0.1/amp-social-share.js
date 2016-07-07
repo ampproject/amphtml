@@ -19,6 +19,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {openWindowDialog} from '../../../src/dom';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
@@ -67,7 +68,7 @@ class AmpSocialShare extends AMP.BaseElement {
       return;
     }
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    this.getWin().open(this.href_, '_blank', windowFeatures);
+    openWindowDialog(this.getWin(), this.href_, '_blank', windowFeatures);
   }
 
 };

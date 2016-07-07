@@ -60,7 +60,6 @@ export function isDevChannel(win) {
 /**
  * Whether the version corresponds to the dev-channel binary.
  * @param {!Window} win
- * @param {string} version
  * @return {boolean}
  * @private Visible for testing only!
  */
@@ -143,8 +142,12 @@ export function toggleExperiment(win, experimentId, opt_on,
  * @return {!Array<string>}
  */
 function getExperimentIds(win) {
+  if (win._experimentCookie) {
+    return win._experimentCookie;
+  }
   const experimentCookie = getCookie(win, COOKIE_NAME);
-  return experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
+  return win._experimentCookie = (
+      experimentCookie ? experimentCookie.split(/\s*,\s*/g) : []);
 }
 
 
@@ -154,6 +157,7 @@ function getExperimentIds(win) {
  * @param {!Array<string>} experimentIds
  */
 function saveExperimentIds(win, experimentIds) {
+  win._experimentCookie = null;
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
       timer.now() + COOKIE_EXPIRATION_INTERVAL);
 }

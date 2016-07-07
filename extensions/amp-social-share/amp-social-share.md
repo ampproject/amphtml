@@ -95,7 +95,9 @@ The element provides [some pre-configured providers](0.1/amp-social-share-config
     - url `optional` (defaults: `rel=canonical` URL)
     - text `optional` (defaults: Current page title)
 - facebook
-    - url `optional` (defaults: `rel=canonical` URL)
+    - href `optional` (defaults: `rel=canonical` URL)
+    - text `optional` (defaults: none)
+    - app_id `required` (defaults: none) Required by [Facebook share dialog](https://developers.facebook.com/docs/sharing/reference/share-dialog).
 - pinterest
     - url `optional` (defaults: `rel=canonical` URL)
 - linkedin
@@ -121,4 +123,4 @@ The following example will create a share button through whatsapp, by setting `d
 ```
 
 ##### Var Substitution
-You can use the [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. For exmaple, the above example will substitute `TITEL` with the page title and `CANONICAL_URL` with the document canonical URL.
+You can use the [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. For exmaple, the above example will substitute `TITLE` with the page title and `CANONICAL_URL` with the document canonical URL.

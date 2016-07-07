@@ -83,14 +83,14 @@ export function parseSrcset(s, opt_element) {
     const url = parts[0];
     if (parts.length == 1 || parts.length == 2 && !parts[1]) {
       // If no "w" or "x" specified, we assume it's "1x".
-      sources.push({url: url, width: undefined, dpr: 1});
+      sources.push({url, width: undefined, dpr: 1});
     } else {
       const spec = parts[1].toLowerCase();
       const lastChar = spec.substring(spec.length - 1);
       if (lastChar == 'w') {
-        sources.push({url: url, width: parseFloat(spec), dpr: undefined});
+        sources.push({url, width: parseFloat(spec), dpr: undefined});
       } else if (lastChar == 'x') {
-        sources.push({url: url, width: undefined, dpr: parseFloat(spec)});
+        sources.push({url, width: undefined, dpr: parseFloat(spec)});
       }
     }
   }
@@ -223,7 +223,7 @@ export class Srcset {
   }
 
   /**
-   * @param {number} width
+   * @param {number} _width
    * @param {number} dpr
    * @return {number}
    * @private

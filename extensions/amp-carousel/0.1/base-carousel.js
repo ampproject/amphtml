@@ -131,16 +131,6 @@ export class BaseCarousel extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @return {boolean}
-   * @override
-   */
-  isReadyToBuild() {
-    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
-    // Wait until DOMReady.
-    return false;
-  }
-
   /** @override */
   unlayoutCallback() {
     return true;

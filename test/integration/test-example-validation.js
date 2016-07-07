@@ -72,6 +72,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
+    /DISALLOWED_TAG content/,  // Experiments with shadow slots
   ];
 
   const usedWhitelist = [];
@@ -84,6 +85,7 @@ describe('example', function() {
     it(filename + ' should validate', () => {
       const url = '/base/examples/' + filename;
       return get(url).then(html => {
+        /* global amp: false */
         const validationResult = amp.validator.validateString(html);
         const errors = [];
         if (validationResult.status == 'FAIL') {

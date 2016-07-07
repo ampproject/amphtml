@@ -15,7 +15,7 @@
  */
 
 /**
- * @const {!JSONObject}
+ * @const {!JSONType}
  */
 export const ANALYTICS_CONFIG = {
 
@@ -26,6 +26,7 @@ export const ANALYTICS_CONFIG = {
       'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocUrl': 'AMPDOC_URL',
+      'ampVersion': 'AMP_VERSION',
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -77,7 +78,7 @@ export const ANALYTICS_CONFIG = {
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${extraUrlParams}${suffix}',
+        's2=${level2}&${extraUrlParams}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -201,11 +202,54 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'clicky': {
+    'vars': {
+      'site_id': '',
+    },
+    'requests': {
+      'base': 'https://in.getclicky.com/in.php?' +
+        'site_id=${site_id}',
+      'baseSuffix': '&mime=${contentType}&' +
+        'x=${random}',
+      'pageview': '${base}&' +
+        'res=${screenWidth}x${screenHeight}&' +
+        'lang=${browserLanguage}&' +
+        'secure=1&' +
+        'type=pageview&' +
+        'href=${canonicalPath}&' +
+        'title=${title}' +
+        '${baseSuffix}',
+      'interval': '${base}&' +
+        'type=ping' +
+        '${baseSuffix}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'interval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 60,
+          'maxTimerLength': 600,
+        },
+        'request': 'interval',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': true,
+      'image': true,
+    },
+  },
+
   'colanalytics': {
     'requests': {
       'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
+        '&val_101=${id}' +
         '&val_101=${canonicalPath}' +
         '&ch=${canonicalHost}' +
         '&uuid=${uid}' +
@@ -219,7 +263,8 @@ export const ANALYTICS_CONFIG = {
         '&tet=${totalEngagedTime}' +
         '&dr=${documentReferrer}' +
         '&plt=${pageLoadTime}' +
-        '&val_108=${title}',
+        '&val_108=${title}' +
+        '&val_120=3',
     },
     'triggers': {
       'defaultPageview': {
@@ -257,15 +302,39 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'cxense': {
+    'requests': {
+      'host': 'https://scomcluster.cxense.com',
+      'base': '${host}/Repo/rep.gif',
+      'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+          'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+          'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+          'bln=${browserLanguage}&chs=${documentCharset}&' +
+          'col=${screenColorDepth}&tzo=${timezone}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
       'documentLocation': 'SOURCE_URL',
       'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
+      'dataSource': 'AMP',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
+      'basePrefix': 'v=1&_v=a1&ds=${dataSource}&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
           'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
@@ -283,6 +352,16 @@ export const ANALYTICS_CONFIG = {
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+    },
+    'triggers': {
+      'performanceTiming': {
+        'on': 'visible',
+        'request': 'timing',
+        'sampleSpec': {
+          'sampleOn': '${clientId}',
+          'threshold': 1,
+        },
+      },
     },
     'extraUrlParamsReplaceMap': {
       'dimension': 'cd',
@@ -377,6 +456,76 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'mparticle': {
+    'vars': {
+      'eventType': 'Unknown',
+      'debug': false,
+      'amp_clientId': 'CLIENT_ID(mparticle_amp_id)',
+    },
+    'requests': {
+      'host': 'https://pixels.mparticle.com',
+      'endpointPath': '/v1/${apiKey}/Pixel',
+      'baseParams': 'et=${eventType}&' +
+          'amp_id=${amp_clientId}&' +
+          'attrs_k=${eventAttributes_Keys}&' +
+          'attrs_v=${eventAttributes_Values}&' +
+          'ua_k=${userAttributes_Keys}&' +
+          'ua_v=${userAttributes_Values}&' +
+          'ui_t=${userIdentities_Types}&' +
+          'ui_v=${userIdentities_Values}&' +
+          'flags_k=${customFlags_Keys}&' +
+          'flags_v=${customFlags_Values}&' +
+          'ct=${timestamp}&' +
+          'dbg=${debug}&' +
+          'lc=${location}&' +
+          'av=${appVersion}',
+      'pageview': '${host}${endpointPath}?' +
+          'dt=ScreenView&' +
+          'n=${canonicalPath}&' +
+          'hn=${ampdocUrl}&' +
+          'ttl=${title}&' +
+          '${baseParams}',
+      'event': '${host}${endpointPath}?' +
+          'dt=AppEvent&' +
+          'n=${eventName}&' +
+          '${baseParams}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'oewadirect': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': 'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
+  'oewa': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?s=${s}' +
+        '&amp=1' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
@@ -507,7 +656,6 @@ export const ANALYTICS_CONFIG = {
       },
     },
   },
-
   'simplereach': {
     'vars': {
       'pid': '',
@@ -547,6 +695,37 @@ export const ANALYTICS_CONFIG = {
           'max-timer-length': 1200,
         },
         'request': 'timer',
+      },
+    },
+  },
+
+  'segment': {
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+    'vars': {
+      'anonymousId': 'CLIENT_ID(segment_amp_id)',
+    },
+    'requests': {
+      'host': 'https://api.segment.io/v1/pixel',
+      'base': '?writeKey=${writeKey}' +
+        '&anonymousId=${anonymousId}' +
+        '&context.locale=${browserLanguage}' +
+        '&context.page.path=${canonicalPath}' +
+        '&context.page.url=${canonicalUrl}' +
+        '&context.page.referrer=${documentReferrer}' +
+        '&context.page.title=${title}' +
+        '&context.screen.width=${screenWidth}' +
+        '&context.screen.height=${screenHeight}',
+      'page': '${host}/page${base}&name=${name}',
+      'track': '${host}/track${base}&event=${event}',
+    },
+    'triggers': {
+      'page': {
+        'on': 'visible',
+        'request': 'page',
       },
     },
   },
@@ -747,3 +926,5 @@ ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
   ['triggers']['pageLoad']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;

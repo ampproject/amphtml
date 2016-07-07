@@ -40,6 +40,19 @@ export function endsWith(string, suffix) {
 }
 
 /**
+ * Polyfill for String.prototype. startsWith.
+ * @param {string} string
+ * @param {string} prefix
+ * @return {boolean}
+ */
+export function startsWith(string, prefix) {
+  if (prefix.length > string.length) {
+    return false;
+  }
+  return string.lastIndexOf(prefix, 0) == 0;
+}
+
+/**
  * Expands placeholders in a given template string with values.
  *
  * Placeholders use ${key-name} syntax and are replaced with the value
@@ -48,7 +61,7 @@ export function endsWith(string, suffix) {
  * @param {string} template The template string to expand.
  * @param {!function(string):*} getter Function used to retrieve a value for a
  *   placeholder. Returns values will be coerced into strings.
- * @param {number=1} optMaxIterations Number of times to expand the template.
+ * @param {number=} opt_maxIterations Number of times to expand the template.
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
  *   can be expanded to other placeholder tokens. Take caution with large values
  *   as recursively expanding a string can be exponentially expensive.

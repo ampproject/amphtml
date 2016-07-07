@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-youtube
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-youtube extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -49,9 +49,8 @@ tags: {  # amp-youtube
 # amp-youtube either comes with a video-id attribute, or with
 # a data-videoid attribute.
 tags: {  # <amp-youtube>
-  tag_name: "amp-youtube"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-YOUTUBE"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-youtube extension .js script"
   attrs: {
     name: "data-videoid"

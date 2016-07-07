@@ -16,6 +16,7 @@
 
 import {endsWith} from './string';
 import {user} from './log';
+import {getMode} from './mode';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
 const a = window.document.createElement('a');
@@ -27,6 +28,21 @@ const cache = Object.create(null);
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+/**
+ * @typedef {({
+ *   href: string,
+ *   protocol: string,
+ *   host: string,
+ *   hostname: string,
+ *   port: string,
+ *   pathname: string,
+ *   search: string,
+ *   hash: string,
+ *   origin: string
+ * }|!Location)}
+ */
+export let Location;
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
@@ -42,6 +58,14 @@ export function parseUrl(url) {
     return fromCache;
   }
   a.href = url;
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  // TODO(lannka, #3449): Remove all the polyfills once we don't support IE11
+  // and it passes tests in all browsers.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
   const info = {
     href: a.href,
     protocol: a.protocol,
@@ -51,13 +75,34 @@ export function parseUrl(url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
+    origin: null,  // Set below.
   };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if ((info.protocol == 'http:' && info.port == 80)
+      || (info.protocol == 'https:' && info.port == 443)) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
-  info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
-  user.assert(info.origin, 'Origin must exist');
+  if (a.origin && a.origin != 'null') {
+    info.origin = a.origin;
+  } else if (info.protocol == 'data:' || !info.host) {
+    info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
+  }
   // Freeze during testing to avoid accidental mutation.
-  cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
+  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
   return info;
 }
 
@@ -123,18 +168,21 @@ export function addParamsToUrl(url, params) {
  *
  * @param {?string|undefined} urlString
  * @param {!Element|string} elementContext Element where the url was found.
+ * @param {string=} sourceName Used for error messages.
  * @return {string}
  */
-export function assertHttpsUrl(urlString, elementContext) {
-  user.assert(urlString != null, '%s source must be available', elementContext);
+export function assertHttpsUrl(
+    urlString, elementContext, sourceName = 'source') {
+  user.assert(urlString != null, '%s %s must be available',
+      elementContext, sourceName);
   const url = parseUrl(urlString);
   user.assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
-      '%s source must start with ' +
+      '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
-      elementContext, urlString);
+      elementContext, sourceName, urlString);
   return urlString;
 }
 
@@ -183,25 +231,6 @@ export function parseQueryString(queryString) {
     }
   }
   return params;
-}
-
-
-/**
- * Don't use this directly, only exported for testing. The value
- * is available via the origin property of the object returned by
- * parseUrl.
- * @param {string|!Location} url
- * @return {string}
- * @visibleForTesting
- */
-export function getOrigin(url) {
-  if (typeof url == 'string') {
-    url = parseUrl(url);
-  }
-  if (url.protocol == 'data:' || !url.host) {
-    return url.href;
-  }
-  return url.protocol + '//' + url.host;
 }
 
 
@@ -295,7 +324,7 @@ export function getSourceUrl(url) {
  * @return {string} The source origin of the URL.
  */
 export function getSourceOrigin(url) {
-  return getOrigin(getSourceUrl(url));
+  return parseUrl(getSourceUrl(url)).origin;
 }
 
 /**

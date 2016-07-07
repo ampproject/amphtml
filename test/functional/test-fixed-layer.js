@@ -153,7 +153,8 @@ describe('FixedLayer', () => {
     const attrs = {};
     const children = [];
     const elem = {
-      id: id,
+      id,
+      autoOffsetTop: 17,
       toString: () => {
         return id;
       },
@@ -201,6 +202,15 @@ describe('FixedLayer', () => {
         children.push(newChild);
       },
     };
+    Object.defineProperty(elem, 'offsetTop', {
+      get: () => {
+        if (elem.style.top == 'auto' || elem.computedStyle.top == 'auto' ||
+                elem.computedStyle.top == '') {
+          return elem.autoOffsetTop;
+        }
+        return parseFloat(elem.computedStyle.top);
+      },
+    });
     return elem;
   }
 
@@ -217,7 +227,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {position: 'fixed'},
-      elements: elements,
+      elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -231,7 +241,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {},
-      elements: elements,
+      elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -284,6 +294,9 @@ describe('FixedLayer', () => {
           '#other-rule2',
         ],
       });
+      expect(fixedLayer.isDeclaredFixed(element1)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element2)).to.be.true;
+      expect(fixedLayer.isDeclaredFixed(element3)).to.be.false;
     });
 
     it('should add and remove element directly', () => {
@@ -371,6 +384,64 @@ describe('FixedLayer', () => {
       expect(state['F0'].zIndex).to.equal('');
 
       expect(state['F1'].fixed).to.equal(false);
+    });
+
+    it('should collect for top != auto', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '11px';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('11px');
+    });
+
+    it('should collect for top = auto, but not update top', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = 'auto';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('');
+    });
+
+    it('should collect for implicit top = auto, but not update top', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '11px';
+      element1.autoOffsetTop = 11;
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('');
+    });
+
+    it('should always collect and update top = 0', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.computedStyle['top'] = '0px';
+      element1.autoOffsetTop = 0;
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].top).to.equal('0px');
     });
 
     it('should mutate element to fixed without top', () => {

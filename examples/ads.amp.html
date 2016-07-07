@@ -25,6 +25,13 @@
       margin: 18px 0;
       padding: 0;
     }
+    amp-ad[type="nativo"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
+      height:100px;
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -124,21 +131,6 @@
       layout="responsive">
 
       <div fallback>Teads fallback - Discover <a href="http://teads.tv/en/platform/">inRead by Teads</a> !</div>
-  </amp-ad>
-
-  <h2>AppNexus single ad with tagid (placement id)</h2>
-  <amp-ad width=300 height=250
-    type="appnexus"
-    data-tagid="6063968"
-    >
-  </amp-ad>
-
-  <h2>AppNexus single ad with member and code</h2>
-  <amp-ad width=300 height=250
-    type="appnexus"
-    data-member="958"
-    data-code="inv_code_test"
-    >
   </amp-ad>
 
   <h2>AppNexus with JSON based configuration multi ad</h2>
@@ -453,7 +445,7 @@
       type="sharethrough"
       data-pkey="c0fa8367">
   </amp-ad>
-  
+
  <h2>E-Planning 320x50</h2>
  <amp-ad width=320 height=50
       type="eplanning"
@@ -471,8 +463,55 @@
       height="50"
       type="microad"
       data-spot="b4bf837c5ddd69758d5ac924d04cf502"
-      data-url="siteUrl"
-      data-referrer="referrerUrl">
+      data-url="${COMPASS_EXT_URL}"
+      data-referrer="${COMPASS_EXT_REF}"
+      data-ifa="${COMPASS_EXT_IFA}"
+      data-appid="${COMPASS_EXT_APPID}"
+      data-geo="${COMPASS_EXT_GEO}">
+  </amp-ad>
+
+
+  <h2>YahooJP YDN</h2>
+  <amp-ad width="300"
+      height="250"
+      type="yahoojp"
+      data-yadsid="79712_113431">
+  </amp-ad>
+
+  <h2>Chargeads</h2>
+  <amp-ad width="320"
+          height="50"
+          type="chargeads"
+          src="https://www.chargeplatform.com/ads/?id=1288491435">
+  </amp-ad>
+
+  <h2>Nend</h2>
+  <amp-ad width="320"
+    height="50"
+    type="nend"
+    data-nend_params='{"media":82,"site":58536,"spot":127513,"type":1,"oriented":1}'>
+  </amp-ad>
+
+  <h2>Ad Generation</h2>
+  <amp-ad width=320 height=50
+      type="adgeneration"
+      data-id="10722">
+  </amp-ad>
+
+  <h2>Geniee SSP</h2>
+  <amp-ad width="300" height="250"
+      type="genieessp"
+      data-vid="3"
+      data-zid="1077330">
+  </amp-ad>
+ <h2>Nativo</h2>
+  <amp-ad
+    type="nativo"
+    height="150"
+    width="350"
+    layout="responsive"
+    data-premium
+    data-request-url="http://localhost:9876">
   </amp-ad>
 
 </body>

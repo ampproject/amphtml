@@ -51,7 +51,7 @@ export function register(id, draw) {
 
 /**
  * Execute the 3p integration with the given id.
- * @param {id} id
+ * @param {string} id
  * @param {!Window} win
  * @param {!Object} data
  */
@@ -83,12 +83,14 @@ export function writeScript(win, url, opt_cb) {
  * Asynchronously load the given script URL.
  * @param {!Window} win
  * @param {string} url
- * @param {function()=} cb
+ * @param {function()=} opt_cb
  */
-export function loadScript(win, url, cb) {
+export function loadScript(win, url, opt_cb) {
   const s = win.document.createElement('script');
   s.src = url;
-  s.onload = cb;
+  if (opt_cb) {
+    s.onload = opt_cb;
+  }
   win.document.body.appendChild(s);
 }
 
@@ -97,7 +99,7 @@ export function loadScript(win, url, cb) {
  * This is a lightweight helper, because we cannot guarantee that
  * Promises are available inside the 3p frame.
  * @param {!Window} win
- * @param {function} fn
+ * @param {function()} fn
  */
 export function nextTick(win, fn) {
   const P = win.Promise;

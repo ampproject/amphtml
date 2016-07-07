@@ -51,14 +51,6 @@ install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
 run `npm install -g` in this directory. After that, you may type
 `amp-validator` in any directory to invoke the validator.
 
-## Using the web UI (Beta!)
-
-This is a simple web editor which validates AMP HTML documents on the fly.
-This feature is new and experimental, feedback is especially welcome.
-
-* Type `./index.js webui` in this directory.
-* Point your web browser to http://127.0.0.1:8765/
-
 ## Using the NodeJS API (Beta!)
 
 This API is new and still experimental, feedback is especially welcome. We may
@@ -66,14 +58,13 @@ try to port to earlier versions of NodeJS if sufficient interest exists.
 
 ```js
 'use strict';
-
 const ampValidator = require('amp-validator');
-ampValidator.getInstance((instance) => {
-  const result = instance.validateString('<html>Hello, world</html>');
+
+ampValidator.getInstance().then((validator) => {
+  const result = validator.validateString('<html>Hello, world.</html>');
   ((result.status === 'PASS') ? console.log : console.error)(result.status);
   for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-        error.message;
+    let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
     if (error.specUrl !== null) {
       msg += ' (see ' + error.specUrl + ')';
     }

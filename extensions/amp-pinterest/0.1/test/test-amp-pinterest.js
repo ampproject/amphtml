@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-    require('../amp-pinterest');
+    import '../amp-pinterest';
     import {adopt} from '../../../../src/runtime';
     import {Timer} from '../../../../src/timer';
 
@@ -26,7 +26,7 @@
         return new Promise(function(resolve) {
           const div = document.createElement('div');
           resolve({
-            div: div,
+            div,
             addElement: function(element) {
               div.appendChild(element);
               return new Timer(window).promise(16).then(() => {
