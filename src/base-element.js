@@ -214,6 +214,23 @@ export class BaseElement {
   }
 
   /**
+   * This method is called when the element is added to DOM for the first time
+   * and before `buildCallback` to give an element a chance to redirect its
+   * implementation to another `BaseElement` implementation. The returned
+   * value can be either `null` or `undefined` to indicate that no redirection
+   * will take place; `BaseElement` instance to upgrade immediately; or a
+   * promise to upgrade with the resolved `BaseElement` instance.
+   *
+   * Notice that calls to `upgradeCallback` are not recursive. I.e. this
+   * callback will not be called on the returned instance again.
+   *
+   * @return {!BaseElement|!Promise<!BaseElement>|null|undefined}
+   */
+  upgradeCallback() {
+    // Subclasses may override.
+  }
+
+  /**
    * Called when the element is first created. Note that for element created
    * using createElement this may be before any children are added.
    */

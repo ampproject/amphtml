@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
+import {dev} from './log';
 import {insertAmpExtensionScript} from './insert-extension';
 
 /** @type {!Array} */
@@ -30,7 +31,7 @@ export class ElementStub extends BaseElement {
 
   /** @override */
   getPriority() {
-    throw new Error('Cannot get priority of stubbed element');
+    return dev.assert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */
