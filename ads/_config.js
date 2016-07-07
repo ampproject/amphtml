@@ -181,6 +181,11 @@ export const adPreconnect = {
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
   ],
+  kargo: [
+    'https://storage.cloud.kargo.com',
+    'https://pubads.g.doubleclick.net',
+    'https://prg.kargo.com',
+  ],
 };
 
 /**

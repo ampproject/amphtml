@@ -78,6 +78,7 @@ import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 import {adgeneration} from '../ads/adgeneration';
 import {genieessp} from '../ads/genieessp';
+import {kargo} from '../ads/kargo';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -142,6 +143,7 @@ register('chargeads', chargeads);
 register('nend', nend);
 register('adgeneration', adgeneration);
 register('genieessp', genieessp);
+register('kargo', kargo);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
