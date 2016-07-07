@@ -115,11 +115,6 @@
       overflow-y: hidden;
     }
 
-    viewer.virtual container {
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
     container iframe {
       border: 0;
       margin: 0;
@@ -145,9 +140,10 @@
       this.url = url;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
-      this.viewportType_ = 'natural';  // "natural" or "virtual"
+      this.viewportType_ = 'natural';
       this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
+      this.csi_ = 1;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -177,9 +173,6 @@
         this.iframe.setAttribute('scrolling', 'no');
       }
 
-      if (this.viewportType_ == 'virtual') {
-        this.container.addEventListener('scroll', this.onScroll_.bind(this));
-      }
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
     };
@@ -197,7 +190,7 @@
         visibilityState: this.visibilityState_,
         prerenderSize: this.prerenderSize_,
         viewerorigin: parseUrl(window.location.href).origin,
-        csi: 0
+        csi: this.csi_,
       };
       log('Params:' + JSON.stringify(params));
 
@@ -220,9 +213,6 @@
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
-        if (this.viewportType_ == 'virtual') {
-          this.iframe.style.height = this.container./*OK*/offsetHeight + 'px';
-        }
         this.iframe.style.display = '';
         this.iframe.setAttribute('src', url);
       }.bind(this));
@@ -294,16 +284,6 @@
     Viewer.prototype.documentReady_ = function() {
       log('AMP document ready');
       this.loaded_();
-      return Promise.resolve();
-    };
-
-
-    Viewer.prototype.documentHeight_ = function(documentHeight) {
-      log('AMP document height:', documentHeight);
-      if (this.viewportType_ == 'virtual') {
-        this.iframe.style.height = Math.max(documentHeight,
-            this.container./*OK*/offsetHeight) + 'px';
-      }
       return Promise.resolve();
     };
 
@@ -398,9 +378,6 @@
       if (type == 'documentLoaded') {
         return this.documentReady_();
       }
-      if (type == 'documentResized') {
-        return this.documentHeight_(data.height);
-      }
       if (type == 'requestFullOverlay') {
         return this.requestFullOverlay_();
       }
@@ -417,6 +394,19 @@
         return this.broadcast_(data);
       }
       if (type == 'setFlushParams') {
+        return;
+      }
+      if (type == 'prerenderComplete') {
+        return;
+      }
+      if (type == 'tick') {
+        log('[CSI] tick. label:', data.label);
+        return;
+      }
+      if (type == 'sendCsi') {
+        log('[CSI] sendCsi.');
+      }
+      if (type == 'scroll') {
         return;
       }
       return Promise.reject('request not supported: ' + type);

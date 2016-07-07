@@ -17,7 +17,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-kaltura-player');
+import '../amp-kaltura-player';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

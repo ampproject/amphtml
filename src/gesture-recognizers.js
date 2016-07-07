@@ -355,8 +355,8 @@ class SwipeRecognizer extends GestureRecognizer {
     }
 
     this.signalEmit({
-      first: first,
-      last: last,
+      first,
+      last,
       time: this.lastTime_,
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
@@ -585,8 +585,8 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.prevTime_ = this.lastTime_;
 
     this.signalEmit({
-      first: first,
-      last: last,
+      first,
+      last,
       centerClientX: this.startX_,
       centerClientY: this.startY_,
       deltaX: this.lastX_ - this.startX_,
@@ -782,8 +782,8 @@ export class PinchRecognizer extends GestureRecognizer {
     const lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
         this.lastY1_, this.lastY2_);
     this.signalEmit({
-      first: first,
-      last: last,
+      first,
+      last,
       time: this.lastTime_,
       centerClientX: this.centerClientX_,
       centerClientY: this.centerClientY_,

@@ -106,7 +106,7 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
-            impl = element.implementation_;
+            const impl = element.implementation_;
             impl.layoutCallback();
             impl.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
@@ -143,7 +143,7 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
-            impl = element.implementation_;
+            const impl = element.implementation_;
             impl.layoutCallback();
             impl.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
@@ -175,7 +175,7 @@ function tests(name) {
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
-          impl = element.implementation_;
+          const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217, 114);
           expect(impl.attemptChangeSize.callCount).to.equal(1);
@@ -192,7 +192,7 @@ function tests(name) {
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
-          impl = element.implementation_;
+          const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.updateSize_(217);
           expect(impl.attemptChangeSize.callCount).to.equal(1);

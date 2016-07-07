@@ -76,6 +76,7 @@ exports.cleanupBuildDir = cleanupBuildDir;
 function compile(entryModuleFilename, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+    const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     console./*OK*/log('Starting closure compiler for', entryModuleFilename);
@@ -164,9 +165,9 @@ function compile(entryModuleFilename, outputDir,
             'export function deadCode() {}');
       }
     });
+
     /*eslint "google-camelcase/google-camelcase": 0*/
-    return gulp.src(srcs)
-    .pipe(closureCompiler({
+    var compilerOptions = {
       // Temporary shipping with our own compiler that has a single patch
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
@@ -180,7 +181,10 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
-        externs: 'build-system/amp.extern.js',
+        externs: [
+          'build-system/amp.extern.js',
+          'third_party/closure-compiler/externs/intersection_observer.js',
+        ],
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
@@ -195,25 +199,47 @@ function compile(entryModuleFilename, outputDir,
         create_source_map: intermediateFilename + '.map',
         source_map_location_mapping:
             '|' + sourceMapBase,
-        warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
+        warning_level: 'DEFAULT',
+        hide_warnings_for: [
+          'ads/',  // TODO(@cramforce): Remove when we are better at typing.
+          'node_modules/',
+          'build/patched-module/',
+        ],
       }
-    }))
-    .on('error', function(err) {
-      console./*OK*/error(err.message);
-      process.exit(1);
-    })
-    .pipe(rename(outputFilename))
-    .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-    .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
-    .pipe(gulp.dest(outputDir))
-    .on('end', function() {
-      console./*OK*/log('Compiled', entryModuleFilename, 'to',
-          outputDir + '/' + outputFilename, 'via', intermediateFilename);
-      gulp.src(intermediateFilename + '.map')
-          .pipe(rename(outputFilename + '.map'))
-          .pipe(gulp.dest(outputDir))
-          .on('end', resolve);
-    });
+    };
+
+    // For now do type check separately
+    if (argv.typecheck_only || checkTypes) {
+      // Don't modify compilation_level to a lower level since
+      // it won't do strict type checking if its whitespace only.
+      compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
+      compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+    }
+
+    var stream = gulp.src(srcs)
+        .pipe(closureCompiler(compilerOptions))
+        .on('error', function(err) {
+          console./*OK*/error(err.message);
+          process.exit(1);
+        });
+
+    // If we're only doing type checking, no need to output the files.
+    if (!argv.typecheck_only) {
+      stream = stream
+        .pipe(rename(outputFilename))
+        .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+        .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
+        .pipe(gulp.dest(outputDir))
+        .on('end', function() {
+          console./*OK*/log('Compiled', entryModuleFilename, 'to',
+              outputDir + '/' + outputFilename, 'via', intermediateFilename);
+          gulp.src(intermediateFilename + '.map')
+              .pipe(rename(outputFilename + '.map'))
+              .pipe(gulp.dest(outputDir))
+              .on('end', resolve);
+        });
+    }
+    return stream;
   });
 };
 

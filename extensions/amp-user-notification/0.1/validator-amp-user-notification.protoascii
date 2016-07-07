@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-user-notification
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-user-notification extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,8 @@ tags: {  # amp-user-notification
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
 }
 tags: {  # <amp-user-notification>
-  tag_name: "amp-user-notification"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-USER-NOTIFICATION"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-analytics extension .js script"
   also_requires_tag: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"

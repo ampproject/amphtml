@@ -16,7 +16,7 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-image-lightbox');
+import '../amp-image-lightbox';
 import {
   ImageViewer,
 } from '../amp-image-lightbox';
@@ -82,8 +82,8 @@ describe('amp-image-lightbox component', () => {
       const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
+        enterLightboxMode,
+        leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
@@ -118,10 +118,9 @@ describe('amp-image-lightbox component', () => {
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
       const enterLightboxMode = sandbox.spy();
       const leaveLightboxMode = sandbox.spy();
-      impl.getViewport = () => {return {
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
-      };};
+      impl.getViewport = () => {
+        return {enterLightboxMode, leaveLightboxMode};
+      };
       const historyPop = sandbox.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
@@ -152,8 +151,8 @@ describe('amp-image-lightbox component', () => {
       const leaveLightboxMode = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        enterLightboxMode: enterLightboxMode,
-        leaveLightboxMode: leaveLightboxMode,
+        enterLightboxMode,
+        leaveLightboxMode,
       };};
       const historyPush = sandbox.spy();
       impl.getHistory_ = () => {

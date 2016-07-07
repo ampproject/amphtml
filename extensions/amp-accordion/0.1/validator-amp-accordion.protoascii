@@ -14,9 +14,9 @@
 # limitations under the license.
 #
 tags: {  # amp-accordion
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-accordion extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -46,12 +46,11 @@ tags: {  # amp-accordion
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
 }
 tags: {  # <amp-accordion>
-  tag_name: "amp-accordion"
-  disallowed_ancestor: "head"
+  tag_name: "AMP-ACCORDION"
   also_requires_tag: "amp-accordion extension .js script"
   attrs: { name: "animate" value: "" }
   child_tags: {
-    child_tag_name_oneof: "section"
+    child_tag_name_oneof: "SECTION"
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
   amp_layout: {
@@ -59,19 +58,18 @@ tags: {  # <amp-accordion>
   }
 }
 tags: {  # <amp-accordion> > <section>
-  tag_name: "section"
+  tag_name: "SECTION"
   spec_name: "amp-accordion > section"
-  mandatory_parent: "amp-accordion"
-  disallowed_ancestor: "head"
+  mandatory_parent: "AMP-ACCORDION"
   attrs: { name: "expanded" value: "" }
   child_tags: {
     mandatory_num_child_tags: 2
-    first_child_tag_name_oneof: "h1"
-    first_child_tag_name_oneof: "h2"
-    first_child_tag_name_oneof: "h3"
-    first_child_tag_name_oneof: "h4"
-    first_child_tag_name_oneof: "h5"
-    first_child_tag_name_oneof: "h6"
-    first_child_tag_name_oneof: "header"
+    first_child_tag_name_oneof: "H1"
+    first_child_tag_name_oneof: "H2"
+    first_child_tag_name_oneof: "H3"
+    first_child_tag_name_oneof: "H4"
+    first_child_tag_name_oneof: "H5"
+    first_child_tag_name_oneof: "H6"
+    first_child_tag_name_oneof: "HEADER"
   }
 }

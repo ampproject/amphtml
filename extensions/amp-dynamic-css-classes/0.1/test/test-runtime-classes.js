@@ -36,12 +36,12 @@ describe('dynamic classes are inserted at runtime', () => {
     };
     body = {
       tagName: 'BODY',
-      classList: classList,
+      classList,
     };
     mockWin = {
       document: {
         referrer: 'http://localhost/',
-        body: body,
+        body,
       },
       navigator: {
         userAgent: '',

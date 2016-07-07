@@ -38,7 +38,7 @@ describe('test-insert-extension', () => {
     return createIframePromise().then(f => {
       doNotLoadExternalResourcesInTest(f.win);
       iframe = f;
-      testElement = iframe.doc.createElement(name);
+      const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
       testElement.setAttribute('type', 'a9');
@@ -56,7 +56,7 @@ describe('test-insert-extension', () => {
   function getAnalyticsIframe() {
     return createIframePromise().then(f => {
       iframe = f;
-      testElement = iframe.doc.createElement('amp-analytics');
+      const testElement = iframe.doc.createElement('amp-analytics');
       return iframe.addElement(testElement);
     });
   }
@@ -92,7 +92,6 @@ describe('test-insert-extension', () => {
     return getAnalyticsIframe().then(() => {
       const ampTestScript = iframe.doc.createElement('script');
       ampTestScript.setAttribute('custom-element', 'amp-analytics');
-      scriptSrc = 'http://localhost:8000/dist/v0/amp-analytics-0.1.max.js';
       expect(iframe.doc.head.querySelectorAll(
           '[custom-element="amp-analytics"]')).to.have.length(0);
       iframe.doc.head.appendChild(ampTestScript);

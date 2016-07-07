@@ -270,6 +270,10 @@ export class ImageViewer {
    * @private
    */
   updateSrc_() {
+    if (!this.srcset_) {
+      // Do not update source if the lightbox has already exited.
+      return Promise.resolve();
+    }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
     const src = this.srcset_.select(width, this.lightbox_.getDpr()).url;

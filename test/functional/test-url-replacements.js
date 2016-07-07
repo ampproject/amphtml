@@ -83,7 +83,7 @@ describe('UrlReplacements', () => {
         loadObservable.add(callback);
       },
       complete: false,
-      Object: Object,
+      Object,
       performance: {
         timing: {
           navigationStart: 100,
@@ -389,6 +389,12 @@ describe('UrlReplacements', () => {
   it('should replace TOTAL_ENGAGED_TIME', () => {
     return expand('?sh=TOTAL_ENGAGED_TIME', false, true).then(res => {
       expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AMP_VERSION', () => {
+    return expand('?sh=AMP_VERSION').then(res => {
+      expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
     });
   });
 

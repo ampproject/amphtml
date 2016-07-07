@@ -46,18 +46,19 @@ let VsyncTaskSpecDef;
  * NOTE: If the document is invisible due to prerendering (this includes
  * application level prerendering where the doc is rendered in a hidden
  * iframe or webview), then no frame will be scheduled.
+ * @package Visible for type.
  */
 export class Vsync {
 
   /**
    * @param {!Window} win
-   * @param {!Viewer} viewer
+   * @param {!./viewer-impl.Viewer} viewer
    */
   constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private @const {function(function())}  */
@@ -203,7 +204,7 @@ export class Vsync {
    * Runs `measure` wrapped in a promise.
    * @param {function():TYPE} measurer
    * @return {!Promise<TYPE>}
-   * @templates TYPE
+   * @template TYPE
    */
   measurePromise(measurer) {
     return new Promise(resolve => {

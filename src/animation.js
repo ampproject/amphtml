@@ -93,8 +93,12 @@ export class Animation {
    * @return {!Animation}
    */
   add(delay, transition, duration, opt_curve) {
-    this.segments_.push({delay: delay, func: transition, duration: duration,
-        curve: getCurve(opt_curve)});
+    this.segments_.push({
+      delay,
+      func: transition,
+      duration,
+      curve: getCurve(opt_curve),
+    });
     return this;
   }
 

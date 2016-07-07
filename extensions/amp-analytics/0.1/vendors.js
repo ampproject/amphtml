@@ -15,7 +15,7 @@
  */
 
 /**
- * @const {!JSONObject}
+ * @const {!JSONType}
  */
 export const ANALYTICS_CONFIG = {
 
@@ -26,6 +26,7 @@ export const ANALYTICS_CONFIG = {
       'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocUrl': 'AMPDOC_URL',
+      'ampVersion': 'AMP_VERSION',
       'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -285,6 +286,29 @@ export const ANALYTICS_CONFIG = {
       'base': '${host}/b?',
       'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
         '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'cxense': {
+    'requests': {
+      'host': 'https://scomcluster.cxense.com',
+      'base': '${host}/Repo/rep.gif',
+      'pageview': '${base}?ver=1&typ=pgv&sid=${siteId}&ckp=${clientId(cX_P)}&' +
+          'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
+          'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
+          'bln=${browserLanguage}&chs=${documentCharset}&' +
+          'col=${screenColorDepth}&tzo=${timezone}',
     },
     'triggers': {
       'defaultPageview': {

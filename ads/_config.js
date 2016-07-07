@@ -61,7 +61,11 @@ export const adPrefetch = {
     'https://yads.c.yimg.jp/js/yads.js',
   ],
   nend: 'https://js1.nend.net/js/amp.js',
+<<<<<<< HEAD
   adcrops: 'https://js.adcrops.net/amp.js',
+=======
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+>>>>>>> ampproject/master
 };
 
 /**

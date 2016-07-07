@@ -257,7 +257,12 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
-  'sessionStorage': requiresReviewPrivacy,
+  'sessionStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-accordion/0.1/amp-accordion.js',
+    ],
+  },
   'indexedDB': requiresReviewPrivacy,
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
@@ -335,6 +340,7 @@ var forbiddenTerms = {
       '`document` is forbidden',
     whitelist: [
       'build-system/server.js',
+      'examples/pwa/pwa.js',
       'examples/viewer-integr.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',

@@ -85,26 +85,23 @@ amp.domwalker.NodeProcessingState_ = class {
 /**
  * Convert a dom namedNodeMap to an attribute/value list.
  * @param {NamedNodeMap} namedNodeMap
- * @return {Array<!string>} attributes as alternating key/value pairs
+ * @return {Array<string>} attributes as alternating key/value pairs
  */
 function attrList(namedNodeMap) {
   var ret = [];
   for (var i = 0; i < namedNodeMap.length; ++i) {
-    ret.push(namedNodeMap[i].name.toLowerCase());
+    // The attribute name is always lower cased when returned by the browser.
+    ret.push(namedNodeMap[i].name);
     ret.push(namedNodeMap[i].value);
   }
   return ret;
 }
 
 /**
- * Condition evaluates if the given node name requires cdata validation.
- * @param {string} nodeName
- * @return {boolean}
+ * Set of element names requiring cdata validation.
+ * @type {Object<string,number>}
  */
-function cdataTagsToValidate(nodeName) {
-  const cdataTags = {'script': 0, 'style': 0};
-  return cdataTags.hasOwnProperty(nodeName);
-}
+const CdataTagsToValidate = {'SCRIPT': 0, 'STYLE': 0};
 
 /**
  * @enum {number}
@@ -147,7 +144,7 @@ amp.domwalker.DomWalker = class {
     // Apparently the !doctype 'tag' is not considered an element in the DOM,
     // so we can't see it naively. Unsure if there is a better approach here.
     if (rootDoc.doctype !== null) {
-      handler.startTag('!doctype', [rootDoc.doctype.name, '']);
+      handler.startTag('!DOCTYPE', [rootDoc.doctype.name, '']);
     }
 
     // The approach here is to walk the DOM, generating handler calls which
@@ -165,14 +162,13 @@ amp.domwalker.DomWalker = class {
       const curState = tagStack[tagStack.length - 1];
       const nextChild = curState.nextChild();
       if (nextChild !== undefined) {
-        // TODO(gregable): browser always returns upper case tag names, can we
-        // just make the validator use upper case tag names too to avoid this?
-        const tagName = nextChild.node().nodeName.toLowerCase();
+        // The browser always returns upper case tag names.
+        const tagName = nextChild.node().nodeName;
         calls.push([
           amp.domwalker.HandlerCalls.START_TAG, tagName,
           attrList(nextChild.node().attributes)
         ]);
-        if (cdataTagsToValidate(tagName)) {
+        if (CdataTagsToValidate.hasOwnProperty(tagName)) {
           calls.push(
               [amp.domwalker.HandlerCalls.CDATA, nextChild.node().textContent]);
         }
@@ -183,7 +179,8 @@ amp.domwalker.DomWalker = class {
         if (tagStack.length > 1) {
           calls.push([
             amp.domwalker.HandlerCalls.END_TAG,
-            curState.node().nodeName.toLowerCase()
+            // The browser always returns upper case tag names.
+            curState.node().nodeName
           ]);
         }
         tagStack.pop();
@@ -209,3 +206,13 @@ amp.domwalker.DomWalker = class {
     handler.endDoc();
   }
 };
+
+/**
+ * This function gets eliminated by closure compiler. It's purpose in life
+ * is to work around a bug wherein the compiler renames the object keys
+ * for objects never accessed using an array ([]) operator. We need the keys
+ * to remain unchanged for these objects.
+ */
+function unusedDomWalker() {
+  console./*OK*/log(CdataTagsToValidate['']);
+}

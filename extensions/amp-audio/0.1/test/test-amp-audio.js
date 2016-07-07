@@ -19,7 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
-require('../amp-audio');
+import '../amp-audio';
 
 adopt(window);
 

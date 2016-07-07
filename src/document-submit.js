@@ -54,6 +54,7 @@ export function onDocumentFormSubmit_(e) {
   user.assert(target, 'form target attribute is required: %s', form);
   user.assert(target == '_blank' || target == '_top',
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
+  const shouldValidate = !form.hasAttribute('novalidate');
 
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since
@@ -61,7 +62,7 @@ export function onDocumentFormSubmit_(e) {
   // TODO: This doesn't display the validation error messages. Safari makes them
   // available per input.validity object. We need to figure out a way of
   // displaying these.
-  if (form.checkValidity && !form.checkValidity()) {
+  if (shouldValidate && form.checkValidity && !form.checkValidity()) {
     e.preventDefault();
     return;
   }

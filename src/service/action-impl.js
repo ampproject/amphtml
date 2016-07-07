@@ -38,7 +38,7 @@ const DEFAULT_METHOD_ = 'activate';
  *   event: string,
  *   target: string,
  *   method: string,
- *   args: ?JSONObject,
+ *   args: ?JSONType,
  *   str: string
  * }}
  */
@@ -50,12 +50,13 @@ let ActionInfoDef;
  * @struct
  * @const
  * TODO(dvoytenko): add action arguments here as well.
+ * @package For type.
  */
-class ActionInvocation {
+export class ActionInvocation {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -64,7 +65,7 @@ class ActionInvocation {
     this.target = target;
     /** @const {string} */
     this.method = method;
-    /** @const {?JSONObject} */
+    /** @const {?JSONType} */
     this.args = args;
     /** @const {?Element} */
     this.source = source;
@@ -94,7 +95,7 @@ export class ActionService {
     /** @const @private {!Object<string, function(!ActionInvocation)>} */
     this.globalMethodHandlers_ = {};
 
-    /** @param {!Vsync} */
+    /** @private {!./vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
     // Add core events.
@@ -141,7 +142,7 @@ export class ActionService {
    * Triggers execution of the method on a target/method.
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
    */
@@ -212,7 +213,7 @@ export class ActionService {
   /**
    * The errors that are a result of action definition.
    * @param {string} s
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    * @param {?Element} target
    * @private
    */
@@ -226,10 +227,10 @@ export class ActionService {
   /**
    * @param {!Element} target
    * @param {string} method
-   * @param {?JSONObject} args
+   * @param {?JSONType} args
    * @param {?Element} source
    * @param {?Event} event
-   * @param {?ActionInfo} actionInfo
+   * @param {?ActionInfoDef} actionInfo
    */
   invoke_(target, method, args, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, args,
@@ -281,7 +282,7 @@ export class ActionService {
     while (n) {
       actionInfo = this.matchActionInfo_(n, actionEventType);
       if (actionInfo) {
-        return {node: n, actionInfo: actionInfo};
+        return {node: n, actionInfo};
       }
       n = n.parentElement;
     }
@@ -394,9 +395,9 @@ export function parseActionMap(s, context) {
       }
 
       const action = {
-        event: event,
-        target: target,
-        method: method,
+        event,
+        target,
+        method,
         args: (args && window.AMP_TEST && Object.freeze) ?
             Object.freeze(args) : args,
         str: s,
@@ -432,8 +433,8 @@ function assertActionForParser(s, context, condition, opt_message) {
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: string, value: *}} token
- * @param {string} token
+ * @param {!{type: string, value: *}} tok
+ * @param {string} type
  * @param {*=} opt_value
  * @return {!{type: string, value: *}}
  * @private
@@ -551,7 +552,7 @@ class ParserTokenizer {
       const s = this.str_.substring(newIndex, end);
       const value = hasFraction ? parseFloat(s) : parseInt(s, 10);
       newIndex = end - 1;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // Different separators.
@@ -573,7 +574,7 @@ class ParserTokenizer {
       }
       const value = this.str_.substring(newIndex + 1, end);
       newIndex = end;
-      return {type: TokenType.LITERAL, value: value, index: newIndex};
+      return {type: TokenType.LITERAL, value, index: newIndex};
     }
 
     // A key
@@ -587,7 +588,7 @@ class ParserTokenizer {
     const value = convertValues && (s == 'true' || s == 'false') ?
         s == 'true' : s;
     newIndex = end - 1;
-    return {type: TokenType.LITERAL, value: value, index: newIndex};
+    return {type: TokenType.LITERAL, value, index: newIndex};
   }
 }
 

@@ -67,8 +67,8 @@ export function adopt(global) {
     const register = function() {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
-        name: name,
-        implementationClass: implementationClass,
+        name,
+        implementationClass,
         css: opt_css,
       });
       // Resolve this extension's Service Promise.
@@ -128,7 +128,7 @@ export function adopt(global) {
 
   /**
    * Registers a new custom element.
-   * @param {GlobalAmp} fn
+   * @param {function(!Object)} fn
    */
   global.AMP.push = function(fn) {
     // Extensions are only processed once HEAD is complete.
@@ -139,12 +139,12 @@ export function adopt(global) {
 
   /**
    * Sets the function to forward tick events to.
-   * @param {funtion(string,?string=,number=)} fn
+   * @param {function(string,?string=,number=)} fn
    * @param {function()=} opt_flush
    * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = () => {};
+  global.AMP.setTickFunction = (fn, opt_flush) => {};
 
   // Execute asynchronously scheduled elements.
   // Extensions are only processed once HEAD is complete.

@@ -16,7 +16,7 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
-var karma = require('karma').server;
+var Karma = require('karma').Server;
 var config = require('../config');
 var karmaConfig = config.karma;
 var extend = require('util')._extend;
@@ -51,17 +51,10 @@ function getConfig() {
   return extend(obj, karmaConfig.default);
 }
 
-var prerequisites = ['build'];
-if (process.env.TRAVIS) {
-  // No need to do this because we are guaranteed to have done
-  // it.
-  prerequisites = [];
-}
-
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests', prerequisites, function(done) {
+gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   if (argv.saucelabs && process.env.MAIN_REPO &&
       // Sauce Labs does not work on Pull Requests directly.
       // The @ampsauce bot builds these.
@@ -104,7 +97,8 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
     };
   }
 
-  karma.start(c, done);
+
+  new Karma(c, done).start();
 }, {
   options: {
     'verbose': '  With logging enabled',

@@ -39,8 +39,8 @@ describe('runtime', () => {
       navigator: {},
       setTimeout: () => {},
       location: parseUrl('https://acme.com/document1'),
-      Object: Object,
-      HTMLElement: HTMLElement,
+      Object,
+      HTMLElement,
     };
     errorStub = sandbox.stub(dev, 'error');
   });
@@ -172,4 +172,3 @@ describe('runtime', () => {
     });
   });
 });
-

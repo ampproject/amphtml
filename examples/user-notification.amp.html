@@ -205,8 +205,8 @@
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
-      data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
+      data-show-if-href="/api/show?timestamp=TIMESTAMP"
+      data-dismiss-href="/api/echo/post">
       This site uses cookies to personalize content.
       <a href="#learn-more">Learn more.</a>
      <button on="tap:amp-user-notification1.dismiss" role="button" tabindex="0">I accept</button>
@@ -215,8 +215,8 @@
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification2"
-      data-show-if-href="http://localhost:8000/api/dont-show"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
+      data-show-if-href="/api/dont-show"
+      data-dismiss-href="/api/echo/post">
       notify 2
       <a href="#learn-more">Learn more.</a>
      <button on="tap:amp-user-notification2.dismiss" role="button" tabindex="1">I accept</button>
@@ -233,8 +233,8 @@
           layout=nodisplay
           id="amp-user-notification4"
           data-persist-dismissal="false"
-          data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-          data-dismiss-href="http://localhost:8000/api/echo/post">
+          data-show-if-href="/api/show?timestamp=TIMESTAMP"
+          data-dismiss-href="/api/echo/post">
     This notification should ALWAYS show.
     <a href="#learn-more">Learn more.</a>
     <button on="tap:amp-user-notification4.dismiss" role="button" tabindex="3">Dismiss</button>
@@ -244,8 +244,8 @@
           layout=nodisplay
           id="amp-user-notification5"
           data-persist-dismissal="false"
-          data-show-if-href="http://localhost:8000/api/dont-show"
-          data-dismiss-href="http://localhost:8000/api/echo/post">
+          data-show-if-href="/api/dont-show"
+          data-dismiss-href="/api/echo/post">
     This notification should NEVER show.
     <a href="#learn-more">Learn more.</a>
     <button on="tap:amp-user-notification5.dismiss" role="button" tabindex="4">Dismiss</button>

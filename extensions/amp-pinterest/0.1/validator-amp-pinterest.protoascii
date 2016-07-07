@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-pinterest
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-pinterest extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -50,9 +50,8 @@ tags: {  # amp-pinterest
 # attribute. In this case, depending on the value of data-do, data-media and
 # data-description may or may not be mandatory.
 tags: {  # <amp-pinterest>
-  tag_name: "amp-pinterest"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-PINTEREST"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-pinterest extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }

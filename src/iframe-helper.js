@@ -91,7 +91,7 @@ function getOrCreateListenForEvents(parentWin, iframe, opt_is3P) {
   if (!windowEvents) {
     windowEvents = {
       frame: iframe,
-      origin: origin,
+      origin,
       events: Object.create(null),
     };
     listenSentinel.push(windowEvents);
@@ -238,7 +238,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @param {boolean=} opt_includingNestedWindows set to true if a messages from
  *     nested frames should also be accepted.
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listenFor(
     iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
@@ -300,7 +300,7 @@ export function listenFor(
  * @param {function(!Object, !Window, string)} callback Called when a message of this type
  *     arrives for this iframe.
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
   const unlisten = listenFor(iframe, typeOfMessage, (data, source, origin) => {
@@ -374,7 +374,7 @@ function parseIfNeeded(data) {
     try {
       data = JSON.parse(data);
     } catch (e) {
-      log.warn('Postmessage could not be parsed. ' +
+      dev.warn('Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
     }
   }

@@ -65,6 +65,27 @@ def FindDescriptors(validator_pb2, msg_desc_by_name, enum_desc_by_name):
       enum_desc_by_name[enum_type.full_name] = enum_type
 
 
+class Indenter(object):
+  """Helper class for indenting lines."""
+
+  def __init__(self, lines):
+    """Initializes the indenter with indent 0."""
+    self.lines = lines
+    self.indent_by_ = [0]
+
+  def PushIndent(self, indent):
+    """Pushes a particular indent onto the stack."""
+    self.indent_by_.append(self.indent_by_[-1] + indent)
+
+  def PopIndent(self):
+    """Pops a particular indent from the stack, reverting to the previous."""
+    self.indent_by_.pop()
+
+  def Line(self, line):
+    """Adds a line to self.lines, applying the indent."""
+    self.lines.append('%s%s' % (' ' * self.indent_by_[-1], line))
+
+
 def FieldTypeFor(descriptor, field_desc):
   """Returns the Javascript type for a given field descriptor.
 
@@ -132,10 +153,12 @@ def ValueToString(descriptor, field_desc, value):
   """
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     if value:
-      return '[%s]' % ', '.join([NonRepeatedValueToString(
-          descriptor, field_desc, s) for s in value])
+      return '[%s]' % ', '.join([NonRepeatedValueToString(descriptor,
+                                                          field_desc, s)
+                                 for s in value])
     return '[]'
   return NonRepeatedValueToString(descriptor, field_desc, value)
+
 
 # For the validator-light version, skip these fields. This works by
 # putting them inside a conditional with
@@ -143,7 +166,9 @@ def ValueToString(descriptor, field_desc, value):
 # leave them out via dead code elimination.
 SKIP_FIELDS_FOR_LIGHT = ['error_formats', 'spec_url', 'validator_revision',
                          'spec_file_revision', 'template_spec_url',
-                         'min_validator_revision_required', 'deprecation_url']
+                         'min_validator_revision_required', 'deprecation_url',
+                         'errors']
+SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError']
 
 
 def PrintClassFor(descriptor, msg_desc, out):
@@ -156,33 +181,49 @@ def PrintClassFor(descriptor, msg_desc, out):
     descriptor: The descriptor module from the protobuf package, e.g.
         google.protobuf.descriptor.
     msg_desc: The descriptor for a particular message type.
-    out: a list of lines to output (without the newline characters), to
-        which this function will append.
+    out: a list of lines to output (without the newline characters) wrapped as
+        an Indenter instance, to which this function will append.
   """
   # TODO(johannes): Should we provide access to the default values?
   # Those are given in field.default_value for each field.
-  out.append('/**')
-  out.append(' * @constructor')
+  if msg_desc.full_name in SKIP_CLASSES_FOR_LIGHT:
+    out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+    out.PushIndent(2)
+  out.Line('/**')
+  out.Line(' * @constructor')
   is_exported = msg_desc.name in ['ValidationResult', 'ValidationError']
+  export_or_empty = ''
   if is_exported:
-    out.append(' * @export')
-  out.append(' */')
-  out.append('%s = function() {' % msg_desc.full_name)
+    out.Line(' * @export')
+    export_or_empty = ' @export'
+  out.Line(' */')
+  out.Line('%s = function() {' % msg_desc.full_name)
+  out.PushIndent(2)
   for field in msg_desc.fields:
     if field.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+      out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+      out.PushIndent(2)
     if field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-      if is_exported:
-        out.append('  /** @export {%s} */' % FieldTypeFor(descriptor, field))
-      out.append('  this.%s = [];' % UnderscoreToCamelCase(field.name))
+      out.Line('/**%s @type {%s} */' % (export_or_empty,
+                                        FieldTypeFor(descriptor, field)))
+      out.Line('this.%s = [];' % UnderscoreToCamelCase(field.name))
     else:
-      if is_exported:
-        out.append('  /** @export {?%s} */' % FieldTypeFor(descriptor, field))
-      out.append('  this.%s = null;' % UnderscoreToCamelCase(field.name))
+      out.Line('/**%s @type {?%s} */' % (export_or_empty,
+                                         FieldTypeFor(descriptor, field)))
+      out.Line('this.%s = null;' % UnderscoreToCamelCase(field.name))
     if field.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  }')
-  out.append('};')
-  out.append('')
+      out.PopIndent()
+      out.Line('}')
+  out.PopIndent()
+  out.Line('};')
+  if msg_desc.full_name in SKIP_CLASSES_FOR_LIGHT:
+    out.PopIndent()
+    out.Line('}')
+  out.Line('')
+
+
+SKIP_ENUMS_FOR_LIGHT = ['amp.validator.ValidationError.Code',
+                        'amp.validator.ValidationError.Severity']
 
 
 def PrintEnumFor(enum_desc, out):
@@ -190,18 +231,24 @@ def PrintEnumFor(enum_desc, out):
 
   Args:
     enum_desc: The descriptor for a particular enum type.
-    out: a list of lines to output (without the newline characters), to
-        which this function will append.
+    out: a list of lines to output (without the newline characters) wrapped as
+        an Indenter instance, to which this function will append.
   """
-  out.append('/**')
-  out.append(' * @enum {string}')
-  out.append(' * @export')
-  out.append(' */')
-  out.append('%s = {' % enum_desc.full_name)
-  out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in
-                         enum_desc.values]))
-  out.append('};')
-  out.append('')
+  if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
+    out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+    out.PushIndent(2)
+  out.Line('/**')
+  out.Line(' * @enum {string}')
+  out.Line(' * @export')
+  out.Line(' */')
+  out.Line('%s = {' % enum_desc.full_name)
+  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in enum_desc.values
+                      ]))
+  out.Line('};')
+  if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
+    out.PopIndent()
+    out.Line('}')
+  out.Line('')
 
 
 def PrintObject(descriptor, msg, this_id, out):
@@ -217,35 +264,36 @@ def PrintObject(descriptor, msg, this_id, out):
     msg: A protocol message instance.
     this_id: The id for the object being printed (all variables have the form
         o_${num} with ${num} being increasing integers
-    out: a list of lines to output (without the newline characters), to
-        which this function will append.
+    out: a list of lines to output (without the newline characters) wrapped as
+        an Indenter instance, to which this function will append.
   Returns:
     The next object id, that is, next variable available for creating objects.
   """
-  out.append('  var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
+  out.Line('var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
   next_id = this_id + 1
   for (field_desc, field_val) in msg.ListFields():
     if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+      out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+      out.PushIndent(2)
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.append('    o_%d.%s.push(o_%d);' %
-                     (this_id, UnderscoreToCamelCase(field_desc.name),
-                      field_id))
+          out.Line('o_%d.%s.push(o_%d);' %
+                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
       else:
         field_id = next_id
         next_id = PrintObject(descriptor, field_val, field_id, out)
-        out.append('  o_%d.%s = o_%d;' %
-                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+        out.Line('o_%d.%s = o_%d;' %
+                 (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
     else:
-      out.append('  o_%d.%s = %s;' %
-                 (this_id, UnderscoreToCamelCase(field_desc.name),
-                  ValueToString(descriptor, field_desc, field_val)))
+      out.Line('o_%d.%s = %s;' %
+               (this_id, UnderscoreToCamelCase(field_desc.name),
+                ValueToString(descriptor, field_desc, field_val)))
     if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
-      out.append('  }')
+      out.PopIndent()
+      out.Line('}')
   return next_id
 
 
@@ -276,17 +324,18 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   all_names = [rules_obj] + msg_desc_by_name.keys() + enum_desc_by_name.keys()
   all_names.sort()
 
-  out.append('//')
-  out.append('// Generated by %s - do not edit.' % os.path.basename(__file__))
-  out.append('//')
-  out.append('')
+  out = Indenter(out)
+  out.Line('//')
+  out.Line('// Generated by %s - do not edit.' % os.path.basename(__file__))
+  out.Line('//')
+  out.Line('')
   for name in all_names:
-    out.append("goog.provide('%s');" % name)
-  out.append("goog.provide('amp.validator.GENERATE_DETAILED_ERRORS');")
-  out.append('')
-  out.append('/** @define {boolean} */')
-  out.append('amp.validator.GENERATE_DETAILED_ERRORS = true;')
-  out.append('')
+    out.Line("goog.provide('%s');" % name)
+  out.Line("goog.provide('amp.validator.GENERATE_DETAILED_ERRORS');")
+  out.Line('')
+  out.Line('/** @define {boolean} */')
+  out.Line('amp.validator.GENERATE_DETAILED_ERRORS = true;')
+  out.Line('')
 
   for name in all_names:
     if name in msg_desc_by_name:
@@ -298,15 +347,17 @@ def GenerateValidatorGeneratedJs(specfile, validator_pb2, text_format,
   # message of type ValidatorRules.
   rules = validator_pb2.ValidatorRules()
   text_format.Merge(open(specfile).read(), rules)
-  out.append('/**')
-  out.append(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
-  out.append(' */')
-  out.append('function createRules() {')
+  out.Line('/**')
+  out.Line(' * @return {!%s}' % rules.DESCRIPTOR.full_name)
+  out.Line(' */')
+  out.Line('function createRules() {')
+  out.PushIndent(2)
   PrintObject(descriptor, rules, 0, out)
-  out.append('  return o_0;')
-  out.append('}')
-  out.append('')
-  out.append('/**')
-  out.append(' * @type {!%s}' % rules.DESCRIPTOR.full_name)
-  out.append(' */')
-  out.append('%s = createRules();' % rules_obj)
+  out.Line('return o_0;')
+  out.PopIndent()
+  out.Line('}')
+  out.Line('')
+  out.Line('/**')
+  out.Line(' * @type {!%s}' % rules.DESCRIPTOR.full_name)
+  out.Line(' */')
+  out.Line('%s = createRules();' % rules_obj)

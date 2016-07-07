@@ -63,7 +63,11 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('yahoojp');
     expect(registrations).to.include.key('chargeads');
     expect(registrations).to.include.key('nend');
+<<<<<<< HEAD
     expect(registrations).to.include.key('adcrops');
+=======
+    expect(registrations).to.include.key('adgeneration');
+>>>>>>> ampproject/master
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
@@ -154,7 +158,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -177,7 +181,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
       },
     };
     let called = false;
@@ -209,7 +213,7 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {},
-        data: data,
+        data,
       },
     };
     expect(() => {
@@ -226,7 +230,7 @@ describe('3p integration.js', () => {
         location: {
           originValidated: true,
         },
-        data: data,
+        data,
         tagName: 'AMP-EMBED',
       },
     };

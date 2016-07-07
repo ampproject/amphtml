@@ -86,26 +86,18 @@ describe('Viewer', () => {
 
   it('should configure as natural viewport by default', () => {
     expect(viewer.getViewportType()).to.equal('natural');
-    expect(viewer.getViewportWidth()).to.equal(0);
-    expect(viewer.getViewportHeight()).to.equal(0);
-    expect(viewer.getScrollTop()).to.equal(0);
     expect(viewer.getPaddingTop()).to.equal(0);
   });
 
   it('should configure correctly based on window name and hash', () => {
-    windowApi.name = '__AMP__viewportType=virtual&width=222&height=333' +
-        '&scrollTop=15';
-    windowApi.location.hash = '#width=111&paddingTop=17&other=something';
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.location.hash = '#paddingTop=17&other=something';
     const viewer = new Viewer(windowApi);
-    expect(viewer.getViewportType()).to.equal('virtual');
-    expect(viewer.getViewportWidth()).to.equal(111);
-    expect(viewer.getViewportHeight()).to.equal(333);
-    expect(viewer.getScrollTop()).to.equal(15);
+    expect(viewer.getViewportType()).to.equal('natural');
     expect(viewer.getPaddingTop()).to.equal(17);
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
-    expect(viewer.getParam('width')).to.equal('111');
     expect(viewer.getParam('other')).to.equal('something');
   });
 
@@ -179,14 +171,27 @@ describe('Viewer', () => {
   it('should configure performance tracking', () => {
     windowApi.location.hash = '';
     let viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
 
     windowApi.location.hash = '#csi=1';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
     expect(viewer.isPerformanceTrackingOn()).to.be.true;
 
     windowApi.location.hash = '#csi=0';
     viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = Promise.resolve();
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    viewer.messagingMaybePromise_ = null;
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
@@ -218,16 +223,9 @@ describe('Viewer', () => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
-      scrollTop: 11,
-      scrollLeft: 12,
-      width: 13,
-      height: 14,
       paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewer.getScrollTop()).to.equal(11);
-    expect(viewer.getViewportWidth()).to.equal(13);
-    expect(viewer.getViewportHeight()).to.equal(14);
     expect(viewer.getPaddingTop()).to.equal(19);
   });
 
@@ -416,20 +414,17 @@ describe('Viewer', () => {
   });
 
   it('should post documentLoaded event', () => {
-    viewer.postDocumentReady(11, 12);
+    viewer.postDocumentReady();
     const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
-    expect(m.data.width).to.equal(11);
-    expect(m.data.height).to.equal(12);
     expect(m.data.title).to.equal('Awesome doc');
   });
 
-  it('should post documentResized event', () => {
-    viewer.postDocumentResized(13, 14);
+  it('should post scroll event', () => {
+    viewer.postScroll(111);
     const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('documentResized');
-    expect(m.data.width).to.equal(13);
-    expect(m.data.height).to.equal(14);
+    expect(m.eventType).to.equal('scroll');
+    expect(m.data.scrollTop).to.equal(111);
   });
 
   it('should post request/cancelFullOverlay event', () => {
@@ -440,33 +435,24 @@ describe('Viewer', () => {
   });
 
   it('should queue non-dupe events', () => {
-    viewer.postDocumentReady(11, 12);
-    viewer.postDocumentResized(13, 14);
-    viewer.postDocumentResized(15, 16);
-    expect(viewer.messageQueue_.length).to.equal(2);
+    viewer.postDocumentReady();
+    viewer.postDocumentReady();
+    expect(viewer.messageQueue_.length).to.equal(1);
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
-    const m = viewer.messageQueue_[1];
-    expect(m.eventType).to.equal('documentResized');
-    expect(m.data.width).to.equal(15);
-    expect(m.data.height).to.equal(16);
   });
 
   it('should dequeue events when deliverer set', () => {
-    viewer.postDocumentReady(11, 12);
-    viewer.postDocumentResized(13, 14);
-    expect(viewer.messageQueue_.length).to.equal(2);
+    viewer.postDocumentReady();
+    expect(viewer.messageQueue_.length).to.equal(1);
 
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
-      delivered.push({eventType: eventType, data: data});
+      delivered.push({eventType, data});
     }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
-    expect(delivered.length).to.equal(2);
+    expect(delivered.length).to.equal(1);
     expect(delivered[0].eventType).to.equal('documentLoaded');
-    expect(delivered[0].data.width).to.equal(11);
-    expect(delivered[1].eventType).to.equal('documentResized');
-    expect(delivered[1].data.width).to.equal(13);
   });
 
   describe('Messaging not embedded', () => {
@@ -510,7 +496,7 @@ describe('Viewer', () => {
     it('should post broadcast event', () => {
       const delivered = [];
       viewer.setMessageDeliverer((eventType, data) => {
-        delivered.push({eventType: eventType, data: data});
+        delivered.push({eventType, data});
       }, 'https://acme.com');
       viewer.broadcast({type: 'type1'});
       expect(viewer.messageQueue_.length).to.equal(0);

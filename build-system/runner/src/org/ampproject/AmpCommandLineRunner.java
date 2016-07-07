@@ -17,7 +17,6 @@ package org.ampproject;
 
 
 import com.google.common.collect.ImmutableSet;
-import com.google.javascript.jscomp.AbstractCommandLineRunner.FlagUsageException;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
@@ -33,6 +32,11 @@ import java.io.IOException;
 public class AmpCommandLineRunner extends CommandLineRunner {
 
   /**
+   * Identifies if the runner only needs to do type checking.
+   */
+  private boolean typecheck_only = false;
+
+  /**
    * List of string suffixes to eliminate from the AST.
    */
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
@@ -43,6 +47,9 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   }
 
   @Override protected CompilerOptions createOptions() {
+    if (typecheck_only) {
+      return createTypeCheckingOptions();
+    }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
@@ -59,10 +66,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRemoveUnusedPrototypeProperties(false);
     options.setInlineProperties(false);
     options.setComputeFunctionSideEffects(false);
-    // Waiting for upstream change to stop renaming exported properties.
-    // options.setRenamingPolicy(VariableRenamingPolicy.ALL,
-    //    PropertyRenamingPolicy.ALL_UNQUOTED);
-    // options.setDisambiguatePrivateProperties(true);
+    // Property renaming. Relies on AmpCodingConvention to be safe.
+    options.setRenamingPolicy(VariableRenamingPolicy.ALL,
+        PropertyRenamingPolicy.ALL_UNQUOTED);
+    options.setDisambiguatePrivateProperties(true);
     return options;
   }
 
@@ -72,8 +79,30 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setCodingConvention(new AmpCodingConvention());
   }
 
+  /**
+   * Create the most basic CompilerOptions instance with type checking turned on.
+   */
+  protected CompilerOptions createTypeCheckingOptions() {
+    CompilerOptions options = super.createOptions();
+    options.setCheckTypes(true);
+    return options;
+  }
+
+  protected void setTypeCheckOnly(boolean value) {
+    typecheck_only = value;
+  }
+
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
+
+    // Scan for TYPECHECK_ONLY string which we pass in as a --define
+    for (String arg : args) {
+      if (arg.contains("TYPECHECK_ONLY=true")) {
+        runner.setTypeCheckOnly(true);
+        break;
+      }
+    }
+
     if (runner.shouldRunCompiler()) {
       runner.run();
     }

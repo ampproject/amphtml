@@ -70,7 +70,7 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
@@ -288,9 +288,9 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} opt_implementationClass For
+ * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
  *     testing only.
- * @return {!AmpElement.prototype}
+ * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
@@ -316,7 +316,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!Resources}  */
+    /** @private @const {!./service/resources-impl.Resources}  */
     this.resources_ = resourcesFor(win);
 
     /** @private {!Layout} */
@@ -334,10 +334,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     /** @private {string|null|undefined} */
     this.mediaQuery_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.sizeList_ = undefined;
 
-    /** @private {!SizeList|null|undefined} */
+    /** @private {!./size-list.SizeList|null|undefined} */
     this.heightsList_ = undefined;
 
     /**
@@ -365,14 +365,14 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     // `opt_implementationClass` is only used for tests.
     const Ctor = opt_implementationClass || knownElements[name];
 
-    /** @private {!BaseElement} */
+    /** @private {!./base-element.BaseElement} */
     this.implementation_ = new Ctor(this);
     this.implementation_.createdCallback();
 
     /**
      * Action queue is initially created and kept around until the element
      * is ready to send actions directly to the implementation.
-     * @private {?Array<!ActionInvocation>}
+     * @private {?Array<!./service/action-impl.ActionInvocation>}
      */
     this.actionQueue_ = [];
 
@@ -401,7 +401,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * Upgrades the element to the provided new implementation. If element
    * has already been attached, it's layout validation and attachment flows
    * are repeated for the new implementation.
-   * @param {function(new:BaseElement, !Element)} newImplClass
+   * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
    * @final @package @this {!Element}
    */
   ElementProto.upgrade = function(newImplClass) {
@@ -421,8 +421,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
+      // For a never-added resource, the build will be done automatically
+      // via `resources.add` on the first attach.
+      this.resources_.upgraded(this);
     }
-    this.resources_.upgraded(this);
   };
 
   /**
@@ -508,7 +510,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   };
 
   /**
-   * @return {!Vsync}
+   * @return {!./service/vsync-impl.Vsync}
    * @private @this {!Element}
    */
   ElementProto.getVsync_ = function() {
@@ -527,7 +529,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
-   * @param {!LayoutRect} layoutBox
+   * @param {!./layout-rect.LayoutRectDef} layoutBox
    * @this {!Element}
    */
   ElementProto.updateLayoutBox = function(layoutBox) {
@@ -733,7 +735,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
   };
 
   /**
-   * @return {!LayoutRect}
+   * @return {!./layout-rect.LayoutRectDef}
    * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
@@ -907,7 +909,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready
    * to receive actions.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @final @this {!Element}
    */
   ElementProto.enqueAction = function(invocation) {
@@ -940,7 +942,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 
   /**
    * Executes the action immediately. All errors are consumed and reported.
-   * @param {!ActionInvocation} invocation
+   * @param {!./service/action-impl.ActionInvocation} invocation
    * @param {boolean} deferred
    * @final
    * @private @this {!Element}
@@ -1219,7 +1221,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:BaseElement, !Element)} implementationClass
+ * @param {function(new:./base-element.BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;

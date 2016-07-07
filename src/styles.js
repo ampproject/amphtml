@@ -18,6 +18,7 @@ import {setStyles, setStyle} from './style';
 import {platformFor} from './platform';
 import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
+import {dev} from './log';
 
 
 /**
@@ -52,7 +53,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
     style.setAttribute('amp-extension', opt_ext || '');
     afterElement = doc.querySelector('style[amp-runtime]');
   }
-  insertAfterOrAtStart(doc.head, style, afterElement);
+  insertAfterOrAtStart(dev.assert(doc.head), style, afterElement);
   // Styles aren't always available synchronously. E.g. if there is a
   // pending style download, it will have to finish before the new
   // style is visible.
@@ -91,7 +92,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
  */
 export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    setStyles(doc.body, {
+    setStyles(dev.assert(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',

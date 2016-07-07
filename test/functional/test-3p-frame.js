@@ -127,7 +127,7 @@ describe('3p-frame', () => {
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
-        '"version":"$internalRuntimeVersion$"}' +
+        '"test":false,"version":"$internalRuntimeVersion$"}' +
         ',"hidden":false' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
         ',"initialIntersection":{"time":1234567888,' +
@@ -233,16 +233,13 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (Math)', () => {
-    const fakeWin = {
-      document: document,
-      Math: Math,
-    };
+    const fakeWin = {document, Math};
     expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
   });
 
   it('should make sub domains (crypto)', () => {
     const fakeWin = {
-      document: document,
+      document,
       crypto: {
         getRandomValues: function(arg) {
           arg[0] = 123;
@@ -255,7 +252,7 @@ describe('3p-frame', () => {
 
   it('should make sub domains (fallback)', () => {
     const fakeWin = {
-      document: document,
+      document,
       Math: {
         random: function() {
           return 0.567;

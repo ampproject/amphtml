@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-twitter');
+import '../amp-twitter';
 import {adopt} from '../../../../src/runtime';
 import {twitter} from '../../../../3p/twitter';
 

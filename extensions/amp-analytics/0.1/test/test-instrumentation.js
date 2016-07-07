@@ -25,6 +25,7 @@ describe('amp-analytics.instrumentation', function() {
   let ins;
   let fakeViewport;
   let clock;
+  let sandbox;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
