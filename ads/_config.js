@@ -35,6 +35,7 @@ export const adPrefetch = {
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  nativo: 'https://s.ntv.io/serve/load.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
@@ -159,7 +160,10 @@ export const adPreconnect = {
   appnexus: 'https://ib.adnxs.com',
   microad: [
     'https://s-rtb.send.microad.jp',
+    'https://s-rtb.send.microadinc.com',
     'https://cache.send.microad.jp',
+    'https://cache.send.microadinc.com',
+    'https://deb.send.microad.jp',
   ],
   yahoojp: [
     'https://s.yimg.jp',
@@ -176,6 +180,11 @@ export const adPreconnect = {
   adtech: [
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
+  ],
+  kargo: [
+    'https://storage.cloud.kargo.com',
+    'https://pubads.g.doubleclick.net',
+    'https://prg.kargo.com',
   ],
 };
 

@@ -105,7 +105,8 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(this.doPass_.bind(this));
+    this.pass_ = new Pass(element.ownerDocument.defaultView,
+        this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();

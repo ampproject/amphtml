@@ -33,6 +33,9 @@ describe('TapRecognizer', () => {
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     gestures = new Gestures(element);
@@ -122,6 +125,9 @@ describe('DoubletapRecognizer', () => {
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     gestures = new Gestures(element);
@@ -227,6 +233,9 @@ describe('SwipeXYRecognizer', () => {
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     gestures = new Gestures(element);
@@ -411,6 +420,9 @@ describe('TapzoomRecognizer', () => {
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     gestures = new Gestures(element);
@@ -589,6 +601,9 @@ describe('PinchRecognizer', () => {
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {},
+      ownerDocument: {
+        defaultView: window,
+      },
     };
 
     gestures = new Gestures(element);

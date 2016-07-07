@@ -86,6 +86,7 @@ describe('Logging', () => {
     });
 
     it('should be enabled when forced for tests', () => {
+      mode.test = true;
       win.ENABLE_LOG = true;
       expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.FINE);
     });

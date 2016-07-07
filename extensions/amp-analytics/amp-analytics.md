@@ -180,7 +180,7 @@ Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`.
 
 Type attribute value: `mparticle`
 
-Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](https://docs.mparticle.com/?javascript#amp/).
+Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
 
 ### OEWA
 

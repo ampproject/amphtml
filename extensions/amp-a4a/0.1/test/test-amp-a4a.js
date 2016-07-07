@@ -195,7 +195,10 @@ describe('amp-a4a', () => {
           expect(a4aElement.shadowRoot, 'Shadow root is not set').to.be.null;
           expect(a4aElement.children.length, 'has no children').to.equal(0);
           expect(a4a.rendered_).to.be.false;
-          a4a.layoutCallback().then(() => {
+          return a4a.layoutCallback().then(() => {
+            // Force vsync system to run all queued tasks, so that DOM mutations
+            // are actually completed before testing.
+            a4a.vsync_.runScheduledTasks_();
             expect(a4aElement.shadowRoot, 'Shadow root is not set').to.be.null;
             expect(a4aElement.children.length, 'has child').to.equal(1);
             expect(a4aElement.firstChild.src, 'verify iframe src w/ origin').to
@@ -303,7 +306,10 @@ describe('amp-a4a', () => {
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
         const bytes = buildCreativeArrayBuffer();
-        a4a.maybeRenderAmpAd_(false, bytes).then(rendered => {
+        return a4a.maybeRenderAmpAd_(false, bytes).then(rendered => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
           expect(rendered).to.be.false;
           expect(a4aElement.shadowRoot).to.be.null;
           expect(a4a.rendered_).to.be.false;
@@ -317,7 +323,10 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         const bytes = buildCreativeArrayBuffer();
-        a4a.maybeRenderAmpAd_(true, bytes).then(rendered => {
+        return a4a.maybeRenderAmpAd_(true, bytes).then(rendered => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
           expect(a4aElement.shadowRoot).to.not.be.null;
           expect(rendered).to.be.true;
           const root = a4aElement.shadowRoot;
@@ -491,6 +500,9 @@ describe('amp-a4a', () => {
           a4a.onLayoutMeasure();
           const adPromise = a4a.adPromise_;
           a4a.unlayoutCallback();
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
           whenFirstVisibleResolve();
           return adPromise.then(unusedError => {
             assert.fail('cancelled ad promise should not succeed');

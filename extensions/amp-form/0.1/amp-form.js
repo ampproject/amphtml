@@ -65,7 +65,7 @@ export class AmpForm {
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
-    /** @const @private {!../../../src/action-impl.Action} */
+    /** @const @private {!../../../src/service/action-impl.Action} */
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */

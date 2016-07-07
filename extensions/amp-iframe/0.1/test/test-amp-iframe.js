@@ -15,7 +15,11 @@
  */
 
 import {Timer} from '../../../../src/timer';
-import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
+import {
+  AmpIframe,
+  isAdLike,
+  setTrackingIframeTimeoutForTesting,
+} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
 import {
   createIframePromise,
@@ -142,20 +146,23 @@ describe('amp-iframe', () => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
+      expect(impl.getPriority()).to.equal(0);
       return timer.promise(50).then(() => {
         expect(ranJs).to.equal(0);
       });
     });
   });
 
-  it('should allow JS and propagate scrolling', () => {
+  it('should allow JS and propagate scrolling and have lower priority', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
-      width: 100,
-      height: 100,
+      width: 320,
+      height: 250,
       scrolling: 'no',
     }).then(amp => {
+      const impl = amp.container.implementation_;
+      expect(impl.getPriority()).to.equal(2);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
@@ -347,8 +354,8 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
-        impl.updateSize_ = (newHeight, newWidth) => {
-          resolve({amp, newHeight, newWidth});
+        impl.updateSize_ = (height, width) => {
+          resolve({amp, height, width});
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -359,10 +366,8 @@ describe('amp-iframe', () => {
       }, '*');
       return p;
     }).then(res => {
-      expect(res.newHeight).to.equal(217);
-      expect(res.newWidth).to.equal(113);
-      expect(res.amp.iframe.height).to.equal('217');
-      expect(res.amp.iframe.width).to.equal('113');
+      expect(res.height).to.equal(217);
+      expect(res.width).to.equal(113);
     });
   });
 
@@ -377,8 +382,8 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
-        impl.updateSize_ = (newHeight, unusedNewWidth) => {
-          resolve({amp, newHeight});
+        impl.updateSize_ = (height, unusedWidth) => {
+          resolve({amp, height});
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -388,8 +393,7 @@ describe('amp-iframe', () => {
       }, '*');
       return p;
     }).then(res => {
-      expect(res.newHeight).to.equal(217);
-      expect(res.amp.iframe.height).to.equal('217');
+      expect(res.height).to.equal(217);
     });
   });
 
@@ -518,5 +522,20 @@ describe('amp-iframe', () => {
     }).then(impl => {
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
     });
+  });
+
+  it('should correctly classify ads', () => {
+    function e(width, height) {
+      const element = document.createElement('test');
+      element.setAttribute('width', width);
+      element.setAttribute('height', height);
+      return element;
+    }
+    expect(isAdLike(e(300, 250))).to.be.true;
+    expect(isAdLike(e(320, 270))).to.be.true;
+    expect(isAdLike(e(299, 249))).to.be.false;
+    expect(isAdLike(e(320, 100))).to.be.true;
+    expect(isAdLike(e(335, 100))).to.be.true;
+    expect(isAdLike(e(341, 100))).to.be.false;
   });
 });

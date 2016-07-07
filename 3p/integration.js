@@ -40,6 +40,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {nativo} from '../ads/nativo';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
@@ -77,6 +78,7 @@ import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 import {adgeneration} from '../ads/adgeneration';
 import {genieessp} from '../ads/genieessp';
+import {kargo} from '../ads/kargo';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -109,6 +111,7 @@ register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
+register('nativo', nativo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
@@ -140,6 +143,7 @@ register('chargeads', chargeads);
 register('nend', nend);
 register('adgeneration', adgeneration);
 register('genieessp', genieessp);
+register('kargo', kargo);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

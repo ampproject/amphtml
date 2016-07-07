@@ -75,6 +75,7 @@ export function parseUrl(url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
+    origin: null,  // Set below.
   };
 
   // Some IE11 specific polyfills.

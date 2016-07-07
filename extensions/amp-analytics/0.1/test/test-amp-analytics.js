@@ -726,7 +726,7 @@ describe('amp-analytics', function() {
     it('allows a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(crypto, 'sha384').returns(Promise.resolve([0, 100, 0, 100]));
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -740,8 +740,8 @@ describe('amp-analytics', function() {
       const urlReplacements = installUrlReplacementsService(
                 analytics.getWin());
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
-      sandbox.stub(crypto, 'sha384')
-          .withArgs('0').returns(Promise.resolve([0]));
+      sandbox.stub(crypto, 'uniform')
+          .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -750,7 +750,7 @@ describe('amp-analytics', function() {
     it('does not allow a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(crypto, 'sha384').returns(Promise.resolve([1, 2, 3, 4]));
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
       return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(0);
       });

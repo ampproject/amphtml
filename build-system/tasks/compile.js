@@ -227,7 +227,9 @@ function compile(entryModuleFilename, outputDir,
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
-
+    if (argv.pseudo_names) {
+      compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
+    }
     if (argv.fortesting) {
       compilerOptions.compilerFlags.define.push('FORTESTING=true');
     }

@@ -56,8 +56,13 @@ export class Preconnect {
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
 
-    /** @private {boolean} */
-    this.preloadSupported_ = this.isPreloadSupported_();
+    /**
+     * Detect support for the given resource hints.
+     * Unfortunately not all browsers support this, so this can only
+     * be used as an affirmative signal.
+     * @private @const {{preload: boolean, preconnect: boolean}}
+     */
+    this.features_ = this.detectFeatures_();
 
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
@@ -94,19 +99,24 @@ export class Preconnect {
         ? ACTIVE_CONNECTION_TIMEOUT_MS
         : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
-    const dns = this.document_.createElement('link');
-    dns.setAttribute('rel', 'dns-prefetch');
-    dns.setAttribute('href', origin);
+    // If we know that preconnect is supported, there is no need to do
+    // dedicated dns-prefetch.
+    let dns;
+    if (!this.features_.preconnect) {
+      dns = this.document_.createElement('link');
+      dns.setAttribute('rel', 'dns-prefetch');
+      dns.setAttribute('href', origin);
+      this.head_.appendChild(dns);
+    }
     const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
     preconnect.setAttribute('referrerpolicy', 'origin');
-    this.head_.appendChild(dns);
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
     timer.delay(() => {
-      if (dns.parentNode) {
+      if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
       if (preconnect.parentNode) {
@@ -118,39 +128,44 @@ export class Preconnect {
   }
 
   /**
-   * Asks the browser to prefetch a URL. Always also does a preconnect
+   * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  prefetch(url, opt_preloadAs) {
+  preload(url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
     if (this.urls_[url]) {
       return;
     }
-    const command = this.preloadSupported_ ? 'preload' : 'prefetch';
+    const command = this.features_.preload ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
     this.viewer_.whenFirstVisible().then(() => {
-      const prefetch = this.document_.createElement('link');
-      prefetch.setAttribute('rel', command);
-      prefetch.setAttribute('href', url);
-      prefetch.setAttribute('referrerpolicy', 'origin');
+      const preload = this.document_.createElement('link');
+      preload.setAttribute('rel', command);
+      preload.setAttribute('href', url);
+      preload.setAttribute('referrerpolicy', 'origin');
       // Do not set 'as' attribute for now, for 2 reasons
       // - document value is not yet supported and dropped
       // - script is blocked due to CSP.
       // if (opt_preloadAs) {
-      //  prefetch.setAttribute('as', opt_preloadAs);
+      //  preload.setAttribute('as', opt_preloadAs);
       // }
-      this.head_.appendChild(prefetch);
+      this.head_.appendChild(preload);
       // As opposed to preconnect we do not clean this tag up, because there is
       // no expectation as to it having an immediate effect.
     });
   }
 
+  /**
+   * Skips over non HTTP/HTTPS URL.
+   * @param {string} url
+   * @return {boolean}
+   */
   isInterestingUrl_(url) {
     if (url.indexOf('https:') == 0 || url.indexOf('http:') == 0) {
       return true;
@@ -158,15 +173,21 @@ export class Preconnect {
     return false;
   }
 
-  /** @private */
-  isPreloadSupported_() {
+  /**
+   * Detect related features if feature detection is supported by the
+   * browser. Even if this fails, the browser may support the feature.
+   * @return {{preload: boolean, preconnect: boolean}}
+   * @private
+   */
+  detectFeatures_() {
     const tokenList = this.document_.createElement('link').relList;
     if (!tokenList || !tokenList.supports) {
-      this.preloadSupported_ = false;
-      return this.preloadSupported_;
+      return {};
     }
-    this.preloadSupported_ = tokenList.supports('preload');
-    return this.preloadSupported_;
+    return {
+      preconnect: tokenList.supports('preconnect'),
+      preload: tokenList.supports('preload'),
+    };
   }
 
   /**
@@ -186,11 +207,10 @@ export class Preconnect {
    * response, but please make it small :)
    */
   preconnectPolyfill_(origin) {
-    // Unfortunately there is no way to feature detect whether preconnect is
-    // supported, so we do this only in Safari, which is the most important
-    // browser without support for it. This needs to be removed should it
-    // ever add support.
-    if (!this.platform_.isSafari()) {
+    // Unfortunately there is no reliable way to feature detect whether
+    // preconnect is supported, so we do this only in Safari, which is
+    // the most important browser without support for it.
+    if (this.features_.preconnect || !this.platform_.isSafari()) {
       return;
     }
 

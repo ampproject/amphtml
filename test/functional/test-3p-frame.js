@@ -19,12 +19,11 @@ import {
   getIframe,
   getBootstrapBaseUrl,
   getSubDomain,
-  prefetchBootstrap,
+  preloadBootstrap,
   resetCountForTesting,
 } from '../../src/3p-frame';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {preconnectFor} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
 import {setModeForTesting} from '../../src/mode';
 import {validateData} from '../../3p/3p';
@@ -220,20 +219,16 @@ describe('3p-frame', () => {
 
   it('should prefetch bootstrap frame and JS', () => {
     setModeForTesting({localDev: true});
-    const preconnect = preconnectFor(window);
-    const origPreloadSupportValue = preconnect.preloadSupported_;
-    preconnect.preloadSupported_ = false;
-    prefetchBootstrap(window);
+    preloadBootstrap(window);
     // Wait for visible promise
     return Promise.resolve().then(() => {
       const fetches = document.querySelectorAll(
-          'link[rel=prefetch]');
+          'link[rel=prefetch],link[rel=preload]');
       expect(fetches).to.have.length(2);
       expect(fetches[0].href).to.equal(
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
       expect(fetches[1].href).to.equal(
           'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-      preconnect.preloadSupported_ = origPreloadSupportValue;
     });
   });
 
