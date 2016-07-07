@@ -382,6 +382,14 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
+    if (height < 100) {
+      user.warn(TAG_,
+          'ignoring embed-size request because the resize height is ' +
+          'less than 100px',
+          this.element);
+      return;
+    }
+
     let newHeight, newWidth;
     if (height !== undefined) {
       newHeight = Math.max(
