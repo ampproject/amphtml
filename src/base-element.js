@@ -705,8 +705,9 @@ export class BaseElement {
   }
 
   /**
-   * Collapses the element, and notifies its owner (if there is one) that the
-   * element is no longer present.
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
    */
   collapse() {
     this.resources_.collapseElement(this.element);
@@ -714,6 +715,7 @@ export class BaseElement {
 
   /**
    * Called every time an owned AmpElement collapses itself.
+   * See {@link collapse}.
    * @param {!AmpElement} unusedElement
    */
   collapsedCallback(unusedElement) {
