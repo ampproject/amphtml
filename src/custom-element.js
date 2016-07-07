@@ -687,7 +687,7 @@ function createBaseAmpElementProto(win) {
     }
     if (!this.everAttached) {
       if (!isStub(this.implementation_)) {
-        this.tryUpgrade();
+        this.tryUpgrade(this.implementation_);
       }
       if (!this.isUpgraded()) {
         this.classList.add('amp-unresolved');
@@ -702,8 +702,8 @@ function createBaseAmpElementProto(win) {
         this.implementation_.layout_ = this.layout_;
         this.implementation_.firstAttachedCallback();
         if (!this.isUpgraded()) {
-          // amp:attached is dispatched from the ElementStub class when it replayed
-          // the firstAttachedCallback call.
+          // amp:attached is dispatched from the ElementStub class when it
+          // replayed the firstAttachedCallback call.
           this.dispatchCustomEvent('amp:stubbed');
         } else {
           this.dispatchCustomEvent('amp:attached');
@@ -712,6 +712,8 @@ function createBaseAmpElementProto(win) {
         reportError(e, this);
       }
 
+      // It's important to have this flag set in the end to avoid
+      // `resources.add` called twice if upgrade happens immediately.
       this.everAttached = true;
     }
     this.resources_.add(this);

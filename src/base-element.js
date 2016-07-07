@@ -215,7 +215,7 @@ export class BaseElement {
 
   /**
    * This method is called when the element is added to DOM for the first time
-   * and before `buildCallback` to give an element a chance to redirect its
+   * and before `buildCallback` to give the element a chance to redirect its
    * implementation to another `BaseElement` implementation. The returned
    * value can be either `null` or `undefined` to indicate that no redirection
    * will take place; `BaseElement` instance to upgrade immediately; or a
