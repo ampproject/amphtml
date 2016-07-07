@@ -37,7 +37,7 @@ export function pulsepoint(global, data) {
  * @param {!Object} data
  */
 function tag(global, data) {
-  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD&cwpid=' + data.pid + '&cwtagid=' + data.tagid + '&cwadformat=' + data.width + 'X' + data.height); 
+  writeScript(global, 'https://tag.contextweb.com/getjs.aspx?action=VIEWAD&cwpid=' + encodeURIComponent(data.pid) + '&cwtagid=' + encodeURIComponent(data.tagid) + '&cwadformat=' + encodeURIComponent(data.width + 'X' + data.height)); 
 }
 
 /**
@@ -67,3 +67,4 @@ function headerBidding(global, data) {
     new PulsePointHeaderTag(hbConfig).init();
   });
 }
+
