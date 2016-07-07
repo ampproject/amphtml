@@ -13,3 +13,131 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {createIframePromise} from '../../../../testing/iframe';
+import {platform} from '../../../../src/platform';
+import {preconnectFor} from '../../../../src/preconnect';
+import * as sinon from 'sinon';
+import {toggleExperiment} from '../../../../src/experiments';
+require('../amp-app-banner');
+
+describe('amp-app-banner', () => {
+
+  let sandbox;
+  let preconnect;
+  let mockXhr;
+
+  function getAppBanner(config = {}) {
+    return createIframePromise(true).then(iframe => {
+      toggleExperiment(iframe.win, 'amp-app-banner');
+
+      if (config.meta) {
+        const meta = iframe.doc.createElement('meta');
+        meta.setAttribute('name', 'apple-itunes-app');
+        meta.setAttribute('content', config.meta.content);
+        iframe.doc.head.appendChild(meta);
+      }
+
+      if (config.manifest) {
+        const meta = iframe.doc.createElement('link');
+        meta.setAttribute('rel', 'amp-manifest');
+        meta.setAttribute('href', config.manifest.href);
+        sandbox.mock(mockXhr(iframe.win)).expects('fetchJson')
+            .returns(config.manifest.content);
+      }
+
+      const banner = iframe.doc.createElement('amp-app-banner');
+      if (!config.noInstallLink) {
+        const installLink = iframe.doc.createElement('a');
+        installLink.setAttribute('install-link', '');
+        banner.appendChild(installLink);
+      }
+      if (!config.noOpenLink) {
+        const openLink = iframe.doc.createElement('a');
+        openLink.setAttribute('open-link', '');
+        banner.appendChild(openLink);
+      }
+
+      return iframe.addElement(banner);
+    });
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should preconnect to correct platform store', () => {
+    return getAppBanner().then(banner => {
+      const impl = banner.implementation_;
+      sandbox.stub(platform, 'isIos').returns(true);
+      sandbox.stub(impl.preconnect, 'url');
+      impl.preconnectCallback(true);
+      expect(impl.preconnect.url.called).to.be.true;
+      expect(impl.preconnect.url.callCount).to.equal(1);
+      expect(impl.preconnect.url.calledWith('https://itunes.apple.com')).to.be.true;
+
+      sandbox.restore()
+      sandbox.stub(platform, 'isAndroid').returns(true);
+      sandbox.stub(impl.preconnect, 'url');
+      impl.preconnectCallback(true);
+      expect(impl.preconnect.url.called).to.be.true;
+      expect(impl.preconnect.url.callCount).to.equal(1);
+      expect(impl.preconnect.url.calledWith('https://play.google.com')).to.be.true;
+    });
+  });
+
+  it('should hide if not on ios or android', () => {
+    sandbox.stub(platform, 'isIos').returns(false);
+    sandbox.stub(platform, 'isAndroid').returns(false);
+    return getAppBanner().then(banner => {
+      expect(banner.style.display).to.equal('none');
+    });
+  });
+
+  it('should throw if install link is missing', () => {
+    return getAppBanner({noInstallLink: true})
+        .should.eventually.be.rejectedWith(/<a install-link> is required/);
+  });
+
+  it('should throw if open link is missing', () => {
+    return getAppBanner({noOpenLink: true})
+        .should.eventually.be.rejectedWith(/<a open-link> is required/);
+  });
+
+  describe('hiding on iOS', () => {
+    beforeEach(() => {
+      sandbox.stub(platform, 'isIos').returns(true);
+    });
+
+    it('should hide if no meta', () => {
+      return getAppBanner().then(banner => {
+        expect(banner.style.display).to.equal('none');
+      });
+    });
+    it('should hide if no meta', () => {
+      sandbox.stub(viewer, 'isEmbedded').returns(false);
+      return getAppBanner().then(banner => {
+        expect(banner.style.display).to.equal('none');
+      });
+    });
+
+  });
+
+
+  it('should parse meta content and set hrefs on ios', () => {
+
+  });
+
+  it('should hide if Android and no manifest or not embedded Chrome', () => {
+
+  });
+
+  it('should fetch & parse manifest and set hrefs on android', () => {
+
+  });
+
+});
