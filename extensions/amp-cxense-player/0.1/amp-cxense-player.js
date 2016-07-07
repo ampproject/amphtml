@@ -39,7 +39,6 @@ class AmpCxense extends AMP.BaseElement {
     /** @override */
     preconnectCallback(onLayout) {
       this.preconnect.url(cxDefaults.apiHost, onLayout);
-      this.preconnect.prefetch(this.getIframeSrc_(), 'document');
     }
 
     /** @override */
@@ -173,7 +172,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     postMessage_(data) {
       data = extend({
-        location: location,
+        location,
       }, data || {});
 
       return this.iframe_.contentWindow./*OK*/postMessage(
