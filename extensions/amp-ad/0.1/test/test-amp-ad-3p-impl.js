@@ -285,15 +285,16 @@ function tests(name) {
         }, 'https://schema.org', ad => {
           return ad;
         }).then(ad => {
+          console.log(ad);
           sandbox.stub(
               ad.implementation_, 'deferMutate', function(callback) {
                 callback();
               });
+          //TODO(zhouyx): need to fix the test
           sandbox.stub(ad.implementation_,
-              'attemptChangeHeight',
-              function(height, callback) {
-                ad.style.height = height;
-                callback();
+              'collapseParent',
+              function() {
+                ad.style.display = 'none';
               });
           ad.style.position = 'absolute';
           ad.style.top = '300px';

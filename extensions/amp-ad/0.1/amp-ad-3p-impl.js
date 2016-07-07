@@ -193,11 +193,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     setupA2AListener(this.getWin());
 
     this.parent_ = closestByTag(this.element, 'amp-ad');
-    if(!this.parent_) {
+    if (!this.parent_) {
       this.parent_ = closestByTag(this.element, 'amp-embed');
     }
-
-    //this.parentInstance_ = new AmpAd(this.parent_);
   }
 
   /**
@@ -283,7 +281,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, /*this.parentInstance_, this.parent_,*/ this.boundNoContentHandler_);
+          this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
@@ -309,9 +307,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
-      this.attemptChangeHeight(0, () => {
-        this.element.style.display = 'none';
-      })
+      this.collapseParent();
     }
 
     this.deferMutate(() => {
@@ -360,5 +356,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.overflowCallback(
         overflown, requestedHeight, requestedWidth);
     }
+  }
+
+  /** Function to collapse parent <amp-ad> element*/
+  collapseParent() {
+    this.resources_.attemptChangeSize(this.parent_, 0, 0, () => {
+      this.parent_.style.display = 'none';
+      this.style.display = 'none';
+    });
   }
 }
