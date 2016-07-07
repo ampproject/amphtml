@@ -292,12 +292,12 @@ export class AmpSlideScroll extends BaseCarousel {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
       // Make the container non scrollable to stop scroll events.
-      this.slidesContainer_.classList.add('no-scroll');
+      this.slidesContainer_.classList.add('-amp-no-scroll');
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlide_(newIndex);
       this.vsync_.mutate(() => {
         // Make the container scrollable again to enable user swiping.
-        this.slidesContainer_.classList.remove('no-scroll');
+        this.slidesContainer_.classList.remove('-amp-no-scroll');
         this.snappingInProgress_ = false;
       });
     });
