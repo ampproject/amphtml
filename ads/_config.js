@@ -188,8 +188,7 @@ export const adPreconnect = {
     'https://prg.kargo.com',
   ],
   pulsepoint: [
-    'https://tag.contextweb.com',
-    'https://ads.contextweb.com'
+    'https://tag.contextweb.com'
   ]
 };
 
