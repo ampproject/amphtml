@@ -218,9 +218,8 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 export function validateDataExists(data, mandatoryFields) {
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
-    //TODO(zhouyx): skip for testing now, need to delete later
-    //user.assert(data[field],
-      //  'Missing attribute for %s: %s.', data.type, field);
+    user.assert(data[field],
+        'Missing attribute for %s: %s.', data.type, field);
   }
 }
 

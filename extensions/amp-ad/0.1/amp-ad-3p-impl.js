@@ -25,7 +25,6 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
-import {AmpAd} from './amp-ad';
 import {Layout} from '../../../src/layout';
 
 /** @const These tags are allowed to have fixed positioning */
@@ -304,17 +303,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   noContentHandler_() {
-    console.log('no noContentHandler_');
     // If iframe is null nothing to do.
     if (!this.iframe_) {
       return;
     }
-    let collapseState = false;
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
       this.attemptChangeHeight(0, () => {
         this.element.style.display = 'none';
-        collapseState = true;
       })
     }
 
@@ -365,10 +361,4 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         overflown, requestedHeight, requestedWidth);
     }
   }
-
-    /** @override */
-  // attemptChangeHeight(newHeight, opt_callback) {
-  //   console.log(this.resources_.getResourceForElement(this.parent_));
-  //   this.resources_.getResourceForElement(this.parent_).implementation_.layoutCallback();
-  // }
 }
