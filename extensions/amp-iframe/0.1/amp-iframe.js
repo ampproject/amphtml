@@ -21,7 +21,7 @@ import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -272,7 +272,7 @@ export class AmpIframe extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timer.promise(trackingIframeTimeout).then(() => {
+        timerFor(this.getWin()).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -311,7 +311,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timer.delay(() => {
+        timerFor(this.getWin()).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });
@@ -351,6 +351,14 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
     }
+  }
+
+  /** @override  */
+  getPriority() {
+    if (isAdLike(this.element)) {
+      return 2; // See AmpAd3PImpl.
+    }
+    return super.getPriority();
   }
 
   /**
@@ -434,6 +442,36 @@ function makeIOsScrollable(element) {
     return wrapper;
   }
   return element;
+}
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const height = parseInt(element.getAttribute('height'), 10);
+  const width = parseInt(element.getAttribute('width'), 10);
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

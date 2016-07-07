@@ -15,12 +15,25 @@
  */
 
 import {BaseElement} from './base-element';
-import {BaseTemplate, registerExtendedTemplate} from './template';
+import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
+import {installActionServiceForDoc} from './service/action-impl';
+import {installGlobalSubmitListener} from './document-submit';
+import {installHistoryService} from './service/history-impl';
+import {installImg} from '../builtins/amp-img';
+import {installPixel} from '../builtins/amp-pixel';
+import {installResourcesService} from './service/resources-impl';
+import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles} from './styles';
-import {installCoreServices} from './amp-core-service';
+import {installTemplatesService} from './service/template-impl';
+import {installUrlReplacementsService} from './service/url-replacements-impl';
+import {installVideo} from '../builtins/amp-video';
+import {installViewerService} from './service/viewer-impl';
+import {installViewportService} from './service/viewport-impl';
+import {installVsyncService} from './service/vsync-impl';
+import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -35,6 +48,48 @@ const TAG = 'runtime';
 
 /** @type {!Array} */
 const elementsForTesting = [];
+
+
+/**
+ * Install runtime-level services.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function installRuntimeServices(global) {
+  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installViewerService(global);
+  installViewportService(global);
+  installHistoryService(global);
+  installVsyncService(global);
+  installResourcesService(global);
+  installUrlReplacementsService(global);
+  installXhrService(global);
+  installTemplatesService(global);
+  if (isExperimentOn(global, 'form-submit')) {
+    installGlobalSubmitListener(global);
+  }
+}
+
+
+/**
+ * Install ampdoc-level services.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installAmpdocServices(ampdoc) {
+  // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installActionServiceForDoc(ampdoc);
+  installStandardActionsForDoc(ampdoc);
+}
+
+
+/**
+ * Install builtins.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function installBuiltins(global) {
+  installImg(global);
+  installPixel(global);
+  installVideo(global);
+}
 
 
 /**
@@ -99,7 +154,7 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  installCoreServices(global);
+  installRuntimeServices(global);
   const viewer = viewerFor(global);
 
   /** @const */

@@ -64,9 +64,14 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('chargeads');
     expect(registrations).to.include.key('nend');
 <<<<<<< HEAD
+<<<<<<< HEAD
     expect(registrations).to.include.key('adcrops');
 =======
     expect(registrations).to.include.key('adgeneration');
+>>>>>>> ampproject/master
+=======
+    expect(registrations).to.include.key('adgeneration');
+    expect(registrations).to.include.key('genieessp');
 >>>>>>> ampproject/master
   });
 

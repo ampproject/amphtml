@@ -32,6 +32,8 @@ import {viewerFor} from './viewer';
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 let count = {};
 
+/** @type {string} */
+let overrideBootstrapBaseUrl;
 
 /**
  * Produces the attributes for the ad template.
@@ -76,6 +78,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    startTime,
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
         timer.now(),
@@ -162,17 +165,17 @@ export function addDataAndJsonAttributes_(element, attributes) {
 }
 
 /**
- * Prefetches URLs related to the bootstrap iframe.
+ * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} parentWindow
  * @return {string}
  */
-export function prefetchBootstrap(window) {
+export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
-  preconnect.prefetch(url, 'document');
+  preconnect.preload(url, 'document');
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.prefetch(
+  preconnect.preload(
       'https://3p.ampproject.net/$internalRuntimeVersion$/f.js', 'script');
 }
 
@@ -190,14 +193,21 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   });
 }
 
+export function setDefaultBootstrapBaseUrlForTesting(url) {
+  overrideBootstrapBaseUrl = url;
+}
+
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  if (getMode().localDev || parentWindow.AMP_TEST) {
-    const prefix = parentWindow.AMP_TEST ? '/base' : '';
+  if (getMode().localDev || getMode().test) {
+    if (overrideBootstrapBaseUrl) {
+      return overrideBootstrapBaseUrl;
+    }
+    const prefix = getMode().test ? '/base' : '';
     return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
         prefix + '/dist.3p/current' +

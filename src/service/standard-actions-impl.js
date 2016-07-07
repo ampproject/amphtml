@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
-import {installActionService} from './action-impl';
+import {getServiceForDoc} from '../service';
+import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
 
 
@@ -26,14 +26,23 @@ import {installResourcesService} from './resources-impl';
  */
 export class StandardActions {
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
+<<<<<<< HEAD
   constructor(win) {
     /** @const @private {!./action-impl.ActionService} */
     this.actions_ = installActionService(win);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesService(win);
+=======
+  constructor(ampdoc) {
+    /** @const @private {!./action-impl.ActionService} */
+    this.actions_ = installActionServiceForDoc(ampdoc);
+
+    /** @const @private {!./resources-impl.Resources} */
+    this.resources_ = installResourcesService(ampdoc.getWin());
+>>>>>>> ampproject/master
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }
@@ -52,6 +61,7 @@ export class StandardActions {
 
 
 /**
+<<<<<<< HEAD
  * @param {!Window} win
  * @return {!StandardActions}
  */
@@ -59,5 +69,14 @@ export function installStandardActions(win) {
   return /** @type {!StandardActions} */ (
       getService(win, 'standard-actions', () => {
         return new StandardActions(win);
+=======
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!StandardActions}
+ */
+export function installStandardActionsForDoc(ampdoc) {
+  return /** @type {!StandardActions} */ (
+      getServiceForDoc(ampdoc, 'standard-actions', ampdoc => {
+        return new StandardActions(ampdoc);
+>>>>>>> ampproject/master
       }));
 };

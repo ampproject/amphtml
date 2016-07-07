@@ -18,6 +18,10 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+<<<<<<< HEAD
+=======
+import {removeElement} from '../../../src/dom';
+>>>>>>> ampproject/master
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
@@ -38,7 +42,7 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
-
+    toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
     user.assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
@@ -46,6 +50,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @const @private {!Element} */
     this.ad_ = children[0];
+    this.setAsOwner(this.ad_);
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
@@ -53,6 +58,12 @@ class AmpStickyAd extends AMP.BaseElement {
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
+<<<<<<< HEAD
+=======
+    /** @const @private {boolean} */
+    this.visible_ = false;
+
+>>>>>>> ampproject/master
     /**
      * On viewport scroll, check requirements for amp-stick-ad to display.
      * @const @private {!UnlistenDef}
@@ -68,7 +79,17 @@ class AmpStickyAd extends AMP.BaseElement {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
+    // Reschedule layout for ad if layout sticky-ad again.
+    if (this.visible_) {
+      this.updateInViewport(this.ad_, true);
+      this.scheduleLayout(this.ad_);
+    }
     return Promise.resolve();
+  }
+
+  /** @override */
+  unlayoutCallback() {
+    return true;
   }
 
   /** @override */
@@ -106,14 +127,20 @@ class AmpStickyAd extends AMP.BaseElement {
     if (scrollTop > viewportHeight) {
       this.removeOnScrollListener_();
       this.deferMutate(() => {
-        toggle(this.element, true);
+        this.visible_ = true;
+        this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
+        this.updateInViewport(this.ad_, true);
         this.scheduleLayout(this.ad_);
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
+<<<<<<< HEAD
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
+=======
+        this.addCloseButton_();
+>>>>>>> ampproject/master
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
@@ -124,6 +151,31 @@ class AmpStickyAd extends AMP.BaseElement {
         }, 1000);
       });
     }
+  }
+
+  /**
+   * The function that add a close button to sticky ad
+   * @private
+   */
+  addCloseButton_() {
+    const closeButton = this.getWin().document.createElement('button');
+    closeButton.classList.add('amp-sticky-ad-close-button');
+    closeButton.setAttribute('aria-label',
+        this.element.getAttribute('data-close-button-aria-label') || 'Close');
+    const boundOnCloseButtonClick = this.onCloseButtonClick_.bind(this);
+    closeButton.addEventListener('click', boundOnCloseButtonClick);
+    this.element.appendChild(closeButton);
+  }
+
+  /**
+   * The listener function that listen to click event and dismiss sticky ad
+   * @private
+   */
+  onCloseButtonClick_() {
+    this.vsync_.mutate(() => {
+      removeElement(this.element);
+      this.viewport_.updatePaddingBottom(0);
+    });
   }
 }
 

@@ -248,4 +248,73 @@ describe('amp-sticky-ad', () => {
       expect(error).not.to.be.null;
     });
   });
+<<<<<<< HEAD
+=======
+
+  it('should create a close button', () => {
+    return getAmpStickyAd().then(obj => {
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+      const addCloseButtonSpy = sandbox.spy(impl, 'addCloseButton_');
+
+      impl.viewport_.getScrollTop = function() {
+        return 100;
+      };
+      impl.viewport_.getSize = function() {
+        return {height: 50};
+      };
+      impl.viewport_.getScrollHeight = function() {
+        return 300;
+      };
+      impl.deferMutate = function(callback) {
+        callback();
+      };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+
+      impl.displayAfterScroll_();
+      expect(addCloseButtonSpy).to.be.called;
+      expect(impl.element.children[1]).to.be.not.null;
+      expect(impl.element.children[1].tagName).to.equal('BUTTON');
+    });
+  });
+
+  it('close button should close ad and reset body borderBottom', () => {
+    return getAmpStickyAd().then(obj => {
+      const iframe = obj.iframe;
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+
+      impl.viewport_.getScrollTop = function() {
+        return 100;
+      };
+      impl.viewport_.getSize = function() {
+        return {height: 50};
+      };
+      impl.viewport_.getScrollHeight = function() {
+        return 300;
+      };
+      impl.deferMutate = function(callback) {
+        callback();
+      };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.element.offsetHeight = function() {
+        return 20;
+      };
+
+      impl.displayAfterScroll_();
+      let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+          .getPropertyValue('border-bottom-width');
+      expect(borderWidth).to.equal('50px');
+      expect(impl.element.children[1]).to.be.not.null;
+      impl.element.children[1].dispatchEvent(new Event('click'));
+      borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+          .getPropertyValue('border-bottom-width');
+      expect(borderWidth).to.equal('0px');
+    });
+  });
+>>>>>>> ampproject/master
 });

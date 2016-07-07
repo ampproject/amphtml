@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from './dom';
 import {getService} from './service';
+<<<<<<< HEAD
 import {user} from './log';
 
 /**
@@ -341,14 +341,15 @@ export class Templates {
 export function registerExtendedTemplate(win, type, templateClass) {
   return templatesFor(win).registerTemplate_(type, templateClass);
 }
+=======
+>>>>>>> ampproject/master
 
 
 /**
  * @param {!Window} window
- * @return {!Templates}
+ * @return {!./service/template-impl.Templates}
  */
 export function templatesFor(window) {
-  return getService(window, 'templates', () => {
-    return new Templates(window);
-  });
+  return /** @type {!./service/template-impl.Templates} */ (
+      getService(window, 'templates'));
 };

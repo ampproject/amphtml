@@ -61,10 +61,19 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     if (local) {
       return false;
     }
+    // This is a special case, of compiler generated super globals.
+    // Because we otherwise use ES6 modules throughout, we don't
+    // have any other similar variables.
+    if (name.startsWith("JSCompiler_")) {
+      return false;
+    }
+<<<<<<< HEAD
+=======
     // ES6 generated module names are not exported.
     if (name.contains("$")) {
       return false;
     }
+>>>>>>> ampproject/master
     // Starting with _ explicitly exports a name.
     if (name.startsWith("_")) {
       return true;

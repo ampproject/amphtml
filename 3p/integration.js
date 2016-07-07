@@ -40,6 +40,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {nativo} from '../ads/nativo';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
@@ -76,9 +77,14 @@ import {yahoojp} from '../ads/yahoojp';
 import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {adcrops} from '../ads/adcrops';
 =======
 import {adgeneration} from '../ads/adgeneration';
+>>>>>>> ampproject/master
+=======
+import {adgeneration} from '../ads/adgeneration';
+import {genieessp} from '../ads/genieessp';
 >>>>>>> ampproject/master
 
 /**
@@ -112,6 +118,7 @@ register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
+register('nativo', nativo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
@@ -142,9 +149,14 @@ register('yahoojp', yahoojp);
 register('chargeads', chargeads);
 register('nend', nend);
 <<<<<<< HEAD
+<<<<<<< HEAD
 register('adcrops', adcrops);
 =======
 register('adgeneration', adgeneration);
+>>>>>>> ampproject/master
+=======
+register('adgeneration', adgeneration);
+register('genieessp', genieessp);
 >>>>>>> ampproject/master
 
 // For backward compat, we always allow these types without the iframe
@@ -276,8 +288,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
   } catch (e) {
-    lightweightErrorReport(e);
-    throw e;
+    if (!window.context.mode.test) {
+      lightweightErrorReport(e);
+      throw e;
+    }
   }
 };
 

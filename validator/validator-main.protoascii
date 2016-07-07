@@ -20,12 +20,16 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 135
+min_validator_revision_required: 143
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
+<<<<<<< HEAD
 spec_file_revision: 231
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
 
 # Validator extensions.
 # =====================
@@ -716,6 +720,7 @@ attr_lists: {
       allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
+      allowed_protocol: "threema"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
     }
@@ -800,6 +805,7 @@ tags: {
       allowed_protocol: "fb-messenger"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
+      allowed_protocol: "threema"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
       allow_relative: true
@@ -1902,7 +1908,94 @@ tags: {
 }
 
 # 4.10 Forms
-# Not allowed, except for button.
+# Form elements are allowed only when amp-form extension script is included
+# with the exception of the button element which is always allowed.
+# 4.10.3 The form element
+tags {
+  tag_name: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accept-charset" }
+  attrs: {
+    name: "action"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+      disallowed_domain: "cdn.ampproject.org"
+    }
+  }
+  attrs: { name: "action-xhr" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "enctype" }
+  attrs: { name: "method" }
+  attrs: { name: "name" }
+  attrs: { name: "novalidate" }
+  attrs: {
+    name: "target"
+    mandatory: true
+    value_regex_casei: "(_blank|_top)"
+  }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.4 The label element
+tags: {
+  tag_name: "LABEL"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "for" }
+  attrs: { name: "form" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.5 The input element
+tags: {
+  tag_name: "INPUT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "formmethod" }
+  attrs: { name: "formnovalidate" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.6 The button element
 tags: {
   tag_name: "BUTTON"
   attrs: {
@@ -1920,6 +2013,69 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+}
+# 4.10.7 The select element
+tags: {
+  tag_name: "SELECT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autofocus" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+  attrs: { name: "required" }
+  attrs: { name: "size" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.10 The option element
+tags: {
+  tag_name: "OPTION"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "label" }
+  attrs: { name: "selected" }
+  attrs: { name: "value" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.11 The textarea element
+tags: {
+  tag_name: "TEXTAREA"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "cols" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "minlength" }
+  attrs: { name: "name" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "rows" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "selectionend" }
+  attrs: { name: "selectionstart" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "wrap"}
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.16 The fieldset element
+tags: {
+  tag_name: "FIELDSET"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "name" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
 }
 
 # 4.11 Scripting
@@ -2066,6 +2222,7 @@ attr_lists: {
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
 }
+<<<<<<< HEAD
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {  # <amp-ad>
@@ -2118,6 +2275,8 @@ tags: {  # <amp-embed>
     supported_layouts: RESPONSIVE
   }
 }
+=======
+>>>>>>> ampproject/master
 tags: {  # <amp-img>
   tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
@@ -2393,6 +2552,10 @@ error_formats {
   format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
 }
 error_formats {
+  code: DISALLOWED_DOMAIN
+  format: "The domain '%3' for attribute '%1' in tag '%2' is disallowed."
+}
+error_formats {
   code: DISALLOWED_RELATIVE_URL
   format: "The relative URL '%3' for attribute '%1' in tag '%2' is disallowed."
 }
@@ -2547,6 +2710,10 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_INVALID_URL_PROTOCOL
   format: "CSS syntax error in tag '%1' - invalid url protocol '%2:'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_DOMAIN
+  format: "CSS syntax error in tag '%1' - invalid domain '%2'."
 }
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL

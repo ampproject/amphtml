@@ -95,7 +95,11 @@ function getMode_() {
     filter: developmentQuery['filter'],
     /* global process: false */
     minified: process.env.NODE_ENV == 'production',
+<<<<<<< HEAD
     test: !!(window.AMP_TEST),
+=======
+    test: !!(window.AMP_TEST || window.__karma__),
+>>>>>>> ampproject/master
     log: developmentQuery['log'],
     version: fullVersion,
   };

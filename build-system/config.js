@@ -45,7 +45,7 @@ var commonTestPaths = [
     nocache: false,
     watched: true,
   },
-]
+];
 
 var testPaths = commonTestPaths.concat([
   'test/**/*.js',
@@ -57,38 +57,27 @@ var integrationTestPaths = commonTestPaths.concat([
   'extensions/**/test/integration/**/*.js',
 ]);
 
+var karmaDefault = {
+  configFile: karmaConf,
+  singleRun: true,
+  client: {
+    mocha: {
+      // Longer timeout on Travis; fail quickly at local.
+      timeout: process.env.TRAVIS ? 10000 : 2000
+    },
+    captureConsole: false,
+  },
+  browserDisconnectTimeout: 10000,
+  browserDisconnectTolerance: 2,
+  browserNoActivityTimeout: 4 * 60 * 1000,
+  captureTimeout: 4 * 60 * 1000,
+};
+
 var karma = {
-  default: {
-    configFile: karmaConf,
-    singleRun: true,
-    client: {
-      captureConsole: false,
-    }
-  },
-  firefox: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  safari: {
-    configFile: karmaConf,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
-  },
-  saucelabs: {
-    configFile: karmaConf,
+  default: karmaDefault,
+  firefox: extend(karmaDefault, {browsers: ['Firefox']}),
+  safari: extend(karmaDefault, {browsers: ['Safari']}),
+  saucelabs: extend(karmaDefault, {
     reporters: ['dots', 'saucelabs'],
     browsers: [
       'SL_Chrome_android',
@@ -102,6 +91,7 @@ var karma = {
       //'SL_iOS_9_1',
       //'SL_IE_11',
     ],
+<<<<<<< HEAD
     singleRun: true,
     client: {
       mocha: {
@@ -114,6 +104,9 @@ var karma = {
     browserNoActivityTimeout: 4 * 60 * 1000,
     captureTimeout: 4 * 60 * 1000,
   }
+=======
+  })
+>>>>>>> ampproject/master
 };
 
 /** @const  */
@@ -124,6 +117,7 @@ module.exports = {
   karma: karma,
   lintGlobs: [
     '**/*.js',
+    '!**/*.extern.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
     '!{testing,examples,examples.build}/**/*.*',
@@ -147,6 +141,14 @@ module.exports = {
     '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
+    '!validator/chromeextension/*.*',
+    // Files in this testdata dir are machine-generated and are not part
+    // of the AMP runtime, so shouldn't be checked.
+    '!extensions/amp-a4a/*/test/testdata/*.js',
   ],
   changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
+
+function extend(orig, add) {
+  return Object.assign({}, orig, add);
+}

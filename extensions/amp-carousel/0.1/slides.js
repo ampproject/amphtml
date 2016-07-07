@@ -101,7 +101,8 @@ export class AmpSlides extends BaseCarousel {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
+        Animation.animate(this.element,
+            this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);
@@ -400,7 +401,7 @@ export class AmpSlides extends BaseCarousel {
     let promise;
     if (newPos != s.pos) {
       const posFunc = tr.numeric(s.pos, newPos);
-      promise = Animation.animate(time => {
+      promise = Animation.animate(this.element, time => {
         const pos = posFunc(time);
         s.nextTr(pos > 0 ? pos : 0);
         s.prevTr(pos < 0 ? -pos : 0);

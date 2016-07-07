@@ -15,15 +15,17 @@
  */
 
 /**
- * @fileoverview Factory for ./service/cid-impl.js
+ * @fileoverview Factory for amp-share-tracking
  */
 
-import {getService} from './service';
+import {getElementService} from './element-service';
+
 
 /**
  * @param {!Window} window
- * @return {!Framerate}
+ * @return {!Promise<!ShareTrackingService>}
  */
-export function framerateFor(window) {
-  return getService(window, 'framerate');
-};
+export function shareTrackingServiceFor(window) {
+  return getElementService(window, 'shareTrackingService',
+      'amp-share-tracking');
+}

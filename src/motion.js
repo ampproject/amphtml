@@ -70,6 +70,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * zerp. For each iteration, the velocity is depreciated and the coordinates
  * are advanced from start X/Y to the destination according to velocity
  * vectors. For each such iteration the callback is called with the new x and y.
+ * @param {!Node} contextNode
  * @param {number} startX Start X coordinate.
  * @param {number} startY Start Y coordinate.
  * @param {number} veloX Starting X velocity.
@@ -79,9 +80,10 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @param {!Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
-export function continueMotion(startX, startY, veloX, veloY, callback,
-    opt_vsync) {
-  return new Motion(startX, startY, veloX, veloY, callback, opt_vsync).start_();
+export function continueMotion(contextNode, startX, startY, veloX, veloY,
+    callback, opt_vsync) {
+  return new Motion(contextNode, startX, startY, veloX, veloY,
+      callback, opt_vsync).start_();
 }
 
 
@@ -95,6 +97,7 @@ export function continueMotion(startX, startY, veloX, veloY, callback,
  */
 class Motion {
   /**
+   * @param {!Node} contextNode Context node.
    * @param {number} startX Start X coordinate.
    * @param {number} startY Start Y coordinate.
    * @param {number} veloX Starting X velocity.
@@ -103,9 +106,12 @@ class Motion {
    *   step of the deceleration motion.
    * @param {!Vsync=} opt_vsync
    */
-  constructor(startX, startY, veloX, veloY, callback, opt_vsync) {
+  constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const */
     this.vsync_ = opt_vsync || vsyncFor(window);
+
+    /** @private @const {!Node} */
+    this.contextNode_ = contextNode;
 
     /** @private @const */
     this.callback_ = callback;
@@ -203,7 +209,7 @@ class Motion {
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
     const boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runAnimMutateSeries(boundStep, 5000)
+    return this.vsync_.runAnimMutateSeries(this.contextNode_, boundStep, 5000)
         .then(boundComplete, boundComplete);
   }
 

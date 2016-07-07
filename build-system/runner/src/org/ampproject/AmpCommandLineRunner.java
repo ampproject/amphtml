@@ -36,6 +36,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   private boolean typecheck_only = false;
 
+<<<<<<< HEAD
+=======
+  private boolean pseudo_names = false;
+
+  private boolean is_production_env = true;
+
+>>>>>>> ampproject/master
   /**
    * List of string suffixes to eliminate from the AST.
    */
@@ -52,7 +59,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
-    AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
+    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);
@@ -70,6 +77,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     options.setRenamingPolicy(VariableRenamingPolicy.ALL,
         PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
+<<<<<<< HEAD
+=======
+    options.setGeneratePseudoNames(pseudo_names);
+>>>>>>> ampproject/master
     return options;
   }
 
@@ -88,18 +99,30 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     return options;
   }
 
+<<<<<<< HEAD
   protected void setTypeCheckOnly(boolean value) {
     typecheck_only = value;
   }
 
+=======
+>>>>>>> ampproject/master
   public static void main(String[] args) {
     AmpCommandLineRunner runner = new AmpCommandLineRunner(args);
 
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
+<<<<<<< HEAD
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.setTypeCheckOnly(true);
         break;
+=======
+      if (arg.contains("--define=TYPECHECK_ONLY=true")) {
+        runner.typecheck_only = true;
+      } else if (arg.contains("--define=FORTESTING=true")) {
+        runner.is_production_env = false;
+      } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
+        runner.pseudo_names = true;
+>>>>>>> ampproject/master
       }
     }
 

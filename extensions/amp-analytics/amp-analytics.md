@@ -176,6 +176,12 @@ Type attribute value: `mediametrie`
 
 Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
 
+### mParticle
+
+Type attribute value: `mparticle`
+
+Adds support for mParticle. More details for adding mParticle support can be found at [docs.mparticle.com](http://docs.mparticle.com/?javascript#amp).
+
 ### OEWA
 
 Type attribute value: `oewa`
@@ -213,6 +219,13 @@ Adds support for Piano.  Configuration details can be found at [vx.piano.io](htt
 Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
+## Segment
+
+Type attribute value: `segment`
+
+Adds support for segment page views and events.
+To see the full list of fields that you can send, see [Segment Spec](https://segment.com/docs/spec/).
 
 ### SOASTA mPulse
 

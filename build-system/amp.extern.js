@@ -22,6 +22,11 @@ process.end.NODE_ENV;
 // Exposed to ads.
 window.context = {};
 window.context.amp3pSentinel;
+<<<<<<< HEAD
+=======
+window.context.clientId;
+window.context.initialIntersection;
+>>>>>>> ampproject/master
 
 // Exposed to custom ad iframes.
 /* @type {!Function} */
@@ -29,9 +34,14 @@ window.draw3p;
 
 // AMP's globals
 window.AMP_TEST;
+window.AMP_TEST_IFRAME;
 window.AMP_TAG;
 window.AMP_CONFIG;
 window.AMP = {};
+
+// Should have been defined in the closure compiler's extern file for
+// IntersectionObserverEntry, but appears to have been omitted.
+IntersectionObserverEntry.prototype.rootBounds;
 
 // Externed explicitly because we do not export Class shaped names
 // by default.
@@ -120,4 +130,7 @@ twttr.widgets.createTweet;
 
 var FB;
 FB.init;
+<<<<<<< HEAD
 
+=======
+>>>>>>> ampproject/master

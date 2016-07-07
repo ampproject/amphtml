@@ -36,7 +36,7 @@ let ServiceHolderDef;
  * If the service is not yet available the factory function is invoked and
  * expected to return the service.
  * Users should typically wrap this as a special purpose function (e.g.
- * viewportFor(win)) for type safety and because the factory should not be
+ * `viewportFor(win)`) for type safety and because the factory should not be
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
@@ -46,7 +46,116 @@ let ServiceHolderDef;
  * @return {*}
  */
 export function getService(win, id, opt_factory) {
-  const services = getServices(win);
+  return getServiceInternal(win, id,
+      opt_factory ? () => opt_factory(win) : undefined);
+}
+
+/**
+ * Returns a promise for a service for the given id and window. Also expects
+ * an element that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * Users should typically wrap this as a special purpose function (e.g.
+ * `viewportFor(win)`) for type safety and because the factory should not be
+ * passed around.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @return {!Promise<*>}
+ */
+export function getServicePromise(win, id) {
+  return getServicePromiseInternal(win, id);
+}
+
+/**
+ * Like getServicePromise but returns null if the service was never registered.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @return {?Promise<*>}
+ */
+export function getServicePromiseOrNull(win, id) {
+  return getServicePromiseOrNullInternal(win, id);
+}
+
+/**
+ * Returns a service for the given id and ampdoc (a per-ampdoc singleton).
+ * If the service is not yet available the factory function is invoked and
+ * expected to return the service.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id of the service.
+ * @param {function(!AmpDoc):!Object=} opt_factory Should create the service
+ *     if it does not exist yet. If the factory is not given, it is an error
+ *     if the service does not exist yet.
+ * @return {*}
+ */
+export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return getServiceInternal(
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      id,
+      opt_factory ? () => opt_factory(ampdoc) : undefined);
+}
+
+/**
+ * Returns a promise for a service for the given id and ampdoc. Also expects
+ * a service that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id of the service.
+ * @return {!Promise<*>}
+ */
+export function getServicePromiseForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return getServicePromiseInternal(
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      id);
+}
+
+/**
+ * Like getServicePromiseForDoc but returns null if the service was never
+ * registered for this ampdoc.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id of the service.
+ * @return {?Promise<*>}
+ */
+export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return getServicePromiseOrNullInternal(
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      id);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-impl.AmpDoc}
+ */
+function getAmpdoc(nodeOrDoc) {
+  if (nodeOrDoc.nodeType) {
+    return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
+        nodeOrDoc);
+  }
+  return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
+}
+
+/**
+ * This is essentially a duplicate of `ampdoc.js`, but necessary to avoid
+ * circular dependencies.
+ * @param {!Window} win
+ * @return {!./service/ampdoc-impl.AmpDocService}
+ */
+function getAmpdocService(win) {
+  return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
+      getService(win, 'ampdoc'));
+}
+
+/**
+ * @param {!Object} holder
+ * @param {string} id of the service.
+ * @param {function():!Object=} opt_factory Should create the service
+ *     if it does not exist yet. If the factory is not given, it is an error
+ *     if the service does not exist yet.
+ * @return {*}
+ */
+function getServiceInternal(holder, id, opt_factory) {
+  const services = getServices(holder);
   let s = services[id];
   if (!s) {
     s = services[id] = {
@@ -58,10 +167,7 @@ export function getService(win, id, opt_factory) {
 
   if (!s.obj) {
     dev.assert(opt_factory, 'Factory not given and service missing %s', id);
-    s.obj = opt_factory(win);
-    if (!s.promise) {
-      s.promise = Promise.resolve(s.obj);
-    }
+    s.obj = opt_factory();
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -72,22 +178,16 @@ export function getService(win, id, opt_factory) {
 }
 
 /**
- * Returns a promise for a service for the given id and window. Also expects
- * an element that has the actual implementation. The promise resolves when
- * the implementation loaded.
- * Users should typically wrap this as a special purpose function (e.g.
- * viewportFor(win)) for type safety and because the factory should not be
- * passed around.
- * @param {!Window} win
+ * @param {!Object} holder
  * @param {string} id of the service.
  * @return {!Promise<*>}
  */
-export function getServicePromise(win, id) {
-  const services = getServices(win);
-  const s = services[id];
-  if (s) {
-    return s.promise;
+function getServicePromiseInternal(holder, id) {
+  const cached = getServicePromiseOrNullInternal(holder, id);
+  if (cached) {
+    return cached;
   }
+  const services = getServices(holder);
 
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
@@ -105,39 +205,46 @@ export function getServicePromise(win, id) {
 }
 
 /**
- * Like getServicePromise but returns null if the service was never registered.
- * @param {!Window} win
+ * @param {!Object} holder
  * @param {string} id of the service.
  * @return {?Promise<*>}
  */
-export function getServicePromiseOrNull(win, id) {
-  const services = getServices(win);
-  if (services[id]) {
-    return services[id].promise;
+function getServicePromiseOrNullInternal(holder, id) {
+  const services = getServices(holder);
+  const s = services[id];
+  if (s) {
+    const p = s.promise;
+    if (p) {
+      return p;
+    }
+    if (s.obj) {
+      return s.promise = Promise.resolve(s.obj);
+    }
+    dev.assert(false, 'Expected object or promise to be present');
   }
   return null;
 }
 
 /**
- * Returns the object that holds the services registered in a window.
- * @param {!Window} win
+ * Returns the object that holds the services registered in a holder.
+ * @param {!Object} holder
  * @return {!Object<string,!ServiceHolderDef>}
  */
-function getServices(win) {
-  let services = win.services;
+function getServices(holder) {
+  let services = holder.services;
   if (!services) {
-    services = win.services = {};
+    services = holder.services = {};
   }
   return services;
 }
 
 /**
  * Resets a single service, so it gets recreated on next getService invocation.
- * @param {!Window} win
+ * @param {!Object} holder
  * @param {string} id of the service.
  */
-export function resetServiceForTesting(win, id) {
-  if (win.services) {
-    win.services[id] = null;
+export function resetServiceForTesting(holder, id) {
+  if (holder.services) {
+    holder.services[id] = null;
   }
 }

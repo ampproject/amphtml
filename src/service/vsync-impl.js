@@ -108,7 +108,7 @@ export class Vsync {
     this.boundRunScheduledTasks_ = this.runScheduledTasks_.bind(this);
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(this.boundRunScheduledTasks_, FRAME_TIME);
+    this.pass_ = new Pass(this.win, this.boundRunScheduledTasks_, FRAME_TIME);
 
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
@@ -216,22 +216,34 @@ export class Vsync {
 
   /**
    * Whether the runtime is allowed to animate at this time.
+   * @param {!Node} contextNode
    * @return {boolean}
    */
-  canAnimate() {
+  canAnimate(contextNode) {
+    return this.canAnimate_(dev.assert(contextNode));
+  }
+
+  /**
+   * @param {!Node=} unusedOptContextNode
+   * @return {boolean}
+   * @private
+   */
+  canAnimate_(unusedOptContextNode) {
+    // TODO(dvoytenko, #3742): Use opt_node -> ampdoc.
     return this.viewer_.isVisible();
   }
 
   /**
    * Runs the animation vsync task. This operation can only run when animations
    * are allowed. Otherwise, this method returns `false` and exits.
+   * @param {!Node} contextNode
    * @param {!VsyncTaskSpecDef} task
    * @param {!VsyncStateDef=} opt_state
    * @return {boolean}
    */
-  runAnim(task, opt_state) {
+  runAnim(contextNode, task, opt_state) {
     // Do not request animation frames when the document is not visible.
-    if (!this.canAnimate()) {
+    if (!this.canAnimate_(contextNode)) {
       dev.warn('Vsync', 'Did not schedule a vsync request, because doc' +
           'ument was invisible');
       return false;
@@ -243,17 +255,19 @@ export class Vsync {
   /**
    * Creates an animation vsync task. This operation can only run when
    * animations are allowed. Otherwise, this closure returns `false` and exits.
+   * @param {!Node} contextNode
    * @param {!VsyncTaskSpecDef} task
    * @return {function(!VsyncStateDef=):boolean}
    */
-  createAnimTask(task) {
+  createAnimTask(contextNode, task) {
     return opt_state => {
-      return this.runAnim(task, opt_state);
+      return this.runAnim(contextNode, task, opt_state);
     };
   }
 
   /**
    * Runs the series of mutates until the mutator returns a false value.
+   * @param {!Node} contextNode
    * @param {function(time, time, !VsyncStateDef):boolean} mutator The
    *   mutator callback. Only expected to do DOM writes, not reads. If the
    *   returned value is true, the vsync task will be repeated, otherwise it
@@ -265,14 +279,14 @@ export class Vsync {
    *   the vsync series are completed or reject in case of failure, such as
    *   timeout.
    */
-  runAnimMutateSeries(mutator, opt_timeout) {
-    if (!this.canAnimate()) {
+  runAnimMutateSeries(contextNode, mutator, opt_timeout) {
+    if (!this.canAnimate_(contextNode)) {
       return Promise.reject(cancellation());
     }
     return new Promise((resolve, reject) => {
       const startTime = timer.now();
       let prevTime = 0;
-      const task = this.createAnimTask({
+      const task = this.createAnimTask(contextNode, {
         mutate: state => {
           const timeSinceStart = timer.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
@@ -302,7 +316,7 @@ export class Vsync {
 
   /** @private */
   forceSchedule_() {
-    if (this.canAnimate()) {
+    if (this.canAnimate_()) {
       this.raf_(this.boundRunScheduledTasks_);
     } else {
       this.pass_.schedule();

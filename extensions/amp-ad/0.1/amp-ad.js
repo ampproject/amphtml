@@ -13,74 +13,49 @@
  * limitations under the License.
  */
 
-import {IntersectionObserver} from '../../../src/intersection-observer';
-import {getAdCid} from '../../../src/ad-cid';
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listenFor, listenForOnce,
-    postMessage} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
-import {parseUrl} from '../../../src/url';
-import {adPrefetch, adPreconnect} from '../../../ads/_config';
-import {timer} from '../../../src/timer';
-import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
-import {removeElement} from '../../../src/dom';
+import {AmpAd3PImpl, TAG_3P_IMPL} from './amp-ad-3p-impl';
+import {a4aRegistry} from '../../../ads/_config';
+import {insertAmpExtensionScript} from '../../../src/insert-extension';
 
-
-/** @const These tags are allowed to have fixed positioning */
-const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-FX-FLYING-CARPET': true,
-  'AMP-LIGHTBOX': true,
-  'AMP-STICKY-AD': true,
-};
 
 /**
- * Heuristic number as for counting whether another ad is currently loading.
- * @type {number}
+ * Construct ad network type-specific tag and script name.  Note that this
+ * omits the version number and '.js' suffix for the extension script, which
+ * will be handled by the extension loader.
+ *
+ * @param {!string} type
+ * @return !string
+ * @private
  */
-let loadingAdsCount = 0;
-
-/**
- * For testing purpose only.
- * Record the id for timer delay in order to remove them after each test.
- */
-let delayIdForTesting = null;
-
-/**
- * For testing purpose only.
- * Set the loadingAdsCount to 0. And stop test from decreasing loadingAdsCount
- * after each run.
- * @visibleForTesting
- */
-export function resetAdCountForTesting() {
-  loadingAdsCount = 0;
-  timer.cancel(delayIdForTesting);
+function networkImplementationTag(type) {
+  return `amp-ad-network-${type}-impl`;
 }
 
-class AmpAd extends AMP.BaseElement {
+/** @private @enum {!number} */
+const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
 
-  /** @override */
-  getPriority() {
-    // Loads ads after other content.
-    return 2;
+/**
+ * Copies (almost) all attributes from one Element to another.  Skips AMP
+ * and other bookkeeping attributes.  Doesn't check for existence of any
+ * attribute on the target Element, so may overwrite existing attributes.
+ *
+ * @param {!Element} sourceElement  Element to copy attributes from.
+ * @param {!Element} targetElement  Element to copy attributes to.
+ */
+function copyAttributes(sourceElement, targetElement) {
+  const attrs = sourceElement.attributes;
+  for (let i = attrs.length - 1; i >= 0; --i) {
+    const attr = attrs[i];
+    if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
+      targetElement.setAttribute(attr.name, attr.value);
+    }
   }
+}
 
-  renderOutsideViewport() {
-    // If another ad is currently loading we only load ads that are currently
-    // in viewport.
-    if (loadingAdsCount > 0) {
-      return false;
-    }
-
-    // Ad opts into lazier loading strategy where we only load ads that are
-    // at closer than 1.25 viewports away.
-    if (this.element.getAttribute('data-loading-strategy') ==
-        'prefer-viewability-over-views') {
-      return 1.25;
-    }
-    // Otherwise the ad is good to go.
-    return super.renderOutsideViewport();
+export class AmpAd extends AMP.BaseElement {
+  constructor(element) {
+    super(element);
   }
 
   /** @override */
@@ -89,57 +64,9 @@ class AmpAd extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
-    // Wait until DOMReady.
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
-    /** @private {?Element} */
-    this.iframe_ = null;
-
-    /** @private {?Element} */
-    this.placeholder_ = this.getPlaceholder();
-
-    /** @private {?Element} */
-    this.fallback_ = this.getFallback();
-
-    /** @private {boolean} */
-    this.isInFixedContainer_ = false;
-
-    /**
-     * The layout box of the ad iframe (as opposed to the amp-ad tag).
-     * In practice it often has padding to create a grey or similar box
-     * around ads.
-     * @private {!LayoutRect}
-     */
-    this.iframeLayoutBox_ = null;
-
-    /**
-     * Call to stop listening to viewport changes.
-     * @private {?function()}
-     */
-    this.unlistenViewportChanges_ = null;
-
-    /** @private {IntersectionObserver} */
-    this.intersectionObserver_ = null;
-
-    /**
-     * @private @const
-     */
-    this.viewer_ = viewerFor(this.getWin());
-  }
-
-  /**
-   * Prefetches and preconnects URLs related to the ad.
-   * @override
-   */
-  preconnectCallback(onLayout) {
-    // We always need the bootstrap.
-    prefetchBootstrap(this.getWin());
     const type = this.element.getAttribute('type');
+<<<<<<< HEAD
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {
@@ -399,8 +326,34 @@ class AmpAd extends AMP.BaseElement {
         this.iframe_ = null;
       }
     });
+=======
+    if (!type) {
+      // Unspecified or empty type.  Nothing to do here except bail out.
+      return;
+    }
+    let newChild;
+    // TODO(tdrl): Check amp-ad registry to see if they have this already.
+    if (!a4aRegistry[type] ||
+        !a4aRegistry[type](this.getWin(), this.element)) {
+      // Network either has not provided any A4A implementation or the
+      // implementation exists, but has explicitly chosen not to handle this
+      // tag as A4A.  Fall back to the 3p implementation.
+      newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
+    } else {
+      // Note: The insertAmpExtensionScript method will pick the version number.
+      // If we ever reach a point at which there are different extensions with
+      // different version numbers at play simultaneously, we'll have to make sure
+      // that the loader can handle the case.
+      const extensionTag = networkImplementationTag(type);
+      newChild = this.element.ownerDocument.createElement(extensionTag);
+      /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
+    }
+    copyAttributes(this.element, newChild);
+    this.element.appendChild(newChild);
+>>>>>>> ampproject/master
   }
 }
 
 AMP.registerElement('amp-ad', AmpAd);
 AMP.registerElement('amp-embed', AmpAd);
+AMP.registerElement(TAG_3P_IMPL, AmpAd3PImpl);

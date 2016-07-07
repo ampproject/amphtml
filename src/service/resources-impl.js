@@ -26,7 +26,10 @@ import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
+<<<<<<< HEAD
 import {installFramerateService} from './framerate-impl';
+=======
+>>>>>>> ampproject/master
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
@@ -118,13 +121,22 @@ export class Resources {
     this.lastVelocity_ = 0;
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(() => this.doPass_());
+    this.pass_ = new Pass(this.win, () => this.doPass_());
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
+<<<<<<< HEAD
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
+=======
+
+    /** @const {!TaskQueue} */
+    this.queue_ = new TaskQueue();
+
+    /** @const */
+    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+>>>>>>> ampproject/master
 
    /**
     * @private {!Array<!ChangeSizeRequestDef>}
@@ -152,9 +164,12 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
+<<<<<<< HEAD
     /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
+=======
+>>>>>>> ampproject/master
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -170,7 +185,6 @@ export class Resources {
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = timer.now();
-      this.framerate_.collect();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
@@ -1004,16 +1018,13 @@ export class Resources {
     const now = timer.now();
     const visibility = this.viewer_.getVisibilityState();
 
-    const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
-        this.getScrollDirection());
-
     let timeout = -1;
-    let task = this.queue_.peek(scorer);
+    let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
       dev.fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
-          'score', scorer(task),
+          'score', this.boundTaskScorer_(task),
           'timeout', timeout);
       if (timeout > 16) {
         break;
@@ -1041,7 +1052,7 @@ export class Resources {
         }
       }
 
-      task = this.queue_.peek(scorer);
+      task = this.queue_.peek(this.boundTaskScorer_);
       timeout = -1;
     }
 
@@ -1080,20 +1091,25 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
+<<<<<<< HEAD
    * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
+=======
+>>>>>>> ampproject/master
    * @param {!TaskDef} task
    * @private
    */
-  calcTaskScore_(viewportRect, dir, task) {
-    const box = task.resource.getLayoutBox();
+  calcTaskScore_(task) {
+    let posPriority = 0;
     // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
     // layers. This is currently a short-term fix to the problem that
     // the fixed elements get incorrect top coord.
-    const isFixed = task.resource.isFixed();
-    let posPriority = isFixed ? 0 :
-        Math.floor((box.top - viewportRect.top) / viewportRect.height);
-    if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
+    if (!task.resource.isFixed()) {
+      const viewport = this.viewport_.getRect();
+      const box = task.resource.getLayoutBox();
+      posPriority = Math.floor((box.top - viewport.top) / viewport.height);
+    }
+    if (Math.sign(posPriority) != this.getScrollDirection()) {
       posPriority *= 2;
     }
     posPriority = Math.abs(posPriority);

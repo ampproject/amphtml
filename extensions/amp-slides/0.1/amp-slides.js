@@ -32,11 +32,6 @@ class AmpSlides extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return this.getRealChildren().length > 0;
-  }
-
-  /** @override */
   buildCallback() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
@@ -125,7 +120,8 @@ class AmpSlides extends AMP.BaseElement {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
+        Animation.animate(this.element,
+            this.createTransition_(oldSlide, newSlide, dir),
             200, 'ease-out').thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);
