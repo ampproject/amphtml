@@ -42,6 +42,7 @@ describe('A4A loader', () => {
       a4aRegistry[k] = registryBackup[k];
     });
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     describe('ad resize', () => {
       it('should listen for resize events', () => {
@@ -75,6 +76,8 @@ describe('A4A loader', () => {
             };
             impl.iframe_.src = iframeSrc;
 =======
+=======
+>>>>>>> ampproject/master
     registryBackup = null;
     sandbox.restore();
   });
@@ -103,6 +106,7 @@ describe('A4A loader', () => {
                 c => {
                   return c.tagName === 'AMP-AD-3P-IMPL';
                 })).to.not.be.null;
+<<<<<<< HEAD
 >>>>>>> ampproject/master
           });
         });
@@ -136,11 +140,19 @@ describe('A4A loader', () => {
                     impl.iframe_.getAttribute('data-amp-3p-sentinel'),
               }, '*');
 =======
+=======
+          });
+        });
+
+>>>>>>> ampproject/master
         it('falls back to 3p for registered, non-A4A type', () => {
           return createIframePromise().then(fixture => {
             const doc = fixture.doc;
             a4aRegistry['zort'] = function() {
               return false;
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
             };
             const element = doc.createElement(tag);
@@ -163,6 +175,7 @@ describe('A4A loader', () => {
             expect(expectedChild.getAttribute('width')).to.equal('300');
             expect(expectedChild.getAttribute('height')).to.equal('200');
           });
+<<<<<<< HEAD
 <<<<<<< HEAD
         }).then(impl => {
           expect(impl.iframe_.height).to.equal('217');
@@ -366,6 +379,8 @@ describe('A4A loader', () => {
               });
           ad.implementation_.noContentHandler_();
           expect(ad.implementation_.iframe_).to.be.null;
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
         });

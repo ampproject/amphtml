@@ -318,11 +318,17 @@ the lowest one.
 
 <style amp-custom>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
   amp-live-list > [update] {
     display: none;
   }
 
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
   #fixed-button {
     position: fixed;

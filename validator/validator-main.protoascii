@@ -26,7 +26,11 @@ min_validator_revision_required: 143
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
 <<<<<<< HEAD
+<<<<<<< HEAD
 spec_file_revision: 231
+=======
+spec_file_revision: 235
+>>>>>>> ampproject/master
 =======
 spec_file_revision: 235
 >>>>>>> ampproject/master
@@ -1940,6 +1944,7 @@ tags {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
 }
 # 4.10.4 The label element
+<<<<<<< HEAD
 tags: {
   tag_name: "LABEL"
   mandatory_ancestor: "FORM"
@@ -1997,6 +2002,65 @@ tags: {
 }
 # 4.10.6 The button element
 tags: {
+=======
+tags: {
+  tag_name: "LABEL"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "for" }
+  attrs: { name: "form" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.5 The input element
+tags: {
+  tag_name: "INPUT"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "accept" }
+  attrs: { name: "accesskey" }
+  attrs: { name: "autocomplete" }
+  attrs: { name: "autofocus" }
+  attrs: { name: "checked" }
+  attrs: { name: "disabled" }
+  attrs: { name: "form" }
+  attrs: { name: "formmethod" }
+  attrs: { name: "formnovalidate" }
+  attrs: { name: "height" }
+  attrs: { name: "inputmode" }
+  attrs: { name: "list" }
+  attrs: { name: "max" }
+  attrs: { name: "maxlength" }
+  attrs: { name: "min" }
+  attrs: { name: "minlength" }
+  attrs: { name: "multiple" }
+  attrs: { name: "name" }
+  attrs: { name: "pattern" }
+  attrs: { name: "placeholder" }
+  attrs: { name: "readonly" }
+  attrs: { name: "required" }
+  attrs: { name: "selectiondirection" }
+  attrs: { name: "size" }
+  attrs: { name: "spellcheck" }
+  attrs: { name: "step" }
+  attrs: { name: "tabindex" }
+  attrs: {
+    name: "type"
+    blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
+        "button|"
+        "file|"
+        "image|"
+        "password|"
+        ")(\\s|$)"
+  }
+  attrs: { name: "value" }
+  attrs: { name: "width" }
+  # TODO: update with ampproject.org url when available
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.6 The button element
+tags: {
+>>>>>>> ampproject/master
   tag_name: "BUTTON"
   attrs: {
     name: "disabled"
@@ -2223,6 +2287,7 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {  # <amp-ad>
@@ -2275,6 +2340,8 @@ tags: {  # <amp-embed>
     supported_layouts: RESPONSIVE
   }
 }
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 tags: {  # <amp-img>

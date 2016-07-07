@@ -64,7 +64,13 @@ const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 /**
  * A service that polyfills Fetch API for use within AMP.
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @package Visible for type.
+=======
+ *
+ * @package Visible for type.
+ * @visibleForTesting
+>>>>>>> ampproject/master
 =======
  *
  * @package Visible for type.

@@ -125,6 +125,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    externs: ['ads/ads.extern.js',],
+>>>>>>> ampproject/master
 =======
     externs: ['ads/ads.extern.js',],
 >>>>>>> ampproject/master
@@ -156,7 +160,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         's.WebkitAnimation="none;"},1000);throw e};'
   });
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
   // Entry point for shadow runtime.
   compileJs('./src/', 'amp-shadow-babel.js', './dist', {
     toName: 'amp-shadow.js',

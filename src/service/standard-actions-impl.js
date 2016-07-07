@@ -29,12 +29,21 @@ export class StandardActions {
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
 <<<<<<< HEAD
+<<<<<<< HEAD
   constructor(win) {
     /** @const @private {!./action-impl.ActionService} */
     this.actions_ = installActionService(win);
 
     /** @const @private {!./resources-impl.Resources} */
     this.resources_ = installResourcesService(win);
+=======
+  constructor(ampdoc) {
+    /** @const @private {!./action-impl.ActionService} */
+    this.actions_ = installActionServiceForDoc(ampdoc);
+
+    /** @const @private {!./resources-impl.Resources} */
+    this.resources_ = installResourcesService(ampdoc.getWin());
+>>>>>>> ampproject/master
 =======
   constructor(ampdoc) {
     /** @const @private {!./action-impl.ActionService} */
@@ -62,6 +71,7 @@ export class StandardActions {
 
 /**
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @param {!Window} win
  * @return {!StandardActions}
  */
@@ -73,10 +83,18 @@ export function installStandardActions(win) {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!StandardActions}
  */
+=======
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!StandardActions}
+ */
+>>>>>>> ampproject/master
 export function installStandardActionsForDoc(ampdoc) {
   return /** @type {!StandardActions} */ (
       getServiceForDoc(ampdoc, 'standard-actions', ampdoc => {
         return new StandardActions(ampdoc);
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
       }));
 };

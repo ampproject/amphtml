@@ -23,6 +23,10 @@ var fs = require('fs');
 global.path = require('path');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+var execFile = require('child_process').execFile;
+>>>>>>> ampproject/master
 =======
 var execFile = require('child_process').execFile;
 >>>>>>> ampproject/master

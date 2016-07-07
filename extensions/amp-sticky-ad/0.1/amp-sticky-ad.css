@@ -20,7 +20,11 @@ amp-sticky-ad {
   bottom: 0 !important;
   left: 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
   width: 100%;
+=======
+  width: 100% !important;
+>>>>>>> ampproject/master
 =======
   width: 100% !important;
 >>>>>>> ampproject/master
@@ -29,7 +33,11 @@ amp-sticky-ad {
   max-height: 100px !important;
   box-sizing: border-box;
 <<<<<<< HEAD
+<<<<<<< HEAD
   background-color: rgba(255,255,255,0.5);
+=======
+  background-color: rgba(0, 0, 0, 0.5);
+>>>>>>> ampproject/master
 =======
   background-color: rgba(0, 0, 0, 0.5);
 >>>>>>> ampproject/master
@@ -43,6 +51,17 @@ amp-sticky-ad {
   justify-content: center;
   overflow: visible !important;
   transform: translateZ(0) !important;
+<<<<<<< HEAD
+=======
+}
+
+.-amp-sticky-ad-visible {
+  visibility: visible !important;
+}
+
+.amp-sticky-ad-loaded {
+  background-color: #fff;
+>>>>>>> ampproject/master
 }
 
 .-amp-sticky-ad-visible {

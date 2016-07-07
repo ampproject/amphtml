@@ -35,6 +35,10 @@ goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+goog.require('goog.uri.utils');
+>>>>>>> ampproject/master
 =======
 goog.require('goog.uri.utils');
 >>>>>>> ampproject/master
@@ -939,7 +943,11 @@ class ParsedUrlSpec {
 
     /**
 <<<<<<< HEAD
+<<<<<<< HEAD
      * @type {!Object<string, ?>}
+=======
+     * @type {!Object<string, number>}
+>>>>>>> ampproject/master
 =======
      * @type {!Object<string, number>}
 >>>>>>> ampproject/master
@@ -950,7 +958,10 @@ class ParsedUrlSpec {
       for (const protocol of this.spec_.allowedProtocol) {
         this.allowedProtocols_[protocol] = 0;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
       }
     }
 
@@ -962,6 +973,9 @@ class ParsedUrlSpec {
     if (this.spec_ !== null) {
       for (const domain of this.spec_.disallowedDomain) {
         this.disallowedDomains_[domain] = 0;
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
       }
     }
@@ -1021,8 +1035,14 @@ class ParsedUrlSpec {
       return;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (uri.hasScheme() &&
         !this.allowedProtocols_.hasOwnProperty(uri.getScheme().toLowerCase())) {
+=======
+    const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
+    if (scheme &&
+        !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
+>>>>>>> ampproject/master
 =======
     const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
     if (scheme &&
@@ -1112,7 +1132,10 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
   /**
    * @param {!Context} context
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
    * @param {string} domain
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -1128,6 +1151,9 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
    * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
@@ -1204,7 +1230,10 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
   /**
    * @param {!Context} context
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
    * @param {string} domain
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -1219,6 +1248,9 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
    * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
@@ -1962,7 +1994,11 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
 class ParsedTagSpec {
   /**
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @param {string} templateSpecUrl
+=======
+   * @param {?string} templateSpecUrl
+>>>>>>> ampproject/master
 =======
    * @param {?string} templateSpecUrl
 >>>>>>> ampproject/master
@@ -2011,7 +2047,11 @@ class ParsedTagSpec {
     this.mandatoryOneofs_ = [];
     /**
 <<<<<<< HEAD
+<<<<<<< HEAD
      * @type {string}
+=======
+     * @type {?string}
+>>>>>>> ampproject/master
 =======
      * @type {?string}
 >>>>>>> ampproject/master

@@ -103,12 +103,18 @@ const EXPERIMENTS = [
     spec: '',
   },
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
   {
     id: 'amp-share-tracking',
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 ];
 

@@ -37,11 +37,17 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   private boolean typecheck_only = false;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
   private boolean pseudo_names = false;
 
   private boolean is_production_env = true;
 
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
   /**
    * List of string suffixes to eliminate from the AST.
@@ -78,6 +84,10 @@ public class AmpCommandLineRunner extends CommandLineRunner {
         PropertyRenamingPolicy.ALL_UNQUOTED);
     options.setDisambiguatePrivateProperties(true);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    options.setGeneratePseudoNames(pseudo_names);
+>>>>>>> ampproject/master
 =======
     options.setGeneratePseudoNames(pseudo_names);
 >>>>>>> ampproject/master
@@ -100,10 +110,13 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   protected void setTypeCheckOnly(boolean value) {
     typecheck_only = value;
   }
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
   public static void main(String[] args) {
@@ -112,16 +125,22 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     // Scan for TYPECHECK_ONLY string which we pass in as a --define
     for (String arg : args) {
 <<<<<<< HEAD
+<<<<<<< HEAD
       if (arg.contains("TYPECHECK_ONLY=true")) {
         runner.setTypeCheckOnly(true);
         break;
 =======
+=======
+>>>>>>> ampproject/master
       if (arg.contains("--define=TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
       } else if (arg.contains("--define=FORTESTING=true")) {
         runner.is_production_env = false;
       } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
       }
     }

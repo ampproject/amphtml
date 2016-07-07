@@ -92,6 +92,7 @@ var karma = {
       //'SL_IE_11',
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     singleRun: true,
     client: {
       mocha: {
@@ -104,6 +105,9 @@ var karma = {
     browserNoActivityTimeout: 4 * 60 * 1000,
     captureTimeout: 4 * 60 * 1000,
   }
+=======
+  })
+>>>>>>> ampproject/master
 =======
   })
 >>>>>>> ampproject/master

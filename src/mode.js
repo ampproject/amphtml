@@ -96,7 +96,11 @@ function getMode_() {
     /* global process: false */
     minified: process.env.NODE_ENV == 'production',
 <<<<<<< HEAD
+<<<<<<< HEAD
     test: !!(window.AMP_TEST),
+=======
+    test: !!(window.AMP_TEST || window.__karma__),
+>>>>>>> ampproject/master
 =======
     test: !!(window.AMP_TEST || window.__karma__),
 >>>>>>> ampproject/master

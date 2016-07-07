@@ -644,7 +644,11 @@ function createHistory_(window) {
   const viewer = installViewerService(window);
   let binding;
 <<<<<<< HEAD
+<<<<<<< HEAD
   if (viewer.isOvertakeHistory() || window.AMP_TEST) {
+=======
+  if (viewer.isOvertakeHistory() || getMode().test) {
+>>>>>>> ampproject/master
 =======
   if (viewer.isOvertakeHistory() || getMode().test) {
 >>>>>>> ampproject/master

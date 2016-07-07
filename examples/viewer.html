@@ -116,9 +116,18 @@
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     viewer[data-show-container="4"] #show-container4-anchor {
       text-decoration: underline;
+=======
+    viewer[data-show-container="4"] #show-container4-anchor {
+      text-decoration: underline;
+    }
+
+    viewer.natural container {
+      overflow-y: hidden;
+>>>>>>> ampproject/master
     }
 
     viewer.natural container {
@@ -203,6 +212,10 @@
         viewerorigin: parseUrl(window.location.href).origin,
         csi: this.csi_,
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        cap: 'foo,a2a',
+>>>>>>> ampproject/master
 =======
         cap: 'foo,a2a',
 >>>>>>> ampproject/master
@@ -421,6 +434,10 @@
       if (type == 'sendCsi') {
         log('[CSI] sendCsi.');
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+        return;
+>>>>>>> ampproject/master
 =======
         return;
 >>>>>>> ampproject/master
@@ -429,11 +446,17 @@
         return;
       }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
       if (type == 'a2a') {
         log('a2a navigation', data);
         return;
       }
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
       return Promise.reject('request not supported: ' + type);
     };

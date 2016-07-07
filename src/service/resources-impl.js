@@ -27,7 +27,10 @@ import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {installFramerateService} from './framerate-impl';
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 import {installViewerService} from './viewer-impl';
@@ -126,9 +129,18 @@ export class Resources {
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     /** @const {!TaskQueue} */
     this.queue_ = new TaskQueue();
+=======
+
+    /** @const {!TaskQueue} */
+    this.queue_ = new TaskQueue();
+
+    /** @const */
+    this.boundTaskScorer_ = task => this.calcTaskScore_(task);
+>>>>>>> ampproject/master
 =======
 
     /** @const {!TaskQueue} */
@@ -165,9 +177,12 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     /** @private @const {!./framerate-impl.Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
@@ -1092,8 +1107,11 @@ export class Resources {
    * this element or away from it.
    *
 <<<<<<< HEAD
+<<<<<<< HEAD
    * @param {!../layout-rect.LayoutRectDef} viewportRect
    * @param {number} dir
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
    * @param {!TaskDef} task

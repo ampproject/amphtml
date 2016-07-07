@@ -168,7 +168,10 @@ function compile(entryModuleFilename, outputDir,
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
     var externs = [
       'build-system/amp.extern.js',
       'third_party/closure-compiler/externs/intersection_observer.js',
@@ -177,6 +180,9 @@ function compile(entryModuleFilename, outputDir,
       externs = externs.concat(options.externs);
     }
 
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
     /*eslint "google-camelcase/google-camelcase": 0*/
     var compilerOptions = {
@@ -194,10 +200,14 @@ function compile(entryModuleFilename, outputDir,
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
 <<<<<<< HEAD
+<<<<<<< HEAD
         externs: [
           'build-system/amp.extern.js',
           'third_party/closure-compiler/externs/intersection_observer.js',
         ],
+=======
+        externs: externs,
+>>>>>>> ampproject/master
 =======
         externs: externs,
 >>>>>>> ampproject/master
@@ -217,11 +227,14 @@ function compile(entryModuleFilename, outputDir,
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
 <<<<<<< HEAD
+<<<<<<< HEAD
         hide_warnings_for: [
           'ads/',  // TODO(@cramforce): Remove when we are better at typing.
           'node_modules/',
           'build/patched-module/',
 =======
+=======
+>>>>>>> ampproject/master
         define: [],
         hide_warnings_for: [
           'node_modules/',
@@ -232,6 +245,9 @@ function compile(entryModuleFilename, outputDir,
           'src/service.js',
           '3p/environment.js',
           'src/document-state.js'
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
         ],
       }
@@ -242,10 +258,13 @@ function compile(entryModuleFilename, outputDir,
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
 <<<<<<< HEAD
+<<<<<<< HEAD
       compilerOptions.compilerFlags.define = 'TYPECHECK_ONLY=true';
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
 =======
+=======
+>>>>>>> ampproject/master
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
@@ -259,6 +278,9 @@ function compile(entryModuleFilename, outputDir,
     if (compilerOptions.compilerFlags.define.length == 0) {
       delete compilerOptions.compilerFlags.define;
     }
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 
     var stream = gulp.src(srcs)

@@ -21,6 +21,10 @@
 var BBPromise = require('bluebird');
 var app = require('express')();
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+var bacon = require('baconipsum');
+>>>>>>> ampproject/master
 =======
 var bacon = require('baconipsum');
 >>>>>>> ampproject/master

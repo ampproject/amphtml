@@ -19,6 +19,10 @@ import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+import {removeElement} from '../../../src/dom';
+>>>>>>> ampproject/master
 =======
 import {removeElement} from '../../../src/dom';
 >>>>>>> ampproject/master
@@ -59,6 +63,12 @@ class AmpStickyAd extends AMP.BaseElement {
     this.vsync_ = this.getVsync();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    /** @const @private {boolean} */
+    this.visible_ = false;
+
+>>>>>>> ampproject/master
 =======
     /** @const @private {boolean} */
     this.visible_ = false;
@@ -137,7 +147,11 @@ class AmpStickyAd extends AMP.BaseElement {
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
 <<<<<<< HEAD
+<<<<<<< HEAD
         // TODO(zhouyx): need to delete borderBottom when sticky ad is dismissed
+=======
+        this.addCloseButton_();
+>>>>>>> ampproject/master
 =======
         this.addCloseButton_();
 >>>>>>> ampproject/master

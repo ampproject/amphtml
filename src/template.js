@@ -16,6 +16,7 @@
 
 import {getService} from './service';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {user} from './log';
 
 /**
@@ -341,6 +342,8 @@ export class Templates {
 export function registerExtendedTemplate(win, type, templateClass) {
   return templatesFor(win).registerTemplate_(type, templateClass);
 }
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master
 

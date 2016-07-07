@@ -249,7 +249,10 @@ describe('amp-sticky-ad', () => {
     });
   });
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
 
   it('should create a close button', () => {
     return getAmpStickyAd().then(obj => {
@@ -316,5 +319,8 @@ describe('amp-sticky-ad', () => {
       expect(borderWidth).to.equal('0px');
     });
   });
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 });

@@ -65,9 +65,15 @@ export const adPrefetch = {
   nend: 'https://js1.nend.net/js/amp.js',
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   adcrops: 'https://js.adcrops.net/amp.js',
 =======
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+>>>>>>> ampproject/master
+=======
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
+  genieessp: 'https://js.gsspcln.jp/l/amp.js',
 >>>>>>> ampproject/master
 =======
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',

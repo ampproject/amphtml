@@ -78,9 +78,14 @@ import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import {adcrops} from '../ads/adcrops';
 =======
 import {adgeneration} from '../ads/adgeneration';
+>>>>>>> ampproject/master
+=======
+import {adgeneration} from '../ads/adgeneration';
+import {genieessp} from '../ads/genieessp';
 >>>>>>> ampproject/master
 =======
 import {adgeneration} from '../ads/adgeneration';
@@ -150,9 +155,14 @@ register('chargeads', chargeads);
 register('nend', nend);
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 register('adcrops', adcrops);
 =======
 register('adgeneration', adgeneration);
+>>>>>>> ampproject/master
+=======
+register('adgeneration', adgeneration);
+register('genieessp', genieessp);
 >>>>>>> ampproject/master
 =======
 register('adgeneration', adgeneration);

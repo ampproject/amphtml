@@ -84,7 +84,11 @@ export function writeScript(win, url, opt_cb) {
  * @param {!Window} win
  * @param {string} url
 <<<<<<< HEAD
+<<<<<<< HEAD
  * @param {function()} cb
+=======
+ * @param {function()=} opt_cb
+>>>>>>> ampproject/master
 =======
  * @param {function()=} opt_cb
 >>>>>>> ampproject/master

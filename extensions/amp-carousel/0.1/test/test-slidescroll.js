@@ -21,6 +21,10 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 describe('SlideScroll', () => {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+  const SHOW_CLASS = '-amp-slide-item-show';
+>>>>>>> ampproject/master
 =======
   const SHOW_CLASS = '-amp-slide-item-show';
 >>>>>>> ampproject/master
@@ -36,7 +40,11 @@ describe('SlideScroll', () => {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   function getAmpSlideScroll() {
+=======
+  function getAmpSlideScroll(opt_hasLooping) {
+>>>>>>> ampproject/master
 =======
   function getAmpSlideScroll(opt_hasLooping) {
 >>>>>>> ampproject/master
@@ -52,6 +60,12 @@ describe('SlideScroll', () => {
       ampSlideScroll.setAttribute('height', '300');
       ampSlideScroll.setAttribute('controls', '');
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+      if (opt_hasLooping) {
+        ampSlideScroll.setAttribute('loop', '');
+      }
+>>>>>>> ampproject/master
 =======
       if (opt_hasLooping) {
         ampSlideScroll.setAttribute('loop', '');
@@ -85,9 +99,15 @@ describe('SlideScroll', () => {
             '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
       const impl = ampSlideScroll.implementation_;
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
+=======
+      expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
+          .to.be.true;
+      expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
+>>>>>>> ampproject/master
 =======
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -153,17 +173,23 @@ describe('SlideScroll', () => {
           impl.slides_[1], true);
       expect(updateInViewportSpy.callCount).to.equal(2);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
 =======
+=======
+>>>>>>> ampproject/master
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains(SHOW_CLASS))
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
           .to.be.true;
       expect(schedulePreloadSpy).to.have.been.calledWith(impl.slides_[0]);
@@ -174,7 +200,11 @@ describe('SlideScroll', () => {
       expect(impl.slideIndex_).to.equal(1);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
+=======
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
+>>>>>>> ampproject/master
 =======
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
 >>>>>>> ampproject/master
@@ -189,17 +219,23 @@ describe('SlideScroll', () => {
           impl.slides_[0], true);
       expect(updateInViewportSpy.callCount).to.equal(4);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(impl.slideWrappers_[0].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
 =======
+=======
+>>>>>>> ampproject/master
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[1].classList.contains(SHOW_CLASS))
           .to.be.true;
       expect(impl.slideWrappers_[2].classList.contains(SHOW_CLASS))
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
           .to.be.false;
       expect(scheduleLayoutSpy).to.have.been.calledWith(impl.slides_[0]);
@@ -209,7 +245,11 @@ describe('SlideScroll', () => {
       expect(impl.slideIndex_).to.equal(0);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(0);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
+=======
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
+>>>>>>> ampproject/master
 =======
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1]);
 >>>>>>> ampproject/master
@@ -224,9 +264,15 @@ describe('SlideScroll', () => {
           impl.slides_[4], true);
       expect(updateInViewportSpy.callCount).to.equal(6);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
           .to.be.true;
       expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
+=======
+      expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
+          .to.be.true;
+      expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
+>>>>>>> ampproject/master
 =======
       expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -240,7 +286,11 @@ describe('SlideScroll', () => {
       expect(impl.slideIndex_).to.equal(4);
       expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(impl.slideWidth_);
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
+=======
+      expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
+>>>>>>> ampproject/master
 =======
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
 >>>>>>> ampproject/master
@@ -250,7 +300,11 @@ describe('SlideScroll', () => {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   it('should hide the unwatned slides slide', () => {
+=======
+  it('should hide the unwanted slides', () => {
+>>>>>>> ampproject/master
 =======
   it('should hide the unwanted slides', () => {
 >>>>>>> ampproject/master
@@ -263,11 +317,14 @@ describe('SlideScroll', () => {
       impl.showSlide_(1);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(1);
       expect(impl.slideWrappers_[3].classList.contains('-amp-slide-item-show'))
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
 =======
+=======
+>>>>>>> ampproject/master
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0, 1, 2]);
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -278,6 +335,9 @@ describe('SlideScroll', () => {
       expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
           .to.be.false;
       expect(schedulePauseSpy).to.not.have.been.called;
@@ -285,6 +345,7 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(0);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(0);
 
@@ -294,6 +355,8 @@ describe('SlideScroll', () => {
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains('-amp-slide-item-show'))
 =======
+=======
+>>>>>>> ampproject/master
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([0,1]);
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -304,6 +367,9 @@ describe('SlideScroll', () => {
       expect(impl.slideWrappers_[3].classList.contains(SHOW_CLASS))
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
           .to.be.false;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
@@ -311,6 +377,7 @@ describe('SlideScroll', () => {
 
       impl.showSlide_(4);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith(4);
 
@@ -321,6 +388,8 @@ describe('SlideScroll', () => {
       expect(impl.slideWrappers_[2].classList.contains('-amp-slide-item-show'))
           .to.be.false;
 =======
+=======
+>>>>>>> ampproject/master
       expect(hideRestOfTheSlidesSpy).to.have.been.calledWith([3, 4]);
 
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
@@ -333,6 +402,9 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
           .to.be.true;
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
@@ -366,7 +438,10 @@ describe('SlideScroll', () => {
   });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
   it('should set the correct scrollLeft when there is only one slide', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
@@ -698,5 +773,8 @@ describe('SlideScroll', () => {
       });
     });
   });
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
 });

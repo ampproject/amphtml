@@ -50,6 +50,7 @@ class TestSkipper {
     this.skippedUserAgents.push('Chromium');
     return this;
 <<<<<<< HEAD
+<<<<<<< HEAD
   }
 
   skipChrome() {
@@ -70,11 +71,23 @@ class TestSkipper {
     return this;
   }
 
+=======
+  }
+
+  skipChrome() {
+    this.skippedUserAgents.push('Chrome');
+    return this;
+  }
+
+>>>>>>> ampproject/master
   skipEdge() {
     this.skippedUserAgents.push('Edge');
     return this;
   }
 
+<<<<<<< HEAD
+>>>>>>> ampproject/master
+=======
 >>>>>>> ampproject/master
   skipFirefox() {
     this.skippedUserAgents.push('Firefox');

@@ -23,6 +23,11 @@ process.end.NODE_ENV;
 window.context = {};
 window.context.amp3pSentinel;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+window.context.clientId;
+window.context.initialIntersection;
+>>>>>>> ampproject/master
 =======
 window.context.clientId;
 window.context.initialIntersection;
@@ -131,6 +136,9 @@ twttr.widgets.createTweet;
 var FB;
 FB.init;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> ampproject/master
 =======
 >>>>>>> ampproject/master

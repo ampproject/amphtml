@@ -68,7 +68,10 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
       return false;
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> ampproject/master
     // ES6 generated module names are not exported.
     if (name.contains("$")) {
       return false;
