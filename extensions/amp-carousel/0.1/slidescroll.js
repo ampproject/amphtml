@@ -92,10 +92,12 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {?number} */
     this.scrollTimeout_ = null;
 
-    /** @private {number} */
-    // 0 - not in an elastic state.
-    // -1 - elastic scrolling (back) to the left of scrollLeft 0.
-    // 1 - elastic scrolling (fwd) to the right of the max scrollLeft possible.
+    /**
+     * 0 - not in an elastic state.
+     * -1 - elastic scrolling (back) to the left of scrollLeft 0.
+     * 1 - elastic scrolling (fwd) to the right of the max scrollLeft possible.
+     * @private {number}
+     */
     this.elasticScrollState_ = 0;
 
     this.slidesContainer_.addEventListener(
@@ -124,7 +126,7 @@ export class AmpSlideScroll extends BaseCarousel {
     if (inViewport) {
       this.hintControls();
     }
-    if (inViewport == false) {
+    if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], inViewport);
     }
   }
@@ -190,7 +192,7 @@ export class AmpSlideScroll extends BaseCarousel {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    */
   handleCustomElasticScroll_(currentScrollLeft) {
-    const scrollWidth = this.slidesContainer_./*REVIEW*/scrollWidth;
+    const scrollWidth = this.slidesContainer_./*OK*/scrollWidth;
     if (this.elasticScrollState_ == -1 &&
         currentScrollLeft >= this.previousScrollLeft_) {
       // Elastic Scroll is reversing direction take control.
@@ -224,14 +226,14 @@ export class AmpSlideScroll extends BaseCarousel {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     let toScrollLeft;
     const diff = newIndex - this.slideIndex_;
-    const hasPrev_ = this.hasPrev();
+    const hasPrev = this.hasPrev();
 
     if (diff == 0) {
       // Snap and stay.
-      toScrollLeft = hasPrev_ ? this.slideWidth_ : 0;
+      toScrollLeft = hasPrev ? this.slideWidth_ : 0;
     } else if (diff == 1 || diff == -1 * (this.noOfSlides_ - 1)) {
       // Move fwd.
-      toScrollLeft = hasPrev_ ? this.slideWidth_ * 2 : this.slideWidth_;
+      toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
       // Move backward.
       toScrollLeft = 0;
@@ -256,15 +258,15 @@ export class AmpSlideScroll extends BaseCarousel {
     // shown slide.
     let updateValue = 0;
 
-    const hasPrev_ = this.hasPrev();
-    const hasNext_ = this.hasNext();
+    const hasPrev = this.hasPrev();
+    const hasNext = this.hasNext();
 
-    if (hasPrev_ && hasNext_) {
+    if (hasPrev && hasNext) {
       updateValue = scrolledSlideIndex - 1;
-    } else if (hasNext_) {
+    } else if (hasNext) {
       // Has next and does not have a prev. (slideIndex 0)
       updateValue = scrolledSlideIndex;
-    } else if (hasPrev_) {
+    } else if (hasPrev) {
       // Has prev and no next slide (last slide)
       updateValue = scrolledSlideIndex - 1;
     }
@@ -389,7 +391,7 @@ export class AmpSlideScroll extends BaseCarousel {
     }
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     return Animation.animate(this.slidesContainer_, pos => {
-      this.slidesContainer_./*REVIEW*/scrollLeft = interpolate(pos);
+      this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
     }, 80, 'ease-in-out').thenAlways();
   }
 }
