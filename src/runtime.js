@@ -16,6 +16,8 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {ampdocFor} from './ampdoc';
+import {cssText} from '../build/css';
 import {dev} from './log';
 import {getMode} from './mode';
 import {getService} from './service';
@@ -26,7 +28,7 @@ import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStyles} from './styles';
+import {installStyles, installStylesForShadowRoot} from './styles';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
@@ -35,9 +37,11 @@ import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
+import {setStyle} from './style';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
@@ -107,6 +111,10 @@ export function adopt(global) {
   // of functions
   const preregisteredElements = global.AMP || [];
 
+  installRuntimeServices(global);
+  const ampdocService = ampdocFor(global);
+  const isSingleDoc = ampdocService.isSingleDoc();
+
   global.AMP = {
     win: global,
   };
@@ -133,6 +141,7 @@ export function adopt(global) {
       });
     };
     if (opt_css) {
+      // TODO(dvoytenko): collect and install all styles into shadow roots.
       installStyles(global.document, opt_css, register, false, name);
     } else {
       register();
@@ -154,7 +163,14 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  installRuntimeServices(global);
+  if (!isSingleDoc) {
+    /**
+     * Registers a shadow root document.
+     * @param {!ShadowRoot} shadowRoot
+     */
+    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null, global);
+  }
+
   const viewer = viewerFor(global);
 
   /** @const */
@@ -219,6 +235,37 @@ export function adopt(global) {
     // go out of scope here, but just making sure.
     preregisteredElements.length = 0;
   });
+
+  // For iOS we need to set `cursor:pointer` to ensure that click events are
+  // delivered.
+  if (platformFor(global).isIos()) {
+    setStyle(global.document.documentElement, 'cursor', 'pointer');
+  }
+}
+
+
+/**
+ * Attaches the shadow root and configures ampdoc for it.
+ * @param {!Window} global
+ * @param {!ShadowRoot} shadowRoot
+ */
+export function prepareAndAttachShadowRoot(global, shadowRoot) {
+  dev.fine(TAG, 'Attach shadow root:', shadowRoot);
+  const ampdocService = ampdocFor(global);
+  const ampdoc = ampdocService.getAmpDoc(shadowRoot);
+
+  shadowRoot.AMP = {};
+
+  // Install runtime CSS.
+  // TODO(dvoytenko): discover all other extensions and install their CSS.
+  installStylesForShadowRoot(shadowRoot, cssText,
+      /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+
+  // Install services.
+  installAmpdocServices(ampdoc);
+
+  dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
+  return shadowRoot.AMP;
 }
 
 

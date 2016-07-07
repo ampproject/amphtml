@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {adopt} from '../../src/runtime';
 import {dev} from '../../src/log';
-import {parseUrl} from '../../src/url';
 import {getServicePromise} from '../../src/service';
+import {parseUrl} from '../../src/url';
+import {platformFor} from '../../src/platform';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -27,9 +29,16 @@ describe('runtime', () => {
   let win;
   let sandbox;
   let errorStub;
+  let ampdocService;
+  let ampdocServiceMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    ampdocService = {
+      isSingleDoc: () => true,
+      getAmpDoc: () => null,
+    };
+    ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
       AMP: [],
       location: {},
@@ -41,11 +50,15 @@ describe('runtime', () => {
       location: parseUrl('https://acme.com/document1'),
       Object,
       HTMLElement,
+      services: {
+        ampdoc: {obj: ampdocService},
+      },
     };
     errorStub = sandbox.stub(dev, 'error');
   });
 
   afterEach(() => {
+    ampdocServiceMock.verify();
     sandbox.restore();
   });
 
@@ -60,9 +73,25 @@ describe('runtime', () => {
     expect(win.AMP.win).to.equal(win);
     expect(win.AMP.viewer).to.be.a('object');
     expect(win.AMP.viewport).to.be.a('object');
+    // Single-doc mode does not create `attachShadowRoot`.
+    expect(win.AMP.attachShadowRoot).to.not.exist;
     expect(win.AMP_TAG).to.be.true;
 
     expect(win.AMP.push).to.not.equal([].push);
+  });
+
+  it('should NOT set cursor:pointer on document element on non-IOS', () => {
+    const platform = platformFor(win);
+    sandbox.stub(platform, 'isIos').returns(false);
+    adopt(win);
+    expect(win.document.documentElement.style.cursor).to.not.be.ok;
+  });
+
+  it('should set cursor:pointer on document element on IOS', () => {
+    const platform = platformFor(win);
+    sandbox.stub(platform, 'isIos').returns(true);
+    adopt(win);
+    expect(win.document.documentElement.style.cursor).to.equal('pointer');
   });
 
   it('should execute scheduled extensions & execute new extensions', () => {
@@ -169,6 +198,35 @@ describe('runtime', () => {
       const promise = getServicePromise(win, 'amp-test-register');
       win.AMP.registerElement('amp-test-register', win.AMP.BaseElement);
       return promise;
+    });
+  });
+
+  describe('attachShadowRoot', () => {
+    beforeEach(() => {
+      ampdocServiceMock.expects('isSingleDoc').returns(false).atLeast(1);
+      adopt(win);
+    });
+
+    it('should register attachShadowRoot callback for a multi-doc', () => {
+      expect(win.AMP.attachShadowRoot).to.be.a('function');
+    });
+
+    it('should register services and install stylesheet', () => {
+      const shadowRoot = document.createElement('div');
+      const ampdoc = new AmpDocShadow(win, shadowRoot);
+      ampdocServiceMock.expects('getAmpDoc')
+          .withExactArgs(shadowRoot)
+          .returns(ampdoc)
+          .atLeast(1);
+      const ret = win.AMP.attachShadowRoot(shadowRoot);
+      expect(ret).to.exist;
+
+      // Stylesheet has been installed.
+      expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
+
+      // Services have been installed.
+      expect(ampdoc.services.action).to.exist;
+      expect(ampdoc.services.action.obj).to.exist;
     });
   });
 });

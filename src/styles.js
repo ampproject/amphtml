@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {setStyles, setStyle} from './style';
-import {platformFor} from './platform';
+import {setStyles} from './style';
 import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
@@ -39,21 +38,12 @@ import {dev} from './log';
  * @param {string=} opt_ext
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
-  if (platformFor(doc.defaultView).isIos() && opt_isRuntimeCss) {
-    setStyle(doc.documentElement, 'cursor', 'pointer');
-  }
-  const style = doc.createElement('style');
-  style.textContent = cssText;
-  let afterElement = null;
-  // Make sure that we place style tags after the main runtime CSS. Otherwise
-  // the order is random.
-  if (opt_isRuntimeCss) {
-    style.setAttribute('amp-runtime', '');
-  } else {
-    style.setAttribute('amp-extension', opt_ext || '');
-    afterElement = doc.querySelector('style[amp-runtime]');
-  }
-  insertAfterOrAtStart(dev.assert(doc.head), style, afterElement);
+  const style = insertStyleElement(
+      doc,
+      dev.assert(doc.head),
+      opt_isRuntimeCss || false,
+      opt_ext || null);
+
   // Styles aren't always available synchronously. E.g. if there is a
   // pending style download, it will have to finish before the new
   // style is visible.
@@ -81,6 +71,58 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
     }
   }, 4);
 }
+
+
+/**
+ * Adds the given css text to the given shadow root.
+ *
+ * The style tags will be at the beginning of the shadow root before all author
+ * styles. One element can be the main runtime CSS. This is guaranteed
+ * to always be the first stylesheet in the doc.
+ *
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} cssText
+ * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
+ *     as the first element in head and all style elements will be positioned
+ *     after.
+ * @param {string=} opt_ext
+ */
+export function installStylesForShadowRoot(shadowRoot, cssText,
+    opt_isRuntimeCss, opt_ext) {
+  insertStyleElement(
+      shadowRoot.ownerDocument,
+      shadowRoot,
+      cssText,
+      opt_isRuntimeCss || false,
+      opt_ext || null);
+}
+
+
+/**
+ * Creates the properly configured style element.
+ * @param {!Document} doc
+ * @param {!Element|!ShadowRoot} cssRoot
+ * @param {string} cssText
+ * @param {boolean} isRuntimeCss
+ * @param {?string} ext
+ * @return {!Element}
+ */
+function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
+  const style = doc.createElement('style');
+  style.textContent = cssText;
+  let afterElement = null;
+  // Make sure that we place style tags after the main runtime CSS. Otherwise
+  // the order is random.
+  if (isRuntimeCss) {
+    style.setAttribute('amp-runtime', '');
+  } else {
+    style.setAttribute('amp-extension', ext || '');
+    afterElement = cssRoot.querySelector('style[amp-runtime]');
+  }
+  insertAfterOrAtStart(cssRoot, style, afterElement);
+  return style;
+}
+
 
 /**
  * Sets the document's body opacity to 1.
