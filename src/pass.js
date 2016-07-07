@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
+import {timerFor} from './timer';
 
 
 /**
@@ -26,11 +26,14 @@ export class Pass {
 
   /**
    * Creates a new Pass instance.
+   * @param {!Window} win
    * @param {function()} handler Handler to be executed when pass is triggered.
    * @param {number=} opt_defaultDelay Default delay to be used when schedule
    *   is called without one.
    */
-  constructor(handler, opt_defaultDelay) {
+  constructor(win, handler, opt_defaultDelay) {
+    this.timer_ = timerFor(win);
+
     /** @private @const {function()} */
     this.handler_ = handler;
 
@@ -79,13 +82,13 @@ export class Pass {
       delay = 10;
     }
 
-    const nextTime = timer.now() + delay;
+    const nextTime = this.timer_.now() + delay;
     // Schedule anew if nothing is scheduled currently or if the new time is
     // sooner then previously requested.
     if (!this.isPending() || nextTime - this.nextTime_ < -10) {
       this.cancel();
       this.nextTime_ = nextTime;
-      this.scheduled_ = timer.delay(this.boundPass_, delay);
+      this.scheduled_ = this.timer_.delay(this.boundPass_, delay);
 
       return true;
     }
@@ -106,7 +109,7 @@ export class Pass {
    */
   cancel() {
     if (this.isPending()) {
-      timer.cancel(this.scheduled_);
+      this.timer_.cancel(this.scheduled_);
       this.scheduled_ = -1;
     }
   }

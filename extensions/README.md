@@ -42,6 +42,7 @@ Current list of extended components:
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md) | Allows for a “lightbox” or similar experience. |
 | [`amp-list`](amp-list/amp-list.md) | Dynamically downloads data and creates list items using a template. |
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
+| [`amp-o2-player`](amp-o2-player/amp-o2-player.md) | Displays a AOL O2Player. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
 | [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
 | [`amp-sidebar`](amp-sidebar/amp-sidebar.md) | Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. |

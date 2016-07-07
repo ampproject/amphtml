@@ -18,6 +18,7 @@
 import './polyfills';
 
 import {user} from './log';
+import {getService} from './service';
 
 /**
  * Helper with all things Timer.
@@ -159,5 +160,15 @@ export class Timer {
   }
 }
 
+/**
+ * @param {!Window} window
+ * @return {!Timer}
+ */
+export function timerFor(window) {
+  return /** @type {!Timer} */ (getService(window, 'timer', () => {
+    return new Timer(window);
+  }));
+};
 
-export const timer = new Timer(window);
+
+export const timer = timerFor(window);

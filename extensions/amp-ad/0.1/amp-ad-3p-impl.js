@@ -16,7 +16,7 @@
 
 import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
-import {prefetchBootstrap} from '../../../src/3p-frame';
+import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
@@ -110,13 +110,6 @@ export function incrementLoadingAds(win) {
  * anyway.
  */
 export function isPositionFixed(el, win) {
-  // TODO(@cramforce): Figure out why test comes here with the window
-  // removed. This is somehow related to the resource framework running
-  // on a timer that is not bound to the lifetime of the iframe.
-  // See https://github.com/ampproject/amphtml/issues/3709
-  if (!win) {
-    return false;
-  }
   let hasFixedAncestor = false;
   do {
     if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
@@ -193,6 +186,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private {IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private @const {function()} */
+    this.boundNoContentHandler_ = () => this.noContentHandler_();
+
     setupA2AListener(this.getWin());
   }
 
@@ -202,15 +198,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
-    prefetchBootstrap(this.getWin());
+    preloadBootstrap(this.getWin());
     const type = this.element.getAttribute('type');
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {
-      this.preconnect.prefetch(prefetch, 'script');
+      this.preconnect.preload(prefetch, 'script');
     } else if (prefetch) {
       prefetch.forEach(p => {
-        this.preconnect.prefetch(p, 'script');
+        this.preconnect.preload(p, 'script');
       });
     }
     if (typeof preconnect == 'string') {
@@ -279,7 +275,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.noContentHandler_);
+          this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }

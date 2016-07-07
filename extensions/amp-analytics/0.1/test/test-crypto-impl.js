@@ -45,6 +45,13 @@ describe('crypto-impl', () => {
       it('should throw when input contains chars out of range [0,255]', () => {
         expect(() => crypto.sha384('abc今')).to.throw();
         expect(() => crypto.sha384Base64('abc今')).to.throw();
+        expect(() => crypto.uniform('abc今')).to.throw();
+      });
+
+      it('should hash "abc" to uniform number', () => {
+        return crypto.uniform('abc').then(result => {
+          expect(result.toFixed(6)).to.equal('0.792976');
+        });
       });
     });
   }

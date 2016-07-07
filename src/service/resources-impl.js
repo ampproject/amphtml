@@ -26,7 +26,6 @@ import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
-import {installFramerateService} from './framerate-impl';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
@@ -118,7 +117,7 @@ export class Resources {
     this.lastVelocity_ = 0;
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(() => this.doPass_());
+    this.pass_ = new Pass(this.win, () => this.doPass_());
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -155,9 +154,6 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
-    /** @private @const {!./framerate-impl.Framerate}  */
-    this.framerate_ = installFramerateService(this.win);
-
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -173,7 +169,6 @@ export class Resources {
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = timer.now();
-      this.framerate_.collect();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
@@ -1036,9 +1031,6 @@ export class Resources {
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
             .catch(reportError);
-        if (task.resource.getState() == ResourceState.LAYOUT_SCHEDULED) {
-          this.framerate_.collect(task.resource.element);
-        }
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);

@@ -76,6 +76,7 @@ function buildExtensions(options) {
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
+  buildExtension('amp-o2-player', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
   buildExtension('amp-share-tracking', '0.1', false, options);
@@ -378,6 +379,7 @@ function buildExamples(watch) {
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
+  buildExample('o2player.amp.html');
   buildExample('pinterest.amp.html');
   buildExample('reach-player.amp.html');
   buildExample('released.amp.html');
@@ -775,7 +777,13 @@ gulp.task('build', 'Builds the AMP library', build);
 gulp.task('check-types', 'Check JS types', checkTypes);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
-gulp.task('dist', 'Build production binaries', dist);
+gulp.task('dist', 'Build production binaries', dist, {
+  options: {
+    pseudo_names: 'Compiles with readable names. ' +
+        'Great for profiling and debugging production code.',
+    fortesting: 'Compiles with `getMode().test` set to true',
+  }
+});
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);

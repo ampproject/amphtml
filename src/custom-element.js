@@ -22,10 +22,11 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
+import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
 
@@ -280,7 +281,6 @@ class AmpElement {
   // TODO(dvoytenko): Add all exposed methods.
 }
 
-
 /**
  * Creates a new custom element class prototype.
  *
@@ -293,10 +293,34 @@ class AmpElement {
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementProto(win, name, opt_implementationClass) {
+  const ElementProto = win.Object.create(createBaseAmpElementProto(win));
+  ElementProto.name = name;
+  if (getMode().test && opt_implementationClass) {
+    ElementProto.implementationClassForTesting = opt_implementationClass;
+  }
+  return ElementProto;
+}
+
+/**
+ * Creates a new custom element class prototype.
+ *
+ * The prototype is cached per window and meant to be sub classed for a
+ * concrete object.
+ *
+ * @param {!Window} win The window in which to register the elements.
+ * @return {!Object} Prototype of element.
+ */
+function createBaseAmpElementProto(win) {
+
+  if (win.BaseCustomElementProto) {
+    return win.BaseCustomElementProto;
+  }
+
   /**
    * @lends {AmpElement.prototype}
    */
   const ElementProto = win.Object.create(win.HTMLElement.prototype);
+  win.BaseCustomElementProto = ElementProto;
 
   /**
    * Called when elements is created. Sets instance vars since there is no
@@ -317,7 +341,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.everAttached = false;
 
     /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(win);
+    this.resources_ = resourcesFor(this.ownerDocument.defaultView);
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -363,7 +387,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     this.overflowElement_ = undefined;
 
     // `opt_implementationClass` is only used for tests.
-    const Ctor = opt_implementationClass || knownElements[name];
+    let Ctor = knownElements[this.name];
+    if (getMode().test && this.implementationClassForTesting) {
+      Ctor = this.implementationClassForTesting;
+    }
 
     /** @private {!./base-element.BaseElement} */
     this.implementation_ = new Ctor(this);
@@ -472,7 +499,8 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       if (this.actionQueue_.length > 0) {
         // Only schedule when the queue is not empty, which should be
         // the case 99% of the time.
-        timer.delay(this.dequeueActions_.bind(this), 1);
+        timerFor(this.ownerDocument.defaultView)
+            .delay(this.dequeueActions_.bind(this), 1);
       } else {
         this.actionQueue_ = null;
       }
@@ -498,7 +526,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       // If we do early preconnects we delay them a bit. This is kind of
       // an unfortunate trade off, but it seems faster, because the DOM
       // operations themselves are not free and might delay
-      timer.delay(() => {
+      timerFor(this.ownerDocument.defaultView).delay(() => {
         this.implementation_.preconnectCallback(onLayout);
       }, 1);
     }
@@ -668,11 +696,19 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
 
 
   /**
+   * Dispatches a custom event.
+   *
+   * NOTE: This is currently only active for tests.
+   * Do not rely on this mechanism for production code.
+   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
+    if (!getMode().test) {
+      return;
+    }
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
@@ -727,7 +763,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
     const box = this.implementation_.getIntersectionElementLayoutBox();
     const rootBounds = this.implementation_.getViewport().getRect();
     return getIntersectionChangeEntry(
-        timer.now(),
+        timerFor(this.ownerDocument.defaultView).now(),
         rootBounds,
         box);
   };
@@ -795,7 +831,7 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
       } else {
         // Set a minimum delay in case the element loads very fast or if it
         // leaves the viewport.
-        timer.delay(() => {
+        timerFor(this.ownerDocument.defaultView).delay(() => {
           if (this.layoutCount_ == 0 && this.isInViewport_) {
             this.toggleLoading_(true);
           }

@@ -21,7 +21,7 @@ import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @const {string} */
@@ -272,7 +272,7 @@ export class AmpIframe extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timer.promise(trackingIframeTimeout).then(() => {
+        timerFor(this.getWin()).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -281,23 +281,7 @@ export class AmpIframe extends AMP.BaseElement {
     };
 
     listenFor(iframe, 'embed-size', data => {
-      let newHeight, newWidth;
-      if (data.width !== undefined) {
-        newWidth = Math.max(this.element./*OK*/offsetWidth +
-            data.width - iframe./*OK*/offsetWidth, data.width);
-        iframe.width = data.width;
-        this.element.setAttribute('width', newWidth);
-      }
-
-      if (data.height !== undefined) {
-        newHeight = Math.max(this.element./*OK*/offsetHeight +
-            data.height - iframe./*OK*/offsetHeight, data.height);
-        iframe.height = data.height;
-        this.element.setAttribute('height', newHeight);
-      }
-      if (newHeight !== undefined || newWidth !== undefined) {
-        this.updateSize_(newHeight, newWidth);
-      }
+      this.updateSize_(data.height, data.width);
     });
 
     if (this.isClickToPlay_) {
@@ -311,7 +295,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timer.delay(() => {
+        timerFor(this.getWin()).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });
@@ -386,18 +370,47 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {number|undefined} newWidth
-   * @param {number|undefined} newHeight
+   * @param {number|undefined} height
+   * @param {number|undefined} width
    * @private
    */
-  updateSize_(newHeight, newWidth) {
+  updateSize_(height, width) {
     if (!this.isResizable_) {
       user.warn(TAG_,
           'ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
-    this.attemptChangeSize(newHeight, newWidth);
+
+    let newHeight, newWidth;
+    if (height !== undefined) {
+      newHeight = Math.max(
+        (this.element./*OK*/offsetHeight - this.iframe_./*OK*/offsetHeight)
+            + height,
+        height);
+    }
+    if (width !== undefined) {
+      newWidth = Math.max(
+        (this.element./*OK*/offsetWidth - this.iframe_./*OK*/offsetWidth)
+            + width,
+        width);
+    }
+
+    if (newHeight !== undefined || newWidth !== undefined) {
+      this.attemptChangeSize(newHeight, newWidth, () => {
+        if (newHeight !== undefined) {
+          this.element.setAttribute('height', newHeight);
+        }
+        if (newWidth !== undefined) {
+          this.element.setAttribute('width', newWidth);
+        }
+      });
+    } else {
+      user.warn(TAG_,
+          'ignoring embed-size request because'
+          + 'no width or height value is provided',
+          this.element);
+    }
   }
 
   /**

@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Factory for ./service/cid-impl.js
- */
-
-import {getService} from './service';
+import {getElementServiceIfAvailable} from './element-service';
 
 /**
- * @param {!Window} window
- * @return {!Framerate}
+ * Returns a promise for the experiment variants or a promise for null if it is
+ * not available on the current page.
+ * @param {!Window} win
+ * @return {!Promise<?Object<string, string>>}
  */
-export function framerateFor(window) {
-  return getService(window, 'framerate');
-};
+export function variantForOrNull(win) {
+  return getElementServiceIfAvailable(win, 'variant', 'amp-experiment');
+}
