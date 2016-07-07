@@ -126,7 +126,17 @@ function main() {
       });
 }
 
-gulp.task('prepend-global', 'test', main);
+gulp.task('prepend-global', 'Prepends a json config to a target file', main, {
+  options: {
+    'target': '  The file to prepend the json config to.',
+    'canary': '  Prepend the default canary config. ' +
+        'Takes in an optional value for a custom canary config source.',
+    'prod': '  Prepend the default prod config. ' +
+        'Takes in an optional value for a custom prod config source.',
+    'branch': '  Switch to a git branch to get config source from. ' +
+        'Uses master by default.',
+  }
+});
 
 exports.checkoutBranchConfigs = checkoutBranchConfigs;
 exports.prependConfig = prependConfig;
