@@ -57,6 +57,7 @@ function buildExtensions(options) {
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
+  buildExtension('amp-cxense-player', '0.1', true, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
@@ -353,6 +354,7 @@ function buildExamples(watch) {
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
   buildExample('brid-player.amp.html');
+  buildExample('cxense-player.amp.html');
   buildExample('brightcove.amp.html');
   buildExample('kaltura.amp.html');
   buildExample('responsive.amp.html');
