@@ -167,6 +167,7 @@ function tests(name) {
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
+
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.apiHandler_.updateSize_(217, 114);
@@ -276,7 +277,7 @@ function tests(name) {
         });
       });
 
-      it('should collapse when attemptChangeHeight succeeds', () => {
+      it('should collapse when attempChangeHeight succeeds', () => {
         return getAd({
           width: 300,
           height: 750,
@@ -290,11 +291,10 @@ function tests(name) {
               ad.implementation_, 'deferMutate', function(callback) {
                 callback();
               });
-          //TODO(zhouyx): need to fix the test
-          sandbox.stub(ad.implementation_,
-              'collapseParent',
-              function() {
-                ad.style.display = 'none';
+          sandbox.stub(ad.implementation_, 'parent_', ad);
+          sandbox.stub(ad.implementation_, 'attemptChangeHeight',
+              function(height, callback) {
+                callback();
               });
           ad.style.position = 'absolute';
           ad.style.top = '300px';

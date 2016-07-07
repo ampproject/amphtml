@@ -307,7 +307,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
-      this.collapseParent();
+      this.attemptChangeHeight(0, () => {
+        this.parent_.style.display = 'none';
+      });
     }
 
     this.deferMutate(() => {
@@ -358,11 +360,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
   }
 
-  /** Function to collapse parent <amp-ad> element*/
-  collapseParent() {
-    this.resources_.attemptChangeSize(this.parent_, 0, 0, () => {
-      this.parent_.style.display = 'none';
-      this.style.display = 'none';
-    });
+  /** @override */
+  attemptChangeHeight(newHeight, opt_callback) {
+    this.resources_.attemptChangeSize(this.parent_, newHeight,
+        /* newWidth */ undefined, opt_callback);
+  }
+
+  /** @override */
+  attemptChangeSize(newHeight, newWidth, opt_callback) {
+    this.resources_.attemptChangeSize(this.parent_, newHeight, newWidth,
+        opt_callback);
   }
 }
