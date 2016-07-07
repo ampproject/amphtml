@@ -8,8 +8,8 @@
       width="320"
       height="50"
       type="yieldone"
-      yieldoneParam.pubid="0214"
-      yieldoneParam.pid="31480"
+      data-pubid="0214"
+      data-pid="31480"
       >
       </amp-ad>
 
@@ -20,5 +20,5 @@
 
  Supported parameters:
 
- - yieldoneParam.pubid
- - yieldoneParam.pid
+ - data-pubid
+ - data-pid

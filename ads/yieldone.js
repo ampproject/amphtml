@@ -16,7 +16,7 @@
 
  import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
- const yieldoneFields = ['yieldoneParam.pubid', 'yieldoneParam.pid','width', 'height'];
+ const yieldoneFields = ['pubid', 'pid','width', 'height'];
 
  /**
   * @param {!Window} global
