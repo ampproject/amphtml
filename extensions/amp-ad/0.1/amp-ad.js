@@ -17,6 +17,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl, TAG_3P_IMPL} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_config';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {copyChildren} from '../../../src/dom';
 
 
 /**
@@ -33,7 +34,8 @@ function networkImplementationTag(type) {
 }
 
 /** @private @enum {!number} */
-const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
+const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3, 'layout': 4,
+    'width': 5, 'height': 6, 'heights': 7, 'sizes': 8, 'media': 9,};
 
 /**
  * Copies (almost) all attributes from one Element to another.  Skips AMP
@@ -50,6 +52,10 @@ function copyAttributes(sourceElement, targetElement) {
     if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
       targetElement.setAttribute(attr.name, attr.value);
     }
+    // special case put here for width and height
+    if (attr.name == 'width' || attr.name == 'height') {
+      targetElement.setAttribute(attr.name, attr.value);
+    }
   }
 }
 
@@ -60,6 +66,7 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
+    console.log(isLayoutSizeDefined(layout));
     return isLayoutSizeDefined(layout);
   }
 
@@ -78,6 +85,7 @@ export class AmpAd extends AMP.BaseElement {
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
       newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
+      newChild.setAttribute('layout', 'fill');
     } else {
       // Note: The insertAmpExtensionScript method will pick the version number.
       // If we ever reach a point at which there are different extensions with
@@ -88,9 +96,12 @@ export class AmpAd extends AMP.BaseElement {
       /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
     }
     copyAttributes(this.element, newChild);
+    copyChildren(this.element, newChild);
     this.element.appendChild(newChild);
   }
 }
+
+// export function attemptChangeHeightAd(element, )
 
 AMP.registerElement('amp-ad', AmpAd);
 AMP.registerElement('amp-embed', AmpAd);

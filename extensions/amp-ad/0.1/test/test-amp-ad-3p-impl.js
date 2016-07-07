@@ -62,7 +62,7 @@ function tests(name) {
         expect(data.width).to.equal(300);
         expect(data.height).to.equal(250);
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
-
+        console.log(iframe);
         const doc = iframe.ownerDocument;
         let fetches = doc.querySelectorAll(
             'link[rel=prefetch]');

@@ -45,6 +45,7 @@ export function createAdPromise(name, attributes, canonical,
     opt_handleElement, opt_beforeLayoutCallback) {
   return createIframePromise(undefined, opt_beforeLayoutCallback)
     .then(iframe => {
+      console.log('in createAdPromise');
       iframe.iframe.style.height = '400px';
       iframe.iframe.style.width = '400px';
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');

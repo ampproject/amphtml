@@ -33,12 +33,18 @@ export class AmpAdApiHandler {
    * @param {!Element} element
    * @param {function()=} opt_noContentCallback
    */
-  constructor(baseInstance, element, opt_noContentCallback) {
+  constructor(baseInstance, element/*, parentInstance, parent*/, opt_noContentCallback) {
     /** @private {!BaseElement} */
     this.baseInstance_ = baseInstance;
 
     /** @privat {!Element} */
     this.element_ = element;
+
+    // /** @private {!BaseElement} */
+    // this.parentInstance_ = parentInstance;
+
+    // /** @privat {!Element} */
+    // this.parent_ = parent;
 
     /** @private {?Element} iframe instance */
     this.iframe_ = null;
