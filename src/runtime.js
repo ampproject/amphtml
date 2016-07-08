@@ -52,6 +52,7 @@ import {setStyle} from './style';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
+import * as config from './config';
 
 
 /** @const @private {string} */
@@ -138,6 +139,9 @@ function adoptShared(global, opts, callback) {
   global.AMP = {
     win: global,
   };
+
+  /** @const */
+  global.AMP.config = config;
 
   /** @const */
   global.AMP.BaseElement = BaseElement;

@@ -19,6 +19,7 @@ import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
+import {urls} from './config';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
 
@@ -144,7 +145,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // ../tools/errortracker
   // It stores error reports via https://cloud.google.com/error-reporting/
   // for analyzing production issues.
-  let url = 'https://amp-error-reporting.appspot.com/r' +
+  let url = urls.errorReporting +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);

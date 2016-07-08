@@ -23,6 +23,7 @@ import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
+import {urls} from '../../../src/config';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -61,7 +62,7 @@ export class AmpIframe extends AMP.BaseElement {
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
-    user.assert(!(endsWith(url.hostname, '.ampproject.net') ||
+    user.assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
         'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);

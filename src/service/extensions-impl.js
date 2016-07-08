@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {urls} from '../config';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 
@@ -413,10 +414,9 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
-  const domain = 'https://cdn.ampproject.org/';
   const folderPath = getMode().version == '$internalRuntimeVersion$' ?
       '' : `rtv/${getMode().version}/`;
-  return `${domain}${folderPath}v0/${extensionId}-0.1.js`;
+  return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
 }
 
 
