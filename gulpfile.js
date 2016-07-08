@@ -273,8 +273,13 @@ function buildExtensionJs(path, name, version, options) {
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
+    // Wrapper that either registers the extension or schedules it for
+    // execution after the main binary comes back.
+    // The `function` is wrapped in `()` to avoid lazy parsing it,
+    // since it will be immediately executed anyway.
+    // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: '(window.AMP = window.AMP || [])' +
-        '.push(function(AMP) {<%= contents %>\n});',
+        '.push((function(AMP) {<%= contents %>\n}));',
   });
 }
 
