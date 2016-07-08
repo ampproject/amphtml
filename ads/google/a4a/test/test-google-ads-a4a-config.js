@@ -41,9 +41,6 @@ describe('a4a_config', () => {
         subtle: true,
         webkitSubtle: true,
       },
-      AMP_CONFIG: {
-	test_experiment_id: 0.0,
-      },
     };
   });
 
@@ -84,7 +81,7 @@ describe('a4a_config', () => {
     rand.onFirstCall().returns(2);  // Force experiment off.
     const element = document.createElement('div');
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
-	   'googleAdsIsA4AEnabled').to.be.false;
+        'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
     expect(rand.calledOnce, 'rand called once').to.be.true;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;

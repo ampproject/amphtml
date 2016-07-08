@@ -17,10 +17,6 @@
 import {
   extractGoogleAdCreativeAndSignature,
 } from '../utils';
-import * as sinon from 'sinon';
-
-/** @const {string} */
-const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
 
 describe('Google A4A utils', () => {
   describe('#extractGoogleAdCreativeAndSignature', () => {
@@ -31,7 +27,7 @@ describe('Google A4A utils', () => {
       };
       const headers = {
         has: h => { return h in headerData; },
-        get: h => { return headerData[h]; }
+        get: h => { return headerData[h]; },
       };
       return expect(extractGoogleAdCreativeAndSignature(text, headers))
           .to.eventually.deep.equal({
@@ -43,8 +39,8 @@ describe('Google A4A utils', () => {
     it('should return null when no signature header is present', () => {
       const text = 'some test data';
       const headers = {
-        has: h => { return false; },
-        get: h => { throw new Error('Tried to get ' + h); }
+        has: unused => { return false; },
+        get: h => { throw new Error('Tried to get ' + h); },
       };
       return expect(extractGoogleAdCreativeAndSignature(text, headers))
           .to.eventually.deep.equal({

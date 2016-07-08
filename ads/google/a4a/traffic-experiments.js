@@ -62,7 +62,7 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
     handleUrlParameters(win, experimentId, branches);
-    let experimentInfo = {};
+    const experimentInfo = {};
     experimentInfo[experimentId] = branches;
     setupPageExperiments(win, experimentInfo);
     if (isExperimentOn(win, experimentId)) {
