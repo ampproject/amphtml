@@ -227,19 +227,19 @@ export class AmpSlideScroll extends BaseCarousel {
   /**
    * Animate and snap to the correct slide for a given scrollLeft.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @param {number=} optForceDir if a valid direction is given force it to
+   * @param {number=} opt_forceDir if a valid direction is given force it to
    *    move 1 slide in that direction.
    * @return {!Promise}
    */
-  customSnap_(currentScrollLeft, optForceDir) {
+  customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     let toScrollLeft;
     let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
 
-    if (diff == 0 && (optForceDir == 1 || optForceDir == -1)) {
-      diff = optForceDir;
+    if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
+      diff = opt_forceDir;
     }
 
     if (diff == 0) {
