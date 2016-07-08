@@ -17,6 +17,7 @@
 import {createIframePromise} from '../../../../testing/iframe';
 import {a4aRegistry} from '../../../../ads/_config';
 import {AmpAd} from '../amp-ad';
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {childElement} from '../../../../src/dom';
 import {
   resetExtensionScriptInsertedOrPresentForTesting,
@@ -59,16 +60,13 @@ describe('A4A loader', () => {
             element.setAttribute('height', '200');
             doc.body.appendChild(element);
             const handler = new AmpAd(element);
-            handler.buildCallback();
+            const impl = handler.upgradeCallback();
+            expect(impl).to.be.instanceof(AmpAd3PImpl);
             expect(childElement(element,
                 c => {
                   return c.tagName.indexOf('NONEXISTENT-TAG-TYPE') >= 0;
                 }))
                 .to.be.null;
-            expect(childElement(element,
-                c => {
-                  return c.tagName === 'AMP-AD-3P-IMPL';
-                })).to.not.be.null;
           });
         });
 
@@ -84,19 +82,12 @@ describe('A4A loader', () => {
             element.setAttribute('height', '200');
             doc.body.appendChild(element);
             const handler = new AmpAd(element);
-            handler.buildCallback();
+            const impl = handler.upgradeCallback();
+            expect(impl).to.be.instanceof(AmpAd3PImpl);
             expect(childElement(element,
                 c => {
                   return c.tagName.indexOf('ZORT') >= 0;
                 })).to.be.null;
-            const expectedChild = childElement(element,
-                c => {
-                  return c.tagName === 'AMP-AD-3P-IMPL';
-                });
-            expect(expectedChild).to.not.be.null;
-            expect(expectedChild.getAttribute('type')).to.equal('zort');
-            expect(expectedChild.getAttribute('width')).to.equal('300');
-            expect(expectedChild.getAttribute('height')).to.equal('200');
           });
         });
       });
@@ -113,6 +104,7 @@ describe('A4A loader', () => {
           element.setAttribute('height', '200');
           doc.body.appendChild(element);
           const handler = new AmpAd(element);
+          expect(handler.upgradeCallback()).to.be.null;
           handler.buildCallback();
           const expectedChild = childElement(element,
               c => {
@@ -142,6 +134,7 @@ describe('A4A loader', () => {
           element.setAttribute('height', '200');
           doc.body.appendChild(element);
           const handler = new AmpAd(element);
+          expect(handler.upgradeCallback()).to.be.null;
           handler.buildCallback();
           expect(childElement(doc.head,
               c => {
