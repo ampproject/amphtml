@@ -199,7 +199,7 @@ export class AccessService {
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
-    throw dev.createError('Unsuported access type: ', this.type_);
+    throw dev.createError('Unsupported access type: ', this.type_);
   }
 
   /**
@@ -213,6 +213,10 @@ export class AccessService {
     if (type == AccessType.SERVER && !this.isServerEnabled_) {
       user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;
+    }
+    if (type == AccessType.CLIENT && this.isServerEnabled_) {
+      user.info(TAG, 'Forcing access type: SERVER');
+      type = AccessType.SERVER;
     }
     return type;
   }
