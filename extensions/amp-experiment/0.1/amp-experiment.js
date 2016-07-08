@@ -52,9 +52,13 @@ export class AmpExperiment extends AMP.BaseElement {
 
     /** @private @const {!Promise<Object<string, ?string>>} */
     this.experimentVariants_ = Promise.all(variants).then(() => results);
-    this.experimentVariants_.then(this.addToBody_.bind(this));
+    const bodyMutatePromise =
+        this.experimentVariants_.then(this.addToBody_.bind(this));
 
     getService(this.getWin(), 'variant', () => this.experimentVariants_);
+    // Body mutation makes amp-experiment a render-delaying-extension.
+    // Use the service framework to inform outside when the mutation is done.
+    getService(this.getWin(), 'amp-experiment', () => bodyMutatePromise);
   }
 
   getConfig_() {

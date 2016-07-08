@@ -27,13 +27,14 @@ import {timer} from './timer';
 const EXTENSIONS = [
   'amp-accordion',
   'amp-dynamic-css-classes',
+  'amp-experiment',
 ];
 
 /**
  * Maximum milliseconds to wait for all extensions to load before erroring.
  * @const
  */
-const LOAD_TIMEOUT = 3000;
+const LOAD_TIMEOUT = 300000;
 
 
 /**

@@ -19,6 +19,7 @@ import {AmpExperiment} from '../amp-experiment';
 import * as variant from '../variant';
 import {variantForOrNull} from '../../../../src/variant-service';
 import {toggleExperiment} from '../../../../src/experiments';
+import {getServicePromise} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 describe('amp-experiment', () => {
@@ -143,6 +144,26 @@ describe('amp-experiment', () => {
       });
       expect(win.document.body.getAttribute('amp-x-experiment-3'))
           .to.equal(null);
+    });
+  });
+
+  it('should expose amp-experiment as service after body mutation', () => {
+    addConfigElement('script');
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(
+        win, config['experiment-1']).returns(Promise.resolve('variant-a'));
+    stub.withArgs(
+        win, config['experiment-2']).returns(Promise.resolve('variant-d'));
+    stub.withArgs(
+        win, config['experiment-3']).returns(Promise.resolve(null));
+
+    experiment.buildCallback();
+    return getServicePromise(win, 'amp-experiment').then(() => {
+      // Body mutation should be done at this point.
+      expectBodyHasAttributes({
+        'amp-x-experiment-1': 'variant-a',
+        'amp-x-experiment-2': 'variant-d',
+      });
     });
   });
 });
