@@ -207,7 +207,7 @@ class ChildTagMatcher {
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) == -1) {
+      if (names.indexOf(tagName) === -1) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -215,8 +215,10 @@ class ChildTagMatcher {
               amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
-               allowedNames.toLowerCase()],
+              [
+                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                allowedNames.toLowerCase()
+              ],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -225,7 +227,7 @@ class ChildTagMatcher {
       }
     }
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        (this.numChildTagsSeen_ - 1) == 0) {
+        (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(tagName) == -1) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -236,8 +238,10 @@ class ChildTagMatcher {
                   .DISALLOWED_FIRST_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
-               allowedNames.toLowerCase()],
+              [
+                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                allowedNames.toLowerCase()
+              ],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -559,13 +563,13 @@ class CdataMatcher {
      * @private
      */
     this.cdataRegex_ = null;
-    if (tagSpec.cdata && tagSpec.cdata.cdataRegex) {
+    if (tagSpec.cdata !== null && tagSpec.cdata.cdataRegex !== null) {
       this.cdataRegex_ = new RegExp('^(' + tagSpec.cdata.cdataRegex + ')$');
     }
 
     /** @type {string} */
     var blacklistedCdataRegexStr = '';
-    if (tagSpec.cdata) {
+    if (tagSpec.cdata !== null) {
       for (const blacklist of tagSpec.cdata.blacklistedCdataRegex) {
         blacklistedCdataRegexStr += blacklist + '|';
       }
@@ -895,7 +899,8 @@ class Context {
   setCdataMatcher(matcher) {
     if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
       // We store away the position from when the matcher was created
-      // so we can use it to generate error messages relating to the opening tag.
+      // so we can use it to generate error messages relating to the opening
+      // tag.
       matcher.setLineCol(
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
@@ -908,8 +913,8 @@ class Context {
   /** @param {?ChildTagMatcher} matcher */
   setChildTagMatcher(matcher) {
     if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
-        matcher.setLineCol(
-            new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+      matcher.setLineCol(
+          new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
     this.tagStack_.setChildTagMatcher(matcher);
   }
@@ -1011,7 +1016,7 @@ class ParsedUrlSpec {
       return;
     }
     const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
-    if (scheme &&
+    if (scheme !== undefined && scheme.length > 0 &&
         !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrlProtocol(
@@ -1021,7 +1026,8 @@ class ParsedUrlSpec {
       }
       return;
     }
-    if (!this.spec_.allowRelative && (scheme === undefined)) {
+    if (!this.spec_.allowRelative &&
+        (scheme === undefined || scheme.length == 0)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.disallowedRelativeUrl(context, url, tagSpec, result);
       } else {
@@ -1030,7 +1036,7 @@ class ParsedUrlSpec {
       return;
     }
     const domain = urlComponents[goog.uri.utils.ComponentIndex.DOMAIN];
-    if (domain &&
+    if (domain !== undefined && domain.length > 0 &&
         this.disallowedDomains_.hasOwnProperty(domain.toLowerCase())) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.disallowedDomain(
@@ -1231,7 +1237,7 @@ class ParsedAttrTriggerSpec {
      */
     this.spec_ = attrSpec.trigger;
 
-    goog.asserts.assert(attrSpec.name != null);
+    goog.asserts.assert(attrSpec.name !== null);
     /**
      * @type {string} attrName
      * @private
@@ -1244,7 +1250,7 @@ class ParsedAttrTriggerSpec {
      */
     this.ifValueRegex_ = null;
 
-    if (this.spec_ && this.spec_.ifValueRegex) {
+    if (this.spec_ !== null && this.spec_.ifValueRegex !== null) {
       this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
     }
   }
@@ -1299,7 +1305,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.triggerSpec_ = null;
-    if (this.spec_.trigger) {
+    if (this.spec_.trigger !== null) {
       this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
     }
     /**
@@ -1333,7 +1339,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueRegex_ = null;
-    if (this.spec_ && this.spec_.valueRegex) {
+    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
       this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
     }
 
@@ -1342,7 +1348,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueRegexCasei_ = null;
-    if (this.spec_ && this.spec_.valueRegexCasei) {
+    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
       this.valueRegexCasei_ =
           new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
     }
@@ -1352,7 +1358,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.blacklistedValueRegex_ = null;
-    if (this.spec_ && this.spec_.blacklistedValueRegex) {
+    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
       this.blacklistedValueRegex_ =
           new RegExp(this.spec_.blacklistedValueRegex, 'i');
     }
@@ -1483,11 +1489,11 @@ class ParsedAttrSpec {
   validateAttrValueUrl(context, attrName, attrValue, tagSpec, result) {
     /** @type {!Array<string>} */
     let maybeUris = [];
-    if (attrName != 'srcset') {
+    if (attrName !== 'srcset') {
       maybeUris.push(goog.string.trim(attrValue));
     } else {
       let srcset = goog.string.trim(attrValue);
-      if (srcset == '') {
+      if (srcset === '') {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1585,7 +1591,7 @@ class ParsedAttrSpec {
       }
       const propertySpec = this.valuePropertyByName_[name];
       if (propertySpec.value !== null) {
-        if (propertySpec.value != value.toLowerCase()) {
+        if (propertySpec.value !== value.toLowerCase()) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -1600,7 +1606,7 @@ class ParsedAttrSpec {
           }
         }
       } else if (propertySpec.valueDouble !== null) {
-        if (parseFloat(value) != propertySpec.valueDouble) {
+        if (parseFloat(value) !== propertySpec.valueDouble) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -1692,10 +1698,10 @@ class ParsedAttrLists {
     // (1) layout attrs.
     if (tagSpec.ampLayout !== null) {
       const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
-      if (layoutSpecs) {
+      if (layoutSpecs !== undefined) {
         for (const spec of layoutSpecs) {
           const name = spec.getSpec().name;
-          goog.asserts.assert(name != null);
+          goog.asserts.assert(name !== null);
           if (!namesSeen.hasOwnProperty(name)) {
             namesSeen[name] = 0;
             attrs.push(spec);
@@ -1706,7 +1712,7 @@ class ParsedAttrLists {
     // (2) attributes specified within |tagSpec|.
     for (const spec of tagSpec.attrs) {
       const name = spec.name;
-      goog.asserts.assert(name != null);
+      goog.asserts.assert(name !== null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(new ParsedAttrSpec(spec, this.nextId++));
@@ -1718,7 +1724,7 @@ class ParsedAttrLists {
       goog.asserts.assert(specs !== undefined);
       for (const spec of specs) {
         const name = spec.getSpec().name;
-        goog.asserts.assert(name != null);
+        goog.asserts.assert(name !== null);
         if (!namesSeen.hasOwnProperty(name)) {
           namesSeen[name] = 0;
           attrs.push(spec);
@@ -1727,12 +1733,12 @@ class ParsedAttrLists {
     }
     // (4) attributes specified in the global_attr list.
     const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
-    if (!globalSpecs) {
+    if (globalSpecs === undefined) {
       return attrs;
     }
     for (const spec of globalSpecs) {
       const name = spec.getSpec().name;
-      goog.asserts.assert(name != null);
+      goog.asserts.assert(name !== null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(spec);
@@ -1910,7 +1916,6 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
   return tag.mandatory || tag.unique ||
-      getTagSpecName(tag) != null &&
       tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
@@ -2025,7 +2030,7 @@ class ParsedTagSpec {
       for (const altName of altNames) {
         this.attrsByName_[altName] = parsedAttrSpec;
       }
-      if (parsedAttrSpec.getSpec().dispatchKey) {
+      if (parsedAttrSpec.getSpec().dispatchKey !== null) {
         this.dispatchKeyAttrSpec_ = parsedAttrSpec;
       }
       if (parsedAttrSpec.getSpec().implicit) {
@@ -2143,7 +2148,7 @@ class ParsedTagSpec {
    * @param {!amp.validator.ValidationResult} result
    */
   validateLayout(context, attrsByKey, result) {
-    goog.asserts.assert(this.spec_.ampLayout != null);
+    goog.asserts.assert(this.spec_.ampLayout !== null);
 
     const layoutAttr = attrsByKey['layout'];
     const widthAttr = attrsByKey['width'];
@@ -2376,7 +2381,7 @@ class ParsedTagSpec {
     // At this point, it's an error either way, but we try to give a
     // more specific error in the case of Mustache template characters.
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      if (attrName.indexOf('{{') != -1) {
+      if (attrName.indexOf('{{') !== -1) {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
@@ -2682,8 +2687,11 @@ class ParsedTagSpec {
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
                 context.getDocLocator(),
-                /* params */[this.spec_.tagName.toLowerCase(),
-                             mandatoryAncestor.toLowerCase()],
+                /* params */
+                [
+                  this.spec_.tagName.toLowerCase(),
+                  mandatoryAncestor.toLowerCase()
+                ],
                 this.spec_.specUrl, validationResult);
           }
         } else {
@@ -2699,8 +2707,11 @@ class ParsedTagSpec {
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
               context.getDocLocator(),
-              /* params */[this.spec_.tagName.toLowerCase(),
-                           disallowedAncestor.toLowerCase()],
+              /* params */
+              [
+                this.spec_.tagName.toLowerCase(),
+                disallowedAncestor.toLowerCase()
+              ],
               this.spec_.specUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2784,7 +2795,7 @@ class TagSpecDispatch {
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
     // foo="" or just <tag foo>.
-    if (attrName == attrValue)
+    if (attrName === attrValue)
       return this.matchingDispatchKey(attrName, '', mandatoryParent);
 
     return -1;
@@ -2955,7 +2966,7 @@ function specificity(code) {
 amp.validator.maxSpecificity = function(validationResult) {
   let max = 0;
   for (const error of validationResult.errors) {
-    goog.asserts.assert(error.code != null);
+    goog.asserts.assert(error.code !== null);
     const thisSpecificity = specificity(error.code);
     max = Math.max(thisSpecificity, max);
   }
@@ -3015,7 +3026,7 @@ class ParsedValidatorRules {
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
       if (amp.validator.GENERATE_DETAILED_ERRORS)
-        goog.asserts.assert(rules.templateSpecUrl != null);
+        goog.asserts.assert(rules.templateSpecUrl !== null);
       const parsedTagSpec = new ParsedTagSpec(
           rules.templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
@@ -3092,7 +3103,9 @@ class ParsedValidatorRules {
         let attrValue = encounteredAttrs[i + 1];
         // Our html parser repeats the key as the value if there is no value. We
         // replace the value with an empty string instead in this case.
-        if (attrName === attrValue) attrValue = '';
+        if (attrName === attrValue) {
+          attrValue = '';
+        }
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
@@ -3164,7 +3177,7 @@ class ParsedValidatorRules {
         return;
       }
       // If this is the first attempt, always use it.
-      if (resultForBestAttempt.errors.length == 0) {
+      if (resultForBestAttempt.errors.length === 0) {
         resultForBestAttempt.copyFrom(resultForAttempt);
         return;
       }
@@ -3229,8 +3242,7 @@ class ParsedValidatorRules {
     }
     // (Re)set the cdata matcher to the expectations that this tag
     // brings with it.
-    if (spec.cdata !== null)
-      context.setCdataMatcher(new CdataMatcher(spec));
+    if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
     if (spec.childTags !== null)
       context.setChildTagMatcher(new ChildTagMatcher(spec));
   }
