@@ -16,6 +16,9 @@
 
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
+import {cidFor} from '../../../src/cid';
+import {userNotificationManagerFor} from '../../../src/user-notification';
+import {cryptoFor} from '../../../src/crypto';
 
 const nameValidator = /^[\w-]+$/;
 
@@ -32,20 +35,38 @@ export function allocateVariant(win, config) {
   const cidScope =
       config.cidScope === undefined ? 'amp-experiment' : config.cidScope;
 
-  return getBucketTicket(win, cidScope).then(bucketTicket => {
-    let upperBound = 0;
+  let hasConsentPromise = Promise.resolve(true);
 
-    // Loop through keys in a specific order since the default object key
-    // enumeration is implementation (browser) dependent.
-    const variantNames = Object.keys(config.variants).sort();
-    for (let i = 0; i < variantNames.length; i++) {
-      upperBound += config.variants[variantNames[i]];
-      if (bucketTicket < upperBound) {
-        return variantNames[i];
-      }
-    }
-    return null;
-  });
+  if (cidScope && config.consentNotificationId) {
+    hasConsentPromise = userNotificationManagerFor(win)
+        .then(manager => manager.get(config.consentNotificationId))
+        .then(userNotification => {
+          user.assert(userNotification,
+              `Notification not found: ${config.consentNotificationId}`);
+          return userNotification.isDismissed();
+        });
+  }
+
+  return hasConsentPromise
+      .then(hasConsent => {
+        if (!hasConsent) {
+          return null;
+        }
+        return getBucketTicket(win, cidScope).then(bucketTicket => {
+          let upperBound = 0;
+
+          // Loop through keys in a specific order since the default object key
+          // enumeration is implementation (browser) dependent.
+          const variantNames = Object.keys(config.variants).sort();
+          for (let i = 0; i < variantNames.length; i++) {
+            upperBound += config.variants[variantNames[i]];
+            if (bucketTicket < upperBound) {
+              return variantNames[i];
+            }
+          }
+          return null;
+        });
+      });
 }
 
 /**
@@ -86,10 +107,15 @@ function validateConfig(config) {
  * @return {!Promise<!number>} a float number in the range of [0, 100)
  */
 function getBucketTicket(win, opt_cidScope) {
-  if (opt_cidScope) {
-    // TODO(@lannka, #1411): implement hashing with CID
-    return Promise.resolve(1);
-  } else {
+  if (!opt_cidScope) {
     return Promise.resolve(win.Math.random() * 100);
   }
+
+  const cidPromise = cidFor(win).then(cidService => cidService.get(
+        {scope: opt_cidScope, createCookieIfNotPresent: true},
+        Promise.resolve()));
+
+  return Promise.all([cidPromise, cryptoFor(win)])
+      .then(results => results[1].uniform(results[0]))
+      .then(hash => hash * 100);
 }

@@ -157,6 +157,15 @@ describe('AccessService', () => {
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessServerAdapter);
 
+    // When the 'amp-access-server' experiment is enabled, documents with
+    // access type 'client' are also treated as 'server'.
+    config['type'] = 'client';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerAdapter);
+
     config['type'] = 'other';
     element.textContent = JSON.stringify(config);
     expect(new AccessService(window).type_).to.equal('other');
