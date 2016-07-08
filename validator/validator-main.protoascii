@@ -25,7 +25,7 @@ min_validator_revision_required: 143
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 236
+spec_file_revision: 237
 
 # Validator extensions.
 # =====================
@@ -823,7 +823,6 @@ tags: {
     # TODO(gregable): This could be improved such that the error message would
     # report which value in a list is the one causing problems.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
-        "canonical|"  # Only allowed for link tags, specific req's for AMP.
         "components|"
         "dns-prefetch|"
         "import|"
