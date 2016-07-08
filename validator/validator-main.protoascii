@@ -25,7 +25,7 @@ min_validator_revision_required: 143
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 235
+spec_file_revision: 236
 
 # Validator extensions.
 # =====================
@@ -2065,13 +2065,13 @@ tags: {
 # 4.10.16 The fieldset element
 tags: {
   tag_name: "FIELDSET"
-  mandatory_ancestor: "FORM"
-  also_requires_tag: "amp-form extension .js script"
   attrs: { name: "disabled" }
   attrs: { name: "form" }
   attrs: { name: "name" }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+}
+# 4.10.17 The legend element
+tags: {
+  tag_name: "LEGEND"
 }
 
 # 4.11 Scripting
