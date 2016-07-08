@@ -208,9 +208,12 @@ export function getLengthUnits(length) {
 /**
  * Returns the numeric value of a CSS length value.
  * @param {!LengthDef|string} length
- * @return {number}
+ * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
+  if (!length) {
+    return undefined;
+  }
   return parseFloat(length);
 }
 
