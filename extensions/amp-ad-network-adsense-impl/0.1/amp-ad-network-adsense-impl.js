@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {QueryParameter} from '../../../ads/google/a4a/url-builder';
 import {
   extractGoogleAdCreativeAndSignature,
   getGoogleAdSlotCounter,
@@ -67,34 +66,30 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const slotRect = viewportFor(global).getLayoutRect(this.element);
     const visibilityState = documentStateFor(global).getVisibilityState();
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
-      new QueryParameter(
-          'client', this.element.getAttribute('data-ad-client')),
-      new QueryParameter('format', `${slotRect.width}x${slotRect.height}`),
-      new QueryParameter('w', slotRect.width),
-      new QueryParameter('h', slotRect.height),
-      new QueryParameter('iu', this.element.getAttribute('data-ad-slot')),
-      new QueryParameter(
-          'adtest', this.element.getAttribute('data-adtest')),
-      new QueryParameter(
-          'bc',
-          global.SVGElement && global.document.createElementNS ?
-              '1' : null),
-      new QueryParameter('ctypes', this.getCtypes_()),
-      new QueryParameter('d_imp', '1'),
-      new QueryParameter('host', this.element.getAttribute('data-ad-host')),
-      new QueryParameter('ifi', slotNumber),
-      new QueryParameter(
-          'to', this.element.getAttribute('data-tag-origin')),
-      new QueryParameter('u_ah', screen ? screen.availHeight : null),
-      new QueryParameter('u_aw', screen ? screen.availWidth : null),
-      new QueryParameter('u_cd', screen ? screen.colorDepth : null),
-      new QueryParameter('u_h', screen ? screen.height : null),
-      new QueryParameter('u_tz', -new Date().getTimezoneOffset()),
-      new QueryParameter('u_w', screen ? screen.width : null),
-      new QueryParameter(
-          'vis', visibilityStateCodes[visibilityState] || '0'),
-      new QueryParameter(
-          'wgl', global['WebGLRenderingContext'] ? '1' : '0'),
+      {name: 'client', value: this.element.getAttribute('data-ad-client')},
+      {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
+      {name: 'w', value: slotRect.width},
+      {name: 'h', value: slotRect.height},
+      {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
+      {name: 'adtest', value: this.element.getAttribute('data-adtest')},
+      {
+        name: 'bc',
+        value: global.SVGElement && global.document.createElementNS ?
+            '1' : null,
+      },
+      {name: 'ctypes', value: this.getCtypes_()},
+      {name: 'd_imp', value: '1'},
+      {name: 'host', value: this.element.getAttribute('data-ad-host')},
+      {name: 'ifi', value: slotNumber},
+      {name: 'to', value: this.element.getAttribute('data-tag-origin')},
+      {name: 'u_ah', value: screen ? screen.availHeight : null},
+      {name: 'u_aw', value: screen ? screen.availWidth : null},
+      {name: 'u_cd', value: screen ? screen.colorDepth : null},
+      {name: 'u_h', value: screen ? screen.height : null},
+      {name: 'u_tz', value: -new Date().getTimezoneOffset()},
+      {name: 'u_w', value: screen ? screen.width : null},
+      {name: 'vis', value: visibilityStateCodes[visibilityState] || '0'},
+      {name: 'wgl', value: global['WebGLRenderingContext'] ? '1' : '0'},
     ], []);
   }
 

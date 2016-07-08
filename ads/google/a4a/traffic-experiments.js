@@ -36,12 +36,11 @@ export let ExperimentInfo;
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
- * <ol>
- *   <li>The page must have originated in the {@code cdn.ampproject.org}
- *   CDN <em>or</em> we must be running in local dev mode.</li>
- *   <li>We must be selected in to an A4A traffic experiment and be selected
- *   into the "experiment" branch.
- * </ol>
+ *
+ * - The page must have originated in the `cdn.ampproject.org` CDN _or_ we must
+ *   be running in local dev mode.
+ * - We must be selected in to an A4A traffic experiment and be selected into
+ *   the "experiment" branch.
  *
  * If we're selected into the overall traffic experiment, this function will
  * also attach an experiment or control branch ID to the {@code Element} as

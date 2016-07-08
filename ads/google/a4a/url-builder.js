@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
+/** typedef {{name: string, value: ?(string|number)}} */
+let QueryParameterDef;
+
 /**
  * Builds a URL from query parameters, truncating to a maximum length if
  * necessary.
  * @param {string} baseUrl scheme, domain, and path for the URL.
- * @param {!Array<!QueryParameter>} queryParams query parameters for that URL.
+ * @param {!Array<!QueryParameterDef>} queryParams query parameters for the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
- * @param {!QueryParameter} truncationQueryParam query parameter to append to
+ * @param {!QueryParameterDef} truncationQueryParam query parameter to append to
  *     the URL iff any query parameters were truncated.
  * @return {string} the fully constructed URL.
  */
@@ -63,20 +66,4 @@ export function buildUrl(
     return baseUrl;
   }
   return baseUrl + '?' + encodedParams.join('&');
-}
-
-export class QueryParameter {
-
-  /**
-   * @param {string} name
-   * @param {?(string|number)} value
-   */
-  constructor(name, value, opt_minUsefulLength) {
-    /** @type {string} */
-    this.name = name;
-
-    /** @type {?(string|number)} */
-    this.value = value;
-  }
-
 }
