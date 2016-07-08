@@ -27,26 +27,30 @@ describe('Google A4A utils', () => {
     it('should return body and signature', () => {
       const text = 'some test data';
       const headerData = {
-	'X-AmpAdSignature': 'a test header',
+        'X-AmpAdSignature': 'a test header',
       };
       const headers = {
-	has: h => { return false; },
-	get: h => { throw new Error('Tried to get ' + h); }
+        has: h => { return h in headerData; },
+        get: h => { return headerData[h]; }
       };
-      const actual = extractGoogleAdCreativeAndSignature(text, headers);
-      expect(actual.creativeArrayBuffer).to.equal('some test data');
-      expect(actual.signature).to.equal('a test header');
+      return expect(extractGoogleAdCreativeAndSignature(text, headers))
+          .to.eventually.deep.equal({
+            creativeArrayBuffer: 'some test data',
+            signature: 'a test header',
+          });
     });
 
     it('should return null when no signature header is present', () => {
       const text = 'some test data';
       const headers = {
-	has: h => { return false; },
-	get: h => { throw new Error('Tried to get ' + h); }
+        has: h => { return false; },
+        get: h => { throw new Error('Tried to get ' + h); }
       };
-      const actual = extractGoogleAdCreativeAndSignature(text, headers);
-      expect(actual.creativeArrayBuffer).to.equal('some test data');
-      expect(actual.signature).to.be.null;
+      return expect(extractGoogleAdCreativeAndSignature(text, headers))
+          .to.eventually.deep.equal({
+            creativeArrayBuffer: 'some test data',
+            signature: null,
+          });
     });
   });
 });
