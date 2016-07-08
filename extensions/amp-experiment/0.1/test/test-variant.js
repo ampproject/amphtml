@@ -38,8 +38,8 @@ describe('allocateVariant', () => {
     sandbox = sinon.sandbox.create();
     getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
     uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
-    getNotificationStub =
-        stubService(sandbox, fakeWin, 'userNotificationManager', 'get');
+    getNotificationStub = stubService(
+        sandbox, fakeWin, 'userNotificationManager', 'getNotification');
   });
 
   afterEach(() => {
