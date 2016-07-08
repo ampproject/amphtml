@@ -59,42 +59,31 @@ describe('amp-ad-network-adsense-impl', () => {
   });
 
   describe('#extractCreativeAndSignature', () => {
-    it('without signature', done => {
+    it('without signature', () => {
       const creativeArrayBuffer =
         new TextEncoder('utf-8').encode('some creative');
-      return adsenseImpl.extractCreativeAndSignature(
+      return expect(adsenseImpl.extractCreativeAndSignature(
         creativeArrayBuffer,
         {
-          get: function() {
-            return undefined;
-          },
-        })
-        .then(result => {
-          expect(result).to.deep.equal(
-            {creativeArrayBuffer, signature: undefined});
-          done();
-        })
-        .catch(error => {
-          assert.fail(error);
-          done();
-        });
+          get: function() { return undefined; },
+          has: function() { return false; },
+        })).to.eventually.deep.equal(
+              {creativeArrayBuffer, signature: null});
     });
-    it('with signature', done => {
+    it('with signature', () => {
       const creativeArrayBuffer =
         new TextEncoder('utf-8').encode('some creative');
-      return adsenseImpl.extractCreativeAndSignature(
+      return expect(adsenseImpl.extractCreativeAndSignature(
         creativeArrayBuffer,
-        {get: function(name) {
-          return name == 'X-AmpAdSignature' ? 'some_sig' : undefined;}})
-        .then(result => {
-          expect(result).to.deep.equal(
+        {
+          get: function(name) {
+            return name == 'X-AmpAdSignature' ? 'some_sig' : undefined;
+          },
+          has: function(name) {
+            return name === 'X-AmpAdSignature';
+          },
+        })).to.eventually.deep.equal(
             {creativeArrayBuffer, signature: 'some_sig'});
-          done();
-        })
-        .catch(error => {
-          assert.fail(error);
-          done();
-        });
     });
   });
 });

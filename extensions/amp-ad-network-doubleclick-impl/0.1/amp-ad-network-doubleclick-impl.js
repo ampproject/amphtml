@@ -21,7 +21,6 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
-import {QueryParameter} from '../../../ads/google/a4a/url-builder';
 import {
   extractGoogleAdCreativeAndSignature,
   getGoogleAdSlotCounter,
@@ -59,20 +58,21 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotNumber, [
-      new QueryParameter('iu', this.element.getAttribute('data-slot')),
-      new QueryParameter('co', jsonParameters['cookieOptOut'] ? '1' : null),
-      new QueryParameter('gdfp_req', '1'),
-      new QueryParameter('impl', 'ifr'),
-      new QueryParameter('sfv', 'A'),
-      new QueryParameter('sz', `${slotRect.width}x${slotRect.height}`),
-      new QueryParameter('tfcd', tfcd == undefined ? null : tfcd),
-      new QueryParameter('u_sd', global.devicePixelRatio),
+      {name: 'iu', value: this.element.getAttribute('data-slot')},
+      {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
+      {name: 'gdfp_req', value: '1'},
+      {name: 'impl', value: 'ifr'},
+      {name: 'sfv', value: 'A'},
+      {name: 'sz', value: `${slotRect.width}x${slotRect.height}`},
+      {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
+      {name: 'u_sd', value: global.devicePixelRatio},
     ], [
-      new QueryParameter(
-          'scp',
-          serializeTargeting(
-              jsonParameters['targeting'] || null,
-              jsonParameters['categoryExclusions'] || null)),
+      {
+        name: 'scp',
+        value: serializeTargeting(
+            jsonParameters['targeting'] || null,
+            jsonParameters['categoryExclusions'] || null),
+      },
     ]);
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {QueryParameter, buildUrl} from './url-builder';
+import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoFor} from '../../../src/document-info';
@@ -89,7 +89,11 @@ export function extractGoogleAdCreativeAndSignature(
     signature: null,
   };
   try {
-    adResponse['signature'] = responseHeaders.get(AMP_SIGNATURE_HEADER);
+    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
+      adResponse.signature = responseHeaders.get(AMP_SIGNATURE_HEADER);
+    } else {
+      adResponse.signature = null;
+    }
   } finally {
     return Promise.resolve(adResponse);
   }
@@ -122,41 +126,41 @@ function buildAdUrl(
   const slotRect = viewport.getLayoutRect(a4a.element);
   const viewportRect = viewport.getRect();
   const iframeDepth = iframeNestingDepth(global);
-  const dtdParam = new QueryParameter('dtd', null);
+  const dtdParam = {name: 'dtd'};
   const allQueryParams = [
     ...queryParams,
-    new QueryParameter(
-        'is_amp',
-        a4a.supportsShadowDom() ?
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME),
-    new QueryParameter('amp_v', '$internalRuntimeVersion$'),
-    new QueryParameter('dt', startTime),
-    new QueryParameter('adk', adKey(slotNumber, slotRect, viewportRect)),
-    new QueryParameter('c', makeCorrelator(clientId, documentInfo.pageViewId)),
-    new QueryParameter('output', 'html'),
-    new QueryParameter('nhd', iframeDepth),
-    new QueryParameter('eid', a4a.element.getAttribute('data-experiment-id')),
-    new QueryParameter('bih', viewportRect.height),
-    new QueryParameter('biw', viewportRect.width),
-    new QueryParameter('adx', slotRect.left),
-    new QueryParameter('ady', slotRect.top),
-    new QueryParameter('u_hist', getHistoryLength(global)),
+    {
+      name: 'is_amp',
+      value: a4a.supportsShadowDom() ?
+          AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+          AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+    },
+    {name: 'amp_v', value: '$internalRuntimeVersion$'},
+    {name: 'dt', value: startTime},
+    {name: 'adk', value: adKey(slotNumber, slotRect, viewportRect)},
+    {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
+    {name: 'output', value: 'html'},
+    {name: 'nhd', value: iframeDepth},
+    {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
+    {name: 'bih', value: viewportRect.height},
+    {name: 'biw', value: viewportRect.width},
+    {name: 'adx', value: slotRect.left},
+    {name: 'ady', value: slotRect.top},
+    {name: 'u_hist', value: getHistoryLength(global)},
     dtdParam,
     ...unboundedQueryParams,
-    new QueryParameter('url', documentInfo.canonicalUrl),
-    new QueryParameter(
-        'top', iframeDepth ? topWindowUrlOrDomain(global) : null),
-    new QueryParameter(
-        'loc',
-        global.location.href == documentInfo.canonicalUrl ?
-            null : global.location.href),
-    new QueryParameter('ref', referrer),
+    {name: 'url', value: documentInfo.canonicalUrl},
+    {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
+    {
+      name: 'loc',
+      value: global.location.href == documentInfo.canonicalUrl ?
+          null : global.location.href,
+    },
+    {name: 'ref', value: referrer},
   ];
   dtdParam.value = elapsedTimeWithCeiling(timer.now(), startTime);
   return buildUrl(
-      baseUrl, allQueryParams, MAX_URL_LENGTH,
-      new QueryParameter('trunc', '1'));
+      baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
 
 /**

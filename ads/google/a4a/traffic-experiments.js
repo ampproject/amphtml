@@ -36,15 +36,14 @@ export let ExperimentInfo;
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
- * <ol>
- *   <li>The page must have originated in the {@code cdn.ampproject.org}
- *   CDN <em>or</em> we must be running in local dev mode.</li>
- *   <li>We must be selected in to an A4A traffic experiment and be selected
- *   into the "experiment" branch.
- * </ol>
+ *
+ * - The page must have originated in the `cdn.ampproject.org` CDN _or_ we must
+ *   be running in local dev mode.
+ * - We must be selected in to an A4A traffic experiment and be selected into
+ *   the "experiment" branch.
  *
  * If we're selected into the overall traffic experiment, this function will
- * also attach an experiment or control branch ID to the {@code Element} as
+ * also attach an experiment or control branch ID to the `Element` as
  * a side-effect.
  *
  * @param {!Window} win  Host window for the ad.
@@ -63,7 +62,9 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
     handleUrlParameters(win, experimentId, branches);
-    setupPageExperiments(win, {[experimentId]: branches});
+    const experimentInfo = {};
+    experimentInfo[experimentId] = branches;
+    setupPageExperiments(win, experimentInfo);
     if (isExperimentOn(win, experimentId)) {
       // Page is selected into the overall traffic experiment.
       if (getPageExperimentBranch(win, experimentId) === branches.experiment) {
