@@ -23,16 +23,17 @@ let QueryParameterDef;
  * @param {string} baseUrl scheme, domain, and path for the URL.
  * @param {!Array<!QueryParameterDef>} queryParams query parameters for the URL.
  * @param {number} maxLength length to truncate the URL to if necessary.
- * @param {!QueryParameterDef} truncationQueryParam query parameter to append to
- *     the URL iff any query parameters were truncated.
+ * @param {?QueryParameterDef=} opt_truncationQueryParam query parameter to
+ *     append to the URL iff any query parameters were truncated.
  * @return {string} the fully constructed URL.
  */
 export function buildUrl(
-    baseUrl, queryParams, maxLength, truncationQueryParam) {
+    baseUrl, queryParams, maxLength, opt_truncationQueryParam) {
   const encodedParams = [];
-  const encodedTruncationParam = truncationQueryParam.value ?
-      encodeURIComponent(truncationQueryParam.name) + '=' +
-      encodeURIComponent(truncationQueryParam.value) :
+  const encodedTruncationParam =
+      opt_truncationQueryParam && opt_truncationQueryParam.value ?
+      encodeURIComponent(opt_truncationQueryParam.name) + '=' +
+      encodeURIComponent(opt_truncationQueryParam.value) :
       null;
   let capacity = maxLength - baseUrl.length;
   if (encodedTruncationParam) {
