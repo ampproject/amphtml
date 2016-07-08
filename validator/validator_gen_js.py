@@ -242,8 +242,10 @@ def PrintEnumFor(enum_desc, out):
   out.Line(' * @export')
   out.Line(' */')
   out.Line('%s = {' % enum_desc.full_name)
-  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in enum_desc.values
-                      ]))
+  out.PushIndent(2)
+  for v in enum_desc.values:
+    out.Line("%s: '%s'," % (v.name, v.name))
+  out.PopIndent()
   out.Line('};')
   if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
     out.PopIndent()
