@@ -279,11 +279,14 @@ def PrintObject(descriptor, msg, this_id, out):
       out.PushIndent(2)
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+        elements = []
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.Line('o_%d.%s.push(o_%d);' %
-                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+          elements.append('o_%d' % field_id)
+        out.Line('o_%d.%s = [%s];' %
+                 (this_id, UnderscoreToCamelCase(field_desc.name),
+                  ','.join(elements)))
       else:
         field_id = next_id
         next_id = PrintObject(descriptor, field_val, field_id, out)
