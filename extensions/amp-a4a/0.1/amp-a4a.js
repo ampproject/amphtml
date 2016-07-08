@@ -72,22 +72,6 @@ export function setPublicKeys(publicKeys) {
   publicKeyInfos = publicKeys.map(importPublicKey);
 }
 
-
-/**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
- */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
-  }
-  return bytes;
-}
-
 /**
  * @param {*} ary
  * @return {boolean} whether input is array of 2 numeric elements.
@@ -102,7 +86,7 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creativeArrayBuffer: !ArrayBuffer, signature: ?string}} */
+/** @typedef {{creative: ArrayBuffer, signature: ?ArrayBuffer}} */
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
@@ -467,13 +451,12 @@ export class AmpA4A extends AMP.BaseElement {
    */
   validateAdResponse_(fetchResponse, bytes) {
     return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(adResponse => {
+        .then(({creative, signature}) => {
           // Validate when we have a signature and we have native crypto.
-          if (adResponse.signature && verifySignatureIsAvailable()) {
+          if (signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
-              return verifySignature(adResponse.creativeArrayBuffer,
-                  base64ToByteArray(adResponse.signature), publicKeyInfos);
+              return verifySignature(creative, signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;

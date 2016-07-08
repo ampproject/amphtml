@@ -15,36 +15,37 @@
  */
 
 import {
+  base64ToByteArray,
   extractGoogleAdCreativeAndSignature,
 } from '../utils';
 
 describe('Google A4A utils', () => {
   describe('#extractGoogleAdCreativeAndSignature', () => {
     it('should return body and signature', () => {
-      const text = 'some test data';
+      const creative = 'some test data';
       const headerData = {
-        'X-AmpAdSignature': 'a test header',
+        'X-AmpAdSignature': 'AQAB',
       };
       const headers = {
         has: h => { return h in headerData; },
         get: h => { return headerData[h]; },
       };
-      return expect(extractGoogleAdCreativeAndSignature(text, headers))
+      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
           .to.eventually.deep.equal({
-            creativeArrayBuffer: 'some test data',
-            signature: 'a test header',
+            creative,
+            signature: base64ToByteArray('AQAB'),
           });
     });
 
     it('should return null when no signature header is present', () => {
-      const text = 'some test data';
+      const creative = 'some test data';
       const headers = {
         has: unused => { return false; },
         get: h => { throw new Error('Tried to get ' + h); },
       };
-      return expect(extractGoogleAdCreativeAndSignature(text, headers))
+      return expect(extractGoogleAdCreativeAndSignature(creative, headers))
           .to.eventually.deep.equal({
-            creativeArrayBuffer: 'some test data',
+            creative,
             signature: null,
           });
     });

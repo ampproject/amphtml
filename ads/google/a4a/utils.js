@@ -77,25 +77,36 @@ export function googleAdUrl(
           unboundedQueryParams, clientId, referrer)));
 }
 
+
 /**
- * @param {!ArrayBuffer} responseText
+ * @param {string} str
+ * @return {!Uint8Array}
+ * @visibleForTesting
+ */
+export function base64ToByteArray(str) {
+  const bytesAsString = atob(str);
+  const len = bytesAsString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = bytesAsString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
  * @return {!Promise<!AdResponseDef>}
  */
 export function extractGoogleAdCreativeAndSignature(
-    responseText, responseHeaders) {
-  const adResponse = {
-    creativeArrayBuffer: responseText,
-    signature: null,
-  };
+    creative, responseHeaders) {
+  let signature = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      adResponse.signature = responseHeaders.get(AMP_SIGNATURE_HEADER);
-    } else {
-      adResponse.signature = null;
+      signature = base64ToByteArray(responseHeaders.get(AMP_SIGNATURE_HEADER));
     }
   } finally {
-    return Promise.resolve(adResponse);
+    return Promise.resolve({creative, signature});
   }
 }
 
