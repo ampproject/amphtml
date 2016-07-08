@@ -89,10 +89,10 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
     whitelist: [
-      // Only for A4A registry; see todo note in ads/_config.js
-      'ads/_config.js->' +
+      // See todo note in ads/_a4a-config.js
+      'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-      'ads/_config.js->' +
+      'ads/_a4a-config.js->' +
           'extensions/amp-ad-network-doubleclick-impl/0.1/' +
           'doubleclick-a4a-config.js',
     ],

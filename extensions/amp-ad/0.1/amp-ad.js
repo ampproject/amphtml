@@ -15,7 +15,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl, TAG_3P_IMPL} from './amp-ad-3p-impl';
-import {a4aRegistry} from '../../../ads/_config';
+import {a4aRegistry} from '../../../ads/_a4a-config';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
 
 
