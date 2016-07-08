@@ -16,7 +16,7 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
-import {adopt} from '../../src/runtime';
+import {adopt, adoptShadowMode} from '../../src/runtime';
 import {dev} from '../../src/log';
 import {getServicePromise} from '../../src/service';
 import {parseUrl} from '../../src/url';
@@ -203,8 +203,7 @@ describe('runtime', () => {
 
   describe('attachShadowRoot', () => {
     beforeEach(() => {
-      ampdocServiceMock.expects('isSingleDoc').returns(false).atLeast(1);
-      adopt(win);
+      adoptShadowMode(win);
     });
 
     it('should register attachShadowRoot callback for a multi-doc', () => {
@@ -224,9 +223,22 @@ describe('runtime', () => {
       // Stylesheet has been installed.
       expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
 
-      // Services have been installed.
+      // Globla services have been installed.
+      expect(win.AMP.BaseElement).to.be.a('function');
+      expect(win.AMP.BaseTemplate).to.be.a('function');
+      expect(win.AMP.registerElement).to.be.a('function');
+      expect(win.AMP.isExperimentOn).to.be.a('function');
+      expect(win.AMP.toggleExperiment).to.be.a('function');
+
+      // Doc services have been installed.
       expect(ampdoc.services.action).to.exist;
       expect(ampdoc.services.action.obj).to.exist;
+
+      // Single-doc bidings should not be installed.
+      expect(win.AMP.viewer).to.not.exist;
+      expect(win.AMP.viewport).to.not.exist;
+      expect(ret.viewer).to.not.exist;
+      expect(ret.viewport).to.not.exist;
     });
   });
 });

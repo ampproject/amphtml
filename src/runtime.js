@@ -97,11 +97,12 @@ export function installBuiltins(global) {
 
 
 /**
- * Applies the runtime to a given global scope.
+ * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
+ * @param {function(!Window)} callback
  */
-export function adopt(global) {
+function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
   if (global.AMP_TAG) {
     return;
@@ -112,8 +113,6 @@ export function adopt(global) {
   const preregisteredElements = global.AMP || [];
 
   installRuntimeServices(global);
-  const ampdocService = ampdocFor(global);
-  const isSingleDoc = ampdocService.isSingleDoc();
 
   global.AMP = {
     win: global,
@@ -163,39 +162,14 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  if (!isSingleDoc) {
-    /**
-     * Registers a shadow root document.
-     * @param {!ShadowRoot} shadowRoot
-     */
-    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null, global);
-  }
-
-  const viewer = viewerFor(global);
-
-  /** @const */
-  global.AMP.viewer = viewer;
-
-  if (getMode().development) {
-    /** @const */
-    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-    /** @const */
-    global.AMP.resources = resourcesFor(global);
-  }
-
   // Experiments.
   /** @const */
   global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
   /** @const */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
-  const viewport = viewportFor(global);
-
-  /** @const */
-  global.AMP.viewport = {};
-  global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
-  global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
-  global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+  // Run specific setup for a single-doc or shadow-doc mode.
+  callback(global);
 
   /**
    * Registers a new custom element.
@@ -241,6 +215,52 @@ export function adopt(global) {
   if (platformFor(global).isIos()) {
     setStyle(global.document.documentElement, 'cursor', 'pointer');
   }
+}
+
+
+/**
+ * Applies the runtime to a given global scope for a single-doc mode.
+ * Multi frame support is currently incomplete.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function adopt(global) {
+  adoptShared(global, global => {
+    const viewer = viewerFor(global);
+
+    /** @const */
+    global.AMP.viewer = viewer;
+
+    if (getMode().development) {
+      /** @const */
+      global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+      /** @const */
+      global.AMP.resources = resourcesFor(global);
+    }
+
+    const viewport = viewportFor(global);
+
+    /** @const */
+    global.AMP.viewport = {};
+    global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
+    global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
+    global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+  });
+}
+
+
+/**
+ * Applies the runtime to a given global scope for shadow mode.
+ * @param {!Window} global Global scope to adopt.
+ */
+export function adoptShadowMode(global) {
+  adoptShared(global, global => {
+
+    /**
+     * Registers a shadow root document.
+     * @param {!ShadowRoot} shadowRoot
+     */
+    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null, global);
+  });
 }
 
 
