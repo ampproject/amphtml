@@ -236,7 +236,6 @@ class TagNameStack {
         case TagRegion.PRE_HEAD:
         case TagRegion.PRE_BODY:
           this.startTag('BODY', []);
-          console.error(text.charCodeAt(0));
           break;
         case TagRegion.IN_HEAD:
           this.endTag('HEAD');
