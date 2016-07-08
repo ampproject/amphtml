@@ -211,10 +211,8 @@ export function getLengthUnits(length) {
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
-  if (!length) {
-    return undefined;
-  }
-  return parseFloat(length);
+  const res = parseFloat(length);
+  return isNaN(res) ? undefined : res;
 }
 
 
