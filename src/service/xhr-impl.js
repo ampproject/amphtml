@@ -235,23 +235,6 @@ export class Xhr {
     return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
   }
 
-  /**
-   * @param {!ArrayBuffer} bytes
-   * @return {!Promise<string>}
-   */
-  utf8FromArrayBuffer(bytes) {
-    if (window.TextDecoder) {
-      return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-    }
-    return new Promise(function(resolve, unusedReject) {
-      const reader = new FileReader();
-      reader.onloadend = function(unusedEvent) {
-        resolve(reader.result);
-      };
-      reader.readAsText(new Blob([bytes]));
-    });
-  }
-
 }
 
 

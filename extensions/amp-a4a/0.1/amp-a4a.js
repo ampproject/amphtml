@@ -28,7 +28,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
-import {xhrFor} from '../../../src/xhr';
+import {xhrFor, utf8FromArrayBuffer} from '../../../src/xhr';
 import {
   importPublicKey,
   verifySignature,
@@ -497,7 +497,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.timerId_) {
       decrementLoadingAds(this.timerId_, this.getWin());
     }
-    return xhrFor(this.getWin()).utf8FromArrayBuffer(bytes).then(creative => {
+    return utf8FromArrayBuffer(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
       if (!creativeMetaData || !this.supportsShadowDom()) {
