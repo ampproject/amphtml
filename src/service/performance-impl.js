@@ -16,7 +16,7 @@
 
 import {documentInfoFor} from '../document-info';
 import {onDocumentReady} from '../document-ready';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
 import {timer} from '../timer';
@@ -374,7 +374,5 @@ export class Performance {
  * @return {!Performance}
  */
 export function installPerformanceService(window) {
-  return getService(window, 'performance', () => {
-    return new Performance(window);
-  });
+  return fromClass(window, 'performance', Performance);
 };

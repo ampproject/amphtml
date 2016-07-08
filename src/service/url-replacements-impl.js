@@ -19,7 +19,7 @@ import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
@@ -605,7 +605,5 @@ export class UrlReplacements {
  * @return {!UrlReplacements}
  */
 export function installUrlReplacementsService(window) {
-  return getService(window, 'url-replace', () => {
-    return new UrlReplacements(window);
-  });
+  return fromClass(window, 'url-replace', UrlReplacements);
 };

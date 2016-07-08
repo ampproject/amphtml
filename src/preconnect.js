@@ -20,7 +20,7 @@
  */
 
 
-import {getService} from './service';
+import {fromClass} from './service';
 import {parseUrl} from './url';
 import {timer} from './timer';
 import {platformFor} from './platform';
@@ -237,7 +237,5 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectFor(window) {
-  return getService(window, 'preconnect', () => {
-    return new Preconnect(window);
-  });
+  return fromClass(window, 'preconnect', Preconnect);
 };

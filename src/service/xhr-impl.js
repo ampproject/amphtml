@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {
   addParamToUrl,
   getSourceOrigin,
@@ -535,7 +535,5 @@ class FetchResponseHeaders {
  * @return {!Xhr}
  */
 export function installXhrService(window) {
-  return getService(window, 'xhr', () => {
-    return new Xhr(window);
-  });
+  return fromClass(window, 'xhr', Xhr);
 };
