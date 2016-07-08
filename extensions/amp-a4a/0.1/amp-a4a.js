@@ -28,7 +28,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
-import {xhrFor, utf8FromArrayBuffer} from '../../../src/xhr';
+import {xhrFor} from '../../../src/xhr';
 import {
   importPublicKey,
   verifySignature,
@@ -70,6 +70,24 @@ let publicKeyInfos = [importPublicKey({
  */
 export function setPublicKeys(publicKeys) {
   publicKeyInfos = publicKeys.map(importPublicKey);
+}
+
+/**
+ * @param {!ArrayBuffer} bytes
+ * @return {!Promise<string>}
+ */
+// TODO(taymonbeal): move this somewhere more sensible
+export function utf8FromArrayBuffer(bytes) {
+  if (window.TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
+  }
+  return new Promise(function(resolve, unusedReject) {
+    const reader = new FileReader();
+    reader.onloadend = function(unusedEvent) {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
 }
 
 /**
@@ -466,6 +484,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Render the validated AMP creative directly in the parent page.
    * @param {boolean} valid If the ad response signature was valid.
+   * @param {!ArrayBuffer} The creative as raw bytes.
    * @return {Promise<boolean>} Whether the creative was successfully
    *     rendered.
    * @private
@@ -480,6 +499,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.timerId_) {
       decrementLoadingAds(this.timerId_, this.getWin());
     }
+    // AMP documents are required to be UTF-8
     return utf8FromArrayBuffer(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
