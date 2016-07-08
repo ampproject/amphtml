@@ -35,6 +35,7 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {macroTask} from './macro-task';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -50,37 +51,43 @@ try {
 
   const perf = installPerformanceService(window);
   perf.tick('is');
-  installStyles(document, cssText, () => {
-    try {
-      // Core services.
-      installRuntimeServices(window);
-      installAmpdocServices(ampdoc);
-      // We need the core services (viewer/resources) to start instrumenting
-      perf.coreServicesAvailable();
-      maybeTrackImpression(window);
+  macroTask(() => {
+    installStyles(document, cssText, () => {
+      try {
+        // Core services.
+        installRuntimeServices(window);
+        installAmpdocServices(ampdoc);
+        // We need the core services (viewer/resources) to start instrumenting
+        perf.coreServicesAvailable();
+        maybeTrackImpression(window);
 
-      // Builtins.
-      installBuiltins(window);
+        macroTask(() => {
+          // Builtins.
+          installBuiltins(window);
 
-      // Final configuration and stubbing.
-      adopt(window);
-      stubElements(window);
+          macroTask(() => {
+            // Final configuration and stubbing.
+            adopt(window);
+            stubElements(window);
 
-      installPullToRefreshBlocker(window);
-      installGlobalClickListener(window);
+            installPullToRefreshBlocker(window);
+            installGlobalClickListener(window);
 
-      maybeValidate(window);
-      makeBodyVisible(document, /* waitForExtensions */ true);
-    } catch (e) {
-      makeBodyVisible(document);
-      throw e;
-    } finally {
-      perf.tick('e_is');
-      // TODO(erwinm): move invocation of the `flush` method when we have the
-      // new ticks in place to batch the ticks properly.
-      perf.flush();
-    }
-  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+            maybeValidate(window);
+            makeBodyVisible(document, /* waitForExtensions */ true);
+          });
+        });
+      } catch (e) {
+        makeBodyVisible(document);
+        throw e;
+      } finally {
+        perf.tick('e_is');
+        // TODO(erwinm): move invocation of the `flush` method when we have the
+        // new ticks in place to batch the ticks properly.
+        perf.flush();
+      }
+    }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  });
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(document);
