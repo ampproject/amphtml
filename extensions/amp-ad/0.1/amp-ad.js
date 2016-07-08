@@ -33,7 +33,8 @@ function networkImplementationTag(type) {
 }
 
 /** @private @enum {!number} */
-const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
+const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3, 'layout': 4,
+    'width': 5, 'height': 6, 'heights': 7, 'sizes': 8, 'media': 9};
 
 /**
  * Copies (almost) all attributes from one Element to another.  Skips AMP
@@ -50,6 +51,16 @@ function copyAttributes(sourceElement, targetElement) {
     if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
       targetElement.setAttribute(attr.name, attr.value);
     }
+    // special case put here for width and height
+    if (attr.name == 'width' || attr.name == 'height') {
+      targetElement.setAttribute(attr.name, attr.value);
+    }
+  }
+}
+
+function moveChildren(sourceElement, targetElement) {
+  while (sourceElement.firstChild) {
+    targetElement.appendChild(sourceElement.firstChild);
   }
 }
 
@@ -88,6 +99,8 @@ export class AmpAd extends AMP.BaseElement {
       /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
     }
     copyAttributes(this.element, newChild);
+    newChild.setAttribute('layout', 'fill');
+    moveChildren(this.element, newChild);
     this.element.appendChild(newChild);
   }
 }

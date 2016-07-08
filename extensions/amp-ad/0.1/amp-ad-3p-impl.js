@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {removeElement} from '../../../src/dom';
+import {closestByTag, removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -25,6 +25,7 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {Layout} from '../../../src/layout';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
@@ -149,7 +150,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return layout == Layout.FILL;
   }
 
   /** @override */
@@ -190,6 +191,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.getWin());
+
+    this.parent_ = closestByTag(this.element, 'amp-ad');
+    if (!this.parent_) {
+      this.parent_ = closestByTag(this.element, 'amp-embed');
+    }
   }
 
   /**
@@ -302,9 +308,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
       this.attemptChangeHeight(0, () => {
-        this.element.style.display = 'none';
+        this.parent_.style.display = 'none';
       });
     }
+
     this.deferMutate(() => {
       if (!this.iframe_) {
         return;
@@ -351,5 +358,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_.overflowCallback(
         overflown, requestedHeight, requestedWidth);
     }
+  }
+
+  /** @override */
+  attemptChangeHeight(newHeight, opt_callback) {
+    this.resources_.attemptChangeSize(this.parent_, newHeight,
+        /* newWidth */ undefined, opt_callback);
+  }
+
+  /** @override */
+  attemptChangeSize(newHeight, newWidth, opt_callback) {
+    this.resources_.attemptChangeSize(this.parent_, newHeight, newWidth,
+        opt_callback);
   }
 }

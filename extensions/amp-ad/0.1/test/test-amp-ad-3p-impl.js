@@ -62,7 +62,6 @@ function tests(name) {
         expect(data.width).to.equal(300);
         expect(data.height).to.equal(250);
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
-
         const doc = iframe.ownerDocument;
         let fetches = doc.querySelectorAll(
             'link[rel=prefetch]');
@@ -168,6 +167,7 @@ function tests(name) {
           src: 'testsrc',
           resizable: '',
         }, 'https://schema.org').then(element => {
+
           const impl = element.implementation_;
           impl.attemptChangeSize = sandbox.spy();
           impl.apiHandler_.updateSize_(217, 114);
@@ -277,7 +277,7 @@ function tests(name) {
         });
       });
 
-      it('should collapse when attemptChangeHeight succeeds', () => {
+      it('should collapse when attempChangeHeight succeeds', () => {
         return getAd({
           width: 300,
           height: 750,
@@ -286,14 +286,14 @@ function tests(name) {
         }, 'https://schema.org', ad => {
           return ad;
         }).then(ad => {
+          console.log(ad);
           sandbox.stub(
               ad.implementation_, 'deferMutate', function(callback) {
                 callback();
               });
-          sandbox.stub(ad.implementation_,
-              'attemptChangeHeight',
+          sandbox.stub(ad.implementation_, 'parent_', ad);
+          sandbox.stub(ad.implementation_, 'attemptChangeHeight',
               function(height, callback) {
-                ad.style.height = height;
                 callback();
               });
           ad.style.position = 'absolute';
