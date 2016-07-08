@@ -95,6 +95,7 @@ it's possible to resize an `amp-iframe` in runtime. To do so:
 1. The `amp-iframe` must be defined with `resizable` attribute;
 2. The `amp-iframe` must have `overflow` child element;
 3. The IFrame document has to send a `embed-size` request as a window message.
+4. The `embed-size` request will be denied if the request height is less than certain threshold (100px).
 
 Notice that `resizable` overrides `scrolling` value to `no`.
 
