@@ -406,10 +406,15 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!spec) {
       return resolve;
     }
-    const threshold = spec['threshold'];
-    if (!spec['sampleOn'] ||
-        Number.isNaN(parseFloat(threshold)) || !Number.isFinite(threshold)) {
-      console./*OK*/error(this.getName_(), 'Invalid sampling spec.');
+    if (!spec['sampleOn']) {
+      console./*OK*/error(this.getName_(), 'Invalid sampleOn value.');
+      return resolve;
+    }
+    const threshold = parseFloat(spec['threshold']);
+    if (typeof threshold != 'number' || isNaN(threshold) ||
+        !isFinite(threshold)) {
+      console./*OK*/error(this.getName_(),
+          'Invalid threshold value for sampling.');
       return resolve;
     }
     const key = this.expandTemplate_(spec['sampleOn'], trigger);
