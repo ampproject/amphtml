@@ -33,6 +33,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
+import {toggle} from '../style';
 
 
 const TAG_ = 'Resources';
@@ -598,6 +599,22 @@ export class Resources {
         });
       },
     });
+  }
+
+  collapseElement(element) {
+    const box = this.viewport_.getLayoutRect(element);
+    const resource = Resource.forElement(element);
+    if (box.width != 0 && box.height != 0) {
+      this.setRelayoutTop_(box.top);
+    }
+    toggle(element, false);
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.collapsedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
   /**

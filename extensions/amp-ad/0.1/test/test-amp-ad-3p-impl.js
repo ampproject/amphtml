@@ -296,12 +296,14 @@ function tests(name) {
                 ad.style.height = height;
                 callback();
               });
+          const collapse = sandbox.spy(ad.implementation_, 'collapse');
           ad.style.position = 'absolute';
           ad.style.top = '300px';
           ad.style.left = '50px';
           expect(ad.style.display).to.not.equal('none');
           ad.implementation_.noContentHandler_();
           expect(ad.style.display).to.equal('none');
+          expect(collapse).to.have.been.called;
         });
       });
 

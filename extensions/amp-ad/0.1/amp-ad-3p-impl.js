@@ -301,9 +301,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
-      this.attemptChangeHeight(0, () => {
-        this.element.style.display = 'none';
-      });
+      this.attemptChangeHeight(0, () => this./*OK*/collapse());
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
