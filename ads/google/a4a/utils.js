@@ -89,7 +89,11 @@ export function extractGoogleAdCreativeAndSignature(
     signature: null,
   };
   try {
-    adResponse.signature = responseHeaders.get(AMP_SIGNATURE_HEADER);
+    if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
+      adResponse.signature = responseHeaders.get(AMP_SIGNATURE_HEADER);
+    } else {
+      adResponse.signature = null;
+    }
   } finally {
     return Promise.resolve(adResponse);
   }

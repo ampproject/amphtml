@@ -43,7 +43,7 @@ export let ExperimentInfo;
  *   the "experiment" branch.
  *
  * If we're selected into the overall traffic experiment, this function will
- * also attach an experiment or control branch ID to the {@code Element} as
+ * also attach an experiment or control branch ID to the `Element` as
  * a side-effect.
  *
  * @param {!Window} win  Host window for the ad.
@@ -62,7 +62,9 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
     handleUrlParameters(win, experimentId, branches);
-    setupPageExperiments(win, {[experimentId]: branches});
+    let experimentInfo = {};
+    experimentInfo[experimentId] = branches;
+    setupPageExperiments(win, experimentInfo);
     if (isExperimentOn(win, experimentId)) {
       // Page is selected into the overall traffic experiment.
       if (getPageExperimentBranch(win, experimentId) === branches.experiment) {

@@ -68,6 +68,9 @@ describe('amp-ad-network-adsense-impl', () => {
           get: function() {
             return undefined;
           },
+	  has: function() {
+	    return false;
+	  },
         })
         .then(result => {
           expect(result).to.deep.equal(
@@ -84,8 +87,14 @@ describe('amp-ad-network-adsense-impl', () => {
         new TextEncoder('utf-8').encode('some creative');
       return adsenseImpl.extractCreativeAndSignature(
         creativeArrayBuffer,
-        {get: function(name) {
-          return name == 'X-AmpAdSignature' ? 'some_sig' : undefined;}})
+        {
+	  get: function(name) {
+            return name == 'X-AmpAdSignature' ? 'some_sig' : undefined;
+	  },
+	  has: function(name) {
+	    return name === 'X-AmpAdSignature';
+	  },
+	})
         .then(result => {
           expect(result).to.deep.equal(
             {creativeArrayBuffer, signature: 'some_sig'});
