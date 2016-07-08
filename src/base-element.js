@@ -224,10 +224,11 @@ export class BaseElement {
    * Notice that calls to `upgradeCallback` are not recursive. I.e. this
    * callback will not be called on the returned instance again.
    *
-   * @return {!BaseElement|!Promise<!BaseElement>|null|undefined}
+   * @return {!BaseElement|!Promise<!BaseElement>|null}
    */
   upgradeCallback() {
     // Subclasses may override.
+    return null;
   }
 
   /**
