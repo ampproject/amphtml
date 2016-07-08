@@ -63,7 +63,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const global = this.getWin();
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const screen = global.screen;
-    const slotRect = viewportFor(global).getLayoutRect(this.element);
+    const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
@@ -108,7 +108,8 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     }
     const ctypesReMatch = /[?&]force_a4a_ctypes=([^&]+)/.exec(
         this.getWin().location.search);
-    if (ctypesReMatch && ctypesReMatch.length > 1) {
+    // If the RE passes, then length is necessarily > 1.
+    if (ctypesReMatch) {
       return ctypesReMatch[1];
     }
     return null;
