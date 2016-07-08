@@ -226,6 +226,30 @@ class TagNameStack {
   }
 
   /**
+   * Callback for pcdata. Some text nodes can trigger the start of the body
+   * region.
+   * @param {string} text
+   */
+  pcdata(text) {
+    if (!amp.htmlparser.HtmlParser.SPACE_RE_.test(text)) {
+      switch (this.region_) {
+        case TagRegion.PRE_HEAD:
+        case TagRegion.PRE_BODY:
+          this.startTag('BODY', []);
+          console.error(text.charCodeAt(0));
+          break;
+        case TagRegion.IN_HEAD:
+          this.endTag('HEAD');
+          this.startTag('BODY', []);
+          break;
+        default:
+          break;
+      }
+    }
+    this.handler_.pcdata(text);
+  }
+
+  /**
    * Upon exiting a tag, validation for the current matcher is triggered,
    * e.g. for checking that the tag had some specified number of children.
    * @param {!string} tagName
@@ -393,7 +417,7 @@ amp.htmlparser.HtmlParser = class {
         }
       } else {
         if (m[1]) {  // Entity.
-          handler.pcdata(m[0]);
+          tagStack.pcdata(m[0]);
         } else if (m[3]) {  // Tag.
           openTag = !m[2];
           if (!inTag && locator) {
@@ -405,17 +429,17 @@ amp.htmlparser.HtmlParser = class {
               amp.htmlparser.HtmlParser.Elements[tagName] :
               amp.htmlparser.HtmlParser.EFlags.UNKNOWN_OR_CUSTOM;
         } else if (m[4]) {  // Text.
-          handler.pcdata(m[4]);
+          tagStack.pcdata(m[4]);
         } else if (m[5]) {  // Cruft.
           switch (m[5]) {
             case '<':
-              handler.pcdata('&lt;');
+              tagStack.pcdata('&lt;');
               break;
             case '>':
-              handler.pcdata('&gt;');
+              tagStack.pcdata('&gt;');
               break;
             default:
-              handler.pcdata('&amp;');
+              tagStack.pcdata('&amp;');
               break;
           }
         }
@@ -715,6 +739,14 @@ amp.htmlparser.HtmlParser.NULL_RE_ = /\0/g;
  * @private
  */
 amp.htmlparser.HtmlParser.ENTITY_RE_ = /&(#\d+|#x[0-9A-Fa-f]+|\w+);/g;
+
+/**
+ * Regular expression that matches strings composed of all space characters:
+ * https://dev.w3.org/html5/spec-LC/common-microsyntaxes.html#space-character
+ * @type {RegExp}
+ * @private
+ */
+amp.htmlparser.HtmlParser.SPACE_RE_ = /^\s*$/;
 
 
 /**

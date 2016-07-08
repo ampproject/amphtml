@@ -65,7 +65,8 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, 'hello world');
     expect(handler.log).toEqual([
-      'startDoc()', 'pcdata("hello world")', 'endDoc()'
+      'startDoc()', 'startTag(BODY,[])', 'pcdata("hello world")',
+      'endTag(BODY)', 'endDoc()'
     ]);
   });
 
