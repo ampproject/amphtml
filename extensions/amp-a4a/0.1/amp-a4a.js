@@ -469,12 +469,13 @@ export class AmpA4A extends AMP.BaseElement {
    */
   validateAdResponse_(fetchResponse, bytes) {
     return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(({creative, signature}) => {
+        .then(response => {
           // Validate when we have a signature and we have native crypto.
-          if (signature && verifySignatureIsAvailable()) {
+          if (response.signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
-              return verifySignature(creative, signature, publicKeyInfos);
+              return verifySignature(
+                  response.creative, response.signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;
