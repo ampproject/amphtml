@@ -92,7 +92,7 @@ describe('cid', () => {
           cid = results[0];
           crypto = results[1];
           crypto.sha384Base64 = val => {
-            if (val instanceof Array) {
+            if (val instanceof Uint8Array) {
               val = '[' + val + ']';
             }
 
@@ -324,7 +324,7 @@ describe('cid', () => {
 
     let sha384Promise;
     crypto.sha384Base64 = val => {
-      if (val instanceof Array) {
+      if (val instanceof Uint8Array) {
         val = '[' + val + ']';
       }
 
