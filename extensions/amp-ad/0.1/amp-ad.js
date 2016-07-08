@@ -85,7 +85,8 @@ export class AmpAd extends AMP.BaseElement {
     // This is only called for a4a. All other cases are redirected to
     // `AmpAd3PImpl` in `upgradeCallback`.
     // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
-    const type = dev.assert(this.element.getAttribute('type'));
+    const type = dev.assert(this.element.getAttribute('type'),
+        'Required attribute type');
     // Note: The insertAmpExtensionScript method will pick the version number.
     // If we ever reach a point at which there are different extensions with
     // different version numbers at play simultaneously, we'll have to make sure

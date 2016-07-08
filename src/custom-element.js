@@ -721,10 +721,11 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Try to upgrade the element with the provided implementation.
-   * @param {!./base-element.BaseElement} impl
+   * @param {!./base-element.BaseElement=} opt_impl
    * @package @final @this {!Element}
    */
-  ElementProto.tryUpgrade = function(impl) {
+  ElementProto.tryUpgrade = function(opt_impl) {
+    const impl = opt_impl || this.implementation_;
     dev.assert(!isStub(impl), 'Implementation must not be a stub');
     if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
       // Already upgraded or in progress or failed.
