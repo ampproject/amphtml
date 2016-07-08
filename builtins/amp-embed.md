@@ -55,6 +55,7 @@ The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriv
 ## Supported embed types
 
 - [Taboola](../ads/taboola.md)
+- [ZergNet](../ads/zergnet.md)
 
 ## Validation
 
