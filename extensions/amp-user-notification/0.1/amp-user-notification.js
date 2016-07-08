@@ -326,10 +326,13 @@ export class UserNotificationManager {
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win_);
 
-    /** @private {!Promise} */
+    /** @private @const {!Promise} */
+    this.documentReadyPromise_ = whenDocumentReady(this.win_.document);
+
+    /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
       this.viewer_.whenFirstVisible(),
-      whenDocumentReady(this.win_.document),
+      this.documentReadyPromise_,
     ]);
 
     /** @private {!Promise} */
@@ -358,7 +361,7 @@ export class UserNotificationManager {
    * @return {!Promise<?NotificationInterface>}
    */
   getNotification(id) {
-    return whenDocumentReady(this.win_.document).then(() => this.registry_[id]);
+    return this.documentReadyPromise_.then(() => this.registry_[id]);
   }
 
   /**
