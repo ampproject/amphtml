@@ -31,38 +31,39 @@ export class Crypto {
   /**
    * Returns the SHA-384 hash of the input string in a number array.
    * Input string cannot contain chars out of range [0,255].
-   * @param {string} str
+   * @param {string|!Uint8Array} input
    * @returns {!Promise<!Array<number>>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
-  sha384(str) {
+  sha384(input) {
     if (this.subtle_) {
       try {
-        return this.subtle_.digest('SHA-384', str2ab(str))
+        return this.subtle_.digest('SHA-384',
+                input instanceof Uint8Array ? input : str2ab(input))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
                 e => {
                   dev.info(TAG, 'Crypto digest promise has rejected, ' +
                       'fallback to closure lib.', e);
-                  return lib.sha384(str);
+                  return lib.sha384(input);
                 });
       } catch (e) {
         dev.info(TAG, 'Crypto digest has thrown, fallback to closure lib.', e);
       }
     }
-    return Promise.resolve(lib.sha384(str));
+    return Promise.resolve(lib.sha384(input));
   }
 
   /**
    * Returns the SHA-384 hash of the input string in the format of web safe
    * base64 (using -_. instead of +/=).
    * Input string cannot contain chars out of range [0,255].
-   * @param {string} str
+   * @param {string|!Uint8Array} input
    * @returns {!Promise<string>}
    * @throws {!Error} when input string contains chars out of range [0,255]
    */
-  sha384Base64(str) {
-    return this.sha384(str).then(buffer => {
+  sha384Base64(input) {
+    return this.sha384(input).then(buffer => {
       return lib.base64(buffer);
     });
   }
@@ -71,11 +72,11 @@ export class Crypto {
    * Returns a uniform hash of the input string as a float number in the range
    * of [0, 1).
    * Input string cannot contain chars out of range [0,255].
-   * @param {string} str
+   * @param {string|!Uint8Array} input
    * @returns {!Promise<number>}
    */
-  uniform(str) {
-    return this.sha384(str).then(buffer => {
+  uniform(input) {
+    return this.sha384(input).then(buffer => {
       // Consider the Uint8 array as a base256 fraction number,
       // then convert it to the decimal form.
       let result = 0;
