@@ -179,6 +179,15 @@ describe('CustomElement', () => {
     }
   }
 
+  class TestElementWithReUpgrade extends BaseElement {
+    isLayoutSupported(unusedLayout) {
+      return true;
+    }
+    upgradeCallback() {
+      return new TestElement(this.element);
+    }
+  }
+
   const ElementClass = document.registerElement('amp-test', {
     prototype: createAmpElementProto(window, 'amp-test', TestElement),
   });
@@ -229,6 +238,11 @@ describe('CustomElement', () => {
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
     expect(testElementCreatedCallback.callCount).to.equal(0);
+
+    element.attachedCallback();
+    expect(element.everAttached).to.equal(true);
+    expect(testElementCreatedCallback.callCount).to.equal(1);
+    expect(element.isUpgraded()).to.equal(true);
   });
 
   it('StubElement - createdCallback', () => {
@@ -242,6 +256,11 @@ describe('CustomElement', () => {
     expect(element.everAttached).to.equal(false);
     expect(element.layout_).to.equal(Layout.NODISPLAY);
     expect(testElementCreatedCallback.callCount).to.equal(0);
+
+    element.attachedCallback();
+    expect(element.everAttached).to.equal(true);
+    expect(testElementCreatedCallback.callCount).to.equal(0);
+    expect(element.isUpgraded()).to.equal(false);
   });
 
   it('Element - getIntersectionChangeEntry', () => {
@@ -313,6 +332,99 @@ describe('CustomElement', () => {
     element.upgrade(TestElement);
     expect(element.isUpgraded()).to.equal(false);
     expect(element.isBuilt()).to.equal(false);
+  });
+
+  it('Element - re-upgrade to new direct instance', () => {
+    const element = new ElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    const newImpl = new TestElement(element);
+    element.implementation_.upgradeCallback = () => newImpl;
+
+    element.attachedCallback();
+    expect(element.isUpgraded()).to.equal(true);
+    expect(element.implementation_).to.equal(newImpl);
+  });
+
+  it('Element - re-upgrade to new promised instance', () => {
+    const element = new ElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    const oldImpl = element.implementation_;
+    const newImpl = new TestElement(element);
+    const promise = Promise.resolve(newImpl);
+    oldImpl.upgradeCallback = () => promise;
+
+    element.attachedCallback();
+    expect(element.implementation_).to.equal(oldImpl);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    return promise.then(() => {
+      // Skip a microtask.
+    }).then(() => {
+      expect(element.implementation_).to.equal(newImpl);
+      expect(element.isUpgraded()).to.equal(true);
+      expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+    });
+  });
+
+  it('Element - re-upgrade with a failed promised', () => {
+    const element = new ElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    const oldImpl = element.implementation_;
+    const promise = Promise.reject();
+    oldImpl.upgradeCallback = () => promise;
+
+    element.attachedCallback();
+    expect(element.implementation_).to.equal(oldImpl);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    return promise.catch(() => {
+      // Ignore error.
+    }).then(() => {
+      expect(element.implementation_).to.equal(oldImpl);
+      expect(element.isUpgraded()).to.equal(false);
+      expect(element.upgradeState_).to.equal(/* UPGRADE_FAILED */ 3);
+    });
+  });
+
+  it('Element - can only re-upgrade once', () => {
+    const element = new ElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    const oldImpl = element.implementation_;
+    const newImpl = new TestElement(element);
+    const newImpl2 = new TestElement(element);
+    const promise = Promise.resolve(newImpl);
+    oldImpl.upgradeCallback = () => promise;
+
+    element.attachedCallback();
+    expect(element.implementation_).to.equal(oldImpl);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+
+    oldImpl.upgradeCallback = () => newImpl2;
+    element.tryUpgrade();
+    expect(element.implementation_).to.equal(oldImpl);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.upgradeState_).to.equal(/* UPGRADE_IN_PROGRESS */ 4);
+    return promise.then(() => {
+      // Skip a microtask.
+    }).then(() => {
+      expect(element.implementation_).to.equal(newImpl);
+      expect(element.isUpgraded()).to.equal(true);
+      expect(element.upgradeState_).to.equal(/* UPGRADED */ 2);
+    });
+  });
+
+  it('StubElement - re-upgrade', () => {
+    const element = new StubElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    expect(testElementCreatedCallback.callCount).to.equal(0);
+    resourcesMock.expects('upgraded').withExactArgs(element).never();
+
+    element.upgrade(TestElementWithReUpgrade);
+
+    expect(element.isUpgraded()).to.equal(true);
+    expect(element.implementation_ instanceof TestElement).to.equal(true);
+    expect(testElementCreatedCallback.callCount).to.equal(1);
   });
 
 
