@@ -410,20 +410,17 @@ export class AmpAnalytics extends AMP.BaseElement {
       console./*OK*/error(this.getName_(), 'Invalid sampleOn value.');
       return resolve;
     }
-    const threshold = parseFloat(spec['threshold']);
-    if (typeof threshold != 'number' || isNaN(threshold) ||
-        !isFinite(threshold)) {
-      console./*OK*/error(this.getName_(),
-          'Invalid threshold value for sampling.');
-      return resolve;
+    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+    if (threshold >= 0 && threshold <= 100) {
+      const key = this.expandTemplate_(spec['sampleOn'], trigger);
+      const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
+      const cryptoPromise = cryptoFor(this.getWin());
+      return Promise.all([keyPromise, cryptoPromise])
+          .then(results => results[1].uniform(results[0]))
+          .then(digest => digest * 100 < spec['threshold']);
     }
-    const key = this.expandTemplate_(spec['sampleOn'], trigger);
-
-    const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
-    const cryptoPromise = cryptoFor(this.getWin());
-    return Promise.all([keyPromise, cryptoPromise])
-        .then(results => results[1].uniform(results[0]))
-        .then(digest => digest * 100 < spec['threshold']);
+    console./*OK*/error(this.getName_(), 'Invalid threshold for sampling.');
+    return resolve;
   }
 
   /**
