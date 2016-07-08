@@ -41,6 +41,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       doc,
       dev.assert(doc.head),
+      cssText,
       opt_isRuntimeCss || false,
       opt_ext || null);
 

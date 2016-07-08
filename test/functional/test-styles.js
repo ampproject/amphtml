@@ -39,4 +39,36 @@ describe('Styles', () => {
     expect(getStyle(document.body, 'visibility')).to.equal('visible');
     expect(getStyle(document.body, 'animation')).to.equal('none');
   });
+
+  it('should install runtime styles', () => {
+    const cssText = '/*amp-runtime*/';
+    return new Promise(resolve => {
+      styles.installStyles(document, cssText, () => {
+        resolve();
+      }, true);
+    }).then(() => {
+      const styleEl = document.head.querySelector('style');
+      expect(styleEl.hasAttribute('amp-runtime')).to.be.true;
+      expect(styleEl.textContent).to.equal(cssText);
+      document.head.removeChild(styleEl);
+    });
+  });
+
+  it('should install extension styles after runtime', () => {
+    const runtimeCssText = '/*amp-runtime*/';
+    const extCssText = '/*amp-ext1*/';
+    styles.installStyles(document, runtimeCssText, () => {}, true);
+    return new Promise(resolve => {
+      styles.installStyles(document, extCssText, () => {
+        resolve();
+      }, false, 'amp-ext1');
+    }).then(() => {
+      const styleEls = document.head.querySelectorAll('style');
+      expect(styleEls[0].hasAttribute('amp-runtime')).to.be.true;
+      expect(styleEls[1].getAttribute('amp-extension')).to.equal('amp-ext1');
+      expect(styleEls[1].textContent).to.equal(extCssText);
+      document.head.removeChild(styleEls[0]);
+      document.head.removeChild(styleEls[1]);
+    });
+  });
 });
