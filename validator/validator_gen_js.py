@@ -242,8 +242,10 @@ def PrintEnumFor(enum_desc, out):
   out.Line(' * @export')
   out.Line(' */')
   out.Line('%s = {' % enum_desc.full_name)
-  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in enum_desc.values
-                      ]))
+  out.PushIndent(2)
+  for v in enum_desc.values:
+    out.Line("%s: '%s'," % (v.name, v.name))
+  out.PopIndent()
   out.Line('};')
   if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
     out.PopIndent()
@@ -277,11 +279,14 @@ def PrintObject(descriptor, msg, this_id, out):
       out.PushIndent(2)
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+        elements = []
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.Line('o_%d.%s.push(o_%d);' %
-                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+          elements.append('o_%d' % field_id)
+        out.Line('o_%d.%s = [%s];' %
+                 (this_id, UnderscoreToCamelCase(field_desc.name),
+                  ','.join(elements)))
       else:
         field_id = next_id
         next_id = PrintObject(descriptor, field_val, field_id, out)
