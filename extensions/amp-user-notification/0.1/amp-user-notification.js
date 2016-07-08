@@ -358,7 +358,7 @@ export class UserNotificationManager {
    * @return {!Promise<?NotificationInterface>}
    */
   getNotification(id) {
-    return this.managerReadyPromise_.then(() => this.registry_[id]);
+    return whenDocumentReady(this.win_.document).then(() => this.registry_[id]);
   }
 
   /**
