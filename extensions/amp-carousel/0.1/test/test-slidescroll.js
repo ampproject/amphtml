@@ -53,6 +53,8 @@ describe('SlideScroll', () => {
         ampSlideScroll.setAttribute('src', imgUrl);
         ampSlideScroll.setAttribute('width', '400');
         ampSlideScroll.setAttribute('height', '300');
+        // See https://github.com/ampproject/amphtml/issues/3989
+        ampSlideScroll.style.display = 'inline';
         ampSlideScroll.appendChild(img);
       }
       return iframe.addElement(ampSlideScroll).then(() => {
