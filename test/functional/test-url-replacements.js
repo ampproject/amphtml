@@ -294,7 +294,9 @@ describe('UrlReplacements', () => {
     const urlReplacements = installUrlReplacementsService(win);
     const validMetric = urlReplacements.expand('?sh=PAGE_LOAD_TIME&s');
     urlReplacements.win_.performance.timing.loadEventStart = 109;
-    loadObservable.fire(document.createEvent('Event')); // Mimics load event.
+    loadObservable.fire({
+      target: win,
+    }); // Mimics load event.
     return validMetric.then(res => {
       expect(res).to.match(/sh=9&s/);
     });
