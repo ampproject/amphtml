@@ -98,6 +98,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
   },
   {
+    id: 'amp-google-vrview-image',
+    name: 'AMP VR Viewer for images via Google VRView',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-google-vrview-image/amp-google-vrview-image.md',
+  },
+  {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',

@@ -95,6 +95,7 @@ function buildExtensions(options) {
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
+  buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
@@ -396,6 +397,7 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('vrview.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');
   buildExample('openx.amp.html');
