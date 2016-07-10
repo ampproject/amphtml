@@ -46,6 +46,7 @@ describe('amp-instagram', () => {
         'https://www.instagram.com/p/fBwFP/media/?size=l');
     expect(image.getAttribute('layout')).to.equal('fill');
     expect(image.getAttribute('alt')).to.equal('Testing');
+    expect(image.getAttribute('referrerpolicy')).to.equal('origin');
   }
 
   function testIframe(iframe) {

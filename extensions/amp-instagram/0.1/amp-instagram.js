@@ -88,6 +88,7 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('src', 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
+    image.setAttribute('referrerpolicy', 'origin');
 
     this.propagateAttributes(['alt'], image);
 
