@@ -64,6 +64,9 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  neo4w: 'https://js-ssl.neodatagroup.com/4wr.js',
+  neo4wPPN: 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js',
+  adagio: 'https://js-ssl.neodatagroup.com/adagio_amp.js'
 };
 
 /**
@@ -176,6 +179,21 @@ export const adPreconnect = {
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
   ],
+  neo4w: [
+    'https://js-ssl.neodatagroup.com',
+    'https://ad-aws-it.neodatagroup.com',
+    'https://tracker.neodatagroup.com'
+  ],
+  neo4wPPN: [
+    'https://js-ssl.neodatagroup.com',
+    'https://ad-aws-it.neodatagroup.com',
+    'https://tracker.neodatagroup.com'
+  ],
+  adagio: [
+    'https://js-ssl.neodatagroup.com',
+    'https://ad-aws-it.neodatagroup.com',
+    'https://tracker.neodatagroup.com'
+  ]
 };
 
 /**
