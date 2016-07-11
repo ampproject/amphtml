@@ -21,8 +21,8 @@ import {writeScript, checkData, validateDataExists} from '../3p/3p';
  * @param {!Object} data
  */
 export function zergnet(global, data) {
-    checkData(data, ['zergid']);
-    validateDataExists(data, ['zergid']);
-    global.zergnetWidgetId = data.zergid;
-    writeScript(global, 'https://www.zergnet.com/zerg-amp.js');
+  checkData(data, ['zergid']);
+  validateDataExists(data, ['zergid']);
+  global.zergnetWidgetId = data.zergid;
+  writeScript(global, 'https://www.zergnet.com/zerg-amp.js');
 }
