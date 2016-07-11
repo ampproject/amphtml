@@ -118,6 +118,11 @@ function adoptShared(global, callback) {
     win: global,
   };
 
+  function emptyService() {
+    // All services need to resolve to an object.
+    return {};
+  }
+
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
@@ -128,16 +133,15 @@ function adoptShared(global, callback) {
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
     const register = function() {
       registerExtendedElement(global, name, implementationClass);
-      elementsForTesting.push({
-        name,
-        implementationClass,
-        css: opt_css,
-      });
+      if (getMode().test) {
+        elementsForTesting.push({
+          name,
+          implementationClass,
+          css: opt_css,
+        });
+      }
       // Resolve this extension's Service Promise.
-      getService(global, name, () => {
-        // All services need to resolve to an object.
-        return {};
-      });
+      getService(global, name, emptyService);
     };
     if (opt_css) {
       // TODO(dvoytenko): collect and install all styles into shadow roots.

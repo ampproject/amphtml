@@ -49,24 +49,14 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   // pending style download, it will have to finish before the new
   // style is visible.
   // For this reason we poll until the style becomes available.
-  const done = () => {
-    const sheets = doc.styleSheets;
-    for (let i = 0; i < sheets.length; i++) {
-      const sheet = sheets[i];
-      if (sheet.ownerNode == style) {
-        return true;
-      }
-    }
-    return false;
-  };
   // Sync case.
-  if (done()) {
+  if (styleLoaded(doc, style)) {
     cb();
     return;
   }
   // Poll until styles are available.
   const interval = setInterval(() => {
-    if (done()) {
+    if (styleLoaded(doc, style)) {
       clearInterval(interval);
       cb();
     }
@@ -116,9 +106,10 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   // the order is random.
   if (isRuntimeCss) {
     style.setAttribute('amp-runtime', '');
+    cssRoot.runtimeStyleElement = style;
   } else {
     style.setAttribute('amp-extension', ext || '');
-    afterElement = cssRoot.querySelector('style[amp-runtime]');
+    afterElement = cssRoot.runtimeStyleElement;
   }
   insertAfterOrAtStart(cssRoot, style, afterElement);
   return style;
@@ -152,6 +143,22 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
   });
 }
 
+/**
+ * Checks whether a style element was registered in the DOM.
+ * @param {!Document} doc
+ * @param {!Element} style
+ * @return {boolean}
+ */
+function styleLoaded(doc, style) {
+  const sheets = doc.styleSheets;
+  for (let i = 0; i < sheets.length; i++) {
+    const sheet = sheets[i];
+    if (sheet.ownerNode == style) {
+      return true;
+    }
+  }
+  return false;
+};
 
 /**
  * Insert the element in the root after the element named after or
