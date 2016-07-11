@@ -1,4 +1,5 @@
 {
   "canary": true,
-  "no-auth-in-prerender": 1
+  "no-auth-in-prerender": 1,
+  "amp-sticky-ad": 1
 }

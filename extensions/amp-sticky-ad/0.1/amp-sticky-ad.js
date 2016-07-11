@@ -16,14 +16,11 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
-/** @const */
-const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
@@ -33,12 +30,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
     toggle(this.element, true);
     this.element.classList.add('-amp-sticky-ad-layout');
     const children = this.getRealChildren();
@@ -68,11 +59,6 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return Promise.resolve();
-    }
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
       this.updateInViewport(this.ad_, true);
