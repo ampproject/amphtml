@@ -37,6 +37,8 @@ var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
+var cssOnly = argv['css-only'];
+
 require('./build-system/tasks');
 
 
@@ -217,6 +219,9 @@ function watch() {
  * @return {!Stream} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
+  if (cssOnly && !hasCss) {
+    return Promise.resolve();
+  }
   options = options || {};
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
@@ -248,6 +253,9 @@ function buildExtension(name, version, hasCss, options) {
       var jsCss = 'export const CSS = ' + css + ';\n';
       var builtName = 'build/' + name + '-' + version + '.css.js';
       fs.writeFileSync(builtName, jsCss, 'utf-8');
+      if (cssOnly) {
+        return Promise.resolve();
+      }
       return buildExtensionJs(path, name, version, options);
     });
   } else {
