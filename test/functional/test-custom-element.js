@@ -1443,6 +1443,7 @@ describe('CustomElement Loading Indicator', () => {
     const prepareLoading = sandbox.spy(element, 'prepareLoading_');
     const implMock = sandbox.mock(element.implementation_);
     implMock.expects('layoutCallback').returns(Promise.reject());
+    element.tryUpgrade_();
     element.build();
     expect(element.layoutCount_).to.equal(0);
     expect(element.isLoadingEnabled_()).to.equal(true);

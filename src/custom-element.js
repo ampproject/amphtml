@@ -364,7 +364,7 @@ function createBaseAmpElementProto(win) {
     this.layoutCount_ = 0;
 
     /** @private {boolean} */
-    this.isFirstLayoutCompleted = true;
+    this.isFirstLayoutCompleted_ = true;
 
     /** @private {boolean} */
     this.isInViewport_ = false;
@@ -883,9 +883,9 @@ function createBaseAmpElementProto(win) {
       this.toggleLoading_(false, /* cleanup */ true);
       // Check if this is the first success layout that needs
       // to call firstLayoutCompleted.
-      if (this.isFirstLayoutCompleted) {
+      if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
-        this.isFirstLayoutCompleted = false;
+        this.isFirstLayoutCompleted_ = false;
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not
@@ -913,11 +913,7 @@ function createBaseAmpElementProto(win) {
       } else {
         // Set a minimum delay in case the element loads very fast or if it
         // leaves the viewport.
-<<<<<<< f9e9854f0ce99c23c911f80b9091bd7bc452d556
         timerFor(this.ownerDocument.defaultView).delay(() => {
-=======
-        timer.delay(() => {
->>>>>>> combine layoutCount_ and layoutAttemptCount_, introduce isFirstLayoutComplete
           if (this.layoutCount_ == 0 && this.isInViewport_) {
             this.toggleLoading_(true);
           }
@@ -985,7 +981,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
-      this.isFirstLayoutCompleted = true;
+      this.isFirstLayoutCompleted_ = true;
     }
     return isReLayoutNeeded;
   };
