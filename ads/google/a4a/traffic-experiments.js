@@ -54,11 +54,6 @@ export let ExperimentInfo;
  *   pathway.
  */
 export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
-  // Note: Theoretically, isProxyOrigin is the right way to do this, b/c it
-  // will be kept up to date with known proxies.  However, it doesn't seem to
-  // be compatible with loading the example files from localhost.  To hack
-  // around that, just say that we're A4A eligible if we're in local dev
-  // mode, regardless of origin path.
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
     handleUrlParameters(win, experimentId, branches);
@@ -95,7 +90,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
  */
 function handleUrlParameters(win, experimentId, branches) {
   const a4aParam = /(?:\?|&)a4a=([0-9]+)/.exec(win.location.search);
-  if (a4aParam && a4aParam.length > 1) {
+  if (a4aParam) {
+    // If a4aParam is non-null, it necessarily has at least 2 elements.
     switch (a4aParam[1]) {
       case '0':
         // Not selected into experiment.  Disable the experiment altogether, so

@@ -133,9 +133,8 @@ function buildAdUrl(
       hid: documentInfo.pageViewId,
     };
   }
-  const viewport = viewportFor(global);
-  const slotRect = viewport.getLayoutRect(a4a.element);
-  const viewportRect = viewport.getRect();
+  const slotRect = a4a.getIntersectionElementLayoutBox();
+  const viewportRect = viewportFor(global).getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
   const allQueryParams = [
@@ -257,27 +256,48 @@ function getHistoryLength(global) {
     return 0;
   }
 }
+
 /**
  * @param {!Window} global
  * @return {?string}
  */
 function topWindowUrlOrDomain(global) {
-  try {
-    return global.top.location.href;
-  } catch (e) {}
+  const ancestorOrigins = global.location.ancestorOrigins;
+  if (ancestorOrigins) {
+    const origin = global.location.origin;
+    const topOrigin = ancestorOrigins[ancestorOrigins.length - 1];
+    if (origin == topOrigin) {
+      return global.top.location.href;
+    }
+    const secondFromTop = secondWindowFromTop(global);
+    if (secondFromTop == global ||
+        origin == ancestorOrigins[ancestorOrigins.length - 2]) {
+      return secondFromTop./*REVIEW*/document.referrer;
+    }
+    return topOrigin;
+  } else {
+    try {
+      return global.top.location.href;
+    } catch (e) {}
+    const secondFromTop = secondWindowFromTop(global);
+    try {
+      return secondFromTop./*REVIEW*/document.referrer;
+    } catch (e) {}
+    return null;
+  }
+}
+
+/**
+ * @param {!Window} global
+ * @return {!Window}
+ */
+function secondWindowFromTop(global) {
   let secondFromTop = global;
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
   dev.assert(secondFromTop.parent == global.top);
-  try {
-    return secondFromTop./*REVIEW*/document.referrer;
-  } catch (e) {}
-  const ancestorOrigins = global.location.ancestorOrigins;
-  if (ancestorOrigins) {
-    return ancestorOrigins[ancestorOrigins.length - 1];
-  }
-  return null;
+  return secondWindowFromTop;
 }
 
 /**
