@@ -20,9 +20,9 @@ import {loadScript, checkData} from '../3p/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-export function neo4w(global, data) {
+export function adagio(global, data) {
 
-  checkData(data, ['pid', 'taxonomy']);
+  checkData(data, ['sid', 'loc']);
 
   const $neodata = global;
 
@@ -31,9 +31,9 @@ export function neo4w(global, data) {
   $neodata._adagio.amp = data;
 
   $neodata._adagio.Q.push(['setup', function () {
-    $neodata._adagio.B.addPosition(data.pid, 'c');
+    $neodata._adagio.B.setSid(data.sid);
+    $neodata._adagio.B.addBanner(data.loc, 'c');
   }]);
 
-  loadScript($neodata, 'http://ads.localhost:8000/ads/adagio_lib.js');
-  //loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio.js');
+ loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
 }

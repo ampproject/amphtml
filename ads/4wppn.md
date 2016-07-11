@@ -16,7 +16,7 @@ limitations under the License.
 
 # 4w Premium Publisher Network
 
-Please refer to [Help Desk](4winfo@4wmarketplace.com) for more
+Please refer to [4w Marketplace](mailto:4winfo@4wmarketplace.com) for more
 information on how to get required ad tag or placement IDs.
 
 ## Examples
@@ -24,20 +24,14 @@ information on how to get required ad tag or placement IDs.
 ### Simple ad tag 
 
 ```html
- <amp-ad width=320 height=250
-          type="adagio"
-          data-sid="39"
-          data-loc="amp_ampw_amps_ampp_300x250"
-          data-keywords=""
-          data-uservars="">
-  </amp-ad>
+<amp-ad width=320 height=50
+           type="4wppn"
+           data-loc="ppnm_ans_ans_ros_top">
+</amp-ad>
 ```
 
 
 ### Supported parameters
 
-- `data-loc`
-- `data-sid`
-- `data-keywords`
-- `data-uservars`
+* data-loc: (Required) Position Id
 

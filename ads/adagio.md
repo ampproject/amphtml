@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# Ad.Agio
+# Neodata Ad.Agio adserver
 
-Please refer to [Neodata Help Desk](adagio@neodatagroup.com) for more
-information on how to get required ad tag or placement IDs.
+Please refer to [Neodata Help Desk](mailto:adagio@neodatagroup.com) for more
+information on how to get required parameters.
 
 ## Examples
 
@@ -36,8 +36,8 @@ information on how to get required ad tag or placement IDs.
 
 ### Supported parameters
 
-- `data-loc`
-- `data-sid`
-- `data-keywords`
-- `data-uservars`
+* data-loc: (Required) Location External Id
+* data-sid: (Required) Client ID (provided by Neodata)
+* data-keywords: (Optional) List of keywords (comma separated) -> oranges,lemons
+* data-uservars: (Optional) List of key_values parameter (comma separated) name_John,surname_Doe
 
