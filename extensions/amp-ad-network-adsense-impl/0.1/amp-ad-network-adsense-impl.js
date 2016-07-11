@@ -30,7 +30,6 @@ import {
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
 import {timer} from '../../../src/timer';
-import {viewportFor} from '../../../src/viewport';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';

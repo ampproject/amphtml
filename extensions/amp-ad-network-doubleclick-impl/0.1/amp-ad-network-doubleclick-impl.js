@@ -28,7 +28,6 @@ import {
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
 import {timer} from '../../../src/timer';
-import {viewportFor} from '../../../src/viewport';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
