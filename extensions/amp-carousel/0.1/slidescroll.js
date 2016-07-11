@@ -142,17 +142,25 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  goCallback(dir, unusedAnimate) {
+  goCallback(dir, animate) {
     if (this.slideIndex_ != null) {
-      if ((dir == 1 && this.hasNext()) ||
-          (dir == -1 && this.hasPrev())) {
+      const hasNext = this.hasNext();
+      const hasPrev = this.hasPrev();
+      if ((dir == 1 && hasNext) ||
+          (dir == -1 && hasPrev)) {
         let newIndex = this.slideIndex_ + dir;
         if (newIndex == -1) {
           newIndex = this.noOfSlides_ - 1;
         } else if (newIndex >= this.noOfSlides_) {
           newIndex = 0;
         }
-        this.showSlide_(newIndex);
+        if (animate) {
+          const currentScrollLeft =
+              (dir == 1 && !hasPrev) ? 0 : this.slideWidth_;
+          this.customSnap_(currentScrollLeft, dir);
+        } else {
+          this.showSlide_(newIndex);
+        }
       }
     }
   }
@@ -219,14 +227,20 @@ export class AmpSlideScroll extends BaseCarousel {
   /**
    * Animate and snap to the correct slide for a given scrollLeft.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   * @param {number=} opt_forceDir if a valid direction is given force it to
+   *    move 1 slide in that direction.
    * @return {!Promise}
    */
-  customSnap_(currentScrollLeft) {
+  customSnap_(currentScrollLeft, opt_forceDir) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     let toScrollLeft;
-    const diff = newIndex - this.slideIndex_;
+    let diff = newIndex - this.slideIndex_;
     const hasPrev = this.hasPrev();
+
+    if (diff == 0 && (opt_forceDir == 1 || opt_forceDir == -1)) {
+      diff = opt_forceDir;
+    }
 
     if (diff == 0) {
       // Snap and stay.

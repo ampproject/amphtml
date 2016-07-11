@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesFor} from '../../../src/resources';
 import {timer} from '../../../src/timer';
@@ -481,7 +481,5 @@ export class Visibility {
  * @return {!Visibility}
  */
 export function installVisibilityService(win) {
-  return getService(win, 'visibility', () => {
-    return new Visibility(win);
-  });
+  return fromClass(win, 'visibility', Visibility);
 };

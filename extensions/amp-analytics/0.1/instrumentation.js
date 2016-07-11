@@ -16,7 +16,7 @@
 
 import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
@@ -465,7 +465,6 @@ export class InstrumentationService {
  * @return {!InstrumentationService}
  */
 export function instrumentationServiceFor(window) {
-  return getService(window, 'amp-analytics-instrumentation', () => {
-    return new InstrumentationService(window);
-  });
+  return fromClass(window, 'amp-analytics-instrumentation',
+      InstrumentationService);
 }

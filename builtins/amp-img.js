@@ -35,7 +35,10 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  initialize_() {
+    if (this.img_) {
+      return;
+    }
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
@@ -51,7 +54,7 @@ export class AmpImg extends BaseElement {
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
-    this.propagateAttributes(['alt'], this.img_);
+    this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
     this.applyFillContent(this.img_, true);
 
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
@@ -75,6 +78,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initialize_();
     let promise = this.updateImageSrc_();
 
     // We only allow to fallback on error on the initial layoutCallback

@@ -118,6 +118,7 @@ export const adPreconnect = {
     'https://resize.mantisadnetwork.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  widespace: 'https://engine.widespace.com',
   improvedigital: 'https://ad.360yield.com/',
   openx: [
     'https://partner.googleadservices.com',

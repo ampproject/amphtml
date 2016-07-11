@@ -23,9 +23,9 @@ import './polyfills';
 
 import {installDocService} from './service/ampdoc-impl';
 import {
+  adoptShadowMode,
   installBuiltins,
   installRuntimeServices,
-  adopt,
 } from './runtime';
 import {stubElements} from './custom-element';
 
@@ -40,7 +40,7 @@ installRuntimeServices(window);
 installBuiltins(window);
 
 // Final configuration and stubbing.
-adopt(window);
+adoptShadowMode(window);
 stubElements(window);
 
 // Output a message to the console and add an attribute to the <html>

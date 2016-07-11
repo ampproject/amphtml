@@ -102,6 +102,7 @@ describe('amp-youtube', function() {
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
       expect(imgPlaceholder.src).to.be.equal(
           'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');
+      expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal('origin');
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -119,12 +120,14 @@ describe('amp-youtube', function() {
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+      expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal('origin');
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
 
       const imgPlaceholder = yt.querySelector('img[placeholder]');
       expect(imgPlaceholder.className).to.match(/amp-hidden/);
+      expect(imgPlaceholder.getAttribute('referrerpolicy')).to.equal('origin');
 
       expect(imgPlaceholder.src).to.equal(
           'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');

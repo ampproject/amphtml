@@ -39,7 +39,7 @@ export function allocateVariant(win, config) {
 
   if (cidScope && config.consentNotificationId) {
     hasConsentPromise = userNotificationManagerFor(win)
-        .then(manager => manager.get(config.consentNotificationId))
+        .then(manager => manager.getNotification(config.consentNotificationId))
         .then(userNotification => {
           user.assert(userNotification,
               `Notification not found: ${config.consentNotificationId}`);

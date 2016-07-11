@@ -17,7 +17,7 @@
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
@@ -1051,7 +1051,5 @@ export let ViewerHistoryPoppedEventDef;
  * @return {!Viewer}
  */
 export function installViewerService(window) {
-  return getService(window, 'viewer', () => {
-    return new Viewer(window);
-  });
+  return fromClass(window, 'viewer', Viewer);
 };

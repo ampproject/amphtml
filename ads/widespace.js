@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
+import {writeScript, validateDataExists, checkData} from '../3p/3p';
 
-var BBPromise = require('bluebird');
-var fs = BBPromise.promisifyAll(require('fs'));
-var m = require('./');
-var test = require('ava');
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function widespace(global, data) {
+  checkData(data, ['sid']);
+  validateDataExists(data, ['sid']);
 
-var targetFile = 'target-file.js';
+  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + encodeURIComponent(data.sid);
 
-test('sync - prepends global config', t => {
-  t.plan(1);
-  var res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
-  t.is(res, 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"});' +
-      '/*AMP_CONFIG*/var x = 1 + 1;');
-});
-
-test('sync - valueOrDefault', t => {
-  t.plan(2);
-  var res = m.valueOrDefault(true, 'hello');
-  t.is(res, 'hello');
-  res = m.valueOrDefault('world', 'hello');
-  t.is(res, 'world');
-});
+  writeScript(global, url);
+}

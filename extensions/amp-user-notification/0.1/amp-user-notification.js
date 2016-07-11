@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -317,16 +317,22 @@ export class UserNotificationManager {
   constructor(window) {
     this.win_ = window;
 
-    /** @private @const {!Object<!UserNotificationDeferDef>} */
+    /** @private @const {!Object<string,!NotificationInterface>} */
+    this.registry_ = Object.create(null);
+
+    /** @private @const {!Object<string,!UserNotificationDeferDef>} */
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win_);
 
-    /** @private {!Promise} */
+    /** @private @const {!Promise} */
+    this.documentReadyPromise_ = whenDocumentReady(this.win_.document);
+
+    /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
       this.viewer_.whenFirstVisible(),
-      whenDocumentReady(this.win_.document),
+      this.documentReadyPromise_,
     ]);
 
     /** @private {!Promise} */
@@ -349,6 +355,16 @@ export class UserNotificationManager {
   }
 
   /**
+   * Retrieves a registered user notification by ID. Returns undefined if it
+   * is not registered yet.
+   * @param {string} id
+   * @return {!Promise<?NotificationInterface>}
+   */
+  getNotification(id) {
+    return this.documentReadyPromise_.then(() => this.registry_[id]);
+  }
+
+  /**
    * Register an instance of `amp-user-notification`.
    * @param {string} id
    * @param {!NotificationInterface} userNotification
@@ -356,6 +372,7 @@ export class UserNotificationManager {
    * @package
    */
   registerUserNotification(id, userNotification) {
+    this.registry_[id] = userNotification;
     const deferred = this.getOrCreateDeferById_(id);
     // Compose the registered notifications into a promise queue
     // that blocks until one notification is dismissed.
@@ -399,9 +416,8 @@ export class UserNotificationManager {
  * @private
  */
 function getUserNotificationManager_(window) {
-  return getService(window, 'userNotificationManager', () => {
-    return new UserNotificationManager(window);
-  });
+  return fromClass(window, 'userNotificationManager',
+      UserNotificationManager);
 }
 
 /**

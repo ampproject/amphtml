@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {user} from '../log';
 
 
@@ -349,7 +349,5 @@ export function registerExtendedTemplate(win, type, templateClass) {
  * @return {!Templates}
  */
 export function installTemplatesService(window) {
-  return getService(window, 'templates', () => {
-    return new Templates(window);
-  });
+  return fromClass(window, 'templates', Templates);
 };

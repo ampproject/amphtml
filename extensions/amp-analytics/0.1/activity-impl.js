@@ -19,7 +19,7 @@
  * has performed on the page.
  */
 
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
@@ -308,7 +308,5 @@ export class Activity {
  * @return {!Activity}
  */
 export function installActivityService(win) {
-  return getService(win, 'activity', () => {
-    return new Activity(win);
-  });
+  return fromClass(win, 'activity', Activity);
 };

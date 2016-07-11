@@ -109,7 +109,7 @@ def FieldTypeFor(descriptor, field_desc):
   if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
     return '!Array<!%s>' % element_type
   else:
-    return element_type
+    return '?%s' % element_type
 
 
 def NonRepeatedValueToString(descriptor, field_desc, value):
@@ -169,6 +169,9 @@ SKIP_FIELDS_FOR_LIGHT = ['error_formats', 'spec_url', 'validator_revision',
                          'min_validator_revision_required', 'deprecation_url',
                          'errors']
 SKIP_CLASSES_FOR_LIGHT = ['amp.validator.ValidationError']
+EXPORTED_CLASSES = ['amp.validator.ValidationResult',
+                    'amp.validator.ValidationError']
+CONSTRUCTOR_ARG_FIELDS = ['name', 'tag_name']
 
 
 def PrintClassFor(descriptor, msg_desc, out):
@@ -189,28 +192,42 @@ def PrintClassFor(descriptor, msg_desc, out):
   if msg_desc.full_name in SKIP_CLASSES_FOR_LIGHT:
     out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
     out.PushIndent(2)
+  constructor_arg_fields = []
+  constructor_arg_field_names = {}
+  for field in msg_desc.fields:
+    if field.name in CONSTRUCTOR_ARG_FIELDS:
+      constructor_arg_fields.append(field)
+      constructor_arg_field_names[field.name] = 1
   out.Line('/**')
+  for field in constructor_arg_fields:
+    out.Line(' * @param {%s} %s' % (FieldTypeFor(descriptor, field),
+                                    UnderscoreToCamelCase(field.name)))
   out.Line(' * @constructor')
-  is_exported = msg_desc.name in ['ValidationResult', 'ValidationError']
+  out.Line(' * @struct')
   export_or_empty = ''
-  if is_exported:
+  if msg_desc.full_name in EXPORTED_CLASSES:
     out.Line(' * @export')
     export_or_empty = ' @export'
   out.Line(' */')
-  out.Line('%s = function() {' % msg_desc.full_name)
+  out.Line('%s = function(%s) {' % (
+      msg_desc.full_name,
+      ','.join([UnderscoreToCamelCase(f.name)
+                for f in constructor_arg_fields])))
   out.PushIndent(2)
   for field in msg_desc.fields:
     if field.name in SKIP_FIELDS_FOR_LIGHT:
       out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
       out.PushIndent(2)
-    if field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-      out.Line('/**%s @type {%s} */' % (export_or_empty,
-                                        FieldTypeFor(descriptor, field)))
-      out.Line('this.%s = [];' % UnderscoreToCamelCase(field.name))
-    else:
-      out.Line('/**%s @type {?%s} */' % (export_or_empty,
-                                         FieldTypeFor(descriptor, field)))
-      out.Line('this.%s = null;' % UnderscoreToCamelCase(field.name))
+    out.Line('/**%s @type {%s} */' % (export_or_empty,
+                                      FieldTypeFor(descriptor, field)))
+    assigned_value = 'null'
+    if field.name in constructor_arg_field_names:
+      # field.name is also the parameter name.
+      assigned_value = UnderscoreToCamelCase(field.name)
+    elif field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+      assigned_value = '[]'
+    out.Line('this.%s = %s;' % (UnderscoreToCamelCase(field.name),
+                                assigned_value))
     if field.name in SKIP_FIELDS_FOR_LIGHT:
       out.PopIndent()
       out.Line('}')
@@ -242,8 +259,10 @@ def PrintEnumFor(enum_desc, out):
   out.Line(' * @export')
   out.Line(' */')
   out.Line('%s = {' % enum_desc.full_name)
-  out.Line(',\n'.join(["  %s: '%s'" % (v.name, v.name) for v in enum_desc.values
-                      ]))
+  out.PushIndent(2)
+  for v in enum_desc.values:
+    out.Line("%s: '%s'," % (v.name, v.name))
+  out.PopIndent()
   out.Line('};')
   if enum_desc.full_name in SKIP_ENUMS_FOR_LIGHT:
     out.PopIndent()
@@ -269,31 +288,41 @@ def PrintObject(descriptor, msg, this_id, out):
   Returns:
     The next object id, that is, next variable available for creating objects.
   """
-  out.Line('var o_%d = new %s();' % (this_id, msg.DESCRIPTOR.full_name))
   next_id = this_id + 1
+  field_names_and_assigned_values = []
   for (field_desc, field_val) in msg.ListFields():
-    if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
-      out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
-      out.PushIndent(2)
     if field_desc.type == descriptor.FieldDescriptor.TYPE_MESSAGE:
       if field_desc.label == descriptor.FieldDescriptor.LABEL_REPEATED:
+        elements = []
         for val in field_val:
           field_id = next_id
           next_id = PrintObject(descriptor, val, field_id, out)
-          out.Line('o_%d.%s.push(o_%d);' %
-                   (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+          elements.append('o_%d' % field_id)
+        field_names_and_assigned_values.append(
+            (field_desc.name, '[%s]' % ','.join(elements)))
       else:
         field_id = next_id
         next_id = PrintObject(descriptor, field_val, field_id, out)
-        out.Line('o_%d.%s = o_%d;' %
-                 (this_id, UnderscoreToCamelCase(field_desc.name), field_id))
+        field_names_and_assigned_values.append(
+            (field_desc.name, 'o_%d' % field_id))
     else:
-      out.Line('o_%d.%s = %s;' %
-               (this_id, UnderscoreToCamelCase(field_desc.name),
-                ValueToString(descriptor, field_desc, field_val)))
-    if field_desc.name in SKIP_FIELDS_FOR_LIGHT:
-      out.PopIndent()
-      out.Line('}')
+      field_names_and_assigned_values.append(
+          (field_desc.name, ValueToString(descriptor, field_desc, field_val)))
+  constructor_arg_values = []
+  for (name, value) in field_names_and_assigned_values:
+    if name in CONSTRUCTOR_ARG_FIELDS:
+      constructor_arg_values.append(value)
+  out.Line('var o_%d = new %s(%s);' % (
+      this_id, msg.DESCRIPTOR.full_name, ','.join(constructor_arg_values)))
+  for (name, value) in field_names_and_assigned_values:
+    if name not in CONSTRUCTOR_ARG_FIELDS:
+      if name in SKIP_FIELDS_FOR_LIGHT:
+        out.Line('if (amp.validator.GENERATE_DETAILED_ERRORS) {')
+        out.PushIndent(2)
+      out.Line('o_%d.%s = %s;' % (this_id, UnderscoreToCamelCase(name), value))
+      if name in SKIP_FIELDS_FOR_LIGHT:
+        out.PopIndent()
+        out.Line('}')
   return next_id
 
 

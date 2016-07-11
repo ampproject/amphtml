@@ -24,7 +24,7 @@ import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -899,7 +899,7 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    const toUnload = [];
+    let toUnload;
     if (relayoutCount > 0 || remeasureCount > 0 ||
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -914,6 +914,9 @@ export class Resources {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
+            if (!toUnload) {
+              toUnload = [];
+            }
             toUnload.push(r);
           }
         }
@@ -921,7 +924,7 @@ export class Resources {
     }
 
     // Unload all in one cycle.
-    if (toUnload.length > 0) {
+    if (toUnload) {
       this.vsync_.mutate(() => {
         toUnload.forEach(r => {
           r.unload();
@@ -1551,7 +1554,5 @@ let SizeDef;
  * @return {!Resources}
  */
 export function installResourcesService(win) {
-  return getService(win, 'resources', () => {
-    return new Resources(win);
-  });
+  return fromClass(win, 'resources', Resources);
 };

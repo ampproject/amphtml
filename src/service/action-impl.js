@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getServiceForDoc} from '../service';
+import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
@@ -613,7 +613,5 @@ function isNum(c) {
  * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'action', ampdoc => {
-    return new ActionService(ampdoc);
-  });
+  return fromClassForDoc(ampdoc, 'action', ActionService);
 };
