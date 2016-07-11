@@ -364,6 +364,9 @@ function createBaseAmpElementProto(win) {
     this.layoutCount_ = 0;
 
     /** @private {boolean} */
+    this.isFirstLayoutCompleted_ = true;
+
+    /** @private {boolean} */
     this.isInViewport_ = false;
 
     /** @private {string|null|undefined} */
@@ -595,7 +598,11 @@ function createBaseAmpElementProto(win) {
         // Few top elements will also be pre-initialized with a loading
         // element.
         getVsync(this).mutate(() => {
-          this.prepareLoading_();
+          // Repeat "loading enabled" check because it could have changed while
+          // waiting for vsync.
+          if (this.isLoadingEnabled_()) {
+            this.prepareLoading_();
+          }
         });
       }
     }
@@ -874,10 +881,15 @@ function createBaseAmpElementProto(win) {
       this.readyState = 'complete';
       this.layoutCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
-      if (this.layoutCount_ == 1) {
+      // Check if this is the first success layout that needs
+      // to call firstLayoutCompleted.
+      if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
+        this.isFirstLayoutCompleted_ = false;
       }
     }, reason => {
+      // add layoutCount_ by 1 despite load fails or not
+      this.layoutCount_++;
       this.toggleLoading_(false, /* cleanup */ true);
       throw reason;
     });
@@ -969,6 +981,7 @@ function createBaseAmpElementProto(win) {
     const isReLayoutNeeded = this.implementation_.unlayoutCallback();
     if (isReLayoutNeeded) {
       this.layoutCount_ = 0;
+      this.isFirstLayoutCompleted_ = true;
     }
     return isReLayoutNeeded;
   };
@@ -1146,7 +1159,7 @@ function createBaseAmpElementProto(win) {
     // 1. `noloading` attribute is specified;
     // 2. The element has not been whitelisted;
     // 3. The element is too small or has not yet been measured;
-    // 4. The element has already been laid out;
+    // 4. The element has already been laid out (include having loading error);
     // 5. The element is a `placeholder` or a `fallback`;
     // 6. The element's layout is not a size-defining layout.
     if (this.loadingDisabled_ === undefined) {
