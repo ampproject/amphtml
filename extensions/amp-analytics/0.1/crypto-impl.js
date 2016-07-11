@@ -15,7 +15,7 @@
  */
 
 import * as lib from '../../../third_party/closure-library/sha384-generated';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {dev} from '../../../src/log';
 
 /** @const {string} */
@@ -114,7 +114,5 @@ function str2ab(str) {
 }
 
 export function installCryptoService(win) {
-  return getService(win, 'crypto', () => {
-    return new Crypto(win);
-  });
+  return fromClass(win, 'crypto', Crypto);
 }

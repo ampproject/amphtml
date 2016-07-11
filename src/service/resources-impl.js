@@ -24,7 +24,7 @@ import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -1554,7 +1554,5 @@ let SizeDef;
  * @return {!Resources}
  */
 export function installResourcesService(win) {
-  return getService(win, 'resources', () => {
-    return new Resources(win);
-  });
+  return fromClass(win, 'resources', Resources);
 };

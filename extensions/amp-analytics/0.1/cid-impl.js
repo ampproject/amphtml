@@ -23,7 +23,7 @@
  */
 
 import {getCookie, setCookie} from '../../../src/cookies';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -374,7 +374,5 @@ function getEntropy(win) {
  * @return {!Cid}
  */
 export function installCidService(window) {
-  return getService(window, 'cid', () => {
-    return new Cid(window);
-  });
+  return fromClass(window, 'cid', Cid);
 }

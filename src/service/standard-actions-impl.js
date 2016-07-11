@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from '../service';
+import {fromClassForDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
 import {toggle} from '../style';
@@ -62,8 +62,6 @@ export class StandardActions {
  * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return /** @type {!StandardActions} */ (
-      getServiceForDoc(ampdoc, 'standard-actions', ampdoc => {
-        return new StandardActions(ampdoc);
-      }));
+  return fromClassForDoc(
+      ampdoc, 'standard-actions', StandardActions);
 };

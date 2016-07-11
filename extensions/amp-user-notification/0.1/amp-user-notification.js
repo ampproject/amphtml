@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -416,9 +416,8 @@ export class UserNotificationManager {
  * @private
  */
 function getUserNotificationManager_(window) {
-  return getService(window, 'userNotificationManager', () => {
-    return new UserNotificationManager(window);
-  });
+  return fromClass(window, 'userNotificationManager',
+      UserNotificationManager);
 }
 
 /**
