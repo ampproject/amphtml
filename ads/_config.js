@@ -187,6 +187,10 @@ export const adPreconnect = {
     'https://pubads.g.doubleclick.net',
     'https://prg.kargo.com',
   ],
+  zergnet: [
+    'https://www.zergnet.com',
+    'https://zergnet.com',
+  ],
 };
 
 /**

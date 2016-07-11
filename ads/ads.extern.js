@@ -135,3 +135,5 @@ PostRelease.Start;
 PostRelease.checkIsAdVisible;
 var _prx;
 data.delayByTime;
+data.zergid;
+window.zergnetWidgetId;
