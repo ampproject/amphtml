@@ -253,8 +253,9 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     this.propagateAttributes(
-        ['frameborder', 'allowfullscreen', 'allowtransparency', 'scrolling'],
-        iframe);
+        ['frameborder', 'allowfullscreen', 'allowtransparency',
+         'scrolling', 'referrerpolicy'],
+         iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 

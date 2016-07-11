@@ -153,6 +153,28 @@ describe('amp-iframe', () => {
     });
   });
 
+  it('should only propagate supported attributes', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      width: 100,
+      height: 100,
+      allowfullscreen: '',
+      allowtransparency: '',
+      referrerpolicy: 'no-referrer',
+      frameborder: 3,
+      longdesc: 'foo',
+      marginwidth: 5,
+    }).then(amp => {
+      expect(amp.iframe.getAttribute('allowfullscreen')).to.equal('');
+      expect(amp.iframe.getAttribute('allowtransparency')).to.equal('');
+      expect(amp.iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
+      expect(amp.iframe.getAttribute('frameborder')).to.equal('3');
+      // unsupproted attributes
+      expect(amp.iframe.getAttribute('longdesc')).to.be.null;
+      expect(amp.iframe.getAttribute('marginwidth')).to.be.null;
+    });
+  });
+
   it('should allow JS and propagate scrolling and have lower priority', () => {
     return getAmpIframe({
       src: iframeSrc,
