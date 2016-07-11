@@ -82,7 +82,7 @@ const dbPromise = cachePromise.then(() => {
           const item = cursor.item;
           const removal = {
             url: item.url,
-            versions: item.versions.filter((v) => v <= cutoff);
+            versions: item.versions.filter((v) => (v <= cutoff))
           };
           item.versions = item.versions.filter((v) => v > cutoff);
 
@@ -176,8 +176,8 @@ self.addEventListener('install', function(install) {
                   if (!item) {
                     item = {
                       file: requestFile,
-                      url: versionedUrl(url, '0000000000000')
-                      versions: []
+                      url: versionedUrl(url, '0000000000000'),
+                      versions: [],
                     };
                   }
                   const { versions } = item;

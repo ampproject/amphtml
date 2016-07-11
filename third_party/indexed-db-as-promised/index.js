@@ -1,1 +1,2 @@
-export iDb from './src/indexed-db';
+import iDb from './src/indexed-db';
+export default iDb;
