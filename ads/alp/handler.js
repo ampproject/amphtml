@@ -50,9 +50,10 @@ export function installAlpClickHandler(win) {
  * Filter click event and then transform URL for direct AMP navigation
  * with impression logging.
  * @param {!Event} e
+ * @param {function(!Window, !Element, string)=} opt_navigateTo
  * @visibleForTesting
  */
-export function handleClick(e) {
+export function handleClick(e, opt_navigateTo) {
   if (e.defaultPrevented) {
     return;
   }
@@ -91,7 +92,8 @@ export function handleClick(e) {
   }
 
   e.preventDefault();
-  navigateTo(win, link.a, destination);
+  const navigate = opt_navigateTo || navigateTo;
+  navigate(win, link.a, destination);
 }
 
 /**
