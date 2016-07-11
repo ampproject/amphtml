@@ -146,6 +146,7 @@ register('nend', nend);
 register('adgeneration', adgeneration);
 register('genieessp', genieessp);
 register('kargo', kargo);
+register('zergnet', zergnet);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
