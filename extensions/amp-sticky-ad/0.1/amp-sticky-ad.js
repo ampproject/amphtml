@@ -16,14 +16,11 @@
 
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
-/** @const */
-const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
