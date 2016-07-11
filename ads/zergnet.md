@@ -36,4 +36,4 @@ For semantics of configuration, please see ad network documentation.
 
 Supported parameters:
 
-- data-zergnet-widget-id
+- data-zergid
