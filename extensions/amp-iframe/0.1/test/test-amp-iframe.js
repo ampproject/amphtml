@@ -371,33 +371,7 @@ describe('amp-iframe', () => {
     });
   });
 
-  it('should resize height only', () => {
-    return getAmpIframe({
-      src: iframeSrc,
-      sandbox: 'allow-scripts allow-same-origin',
-      width: 100,
-      height: 100,
-      resizable: '',
-    }).then(amp => {
-      const impl = amp.container.implementation_;
-      impl.layoutCallback();
-      const p = new Promise((resolve, unusedReject) => {
-        impl.updateSize_ = (height, unusedWidth) => {
-          resolve({amp, height});
-        };
-      });
-      amp.iframe.contentWindow.postMessage({
-        sentinel: 'amp-test',
-        type: 'requestHeight',
-        height: 217,
-      }, '*');
-      return p;
-    }).then(res => {
-      expect(res.height).to.equal(217);
-    });
-  });
-
-  it('should fallback for resize with overflow element', () => {
+  it('should resize amp-iframe', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
@@ -414,7 +388,7 @@ describe('amp-iframe', () => {
     });
   });
 
-  it('should fallback for resize (height only) with overflow element', () => {
+  it('should resize amp-iframe when only height is provided', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
@@ -427,10 +401,26 @@ describe('amp-iframe', () => {
       impl.updateSize_(217);
       expect(impl.attemptChangeSize.callCount).to.equal(1);
       expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+      expect(impl.attemptChangeSize.firstCall.args[1]).to.be.undefined;
     });
   });
 
-  it('should not resize a non-resizable frame', () => {
+  it('should not resize amp-iframe if request height is small', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      sandbox: 'allow-scripts',
+      width: 100,
+      height: 100,
+      resizable: '',
+    }).then(amp => {
+      const impl = amp.container.implementation_;
+      impl.attemptChangeSize = sandbox.spy();
+      impl.updateSize_(50, 114);
+      expect(impl.attemptChangeSize.callCount).to.equal(0);
+    });
+  });
+
+  it('should not resize amp-iframe if it is non-resizable', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',

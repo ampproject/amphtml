@@ -15,7 +15,7 @@
  */
 
 import {timer} from './timer';
-import {user} from './log';
+import {dev, user} from './log';
 
 
 /**
@@ -44,7 +44,7 @@ export function listen(element, eventType, listener, opt_capture) {
  * as soon as event has been received.
  * @param {?EventTarget} element
  * @param {string} eventType
- * @param {function(Event)} listener
+ * @param {?function(Event)} listener
  * @param {boolean=} opt_capture
  * @return {!UnlistenDef}
  */
@@ -61,6 +61,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
     }
     element = null;
     proxy = null;
+    listener = null;
   };
   element.addEventListener(eventType, proxy, capture);
   return unlisten;
@@ -83,7 +84,7 @@ export function listenOncePromise(element, eventType, opt_capture,
   const eventPromise = new Promise((resolve, unusedReject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
-  return racePromise_(eventPromise, unlisten, opt_timeout);
+  return racePromise_(eventPromise, unlisten, undefined, opt_timeout);
 }
 
 
@@ -96,7 +97,6 @@ export function isLoaded(element) {
   return element.complete || element.readyState == 'complete';
 }
 
-
 /**
  * Returns a promise that will resolve or fail based on the element's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
@@ -108,44 +108,52 @@ export function isLoaded(element) {
 export function loadPromise(element, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
-  const loadingPromise = new Promise((resolve, reject) => {
-    if (isLoaded(element)) {
-      resolve(element);
+  if (isLoaded(element)) {
+    return Promise.resolve(element);
+  }
+  let loadingPromise = new Promise((resolve, reject) => {
+    // Listen once since IE 5/6/7 fire the onload event continuously for
+    // animated GIFs.
+    if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+      unlistenLoad = listenOnce(element, 'loadstart', resolve);
     } else {
-      // Listen once since IE 5/6/7 fire the onload event continuously for
-      // animated GIFs.
-      if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
-        unlistenLoad = listenOnce(element, 'loadstart', () => resolve(element));
-      } else {
-        unlistenLoad = listenOnce(element, 'load', () => resolve(element));
-      }
-      unlistenError = listenOnce(element, 'error', () => {
-        // Report failed loads as asserts so that they automatically go into
-        // the "document error" bucket.
-        reject(user.createError('Failed HTTP request for %s.', element));
-      });
+      unlistenLoad = listenOnce(element, 'load', resolve);
     }
+    unlistenError = listenOnce(element, 'error', reject);
   });
-  return racePromise_(loadingPromise, () => {
-    // It's critical that all listeners are removed.
-    if (unlistenLoad) {
-      unlistenLoad();
-    }
-    if (unlistenError) {
-      unlistenError();
-    }
-  }, opt_timeout);
+  loadingPromise = loadingPromise.then(getTarget, failedToLoad);
+  return racePromise_(loadingPromise, unlistenLoad, unlistenError,
+      opt_timeout);
 }
 
+/**
+ * @param {!Event} event
+ * @return {!Element} The target of the event.
+ */
+function getTarget(event) {
+  return dev.assert(event.target || event.testTarget,
+      'No target present %s', event);
+}
+
+/**
+ * Emit error on load failure.
+ * @param {*} event
+ */
+function failedToLoad(event) {
+  // Report failed loads as user errors so that they automatically go
+  // into the "document error" bucket.
+  throw user.createError('Failed HTTP request for %s.', event.target);
+}
 
 /**
  * @param {!Promise<TYPE>} promise
- * @param {UnlistenDef|undefined} unlisten
+ * @param {UnlistenDef|undefined} unlisten1
+ * @param {UnlistenDef|undefined} unlisten2
  * @param {number|undefined} timeout
  * @return {!Promise<TYPE>}
  * @template TYPE
  */
-function racePromise_(promise, unlisten, timeout) {
+function racePromise_(promise, unlisten1, unlisten2, timeout) {
   let racePromise;
   if (timeout === undefined) {
     // Timeout is not specified: return promise.
@@ -154,14 +162,11 @@ function racePromise_(promise, unlisten, timeout) {
     // Timeout has been specified: add a timeout condition.
     racePromise = timer.timeoutPromise(timeout || 0, promise);
   }
-  if (!unlisten) {
-    return racePromise;
+  if (unlisten1) {
+    racePromise.then(unlisten1, unlisten1);
   }
-  return racePromise.then(result => {
-    unlisten();
-    return result;
-  }, reason => {
-    unlisten();
-    throw reason;
-  });
+  if (unlisten2) {
+    racePromise.then(unlisten2, unlisten2);
+  }
+  return racePromise;
 }

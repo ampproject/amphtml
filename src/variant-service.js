@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
+import {getElementServiceIfAvailable} from './element-service';
 
-var BBPromise = require('bluebird');
-var fs = BBPromise.promisifyAll(require('fs'));
-var m = require('./');
-var test = require('ava');
-
-var targetFile = 'target-file.js';
-
-test('sync - prepends global config', t => {
-  t.plan(1);
-  var res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
-  t.is(res, 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"});' +
-      '/*AMP_CONFIG*/var x = 1 + 1;');
-});
-
-test('sync - valueOrDefault', t => {
-  t.plan(2);
-  var res = m.valueOrDefault(true, 'hello');
-  t.is(res, 'hello');
-  res = m.valueOrDefault('world', 'hello');
-  t.is(res, 'world');
-});
+/**
+ * Returns a promise for the experiment variants or a promise for null if it is
+ * not available on the current page.
+ * @param {!Window} win
+ * @return {!Promise<?Object<string, string>>}
+ */
+export function variantForOrNull(win) {
+  return getElementServiceIfAvailable(win, 'variant', 'amp-experiment');
+}

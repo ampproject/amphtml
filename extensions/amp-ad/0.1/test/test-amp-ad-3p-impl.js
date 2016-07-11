@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import * as sinon from 'sinon';
 
-describe('amp-ad-3p-impl', tests('amp-ad-3p-impl'));
+describe('amp-ad-3p-impl', tests('amp-ad'));
 
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
@@ -45,6 +46,8 @@ function tests(name) {
         // Test precedence
         'data-width': '6666',
       }, 'https://schema.org').then(ad => {
+        expect(ad.implementation_).to.be.instanceof(AmpAd3PImpl);
+
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
@@ -296,12 +299,14 @@ function tests(name) {
                 ad.style.height = height;
                 callback();
               });
+          const collapse = sandbox.spy(ad.implementation_, 'collapse');
           ad.style.position = 'absolute';
           ad.style.top = '300px';
           ad.style.left = '50px';
           expect(ad.style.display).to.not.equal('none');
           ad.implementation_.noContentHandler_();
           expect(ad.style.display).to.equal('none');
+          expect(collapse).to.have.been.called;
         });
       });
 

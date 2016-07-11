@@ -16,6 +16,7 @@
 
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
+import {variantForOrNull} from '../variant-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
 import {getService} from '../service';
@@ -51,6 +52,9 @@ export class UrlReplacements {
 
     /** @private @const {function():!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
+
+    /** @private @const {!Promise<?Object<string, string>>} */
+    this.variants_ = variantForOrNull(win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -172,6 +176,20 @@ export class UrlReplacements {
           scope,
           createCookieIfNotPresent: true,
         }, consent);
+      });
+    });
+
+    // Returns assigned variant name for the given experiment.
+    this.set_('VARIANT', experiment => {
+      return this.variants_.then(variants => {
+        user.assert(variants,
+            'To use variable VARIANT, amp-experiment should be configured');
+        user.assert(variants[experiment] !== undefined,
+            'The value passed to VARIANT() is not a valid experiment name:' +
+                experiment);
+        const variant = variants[experiment];
+        // When no variant assigned, use reserved keyword 'none'.
+        return variant === null ? 'none' : variant;
       });
     });
 

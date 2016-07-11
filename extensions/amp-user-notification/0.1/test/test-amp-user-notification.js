@@ -71,6 +71,7 @@ describe('amp-user-notification', () => {
     button.setAttribute('on', 'tap:' + elem.getAttribute('id') + 'dismiss');
     elem.appendChild(button);
 
+    elem.tryUpgrade_();
     const impl = elem.implementation_;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
@@ -520,6 +521,20 @@ describe('amp-user-notification', () => {
         shouldShow: () => Promise.resolve(true),
         show: () => Promise.resolve(),
       };
+    });
+
+    it('getNotificaiton should return notification object after ' +
+        'registration', () => {
+      return getUserNotification().then(element => {
+        const notification = new AmpUserNotification(element);
+        service.registerUserNotification('n1', notification);
+        return Promise.all([
+          expect(service.getNotification('n1'))
+              .to.eventually.equal(notification),
+          expect(service.getNotification('n2'))
+              .to.eventually.equal(undefined),
+        ]);
+      });
     });
 
     it('should be able to get AmpUserNotification object by ID', () => {

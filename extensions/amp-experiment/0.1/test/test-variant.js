@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
+import * as sinon from 'sinon';
 import {allocateVariant} from '../variant';
+import {stubService} from '../../../../testing/test-helper';
 
 describe('allocateVariant', () => {
 
+  let sandbox;
   let fakeWin;
+  let getCidStub;
+  let uniformStub;
+  let getNotificationStub;
 
   beforeEach(() => {
     fakeWin = {
@@ -28,6 +34,16 @@ describe('allocateVariant', () => {
         },
       },
     };
+
+    sandbox = sinon.sandbox.create();
+    getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
+    uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
+    getNotificationStub = stubService(
+        sandbox, fakeWin, 'userNotificationManager', 'getNotification');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should throw for invalid config', () => {
@@ -130,6 +146,89 @@ describe('allocateVariant', () => {
         '-Variant_1': 2.1,
         '-Variant_2': 23.3,
         '-Variant_3': 20.123,
+      },
+    })).to.eventually.equal(null);
+  });
+
+  it('should work with default CID scope', () => {
+    getCidStub.withArgs({
+      scope: 'amp-experiment',
+      createCookieIfNotPresent: true,
+    }).returns(Promise.resolve('123abc'));
+    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(fakeWin, {
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('should work with custom CID scope', () => {
+    getCidStub.withArgs({
+      scope: 'custom-scope',
+      createCookieIfNotPresent: true,
+    }).returns(Promise.resolve('123abc'));
+    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(fakeWin, {
+      cidScope: 'custom-scope',
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('should have variant allocated if consent is given', () => {
+    getNotificationStub.withArgs('notif-1')
+        .returns(Promise.resolve({
+          isDismissed: () => {
+            return (Promise.resolve(true));
+          },
+        }));
+
+    getCidStub.withArgs({
+      scope: 'amp-experiment',
+      createCookieIfNotPresent: true,
+    }).returns(Promise.resolve('123abc'));
+    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    return expect(allocateVariant(fakeWin, {
+      consentNotificationId: 'notif-1',
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('should have no variant allocated if notification not found', () => {
+    getNotificationStub.withArgs('notif-1')
+        .returns(Promise.resolve(null));
+
+    return expect(allocateVariant(fakeWin, {
+      consentNotificationId: 'notif-1',
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.rejectedWith('Notification not found: notif-1');
+  });
+
+  it('should have no variant allocated if consent is missing', () => {
+    getNotificationStub.withArgs('notif-1')
+        .returns(Promise.resolve({
+          isDismissed: () => {
+            return (Promise.resolve(false));
+          },
+        }));
+
+    getCidStub.returns(Promise.resolve('123abc'));
+    uniformStub.returns(Promise.resolve(0.4));
+    return expect(allocateVariant(fakeWin, {
+      consentNotificationId: 'notif-1',
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
       },
     })).to.eventually.equal(null);
   });

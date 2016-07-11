@@ -31,9 +31,8 @@ import * as sinon from 'sinon';
 // appears on the 3p-impl child, rather than the (delegating) parent.  That
 // should (?) be enough to ensure that it's propagated forward to the ad in the
 // 3p iframe.
-// describe('ad-cid', tests('amp-ad'));
 // describe('ad-cid-embed', tests('amp-embed'));
-describe('ad-cid', tests('amp-ad-3p-impl'));
+describe('ad-cid', tests('amp-ad'));
 
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,

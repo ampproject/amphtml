@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
+import {getService} from '../src/service';
 
-var BBPromise = require('bluebird');
-var fs = BBPromise.promisifyAll(require('fs'));
-var m = require('./');
-var test = require('ava');
-
-var targetFile = 'target-file.js';
-
-test('sync - prepends global config', t => {
-  t.plan(1);
-  var res = m.prependConfig('{"hello":"world"}', 'var x = 1 + 1;');
-  t.is(res, 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"});' +
-      '/*AMP_CONFIG*/var x = 1 + 1;');
-});
-
-test('sync - valueOrDefault', t => {
-  t.plan(2);
-  var res = m.valueOrDefault(true, 'hello');
-  t.is(res, 'hello');
-  res = m.valueOrDefault('world', 'hello');
-  t.is(res, 'world');
-});
+export function stubService(sandbox, win, serviceId, method) {
+  const stub = sandbox.stub();
+  getService(win, serviceId, () => {
+    const service = {};
+    service[method] = stub;
+    return service;
+  });
+  return stub;
+}

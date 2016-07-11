@@ -33,6 +33,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
+import {toggle} from '../style';
 
 
 const TAG_ = 'Resources';
@@ -600,12 +601,29 @@ export class Resources {
     });
   }
 
+  collapseElement(element) {
+    const box = this.viewport_.getLayoutRect(element);
+    const resource = Resource.forElement(element);
+    if (box.width != 0 && box.height != 0) {
+      this.setRelayoutTop_(box.top);
+    }
+    toggle(element, false);
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.collapsedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
+  }
+
   /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
+   * @return {boolean}
    */
   schedulePass(opt_delay) {
-    this.pass_.schedule(opt_delay);
+    return this.pass_.schedule(opt_delay);
   }
 
   /**
@@ -881,7 +899,7 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    const toUnload = [];
+    let toUnload;
     if (relayoutCount > 0 || remeasureCount > 0 ||
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -896,6 +914,9 @@ export class Resources {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
+            if (!toUnload) {
+              toUnload = [];
+            }
             toUnload.push(r);
           }
         }
@@ -903,7 +924,7 @@ export class Resources {
     }
 
     // Unload all in one cycle.
-    if (toUnload.length > 0) {
+    if (toUnload) {
       this.vsync_.mutate(() => {
         toUnload.forEach(r => {
           r.unload();
@@ -931,7 +952,23 @@ export class Resources {
       ? expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Schedule elements for layout within a reasonable distance from
+    // Phase 3: Trigger "viewport enter/exit" events.
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (r.hasOwner()) {
+        continue;
+      }
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
+      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
+          (r.isFixed() || r.overlaps(visibleRect)));
+      r.setInViewport(shouldBeInViewport);
+    }
+
+    // Phase 4: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -946,22 +983,6 @@ export class Resources {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
-    }
-
-    // Phase 4: Trigger "viewport enter/exit" events.
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      if (r.hasOwner()) {
-        continue;
-      }
-      // Note that when the document is not visible, neither are any of its
-      // elements to reduce CPU cycles.
-      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-      // layers. This is currently a short-term fix to the problem that
-      // the fixed elements get incorrect top coord.
-      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          (r.isFixed() || r.overlaps(visibleRect)));
-      r.setInViewport(shouldBeInViewport);
     }
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
@@ -1410,8 +1431,11 @@ export class Resources {
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
         }
         if (this.visible_) {
-          dev.fine(TAG_, 'next pass:', delay);
-          this.schedulePass(delay);
+          if (this.schedulePass(delay)) {
+            dev.fine(TAG_, 'next pass:', delay);
+          } else {
+            dev.fine(TAG_, 'pass already scheduled');
+          }
         } else {
           dev.fine(TAG_, 'document is not visible: no scheduling');
         }

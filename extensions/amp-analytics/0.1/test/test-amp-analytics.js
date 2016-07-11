@@ -791,6 +791,30 @@ describe('amp-analytics', function() {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
     });
+
+    it('works for invalid threadhold (Infinity)', () => {
+      const analytics = getAnalyticsTag(getConfig(Infinity));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (NaN)', () => {
+      const analytics = getAnalyticsTag(getConfig(NaN));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (-1)', () => {
+      const analytics = getAnalyticsTag(getConfig(-1));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
   });
 
   describe('expandTemplate_', () => {
