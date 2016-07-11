@@ -22,11 +22,96 @@
  * impacts on click-throughs.
  */
 
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
-import {getMode} from '../../src/mode';
+import {isGoogleAdsA4AValidEnvironment} from './utils';
+import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
+import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 
-/** @typedef {{string: {branches: {control: string, experiment: string}}}} */
+/** @typedef {{string: {branches: !Branches}}} */
+export let Branches;
+
+/** @typedef {{control: string, experiment: string}} */
 export let ExperimentInfo;
+
+/**
+ * Check whether Google Ads supports the A4A rendering pathway for a given ad
+ * Element on a given Window.  The tests we use are:
+ *
+ * - The page must have originated in the `cdn.ampproject.org` CDN _or_ we must
+ *   be running in local dev mode.
+ * - We must be selected in to an A4A traffic experiment and be selected into
+ *   the "experiment" branch.
+ *
+ * If we're selected into the overall traffic experiment, this function will
+ * also attach an experiment or control branch ID to the `Element` as
+ * a side-effect.
+ *
+ * @param {!Window} win  Host window for the ad.
+ * @param {!Element} element Ad tag Element.
+ * @param {string} experimentId ID for the experiment to use.
+ * @param {!Branches} experiment and control branch IDs to use.
+ * @return {boolean}  Whether Google Ads should attempt to render via the A4A
+ *   pathway.
+ */
+export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
+  if (isGoogleAdsA4AValidEnvironment(win)) {
+    // Page is served from a supported domain.
+    handleUrlParameters(win, experimentId, branches);
+    const experimentInfo = {};
+    experimentInfo[experimentId] = branches;
+    setupPageExperiments(win, experimentInfo);
+    if (isExperimentOn(win, experimentId)) {
+      // Page is selected into the overall traffic experiment.
+      if (getPageExperimentBranch(win, experimentId) === branches.experiment) {
+        // Page is on the "experiment" (i.e., use A4A rendering pathway)
+        // branch of the overall traffic experiment.
+        addExperimentIdToElement(branches.experiment, element);
+        return true;
+      } else {
+        // Page is on the "control" (i.e., use traditional, 3p iframe
+        // rendering pathway) branch of the overall traffic experiment.
+        addExperimentIdToElement(branches.control, element);
+        return false;
+      }
+    }
+  }
+  // Serving location doesn't qualify for A4A treatment or page is not in the
+  // traffic experiment.
+  return false;
+}
+
+/**
+ * Set experiment state from URL parameter, if present.
+ *
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {!Branches} branches
+ * @visibleForTesting
+ */
+function handleUrlParameters(win, experimentId, branches) {
+  const a4aParam = /(?:\?|&)a4a=([0-9]+)/.exec(win.location.search);
+  if (a4aParam) {
+    // If a4aParam is non-null, it necessarily has at least 2 elements.
+    switch (a4aParam[1]) {
+      case '0':
+        // Not selected into experiment.  Disable the experiment altogether, so
+        // that setupPageExperiments doesn't accidentally enable it.
+        forceExperimentBranch(win, experimentId, false);
+        break;
+      case '1':
+        // Selected in; on control branch.
+        forceExperimentBranch(win, experimentId, branches.control);
+        break;
+      case '2':
+        // Selected in; on experiment branch.
+        forceExperimentBranch(win, experimentId, branches.experiment);
+        break;
+      default:
+        dev.warn('a4a-config', 'Unknown a4a URL parameter: ',
+                 a4aParam[1]);
+    }
+  }
+}
 
 // TODO(tdrl): New test case: Invoke setupPageExperiments twice for different
 // experiment lists.

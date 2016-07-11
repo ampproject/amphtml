@@ -357,6 +357,7 @@ var forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       '3p/integration.js',
+      'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
@@ -599,11 +600,12 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /3p|ads/.test(pathname) ||
+  var is3pFile = /\/(3p|ads)\//.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
-  var isImplFile = basename == 'amp-ad-3p-impl.js';
-  if (is3pFile && !isTestFile &&!isImplFile) {
+  // Yet another reason to move ads/google/a4a somewhere else
+  var isA4A = /\/a4a\//.test(pathname);
+  if (is3pFile && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

@@ -100,16 +100,6 @@ describe('test-insert-extension', () => {
     });
   });
 
-  it('should insert when no element but validation disabled', () => {
-    return getAdIframe('amp-ad').then(() => {
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
-          .to.have.length(0);
-      insertAmpExtensionScript(iframe.win, 'amp-audio', true);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-audio"]'))
-          .to.have.length(1);
-    });
-  });
-
   describe('special case for amp-embed', () => {
     it('insert script for amp-embed element asking amp-embed script', () => {
       return getAdIframe('amp-embed').then(() => {

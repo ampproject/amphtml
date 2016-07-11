@@ -18,6 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
+import {base64UrlDecode} from '../crypto-verifier';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -38,7 +39,7 @@ class MockA4AImpl extends AmpA4A {
 
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
-      creativeArrayBuffer: responseArrayBuffer,
+      creative: responseArrayBuffer,
       signature: responseHeaders.get('X-Google-header'),
     });
   }
@@ -58,7 +59,7 @@ describe('amp-a4a', () => {
     headers: {
       get: function(name) {
         const headerValues = {
-          'X-Google-header': validCSSAmp.signature,
+          'X-Google-header': base64UrlDecode(validCSSAmp.signature),
         };
         return headerValues[name];
       },
@@ -184,7 +185,7 @@ describe('amp-a4a', () => {
         sandbox.stub(a4a, 'supportsShadowDom').returns(false);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-          Promise.resolve({creativeArrayBuffer: mockResponse.arrayBuffer()}));
+          Promise.resolve({creative: mockResponse.arrayBuffer()}));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {

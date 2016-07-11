@@ -15,7 +15,7 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {a4aRegistry} from '../../../../ads/_config';
+import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {childElement} from '../../../../src/dom';

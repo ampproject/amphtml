@@ -72,20 +72,22 @@ export function setPublicKeys(publicKeys) {
   publicKeyInfos = publicKeys.map(importPublicKey);
 }
 
-
 /**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
+ * @param {!ArrayBuffer} bytes
+ * @return {!Promise<string>}
  */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
+// TODO(taymonbeal): move this somewhere more sensible
+export function utf8FromArrayBuffer(bytes) {
+  if (window.TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
   }
-  return bytes;
+  return new Promise(function(resolve, unusedReject) {
+    const reader = new FileReader();
+    reader.onloadend = function(unusedEvent) {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
 }
 
 /**
@@ -102,7 +104,7 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creativeArrayBuffer: !ArrayBuffer, signature: ?string}} */
+/** @typedef {{creative: ArrayBuffer, signature: ?ArrayBuffer}} */
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
@@ -193,6 +195,17 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isValidElement() {
     return true;
+  }
+
+  /**
+   * Returns true if this element is the child of an amp-ad element.  For use by
+   * network-specific implementations that don't want to allow themselves to be
+   * embedded directly into a page.
+   * @return {boolean}
+   */
+  isInAmpAdTag() {
+    return !!this.element.parentElement &&
+        this.element.parentElement.tagName == 'AMP-AD';
   }
 
   /**
@@ -357,7 +370,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.adUrl_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      this.intersectionObserver_ = null;
       if (this.apiHandler_) {
         this.apiHandler_.unlayoutCallback();
         this.apiHandler_ = null;
@@ -457,13 +469,13 @@ export class AmpA4A extends AMP.BaseElement {
    */
   validateAdResponse_(fetchResponse, bytes) {
     return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(adResponse => {
+        .then(response => {
           // Validate when we have a signature and we have native crypto.
-          if (adResponse.signature && verifySignatureIsAvailable()) {
+          if (response.signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
-              return verifySignature(adResponse.creativeArrayBuffer,
-                  base64ToByteArray(adResponse.signature), publicKeyInfos);
+              return verifySignature(
+                  response.creative, response.signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;
@@ -473,6 +485,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Render the validated AMP creative directly in the parent page.
    * @param {boolean} valid If the ad response signature was valid.
+   * @param {!ArrayBuffer} The creative as raw bytes.
    * @return {Promise<boolean>} Whether the creative was successfully
    *     rendered.
    * @private
@@ -487,7 +500,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.timerId_) {
       decrementLoadingAds(this.timerId_, this.getWin());
     }
-    return xhrFor(this.getWin()).utf8FromArrayBuffer(bytes).then(creative => {
+    // AMP documents are required to be UTF-8
+    return utf8FromArrayBuffer(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
       if (!creativeMetaData || !this.supportsShadowDom()) {

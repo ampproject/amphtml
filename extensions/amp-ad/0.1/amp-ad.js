@@ -1,4 +1,4 @@
-/* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
-import {a4aRegistry} from '../../../ads/_config';
+import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev} from '../../../src/log';
 import {insertAmpExtensionScript} from '../../../src/insert-extension';
 
