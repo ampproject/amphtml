@@ -17,6 +17,7 @@
 
 import {Timer} from '../src/timer';
 import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
+import {cssText} from '../build/css';
 
 let iframeCount = 0;
 
@@ -187,6 +188,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
+        '<style>.-amp-element {display: block;}</style>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.

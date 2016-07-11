@@ -190,7 +190,6 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(impl.img_).to.not.have.class('-amp-ghost');
       expect(toggleElSpy.callCount).to.equal(0);
 
       return impl.layoutCallback().catch(() => {

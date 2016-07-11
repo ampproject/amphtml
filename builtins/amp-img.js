@@ -35,7 +35,10 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  initialize_() {
+    if (this.img_) {
+      return;
+    }
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
 
@@ -75,6 +78,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initialize_();
     let promise = this.updateImageSrc_();
 
     // We only allow to fallback on error on the initial layoutCallback

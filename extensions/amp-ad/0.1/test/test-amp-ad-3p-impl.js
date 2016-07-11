@@ -395,7 +395,7 @@ function tests(name) {
     });
 
     describe('renderOutsideViewport', () => {
-      function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
+      function getGoodAd(cb, opt_loadingStrategy) {
         const attributes = {
           width: 300,
           height: 250,
@@ -410,15 +410,13 @@ function tests(name) {
         return getAd(attributes, 'https://schema.org', element => {
           cb(element.implementation_);
           return element;
-        }, layoutCb);
+        });
       }
 
       it('should not return false after scrolling, then false for 1s', () => {
-        let clock;
+        const clock = sandbox.useFakeTimers();
         return getGoodAd(ad => {
           expect(ad.renderOutsideViewport()).not.to.be.false;
-        }, () => {
-          clock = sandbox.useFakeTimers();
         }).then(ad => {
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
@@ -430,11 +428,9 @@ function tests(name) {
       });
 
       it('should prefer-viewability-over-views', () => {
-        let clock;
+        const clock = sandbox.useFakeTimers();
         return getGoodAd(ad => {
           expect(ad.renderOutsideViewport()).not.to.be.false;
-        }, () => {
-          clock = sandbox.useFakeTimers();
         }, 'prefer-viewability-over-views').then(ad => {
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
