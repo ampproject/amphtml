@@ -662,7 +662,7 @@ export class BaseElement {
         /* newWidth */ undefined, opt_callback).then(() => {
           //Do nothing
           return;
-        }).catch(error => {
+        }).catch(() => {
           //Do nothing
           return;
         });
@@ -687,7 +687,7 @@ export class BaseElement {
         this.element, newHeight, newWidth, opt_callback).then(() => {
           //Do nothing
           return;
-        }).catch(error => {
+        }).catch(() => {
           //Do nothing
           return;
         });

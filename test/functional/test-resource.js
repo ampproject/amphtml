@@ -20,7 +20,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 
-describe.only('Resource', () => {
+describe('Resource', () => {
 
   let sandbox;
   let element;
