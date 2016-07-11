@@ -390,7 +390,7 @@ export function getDataParamsFromAttributes(element,
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const attributes = element.attributes;
   const params = Object.create(null);
-  const regexp = new RegExp('^' + (opt_attrPrefix || 'data-param-') + '(.+)');
+  const regexp = new RegExp(`^${opt_attrPrefix || 'data-param-'}(.+)`);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
     const matches = attr.name.match(regexp);
