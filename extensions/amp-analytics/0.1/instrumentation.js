@@ -28,6 +28,7 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+const VARS = 'vars';
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -212,14 +213,20 @@ export class InstrumentationService {
    * @private
    */
   createVisibilityListener_(callback, config) {
-    if (config['visibilitySpec']) {
+    const spec = config['visibilitySpec'];
+    if (spec) {
       if (!isVisibilitySpecValid(config)) {
         return;
       }
-
+      const self = this;
       this.runOrSchedule_(() => {
         visibilityFor(this.win_).then(visibility => {
-          visibility.listenOnce(config['visibilitySpec'], vars => {
+          visibility.listenOnce(spec, vars => {
+            if (spec['selector']) {
+              const el = this.win_.document.getElementById(spec['selector']
+                .slice(1));
+              Object.assign(vars, self.extractAnalyticsVariables_(el));
+            }
             callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
           });
         });
@@ -276,29 +283,51 @@ export class InstrumentationService {
   }
 
   /**
+   * @param {!Element} el
+   * @private
+   * @return {!Object<string, string>}
+   */
+  extractAnalyticsVariables_(el) {
+    const dataSet = el.dataset;
+    const analyticsVariables = {};
+    for (const dataKey in dataSet) {
+      if (dataKey.indexOf(VARS) === 0) {
+        let variableName = dataKey.replace(VARS, '');
+        variableName = variableName[0].toLowerCase() + variableName.slice(1);
+        analyticsVariables[variableName] = dataSet[dataKey];
+      }
+    }
+    return analyticsVariables;
+  }
+
+  /**
    * @param {!Function} listener
    * @param {string} selector
    * @private
    */
   createSelectiveListener_(listener, selector) {
     return e => {
+      let el = e.target;
+      let analyticsVariables = null;
       // First do the cheap lookups.
-      if (selector === '*' || this.matchesSelector_(e.target, selector)) {
-        listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+      if (selector === '*' || this.matchesSelector_(el, selector)) {
+        analyticsVariables = this.extractAnalyticsVariables_(el);
+        listener(
+          new AnalyticsEvent(AnalyticsEventType.CLICK, analyticsVariables));
       } else {
         // More expensive search.
-        let el = e.target;
         while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
           el = el.parentElement;
           if (this.matchesSelector_(el, selector)) {
-            listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+            analyticsVariables = this.extractAnalyticsVariables_(el);
+            listener(
+              new AnalyticsEvent(AnalyticsEventType.CLICK, analyticsVariables));
             // Don't fire the event multiple times even if the more than one
             // ancestor matches the selector.
             return;
           }
         }
       }
-
     };
   }
 

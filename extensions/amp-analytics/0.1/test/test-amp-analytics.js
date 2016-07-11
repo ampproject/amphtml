@@ -447,6 +447,20 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('expands element level vars with higher precedence than trigger vars',
+    () => {
+      const ins = instrumentationServiceFor(windowApi);
+      const el1 = windowApi.document.createElement('div');
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      ins.addListener(
+        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+        function(arg) {
+          expect(arg.vars.test).to.equal('foo');
+        });
+      ins.onClick_({target: el1});
+    });
+
   it('expands config vars with higher precedence than platform vars', () => {
     const analytics = getAnalyticsTag({
       'vars': {'random': 428},

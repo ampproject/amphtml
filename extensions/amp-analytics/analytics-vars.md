@@ -31,7 +31,7 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 </amp-analytics>
 ```
 
-When the same `var` is defined in multiple locations, the value is picked in the order remote config > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
+When the same `var` is defined in multiple locations, the value is picked in the order remote config > element level data attributes > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
 
 | var | Value | Defined by |
 |-------|-------|------------|
@@ -305,6 +305,24 @@ Provides the vertical scroll boundary that triggered a scroll event. This var is
 only available in a `trigger` of type `scroll`. The value of the boundary may be
 rounded based on the precision supported by the extension. For example, a
 boundary with value `1` and precision of `5` will result in value of var to be 0.
+
+##Variables as data attribute
+For the following event types, variables can be passed as part of the element level data attribute
+
+1. visible
+2. click
+
+The variables passed as data attributes should follow the format `data-vars-*`.
+
+Example:
+
+`<span id="test1" class="box" data-vars-event-id="22">
+  Click here to generate an event
+</span>`
+
+And in the request url the token would be of the format `${eventId}` (follows camelcase).
+
+
 
 ## Miscellaneous
 
