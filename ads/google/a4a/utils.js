@@ -297,7 +297,7 @@ function secondWindowFromTop(global) {
     secondFromTop = secondFromTop.parent;
   }
   dev.assert(secondFromTop.parent == global.top);
-  return secondWindowFromTop;
+  return secondFromTop;
 }
 
 /**
