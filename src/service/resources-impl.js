@@ -530,9 +530,20 @@ export class Resources {
    *    height is updated.
    * @protected
    */
+
   attemptChangeSize(element, newHeight, newWidth, opt_callback) {
-    this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, opt_callback);
+    return new Promise((resolve, reject) => {
+      this.scheduleChangeSize_(Resource.forElement(element), newHeight,
+        newWidth, /* force */ false, opt_callback, (status) => {
+          if (status) {
+            console.log('succeed');
+            resolve();
+          } else {
+            console.log('failed');
+            reject(new Error('Attempt ChangeSize failed now'));
+          }
+        });
+    });
   }
 
   /**
@@ -717,7 +728,6 @@ export class Resources {
         deferredMutates[i]();
       }
     }
-
     if (this.requestsChangeSize_.length > 0) {
       dev.fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
@@ -737,7 +747,6 @@ export class Resources {
           // Nothing to do.
           continue;
         }
-
         // Check resize rules. It will either resize element immediately, or
         // wait until scrolling stops or will call the overflow callback.
         let resize = false;
@@ -772,11 +781,19 @@ export class Resources {
           // are resized immediately.
           resize = true;
         } else if (diff < 0) {
+          console.log('collapse fail');
           // 6. The new height is smaller than the current one.
-          resize = false;
+          console.log('request.promise');
+          if (request.returnStatus) {
+            request.returnStatus(false);
+          }
+          //return Promise.reject();
         } else {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
+          if (request.returnStatus) {
+            request.returnStatus(false);
+          }
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
         }
@@ -789,6 +806,9 @@ export class Resources {
               request.newHeight, request.newWidth, request.callback);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
+          if (request.returnStatus) {
+            request.returnStatus(true);
+          }
         }
       }
 
@@ -1195,7 +1215,7 @@ export class Resources {
    * @param {function()=} opt_callback A callback function.
    * @private
    */
-  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback) {
+  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback, status) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
@@ -1222,6 +1242,7 @@ export class Resources {
       request.newWidth = newWidth;
       request.force = force || request.force;
       request.callback = opt_callback;
+      request.returnStatus = status;
     } else {
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
         resource,
@@ -1229,6 +1250,7 @@ export class Resources {
         newWidth,
         force,
         callback: opt_callback,
+        returnStatus: status,
       });
     }
     this.schedulePassVsync();

@@ -658,8 +658,14 @@ export class BaseElement {
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeSize(
-        this.element, newHeight, /* newWidth */ undefined, opt_callback);
+    this.resources_.attemptChangeSize(this.element, newHeight,
+        /* newWidth */ undefined, opt_callback).then(() => {
+          //Do nothing
+          return;
+        }).catch(error => {
+          //Do nothing
+          return;
+        });
   }
 
  /**
@@ -676,10 +682,16 @@ export class BaseElement {
   * @param {function()=} opt_callback A callback function.
   * @protected
   */
- attemptChangeSize(newHeight, newWidth, opt_callback) {
-   this.resources_.attemptChangeSize(
-       this.element, newHeight, newWidth, opt_callback);
- }
+  attemptChangeSize(newHeight, newWidth, opt_callback) {
+    this.resources_.attemptChangeSize(
+        this.element, newHeight, newWidth, opt_callback).then(() => {
+          //Do nothing
+          return;
+        }).catch(error => {
+          //Do nothing
+          return;
+        });
+  }
 
  /**
   * Runs the specified mutation on the element and ensures that measures
