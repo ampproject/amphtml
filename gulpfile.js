@@ -301,6 +301,7 @@ function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
+  buildSw();
   buildExtensions({bundleOnlyIfListedInFiles: true});
   compile();
 }
@@ -313,6 +314,7 @@ function dist() {
   cleanupBuildDir();
   compile(false, true, true);
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
@@ -325,6 +327,11 @@ function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildSw({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
@@ -628,6 +635,33 @@ function buildAlp(options) {
     minify: options.minify || argv.minify,
     includePolyfills: true,
     minifiedName: 'alp.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildSw(options) {
+  options = options || {};
+  console.log('Bundling service-worker.js');
+
+  // The service-worker script loaded by the browser.
+  compileJs('./src/', 'service-worker.js', './dist/', {
+    toName: 'service-worker.js',
+    minifiedName: 'v0_sw.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
+  // The script imported by the service-worker. This is the "core".
+  compileJs('./src/', 'service-worker-core.js', './dist/v0', {
+    toName: 'service-worker.max.js',
+    minifiedName: 'service-worker.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
 }
