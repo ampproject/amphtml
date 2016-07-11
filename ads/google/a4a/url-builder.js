@@ -31,7 +31,9 @@ export function buildUrl(
     baseUrl, queryParams, maxLength, opt_truncationQueryParam) {
   const encodedParams = [];
   const encodedTruncationParam =
-      opt_truncationQueryParam && opt_truncationQueryParam.value ?
+      opt_truncationQueryParam &&
+      !(opt_truncationQueryParam.value == null ||
+      opt_truncationQueryParam.value === '') ?
       encodeURIComponent(opt_truncationQueryParam.name) + '=' +
       encodeURIComponent(opt_truncationQueryParam.value) :
       null;
