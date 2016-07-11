@@ -49,6 +49,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('industrybrains');
     expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
+    expect(registrations).to.include.key('widespace');
     expect(registrations).to.include.key('yieldmo');
     expect(registrations).to.include.key('sortable');
     expect(registrations).to.include.key('triplelift');

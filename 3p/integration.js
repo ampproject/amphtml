@@ -53,6 +53,7 @@ import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {widespace} from '../ads/widespace';
 import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
@@ -118,6 +119,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('widespace', widespace);
 register('sovrn', sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
