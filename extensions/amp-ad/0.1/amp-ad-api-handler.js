@@ -20,6 +20,7 @@ import {
   listenFor,
   listenForOnce,
   postMessage,
+  postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
@@ -57,6 +58,16 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.getWin());
+
+    /**
+     * @private {?{
+     *   source: !Window,
+     *   origin: string,
+     *   width: (number|undefined),
+     *   height: (number|undefined),
+     * }}
+     * */
+    this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -86,24 +97,28 @@ export class AmpAdApiHandler {
     listenForOnce(this.iframe_, 'entity-id', info => {
       this.element_.creativeId = info.id;
     }, this.is3p_);
-    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size', data => {
-      let newHeight, newWidth;
-      if (data.width !== undefined) {
-        newWidth = Math.max(this.element_./*OK*/offsetWidth +
-            data.width - this.iframe_./*OK*/offsetWidth, data.width);
-        this.iframe_.width = newWidth;
-        this.element_.setAttribute('width', newWidth);
-      }
-      if (data.height !== undefined) {
-        newHeight = Math.max(this.element_./*OK*/offsetHeight +
-            data.height - this.iframe_./*OK*/offsetHeight, data.height);
-        this.iframe_.height = newHeight;
-        this.element_.setAttribute('height', newHeight);
-      }
-      if (newHeight !== undefined || newWidth !== undefined) {
-        this.updateSize_(newHeight, newWidth);
-      }
-    }, this.is3p_));
+
+    // Install iframe resize API.
+    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
+        (data, source, origin) => {
+          let newHeight, newWidth;
+          if (data.width !== undefined) {
+            newWidth = Math.max(this.element_./*OK*/offsetWidth +
+                data.width - this.iframe_./*OK*/offsetWidth, data.width);
+            this.iframe_.width = newWidth;
+            this.element_.setAttribute('width', newWidth);
+          }
+          if (data.height !== undefined) {
+            newHeight = Math.max(this.element_./*OK*/offsetHeight +
+                data.height - this.iframe_./*OK*/offsetHeight, data.height);
+            this.iframe_.height = newHeight;
+            this.element_.setAttribute('height', newHeight);
+          }
+          if (newHeight !== undefined || newWidth !== undefined) {
+            this.updateSize_(newHeight, newWidth, source, origin);
+          }
+        }, this.is3p_, this.is3p_));
+
     if (this.is3p_) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
@@ -138,22 +153,45 @@ export class AmpAdApiHandler {
 
   /**
    * Updates the element's dimensions to accommodate the iframe's
-   *    requested dimensions.
+   * requested dimensions. Notifies the window that request the resize
+   * of success or failure.
    * @param {number|undefined} height
    * @param {number|undefined} width
+   * @param {!Window} source
+   * @param {string} origin
+   * @private
+  */
+  updateSize_(height, width, source, origin) {
+    if (this.pendingResizeRequest_) {
+      // There is an already pending resize request, fail it.
+      this.sendEmbedSizeResponse_(false /* success */);
+    }
+    this.pendingResizeRequest_ = {source, origin, width, height};
+
+    this.baseInstance_.attemptChangeSize(height, width, () => {
+      this.sendEmbedSizeResponse_(true /* success */);
+    });
+  }
+
+  /**
+   * Sends a response to the window which requested a resize.
+   * @param {boolean} success
    * @private
    */
-  updateSize_(height, width) {
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(
-          this.iframe_,
-          'embed-size-changed',
-          {requestedHeight: height, requestedWidth: width},
-          targetOrigin,
-          this.is3p);
-    });
+  sendEmbedSizeResponse_(success) {
+    postMessageToWindows(
+        this.iframe_,
+        [{
+          win: this.pendingResizeRequest_.source,
+          origin: this.pendingResizeRequest_.origin,
+        }],
+        success ? 'embed-size-changed' : 'embed-size-denied',
+        {
+          requestedHeight: this.pendingResizeRequest_.height,
+          requestedWidth: this.pendingResizeRequest_.width,
+        },
+        this.is3p_);
+     this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -192,14 +230,8 @@ export class AmpAdApiHandler {
 
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown && this.iframe_) {
-      const targetOrigin = parseUrl(this.iframe_.src).origin;
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          this.is3p_);
+    if (overflown && this.iframe_ && this.pendingResizeRequest_) {
+      this.sendEmbedSizeResponse_(false /* success */);
     }
   }
 }
