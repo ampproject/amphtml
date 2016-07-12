@@ -167,12 +167,21 @@ describe('amp-fx-flying-carpet', () => {
       const posttext = iframe.doc.createTextNode('\n');
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
-      const attemptChangeHeight = sandbox.spy(flyingCarpet.implementation_,
-          'attemptChangeHeight');
+      const attemptChangeHeight = sandbox.stub(flyingCarpet.implementation_,
+          'attemptChangeHeight', height => {
+            flyingCarpet.style.height = height;
+            return Promise.resolve();
+          });
+      const collapse = sandbox.spy(flyingCarpet.implementation_, 'collapse');
       expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
       img.collapse();
       expect(attemptChangeHeight).to.have.been.called;
       expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+      return attemptChangeHeight().then(() => {
+        expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
+        expect(collapse).to.have.been.called;
+        expect(flyingCarpet.style.display).to.equal('none');
+      });
     });
   });
 });
