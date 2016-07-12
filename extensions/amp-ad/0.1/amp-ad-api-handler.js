@@ -17,6 +17,7 @@
 import {removeElement} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
 import {
+  SubscriptionApi,
   listenFor,
   listenForOnce,
   postMessage,
@@ -46,6 +47,8 @@ export class AmpAdApiHandler {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    this.embedStateApi_ = null;
+
     /** @private {boolean} */
     this.is3p_ = false;
 
@@ -73,6 +76,10 @@ export class AmpAdApiHandler {
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ =
         new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
+    this.embedStateApi_ = new SubscriptionApi(
+        this.iframe_, 'send-embed-state', is3p,
+        () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
+    this.embedStateApi_.init();
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       if (this.noContentCallback_) {
@@ -114,7 +121,6 @@ export class AmpAdApiHandler {
         return;
       }
       this.iframe_.style.visibility = '';
-      this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     }, this.is3p_);
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
@@ -161,14 +167,10 @@ export class AmpAdApiHandler {
    * @private
    */
   sendEmbedInfo_(inViewport) {
-    if (this.iframe_) {
-      const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-      postMessage(this.iframe_, 'embed-state', {
-        inViewport,
-        pageHidden: !this.viewer_.isVisible(),
-      }, targetOrigin, this.is3p_);
-    }
+    this.embedStateApi_.send('embed-state', {
+      inViewport,
+      pageHidden: !this.viewer_.isVisible(),
+    });
   }
 
   /** @override  */
