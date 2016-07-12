@@ -283,6 +283,7 @@ class AmpViewer {
     this.mergeHead_();
 
     // Body
+    doc.body.setAttribute('style', 'position:relative;');
     this.shadowRoot_.appendChild(this.win.document.importNode(doc.body, true));
   }
 
