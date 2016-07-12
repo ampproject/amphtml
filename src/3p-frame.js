@@ -150,17 +150,23 @@ export function addDataAndJsonAttributes_(element, attributes) {
   }
   const json = element.getAttribute('json');
   if (json) {
-    let obj;
-    try {
-      obj = JSON.parse(json);
-    } catch (e) {
-      throw user.createError(
-          'Error parsing JSON in json attribute in element %s',
-          element);
-    }
+    let obj = tryParseJson_(json, element);
     for (const key in obj) {
       attributes[key] = obj[key];
     }
+  }
+}
+
+/**
+ * @private
+ */
+function tryParseJson_(json, element) {
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    throw user.createError(
+        'Error parsing JSON in json attribute in element %s',
+        element);
   }
 }
 
