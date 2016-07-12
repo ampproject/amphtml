@@ -672,7 +672,7 @@ export class Viewer {
   /**
    * Whether the viewer has been whitelisted for more sensitive operations
    * such as customizing referrer.
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
@@ -792,7 +792,12 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getBaseCid() {
-    return this.sendMessage('cid', undefined, true);
+    return this.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        return undefined;
+      }
+      return this.sendMessage('cid', undefined, true);
+    });
   }
 
   /**
