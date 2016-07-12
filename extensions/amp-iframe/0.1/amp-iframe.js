@@ -408,19 +408,19 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (newHeight !== undefined || newWidth !== undefined) {
-      this.attemptChangeSize(newHeight, newWidth, () => {
+      this.attemptChangeSize(newHeight, newWidth).then(() => {
         if (newHeight !== undefined) {
           this.element.setAttribute('height', newHeight);
         }
         if (newWidth !== undefined) {
           this.element.setAttribute('width', newWidth);
         }
-      });
-    } else {
-      user.error(TAG_,
+      }).catch(() => {
+        user.error(TAG_,
           'ignoring embed-size request because'
           + 'no width or height value is provided',
           this.element);
+      });
     }
   }
 

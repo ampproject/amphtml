@@ -163,6 +163,13 @@ export class AmpAdApiHandler {
           {requestedHeight: height, requestedWidth: width},
           targetOrigin,
           this.is3p_);
+    }, () => {
+      postMessage(
+          this.iframe_,
+          'embed-size-denied',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p_);
     });
   }
 

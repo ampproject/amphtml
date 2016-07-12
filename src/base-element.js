@@ -639,9 +639,9 @@ export class BaseElement {
    * @param {function()=} opt_callback A callback function.
    * @protected
    */
-  changeHeight(newHeight, opt_callback) {
+  changeHeight(newHeight) {
     this.resources_./*OK*/changeSize(
-        this.element, newHeight, /* newWidth */ undefined, opt_callback);
+        this.element, newHeight, /* newWidth */ undefined);
   }
 
   /**
@@ -657,15 +657,9 @@ export class BaseElement {
    * @param {function()=} opt_callback A callback function.
    * @protected
    */
-  attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeSize(this.element, newHeight,
-        /* newWidth */ undefined, opt_callback).then(() => {
-          //Do nothing
-          return;
-        }).catch(() => {
-          //Do nothing
-          return;
-        });
+  attemptChangeHeight(newHeight) {
+    return this.resources_.attemptChangeSize(this.element, newHeight,
+        /* newWidth */ undefined);
   }
 
  /**
@@ -682,15 +676,8 @@ export class BaseElement {
   * @param {function()=} opt_callback A callback function.
   * @protected
   */
-  attemptChangeSize(newHeight, newWidth, opt_callback) {
-    this.resources_.attemptChangeSize(
-        this.element, newHeight, newWidth, opt_callback).then(() => {
-          //Do nothing
-          return;
-        }).catch(() => {
-          //Do nothing
-          return;
-        });
+  attemptChangeSize(newHeight, newWidth) {
+    return this.resources_.attemptChangeSize(this.element, newHeight, newWidth);
   }
 
  /**

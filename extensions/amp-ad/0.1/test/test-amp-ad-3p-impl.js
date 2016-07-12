@@ -172,11 +172,16 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          impl.attemptChangeSize = sandbox.spy();
+          // sandbox.stub(impl,
+          //   'attemptChangeSize',
+          //   function(height, width) {
+          //     return Promise.resolve();
+          // });
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217, 114);
-          expect(impl.attemptChangeSize.callCount).to.equal(1);
-          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
-          expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.firstCall.args[1]).to.equal(114);
         });
       });
 
@@ -189,10 +194,10 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          impl.attemptChangeSize = sandbox.spy();
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217);
-          expect(impl.attemptChangeSize.callCount).to.equal(1);
-          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
         });
       });
     });
@@ -280,6 +285,29 @@ function tests(name) {
         });
       });
 
+      it('should attemptChangeHeight to 0 when there is no fallback', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: '_ping_',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          return ad;
+        }).then(ad => {
+          const attemptChangeHeight = sandbox.stub(ad.implementation_,
+              'attemptChangeHeight',
+              function() {
+                return Promise.resolve();
+              });
+          ad.style.position = 'absolute';
+          ad.style.top = '300px';
+          ad.style.left = '50px';
+          ad.implementation_.noContentHandler_();
+          expect(attemptChangeHeight).to.have.been.called;
+          expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+        });
+      });
+
       it('should collapse when attemptChangeHeight succeeds', () => {
         return getAd({
           width: 300,
@@ -295,20 +323,21 @@ function tests(name) {
               });
           sandbox.stub(ad.implementation_,
               'attemptChangeHeight',
-              function(height, callback) {
-                ad.style.height = height;
-                callback();
+              function() {
+                return Promise.resolve();
               });
           const collapse = sandbox.spy(ad.implementation_, 'collapse');
           ad.style.position = 'absolute';
           ad.style.top = '300px';
           ad.style.left = '50px';
           expect(ad.style.display).to.not.equal('none');
-          ad.implementation_.noContentHandler_();
-          expect(ad.style.display).to.equal('none');
-          expect(collapse).to.have.been.called;
+          ad.implementation_.attemptChangeHeight(0).then(() => {
+            expect(ad.style.display).to.equal('none');
+            expect(collapse).to.have.been.called;
+          });
         });
       });
+
 
       it('should hide placeholder when ad falls back', () => {
         return getAd({

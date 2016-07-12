@@ -507,9 +507,9 @@ export class Resources {
    * @param {number|undefined} newWidth
    * @param {function()=} opt_callback A callback function.
    */
-  changeSize(element, newHeight, newWidth, opt_callback) {
+  changeSize(element, newHeight, newWidth, opt_resolveCb) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ true, opt_callback);
+        newWidth, /* force */ true, opt_resolveCb);
   }
 
   /**
@@ -531,10 +531,10 @@ export class Resources {
    * @protected
    */
 
-  attemptChangeSize(element, newHeight, newWidth, opt_callback) {
+  attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, opt_callback, status => {
+        newWidth, /* force */ false, status => {
           if (status) {
             resolve();
           } else {
@@ -799,12 +799,9 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, request.callback);
+              request.newHeight, request.newWidth, request.resolveCb);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
-          if (request.resolveCb) {
-            request.resolveCb(true);
-          }
         }
       }
 
@@ -1211,7 +1208,7 @@ export class Resources {
    * @param {function()=} opt_callback A callback function.
    * @private
    */
-  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback,
+  scheduleChangeSize_(resource, newHeight, newWidth, force,
       opt_resolveCb) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
@@ -1238,7 +1235,6 @@ export class Resources {
       request.newHeight = newHeight;
       request.newWidth = newWidth;
       request.force = force || request.force;
-      request.callback = opt_callback;
       request.resolveCb = opt_resolveCb;
     } else {
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
@@ -1246,7 +1242,6 @@ export class Resources {
         newHeight,
         newWidth,
         force,
-        callback: opt_callback,
         resolveCb: opt_resolveCb,
       });
     }
