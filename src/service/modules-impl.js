@@ -123,7 +123,7 @@ class Modules {
     const holder = this.getModuleHolder_(name);
     try {
       this.currentModuleName_ = name;
-      factory(this.win.AMP);
+      factory(arg);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.module;
