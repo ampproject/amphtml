@@ -17,7 +17,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev} from '../../../src/log';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {modulesFor} from '../../../src/modules';
 
 
 /**
@@ -71,7 +71,15 @@ export class AmpAd extends AMP.BaseElement {
       // tag as A4A.  Fall back to the 3p implementation.
       return new AmpAd3PImpl(this.element);
     }
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
+    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
+    // as following:
+    /*
+      const modules = modulesFor(this.getWin());
+      return modules.loadModule(extensionTag).then(module => {
+        const implementationClass = module.elements[extensionTag].implementationClass;
+        return new implementationClass(this.element);
+      });
+     */
     return null;
   }
 
@@ -93,7 +101,7 @@ export class AmpAd extends AMP.BaseElement {
     // that the loader can handle the case.
     const extensionTag = networkImplementationTag(type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
+    modulesFor(this.getWin())./*OK*/loadModule(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }

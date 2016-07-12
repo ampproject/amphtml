@@ -290,7 +290,7 @@ function buildExtensionJs(path, name, version, options) {
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
     wrapper: '(window.AMP = window.AMP || [])' +
-        '.push((function(AMP) {<%= contents %>\n}));',
+        '.push({n:"' name + '", f:(function(AMP) {<%= contents %>\n})});',
   });
   // TODO(dvoytenko): Switch to new wrapper format:
   //   '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'

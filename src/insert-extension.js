@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// DO NOT SUBMIT: remove this file
+
 import {getMode} from './mode';
 
 /**

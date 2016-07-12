@@ -19,12 +19,19 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {ampdocFor} from './ampdoc';
 import {cssText} from '../build/css';
 import {dev} from './log';
+import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {getMode} from './mode';
-import {getService} from './service';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
+import {
+  installModulesService,
+  instrumentModuleShadowDoc,
+  registerModule,
+  registerModuleElement,
+  registerModuleDocFactory,
+} from './service/modules-impl';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
@@ -100,7 +107,7 @@ export function installBuiltins(global) {
  * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
- * @param {function(!Window)} callback
+ * @param {function(!Window, !./service/modules-impl/Modules)} callback
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
@@ -112,43 +119,11 @@ function adoptShared(global, callback) {
   // of functions
   const preregisteredExtensions = global.AMP || [];
 
+  const modules = installModulesService(global);
   installRuntimeServices(global);
 
   global.AMP = {
     win: global,
-  };
-
-  function emptyService() {
-    // All services need to resolve to an object.
-    return {};
-  }
-
-  /**
-   * Registers an extended element and installs its styles.
-   * @param {string} name
-   * @param {!Function} implementationClass
-   * @param {string=} opt_css Optional CSS to install with the component.
-   *     Typically imported from generated CSS-in-JS file for each component.
-   */
-  global.AMP.registerElement = function(name, implementationClass, opt_css) {
-    const register = function() {
-      registerExtendedElement(global, name, implementationClass);
-      if (getMode().test) {
-        elementsForTesting.push({
-          name,
-          implementationClass,
-          css: opt_css,
-        });
-      }
-      // Resolve this extension's Service Promise.
-      getService(global, name, emptyService);
-    };
-    if (opt_css) {
-      // TODO(dvoytenko): collect and install all styles into shadow roots.
-      installStyles(global.document, opt_css, register, false, name);
-    } else {
-      register();
-    }
   };
 
   /** @const */
@@ -182,7 +157,7 @@ function adoptShared(global, callback) {
   global.AMP.setTickFunction = (fn, opt_flush) => {};
 
   // Run specific setup for a single-doc or shadow-doc mode.
-  callback(global);
+  callback(global, modules);
 
   /**
    * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
@@ -191,7 +166,7 @@ function adoptShared(global, callback) {
     if (typeof fnOrStruct == 'function') {
       fnOrStruct(global.AMP);
     } else {
-      fnOrStruct.f(global.AMP);
+      registerModule(modules, fnOrStruct.n, fnOrStruct.f, global.AMP);
     }
   }
 
@@ -239,7 +214,54 @@ function adoptShared(global, callback) {
  * @param {!Window} global Global scope to adopt.
  */
 export function adopt(global) {
-  adoptShared(global, global => {
+  adoptShared(global, (global, modules) => {
+    const ampdocService = ampdocFor(global);
+    const ampdoc = ampdocService.getAmpDoc(/* node */ null);
+
+    /**
+     * Registers an extended element and installs its styles.
+     * @param {string} name
+     * @param {!Function} implementationClass
+     * @param {string=} opt_css Optional CSS to install with the component.
+     *     Typically imported from generated CSS-in-JS file for each component.
+     */
+    global.AMP.registerElement = function(name, implementationClass, opt_css) {
+      registerModuleElement(modules, name, implementationClass);
+      const register = function() {
+        registerExtendedElement(global, name, implementationClass);
+        if (getMode().test) {
+          elementsForTesting.push({
+            name,
+            implementationClass,
+            css: opt_css,
+          });
+        }
+        // Resolve this extension's Service Promise.
+        getService(global, name, emptyService);
+      };
+      if (opt_css) {
+        installStyles(global.document, opt_css, register, false, name);
+      } else {
+        register();
+      }
+    };
+
+    /**
+     * Registers an ampdoc service.
+     * @param {string} name
+     * @param {function(new:!Object, !./service/ampdoc-impl/AmpDoc)} opt_class
+     * @param {function(!./service/ampdoc-impl/AmpDoc):!Object} opt_factory
+     */
+    global.AMP.registerDocService = function(name, opt_class, opt_factory) {
+      dev.assert(opt_class || opt_factory,
+          'Either a class or a factory must be specified');
+      if (opt_class) {
+        fromClassForDoc(ampdoc, name, opt_class);
+      } else {
+        getServiceForDoc(ampdoc, name, opt_factory);
+      }
+    };
+
     const viewer = viewerFor(global);
 
     /** @const */
@@ -268,7 +290,58 @@ export function adopt(global) {
  * @param {!Window} global Global scope to adopt.
  */
 export function adoptShadowMode(global) {
-  adoptShared(global, global => {
+  adoptShared(global, (global, modules) => {
+
+    /**
+     * Registers an extended element and installs its styles.
+     * @param {string} name
+     * @param {!Function} implementationClass
+     * @param {string=} opt_css Optional CSS to install with the component.
+     *     Typically imported from generated CSS-in-JS file for each component.
+     */
+    global.AMP.registerElement = function(name, implementationClass, opt_css) {
+      registerModuleElement(modules, name, implementationClass);
+      registerExtendedElement(global, name, implementationClass);
+      if (getMode().test) {
+        elementsForTesting.push({
+          name,
+          implementationClass,
+          css: opt_css,
+        });
+      }
+      // Resolve this extension's Service Promise.
+      getService(global, name, emptyService);
+      if (opt_css) {
+        registerModuleDocFactory(modules, ampdoc => {
+          installStylesForShadowRoot(ampdoc.getRootNode(), opt_css,
+              /* isRuntimeCss */ false, name);
+        });
+      }
+    };
+
+    /**
+     * Registers an ampdoc service.
+     * @param {string} name
+     * @param {function(new:!Object, !./service/ampdoc-impl/AmpDoc)} opt_class
+     * @param {function(!./service/ampdoc-impl/AmpDoc):!Object} opt_factory
+     */
+    global.AMP.registerDocService = function(name, opt_class, opt_factory) {
+      dev.assert(opt_class || opt_factory,
+          'Either a class or a factory must be specified');
+      let factory;
+      if (opt_class) {
+        factory = ampdoc => new opt_class(ampdoc);
+      } else {
+        factory = opt_factory;
+      }
+      registerModuleDocFactory(modules, ampdoc => {
+        if (opt_class) {
+          fromClassForDoc(ampdoc, name, opt_class);
+        } else {
+          getServiceForDoc(ampdoc, name, opt_factory);
+        }
+      }, name);
+    };
 
     /**
      * Registers a shadow root document.
@@ -283,8 +356,11 @@ export function adoptShadowMode(global) {
  * Attaches the shadow root and configures ampdoc for it.
  * @param {!Window} global
  * @param {!ShadowRoot} shadowRoot
+ * @param {!Array<string>} extensions
  */
-export function prepareAndAttachShadowRoot(global, shadowRoot) {
+export function prepareAndAttachShadowRoot(global, shadowRoot, extensions) {
+  // TODO(dvoytenko): switch this method to accept the actual shadow document
+  // and attach shadow in runtime.
   dev.fine(TAG, 'Attach shadow root:', shadowRoot);
   const ampdocService = ampdocFor(global);
   const ampdoc = ampdocService.getAmpDoc(shadowRoot);
@@ -292,15 +368,24 @@ export function prepareAndAttachShadowRoot(global, shadowRoot) {
   shadowRoot.AMP = {};
 
   // Install runtime CSS.
-  // TODO(dvoytenko): discover all other extensions and install their CSS.
   installStylesForShadowRoot(shadowRoot, cssText,
       /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 
   // Install services.
   installAmpdocServices(ampdoc);
+  instrumentModuleShadowDoc(ampdoc, extensions);
 
   dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
   return shadowRoot.AMP;
+}
+
+
+/**
+ * @return {!Object}
+ */
+function emptyService() {
+  // All services need to resolve to an object.
+  return {};
 }
 
 
