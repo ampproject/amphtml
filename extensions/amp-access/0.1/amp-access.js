@@ -90,12 +90,7 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    let configJson;
-    try {
-      configJson = JSON.parse(this.accessElement_.textContent);
-    } catch (e) {
-      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
-    }
+    let configJson = this.tryParseConfigJson_(this.accessElement_.textContent);
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(configJson);
@@ -444,6 +439,17 @@ export class AccessService {
   setAuthResponse_(authResponse) {
     this.authResponse_ = authResponse;
     this.firstAuthorizationResolver_();
+  }
+
+  /**
+   * @private
+   */
+  tryParseConfigJson_(configJson) {
+    try {
+      return JSON.parse(configJson);
+    } catch (e) {
+      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
+    }
   }
 
   /**
