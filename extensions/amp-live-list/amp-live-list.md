@@ -247,8 +247,11 @@ seconds that have elapsed since Thursday, 1 January 1970).
 
 **data-update-time** (Optional)
 
-Timestamp when the entry was last updated. We recommend using Unix time
-(the number of seconds that have elapsed since Thursday, 1 January 1970).
+Timestamp when the entry was last updated.  Use this attribute to trigger an
+update on an existing item: the client will replace all existing content in
+this item with the new, updated content, without triggering the appearance of
+the update reference point. We recommend using Unix time (the number of seconds
+that have elapsed since Thursday, 1 January 1970).
 
 **data-tombstone** (Optional)
 
