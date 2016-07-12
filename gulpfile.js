@@ -277,7 +277,8 @@ function buildExtension(name, version, hasCss, options) {
  * @return {!Stream} Gulp object
  */
 function buildExtensionJs(path, name, version, options) {
-  compileJs(path + '/', name + '.js', './dist/v0', {
+  var filename = options.filename || name + '.js';
+  compileJs(path + '/', filename, './dist/v0', {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
@@ -289,8 +290,8 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: '(window.AMP = window.AMP || [])' +
-        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});',
+    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
 
@@ -645,19 +646,24 @@ function buildAlp(options) {
  * @param {!Object} options
  */
 function buildSw(options) {
-  options = options || {};
   console.log('Bundling service-worker.js');
+  var opts = {};
+  for (var prop in options) {
+    opts[prop] = options[prop];
+  }
+  opts.noWrapper = true;
+  opts.filename = 'service-worker-core-babel.js';
 
   // The service-worker script loaded by the browser.
   compileJs('./src/', 'service-worker.js', './dist/', {
     toName: 'v0_sw.max.js',
     minifiedName: 'v0_sw.js',
-    watch: options.watch,
-    minify: options.minify || argv.minify,
-    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
   });
   // The script imported by the service-worker. This is the "core".
-  buildExtensionJs('./src', 'service-worker-core', '0.1', false, options);
+  buildExtensionJs('./src', 'service-worker-core', '0.1', opts);
 }
 
 /**
