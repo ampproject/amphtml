@@ -63,42 +63,40 @@ const cachePromise = caches.open('cdn-js').then((result) => {
 
 const dbPromise = cachePromise.then(() => {
   return indexedDBP.open('cdn-js', VERSION, {
-    upgrade(db, event) {
-      if (event.oldVersion == 0) {
+    upgrade(db, { oldVersion, transaction }) {
+      if (oldVersion == 0) {
         db.createObjectStore('clients', {keyPath: 'clientId'});
         const files = db.createObjectStore('js-files', {keyPath: 'file'});
         files.createIndex('versions', 'versions', { multiEntry: true });
       }
 
-      cacheCleanup = db.transaction('js-files', 'readwrite').run((transaction) => {
-        const files = transaction.objectStore('js-files');
-        const versions = files.index('versions');
-        // Do not serve versions older than two weeks.
-        const cutoff = Number(RELEASE_DATE.setDate(-14));
-        const range = IDBKeyRange.upperBound(cutoff);
+      const files = transaction.objectStore('js-files');
+      const versions = files.index('versions');
+      // Do not serve versions older than two weeks.
+      const cutoff = Number(RELEASE_DATE.setDate(-14));
+      const range = IDBKeyRange.upperBound(cutoff);
 
-        const removals = [];
-        return versions.openCursor(range).while((cursor) => {
-          const item = cursor.item;
-          const removal = {
-            url: item.url,
-            versions: item.versions.filter((v) => (v <= cutoff))
-          };
-          item.versions = item.versions.filter((v) => v > cutoff);
+      const removals = [];
+      cacheCleanup = versions.openCursor(range).while((cursor) => {
+        const item = cursor.item;
+        const removal = {
+          url: item.url,
+          versions: item.versions.filter((v) => (v <= cutoff))
+        };
+        item.versions = item.versions.filter((v) => v > cutoff);
 
-          return cursor.put(item).then(() => removal);
-        }).then((removals) => {
-          const deletes = removals.map((removal) => {
-            const deletes = removal.versions.forEach((version) => {
-              const url = versionedUrl(removal.url, version);
-              return cache.delete(url);
-            });
-
-            return Promise.all(deletes);
+        return cursor.put(item).then(() => removal);
+      }).then((removals) => {
+        const deletes = removals.map((removal) => {
+          const deletes = removal.versions.forEach((version) => {
+            const url = versionedUrl(removal.url, version);
+            return cache.delete(url);
           });
 
           return Promise.all(deletes);
         });
+
+        return Promise.all(deletes);
       });
     }
   });
