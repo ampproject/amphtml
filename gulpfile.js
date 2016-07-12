@@ -650,20 +650,14 @@ function buildSw(options) {
 
   // The service-worker script loaded by the browser.
   compileJs('./src/', 'service-worker.js', './dist/', {
-    toName: 'service-worker.js',
+    toName: 'v0_sw.max.js',
     minifiedName: 'v0_sw.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
   // The script imported by the service-worker. This is the "core".
-  compileJs('./src/', 'service-worker-core.js', './dist/v0', {
-    toName: 'service-worker.max.js',
-    minifiedName: 'service-worker.js',
-    watch: options.watch,
-    minify: options.minify || argv.minify,
-    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
-  });
+  buildExtensionJs('./src', 'service-worker-core', '0.1', false, options);
 }
 
 /**

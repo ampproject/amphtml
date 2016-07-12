@@ -56,6 +56,7 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
+import {calculateScriptBase} from './insert-extension';
 
 
 /** @const @private {string} */
@@ -66,7 +67,8 @@ const elementsForTesting = {};
 
 // TODO
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+  const url = `${calculateScriptBase(window)}/v0_sw.max.js`;
+  navigator.serviceWorker.register(url).then(function(registration) {
     // Registration was successful
     console.log('ServiceWorker registration successful with scope: ',    registration.scope);
   }).catch(function(err) {

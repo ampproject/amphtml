@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import { calculateExtensionScriptUrl } from './insert-extension';
+
 /**
  * Import the "core" entry point for the AMP CDN Service Worker. This file is
  * kept intentionally small, so that checking if it has changed (and thus, if a
  * new SW must be installed) will be very fast.
  */
-importScripts('/rtv/$internalRuntimeVersion$/v0/service-worker.js');
+const url = calculateExtensionScriptUrl(self, 'service-worker-core');
+importScripts(url);
