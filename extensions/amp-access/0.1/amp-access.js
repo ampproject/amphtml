@@ -90,7 +90,7 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    let configJson = this.tryParseConfigJson_(this.accessElement_.textContent);
+    const configJson = this.tryParseConfig_(this.accessElement_.textContent);
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(configJson);
@@ -444,7 +444,7 @@ export class AccessService {
   /**
    * @private
    */
-  tryParseConfigJson_(configJson) {
+  tryParseConfig_(configJson) {
     try {
       return JSON.parse(configJson);
     } catch (e) {

@@ -150,7 +150,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   }
   const json = element.getAttribute('json');
   if (json) {
-    let obj = tryParseJson_(json, element);
+    const obj = tryParseJson_(json, element);
     for (const key in obj) {
       attributes[key] = obj[key];
     }

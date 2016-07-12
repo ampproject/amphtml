@@ -164,7 +164,7 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   tryParseJson_(json) {
     try {
-       return JSON.parse(json);
+      return JSON.parse(json);
     } catch (unused) {}
   }
 
