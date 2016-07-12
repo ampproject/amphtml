@@ -266,6 +266,26 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!JSONType}
    */
   mergeConfigs_() {
+    const inlineConfig = this.getInlineConfig_();
+    // Initialize config with analytics related vars.
+    const config = {
+      'vars': {
+        'requestCount': 0,
+      },
+    };
+    const defaultConfig = this.predefinedConfig_['default'] || {};
+    const typeConfig = this.predefinedConfig_[
+      this.element.getAttribute('type')] || {};
+
+    this.mergeObjects_(defaultConfig, config);
+    this.mergeObjects_(typeConfig, config, /* predefined */ true);
+    this.mergeObjects_(inlineConfig, config);
+    this.mergeObjects_(this.remoteConfig_, config);
+    return config;
+  }
+
+  /** @private */
+  getInlineConfig_() {
     let inlineConfig = {};
     try {
       const children = this.element.children;
@@ -287,22 +307,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       user.error(this.getName_(), 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
-
-    // Initialize config with analytics related vars.
-    const config = {
-      'vars': {
-        'requestCount': 0,
-      },
-    };
-    const defaultConfig = this.predefinedConfig_['default'] || {};
-    const typeConfig = this.predefinedConfig_[
-      this.element.getAttribute('type')] || {};
-
-    this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config, /* predefined */ true);
-    this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(this.remoteConfig_, config);
-    return config;
+    return inlineConfig;
   }
 
   /**
