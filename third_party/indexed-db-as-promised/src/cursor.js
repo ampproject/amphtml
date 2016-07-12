@@ -44,7 +44,7 @@ class Cursor {
 export default class CursorRequest {
   constructor(cursorRequest, transaction, source) {
     this.cursorRequest = cursorRequest;
-    this.promise = new Request(cursorRequest, this);
+    this.promise = new Request(cursorRequest, this, source);
     this.transaction = transaction;
     this.source = source;
   }
@@ -76,14 +76,12 @@ export default class CursorRequest {
   }
 
   while(iterator) {
-    let broke = false;
+    let preempt = false;
     return this.iterate((cursor) => {
       return SyncPromise.resolve(iterator(cursor)).then((result) => {
-        const advanced = this.cursorRequest.readyState !== 'done';
-        const falsed = result === false;
-        if (!advanced) {
-          if (falsed) {
-            broke = true;
+        if (this.cursorRequest.readyState === 'done') {
+          if (result === false) {
+            preempt = true;
           } else {
             cursor.continue();
           }
@@ -91,7 +89,7 @@ export default class CursorRequest {
         return result;
       });
     }).then((results) => {
-      if (broke) {
+      if (preempt) {
         results.pop();
       }
       return results;

@@ -1,5 +1,5 @@
 import ObjectStore from './object-store';
-import TransactionRequest, { Transaction } from './transaction';
+import Transaction from './transaction';
 
 export default class Database {
   constructor(database) {
@@ -18,6 +18,38 @@ export default class Database {
     return this.database.version;
   }
 
+  get onabort() {
+    return this.database.onabort;
+  }
+
+  set onabort(handler) {
+    this.database.onabort = handler;
+  }
+
+  get onclose() {
+    return this.database.onclose;
+  }
+
+  set onclose(handler) {
+    this.database.onclose = handler;
+  }
+
+  get onerror() {
+    return this.database.onerror;
+  }
+
+  set onerror(handler) {
+    this.database.onerror = handler;
+  }
+
+  get onversionchange() {
+    return this.database.onversionchange;
+  }
+
+  set onversionchange(handler) {
+    this.database.onversionchange = handler;
+  }
+
   close() {
     this.database.close();
   }
@@ -26,8 +58,7 @@ export default class Database {
     const store = this.database.createObjectStore(name, params);
     return new ObjectStore(
       store,
-      new Transaction(store.transaction, this)// ,
-      // TODO params
+      new Transaction(store.transaction, this)
     );
   }
 
@@ -35,11 +66,10 @@ export default class Database {
     this.database.deleteObjectStore(name);
   }
 
-  transaction(scope, mode = 'readonly', params = {}) {
-    return new TransactionRequest(
+  transaction(scope, mode = 'readonly') {
+    return new Transaction(
       this.database.transaction(scope, mode),
-      this,
-      params
+      this
     );
   }
 }

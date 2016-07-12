@@ -1,5 +1,6 @@
 import Request from './request';
 import Database from './database';
+import Transaction from './transaction';
 
 const iDb = {
   deleteDatabase(name) {
@@ -12,12 +13,24 @@ const iDb = {
     function instance() {
       return db || (db = new Database(request.result));
     }
+    function versionChangeEvent(event) {
+      const transaction = request.transaction;
+      return {
+        oldVersion: event.oldVersion,
+        newVersion: event.newVersion,
+        transaction: transaction && new Transaction(transaction, db)
+      };
+    }
 
     if (upgrade) {
-      request.onupgradeneeded = (event) => upgrade(instance(), event);
+      request.onupgradeneeded = (event) => {
+        upgrade(instance(), versionChangeEvent(event));
+      };
     }
     if (blocked) {
-      request.onblocked = (event) => blocked(event);
+      request.onblocked = (event) => {
+        blocked(versionChangeEvent(event));
+      };
     }
 
     return Promise.resolve(new Request(request).then(instance));

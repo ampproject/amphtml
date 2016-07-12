@@ -2,10 +2,16 @@ import ObjectStore from './object-store';
 import SyncPromise from './sync-promise';
 import { recoverWith, rejectWithError } from './util';
 
-export class Transaction {
+export default class Transaction {
   constructor(transaction, db) {
     this.transaction = transaction;
     this.db = db;
+    this.ran = false;
+
+    this.promise = new SyncPromise((resolve, reject) => {
+      transaction.oncomplete = resolve;
+      transaction.onerror = rejectWithError(reject);
+    });
   }
 
   get mode() {
@@ -16,6 +22,14 @@ export class Transaction {
     return this.transaction.objectStoreNames;
   }
 
+  get onabort() {
+    return this.transaction.onabort;
+  }
+
+  set onabort(handler) {
+    this.transaction.onabort = handler;
+  }
+
   abort() {
     this.transaction.abort();
   }
@@ -23,37 +37,25 @@ export class Transaction {
   objectStore(name) {
     return new ObjectStore(this.transaction.objectStore(name), this);
   }
-}
 
-export default class TransactionRequest {
-  constructor(transactionRequest, db, { aborted }) {
-    this.transactionRequest = transactionRequest;
-    this.transaction = new Transaction(transactionRequest, db);
-    this.sentinel = {};
+  run(callback) {
+    if (this.ran) {
+      throw new Error('Transaction has already run.');
+    }
 
-    this.promise = new SyncPromise((resolve, reject) => {
-      transactionRequest.oncomplete = () => resolve(this.sentinel);
-      transactionRequest.onerror = rejectWithError(reject);
-      transactionRequest.onabort = aborted ?
-        recoverWith(resolve, aborted) :
-        rejectWithError(reject);
-    });
-  }
-
-  then(onFulfilled, onRejected) {
-    return SyncPromise.resolve(this.transaction)
-      .then(onFulfilled, onRejected)
-      .then((result) => {
-        return this.promise.then((completion) => {
-          return completion === this.sentinel ? result : completion;
-        });
-      }, (error) => {
-        this.transaction.abort();
-        throw error;
+    this.ran = true;
+    return new SyncPromise((resolve) => {
+      resolve(callback(this));
+    }).then((result) => {
+      if (result === this) {
+        throw new Error('Cannot access the transaction instance outside the run block.');
+      }
+      return this.promise.then((completion) => {
+        return result;
       });
-  }
-
-  catch(onRejected) {
-    this.then(null, onRejected);
+    }, (error) => {
+      this.abort();
+      throw error;
+    });
   }
 }
