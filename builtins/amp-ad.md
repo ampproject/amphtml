@@ -105,6 +105,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [PubMatic](../ads/pubmatic.md)
+- [PulsePoint](../ads/pulsepoint.md)
 - [Revcontent](../ads/revcontent.md)
 - [Rubicon Project](../ads/rubicon.md)
 - [Sharethrough](../ads/sharethrough.md)

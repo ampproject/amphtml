@@ -66,6 +66,7 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
 };
 
 /**
@@ -187,6 +188,7 @@ export const adPreconnect = {
     'https://pubads.g.doubleclick.net',
     'https://prg.kargo.com',
   ],
+  pulsepoint: 'https://tag.contextweb.com',
 };
 
 /**
