@@ -14,6 +14,12 @@ window.addEventListener('message', function(event) {
         height: event.data.height,
         width: event.data.width,
       }, '*');
+    } else if (event.data.type == 'subscribeToEmbedState') {
+      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      parent./*OK*/postMessage({
+        sentinel: sentinel,
+        type: 'send-embed-state',
+      }, '*');
     }
   }
 });
