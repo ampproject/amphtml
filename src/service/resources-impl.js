@@ -501,11 +501,11 @@ export class Resources {
 
   /**
    * Requests the runtime to change the element's size. When the size is
-   * successfully updated then the opt_callback is called.
+   * successfully updated then the opt_resolveCb is called.
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function.
+   * @param {function()=} opt_resolveCb A callback function.
    */
   changeSize(element, newHeight, newWidth, opt_resolveCb) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
@@ -513,21 +513,20 @@ export class Resources {
   }
 
   /**
-   * Requests the runtime to update the size of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
+   * Return a promise that requests the runtime to update the size of
+   * this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will call the
+   * may refuse to make a change in which case it will reject promise, call the
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
    * to update the height manually.
    * Note that the runtime does not call the `overflowCallback` method if the
    * requested height is 0 or negative.
-   * If the height is successfully updated then the opt_callback is called.
+   * If the height is successfully updated then the promise is resolved.
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function to be called if the
-   *    height is updated.
    * @protected
    */
 
@@ -1205,7 +1204,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_callback A callback function.
+   * @param {function()=} opt_resolveCb A callback function
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,

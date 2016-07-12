@@ -634,9 +634,7 @@ export class BaseElement {
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.
-   * When the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
-   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   changeHeight(newHeight) {
@@ -645,16 +643,16 @@ export class BaseElement {
   }
 
   /**
-   * Requests the runtime to update the height of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
+   * Return a promise that requests the runtime to update
+   * the height of this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
    * the necessary user action. (The overflow element is shown only if the
    * requested height is greater than 0.)
-   * If the height is successfully updated then the opt_callback is called.
+   * The promise is resolved if the height is successfully updated.
    * @param {number} newHeight
-   * @param {function()=} opt_callback A callback function.
    * @protected
    */
   attemptChangeHeight(newHeight) {
@@ -663,17 +661,17 @@ export class BaseElement {
   }
 
  /**
-  * Requests the runtime to update the size of this element to the specified
-  * values. The runtime will schedule this request and attempt to process it
+  * Return a promise that requests the runtime to update
+  * the size of this element to the specified value.
+  * The runtime will schedule this request and attempt to process it
   * as soon as possible. However, unlike in {@link changeSize}, the runtime
   * may refuse to make a change in which case it will show the element's
   * overflow element if provided, which is supposed to provide the reader with
   * the necessary user action. (The overflow element is shown only if the
   * requested height is greater than 0.)
-  * If the height is successfully updated then the opt_callback is called.
+  * The promise is resolved if the height is successfully updated.
   * @param {number|undefined} newHeight
   * @param {number|undefined} newWidth
-  * @param {function()=} opt_callback A callback function.
   * @protected
   */
   attemptChangeSize(newHeight, newWidth) {
