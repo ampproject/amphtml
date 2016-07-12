@@ -290,6 +290,8 @@ function buildExtensionJs(path, name, version, options) {
     wrapper: '(window.AMP = window.AMP || [])' +
         '.push((function(AMP) {<%= contents %>\n}));',
   });
+  // TODO(dvoytenko): Switch to new wrapper format:
+  //   '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'
 }
 
 /**
