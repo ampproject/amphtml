@@ -30,7 +30,7 @@ const ADSENSE_A4A_EXPERIMENT_ID = 'expAdsenseA4A';
 /** @const {!Branches} */
 const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
   control: '117152630',
-  experiment: '117152631',
+  experiment: '117152632',
 };
 
 /**
