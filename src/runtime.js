@@ -358,36 +358,6 @@ function registerElementClass(global, name, implementationClass, opt_css) {
 
 
 /**
- * Attaches the shadow root and configures ampdoc for it.
- * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
- * @param {!ShadowRoot} shadowRoot
- * @param {!Array<string>} extensionIds
- */
-function prepareAndAttachShadowRoot(global, extensions,
-    shadowRoot, extensionIds) {
-  // TODO(dvoytenko): switch this method to accept the actual shadow document
-  // and attach shadow in runtime.
-  dev.fine(TAG, 'Attach shadow root:', shadowRoot, extensionIds);
-  const ampdocService = ampdocFor(global);
-  const ampdoc = ampdocService.getAmpDoc(shadowRoot);
-
-  shadowRoot.AMP = {};
-
-  // Install runtime CSS.
-  installStylesForShadowRoot(shadowRoot, cssText,
-      /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
-
-  // Install services.
-  installAmpdocServices(ampdoc);
-  instrumentShadowDocExtensions(extensions, ampdoc, extensionIds);
-
-  dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
-  return shadowRoot.AMP;
-}
-
-
-/**
  * Registers an ampdoc service in a single-doc mode.
  * @param {!Window} global
  * @param {!./service/extensions-impl/Extensions} extensions
@@ -433,6 +403,36 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
   } else {
     getServiceForDoc(ampdoc, name, opt_factory);
   }
+}
+
+
+/**
+ * Attaches the shadow root and configures ampdoc for it.
+ * @param {!Window} global
+ * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!ShadowRoot} shadowRoot
+ * @param {!Array<string>} extensionIds
+ */
+function prepareAndAttachShadowRoot(global, extensions,
+    shadowRoot, extensionIds) {
+  // TODO(dvoytenko): switch this method to accept the actual shadow document
+  // and attach shadow in runtime.
+  dev.fine(TAG, 'Attach shadow root:', shadowRoot, extensionIds);
+  const ampdocService = ampdocFor(global);
+  const ampdoc = ampdocService.getAmpDoc(shadowRoot);
+
+  shadowRoot.AMP = {};
+
+  // Install runtime CSS.
+  installStylesForShadowRoot(shadowRoot, cssText,
+      /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+
+  // Install services.
+  installAmpdocServices(ampdoc);
+  instrumentShadowDocExtensions(extensions, ampdoc, extensionIds);
+
+  dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
+  return shadowRoot.AMP;
 }
 
 

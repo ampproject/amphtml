@@ -25,6 +25,9 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
 
 
 /**
+ * The structure that contains the resources declared by an extension.
+ * Currently only limitted to elements.
+ *
  * @typedef {{
  *   elements: !Array<!{implementationClass:
  *       function(new:../base-element.BaseElement, !Element)}>,
@@ -34,6 +37,8 @@ let ExtensionDef;
 
 
 /**
+ * Internal structure that maintains the state of an extension through loading.
+ *
  * @typedef {{
  *   extension: !ExtensionDef,
  *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
@@ -50,6 +55,7 @@ let ExtensionHolderDef;
 
 
 /**
+ * Install extensions service.
  * @param {!Window} window
  * @restricted
  */
@@ -59,6 +65,9 @@ export function installExtensionsService(window) {
 
 
 /**
+ * Register and process the specified extension. The factory is called
+ * immediately, which in turn is expected to register elements, templates,
+ * services and document factories.
  * @param {!Extensions} extensions
  * @param {string} extensionId
  * @param {function(!Object)} factory
@@ -71,6 +80,7 @@ export function registerExtension(extensions, extensionId, factory, arg) {
 
 
 /**
+ * Apply all registered factories to the specified ampdoc.
  * @param {!Extensions} extensions
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<string>} extensionIds
@@ -83,6 +93,9 @@ export function instrumentShadowDocExtensions(extensions, ampdoc,
 
 
 /**
+ * Add an element to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
  * @param {!Extensions} extensions
  * @param {string} name
  * @param {function(new:../base-element.BaseElement, !Element)}
@@ -95,6 +108,9 @@ export function addElementToExtension(extensions, name, implementationClass) {
 
 
 /**
+ * Add a ampdoc factory to the extension currently being registered. This is a
+ * restricted method and it's allowed to be called only during the overall
+ * extension registration.
  * @param {!Extensions} extensions
  * @param {function(!./ampdoc-impl.AmpDoc)} factory
  * @param {string=} opt_forName
@@ -106,6 +122,7 @@ export function addDocFactoryToExtension(extensions, factory, opt_forName) {
 
 
 /**
+ * The services that manages extensions in the runtime.
  */
 class Extensions {
 
@@ -170,8 +187,8 @@ class Extensions {
   }
 
   /**
-   * Check script info in HTML head and make update if necessary. Returns the
-   * promise that will be resolved when the extension has been loaded.
+   * Returns the promise that will be resolved when the extension has been
+   * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
    * @return {!Promise<!ExtensionDef>}
    */
@@ -185,6 +202,9 @@ class Extensions {
   }
 
   /**
+   * Returns the promise that will be resolved with the extension element's
+   * class when the extension has been loaded. If necessary, adds the extension
+   * script to the page.
    * @param {string} elementName
    * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
    */
@@ -244,6 +264,7 @@ class Extensions {
   }
 
   /**
+   * Creates or returns an existing extension holder.
    * @param {string} extensionId
    * @return {!ExtensionHolderDef}
    * @private
@@ -265,7 +286,7 @@ class Extensions {
 
   /**
    * Returns the holder for the extension currently being registered.
-   * @param {string=} opt_forName
+   * @param {string=} opt_forName Used for logging only.
    * @return {!ExtensionHolderDef}
    * @private
    */
@@ -278,6 +299,8 @@ class Extensions {
   }
 
   /**
+   * Creates or returns an existing promise that will yield as soon as the
+   * extension has been loaded.
    * @param {!ExtensionHolderDef} holder
    * @return {!Promise<!ExtensionDef>}
    * @private
@@ -299,7 +322,7 @@ class Extensions {
   }
 
   /**
-   * Determine the need to add amp extension script to document.
+   * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
    * @return {boolean}

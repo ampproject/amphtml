@@ -100,7 +100,7 @@ export class AmpAd extends AMP.BaseElement {
     // that the loader can handle the case.
     const extensionTag = networkImplementationTag(type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    extensionsFor(this.getWin())./*OK*/loadExtension(extensionTag);
+    extensionsFor(this.getWin()).loadExtension(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }
