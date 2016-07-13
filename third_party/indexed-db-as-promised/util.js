@@ -1,5 +1,3 @@
-import SyncPromise from './sync-promise';
-
 export function resolveWithResult(resolve) {
   return (event) => {
     resolve(event.target.result);

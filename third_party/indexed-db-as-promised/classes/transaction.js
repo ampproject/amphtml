@@ -1,6 +1,6 @@
 import ObjectStore from './object-store';
 import SyncPromise from './sync-promise';
-import { rejectWithError } from './util';
+import { rejectWithError } from '../util';
 
 export default class Transaction {
   constructor(transaction, db) {

@@ -1,5 +1,5 @@
 import SyncPromise from './sync-promise';
-import { resolveWithResult, rejectWithError } from './util';
+import { resolveWithResult, rejectWithError } from '../util';
 
 export default class Request {
   constructor(request, transaction = null, source = null) {
