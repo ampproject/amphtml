@@ -315,12 +315,12 @@ describe('amp-sticky-ad', () => {
     });
   });
 
-  it('should collapse and reset body borderBottom when its child do', () => {
+  it('should collapse and reset borderBottom when its child do', () => {
     return getAmpStickyAd().then(obj => {
       const iframe = obj.iframe;
       const stickyAdElement = obj.ampStickyAd;
       const impl = stickyAdElement.implementation_;
-      const detachedCallbackSpy = sandbox.spy(impl, 'detachedCallback');
+      const collapseSpy = sandbox.spy(impl, 'collapse');
 
       impl.viewport_.getScrollTop = function() {
         return 100;
@@ -345,11 +345,12 @@ describe('amp-sticky-ad', () => {
       let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('50px');
-      impl.collapsedCallback(null);
+      impl.collapsedCallback();
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');
-      expect(detachedCallbackSpy).to.have.been.called;
-    })
-  })
+      expect(collapseSpy).to.have.been.called;
+      expect(stickyAdElement.style.display).to.equal('none');
+    });
+  });
 });

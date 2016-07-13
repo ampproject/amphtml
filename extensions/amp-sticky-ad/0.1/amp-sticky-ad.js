@@ -61,6 +61,8 @@ class AmpStickyAd extends AMP.BaseElement {
   layoutCallback() {
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
+      toggle(this.element, true);
+      this.viewport_.updatePaddingBottom(50);
       this.updateInViewport(this.ad_, true);
       this.scheduleLayout(this.ad_);
     }
@@ -69,20 +71,20 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.viewport_.updatePaddingBottom(0);
     return true;
   }
 
   /** @override */
   detachedCallback() {
+    this.viewport_.updatePaddingBottom(0);
     this.removeOnScrollListener_();
   }
 
   /** @override */
-  collapsedCallback(child) {
+  collapsedCallback() {
+    this.collapse();
     this.vsync_.mutate(() => {
-      //TODO(zhouyx): Need deregister ad here,
-      //and move updatePadding to detachedCallback();
-      removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });
   }
@@ -137,7 +139,7 @@ class AmpStickyAd extends AMP.BaseElement {
         }, 1000);
       });
     }
- }
+  }
 
   /**
    * The function that add a close button to sticky ad
@@ -159,10 +161,9 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
-      //TODO(zhouyx): Need deregister ad here,
-      //and move updatePadding to detachedCallback();
+      //TODO(zhouyx): Need deregister ad here
+      this.visible_ = false;
       removeElement(this.element);
-      this.viewport_.updatePaddingBottom(0);
     });
   }
 }
