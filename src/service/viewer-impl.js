@@ -789,7 +789,7 @@ export class Viewer {
 
   /**
    * Retrieves the Base CID from the viewer
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    */
   getBaseCid() {
     return this.isTrustedViewer().then(trusted => {
