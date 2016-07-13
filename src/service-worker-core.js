@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {startsWith, endsWith} from "./string";
 import indexedDBP from "../third_party/indexed-db-as-promised/index"
 
 const VERSION = '$internalRuntimeVersion$';
@@ -48,8 +47,8 @@ function versionedUrl(url, version = VERSION) {
  * @return {boolean}
  */
 function isCdnJsFile(url) {
-  return startsWith(url, 'https://cdn.ampproject.org/') &&
-    endsWith(url, '.js');
+  return url.startsWith('https://cdn.ampproject.org/') &&
+    url.endsWith('.js');
 }
 
 
@@ -57,7 +56,7 @@ let cache;
 let db;
 let cacheCleanup = Promise.resolve();
 
-const cachePromise = caches.open('cdn-js').then((result) => {
+const cachePromise = caches.open('cdn-js').then(result => {
   cache = result;
 });
 
@@ -77,18 +76,18 @@ const dbPromise = cachePromise.then(() => {
       const range = IDBKeyRange.upperBound(cutoff);
 
       const removals = [];
-      cacheCleanup = versions.openCursor(range).while((cursor) => {
+      cacheCleanup = versions.openCursor(range).while(cursor => {
         const item = cursor.item;
         const removal = {
           url: item.url,
-          versions: item.versions.filter((v) => (v <= cutoff))
+          versions: item.versions.filter(v => (v <= cutoff))
         };
-        item.versions = item.versions.filter((v) => v > cutoff);
+        item.versions = item.versions.filter(v => v > cutoff);
 
         return cursor.put(item).then(() => removal);
-      }).then((removals) => {
-        const deletes = removals.map((removal) => {
-          const deletes = removal.versions.forEach((version) => {
+      }).then(removals => {
+        const deletes = removals.map(removal => {
+          const deletes = removal.versions.forEach(version => {
             const url = versionedUrl(removal.url, version);
             return cache.delete(url);
           });
@@ -100,7 +99,7 @@ const dbPromise = cachePromise.then(() => {
       });
     }
   });
-}).then((result) => {
+}).then(result => {
   db = result;
 });
 
@@ -123,10 +122,10 @@ self.addEventListener('install', function(install) {
       const requestVersion = ampVersion(url);
 
       // What version do we have for this client? Keep it the same regardless.
-      response = db.transaction('clients', 'readonly').then((transaction) => {
+      response = db.transaction('clients', 'readonly').then(transaction => {
         const clients = transaction.objectStore('clients');
         return clients.get(clientId);
-      }).then((client) => {
+      }).then(client => {
         // If we have a client, we must always use the same version.
         if (client) {
           return client.version;
@@ -135,10 +134,10 @@ self.addEventListener('install', function(install) {
         // If not, do we have this version cached, if so serve it.
         // do we have a newer version cached? Check the db, if so serve it.
         // If not, get the newest version, cache it, serve it.
-        return db.transaction('js-files', 'readonly').then((transaction) => {
+        return db.transaction('js-files', 'readonly').then(transaction => {
           const files = transaction.objectStore('js-files');
           return files.get(requestFile);
-        }).then((cachedVersions) => {
+        }).then(cachedVersions => {
           const { versions } = cachedVersions || {};
           if (!versions || versions.length === 0) {
             return VERSION;
@@ -149,7 +148,7 @@ self.addEventListener('install', function(install) {
           // with the most other-files.
           return isVersionCached ? requestVersion : versions[versions.length - 1];
         });
-      }).then((version) => {
+      }).then(version => {
         const versionedRequest = version === requestVersion ?
             request :
             new Request(versionedUrl(url, version), request);
@@ -168,9 +167,12 @@ self.addEventListener('install', function(install) {
               cache.put(versionedRequest, response.clone());
 
               // Store the file version in IndexedDB
-              db.transaction('js-files', 'readwrite').then((transaction) => {
+              // This intentionally does not block the request to speed things
+              // up. This is likely fine since you don't have multiple
+              // `<script>`s with the same `src` on a page.
+              db.transaction('js-files', 'readwrite').then(transaction => {
                 const files = transaction.objectStore('js-files');
-                return files.get(requestFile).then((item) => {
+                return files.get(requestFile).then(item => {
                   if (!item) {
                     item = {
                       file: requestFile,

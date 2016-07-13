@@ -656,8 +656,8 @@ function buildSw(options) {
 
   // The service-worker script loaded by the browser.
   compileJs('./src/', 'service-worker.js', './dist/', {
-    toName: 'v0_sw.max.js',
-    minifiedName: 'v0_sw.js',
+    toName: 'sw.max.js',
+    minifiedName: 'sw.js',
     watch: opts.watch,
     minify: opts.minify || argv.minify,
     preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,

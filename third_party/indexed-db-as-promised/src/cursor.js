@@ -3,56 +3,56 @@ import Request from './request';
 
 class Cursor {
   constructor(cursor, transaction, source) {
-    this.cursor = cursor;
+    this.cursor_ = cursor;
     this.transaction = transaction;
     this.source = source;
   }
 
   get direction() {
-    return this.cursor.direction;
+    return this.cursor_.direction;
   }
 
   get key() {
-    return this.cursor.key;
+    return this.cursor_.key;
   }
 
   get primaryKey() {
-    return this.cursor.primaryKey;
+    return this.cursor_.primaryKey;
   }
 
   get value() {
-    return this.cursor.value;
+    return this.cursor_.value;
   }
 
   advance(count) {
-    this.cursor.advance(count);
+    this.cursor_.advance(count);
   }
 
   continue(key = undefined) {
-    this.cursor.continue(key);
+    this.cursor_.continue(key);
   }
 
   delete() {
-    return new Request(this.cursor.delete(), this.transaction, this);
+    return new Request(this.cursor_.delete(), this.transaction, this);
   }
 
   update(item) {
-    return new Request(this.cursor.update(item), this.transaction, this);
+    return new Request(this.cursor_.update(item), this.transaction, this);
   }
 }
 
 export default class CursorRequest {
   constructor(cursorRequest, transaction, source) {
-    this.cursorRequest = cursorRequest;
-    this.promise = new Request(cursorRequest, this, source);
+    this.cursorRequest_ = cursorRequest;
+    this.promise_ = new Request(cursorRequest, this, source);
     this.transaction = transaction;
     this.source = source;
   }
 
   iterate(iterator) {
-    return this.promise.then((result) => {
+    return this.promise_.then((result) => {
       const iterations = [];
-      const request = this.cursorRequest;
+      const request = this.cursorRequest_;
       const cursor = result && new Cursor(result, this.transaction, this.source);
 
       const iterate = (result) => {
@@ -67,7 +67,7 @@ export default class CursorRequest {
           if (request.readyState === 'done') {
             return null;
           }
-          return (this.promise = new Request(request, this.transaction, this.source));
+          return (this.promise_ = new Request(request, this.transaction, this.source));
         }).then(iterate);
       };
 
@@ -79,7 +79,7 @@ export default class CursorRequest {
     let preempt = false;
     return this.iterate((cursor) => {
       return SyncPromise.resolve(iterator(cursor)).then((result) => {
-        if (this.cursorRequest.readyState === 'done') {
+        if (this.cursorRequest_.readyState === 'done') {
           if (result === false) {
             preempt = true;
           } else {

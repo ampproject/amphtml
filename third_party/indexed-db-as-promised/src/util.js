@@ -6,14 +6,6 @@ export function resolveWithResult(resolve, result = null) {
   };
 }
 
-export function recoverWith(resolve, callback) {
-  return (event) => {
-    resolve(new SyncPromise((resolve) => {
-      resolve(callback(event.target.error));
-    }));
-  };
-}
-
 export function rejectWithError(reject, error = null) {
   return (event) => {
     reject(error || event.target.error);

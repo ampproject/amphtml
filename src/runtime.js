@@ -67,7 +67,7 @@ const elementsForTesting = {};
 
 // TODO
 if ('serviceWorker' in navigator) {
-  const url = `${calculateScriptBase(window)}/v0_sw.max.js`;
+  const url = `${calculateScriptBase(window)}/sw.max.js`;
   navigator.serviceWorker.register(url).then(function(registration) {
     // Registration was successful
     console.log('ServiceWorker registration successful with scope: ',    registration.scope);

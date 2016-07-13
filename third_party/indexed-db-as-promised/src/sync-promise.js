@@ -4,8 +4,8 @@ export default class SyncPromise {
       throw new TypeError('Must pass resolver function');
     }
 
-    this._state = PendingPromise;
-    this._value = [];
+    this.state_ = PendingPromise;
+    this.value_ = [];
 
     doResolve(
       this,
@@ -19,8 +19,8 @@ export default class SyncPromise {
     onFulfilled = isFunction(onFulfilled) ? onFulfilled : void 0;
     onRejected = isFunction(onRejected) ? onRejected : void 0;
 
-    return this._state(
-      this._value,
+    return this.state_(
+      this.value_,
       onFulfilled,
       onRejected
     );
@@ -31,22 +31,19 @@ export default class SyncPromise {
   }
 
   static resolve(value) {
-    const Constructor = this;
-    if (isObject(value) && value instanceof Constructor) {
+    if (isObject(value) && value instanceof SyncPromise) {
       return value;
     }
 
-    return new Constructor((resolve) => resolve(value));
+    return new SyncPromise((resolve) => resolve(value));
   }
 
   static reject(reason) {
-    const Constructor = this;
-    return new Constructor((_, reject) => reject(reason));
+    return new SyncPromise((_, reject) => reject(reason));
   }
 
   static all(promises) {
-    const Constructor = this;
-    return new Constructor((resolve, reject) => {
+    return new SyncPromise((resolve, reject) => {
       let length = promises.length;
       const values = new Array(length);
 
@@ -56,7 +53,7 @@ export default class SyncPromise {
       }
 
       each(promises, (promise, index) => {
-        Constructor.resolve(promise).then((value) => {
+        SyncPromise.resolve(promise).then((value) => {
           values[index] = value;
           if (--length === 0) {
             resolve(values);
@@ -67,10 +64,9 @@ export default class SyncPromise {
   }
 
   static race(promises) {
-    const Constructor = this;
-    return new Constructor((resolve, reject) => {
+    return new SyncPromise((resolve, reject) => {
       for (let i = 0, l = promises.length; i < l; i++) {
-        Constructor.resolve(promises[i]).then(resolve, reject);
+        SyncPromise.resolve(promises[i]).then(resolve, reject);
       }
     });
   }
@@ -117,13 +113,13 @@ function Deferred(SyncPromise) {
 }
 
 function adopt(promise, state, value) {
-  const queue = promise._value;
-  promise._state = state;
-  promise._value = value;
+  const queue = promise.value_;
+  promise.state_ = state;
+  promise.value_ = value;
 
   for (let i = 0; i < queue.length; i++) {
     const { onFulfilled, onRejected, deferred } = queue[i];
-    promise._state(value, onFulfilled, onRejected, deferred);
+    promise.state_(value, onFulfilled, onRejected, deferred);
   }
 }
 
@@ -170,7 +166,7 @@ function doResolve(promise, resolve, reject, value, context) {
     }
     const isObj = isObject(value);
     if (isObj && value instanceof promise.constructor) {
-      adopt(promise, value._state, value._value);
+      adopt(promise, value.state_, value.value_);
     } else if (isObj && (then = value.then) && isFunction(then)) {
       _resolve = (value) => {
         _resolve = _reject = noop;
