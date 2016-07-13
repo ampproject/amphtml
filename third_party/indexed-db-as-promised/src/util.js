@@ -1,13 +1,13 @@
 import SyncPromise from './sync-promise';
 
-export function resolveWithResult(resolve, result = null) {
+export function resolveWithResult(resolve) {
   return (event) => {
-    resolve(result || event.target.result);
+    resolve(event.target.result);
   };
 }
 
-export function rejectWithError(reject, error = null) {
+export function rejectWithError(reject) {
   return (event) => {
-    reject(error || event.target.error);
+    reject(event.target.error);
   };
 }
