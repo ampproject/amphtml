@@ -49,7 +49,7 @@ export function getCookie(win, name) {
 function tryGetDocumentCookie_(win) {
   try {
     return win.document.cookie;
-  } catch(e) {
+  } catch (e) {
     // Act as if no cookie is available. Exceptions can be thrown when
     // AMP docs are opened on origins that do not allow setting
     // cookies such as null origins.

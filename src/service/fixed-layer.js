@@ -101,21 +101,7 @@ export class FixedLayer {
       this.discoverFixedSelectors_(stylesheet.cssRules, fixedSelectors);
     }
 
-    try {
-      fixedSelectors.forEach(selector => {
-        const elements = this.doc.querySelectorAll(selector);
-        for (let i = 0; i < elements.length; i++) {
-          if (i > 10) {
-            // We shouldn't have too many of `fixed` elements.
-            break;
-          }
-          this.setupFixedElement_(elements[i], selector);
-        }
-      });
-    } catch (e) {
-      // Fail quietly.
-      dev.error(TAG, 'Failed to setup fixed elements:', e);
-    }
+    this.trySetupFixedSelectors_(fixedSelectors);
 
     // Sort in document order.
     this.sortInDomOrder_();
@@ -321,6 +307,30 @@ export class FixedLayer {
    */
   isAllowedCoord_(s) {
     return (!!s && parseInt(s, 10) == 0);
+  }
+
+  /**
+   * Calls `setupFixedElement_` for elements of each `fixedSelectors`
+   * Fails quietly with a dev error if it fails.
+   * @param {!Array<string>} fixedSelectors
+   * @private
+   */
+  trySetupFixedSelectors_(fixedSelectors) {
+    try {
+      fixedSelectors.forEach(selector => {
+        const elements = this.doc.querySelectorAll(selector);
+        for (let i = 0; i < elements.length; i++) {
+          if (i > 10) {
+            // We shouldn't have too many of `fixed` elements.
+            break;
+          }
+          this.setupFixedElement_(elements[i], selector);
+        }
+      });
+    } catch (e) {
+      // Fail quietly.
+      dev.error(TAG, 'Failed to setup fixed elements:', e);
+    }
   }
 
   /**
