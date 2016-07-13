@@ -4,7 +4,7 @@ iframe
 <script>
 parent.parent./*OK*/postMessage('loaded-iframe', '*');
 
-function getAmpIframe(sentinel) {
+function getAmpWindow(sentinel) {
   var match = sentinel.match(/^(\d+)-\d+$/);
   // If we have a proper 3P sentinel then use it to find the AMP window.
   if (match) {
@@ -26,7 +26,7 @@ window.addEventListener('message', function(event) {
   if (event.data && event.data.sentinel == 'amp-test') {
     if (event.data.type == 'requestHeight') {
       var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
-      getAmpIframe(sentinel)./*OK*/postMessage({
+      getAmpWindow(sentinel)./*OK*/postMessage({
         sentinel: sentinel,
         type: 'embed-size',
         height: event.data.height,
