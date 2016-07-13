@@ -652,7 +652,7 @@ function buildSw(options) {
     opts[prop] = options[prop];
   }
   opts.noWrapper = true;
-  opts.filename = 'service-worker-core-babel.js';
+  opts.filename = 'service-worker-core.js';
 
   // The service-worker script loaded by the browser.
   compileJs('./src/', 'service-worker.js', './dist/', {

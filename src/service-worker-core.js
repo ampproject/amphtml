@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../third_party/babel/custom-babel-helpers';
 import indexedDBP from "../third_party/indexed-db-as-promised/index"
 
 const VERSION = '$internalRuntimeVersion$';
