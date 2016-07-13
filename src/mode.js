@@ -28,9 +28,6 @@
  */
 export let ModeDef;
 
-/** @typedef {?ModeDef} */
-let mode = null;
-
 /** @typedef {string} */
 const version = '$internalRuntimeVersion$';
 
@@ -47,18 +44,11 @@ let fullVersion = '';
  * @return {!ModeDef}
  */
 export function getMode(opt_win) {
-  if (mode) {
-    return mode;
+  const win = opt_win || window;
+  if (win.AMP_MODE) {
+    return win.AMP_MODE;
   }
-  return mode = getMode_(opt_win || window);
-}
-
-/**
- * Set mode in a test. Pass null in afterEach function to reset.
- * @param {?ModeDef} m
- */
-export function setModeForTesting(m) {
-  mode = m;
+  return win.AMP_MODE = getMode_(win);
 }
 
 /**

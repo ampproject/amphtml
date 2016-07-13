@@ -16,7 +16,6 @@
 
 import {googleAdsIsA4AEnabled} from '../traffic-experiments';
 import {resetExperimentToggles_} from '../../../../src/experiments';
-import {setModeForTesting} from '../../../../src/mode';
 import * as sinon from 'sinon';
 
 describe('a4a_config', () => {
@@ -27,8 +26,10 @@ describe('a4a_config', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     rand = sandbox.stub(Math, 'random');
-    setModeForTesting({localDev: true});
     win = {
+      AMP_MODE: {
+        localDev: true,
+      },
       location: {
         href: 'https://cdn.ampproject.org/fnord',
         pathname: '/fnord',
@@ -46,7 +47,6 @@ describe('a4a_config', () => {
 
   afterEach(() => {
     resetExperimentToggles_();  // Clear saved, page-level experiment state.
-    setModeForTesting(null);
     sandbox.restore();
   });
 
@@ -88,7 +88,7 @@ describe('a4a_config', () => {
   });
 
   it('should return false when not on CDN or local dev', () => {
-    setModeForTesting({localDev: false});
+    win.AMP_MODE.localDev = false;
     win.location.href = 'http://somewhere.over.the.rainbow.org/';
     const element = document.createElement('div');
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
