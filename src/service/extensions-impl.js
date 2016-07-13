@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {dev} from '../log';
+import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
 
 import {fromClass} from '../service';
@@ -25,15 +25,28 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
 
 
 /**
- * @typedef {{}}
+ * @typedef {{
+ *   elements: !Array<!{implementationClass:
+ *       function(new:../base-element.BaseElement, !Element)}>,
+ * }}
  */
-let ExtensionHolderDef;
+let ExtensionDef;
 
 
 /**
- * @typedef {{}}
+ * @typedef {{
+ *   extension: !ExtensionDef,
+ *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
+ *   promise: (!Promise<!ExtensionDef>|undefined),
+ *   resolve: (function(!ExtensionDef)|undefined),
+ *   reject: (function(!Error)|undefined),
+ *   loaded: (boolean|undefined),
+ *   error: (!Error|undefined),
+ *   scriptPresent: (boolean|undefined),
+ * }}
+ * @private
  */
-let ExtensionDef;
+let ExtensionHolderDef;
 
 
 /**
@@ -47,43 +60,43 @@ export function installExtensionsService(window) {
 
 /**
  * @param {!Extensions} extensions
- * @param {string} name
+ * @param {string} extensionId
  * @param {function(!Object)} factory
  * @param {!Object} arg
  * @restricted
  */
-export function registerExtension(extensions, name, factory, arg) {
-  extensions.registerExtension_(name, factory, arg);
+export function registerExtension(extensions, extensionId, factory, arg) {
+  extensions.registerExtension_(extensionId, factory, arg);
 }
 
 
 /**
  * @param {!Extensions} extensions
- * @param {!./ampdoc-impl/AmpDoc} ampdoc
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<string>} extensionIds
  * @restricted
  */
-export function instrumentShadowDocExtensions(extensions, ampdoc, extensionIds) {
+export function instrumentShadowDocExtensions(extensions, ampdoc,
+    extensionIds) {
   extensions.instrumentShadowDoc_(ampdoc, extensionIds);
 }
 
 
 /**
  * @param {!Extensions} extensions
- * @param {string} elementName
+ * @param {string} name
  * @param {function(new:../base-element.BaseElement, !Element)}
  *     implementationClass
  * @restricted
  */
-export function addElementToExtension(extensions, elementName,
-    implementationClass) {
-  extensions.addElement_(elementName, implementationClass);
+export function addElementToExtension(extensions, name, implementationClass) {
+  extensions.addElement_(name, implementationClass);
 }
 
 
 /**
  * @param {!Extensions} extensions
- * @param {function(!./ampdoc-impl/AmpDoc)} factory
+ * @param {function(!./ampdoc-impl.AmpDoc)} factory
  * @param {string=} opt_forName
  * @restricted
  */
@@ -107,67 +120,80 @@ class Extensions {
     this.extensions_ = {};
 
     /** @private {?string} */
-    this.currentExtensionName_ = null;
+    this.currentExtensionId_ = null;
   }
 
   /**
    * Registers a new extension. This method is called by the extension's script
    * itself when it's loaded using the regular `AMP.push()` callback.
-   * @param {string} name
+   * @param {string} extensionId
    * @param {function(!Object)} factory
    * @param {!Object} arg
    * @private
    * @restricted
    */
-  registerExtension_(name, factory, arg) {
-    const holder = this.getExtensionHolder_(name);
+  registerExtension_(extensionId, factory, arg) {
+    const holder = this.getExtensionHolder_(extensionId);
     try {
-      this.currentExtensionName_ = name;
+      this.currentExtensionId_ = extensionId;
       factory(arg);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);
-          m.docFactories_ = Object.freeze(m.docFactories_);
           holder.extension = Object.freeze(m);
         }
       }
-      holder.resolve(holder.extension);
+      holder.loaded = true;
+      if (holder.resolve) {
+        holder.resolve(holder.extension);
+      }
     } catch (e) {
-      holder.reject(e);
+      holder.error = e;
+      if (holder.reject) {
+        holder.reject(e);
+      }
       throw e;
     } finally {
-      this.currentExtensionName_ = null;
+      this.currentExtensionId_ = null;
     }
   }
 
   /**
    * Waits for the previously included extension to complete
    * loading/registration.
-   * @param {string} name
+   * @param {string} extensionId
    * @return {!Promise<!ExtensionDef>}
    */
-  waitForExtension(name) {
-    return this.getExtensionHolder_(name).promise;
+  waitForExtension(extensionId) {
+    return this.waitFor_(this.getExtensionHolder_(extensionId));
   }
 
   /**
    * Check script info in HTML head and make update if necessary. Returns the
    * promise that will be resolved when the extension has been loaded.
-   * @param {string} name
+   * @param {string} extensionId
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(name) {
-    if (name == 'amp-embed') {
-      name = 'amp-ad';
+  loadExtension(extensionId) {
+    if (extensionId == 'amp-embed') {
+      extensionId = 'amp-ad';
     }
-    const holder = this.getExtensionHolder_(name);
-    // DO NOT SUBMIT: complete migration from insert-extension.js
-    if (isAmpExtensionScriptRequired(this.win, name)) {
-      const ampExtensionScript = createAmpExtensionScript(this.win, name);
-      this.win.document.head.appendChild(ampExtensionScript);
-    }
-    return holder.promise;
+    const holder = this.getExtensionHolder_(extensionId);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    return this.waitFor_(holder);
+  }
+
+  /**
+   * @param {string} elementName
+   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   */
+  loadElementClass(elementName) {
+    return this.loadExtension(elementName).then(extension => {
+      const element = dev.assert(extension.elements[elementName],
+          'Element not found: %s', elementName);
+      return element.implementationClass;
+    });
   }
 
   /**
@@ -185,56 +211,54 @@ class Extensions {
   /**
    * Registers an ampdoc factory.
    * @param {function()} factory
-   * @param {string=} opt_name
+   * @param {string=} opt_forName
    * @private
    * @restricted
    */
-  addDocFactory_(factory, opt_name) {
-    const holder = this.getCurrentExtensionHolder_(opt_name);
-    holder.extension.docFactories_.push(factory);
+  addDocFactory_(factory, opt_forName) {
+    const holder = this.getCurrentExtensionHolder_(opt_forName);
+    holder.docFactories.push(factory);
   }
 
   /**
    * Installs all ampdoc factories previously registered with
    * `addDocFactory_`.
-   * @param {!./ampdoc-impl/AmpDoc} ampdoc
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
    * @private
    * @restricted
    */
   instrumentShadowDoc_(ampdoc, extensionIds) {
     extensionIds.forEach(extensionId => {
-      this.waitForExtension(extensionId).then(extension => {
-        extension.docFactories_.forEach(factory => factory(ampdoc));
+      const holder = this.getExtensionHolder_(extensionId);
+      this.waitFor_(holder).then(() => {
+        holder.docFactories.forEach(factory => {
+          try {
+            factory(ampdoc);
+          } catch (e) {
+            rethrowAsync('Doc factory failed: ', e, extensionId);
+          }
+        });
       });
     });
   }
 
   /**
-   * @param {string} name
+   * @param {string} extensionId
    * @return {!ExtensionHolderDef}
    * @private
    */
-  getExtensionHolder_(name) {
-    let holder = this.extensions_[name];
+  getExtensionHolder_(extensionId) {
+    let holder = this.extensions_[extensionId];
     if (!holder) {
-      let resolve, reject;
-      const promise = new Promise((resolve_, reject_) => {
-        resolve = resolve_;
-        reject = reject_;
-      });
       const extension = {
         elements: {},
-        templates: {},
-        docFactories_: [],
       };
       holder = {
         extension,
-        promise,
-        resolve,
-        reject,
+        docFactories: [],
       };
-      this.extensions_[name] = holder;
+      this.extensions_[extensionId] = holder;
     }
     return holder;
   }
@@ -246,10 +270,124 @@ class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionName_) {
+    if (!this.currentExtensionId_) {
       dev.error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
-        this.currentExtensionName_ || UNKNOWN_EXTENSION);
+        this.currentExtensionId_ || UNKNOWN_EXTENSION);
   }
+
+  /**
+   * @param {!ExtensionHolderDef} holder
+   * @return {!Promise<!ExtensionDef>}
+   * @private
+   */
+  waitFor_(holder) {
+    if (!holder.promise) {
+      if (holder.loaded) {
+        holder.promise = Promise.resolve(holder.extension);
+      } else if (holder.error) {
+        holder.promise = Promise.reject(holder.error);
+      } else {
+        holder.promise = new Promise((resolve, reject) => {
+          holder.resolve = resolve;
+          holder.reject = reject;
+        });
+      }
+    }
+    return holder.promise;
+  }
+
+  /**
+   * Determine the need to add amp extension script to document.
+   * @param {string} extensionId
+   * @param {!ExtensionHolderDef} holder
+   * @return {boolean}
+   * @private
+   */
+  insertExtensionScriptIfNeeded_(extensionId, holder) {
+    if (this.isExtensionScriptRequired_(extensionId, holder)) {
+      const scriptElement = this.createExtensionScript_(extensionId);
+      this.win.document.head.appendChild(scriptElement);
+      holder.scriptPresent = true;
+    }
+  }
+
+  /**
+   * Determine the need to add amp extension script to document.
+   * @param {string} extensionId
+   * @param {!ExtensionHolderDef} holder
+   * @return {boolean}
+   * @private
+   */
+  isExtensionScriptRequired_(extensionId, holder) {
+    if (holder.scriptPresent === undefined) {
+      const scriptInHead = this.win.document.head.querySelector(
+          `[custom-element="${extensionId}"]`);
+      holder.scriptPresent = !!scriptInHead;
+    }
+    return !holder.scriptPresent;
+  }
+
+  /**
+   * Create the missing amp extension HTML script element.
+   * @param {string} extensionId
+   * @return {!HTMLScriptElement} Script object
+   * @private
+   */
+  createExtensionScript_(extensionId) {
+    const scriptElement = this.win.document.createElement('script');
+    scriptElement.async = true;
+    scriptElement.setAttribute('custom-element', extensionId);
+    scriptElement.setAttribute('data-script', extensionId);
+    const pathStr = this.win.location.pathname;
+    const useCompiledJs = shouldUseCompiledJs();
+    const scriptSrc = calculateExtensionScriptUrl(pathStr, extensionId,
+        getMode().test, useCompiledJs);
+    scriptElement.src = scriptSrc;
+    return scriptElement;
+  }
+}
+
+
+/**
+ * Calculate script url for amp-ad.
+ * @visibleForTesting
+ * @param {string} path Location path of the window
+ * @param {string} extensionId
+ * @param {boolean=} isTest
+ * @param {boolean=} isUsingCompiledJs
+ * @return {string}
+ * @visibleForTesting
+ */
+export function calculateExtensionScriptUrl(path, extensionId, isTest,
+    isUsingCompiledJs) {
+  if (getMode().localDev) {
+    if (isTest) {
+      if (isUsingCompiledJs) {
+        return `/base/dist/v0/${extensionId}-0.1.js`;
+      }
+      return `/base/dist/v0/${extensionId}-0.1.max.js`;
+    }
+    if (path.indexOf('.max') >= 0) {
+      return `http://localhost:8000/dist/v0/${extensionId}-0.1.max.js`;
+    }
+    if (path.indexOf('.min') >= 0) {
+      return `http://localhost:8000/dist/v0/${extensionId}-0.1.js`;
+    }
+    return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
+  }
+  const domain = 'https://cdn.ampproject.org/';
+  const folderPath = getMode().version == '$internalRuntimeVersion$' ?
+      '' : `rtv/${getMode().version}/`;
+  return `${domain}${folderPath}v0/${extensionId}-0.1.js`;
+}
+
+
+/**
+ * @return {boolean}
+ */
+function shouldUseCompiledJs() {
+  return getMode().test && window.ampTestRuntimeConfig &&
+      window.ampTestRuntimeConfig.useCompiledJs;
 }

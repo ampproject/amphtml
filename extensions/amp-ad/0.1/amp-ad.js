@@ -75,9 +75,8 @@ export class AmpAd extends AMP.BaseElement {
     // as following:
     /*
       const extensions = extensionsFor(this.getWin());
-      return extensions.loadExtension(extensionTag).then(extension => {
-        const implementationClass = extension.elements[extensionTag].implementationClass;
-        return new implementationClass(this.element);
+      return extensions.loadElementClass(extensionTag).then(ctor => {
+        return new ctor(this.element);
       });
      */
     return null;
@@ -95,7 +94,7 @@ export class AmpAd extends AMP.BaseElement {
     // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
     const type = dev.assert(this.element.getAttribute('type'),
         'Required attribute type');
-    // Note: The insertAmpExtensionScript method will pick the version number.
+    // Note: The loadExtension method will pick the version number.
     // If we ever reach a point at which there are different extensions with
     // different version numbers at play simultaneously, we'll have to make sure
     // that the loader can handle the case.

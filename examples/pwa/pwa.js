@@ -228,8 +228,10 @@ class AmpViewer {
     this.ampReadyPromise_.then(AMP => {
       const amp = AMP.attachShadowRoot(this.shadowRoot_, this.extensions_);
       this.viewer_ = amp.viewer;
+      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
       this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
           this.getOrigin_(this.win.location.href));
+      */
     });
 
     // Head
