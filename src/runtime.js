@@ -110,7 +110,7 @@ function adoptShared(global, callback) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  const preregisteredElements = global.AMP || [];
+  const preregisteredExtensions = global.AMP || [];
 
   installRuntimeServices(global);
 
@@ -172,20 +172,6 @@ function adoptShared(global, callback) {
   /** @const */
   global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
-  // Run specific setup for a single-doc or shadow-doc mode.
-  callback(global);
-
-  /**
-   * Registers a new custom element.
-   * @param {function(!Object)} fn
-   */
-  global.AMP.push = function(fn) {
-    // Extensions are only processed once HEAD is complete.
-    waitForBody(global.document, () => {
-      fn(global.AMP);
-    });
-  };
-
   /**
    * Sets the function to forward tick events to.
    * @param {function(string,?string=,number=)} fn
@@ -195,23 +181,48 @@ function adoptShared(global, callback) {
    */
   global.AMP.setTickFunction = (fn, opt_flush) => {};
 
+  // Run specific setup for a single-doc or shadow-doc mode.
+  callback(global);
+
+  /**
+   * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
+   */
+  function installExtension(fnOrStruct) {
+    if (typeof fnOrStruct == 'function') {
+      fnOrStruct(global.AMP);
+    } else {
+      fnOrStruct.f(global.AMP);
+    }
+  }
+
+  /**
+   * Registers a new custom element.
+   * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
+   */
+  global.AMP.push = function(fnOrStruct) {
+    // Extensions are only processed once HEAD is complete.
+    waitForBody(global.document, () => {
+      installExtension(fnOrStruct);
+    });
+  };
+
   // Execute asynchronously scheduled elements.
   // Extensions are only processed once HEAD is complete.
   waitForBody(global.document, () => {
-    for (let i = 0; i < preregisteredElements.length; i++) {
-      const fn = preregisteredElements[i];
+    for (let i = 0; i < preregisteredExtensions.length; i++) {
+      const fnOrStruct = preregisteredExtensions[i];
       try {
-        fn(global.AMP);
+        installExtension(fnOrStruct);
       } catch (e) {
         // Throw errors outside of loop in its own micro task to
         // avoid on error stopping other extensions from loading.
-        dev.error(TAG, 'Extension failed: ', e);
+        dev.error(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
     }
     // Make sure we empty the array of preregistered extensions.
     // Technically this is only needed for testing, as everything should
     // go out of scope here, but just making sure.
-    preregisteredElements.length = 0;
+    preregisteredExtensions.length = 0;
   });
 
   // For iOS we need to set `cursor:pointer` to ensure that click events are

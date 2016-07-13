@@ -124,6 +124,17 @@ describe('runtime', () => {
     });
     expect(progress).to.equal('12345');
     expect(queueExtensions).to.have.length(0);
+
+    // New format: {n:string, f:function()}.
+    win.AMP.push({
+      n: 'ext6',
+      f: amp => {
+        expect(amp).to.equal(win.AMP);
+        progress += '6';
+      },
+    });
+    expect(progress).to.equal('123456');
+    expect(queueExtensions).to.have.length(0);
   });
 
   it('should wait for body before processing extensions', () => {

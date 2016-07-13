@@ -36,7 +36,7 @@ const TAG = 'amp-user-notification';
  *   showNotification: boolean
  * }}
  */
-let PostResponseMetadataDef;
+let GetResponseMetadataDef;
 
 /**
  * @typedef {{
@@ -163,10 +163,10 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
-   * Executes a `POST` request to the url given on the `data-show-if-href`
+   * Executes a `GET` request to the url given on the `data-show-if-href`
    * attribute.
    * @param {string} ampUserId
-   * @return {!Promise<!PostResponseMetadataDef>}
+   * @return {!Promise<!GetResponseMetadataDef>}
    * @private
    */
   getShowEndpoint_(ampUserId) {
@@ -197,7 +197,7 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /**
    * Success handler for `getShowEndpoint_`.
-   * @param {!PostResponseMetadataDef} data
+   * @param {!GetResponseMetadataDef} data
    * @return {!Promise<boolean>}
    * @private
    */
