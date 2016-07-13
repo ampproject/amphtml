@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
 import {timer} from '../../../src/timer';
-import {user} from '../../../src/log';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
@@ -149,7 +150,7 @@ class AmpYoutube extends AMP.BaseElement {
     if (!event.data || event.data.indexOf('{') != 0) {
       return;  // Doesn't look like JSON.
     }
-    const data = this.tryParseJson_(event.data);
+    const data = tryParseJson(event.data);
     if (!data) {
       return; // We only process valid JSON.
     }
@@ -159,13 +160,6 @@ class AmpYoutube extends AMP.BaseElement {
         data.info && data.info.playerState !== undefined) {
       this.playerState_ = data.info.playerState;
     }
-  }
-
-  /** @private */
-  tryParseJson_(json) {
-    try {
-      return JSON.parse(json);
-    } catch (unused) {}
   }
 
   /**

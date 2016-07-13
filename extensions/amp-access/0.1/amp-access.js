@@ -25,7 +25,7 @@ import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
@@ -90,7 +90,9 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    const configJson = this.tryParseConfig_(this.accessElement_.textContent);
+    const configJson = tryParseJson(this.accessElement_.textContent, e => {
+      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
+    });
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(configJson);
@@ -439,17 +441,6 @@ export class AccessService {
   setAuthResponse_(authResponse) {
     this.authResponse_ = authResponse;
     this.firstAuthorizationResolver_();
-  }
-
-  /**
-   * @private
-   */
-  tryParseConfig_(configJson) {
-    try {
-      return JSON.parse(configJson);
-    } catch (e) {
-      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
-    }
   }
 
   /**

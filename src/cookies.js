@@ -27,14 +27,7 @@
  * @return {?string}
  */
 export function getCookie(win, name) {
-  let cookieString;
-  try {
-    cookieString = win.document.cookie;
-  } catch (ignore) {
-    // Act as if no cookie is available. Exceptions can be thrown when
-    // AMP docs are opened on origins that do not allow setting
-    // cookies such as null origins.
-  }
+  const cookieString = tryGetDocumentCookie_(win);
   if (!cookieString) {
     return null;
   }
@@ -50,6 +43,17 @@ export function getCookie(win, name) {
     }
   }
   return null;
+}
+
+/** @private */
+function tryGetDocumentCookie_(win) {
+  try {
+    return win.document.cookie;
+  } catch(e) {
+    // Act as if no cookie is available. Exceptions can be thrown when
+    // AMP docs are opened on origins that do not allow setting
+    // cookies such as null origins.
+  }
 }
 
 /**

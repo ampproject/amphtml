@@ -106,15 +106,19 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
-      try {
-        element.upgrade(toClass);
-      } catch (e) {
-        reportError(e, this);
-      }
+      tryUpgradeElement_(element, toClass);
     }
   }
 }
 
+/** @private */
+function tryUpgradeElement_(element, toClass) {
+  try {
+    element.upgrade(toClass);
+  } catch (e) {
+    reportError(e, this);
+  }
+}
 
 /**
  * Stub extended elements missing an implementation.
