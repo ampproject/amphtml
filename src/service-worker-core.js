@@ -66,6 +66,7 @@ const cachePromise = caches.open('cdn-js').then(result => {
 const dbPromise = cachePromise.then(() => {
   return indexedDBP.open('cdn-js', VERSION, {
     upgrade(db, { oldVersion, transaction }) {
+      // Do we need to create our database?
       if (oldVersion == 0) {
         const files = db.createObjectStore('js-files', {keyPath: 'file'});
         files.createIndex('versions', 'versions', { multiEntry: true });
@@ -73,23 +74,28 @@ const dbPromise = cachePromise.then(() => {
 
       const files = transaction.objectStore('js-files');
       const versions = files.index('versions');
+
       // Do not serve versions older than two weeks.
       const cutoff = Number(RELEASE_DATE.setDate(-14));
       const range = IDBKeyRange.upperBound(cutoff);
 
-      const removals = [];
+      // We need to find file that has an old version, then prune that version
+      // from the db and cache.
       cacheCleanup = versions.openCursor(range).while(cursor => {
-        const item = cursor.item;
+        const item = cursor.value;
         const removal = {
           url: item.url,
           versions: item.versions.filter(v => (v <= cutoff))
         };
-        item.versions = item.versions.filter(v => v > cutoff);
 
+        // Remove old versions from our db.
+        item.versions = item.versions.filter(v => v > cutoff);
         return cursor.put(item).then(() => removal);
       }).then(removals => {
+        // Prune all versions of all files from the cache.
         const deletes = removals.map(removal => {
-          const deletes = removal.versions.forEach(version => {
+          // Prune all versions of this file from the cache
+          const deletes = removal.versions.map(version => {
             const url = versionedUrl(removal.url, version);
             return cache.delete(url);
           });
@@ -110,7 +116,6 @@ self.addEventListener('install', function(install) {
 
   // Setup the Fetch listener
   // My assumptions:
-  //   - The AMP core runtime is the first request (since it's sync).
   //   - Doc requests one uniform AMP version for all files, anything else
   //     is malarkey.
   self.addEventListener('fetch', function(event) {
@@ -124,7 +129,7 @@ self.addEventListener('install', function(install) {
       const requestVersion = ampVersion(url);
 
       // What version do we have for this client?
-      response = SyncPromise.resolve(clients[clientId]).then(version => {
+      response = Promise.resolve(clients[clientId]).then(version => {
         // If we already registered this client, we must always use the same
         // version.
         if (version) {
@@ -137,8 +142,8 @@ self.addEventListener('install', function(install) {
         return db.transaction('js-files', 'readonly').then(transaction => {
           const files = transaction.objectStore('js-files');
           return files.get(requestFile);
-        }).then(cachedVersions => {
-          const { versions } = cachedVersions || {};
+        }).then((item = {}) => {
+          const { versions } = item;
           if (!versions || versions.length === 0) {
             return VERSION;
           }
