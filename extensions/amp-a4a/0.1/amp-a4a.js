@@ -772,5 +772,3 @@ export class AmpA4A extends AMP.BaseElement {
     });
   }
 }
-
-AMP.registerElement('amp-a4a', AmpA4A);
