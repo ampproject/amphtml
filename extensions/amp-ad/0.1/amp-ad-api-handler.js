@@ -179,6 +179,10 @@ export class AmpAdApiHandler {
    * @private
    */
   sendEmbedSizeResponse_(success) {
+    const data = {
+      requestedHeight: this.pendingResizeRequest_.height,
+      requestedWidth: this.pendingResizeRequest_.width,
+    };
     postMessageToWindows(
         this.iframe_,
         [{
@@ -186,12 +190,9 @@ export class AmpAdApiHandler {
           origin: this.pendingResizeRequest_.origin,
         }],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        {
-          requestedHeight: this.pendingResizeRequest_.height,
-          requestedWidth: this.pendingResizeRequest_.width,
-        },
+        data,
         this.is3p_);
-     this.pendingResizeRequest_ = null;
+    this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -229,7 +230,7 @@ export class AmpAdApiHandler {
   }
 
   /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
+  overflowCallback(overflown, unusedRequestedHeight, unusedRequestedWidth) {
     if (overflown && this.iframe_ && this.pendingResizeRequest_) {
       this.sendEmbedSizeResponse_(false /* success */);
     }
