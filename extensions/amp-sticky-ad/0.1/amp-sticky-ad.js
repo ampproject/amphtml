@@ -77,6 +77,16 @@ class AmpStickyAd extends AMP.BaseElement {
     this.removeOnScrollListener_();
   }
 
+  /** @override */
+  collapsedCallback(child) {
+    this.vsync_.mutate(() => {
+      //TODO(zhouyx): Need deregister ad here,
+      //and move updatePadding to detachedCallback();
+      removeElement(this.element);
+      this.viewport_.updatePaddingBottom(0);
+    });
+  }
+
   /**
    * The function that remove listener to viewport onScroll event.
    * @private
@@ -127,7 +137,7 @@ class AmpStickyAd extends AMP.BaseElement {
         }, 1000);
       });
     }
-  }
+ }
 
   /**
    * The function that add a close button to sticky ad
@@ -149,6 +159,8 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
+      //TODO(zhouyx): Need deregister ad here,
+      //and move updatePadding to detachedCallback();
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });
