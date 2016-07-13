@@ -767,6 +767,8 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
+    this.implementation_.viewportCallback(false);
+    this.implementation_.unlayoutCallback();
     this.resources_.remove(this);
     this.implementation_.detachedCallback();
   };
