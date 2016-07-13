@@ -151,7 +151,7 @@ class AmpYoutube extends AMP.BaseElement {
       return;  // Doesn't look like JSON.
     }
     const data = tryParseJson(event.data);
-    if (!data) {
+    if (data === undefined) {
       return; // We only process valid JSON.
     }
     if (data.event == 'onReady') {

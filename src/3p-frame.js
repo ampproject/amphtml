@@ -152,7 +152,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   const json = element.getAttribute('json');
   if (json) {
     const obj = tryParseJson(json);
-    if (!obj) {
+    if (obj === undefined) {
       throw user.createError(
           'Error parsing JSON in json attribute in element %s',
           element);
