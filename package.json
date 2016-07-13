@@ -65,7 +65,7 @@
     "gzip-size": "3.0.0",
     "jison": "0.4.15",
     "jsdom": "9.2.1",
-    "karma": "0.13.21",
+    "karma": "1.1.1",
     "karma-browserify": "5.0.2",
     "karma-chai": "0.1.0",
     "karma-chai-as-promised": "0.1.2",
