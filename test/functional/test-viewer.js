@@ -451,6 +451,31 @@ describe('Viewer', () => {
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
   });
 
+  it('should not request cid', () => {
+    sandbox.stub(viewer, 'isTrustedViewer', () => {
+      return Promise.resolve(false);
+    });
+    sandbox.stub(viewer, 'sendMessage', () => {
+      return Promise.reject('should not be requested');
+    });
+    return viewer.getBaseCid().then(cid => {
+      expect(cid).to.be.undefined;
+    });
+  });
+
+  it('should request cid for trusted viewer', () => {
+    sandbox.stub(viewer, 'isTrustedViewer', () => {
+      return Promise.resolve(true);
+    });
+    sandbox.stub(viewer, 'sendMessage', name => {
+      expect(name).to.equal('cid');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getBaseCid().then(cid => {
+      expect(cid).to.be.equal('from-viewer');
+    });
+  });
+
   it('should dequeue events when deliverer set', () => {
     viewer.postDocumentReady();
     expect(viewer.messageQueue_.length).to.equal(1);
