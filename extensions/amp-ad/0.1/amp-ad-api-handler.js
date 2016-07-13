@@ -79,7 +79,6 @@ export class AmpAdApiHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
-    this.embedStateApi_.init();
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       if (this.noContentCallback_) {

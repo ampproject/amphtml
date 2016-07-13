@@ -402,12 +402,15 @@ export class SubscriptionApi {
     this.is3p_ = is3p;
     this.requestCallback_ = requestCallback;
     this.clientWindows_ = [];
+
+    this.init_();
   }
 
   /**
    * Start listening for messages.
+   * @private
    */
-  init() {
+  init_() {
     listenFor(
         this.iframe_, this.type_, (data, source, origin) => {
           // This message might be from any window within the iframe, we need

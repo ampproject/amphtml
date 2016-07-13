@@ -126,9 +126,6 @@ export class IntersectionObserver extends Observable {
   }
 
   init_() {
-    // Start listening to messages.
-    this.postMessageApi_.init();
-
     this.add(() => {
       this.sendElementIntersection_();
     });
