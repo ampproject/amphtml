@@ -20,6 +20,7 @@ import {
   listenFor,
   listenForOnce,
   postMessage,
+  postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
@@ -62,9 +63,10 @@ export class AmpAdApiHandler {
   /**
    * @param {!Element} iframe
    * @param {boolean} is3p
+   * @param {!Object} context
    * @return {!Promise} awaiting load event for ad frame
    */
-  startUp(iframe, is3p) {
+  startUp(iframe, is3p, context) {
     user.assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -73,6 +75,10 @@ export class AmpAdApiHandler {
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ =
         new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
+    listenFor(this.iframe_, 'send-embed-context', (data, source, origin) => {
+      postMessageToWindows(this.iframe_, [{win: source, origin}],
+          'embed-context', context, this.is3p_);
+    }, this.is3p_, this.is3p_);
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       if (this.noContentCallback_) {
