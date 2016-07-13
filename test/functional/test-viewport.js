@@ -706,7 +706,11 @@ describe('ViewportBindingNatural', () => {
     documentBody = {
       style: {},
     };
-    windowApi.document = {documentElement, body: documentBody};
+    windowApi.document = {
+      documentElement,
+      body: documentBody,
+      defaultView: windowApi,
+    };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNatural_(windowApi);
   });

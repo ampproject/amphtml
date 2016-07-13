@@ -745,9 +745,11 @@ export class ViewportBindingNatural_ {
     // Override a user-supplied `body{overflow}` to be always visible. This
     // style is set in runtime vs css to avoid conflicts with ios-embedded
     // mode and fixed transfer layer.
-    waitForBody(this.win.document, () => {
-      this.win.document.body.style.overflow = 'visible';
-    });
+    if (this.win.document.defaultView) {
+      waitForBody(this.win.document, () => {
+        this.win.document.body.style.overflow = 'visible';
+      });
+    }
 
     dev.fine(TAG_, 'initialized natural viewport');
   }
