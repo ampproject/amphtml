@@ -43,13 +43,14 @@ let fullVersion = '';
 
 /**
  * Provides info about the current app.
+ * @param {!Window=} win
  * @return {!ModeDef}
  */
-export function getMode() {
+export function getMode(opt_win) {
   if (mode) {
     return mode;
   }
-  return mode = getMode_();
+  return mode = getMode_(opt_win || window);
 }
 
 /**
@@ -62,19 +63,22 @@ export function setModeForTesting(m) {
 
 /**
  * Provides info about the current app.
+ * @param {!Window} win
  * @return {!ModeDef}
  */
-function getMode_() {
-  if (window.context && window.context.mode) {
-    return window.context.mode;
+function getMode_(win) {
+  // For 3p integration code
+  if (win.context && win.context.mode) {
+    return win.context.mode;
   }
+
   const isLocalDev = !!(location.hostname == 'localhost' ||
-      (location.ancestorOrigins && location.ancestorOrigins[0] &&
+      ((location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
-      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
+      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]'));
 
   const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
@@ -82,20 +86,20 @@ function getMode_() {
       location.originalHash || location.hash);
 
   if (!fullVersion) {
-    fullVersion = getFullVersion_(window, isLocalDev);
+    fullVersion = getFullVersion_(win, isLocalDev);
   }
 
   return {
     localDev: isLocalDev,
     // Triggers validation
     development: !!(developmentQuery['development'] == '1' ||
-        window.AMP_DEV_MODE),
+        win.AMP_DEV_MODE),
     // Allows filtering validation errors by error category. For the
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
     /* global process: false */
     minified: process.env.NODE_ENV == 'production',
-    test: !!(window.AMP_TEST || window.__karma__),
+    test: !!(win.AMP_TEST || win.__karma__),
     log: developmentQuery['log'],
     version: fullVersion,
   };
