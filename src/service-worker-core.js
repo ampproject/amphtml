@@ -53,6 +53,8 @@ function isCdnJsFile(url) {
 }
 
 
+const clients = Object.create(null);
+
 let cache;
 let db;
 let cacheCleanup = Promise.resolve();
@@ -65,7 +67,6 @@ const dbPromise = cachePromise.then(() => {
   return indexedDBP.open('cdn-js', VERSION, {
     upgrade(db, { oldVersion, transaction }) {
       if (oldVersion == 0) {
-        db.createObjectStore('clients', {keyPath: 'clientId'});
         const files = db.createObjectStore('js-files', {keyPath: 'file'});
         files.createIndex('versions', 'versions', { multiEntry: true });
       }
@@ -122,14 +123,12 @@ self.addEventListener('install', function(install) {
       const requestFile = basename(url);
       const requestVersion = ampVersion(url);
 
-      // What version do we have for this client? Keep it the same regardless.
-      response = db.transaction('clients', 'readonly').then(transaction => {
-        const clients = transaction.objectStore('clients');
-        return clients.get(clientId);
-      }).then(client => {
-        // If we have a client, we must always use the same version.
-        if (client) {
-          return client.version;
+      // What version do we have for this client?
+      response = SyncPromise.resolve(clients[clientId]).then(version => {
+        // If we already registered this client, we must always use the same
+        // version.
+        if (version) {
+          return version;
         }
 
         // If not, do we have this version cached, if so serve it.
@@ -153,6 +152,7 @@ self.addEventListener('install', function(install) {
         const versionedRequest = version === requestVersion ?
             request :
             new Request(versionedUrl(url, version), request);
+        clients[clientId] = version;
 
         return cache.match(versionedRequest).then(function(response) {
           // Cache hit - return response
