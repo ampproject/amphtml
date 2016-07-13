@@ -17,84 +17,84 @@
 import {dev} from '../log';
 import {getMode} from '../mode';
 
-import {fromClass} from './service';
+import {fromClass} from '../service';
 
 
-const TAG = 'modules';
-const UNKNOWN_MODULE = '_UNKNOWN_';
-
-
-/**
- * @typedef {{}}
- */
-let ModuleHolderDef;
+const TAG = 'extensions';
+const UNKNOWN_EXTENSION = '_UNKNOWN_';
 
 
 /**
  * @typedef {{}}
  */
-let ModuleDef;
+let ExtensionHolderDef;
+
+
+/**
+ * @typedef {{}}
+ */
+let ExtensionDef;
 
 
 /**
  * @param {!Window} window
  * @restricted
  */
-export function installModulesService(window) {
-  return fromClass(window, 'modules', Modules);
+export function installExtensionsService(window) {
+  return fromClass(window, 'extensions', Extensions);
 }
 
 
 /**
- * @param {!Modules} modules
+ * @param {!Extensions} extensions
  * @param {string} name
  * @param {function(!Object)} factory
  * @param {!Object} arg
  * @restricted
  */
-export function registerModule(modules, name, factory, arg) {
-  modules.registerModule_(ampdoc, name, factory, arg);
+export function registerExtension(extensions, name, factory, arg) {
+  extensions.registerExtension_(name, factory, arg);
 }
 
 
 /**
- * @param {!Modules} modules
+ * @param {!Extensions} extensions
  * @param {!./ampdoc-impl/AmpDoc} ampdoc
- * @param {!Array<string>} moduleIds
+ * @param {!Array<string>} extensionIds
  * @restricted
  */
-export function instrumentModuleShadowDoc(modules, ampdoc, moduleIds) {
-  modules.instrumentShadowDoc_(ampdoc, moduleIds);
+export function instrumentShadowDocExtensions(extensions, ampdoc, extensionIds) {
+  extensions.instrumentShadowDoc_(ampdoc, extensionIds);
 }
 
 
 /**
- * @param {!Modules} modules
+ * @param {!Extensions} extensions
  * @param {string} elementName
  * @param {function(new:../base-element.BaseElement, !Element)}
  *     implementationClass
  * @restricted
  */
-export function registerModuleElement(modules, elementName,
+export function addElementToExtension(extensions, elementName,
     implementationClass) {
-  modules.registerElement_(elementName, implementationClass);
+  extensions.addElement_(elementName, implementationClass);
 }
 
 
 /**
- * @param {!Modules} modules
+ * @param {!Extensions} extensions
  * @param {function(!./ampdoc-impl/AmpDoc)} factory
- * @param {string=} opt_name
+ * @param {string=} opt_forName
  * @restricted
  */
-export function registerModuleDocFactory(modules, factory, opt_name) {
-  modules.registerDocFactory_(factory);
+export function addDocFactoryToExtension(extensions, factory, opt_forName) {
+  extensions.addDocFactory_(factory, opt_forName);
 }
 
 
 /**
  */
-class Modules {
+class Extensions {
 
   /**
    * @param {!Window} win
@@ -103,15 +103,15 @@ class Modules {
     /** @private @const {!Window} */
     this.win = win;
 
-    /** @private @const {!Object<string, !ModuleHolderDef>} */
-    this.modules_ = {};
+    /** @private @const {!Object<string, !ExtensionHolderDef>} */
+    this.extensions_ = {};
 
     /** @private {?string} */
-    this.currentModuleName_ = null;
+    this.currentExtensionName_ = null;
   }
 
   /**
-   * Registers a new module. This method is called by the module's script
+   * Registers a new extension. This method is called by the extension's script
    * itself when it's loaded using the regular `AMP.push()` callback.
    * @param {string} name
    * @param {function(!Object)} factory
@@ -119,48 +119,49 @@ class Modules {
    * @private
    * @restricted
    */
-  registerModule_(name, factory, arg) {
-    const holder = this.getModuleHolder_(name);
+  registerExtension_(name, factory, arg) {
+    const holder = this.getExtensionHolder_(name);
     try {
-      this.currentModuleName_ = name;
+      this.currentExtensionName_ = name;
       factory(arg);
       if (getMode().localDev || getMode().test) {
         if (Object.freeze) {
-          const m = holder.module;
+          const m = holder.extension;
           m.elements = Object.freeze(m.elements);
           m.docFactories_ = Object.freeze(m.docFactories_);
-          holder.module = Object.freeze(m);
+          holder.extension = Object.freeze(m);
         }
       }
-      holder.resolve(holder.module);
+      holder.resolve(holder.extension);
     } catch (e) {
       holder.reject(e);
       throw e;
     } finally {
-      this.currentModuleName_ = null;
+      this.currentExtensionName_ = null;
     }
   }
 
   /**
-   * Waits for the previously included module to complete loading/registration.
+   * Waits for the previously included extension to complete
+   * loading/registration.
    * @param {string} name
-   * @return {!Promise<!ModuleDef>}
+   * @return {!Promise<!ExtensionDef>}
    */
-  waitForModule(name) {
-    return this.getModuleHolder_(name).promise;
+  waitForExtension(name) {
+    return this.getExtensionHolder_(name).promise;
   }
 
   /**
    * Check script info in HTML head and make update if necessary. Returns the
-   * promise that will be resolved when the module has been loaded.
+   * promise that will be resolved when the extension has been loaded.
    * @param {string} name
-   * @return {!Promise<!Module>}
+   * @return {!Promise<!ExtensionDef>}
    */
-  loadModule(name) {
+  loadExtension(name) {
     if (name == 'amp-embed') {
       name = 'amp-ad';
     }
-    const holder = this.getModuleHolder_(name);
+    const holder = this.getExtensionHolder_(name);
     // DO NOT SUBMIT: complete migration from insert-extension.js
     if (isAmpExtensionScriptRequired(this.win, name)) {
       const ampExtensionScript = createAmpExtensionScript(this.win, name);
@@ -170,15 +171,15 @@ class Modules {
   }
 
   /**
-   * Registers the element implementation with the current module.
+   * Registers the element implementation with the current extension.
    * @param {string} name
    * @param {!Function} implementationClass
    * @private
    * @restricted
    */
-  registerElement_(name, implementationClass) {
-    const holder = this.getCurrentModuleHolder_(name);
-    holder.module.elements[name] = {implementationClass};
+  addElement_(name, implementationClass) {
+    const holder = this.getCurrentExtensionHolder_(name);
+    holder.extension.elements[name] = {implementationClass};
   }
 
   /**
@@ -188,65 +189,67 @@ class Modules {
    * @private
    * @restricted
    */
-  registerDocFactory_(factory, opt_name) {
-    const holder = this.getCurrentModuleHolder_(opt_name);
-    holder.module.docFactories_.push(factory);
+  addDocFactory_(factory, opt_name) {
+    const holder = this.getCurrentExtensionHolder_(opt_name);
+    holder.extension.docFactories_.push(factory);
   }
 
   /**
    * Installs all ampdoc factories previously registered with
-   * `registerDocFactory_`.
+   * `addDocFactory_`.
    * @param {!./ampdoc-impl/AmpDoc} ampdoc
-   * @param {!Array<string>} moduleIds
+   * @param {!Array<string>} extensionIds
    * @private
    * @restricted
    */
-  instrumentShadowDoc_(ampdoc, moduleIds) {
-    moduleIds.forEach(extension => {
-      this.waitForModule(extension).then(module => {
-        module.docFactories_.forEach(factory => factory(ampdoc));
+  instrumentShadowDoc_(ampdoc, extensionIds) {
+    extensionIds.forEach(extensionId => {
+      this.waitForExtension(extensionId).then(extension => {
+        extension.docFactories_.forEach(factory => factory(ampdoc));
       });
     });
   }
 
   /**
    * @param {string} name
-   * @return {!ModuleHolderDef}
+   * @return {!ExtensionHolderDef}
    * @private
    */
-  getModuleHolder_(name) {
-    let holder = this.modules_[name];
+  getExtensionHolder_(name) {
+    let holder = this.extensions_[name];
     if (!holder) {
       let resolve, reject;
       const promise = new Promise((resolve_, reject_) => {
         resolve = resolve_;
         reject = reject_;
       });
-      const module = {
+      const extension = {
         elements: {},
         templates: {},
         docFactories_: [],
       };
       holder = {
-        module,
+        extension,
         promise,
         resolve,
         reject,
       };
+      this.extensions_[name] = holder;
     }
     return holder;
   }
 
   /**
-   * Returns the holder for the module currently being registered.
+   * Returns the holder for the extension currently being registered.
    * @param {string=} opt_forName
-   * @return {!ModuleHolderDef}
+   * @return {!ExtensionHolderDef}
    * @private
    */
-  getCurrentModuleHolder_(opt_forName) {
-    if (!this.currentModuleName_) {
-      dev.error(TAG, 'unknown module for ', opt_forName);
+  getCurrentExtensionHolder_(opt_forName) {
+    if (!this.currentExtensionName_) {
+      dev.error(TAG, 'unknown extension for ', opt_forName);
     }
-    return this.getModuleHolder_(this.currentModuleName_ || UNKNOWN_MODULE);
+    return this.getExtensionHolder_(
+        this.currentExtensionName_ || UNKNOWN_EXTENSION);
   }
 }

@@ -17,7 +17,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev} from '../../../src/log';
-import {modulesFor} from '../../../src/modules';
+import {extensionsFor} from '../../../src/extensions';
 
 
 /**
@@ -74,9 +74,9 @@ export class AmpAd extends AMP.BaseElement {
     // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
     // as following:
     /*
-      const modules = modulesFor(this.getWin());
-      return modules.loadModule(extensionTag).then(module => {
-        const implementationClass = module.elements[extensionTag].implementationClass;
+      const extensions = extensionsFor(this.getWin());
+      return extensions.loadExtension(extensionTag).then(extension => {
+        const implementationClass = extension.elements[extensionTag].implementationClass;
         return new implementationClass(this.element);
       });
      */
@@ -101,7 +101,7 @@ export class AmpAd extends AMP.BaseElement {
     // that the loader can handle the case.
     const extensionTag = networkImplementationTag(type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    modulesFor(this.getWin())./*OK*/loadModule(extensionTag);
+    extensionsFor(this.getWin())./*OK*/loadExtension(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }

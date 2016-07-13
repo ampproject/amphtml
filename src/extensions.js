@@ -19,9 +19,9 @@ import {getService} from './service';
 
 /**
  * @param {!Window} window
- * @return {!./service/modules-impl.Modules}
+ * @return {!./service/extensions-impl.Extensions}
  */
-export function modulesFor(window) {
-  return /** @type {!./service/modules-impl.Modules} */ (
-      getService(window, 'modules'));
+export function extensionsFor(window) {
+  return /** @type {!./service/extensions-impl.Extensions} */ (
+      getService(window, 'extensions'));
 };

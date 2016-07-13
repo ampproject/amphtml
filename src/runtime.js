@@ -26,12 +26,12 @@ import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {
-  installModulesService,
-  instrumentModuleShadowDoc,
-  registerModule,
-  registerModuleElement,
-  registerModuleDocFactory,
-} from './service/modules-impl';
+  installExtensionsService,
+  instrumentShadowDocExtensions,
+  registerExtension,
+  addElementToExtension,
+  addDocFactoryToExtension,
+} from './service/extensions-impl';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
@@ -107,7 +107,7 @@ export function installBuiltins(global) {
  * Applies the runtime to a given global scope for a single-doc mode.
  * Multi frame support is currently incomplete.
  * @param {!Window} global Global scope to adopt.
- * @param {function(!Window, !./service/modules-impl/Modules)} callback
+ * @param {function(!Window, !./service/extensions-impl/Extensions)} callback
  */
 function adoptShared(global, callback) {
   // Tests can adopt the same window twice. sigh.
@@ -119,7 +119,7 @@ function adoptShared(global, callback) {
   // of functions
   const preregisteredExtensions = global.AMP || [];
 
-  const modules = installModulesService(global);
+  const extensions = installExtensionsService(global);
   installRuntimeServices(global);
 
   global.AMP = {
@@ -157,7 +157,7 @@ function adoptShared(global, callback) {
   global.AMP.setTickFunction = (fn, opt_flush) => {};
 
   // Run specific setup for a single-doc or shadow-doc mode.
-  callback(global, modules);
+  callback(global, extensions);
 
   /**
    * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
@@ -166,7 +166,7 @@ function adoptShared(global, callback) {
     if (typeof fnOrStruct == 'function') {
       fnOrStruct(global.AMP);
     } else {
-      registerModule(modules, fnOrStruct.n, fnOrStruct.f, global.AMP);
+      registerExtension(extensions, fnOrStruct.n, fnOrStruct.f, global.AMP);
     }
   }
 
@@ -214,7 +214,7 @@ function adoptShared(global, callback) {
  * @param {!Window} global Global scope to adopt.
  */
 export function adopt(global) {
-  adoptShared(global, (global, modules) => {
+  adoptShared(global, (global, extensions) => {
     const ampdocService = ampdocFor(global);
     const ampdoc = ampdocService.getAmpDoc(/* node */ null);
 
@@ -226,7 +226,7 @@ export function adopt(global) {
      *     Typically imported from generated CSS-in-JS file for each component.
      */
     global.AMP.registerElement = function(name, implementationClass, opt_css) {
-      registerModuleElement(modules, name, implementationClass);
+      addElementToExtension(extensions, name, implementationClass);
       const register = function() {
         registerExtendedElement(global, name, implementationClass);
         if (getMode().test) {
@@ -290,7 +290,7 @@ export function adopt(global) {
  * @param {!Window} global Global scope to adopt.
  */
 export function adoptShadowMode(global) {
-  adoptShared(global, (global, modules) => {
+  adoptShared(global, (global, extensions) => {
 
     /**
      * Registers an extended element and installs its styles.
@@ -300,7 +300,7 @@ export function adoptShadowMode(global) {
      *     Typically imported from generated CSS-in-JS file for each component.
      */
     global.AMP.registerElement = function(name, implementationClass, opt_css) {
-      registerModuleElement(modules, name, implementationClass);
+      addElementToExtension(extensions, name, implementationClass);
       registerExtendedElement(global, name, implementationClass);
       if (getMode().test) {
         elementsForTesting.push({
@@ -312,7 +312,7 @@ export function adoptShadowMode(global) {
       // Resolve this extension's Service Promise.
       getService(global, name, emptyService);
       if (opt_css) {
-        registerModuleDocFactory(modules, ampdoc => {
+        addDocFactoryToExtension(extensions, ampdoc => {
           installStylesForShadowRoot(ampdoc.getRootNode(), opt_css,
               /* isRuntimeCss */ false, name);
         });
@@ -334,7 +334,7 @@ export function adoptShadowMode(global) {
       } else {
         factory = opt_factory;
       }
-      registerModuleDocFactory(modules, ampdoc => {
+      addDocFactoryToExtension(extensions, ampdoc => {
         if (opt_class) {
           fromClassForDoc(ampdoc, name, opt_class);
         } else {
@@ -347,7 +347,8 @@ export function adoptShadowMode(global) {
      * Registers a shadow root document.
      * @param {!ShadowRoot} shadowRoot
      */
-    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null, global);
+    global.AMP.attachShadowRoot = prepareAndAttachShadowRoot.bind(null,
+        global, extensions);
   });
 }
 
@@ -355,13 +356,15 @@ export function adoptShadowMode(global) {
 /**
  * Attaches the shadow root and configures ampdoc for it.
  * @param {!Window} global
+ * @param {!./service/extensions-impl/Extensions} extensions
  * @param {!ShadowRoot} shadowRoot
- * @param {!Array<string>} extensions
+ * @param {!Array<string>} extensionIds
  */
-export function prepareAndAttachShadowRoot(global, shadowRoot, extensions) {
+export function prepareAndAttachShadowRoot(global, extensions,
+    shadowRoot, extensionIds) {
   // TODO(dvoytenko): switch this method to accept the actual shadow document
   // and attach shadow in runtime.
-  dev.fine(TAG, 'Attach shadow root:', shadowRoot);
+  dev.fine(TAG, 'Attach shadow root:', shadowRoot, extensionIds);
   const ampdocService = ampdocFor(global);
   const ampdoc = ampdocService.getAmpDoc(shadowRoot);
 
@@ -373,7 +376,7 @@ export function prepareAndAttachShadowRoot(global, shadowRoot, extensions) {
 
   // Install services.
   installAmpdocServices(ampdoc);
-  instrumentModuleShadowDoc(ampdoc, extensions);
+  instrumentShadowDocExtensions(extensions, ampdoc, extensionIds);
 
   dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
   return shadowRoot.AMP;
