@@ -15,6 +15,9 @@
 
 import {closestByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {
+  handleClick as handleAlpClickInternal,
+} from '../../../ads/alp/handler';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 
@@ -35,6 +38,19 @@ export function setupA2AListener(win) {
     return;
   }
   win.addEventListener('message', handleMessageEvent.bind(null, win));
+}
+
+/**
+ * Handles a direct click event (such as from an inline A4A ad) that might
+ * trigger A2A navigation.
+ * @param {!Event} event A click event.
+ */
+export function handleAlpClick(event) {
+  handleAlpClickInternal(event, (win, element, url) => {
+    // TODO(@cramforce) Implement target=_blank handling which can be
+    // correctly done for A4A
+    viewerFor(win).navigateTo(url, 'a4a');
+  });
 }
 
 /**

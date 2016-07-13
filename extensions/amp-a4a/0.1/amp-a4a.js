@@ -27,6 +27,7 @@ import {insertAmpExtensionScript} from '../../../src/insert-extension';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
+import {handleAlpClick} from '../../amp-ad/0.1/a2a-listener';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {
@@ -347,6 +348,7 @@ export class AmpA4A extends AMP.BaseElement {
       }
       this.rendered_ = true;
     }).catch(error => this.promiseErrorHandler_(error));
+    this.registerAlpHandler_();
   }
 
   /** @override  */
@@ -770,5 +772,13 @@ export class AmpA4A extends AMP.BaseElement {
     metaData.forEach(extension => {
       /*OK*/insertAmpExtensionScript(this.getWin(), extension, true);
     });
+  }
+
+  /**
+   * Registers a click handler to potentially initiate A2A navigation
+   * on clicks on this ad.
+   */
+  registerA2AHandler_() {
+    this.element.addEventListener('click', handleAlpClick);
   }
 }
