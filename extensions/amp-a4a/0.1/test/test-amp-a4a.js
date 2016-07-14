@@ -361,7 +361,7 @@ describe('amp-a4a', () => {
           const root = a4aElement.shadowRoot;
           const styles = root.querySelectorAll('style');
           expect(Array.prototype.some.call(styles,
-              s => { return s.innerHTML == 'p { background: green }' }),
+              s => { return s.innerHTML == 'p { background: green }'; }),
               'Some style is "background: green"').to.be.true;
           const adBody = root.querySelector('amp-ad-body');
           expect(adBody).to.be.ok;
