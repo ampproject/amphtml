@@ -767,10 +767,16 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
-    this.implementation_.viewportCallback(false);
-    this.implementation_.unlayoutCallback();
-    this.resources_.remove(this);
-    this.implementation_.detachedCallback();
+    try {
+      this.implementation_.viewportCallback(false);
+    } finally {
+      try {
+        this.implementation_.unlayoutCallback();
+      } finally {
+        this.resources_.remove(this);
+        this.implementation_.detachedCallback();
+      }
+    }
   };
 
 
