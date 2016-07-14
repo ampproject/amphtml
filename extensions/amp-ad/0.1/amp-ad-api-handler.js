@@ -75,10 +75,10 @@ export class AmpAdApiHandler {
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ =
         new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
-    listenFor(this.iframe_, 'send-embed-context', (data, source, origin) => {
-      postMessageToWindows(this.iframe_, [{win: source, origin}],
-          'embed-context', context, this.is3p_);
-    }, this.is3p_, this.is3p_);
+    listenFor(this.iframe_, 'send-embed-context',
+        (data, source, origin) =>
+            this.sendEmbedContext_(source, origin, context),
+        this.is3p_, this.is3p_);
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       if (this.noContentCallback_) {
@@ -175,6 +175,17 @@ export class AmpAdApiHandler {
         pageHidden: !this.viewer_.isVisible(),
       }, targetOrigin, this.is3p_);
     }
+  }
+
+  /**
+   * @param {!Window} win
+   * @param {string} origin
+   * @param {!Object} context
+   * @private
+   */
+  sendEmbedContext_(win, origin, context) {
+    postMessageToWindows(
+        this.iframe_, [{win, origin}], 'embed-context', context, this.is3p_);
   }
 
   /** @override  */
