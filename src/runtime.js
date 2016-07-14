@@ -56,7 +56,6 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
-import {calculateScriptBase} from './insert-extension';
 
 
 /** @const @private {string} */
@@ -64,18 +63,6 @@ const TAG = 'runtime';
 
 /** @type {!Object} */
 const elementsForTesting = {};
-
-// TODO
-if ('serviceWorker' in navigator) {
-  const url = `${calculateScriptBase(window)}/sw.max.js`;
-  navigator.serviceWorker.register(url).then(function(registration) {
-    // Registration was successful
-    console.log('ServiceWorker registration successful with scope: ',    registration.scope);
-  }).catch(function(err) {
-    // registration failed :(
-    console.log('ServiceWorker registration failed: ', err);
-  });
-}
 
 /**
  * Install runtime-level services.

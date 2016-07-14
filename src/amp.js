@@ -25,6 +25,7 @@ import {installGlobalClickListener} from './document-click';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
+import {installCacheServiceWorker} from './service-worker/install';
 import {stubElements} from './custom-element';
 import {
   installAmpdocServices,
@@ -42,6 +43,7 @@ import {maybeTrackImpression} from './impression';
 try {
   // Should happen first.
   installErrorReporting(self);  // Also calls makeBodyVisible on errors.
+  installCacheServiceWorker(self);
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
