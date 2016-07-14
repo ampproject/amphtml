@@ -274,7 +274,7 @@ function tests(name) {
               expect(win).to.equal(impl.iframe_.contentWindow);
               expect(origin).to.equal('http://ads.localhost:' + location.port);
               // Verify that all expected keys exist in the context object.
-              expect(context).to.have.all.keys(
+              expect(context).to.contain.all.keys(
                   'location',
                   'referrer',
                   'canonicalUrl',

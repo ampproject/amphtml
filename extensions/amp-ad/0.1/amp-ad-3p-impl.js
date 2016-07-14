@@ -22,7 +22,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {getIframeAndContext} from '../../../src/3p-frame';
+import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
 
@@ -272,14 +272,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         if (cid) {
           this.element.setAttribute('ampcid', cid);
         }
-        const iframeAndContext = getIframeAndContext(
+        this.iframe_ = getIframe(
             this.element.ownerDocument.defaultView,
             this.element);
-        this.iframe_ = iframeAndContext.iframe;
         this.apiHandler_ = new AmpAdApiHandler(
           this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(
-            this.iframe_, true, iframeAndContext.context);
+            this.iframe_, true, this.iframe_._context);
       });
     }
     return loadPromise(this.iframe_);

@@ -96,16 +96,12 @@ function getFrameAttributes(parentWindow, element, opt_type) {
 /**
  * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
- * Returns the created iframe as well as a context object with metadata.
  * @param {!Window} parentWindow
  * @param {!Element} element
  * @param {string=} opt_type
- * @return {{
- *   iframe: !Element,
- *   context: !Object,
- * }} The iframe and a context object.
+ * @return {!Element} The iframe.
  */
-export function getIframeAndContext(parentWindow, element, opt_type) {
+export function getIframe(parentWindow, element, opt_type) {
   const attributes = getFrameAttributes(parentWindow, element, opt_type);
   const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
@@ -132,22 +128,8 @@ export function getIframeAndContext(parentWindow, element, opt_type) {
   };
   iframe.setAttribute(
       'data-amp-3p-sentinel', attributes._context.amp3pSentinel);
-  return {
-    iframe,
-    context: attributes._context,
-  };
-}
-
-/**
- * Creates the iframe for the embed. Applies correct size and passes the embed
- * attributes to the frame via JSON inside the fragment.
- * @param {!Window} parentWindow
- * @param {!Element} element
- * @param {string=} opt_type
- * @return {!Element} The iframe.
- */
-export function getIframe(parentWindow, element, opt_type) {
-  return getIframe(parentWindow, element, opt_type).iframe;
+  iframe._context = attributes._context;
+  return iframe;
 }
 
 /**
