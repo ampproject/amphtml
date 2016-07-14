@@ -474,8 +474,14 @@ export class AmpA4A extends AMP.BaseElement {
           if (response.signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
+              // TODO(a4a-cam): This call used to be missing the conversion
+              // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
+              // any unit tests to fail, either locally or on Travis.  That
+              // indicates that the tests are too weak or aren't reporting
+              // correctly.  Check out and fix the tests.
               return verifySignature(
-                  response.creative, response.signature, publicKeyInfos);
+                  new Uint8Array(response.creative),
+                  response.signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;
