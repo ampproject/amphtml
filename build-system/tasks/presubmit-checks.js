@@ -72,6 +72,9 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js'
     ]
   },
+  '\\.prefetch\\(': {
+    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
