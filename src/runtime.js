@@ -16,6 +16,13 @@
 
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
+import {
+  addDocFactoryToExtension,
+  addElementToExtension,
+  installExtensionsInShadowDoc,
+  installExtensionsService,
+  registerExtension,
+} from './service/extensions-impl';
 import {ampdocFor} from './ampdoc';
 import {cssText} from '../build/css';
 import {dev} from './log';
@@ -25,13 +32,6 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
-import {
-  installExtensionsService,
-  instrumentShadowDocExtensions,
-  registerExtension,
-  addElementToExtension,
-  addDocFactoryToExtension,
-} from './service/extensions-impl';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
@@ -134,9 +134,6 @@ function adoptShared(global, opts, callback) {
 
   const extensions = installExtensionsService(global);
   installRuntimeServices(global);
-
-  // Install `amp-ad` for backward compatibility with built-ins.
-  extensions.loadExtension('amp-ad');
 
   global.AMP = {
     win: global,
@@ -338,6 +335,8 @@ function prepareAndRegisterElementShadowMode(global, extensions,
 
 
 /**
+ * Registration steps for an extension element in both single- and shadow-doc
+ * modes.
  * @param {!Window} global
  * @param {string} name
  * @param {!Function} implementationClass
@@ -368,7 +367,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
   const ampdocService = ampdocFor(global);
-  const ampdoc = ampdocService.getAmpDoc(/* node */ null);
+  const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
 }
 
@@ -390,6 +389,8 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
 
 
 /**
+ * Registration steps for an ampdoc service in both single- and shadow-doc
+ * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
  * @param {function(new:!Object, !./service/ampdoc-impl.AmpDoc)} opt_ctor
@@ -429,7 +430,7 @@ function prepareAndAttachShadowRoot(global, extensions,
 
   // Install services.
   installAmpdocServices(ampdoc);
-  instrumentShadowDocExtensions(extensions, ampdoc, extensionIds);
+  installExtensionsInShadowDoc(extensions, ampdoc, extensionIds);
 
   dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
   return shadowRoot.AMP;

@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {dev} from './log';
+import {extensionsFor} from './extensions';
 
 /** @type {!Array} */
 export const stubbedElements = [];
@@ -23,6 +24,8 @@ export const stubbedElements = [];
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
+    // Fetch amp-ad script if it is not present.
+    extensionsFor(this.getWin()).loadExtension(element.tagName.toLowerCase());
     stubbedElements.push(this);
   }
 

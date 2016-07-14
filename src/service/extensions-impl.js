@@ -84,11 +84,11 @@ export function registerExtension(extensions, extensionId, factory, arg) {
  * @param {!Extensions} extensions
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @param {!Array<string>} extensionIds
+ * @return {!Promise}
  * @restricted
  */
-export function instrumentShadowDocExtensions(extensions, ampdoc,
-    extensionIds) {
-  extensions.instrumentShadowDoc_(ampdoc, extensionIds);
+export function installExtensionsInShadowDoc(extensions, ampdoc, extensionIds) {
+  return extensions.installExtensionsInShadowDoc_(ampdoc, extensionIds);
 }
 
 
@@ -123,8 +123,9 @@ export function addDocFactoryToExtension(extensions, factory, opt_forName) {
 
 /**
  * The services that manages extensions in the runtime.
+ * @visibleForTesting
  */
-class Extensions {
+export class Extensions {
 
   /**
    * @param {!Window} win
@@ -245,13 +246,15 @@ class Extensions {
    * `addDocFactory_`.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!Array<string>} extensionIds
+   * @return {!Promise}
    * @private
    * @restricted
    */
-  instrumentShadowDoc_(ampdoc, extensionIds) {
+  installExtensionsInShadowDoc_(ampdoc, extensionIds) {
+    const promises = [];
     extensionIds.forEach(extensionId => {
       const holder = this.getExtensionHolder_(extensionId);
-      this.waitFor_(holder).then(() => {
+      promises.push(this.waitFor_(holder).then(() => {
         holder.docFactories.forEach(factory => {
           try {
             factory(ampdoc);
@@ -259,8 +262,9 @@ class Extensions {
             rethrowAsync('Doc factory failed: ', e, extensionId);
           }
         });
-      });
+      }));
     });
+    return Promise.all(promises);
   }
 
   /**
@@ -278,6 +282,12 @@ class Extensions {
       holder = {
         extension,
         docFactories: [],
+        promise: undefined,
+        resolve: undefined,
+        reject: undefined,
+        loaded: undefined,
+        error: undefined,
+        scriptPresent: undefined,
       };
       this.extensions_[extensionId] = holder;
     }
@@ -291,7 +301,7 @@ class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionId_) {
+    if (!this.currentExtensionId_ && !getMode().test) {
       dev.error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
@@ -344,6 +354,9 @@ class Extensions {
    * @private
    */
   isExtensionScriptRequired_(extensionId, holder) {
+    if (holder.loaded || holder.error) {
+      return false;
+    }
     if (holder.scriptPresent === undefined) {
       const scriptInHead = this.win.document.head.querySelector(
           `[custom-element="${extensionId}"]`);
