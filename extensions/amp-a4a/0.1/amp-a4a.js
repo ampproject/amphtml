@@ -545,8 +545,10 @@ export class AmpA4A extends AMP.BaseElement {
             // Finally, add body and re-formatted CSS styling to the shadow root.
             const shadowRoot =
                 this.element.shadowRoot || this.element.createShadowRoot();
+            const forTesting = this.getWin();
             const style = this.getWin().document.querySelector(
-                'style[amp-runtime]');
+                'style[amp-runtime]') ||
+                this.getWin().document.createElement('style');
             shadowRoot.appendChild(style.cloneNode(true));
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
             this.rendered_ = true;
