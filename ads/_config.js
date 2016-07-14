@@ -52,7 +52,10 @@ export const adPrefetch = {
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
-  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  yieldbot: [
+    'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
+    'https://msg.yldbt.com/js/ybmsg.html',
+  ],
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
