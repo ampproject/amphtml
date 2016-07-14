@@ -651,11 +651,9 @@ function buildSw(options) {
   for (var prop in options) {
     opts[prop] = options[prop];
   }
-  opts.noWrapper = true;
-  opts.filename = 'service-worker-core.js';
 
   // The service-worker script loaded by the browser.
-  compileJs('./src/service-worker', 'shell.js', './dist/', {
+  compileJs('./src/service-worker/', 'shell.js', './dist/', {
     toName: 'sw.max.js',
     minifiedName: 'sw.js',
     watch: opts.watch,
@@ -663,7 +661,9 @@ function buildSw(options) {
     preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
   });
   // The script imported by the service-worker. This is the "core".
-  buildExtensionJs('./src/service-worker', 'core', '0.1', opts);
+  opts.noWrapper = true;
+  opts.filename = 'core.js';
+  buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1', opts);
 }
 
 /**

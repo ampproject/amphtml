@@ -65,7 +65,9 @@ const cachePromise = caches.open('cdn-js').then(result => {
 
 const dbPromise = cachePromise.then(() => {
   return indexedDBP.open('cdn-js', VERSION, {
-    upgrade(db, { oldVersion, transaction }) {
+    upgrade(db, event) {
+      const oldVersion = event.oldVersion;
+      const transaction = event.transaction;
       // Do we need to create our database?
       if (oldVersion == 0) {
         const files = db.createObjectStore('js-files', {keyPath: 'file'});
@@ -119,8 +121,9 @@ self.addEventListener('install', function(install) {
   //   - Doc requests one uniform AMP version for all files, anything else
   //     is malarkey.
   self.addEventListener('fetch', function(event) {
-    const { request, clientId } = event;
-    const { url } = request;
+    const request = event.request;
+    const clientId = event.clientId;
+    const url = request.url;
     let response;
 
     // We only cache CDN JS files, and we need a clientId to do our magic.
@@ -143,7 +146,7 @@ self.addEventListener('install', function(install) {
           const files = transaction.objectStore('js-files');
           return files.get(requestFile);
         }).then((item = {}) => {
-          const { versions } = item;
+          const versions = item.versions;
           if (!versions || versions.length === 0) {
             return VERSION;
           }
@@ -186,7 +189,7 @@ self.addEventListener('install', function(install) {
                       versions: [],
                     };
                   }
-                  const { versions } = item;
+                  const versions = item.versions;
                   if (versions.indexOf(version) == -1) {
                     versions.push(version);
                     versions.sort((a, b) => a - b);
