@@ -220,6 +220,13 @@ function masterSelection(type) {
 }
 
 /**
+ * @return {boolean} Whether this is the master iframe.
+ */
+function isMaster() {
+  return window.context.master == window;
+}
+
+/**
  * Draws an embed, optionally synchronously, to the DOM.
  * @param {function(!Object, function(!Object))} opt_configCallback If provided
  *     will be invoked with two arguments:
@@ -243,8 +250,15 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    window.context.master = masterSelection(data.type);
-    window.context.isMaster = window.context.master == window;
+    // Define master related properties to be lazily read.
+    Object.defineProperties(window.context, {
+      master: {
+        get: () => masterSelection(data.type),
+      },
+      isMaster: {
+        get: isMaster,
+      },
+    });
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
