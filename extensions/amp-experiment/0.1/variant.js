@@ -32,12 +32,12 @@ const nameValidator = /^[\w-]+$/;
 export function allocateVariant(win, config) {
   validateConfig(config);
 
-  const cidScope =
-      config.cidScope === undefined ? 'amp-experiment' : config.cidScope;
+  const sticky = config.sticky !== false;
+  const cidScope = config.cidScope || 'amp-experiment';
 
   let hasConsentPromise = Promise.resolve(true);
 
-  if (cidScope && config.consentNotificationId) {
+  if (sticky && config.consentNotificationId) {
     hasConsentPromise = userNotificationManagerFor(win)
         .then(manager => manager.getNotification(config.consentNotificationId))
         .then(userNotification => {
@@ -52,7 +52,7 @@ export function allocateVariant(win, config) {
         if (!hasConsent) {
           return null;
         }
-        return getBucketTicket(win, cidScope).then(bucketTicket => {
+        return getBucketTicket(win, sticky ? cidScope : null).then(ticket => {
           let upperBound = 0;
 
           // Loop through keys in a specific order since the default object key
@@ -60,7 +60,7 @@ export function allocateVariant(win, config) {
           const variantNames = Object.keys(config.variants).sort();
           for (let i = 0; i < variantNames.length; i++) {
             upperBound += config.variants[variantNames[i]];
-            if (bucketTicket < upperBound) {
+            if (ticket < upperBound) {
               return variantNames[i];
             }
           }
