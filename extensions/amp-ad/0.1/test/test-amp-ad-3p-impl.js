@@ -270,8 +270,17 @@ function tests(name) {
           return new Promise((resolve, unusedReject) => {
             const impl = element.implementation_;
             impl.layoutCallback();
-            impl.apiHandler_.sendEmbedContext_ = (win) => {
+            impl.apiHandler_.sendEmbedContext_ = (win, origin, context) => {
               expect(win).to.equal(impl.iframe_.contentWindow);
+              expect(origin).to.equal('http://ads.localhost:' + location.port);
+              // Verify that all expected keys exist in the context object.
+              expect(context).to.have.all.keys(
+                  'location',
+                  'referrer',
+                  'canonicalUrl',
+                  'pageViewId',
+                  'clientId',
+                  'startTime');
               resolve(impl);
             };
             impl.iframe_.onload = function() {

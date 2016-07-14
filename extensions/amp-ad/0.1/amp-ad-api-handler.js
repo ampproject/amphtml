@@ -184,8 +184,18 @@ export class AmpAdApiHandler {
    * @private
    */
   sendEmbedContext_(win, origin, context) {
-    postMessageToWindows(
-        this.iframe_, [{win, origin}], 'embed-context', context, this.is3p_);
+    // Note that we explicitly include only selected properties from the
+    // context object. This is to ensure that we don't inadvertently expose
+    // more API surface than we intend to and end up with somebody depending
+    // on it.
+    postMessageToWindows(this.iframe_, [{win, origin}], 'embed-context', {
+      location: context.location,
+      referrer: context.referrer,
+      canonicalUrl: context.canonicalUrl,
+      pageViewId: context.pageViewId,
+      clientId: context.clientId,
+      startTime: context.startTime,
+    }, this.is3p_);
   }
 
   /** @override  */
