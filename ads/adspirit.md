@@ -21,8 +21,8 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=200
     type="adspirit"
-    data-asm-params="&amp;pid=123"
-    data-asm-host="myserver.adspirit.de">
+    data-asm-params="&amp;pid=4"
+    data-asm-host="help.adspirit.de">
 </amp-ad>
 ```
 
