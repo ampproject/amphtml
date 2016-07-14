@@ -547,7 +547,7 @@ export class AmpA4A extends AMP.BaseElement {
                 this.element.shadowRoot || this.element.createShadowRoot();
 	    const style = this.getWin().document.querySelector(
 		'style[amp-runtime]');
-	    shadowRoot.appendChild(style.cloneNode());
+	    shadowRoot.appendChild(style.cloneNode(true));
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
