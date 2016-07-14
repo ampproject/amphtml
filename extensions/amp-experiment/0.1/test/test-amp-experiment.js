@@ -58,7 +58,7 @@ describe('amp-experiment', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-experiment', false);
+    toggleExperiment(win, 'amp-experiment', false);
     sandbox.restore();
   });
 
