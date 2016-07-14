@@ -145,4 +145,34 @@ describe('amp-experiment', () => {
           .to.equal(null);
     });
   });
+
+  it('variant can be overridden from URL fragment', () => {
+    addConfigElement('script');
+
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(
+        win, config['experiment-1']).returns(Promise.resolve('variant-a'));
+
+    win.location.originalHash =
+        'experiment-1=variant-b' +
+        '&amp-x-experiment-2=variant-c' +
+        '&amp-x-experiment-3=variant-e';
+    experiment.buildCallback();
+    return variantForOrNull(win).then(variants => {
+      expect(variants).to.jsonEqual({
+        'experiment-2': 'variant-c',  // overridden
+        'experiment-3': 'variant-e',  // overridden
+        'experiment-1': 'variant-a',  // missing amp-x- in the URL
+      });
+      expectBodyHasAttributes({
+        'amp-x-experiment-1': 'variant-a',
+        'amp-x-experiment-2': 'variant-c',
+        'amp-x-experiment-3': 'variant-e',
+      });
+
+      // Variant override should bypass the call to allocateVariant.
+      assert(stub.neverCalledWith(win, config['experiment-2']));
+      assert(stub.neverCalledWith(win, config['experiment-3']));
+    });
+  });
 });

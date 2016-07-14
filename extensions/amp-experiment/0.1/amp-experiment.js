@@ -15,10 +15,11 @@
  */
 
 import {dev, user} from '../../../src/log';
+import {parseQueryString} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant} from './variant';
+import {allocateVariant, nameValidator} from './variant';
 import {getService} from '../../../src/service';
 
 /** @const */
@@ -43,21 +44,31 @@ export class AmpExperiment extends AMP.BaseElement {
 
     const config = this.getConfig_();
     const results = Object.create(null);
+    const override = this.getVariantOverride_();
     const variants = Object.keys(config).map(experimentName => {
+      if (override[experimentName]) {
+        results[experimentName] = override[experimentName];
+        return Promise.resolve();
+      }
+
       return allocateVariant(this.getWin(), config[experimentName])
           .then(variantName => {
             results[experimentName] = variantName;
           });
     });
 
-    /** @private @const {!Promise<!Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants)
+    const promise = Promise.all(variants)
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    getService(this.getWin(), 'variant', () => this.experimentVariants_);
+    getService(this.getWin(), 'variant', () => promise);
   }
 
+  /**
+   * Returns config object.
+   * @return {!JSONType}
+   * @private
+   */
   getConfig_() {
     const children = this.element.children;
     user.assert(
@@ -88,6 +99,27 @@ export class AmpExperiment extends AMP.BaseElement {
       }
       return experiments;
     });
+  }
+
+  /**
+   * Parses URL fragment and returns variant override.
+   * @return {!Object<string, string>}
+   * @private
+   */
+  getVariantOverride_() {
+    const queries = parseQueryString(
+        // location.originalHash is set by the viewer when it removes the
+        // fragment from the URL.
+        this.getWin().location.originalHash || this.getWin().location.hash);
+
+    const override = Object.create(null);
+    for (const key in queries) {
+      const value = queries[key];
+      if (key.startsWith(ATTR_PREFIX) && nameValidator.test(value)) {
+        override[key.substr(6 /* amp-x- */)] = value;
+      }
+    }
+    return override;
   }
 }
 
