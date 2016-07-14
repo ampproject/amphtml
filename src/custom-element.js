@@ -770,12 +770,8 @@ function createBaseAmpElementProto(win) {
     try {
       this.implementation_.viewportCallback(false);
     } finally {
-      try {
-        this.implementation_.unlayoutCallback();
-      } finally {
-        this.resources_.remove(this);
-        this.implementation_.detachedCallback();
-      }
+      this.resources_.remove(this);
+      this.implementation_.detachedCallback();
     }
   };
 
