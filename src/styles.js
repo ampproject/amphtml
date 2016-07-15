@@ -16,6 +16,7 @@
 
 import {setStyles} from './style';
 import {waitForBody} from './dom';
+import {platform} from './platform';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
 
@@ -131,6 +132,17 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
       visibility: 'visible',
       animation: 'none',
     });
+
+    // TODO(erwinm): Remove this when safari technology preview has merged
+    // the fix for https://github.com/ampproject/amphtml/issues/4047
+    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
+    if (platform.isSafari()) {
+      if (doc.body.style['webkitAnimation'] !== undefined) {
+        doc.body.style['webkitAnimation'] = 'none';
+      } else if (doc.body.style['WebkitAnimation'] !== undefined) {
+        doc.body.style['WebkitAnimation'] = 'none';
+      }
+    }
   };
   waitForBody(doc, () => {
     const extensionsPromise = opt_waitForExtensions ?
