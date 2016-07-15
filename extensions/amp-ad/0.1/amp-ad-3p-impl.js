@@ -311,10 +311,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.fallback_) {
       this.attemptChangeHeight(0).then(() => {
         this./*OK*/collapse();
-      }).catch(() => {
-        //Code to add backup fallback;
-        return;
-      });
+      }, () => {});
     }
     this.deferMutate(() => {
       if (!this.iframe_) {

@@ -501,15 +501,15 @@ export class Resources {
 
   /**
    * Requests the runtime to change the element's size. When the size is
-   * successfully updated then the opt_resolveCb is called.
+   * successfully updated then the opt_callback is called.
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function()=} opt_resolveCb A callback function.
+   * @param {function()=} opt_callback A callback function.
    */
-  changeSize(element, newHeight, newWidth, opt_resolveCb) {
+  changeSize(element, newHeight, newWidth, opt_callback) {
     this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ true, opt_resolveCb);
+        newWidth, /* force */ true, opt_callback);
   }
 
   /**
@@ -779,15 +779,15 @@ export class Resources {
           resize = true;
         } else if (diff < 0) {
           // 6. The new height is smaller than the current one.
-          if (request.resolveCb) {
-            request.resolveCb(false);
+          if (request.callback) {
+            request.callback(false);
           }
           resize = false;
         } else {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
-          if (request.resolveCb) {
-            request.resolveCb(false);
+          if (request.callback) {
+            request.callback(false);
           }
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
@@ -798,7 +798,7 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, request.resolveCb);
+              request.newHeight, request.newWidth, request.callback);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
         }
@@ -1204,11 +1204,11 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_resolveCb A callback function
+   * @param {function()=} opt_callback A callback function
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
-      opt_resolveCb) {
+      opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
@@ -1234,14 +1234,14 @@ export class Resources {
       request.newHeight = newHeight;
       request.newWidth = newWidth;
       request.force = force || request.force;
-      request.resolveCb = opt_resolveCb;
+      request.callback = opt_callback;
     } else {
       this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
         resource,
         newHeight,
         newWidth,
         force,
-        resolveCb: opt_resolveCb,
+        callback: opt_callback,
       });
     }
     this.schedulePassVsync();

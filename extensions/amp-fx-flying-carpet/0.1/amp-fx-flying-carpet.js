@@ -134,7 +134,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       if (this.totalChildren_ == 0) {
         return this.attemptChangeHeight(0).then(() => {
           this./*OK*/collapse();
-        });
+        }, () => {});
       }
     }
   }

@@ -258,14 +258,14 @@ export class Resource {
    * @param {number|undefined} newWidth
    * @param {function()=} opt_callback A callback function.
    */
-  changeSize(newHeight, newWidth, opt_resolveCb) {
+  changeSize(newHeight, newWidth, opt_callback) {
     this.element./*OK*/changeSize(newHeight, newWidth);
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
-    if (opt_resolveCb) {
-      opt_resolveCb(true);
+    if (opt_callback) {
+      opt_callback(true);
     }
   }
 

@@ -154,9 +154,9 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width) {
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      const targetOrigin =
+    const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+    this.baseInstance_.attemptChangeSize(height, width, () => {
       postMessage(
           this.iframe_,
           'embed-size-changed',
@@ -170,17 +170,6 @@ export class AmpAdApiHandler {
           {requestedHeight: height, requestedWidth: width},
           targetOrigin,
           this.is3p_);
-    });
-  }
-
-  /**
-   * @param {boolean} inViewport
-   * @private
-   */
-  sendEmbedInfo_(inViewport) {
-    this.embedStateApi_.send('embed-state', {
-      inViewport,
-      pageHidden: !this.viewer_.isVisible(),
     });
   }
 
@@ -202,20 +191,4 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.fire();
     }
   }
-<<<<<<< 841d408b230e0bc8ba2219520fc831f4b91271d3
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown && this.iframe_) {
-      const targetOrigin = parseUrl(this.iframe_.src).origin;
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          this.is3p_);
-    }
-  }
-=======
->>>>>>> change overflowCallback() function for baseElement
 }
