@@ -112,6 +112,24 @@ describe('UrlReplacements', () => {
     return win;
   }
 
+  function buildClickEvent(opt_href, opt_tagName) {
+    return {
+      clientX: 123, clientY: 456,
+      target: {
+        tagName: opt_tagName ? opt_tagName : 'A',
+        getAttribute: function(name) {
+          if (name == 'href') {
+            return opt_href !== undefined ? opt_href :
+              'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b';
+          } else if (name == 'data-orig-href') {
+            return undefined;
+          }
+          fail('unknown attribute: ' + name);
+        }
+      }
+    };
+  }
+
   it('should replace RANDOM', () => {
     return expand('ord=RANDOM?').then(res => {
       expect(res).to.match(/ord=(\d\.\d+)\?$/);
@@ -668,6 +686,69 @@ describe('UrlReplacements', () => {
             'PROMISE': 23,
           });
         });
+  });
+
+  it('expand sync', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    urlReplacements.win_.performance.timing.loadEventStart = 109;
+    expect(urlReplacements.expandSync(
+      'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
+      {
+        'CONST': 'ABC',
+        'FUNCT': function(a, b) { return a + b; },
+        'PROM': function() { return Promise.resolve('boo'); },
+      })).to.match(/r=(\d\.\d+)&c=ABC&f=helloworld&a=b&d=&e=9$/);
+  });
+
+  it ('anchor href expand', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    urlReplacements.win_.performance.timing.loadEventStart = 109;
+    expect(urlReplacements.getExpandAnchorHref_(buildClickEvent())).to.match(
+      /r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
+    // Verify missing href does not expand
+    expect(urlReplacements.getExpandAnchorHref_(
+      buildClickEvent(null))).to.equal('');
+    // Verify non-anchor target does not expand
+    expect(urlReplacements.getExpandAnchorHref_(
+      buildClickEvent(undefined, 'SPAN'))).to.equal('');
+    // Verify original href precendence
+    let event = buildClickEvent();
+    event.target.getAttribute = function(name) {
+      expect(name).to.equal('data-orig-href');
+      return 'foo=CLICK_X&hello=world';
+    };
+    expect(urlReplacements.getExpandAnchorHref_(event)).to.equal(
+      'foo=123&hello=world');
+  });
+
+  it ('verify document click listener', () => {
+    let clickObservable = new Observable();
+    const win = getFakeWindow();
+    win.document = {
+      addEventListener: function(eventName, callback) {
+        expect(eventName).to.equal('click');
+        clickObservable.add(callback);
+      }
+    };
+    win.performance.timing.loadEventStart = 109;
+    installUrlReplacementsService(win);
+    expect(clickObservable.getHandlerCount()).to.equal(1);
+    const event = buildClickEvent();
+    const attributes = {};
+    event.target.setAttribute = function(name, val) {
+      attributes[name] = val;
+    }
+    clickObservable.fire(event);
+    expect(attributes['href']).to.match(
+      /r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
+    expect(attributes['data-orig-href']).to.equal(
+      'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b');
+    // Fire again and verify new values are set
+    const currHref = attributes['href'];
+    clickObservable.fire(event);
+    expect(attributes['href']).to.not.equal(currHref);
   });
 
   describe('access values', () => {
