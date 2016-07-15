@@ -551,6 +551,15 @@ export class AmpA4A extends AMP.BaseElement {
             // Finally, add body and re-formatted CSS styling to the shadow root.
             const shadowRoot =
                 this.element.shadowRoot || this.element.createShadowRoot();
+            // TODO(dvoytenko, tdrl): Cloning the amp-runtime style from the
+            // host document is a short-term fix.  Ultimately, AMP will provide
+            // a better mechanism for this, and this code will have to be
+            // updated to coordinate with their approach.
+            const style = this.getWin().document.querySelector(
+                'style[amp-runtime]') ||
+                this.getWin().document.createElement('style');
+            shadowRoot.appendChild(style.cloneNode(true));
+            // End TODO.
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
