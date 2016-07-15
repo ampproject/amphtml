@@ -191,7 +191,6 @@ export const adPreconnect = {
   ],
   pulsepoint: 'https://tag.contextweb.com',
   amoad: [
-    'https://j.amoad.com',
     'https://d.amoad.com',
     'https://i.amoad.com',
     'https://m.amoad.com',
