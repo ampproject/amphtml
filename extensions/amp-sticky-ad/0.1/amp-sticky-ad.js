@@ -62,7 +62,8 @@ class AmpStickyAd extends AMP.BaseElement {
     // Reschedule layout for ad if layout sticky-ad again.
     if (this.visible_) {
       toggle(this.element, true);
-      this.viewport_.updatePaddingBottom(50);
+      const borderBottom = this.element./*OK*/offsetHeight;
+      this.viewport_.updatePaddingBottom(borderBottom);
       this.updateInViewport(this.ad_, true);
       this.scheduleLayout(this.ad_);
     }
@@ -77,13 +78,12 @@ class AmpStickyAd extends AMP.BaseElement {
 
   /** @override */
   detachedCallback() {
-    this.viewport_.updatePaddingBottom(0);
     this.removeOnScrollListener_();
   }
 
   /** @override */
   collapsedCallback() {
-    this.collapse();
+    this./*OK*/collapse();
     this.vsync_.mutate(() => {
       this.viewport_.updatePaddingBottom(0);
     });
@@ -161,9 +161,9 @@ class AmpStickyAd extends AMP.BaseElement {
    */
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
-      //TODO(zhouyx): Need deregister ad here
       this.visible_ = false;
       removeElement(this.element);
+      this.viewport_.updatePaddingBottom(0);
     });
   }
 }
