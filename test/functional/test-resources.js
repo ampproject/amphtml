@@ -930,8 +930,6 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize.callCount).to.equal(0);
       expect(overflowCallbackSpy.callCount).to.equal(1);
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
       expect(resource1.getPendingChangeSize().height).to.equal(111);
       expect(resource1.getPendingChangeSize().width).to.equal(222);
     });
@@ -1006,8 +1004,6 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize.callCount).to.equal(0);
       expect(overflowCallbackSpy.callCount).to.equal(1);
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
       expect(resource1.getPendingChangeSize().height).to.equal(111);
       expect(resource1.getPendingChangeSize().width).to.equal(222);
     });
@@ -1092,8 +1088,6 @@ describe('Resources changeSize', () => {
     it('should reset pending change size when rescheduling', () => {
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
 
       resources.scheduleChangeSize_(resource1, 112, 223, false);
       expect(resource1.getPendingChangeSize()).to.be.undefined;
@@ -1102,8 +1096,6 @@ describe('Resources changeSize', () => {
     it('should force resize after focus', () => {
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
       expect(resources.requestsChangeSize_.length).to.equal(0);
 
       resources.checkPendingChangeSize_(resource1.element);

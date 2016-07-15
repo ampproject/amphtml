@@ -202,6 +202,7 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.fire();
     }
   }
+<<<<<<< 841d408b230e0bc8ba2219520fc831f4b91271d3
 
   /** @override  */
   overflowCallback(overflown, requestedHeight, requestedWidth) {
@@ -215,4 +216,6 @@ export class AmpAdApiHandler {
           this.is3p_);
     }
   }
+=======
+>>>>>>> change overflowCallback() function for baseElement
 }

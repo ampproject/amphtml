@@ -755,11 +755,6 @@ export class BaseElement {
   /**
    * Called after a overflowCallback is triggered on an element.
    * @param {boolean} unusedOverflown
-   * @param {number|undefined} unusedRequestedHeight
-   * @param {number|undefined} unusedRequestedWidth
    */
-  overflowCallback(
-      unusedOverflown,
-      unusedRequestedHeight,
-      unusedRequestedWidth) {}
+  overflowCallback(unusedOverflown) {}
 };

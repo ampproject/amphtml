@@ -388,14 +388,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (this.apiHandler_) {
-      this.apiHandler_.overflowCallback(
-        overflown, requestedHeight, requestedWidth);
-    }
-  }
-
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.

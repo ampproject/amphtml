@@ -1321,7 +1321,7 @@ function createBaseAmpElementProto(win) {
       }
     }
     this.implementation_.overflowCallback(
-        overflown, requestedHeight, requestedWidth);
+        overflown);
   };
 
   return ElementProto;

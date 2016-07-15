@@ -355,12 +355,4 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     return true;
   }
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (this.apiHandler_) {
-      this.apiHandler_.overflowCallback(
-        overflown, requestedHeight, requestedWidth);
-    }
-  }
 }
