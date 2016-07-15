@@ -64,11 +64,12 @@ function getMode_(win) {
 
   const isLocalDev = !!(location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
-          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
+        location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
-      (!document || !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]'));
+      !!(!document ||
+        document.querySelector('script[src*="/dist/"],script[src*="/base/"]'));
 
   const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
