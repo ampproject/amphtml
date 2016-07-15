@@ -187,6 +187,8 @@ class AmpViewer {
     this.stylesheets_ = [];
     /** @private @const {!Array<!Element>} */
     this.scripts_ = [];
+    /** @private @const {!Array<string>} */
+    this.extensions_ = [];
     /** @private @const {...} */
     this.viewer_ = null;
 
@@ -224,10 +226,12 @@ class AmpViewer {
     log('Shadow root:', this.shadowRoot_);
 
     this.ampReadyPromise_.then(AMP => {
-      const amp = AMP.attachShadowRoot(this.shadowRoot_);
+      const amp = AMP.attachShadowRoot(this.shadowRoot_, this.extensions_);
       this.viewer_ = amp.viewer;
+      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
       this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
           this.getOrigin_(this.win.location.href));
+      */
     });
 
     // Head
@@ -263,6 +267,10 @@ class AmpViewer {
         if (n.hasAttribute('src')) {
           log('- src script: ', n);
           this.scripts_.push(n);
+          const customElement = n.getAttribute('custom-element');
+          if (customElement) {
+            this.extensions_.push(customElement);
+          }
         } else {
           log('- non-src script: ', n);
           this.shadowRoot_.appendChild(this.win.document.importNode(n, true));
@@ -277,6 +285,7 @@ class AmpViewer {
     this.mergeHead_();
 
     // Body
+    doc.body.setAttribute('style', 'position:relative;');
     this.shadowRoot_.appendChild(this.win.document.importNode(doc.body, true));
   }
 

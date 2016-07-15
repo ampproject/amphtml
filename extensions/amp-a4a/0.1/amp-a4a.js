@@ -23,7 +23,7 @@ import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {extensionsFor} from '../../../src/extensions';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
@@ -782,8 +782,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (!metaData.customElementExtensions) {
       return;
     }
-    metaData.forEach(extension => {
-      /*OK*/insertAmpExtensionScript(this.getWin(), extension, true);
+    const extensions = extensionsFor(this.getWin());
+    metaData.forEach(extensionId => {
+      extensions.loadExtension(extensionId);
     });
   }
 }

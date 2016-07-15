@@ -17,7 +17,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
 import {dev} from '../../../src/log';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {extensionsFor} from '../../../src/extensions';
 
 
 /**
@@ -71,7 +71,14 @@ export class AmpAd extends AMP.BaseElement {
       // tag as A4A.  Fall back to the 3p implementation.
       return new AmpAd3PImpl(this.element);
     }
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
+    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
+    // as following:
+    /*
+      const extensions = extensionsFor(this.getWin());
+      return extensions.loadElementClass(extensionTag).then(ctor => {
+        return new ctor(this.element);
+      });
+     */
     return null;
   }
 
@@ -87,13 +94,13 @@ export class AmpAd extends AMP.BaseElement {
     // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
     const type = dev.assert(this.element.getAttribute('type'),
         'Required attribute type');
-    // Note: The insertAmpExtensionScript method will pick the version number.
+    // Note: The loadExtension method will pick the version number.
     // If we ever reach a point at which there are different extensions with
     // different version numbers at play simultaneously, we'll have to make sure
     // that the loader can handle the case.
     const extensionTag = networkImplementationTag(type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
+    extensionsFor(this.getWin()).loadExtension(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }
