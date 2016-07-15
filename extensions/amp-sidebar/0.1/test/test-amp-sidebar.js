@@ -119,6 +119,7 @@ describe('amp-sidebar', () => {
       });
       impl.open_();
       expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.hasAttribute('animate')).to.be.true;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
       expect(sidebarElement.style.display).to.equal('block');
       expect(impl.scheduleLayout.callCount).to.equal(1);
@@ -160,7 +161,7 @@ describe('amp-sidebar', () => {
       impl.close_();
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
-      expect(sidebarElement.style.display).to.equal('none');
+      expect(sidebarElement.style.display).to.equal('block');
       expect(impl.schedulePause.callCount).to.equal(1);
       expect(historyPushSpy.callCount).to.equal(0);
       expect(historyPopSpy.callCount).to.equal(1);
@@ -192,7 +193,7 @@ describe('amp-sidebar', () => {
       impl.toggle_();
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
-      expect(sidebarElement.style.display).to.equal('none');
+      expect(sidebarElement.style.display).to.equal('block');
       expect(impl.schedulePause.callCount).to.equal(1);
     });
   });
@@ -227,7 +228,7 @@ describe('amp-sidebar', () => {
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
       expect(sidebarElement.hasAttribute('open')).to.be.false;
       expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
-      expect(sidebarElement.style.display).to.equal('none');
+      expect(sidebarElement.style.display).to.equal('block');
       expect(impl.schedulePause.callCount).to.equal(1);
     });
   });

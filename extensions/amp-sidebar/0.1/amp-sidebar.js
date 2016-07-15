@@ -23,7 +23,7 @@ import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
 
 /** @const */
-const ANIMATION_TIMEOUT = 223;
+const ANIMATION_TIMEOUT = 233;
 
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';

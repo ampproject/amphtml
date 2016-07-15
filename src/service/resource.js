@@ -439,12 +439,6 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
-
-    // If outside of viewport's x-axis, element is not in viewport.
-    if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right ) {
-      return false;
-    }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
