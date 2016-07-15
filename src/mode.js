@@ -40,7 +40,7 @@ let fullVersion = '';
 
 /**
  * Provides info about the current app.
- * @param {!Window=} win
+ * @param {?Window=} win
  * @return {!ModeDef}
  */
 export function getMode(opt_win) {

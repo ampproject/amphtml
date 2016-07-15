@@ -190,7 +190,7 @@ describe('3p-frame', () => {
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
-    window.AMP_MODE = null;;
+    window.AMP_MODE = {};
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
@@ -270,7 +270,7 @@ describe('3p-frame', () => {
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/').twice();
 
-    window.AMP_MODE = null;
+    window.AMP_MODE = {};
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');
