@@ -52,7 +52,10 @@ export const adPrefetch = {
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
-  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  yieldbot: [
+    'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
+    'https://msg.yldbt.com/js/ybmsg.html',
+  ],
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
@@ -67,6 +70,7 @@ export const adPrefetch = {
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
+  amoad: 'https://j.amoad.com/js/a.js',
 };
 
 /**
@@ -189,6 +193,12 @@ export const adPreconnect = {
     'https://prg.kargo.com',
   ],
   pulsepoint: 'https://tag.contextweb.com',
+  amoad: [
+    'https://d.amoad.com',
+    'https://i.amoad.com',
+    'https://m.amoad.com',
+    'https://v.amoad.com',
+  ],
 };
 
 /**

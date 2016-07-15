@@ -752,9 +752,10 @@ export const ANALYTICS_CONFIG = {
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
-      'parameterPrefix': '?p=431,${contentId},1,' +
-        '${screenWidth}x${screenHeight},${screenColorDepth},' +
-        '${documentReferrer},${timestamp},0,,0&tz=${timezone}' +
+      'parameterPrefix': '?p=432,${contentId},1,' +
+        '${screenWidth}x${screenHeight},${screenColorDepth},1,' +
+        '${timestamp},${documentReferrer},${viewportWidth}x' +
+        '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
       'parameterSuffix': '&pu=${canonicalUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +
