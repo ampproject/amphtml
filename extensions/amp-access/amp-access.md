@@ -224,11 +224,12 @@ Here:
 Here’s another example that shows the disclaimer to the reader about the state of metering:
 ```html
 <section amp-access="views <= maxViews">
-  <template type="amp-mustache">
+  <template amp-access-template type="amp-mustache">
     You are reading article {{views}} out of {{maxViews}}.
   </template>
 </section>
 ```
+
 And here’s an example that shows additional content to the premium subscribers:
 ```html
 <section amp-access="subscriptonType = 'premium'">
