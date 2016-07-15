@@ -27,6 +27,9 @@ const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
+const NATIVE_TOUCH_TIMEOUT = 100;
+
+/** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
 export class AmpSlideScroll extends BaseCarousel {
@@ -92,6 +95,12 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {?number} */
     this.scrollTimeout_ = null;
 
+    /** @private {?number} */
+    this.touchEndTimeout_ = null;
+
+    /** @private {?boolean} */
+    this.hasTouchMoved_ = null;
+
     /**
      * 0 - not in an elastic state.
      * -1 - elastic scrolling (back) to the left of scrollLeft 0.
@@ -102,6 +111,37 @@ export class AmpSlideScroll extends BaseCarousel {
 
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
+
+    if(this.hasNativeSnapPoints_) {
+      this.slidesContainer_.addEventListener(
+          'touchend', this.touchEndHandler_.bind(this));
+
+      this.slidesContainer_.addEventListener(
+          'touchmove', this.touchMoveHandler_.bind(this));
+    }
+  }
+
+  touchMoveHandler_() {
+    this.hasTouchMoved_ = true;
+  }
+
+  touchEndHandler_() {
+    if (this.hasTouchMoved_) {
+      if (this.scrollTimeout_) {
+        timer.cancel(this.scrollTimeout_);
+      }
+      // Timer that detects scroll end and/or end of snap scroll.
+      this.touchEndTimeout_ = timer.delay(() => {
+        const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
+
+        if (this.snappingInProgress_) {
+          return;
+        }
+        this.updateOnScroll_(currentScrollLeft);
+        this.touchEndTimeout_ = null;
+      }, NATIVE_TOUCH_TIMEOUT);
+    }
+    this.hasTouchMoved_ = null;
   }
 
   /** @override */
@@ -174,24 +214,30 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
+
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
+    console.log(this.element.id, 'scrolling at ' + currentScrollLeft);
     if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
-    const timeout =
-        this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
-    // Timer that detects scroll end and/or end of snap scroll.
-    this.scrollTimeout_ = timer.delay(() => {
-      if (this.snappingInProgress_) {
-        return;
-      }
-      if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft);
-      } else {
-        this.customSnap_(currentScrollLeft);
-      }
-    }, timeout);
+    if (!this.touchEndTimeout_) {
+      const timeout =
+          this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+      // Timer that detects scroll end and/or end of snap scroll.
+      this.scrollTimeout_ = timer.delay(() => {
+        console.log(this.element.id, 'scroll Ended at ' + currentScrollLeft);
+
+        if (this.snappingInProgress_) {
+          return;
+        }
+        if (this.hasNativeSnapPoints_) {
+          this.updateOnScroll_(currentScrollLeft);
+        } else {
+          this.customSnap_(currentScrollLeft);
+        }
+      }, timeout);
+    }
     this.previousScrollLeft_ = currentScrollLeft;
   }
 
@@ -406,6 +452,6 @@ export class AmpSlideScroll extends BaseCarousel {
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     return Animation.animate(this.slidesContainer_, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
-    }, 80, 'ease-in-out').thenAlways();
+    }, 80, 'ease-out').thenAlways();
   }
 }
