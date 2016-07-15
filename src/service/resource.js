@@ -441,7 +441,7 @@ export class Resource {
     let distance;
     // If outside of viewport's x-axis, element is not in viewport.
     if (viewportBox.right < layoutBox.left ||
-        viewportBox.left > layoutBox.right ) {
+        viewportBox.left > layoutBox.right) {
       return false;
     }
     if (viewportBox.bottom < layoutBox.top) {
