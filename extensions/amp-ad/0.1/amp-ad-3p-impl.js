@@ -25,6 +25,11 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {
+  listenFor,
+  listenForOnce,
+  postMessage,
+} from '../../../src/iframe-helper';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
@@ -190,6 +195,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.win);
+
+    /** @private @const {function()|null}*/
+    this.renderStartResolve_ = null;
+
+    /** @private @const {promise}*/
+    this.renderStartPromise_ = new Promise((resolve) => {
+      this.renderStartResolve_ = resolve;
+    });
   }
 
   /**
@@ -263,7 +276,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    console.log('ad start to layout');
     if (!this.iframe_) {
+      let renderPromise = new Promise((render) => {
+        if (render) {
+          Promise.resolve();
+        }
+      })
       user.assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
@@ -277,6 +296,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.apiHandler_ = new AmpAdApiHandler(
           this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
+      });
+      listenForOnce(this.iframe_, 'render-start', () => {
+        console.log('ad start to render');
       });
     }
     return loadPromise(this.iframe_);
