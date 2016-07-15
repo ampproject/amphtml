@@ -100,8 +100,6 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     for (String arg : args) {
       if (arg.contains("--define=TYPECHECK_ONLY=true")) {
         runner.typecheck_only = true;
-      } else if (arg.contains("--define=FORTESTING=true")) {
-        runner.is_production_env = false;
       } else if (arg.contains("--define=PSEUDO_NAMES=true")) {
         runner.pseudo_names = true;
       }
