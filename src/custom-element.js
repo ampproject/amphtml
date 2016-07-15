@@ -106,13 +106,18 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
-      tryUpgradeElement_(element, toClass);
+      tryUpgradeElementNoInline(element, toClass);
     }
   }
 }
 
-/** @private */
-function tryUpgradeElement_(element, toClass) {
+/**
+ * This method should not be inlined to prevent TryCatch deoptimization.
+ * NoInline keyword at the end of function name also prevents Closure compiler
+ * from inlining the function.
+ * @private
+ */
+function tryUpgradeElementNoInline(element, toClass) {
   try {
     element.upgrade(toClass);
   } catch (e) {

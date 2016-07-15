@@ -27,7 +27,7 @@
  * @return {?string}
  */
 export function getCookie(win, name) {
-  const cookieString = tryGetDocumentCookie_(win);
+  const cookieString = tryGetDocumentCookieNoInline(win);
   if (!cookieString) {
     return null;
   }
@@ -45,8 +45,13 @@ export function getCookie(win, name) {
   return null;
 }
 
-/** @private */
-function tryGetDocumentCookie_(win) {
+/**
+ * This method should not be inlined to prevent TryCatch deoptimization.
+ * NoInline keyword at the end of function name also prevents Closure compiler
+ * from inlining the function.
+ * @private
+ */
+function tryGetDocumentCookieNoInline(win) {
   try {
     return win.document.cookie;
   } catch (e) {

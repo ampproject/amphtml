@@ -266,7 +266,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!JSONType}
    */
   mergeConfigs_() {
-    const inlineConfig = this.getInlineConfig_();
+    const inlineConfig = this.getInlineConfigNoInline();
     // Initialize config with analytics related vars.
     const config = {
       'vars': {
@@ -285,7 +285,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @private */
-  getInlineConfig_() {
+  getInlineConfigNoInline() {
     let inlineConfig = {};
     try {
       const children = this.element.children;

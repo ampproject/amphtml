@@ -112,7 +112,7 @@ export function tryParseJson(json, opt_onFailed) {
     return JSON.parse(json);
   } catch (e) {
     if (opt_onFailed) {
-      onFailed(e);
+      opt_onFailed(e);
     }
     return undefined;
   }
