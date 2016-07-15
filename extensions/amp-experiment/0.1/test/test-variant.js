@@ -119,9 +119,9 @@ describe('allocateVariant', () => {
     }).to.not.throw();
   });
 
-  it('without CID scope, succeed with a variant allocated', () => {
+  it('should work in non-sticky mode', () => {
     return expect(allocateVariant(fakeWin, {
-      cidScope: null,
+      sticky: false,
       variants: {
         '-Variant_1': 56.1,
         '-Variant_2': 23.3,
@@ -131,7 +131,7 @@ describe('allocateVariant', () => {
 
   it('should allocate variant in name order', () => {
     return expect(allocateVariant(fakeWin, {
-      cidScope: null,
+      sticky: false,
       variants: {
         '-Variant_2': 50,
         '-Variant_1': 50,
@@ -141,7 +141,7 @@ describe('allocateVariant', () => {
 
   it('can have no variant allocated if variants don\'t add up to 100', () => {
     return expect(allocateVariant(fakeWin, {
-      cidScope: null,
+      sticky: false,
       variants: {
         '-Variant_1': 2.1,
         '-Variant_2': 23.3,
@@ -150,7 +150,7 @@ describe('allocateVariant', () => {
     })).to.eventually.equal(null);
   });
 
-  it('should work with default CID scope', () => {
+  it('should work in sticky mode with default CID scope', () => {
     getCidStub.withArgs({
       scope: 'amp-experiment',
       createCookieIfNotPresent: true,
@@ -164,7 +164,7 @@ describe('allocateVariant', () => {
     })).to.eventually.equal('-Variant_1');
   });
 
-  it('should work with custom CID scope', () => {
+  it('should work in sticky mode with custom CID scope', () => {
     getCidStub.withArgs({
       scope: 'custom-scope',
       createCookieIfNotPresent: true,

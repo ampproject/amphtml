@@ -24,7 +24,7 @@ import {timer} from '../../../src/timer';
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
 /** @const {number} */
-const NATIVE_SNAP_TIMEOUT = 40;
+const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;

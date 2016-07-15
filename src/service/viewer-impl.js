@@ -672,7 +672,7 @@ export class Viewer {
   /**
    * Whether the viewer has been whitelisted for more sensitive operations
    * such as customizing referrer.
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
@@ -789,10 +789,15 @@ export class Viewer {
 
   /**
    * Retrieves the Base CID from the viewer
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    */
   getBaseCid() {
-    return this.sendMessage('cid', undefined, true);
+    return this.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        return undefined;
+      }
+      return this.sendMessage('cid', undefined, true);
+    });
   }
 
   /**
