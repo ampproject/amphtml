@@ -1077,5 +1077,85 @@ describe('Resource renderOutsideViewport', () => {
         expect(resource.renderOutsideViewport()).to.equal(false);
       });
     });
+
+    describe('when element is on the left of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is on the right of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is fully in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(0, 0, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+    });
+
+    describe('when element is partially in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-50, -50, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+    });
   });
 });
