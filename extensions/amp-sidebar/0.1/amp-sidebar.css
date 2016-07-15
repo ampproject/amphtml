@@ -26,14 +26,6 @@ amp-sidebar {
   overflow-y: auto !important;
   z-index: 9999 !important;
   -webkit-overflow-scrolling: touch;
-  /*
-   * Override layout="nodisplay".
-   * We use translateX and aria-hidden for a11y to hide the sidebar and then
-   * simply translate it back as a separate composition layer.
-   * Note that since sidebar takes owenership of its children, this does
-   * not cause layout for children until sidebar is opened.
-   */
-  display: block !important;
   will-change: transform;
 }
 
@@ -51,7 +43,8 @@ amp-sidebar[side][open] {
   transform: translateX(0) !important;
 }
 
-amp-sidebar[animate] {
+amp-sidebar[side] {
+  /* Use same transition as PWA App-Shell https://goo.gl/AGFioO */
   transition: transform 233ms cubic-bezier(0,0,.21,1);
 }
 
