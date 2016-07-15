@@ -133,7 +133,7 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
       animation: 'none',
     });
 
-    // TODO(erwinm): Remove this when safari technology preview has merged
+    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
     // the fix for https://github.com/ampproject/amphtml/issues/4047
     // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
     if (platform.isSafari()) {
