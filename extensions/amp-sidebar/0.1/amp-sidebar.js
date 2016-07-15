@@ -23,7 +23,7 @@ import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
 
 /** @const */
-const ANIMATION_TIMEOUT = 550;
+const ANIMATION_TIMEOUT = 223;
 
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
@@ -32,6 +32,11 @@ export class AmpSidebar extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NOLAYOUT;
+  }
+
+  /** @override */
+  renderOutsideViewport() {
+    return false;
   }
 
   /** @override */
@@ -65,6 +70,13 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.bottomBarCompensated_ = false;
+
+    /** @private {!Array<!Element>} */
+    this.cells_ = this.getRealChildren();
+
+    this.cells_.forEach(cell => {
+      this.setAsOwner(cell);
+    });
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -111,7 +123,6 @@ export class AmpSidebar extends AMP.BaseElement {
     this.open_();
   }
 
-
   /**
    * Toggles the open/close state of the sidebar.
    * @private
@@ -129,26 +140,21 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
-    this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
-      setStyles(this.element, {
-        'display': 'block',
-      });
+      this.element.setAttribute('open', '');
+      this.element.setAttribute('animate', '');
+      this.element.setAttribute('aria-hidden', 'false');
+      timer.delay(() => {
+        this.scheduleLayout(this.cells_);
+      }, ANIMATION_TIMEOUT);
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
         this.compensateIosBottombar_();
       }
       this.element./*OK*/scrollTop = 1;
-      // Start animation in a separate vsync due to display:block; set above.
-      this.vsync_.mutate(() => {
-        this.element.setAttribute('open', '');
-        this.element.setAttribute('aria-hidden', 'false');
-        timer.delay(() => {
-          this.scheduleLayout(this.getRealChildren());
-        }, ANIMATION_TIMEOUT);
-      });
     });
+    this.viewport_.disableTouchZoom();
     this.getHistory_().push(this.close_.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
@@ -161,16 +167,13 @@ export class AmpSidebar extends AMP.BaseElement {
   close_() {
     this.viewport_.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => {
-      this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
+      this.closeMask_();
       timer.delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'none',
-            });
             this.schedulePause(this.getRealChildren());
           });
         }
