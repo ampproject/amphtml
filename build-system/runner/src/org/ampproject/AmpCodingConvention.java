@@ -25,7 +25,6 @@ import com.google.javascript.jscomp.newtypes.JSType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EmptyStackException;
 
 
 /**

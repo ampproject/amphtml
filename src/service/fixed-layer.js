@@ -445,8 +445,7 @@ export class FixedLayer {
       }
     } else if (oldFixed) {
       // Reset `top` which was assigned above.
-      if (element.style.top) 
-      {
+      if (element.style.top) {
         element.style.top = '';
       }
 
