@@ -57,8 +57,8 @@ import {waitForBody} from './dom';
 /** @const @private {string} */
 const TAG = 'runtime';
 
-/** @type {!Array} */
-const elementsForTesting = [];
+/** @type {!Object} */
+const elementsForTesting = {};
 
 
 /**
@@ -345,11 +345,11 @@ function prepareAndRegisterElementShadowMode(global, extensions,
 function registerElementClass(global, name, implementationClass, opt_css) {
   registerExtendedElement(global, name, implementationClass);
   if (getMode().test) {
-    elementsForTesting.push({
+    elementsForTesting[name] = {
       name,
       implementationClass,
       css: opt_css,
-    });
+    };
   }
   // Resolve this extension's Service Promise.
   getService(global, name, emptyService);
@@ -454,8 +454,8 @@ function emptyService() {
  * @param {!Window} win
  */
 export function registerForUnitTest(win) {
-  for (let i = 0; i < elementsForTesting.length; i++) {
-    const element = elementsForTesting[i];
+  for (const key in elementsForTesting) {
+    const element = elementsForTesting[key];
     if (element.css) {
       installStyles(win.document, element.css, () => {
         registerElement(win, element.name, element.implementationClass);
