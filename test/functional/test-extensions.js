@@ -224,7 +224,7 @@ describe('Extensions', () => {
       }, {});
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
+      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
@@ -233,7 +233,7 @@ describe('Extensions', () => {
         // Should survive errors in one factory.
         expect(factory3.callCount).to.equal(1);
         expect(factory3.args[0][0]).to.equal(ampdoc);
-      })
+      });
     });
 
     it('should load extension class via load extension', () => {

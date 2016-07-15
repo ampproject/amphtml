@@ -478,6 +478,7 @@ var forbiddenTermsSrcInclusive = {
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
+      'src/element-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',

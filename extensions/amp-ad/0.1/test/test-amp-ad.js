@@ -19,9 +19,6 @@ import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {childElement} from '../../../../src/dom';
-import {
-  resetExtensionScriptInsertedOrPresentForTesting,
-} from '../../../../src/insert-extension';
 import * as sinon from 'sinon';
 
 describe('A4A loader', () => {
@@ -37,8 +34,8 @@ describe('A4A loader', () => {
       delete a4aRegistry[k];
     });
   });
+
   afterEach(() => {
-    resetExtensionScriptInsertedOrPresentForTesting();
     Object.keys(registryBackup).forEach(k => {
       a4aRegistry[k] = registryBackup[k];
     });

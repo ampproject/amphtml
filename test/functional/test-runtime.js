@@ -17,7 +17,6 @@
 import {AmpDocShadow, AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Observable} from '../../src/observable';
 import {adopt, adoptShadowMode} from '../../src/runtime';
-import {ampdocFor} from '../../src/ampdoc';
 import {dev} from '../../src/log';
 import {
   getServiceForDoc,
@@ -32,7 +31,8 @@ import * as styles from '../../src/styles';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
-describe.only('runtime', () => {
+
+describe('runtime', () => {
 
   let win;
   let sandbox;

@@ -110,16 +110,16 @@ export function installBuiltins(global) {
  * @param {!{
  *     registerElement: function(
  *         !Window,
- *         !./service/extensions-impl/Extensions,
+ *         !./service/extensions-impl.Extensions,
  *         string, !Function, (string|undefined)),
  *     registerServiceForDoc: function(
  *         !Window,
- *         !./service/extensions-impl/Extensions,
+ *         !./service/extensions-impl.Extensions,
  *         string,
- *         function(new:!Object, !./service/ampdoc-impl.AmpDoc),
- *         function(!./service/ampdoc-impl.AmpDoc):!Object),
+ *         (function(new:Object, !./service/ampdoc-impl.AmpDoc)|undefined),
+ *         (function(!./service/ampdoc-impl.AmpDoc):!Object|undefined)),
  *   }} opts
- * @param {function(!Window, !./service/extensions-impl/Extensions)} callback
+ * @param {function(!Window, !./service/extensions-impl.Extensions)} callback
  */
 function adoptShared(global, opts, callback) {
 
@@ -167,8 +167,8 @@ function adoptShared(global, opts, callback) {
   /**
    * Registers an ampdoc service.
    * @param {string} name
-   * @param {function(new:!Object, !./service/ampdoc-impl.AmpDoc)} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} opt_factory
+   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -295,7 +295,7 @@ export function adoptShadowMode(global) {
 /**
  * Registers an extended element and installs its styles in a single-doc mode.
  * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
  * @param {!Function} implementationClass
  * @param {string=} opt_css
@@ -316,7 +316,7 @@ function prepareAndRegisterElement(global, extensions,
 /**
  * Registers an extended element and installs its styles in a shodow-doc mode.
  * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
  * @param {!Function} implementationClass
  * @param {string=} opt_css
@@ -359,10 +359,10 @@ function registerElementClass(global, name, implementationClass, opt_css) {
 /**
  * Registers an ampdoc service in a single-doc mode.
  * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:!Object, !./service/ampdoc-impl.AmpDoc)} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
@@ -375,10 +375,10 @@ function prepareAndRegisterServiceForDoc(global, extensions,
 /**
  * Registers an ampdoc service in a shadow-doc mode.
  * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {string} name
- * @param {function(new:!Object, !./service/ampdoc-impl.AmpDoc)} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function prepareAndRegisterServiceForDocShadowMode(global, extensions,
     name, opt_ctor, opt_factory) {
@@ -393,8 +393,8 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * modes.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} name
- * @param {function(new:!Object, !./service/ampdoc-impl.AmpDoc)} opt_ctor
- * @param {function(!./service/ampdoc-impl.AmpDoc):!Object} opt_factory
+ * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
+ * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
   dev.assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
@@ -410,7 +410,7 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
 /**
  * Attaches the shadow root and configures ampdoc for it.
  * @param {!Window} global
- * @param {!./service/extensions-impl/Extensions} extensions
+ * @param {!./service/extensions-impl.Extensions} extensions
  * @param {!ShadowRoot} shadowRoot
  * @param {!Array<string>} extensionIds
  */
