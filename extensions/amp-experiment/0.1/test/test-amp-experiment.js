@@ -25,12 +25,14 @@ describe('amp-experiment', () => {
 
   const config = {
     'experiment-1': {
+      grouping: 'xyz',
       variants: {
         'variant-a': 50,
         'variant-b': 50,
       },
     },
     'experiment-2': {
+      grouping: 'xyz',
       variants: {
         'variant-c': 50,
         'variant-d': 50,
@@ -120,6 +122,21 @@ describe('amp-experiment', () => {
     }).to.throw();
   });
 
+  it('should throw if there is invalid experiment name', () => {
+    const badConfig = {
+      'invalid_name!': {
+        variants: {
+          'variant-a': 50,
+          'variant-b': 50,
+        },
+      },
+    };
+    expect(() => {
+      addConfigElement('script', 'application/json', JSON.stringify(badConfig));
+      experiment.buildCallback();
+    }).to.throw();
+  });
+
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
@@ -127,8 +144,11 @@ describe('amp-experiment', () => {
         win, config['experiment-1']).returns(Promise.resolve('variant-a'));
     stub.withArgs(
         win, config['experiment-2']).returns(Promise.resolve('variant-d'));
+    // experiment-3 doesn't have grouping specified, fallback to experiment name
+    const experiment3config =
+        Object.assign(config['experiment-3'], {grouping: 'experiment-3'});
     stub.withArgs(
-        win, config['experiment-3']).returns(Promise.resolve(null));
+        win, experiment3config).returns(Promise.resolve(null));
 
     experiment.buildCallback();
     return variantForOrNull(win).then(variants => {

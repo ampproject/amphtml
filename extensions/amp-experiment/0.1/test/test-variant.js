@@ -69,7 +69,7 @@ describe('allocateVariant', () => {
           'invalid_char_%_in_name': 1,
         },
       });
-    }).to.throw(/Invalid variant name/);
+    }).to.throw(/Invalid name/);
 
     expect(() => {
       allocateVariant(fakeWin, {
@@ -103,6 +103,15 @@ describe('allocateVariant', () => {
         },
       });
     }).to.throw(/Invalid percentage/);
+
+    expect(() => {
+      allocateVariant(fakeWin, {
+        grouping: 'invalid_name!',
+        variants: {
+          'variant_1': 50,
+        },
+      });
+    }).to.throw(/Invalid name/);
   });
 
   it('should work around float rounding error', () => {
@@ -155,8 +164,9 @@ describe('allocateVariant', () => {
       scope: 'amp-experiment',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    uniformStub.withArgs('xyz:123abc').returns(Promise.resolve(0.4));
     return expect(allocateVariant(fakeWin, {
+      grouping: 'xyz',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -169,9 +179,10 @@ describe('allocateVariant', () => {
       scope: 'custom-scope',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    uniformStub.withArgs('xyz:123abc').returns(Promise.resolve(0.4));
     return expect(allocateVariant(fakeWin, {
       cidScope: 'custom-scope',
+      grouping: 'xyz',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -191,9 +202,10 @@ describe('allocateVariant', () => {
       scope: 'amp-experiment',
       createCookieIfNotPresent: true,
     }).returns(Promise.resolve('123abc'));
-    uniformStub.withArgs('123abc').returns(Promise.resolve(0.4));
+    uniformStub.withArgs('xyz:123abc').returns(Promise.resolve(0.4));
     return expect(allocateVariant(fakeWin, {
       consentNotificationId: 'notif-1',
+      grouping: 'xyz',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -207,6 +219,7 @@ describe('allocateVariant', () => {
 
     return expect(allocateVariant(fakeWin, {
       consentNotificationId: 'notif-1',
+      grouping: 'xyz',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
@@ -226,6 +239,7 @@ describe('allocateVariant', () => {
     uniformStub.returns(Promise.resolve(0.4));
     return expect(allocateVariant(fakeWin, {
       consentNotificationId: 'notif-1',
+      grouping: 'xyz',
       variants: {
         '-Variant_1': 50,
         '-Variant_2': 50,
