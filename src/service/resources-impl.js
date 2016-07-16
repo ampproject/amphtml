@@ -402,6 +402,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
@@ -1416,7 +1417,6 @@ export class Resources {
     const hidden = VisibilityState.HIDDEN;
     const paused = VisibilityState.PAUSED;
     const inactive = VisibilityState.INACTIVE;
-
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();

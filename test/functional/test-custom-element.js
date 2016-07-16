@@ -593,12 +593,8 @@ describe('CustomElement', () => {
     element.attachedCallback();
 
     resourcesMock.expects('remove').withExactArgs(element).once();
-    const viewportCallbackSpy =
-        sandbox.spy(element.implementation_, 'viewportCallback');
     element.detachedCallback();
 
-    expect(viewportCallbackSpy).to.have.been.called;
-    expect(element.isInViewport_).to.equal(false);
     expect(element.everAttached).to.equal(true);
     expect(element.layout_).to.equal(Layout.FILL);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
