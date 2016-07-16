@@ -83,9 +83,7 @@ function validateConfig(config) {
   const variants = config.variants;
   user.assert(isObject(variants) && Object.keys(variants).length > 0,
     'Missing experiment variants config.');
-  if (config.sticky !== false) {
-    assertName(config.grouping);
-  }
+  assertName(config.grouping);
   let totalPercentage = 0;
   for (const variantName in variants) {
     if (variants.hasOwnProperty(variantName)) {
