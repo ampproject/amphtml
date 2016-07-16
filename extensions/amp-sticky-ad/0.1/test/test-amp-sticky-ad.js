@@ -320,7 +320,6 @@ describe('amp-sticky-ad', () => {
       const iframe = obj.iframe;
       const stickyAdElement = obj.ampStickyAd;
       const impl = stickyAdElement.implementation_;
-      const collapseSpy = sandbox.spy(impl, 'collapse');
 
       impl.viewport_.getScrollTop = function() {
         return 100;
@@ -349,7 +348,6 @@ describe('amp-sticky-ad', () => {
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');
-      expect(collapseSpy).to.have.been.called;
       expect(stickyAdElement.style.display).to.equal('none');
     });
   });
