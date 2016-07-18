@@ -39,6 +39,12 @@ const version = '$internalRuntimeVersion$';
 let fullVersion = '';
 
 /**
+ * A #querySelector query to see if we have any scripts with development paths.
+ * @type {string}
+ */
+const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
+
+/**
  * Provides info about the current app.
  * @param {?Window=} opt_win
  * @return {!ModeDef}
@@ -68,8 +74,7 @@ function getMode_(win) {
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
-      !!(!document ||
-        document.querySelector('script[src*="/dist/"],script[src*="/base/"]'));
+      (!win.document || !!win.document.querySelector(developmentScriptQuery));
 
   const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
