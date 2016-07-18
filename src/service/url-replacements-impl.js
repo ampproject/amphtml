@@ -27,6 +27,7 @@ import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {timer} from '../timer';
 
 
 /** @private @const {string} */
@@ -83,6 +84,7 @@ export class UrlReplacements {
    */
   initialize_() {
     this.initialized_ = true;
+
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
       return String(Math.random());
@@ -378,6 +380,34 @@ export class UrlReplacements {
 
     // returns the AMP version number
     this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
+  }
+
+  /**
+   * Registers click listener on documentElement that will expand the href of
+   * clicked anchors that will cause navigation (preventDefault has not been
+   * called) with additional support for CLICK_X & CLICK_Y based on clientX &
+   * clientY. If the target is within a shadowRoot, the x/y location is offset
+   * by the shadowRoot host's offset.
+   * @private
+   */
+  registerClickListener_() {
+    if (!this.win_.document) {
+      dev.warn('no win.document?!  testing?');
+      return;
+    }
+    listen(this.win_.document, 'click', evt => {
+      const href = this.getExpandAnchorHref_(evt);
+      if (href) {
+        const originalHref = evt.target.getAttribute('href');
+        if (originalHref != href) {
+          // Store original href to handle case where navigation is prevented
+          // by later executing click listener.  We want to ensure that later
+          // click stores freshest value.
+          evt.target.setAttribute('href', href);
+          evt.target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, originalHref);
+        }
+      }
+    });
   }
 
   /**
@@ -714,7 +744,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
 
   /**
    * Determines the offset of an element's shadowRoot host if it has one.
-   * @param {EventTarget} target
+   * @param {EventTarget} element
    * @return {!{top: number, left: number}}
    * @private
    */
@@ -766,36 +796,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
         return evt.clientY - shadowHostOffset.top;
       }).bind(this),
     };
-
     return this.expandSync(href, vars);
-  }
-
-  /**
-   * Registers click listener on documentElement that will expand the href of
-   * clicked anchors that will cause navigation (preventDefault has not been
-   * called) with additional support for CLICK_X & CLICK_Y based on clientX &
-   * clientY. If the target is within a shadowRoot, the x/y location is offset
-   * by the shadowRoot host's offset.
-   * @private
-   */
-  registerClickListener_() {
-    if (!this.win_.document) {
-      dev.warn('no win.document?!  testing?');
-      return;
-    }
-    listen(this.win_.document, 'click', evt => {
-      const href = this.getExpandAnchorHref_(evt);
-      if (href) {
-        const originalHref = evt.target.getAttribute('href');
-        if (originalHref != href) {
-          // Store original href to handle case where navigation is prevented
-          // by later executing click listener.  We want to ensure that later
-          // click stores freshest value.
-          evt.target.setAttribute('href', href);
-          evt.target.setAttribute('data-orig-href', originalHref);
-        }
-      }
-    });
   }
 }
 

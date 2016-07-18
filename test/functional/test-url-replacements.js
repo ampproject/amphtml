@@ -26,7 +26,7 @@ import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
-  installUrlReplacementsService,
+  installUrlReplacementsService, getExpandAnchorHref,
 } from '../../src/service/url-replacements-impl';
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
@@ -89,6 +89,12 @@ describe('UrlReplacements', () => {
   function expandWithVariant(url) {
     return getReplacements(false, false, true)
         .then(replacements => replacements.expand(url));
+  }
+
+  function expandClickEvent(evt, withCid, withActivity) {
+    return getReplacements(withCid, withActivity).then(replacements => {
+      return replacements.getExpandAnchorHref_(evt);
+    });
   }
 
   function getFakeWindow() {
@@ -814,7 +820,7 @@ describe('UrlReplacements', () => {
       return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
         expect(res).to.match(/a=;/);
         expect(userErrorStub.callCount).to.equal(1);
-      });
+      }); 
     });
   });
 });
