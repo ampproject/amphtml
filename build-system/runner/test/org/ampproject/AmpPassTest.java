@@ -190,6 +190,48 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
+  public void testGetModeWinTestPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true } }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode(win).test) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true }; }",
+             "var $mode = { getMode: getMode };",
+             "  if (false) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
+  public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false } }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode(win).minified) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false }; }",
+             "var $mode = { getMode: getMode };",
+             "  if (true) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
   public void testGetModePreserve() throws Exception {
     test(
         LINE_JOINER.join(

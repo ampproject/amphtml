@@ -17,7 +17,6 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platform} from '../../src/platform';
-import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -218,12 +217,11 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
     sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    setModeForTesting({
+    windowApi.AMP_MODE = {
       localDev: false,
       development: false,
-    });
+    };
     const viewportType = new Viewer(windowApi).getViewportType();
-    setModeForTesting(null);
     expect(viewportType).to.equal('natural');
   });
 
