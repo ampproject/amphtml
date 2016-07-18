@@ -16,6 +16,8 @@
 
 import {
   fromClass,
+  getExistingServiceForWindow,
+  getExistingServiceForDoc,
   getService,
   getServicePromise,
   getServiceForDoc,
@@ -95,6 +97,19 @@ describe('service', () => {
       expect(factory.callCount).to.equal(1);
     });
 
+    it('should return the service when it exists', () => {
+      const c1 = getService(window, 'c', factory);
+      const c2 = getExistingServiceForWindow(window, 'c');
+      expect(c1).to.equal(c2);
+    });
+
+    it('should throw before creation', () => {
+      getService(window, 'another service to avoid NPE', () => {});
+      expect(() => {
+        getExistingServiceForWindow(window, 'c');
+      }).to.throw(/Window service does not exist c/);
+    });
+
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getService(window, 'not-present');
@@ -160,7 +175,9 @@ describe('service', () => {
 
       const b1 = getServiceForDoc(node, 'b', factory);
       const b2 = getServiceForDoc(node, 'b', factory);
+      const b3 = getExistingServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
+      expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
       expect(factory.callCount).to.equal(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
@@ -173,7 +190,9 @@ describe('service', () => {
 
       const a1 = getServiceForDoc(ampdoc, 'a', factory);
       const a2 = getServiceForDoc(ampdoc, 'a', factory);
+      const a3 = getExistingServiceForDoc(ampdoc, 'a', factory);
       expect(a1).to.equal(a2);
+      expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
       expect(factory.callCount).to.equal(1);
       expect(factory.args[0][0]).to.equal(ampdoc);

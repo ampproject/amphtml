@@ -17,6 +17,7 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 import {dev} from './log';
+import {getMode} from './mode';
 
 /**
  * Holds info about a service.
@@ -30,6 +31,38 @@ import {dev} from './log';
  * }}
  */
 let ServiceHolderDef;
+
+/**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
+ * @param {!Window} win
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForWindow(win, id) {
+  if (getMode().localDev) {
+    dev.assert(
+       win.services && win.services[id] && win.services[id].obj,
+        'Window service does not exist %s', id);
+  }
+  return win.services[id].obj;
+}
+
+/**
+ * Returns a service with the given id. Assumes that it has been constructed
+ * already.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!Object} The service.
+ */
+export function getExistingServiceForDoc(nodeOrDoc, id) {
+  if (getMode().localDev) {
+    const holder = getAmpdocServiceHolder(nodeOrDoc);
+    dev.assert(
+       holder.services && holder.services[id] &&
+       holder.services[id].obj,
+        'AmpDoc service does not exist %s', id);
+  }
+  return getAmpdocServiceHolder(nodeOrDoc).services[id].obj;
+}
 
 /**
  * Returns a service for the given id and window (a per-window singleton).
@@ -102,7 +135,7 @@ export function getServicePromiseOrNull(win, id) {
 export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServiceInternal(
-      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
       opt_factory);
@@ -120,7 +153,7 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
 export function fromClassForDoc(nodeOrDoc, id, constructor) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServiceInternal(
-      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
       undefined,
@@ -136,9 +169,8 @@ export function fromClassForDoc(nodeOrDoc, id, constructor) {
  * @return {!Promise<*>}
  */
 export function getServicePromiseForDoc(nodeOrDoc, id) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseInternal(
-      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      getAmpdocServiceHolder(nodeOrDoc),
       id);
 }
 
@@ -150,9 +182,8 @@ export function getServicePromiseForDoc(nodeOrDoc, id) {
  * @return {?Promise<*>}
  */
 export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
-  const ampdoc = getAmpdoc(nodeOrDoc);
   return getServicePromiseOrNullInternal(
-      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      getAmpdocServiceHolder(nodeOrDoc),
       id);
 }
 
@@ -166,6 +197,15 @@ function getAmpdoc(nodeOrDoc) {
         nodeOrDoc);
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
+}
+
+/**
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @return {!./service/ampdoc-impl.AmpDoc|!Window}
+ */
+function getAmpdocServiceHolder(nodeOrDoc) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc;
 }
 
 /**
