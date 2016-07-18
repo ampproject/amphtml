@@ -450,8 +450,23 @@ export class Extensions {
 
 
 /**
+ * Calculate the base url for any scripts.
+ * @param {!Location} location The window's location
+ * @param {boolean=} isLocalDev
+ * @param {boolean=} isTest
+ * @return {string}
+ */
+export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
+  if (isLocalDev) {
+    if (isTest || isMax(location) || isMin(location)) {
+      return location.protocol + '//' + location.host + ':' location.port;
+    }
+  }
+  return urls.cdn;
+}
+
+/**
  * Calculate script url for amp-ad.
- * @visibleForTesting
  * @param {!Location} location The window's location
  * @param {string} extensionId
  * @param {string} version
@@ -462,22 +477,37 @@ export class Extensions {
  */
 export function calculateExtensionScriptUrl(location, extensionId, version,
     isLocalDev, isTest, isUsingCompiledJs) {
-  const path = location.pathname;
-  const base = location.protocol + '//' + location.host + ':' location.port;
+  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
   if (isLocalDev) {
-    if ((isTest && !isUsingCompiledJs)
-        || path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
-      return `${base}/dist/v0/${extensionId}-0.1.max.js`;
+    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
+      return `${base}/v0/${extensionId}-0.1.max.js`;
     }
-    if ((isTest && isUsingCompiledJs)
-        || path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
-      return `${base}/dist/v0/${extensionId}-0.1.js`;
-    }
-    return `${urls.cdn}/v0/${extensionId}-0.1.js`;
+    return `${base}/v0/${extensionId}-0.1.js`;
   }
   const folderPath = version == '$internalRuntimeVersion$' ?
-      '' : `rtv/${version}/`;
-  return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
+      'v0' : `rtv/${version}/v0`;
+  return `${base}/${folderPath}/${extensionId}-0.1.js`;
+}
+
+
+/**
+ * Is this path to a max (unminified) version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMax(location) {
+  const path = location.pathname;
+  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
+}
+
+/**
+ * Is this path to a minified version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMax(location) {
+  const path = location.pathname;
+  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
 
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {calculateScriptBase} from '../insert-extension';
+import {calculateScriptBaseUrl} from '../service/extensions-impl';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 
@@ -27,7 +27,7 @@ const TAG = 'cache-service-worker';
 export function installCacheServiceWorker(win) {
   if (isExperimentOn(win, TAG) && 'serviceWorker' in navigator) {
     // TODO Switch this to `sw.js` after testing.
-    const url = `${calculateScriptBase(win)}/sw.max.js`;
+    const url = `${calculateScriptBaseUrl(win)}/sw.max.js`;
     navigator.serviceWorker.register(url).then(registration => {
       dev.info(TAG, 'ServiceWorker registration successful with scope: ', registration.scope);
     }).catch(err => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {calculateExtensionScriptUrl} from '../insert-extension';
+import {calculateExtensionScriptUrl} from '../service/extensions-impl';
 
 /**
  * Import the "core" entry point for the AMP CDN Service Worker. This shell
