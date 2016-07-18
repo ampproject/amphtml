@@ -453,6 +453,7 @@ export class Resources {
   /**
    * Invokes `unload` on the elements' resource which in turn will invoke
    * the `documentBecameInactive` callback on the custom element.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -462,6 +463,22 @@ export class Resources {
 
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.pause();
+    });
+  }
+
+  /**
+   * Invokes `resume` on the elements' resource which in turn will invoke
+   * `resumeCallback` only on paused custom elements.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleResume(parentElement, subElements) {
+    const parentResource = Resource.forElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.resume();
     });
   }
 
