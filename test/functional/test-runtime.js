@@ -32,7 +32,7 @@ import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
-describe('runtime', () => {
+describe.only('runtime', () => {
 
   let win;
   let sandbox;
@@ -264,8 +264,8 @@ describe('runtime', () => {
 
       expect(win.AMP.viewer).to.be.a('object');
       expect(win.AMP.viewport).to.be.a('object');
-      // Single-doc mode does not create `attachShadowRoot`.
-      expect(win.AMP.attachShadowRoot).to.not.exist;
+      // Single-doc mode does not create `attachShadowDoc`.
+      expect(win.AMP.attachShadowDoc).to.not.exist;
     });
 
     it('should register element without CSS', () => {
@@ -403,7 +403,7 @@ describe('runtime', () => {
       expect(win.AMP.setTickFunction).to.be.a('function');
       expect(win.AMP.win).to.equal(win);
 
-      expect(win.AMP.attachShadowRoot).to.be.a('function');
+      expect(win.AMP.attachShadowDoc).to.be.a('function');
 
       expect(win.AMP.viewer).to.not.exist;
       expect(win.AMP.viewport).to.not.exist;
@@ -509,24 +509,53 @@ describe('runtime', () => {
       extHolder.docFactories[0](ampdoc);
       expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
     });
+  });
 
-    it('should attachShadowRoot', () => {
-      class Service1 {}
-      win.AMP.push({
-        n: 'amp-ext',
-        f: amp => {
-          amp.registerServiceForDoc('service1', Service1);
-        },
-      });
+  describe('attachShadowDoc', () => {
+    const docUrl = 'https://example.org/doc1';
 
-      const shadowRoot = document.createElement('div');
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
+    let clock;
+    let extensions;
+    let extensionsMock;
+    let importDoc;
+    let hostElement;
+    let ampdoc;
+
+    beforeEach(() => {
+      clock = sandbox.useFakeTimers();
+      adoptShadowMode(win);
+      win.setTimeout = window.setTimeout;
+      extensions = ext.installExtensionsService(win);
+      extensionsMock = sandbox.mock(extensions);
+      hostElement = document.createElement('div');
+      importDoc = document.createDocumentFragment();
+      importDoc.head = document.createElement('dochead');
+      importDoc.body = document.createElement('docbody');
+      importDoc.body.appendChild(document.createElement('child'));
+      ampdoc = new AmpDocShadow(win, document.createElement('div'));
+
       ampdocServiceMock.expects('getAmpDoc')
-          .withExactArgs(shadowRoot)
+          .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
           .returns(ampdoc)
-          .atLeast(1);
-      const ret = win.AMP.attachShadowRoot(shadowRoot, ['amp-ext']);
+          .atLeast(0);
+    });
+
+    afterEach(() => {
+      extensionsMock.verify();
+    });
+
+    it('should install services and styles', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const ret = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
       expect(ret).to.exist;
+
+      const shadowRoot = hostElement.shadowRoot;
+
+      // URL is set.
+      expect(shadowRoot.AMP.url).to.equal(docUrl);
 
       // Stylesheet has been installed.
       expect(shadowRoot.querySelector('style[amp-runtime]')).to.exist;
@@ -539,11 +568,244 @@ describe('runtime', () => {
       // TODO(dvoytenko): create doc-level services.
       expect(ret.viewer).to.not.exist;
       expect(ret.viewport).to.not.exist;
+    });
+
+    it('should install doc services', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      class Service1 {}
+      win.AMP.push({
+        n: 'amp-ext',
+        f: amp => {
+          amp.registerServiceForDoc('service1', Service1);
+        },
+      });
+
+      const script = document.createElement('script');
+      script.setAttribute('custom-element', 'amp-ext');
+      script.setAttribute('src', '');
+      importDoc.head.appendChild(script);
+
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
 
       return extensions.waitForExtension('amp-ext').then(() => {
         // Factories have been applied.
         expect(getServiceForDoc(ampdoc, 'service1')).to.be.instanceOf(Service1);
       });
+    });
+
+    it('should update visibility', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+
+      // Document is invisible at first.
+      expect(hostElement.style.visibility).to.equal('hidden');
+
+      // After timeout, it becomes visible again.
+      clock.tick(3000);
+      expect(hostElement.style.visibility).to.equal('visible');
+    });
+
+    it('should import body', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const shadowRoot = hostElement.shadowRoot;
+      const body = shadowRoot.querySelector('docbody');
+      expect(body).to.exist;
+      expect(body).to.have.class('amp-shadow');
+      expect(body.style.position).to.equal('relative');
+      expect(body.querySelector('child')).to.exist;
+    });
+
+    it('should read title element', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const titleEl = document.createElement('title');
+      titleEl.textContent = 'test title';
+      importDoc.head.appendChild(titleEl);
+      const ret = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(ret.title).to.equal('test title');
+      expect(hostElement.shadowRoot.AMP.title).to.equal('test title');
+    });
+
+    it('should read canonical element', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      canonicalEl.setAttribute('href', 'http://example.org/canonical');
+      importDoc.head.appendChild(canonicalEl);
+      const ret = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(ret.canonicalUrl).to.equal('http://example.org/canonical');
+    });
+
+    it('should import fonts', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const fontEl1 = document.createElement('link');
+      fontEl1.setAttribute('rel', 'stylesheet');
+      fontEl1.setAttribute('href', 'http://example.org/font1');
+      importDoc.head.appendChild(fontEl1);
+      const fontEl2 = document.createElement('link');
+      fontEl2.setAttribute('rel', 'stylesheet');
+      fontEl2.setAttribute('href', 'http://example.org/font2');
+      importDoc.head.appendChild(fontEl2);
+      document.head.appendChild(fontEl2.cloneNode(true));
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(document.querySelector('link[href="http://example.org/font1"]'))
+          .to.exist;
+      // Duplicates are ignored.
+      expect(document.querySelectorAll('link[href="http://example.org/font2"]'))
+          .to.have.length(1);
+
+      const fontEl = document.querySelector(
+          'link[href="http://example.org/font1"]');
+      expect(fontEl.getAttribute('type')).to.equal('text/css');
+      expect(fontEl.getAttribute('rel')).to.equal('stylesheet');
+      fontEl.parentElement.removeChild(fontEl);
+    });
+
+    it('should ignore boilerplate style', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('amp-boilerplate', '');
+      importDoc.head.appendChild(styleEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const shadowRoot = hostElement.shadowRoot;
+      expect(shadowRoot.querySelector('style[amp-boilerplate]')).to.not.exist;
+    });
+
+    it('should import custom style', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('amp-custom', '');
+      styleEl.textContent = '/*custom*/';
+      importDoc.head.appendChild(styleEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      const shadowRoot = hostElement.shadowRoot;
+      expect(shadowRoot.querySelector('style[amp-custom]')).to.exist;
+      expect(shadowRoot.querySelector('style[amp-custom]').textContent)
+          .to.equal('/*custom*/');
+    });
+
+    it('should ignore runtime extension', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      extensionsMock.expects('loadExtension').never();
+
+      const scriptEl = document.createElement('script');
+      scriptEl.setAttribute('src', 'https://cdn.ampproject.org/v0.js');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+    });
+
+    it('should ignore unknown script', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      extensionsMock.expects('loadExtension').never();
+
+      const scriptEl = document.createElement('script');
+      scriptEl.setAttribute('data-id', 'unknown1');
+      scriptEl.setAttribute('src', 'https://cdn.ampproject.org/other.js');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(hostElement.shadowRoot.querySelector('script[data-id="unknown1"]'))
+          .to.not.exist;
+      expect(document.querySelector('script[data-id="unknown1"]'))
+          .to.not.exist;
+    });
+
+    it('should import extension element', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      extensionsMock.expects('loadExtension')
+          .withExactArgs('amp-ext1')
+          .returns(Promise.resolve({
+            elements: {
+              'amp-ext1': function() {},
+            },
+          }))
+          .once();
+
+      const scriptEl = document.createElement('script');
+      scriptEl.setAttribute('custom-element', 'amp-ext1');
+      scriptEl.setAttribute('src', '');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(document.querySelector('script[custom-element="amp-ext1"]'))
+          .to.not.exist;
+    });
+
+    it('should import extension template', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      extensionsMock.expects('loadExtension')
+          .withExactArgs('amp-ext1')
+          .returns(Promise.resolve({elements: {}}))
+          .once();
+
+      const scriptEl = document.createElement('script');
+      scriptEl.setAttribute('custom-template', 'amp-ext1');
+      scriptEl.setAttribute('src', '');
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(document.querySelector('script[custom-template="amp-ext1"]'))
+          .to.not.exist;
+    });
+
+    it('should import inline script', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const scriptEl = document.createElement('script');
+      scriptEl.setAttribute('type', 'application/json');
+      scriptEl.setAttribute('data-id', 'test1');
+      scriptEl.textContent = '{}';
+      importDoc.head.appendChild(scriptEl);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
+          .to.exist;
+      expect(hostElement.shadowRoot.querySelector(
+          'script[data-id="test1"]').textContent).to.equal('{}');
+    });
+
+    it('should ignore inline script if javascript', () => {
+      if (!window.Element.prototype.createShadowRoot) {
+        return;
+      }
+
+      const scriptEl1 = document.createElement('script');
+      scriptEl1.setAttribute('type', 'application/javascript');
+      scriptEl1.setAttribute('data-id', 'test1');
+      importDoc.head.appendChild(scriptEl1);
+      const scriptEl2 = document.createElement('script');
+      scriptEl2.setAttribute('data-id', 'test1');
+      importDoc.head.appendChild(scriptEl2);
+      win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+      expect(hostElement.shadowRoot.querySelector('script[data-id="test1"]'))
+          .to.not.exist;
     });
   });
 });
