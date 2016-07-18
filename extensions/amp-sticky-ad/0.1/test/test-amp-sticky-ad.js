@@ -233,7 +233,7 @@ describe('amp-sticky-ad', () => {
       impl.getRealChildren = function() {
         getRealChildrenSpy();
         return [
-          {tagName: 'AMP-Ad'},
+          {tagName: 'AMP-AD'},
           {tagName: 'AMP-AD'},
         ];
       };
@@ -312,6 +312,43 @@ describe('amp-sticky-ad', () => {
       borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
           .getPropertyValue('border-bottom-width');
       expect(borderWidth).to.equal('0px');
+    });
+  });
+
+  it('should collapse and reset borderBottom when its child do', () => {
+    return getAmpStickyAd().then(obj => {
+      const iframe = obj.iframe;
+      const stickyAdElement = obj.ampStickyAd;
+      const impl = stickyAdElement.implementation_;
+
+      impl.viewport_.getScrollTop = function() {
+        return 100;
+      };
+      impl.viewport_.getSize = function() {
+        return {height: 50};
+      };
+      impl.viewport_.getScrollHeight = function() {
+        return 300;
+      };
+      impl.deferMutate = function(callback) {
+        callback();
+      };
+      impl.vsync_.mutate = function(callback) {
+        callback();
+      };
+      impl.element.offsetHeight = function() {
+        return 20;
+      };
+
+      impl.displayAfterScroll_();
+      let borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+          .getPropertyValue('border-bottom-width');
+      expect(borderWidth).to.equal('50px');
+      impl.collapsedCallback();
+      borderWidth = iframe.win.getComputedStyle(iframe.doc.body, null)
+          .getPropertyValue('border-bottom-width');
+      expect(borderWidth).to.equal('0px');
+      expect(stickyAdElement.style.display).to.equal('none');
     });
   });
 });

@@ -807,7 +807,7 @@ export class Resources {
               const box = request.resource.getLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth);
+                  request.newHeight, request.newWidth, request.callback);
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
