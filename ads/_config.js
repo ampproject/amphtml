@@ -70,10 +70,7 @@ export const adPrefetch = {
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
-<<<<<<< HEAD
-=======
   amoad: 'https://j.amoad.com/js/a.js',
->>>>>>> d1240075960801d0c560644507eebbe60d3b943e
 };
 
 /**
@@ -196,15 +193,12 @@ export const adPreconnect = {
     'https://prg.kargo.com',
   ],
   pulsepoint: 'https://tag.contextweb.com',
-<<<<<<< HEAD
-=======
   amoad: [
     'https://d.amoad.com',
     'https://i.amoad.com',
     'https://m.amoad.com',
     'https://v.amoad.com',
   ],
->>>>>>> d1240075960801d0c560644507eebbe60d3b943e
 };
 
 /**
