@@ -18,7 +18,7 @@ import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {waitForBodyPromise} from '../../../src/dom';
-import {allocateVariant, assertName} from './variant';
+import {allocateVariant} from './variant';
 import {getService} from '../../../src/service';
 
 /** @const */
@@ -44,16 +44,11 @@ export class AmpExperiment extends AMP.BaseElement {
     const config = this.getConfig_();
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
-      assertName(experimentName);
-      const experimentConfig = config[experimentName];
-      // If no 'grouping' is specified, fallback to experiment name.
-      if (!experimentConfig.grouping) {
-        experimentConfig.grouping = experimentName;
-      }
-      return allocateVariant(this.getWin(), experimentConfig)
-          .then(variantName => {
-            results[experimentName] = variantName;
-          });
+      return allocateVariant(
+          this.getWin(), experimentName, config[experimentName])
+              .then(variantName => {
+                results[experimentName] = variantName;
+              });
     });
 
     /** @private @const {!Promise<!Object<string, ?string>>} */
