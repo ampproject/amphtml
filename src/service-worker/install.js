@@ -27,9 +27,11 @@ const TAG = 'cache-service-worker';
 export function installCacheServiceWorker(win) {
   if (isExperimentOn(win, TAG) && 'serviceWorker' in navigator) {
     // TODO Switch this to `sw.js` after testing.
-    const url = `${calculateScriptBaseUrl(win)}/sw.max.js`;
+    const base = calculateScriptBaseUrl(win.location.pathname, true);
+    const url = `${base}/sw.max.js`;
     navigator.serviceWorker.register(url).then(registration => {
-      dev.info(TAG, 'ServiceWorker registration successful with scope: ', registration.scope);
+      dev.info(TAG, 'ServiceWorker registration successful with scope: ',
+          registration.scope);
     }).catch(err => {
       dev.error(TAG, 'ServiceWorker registration failed: ', err);
     });
