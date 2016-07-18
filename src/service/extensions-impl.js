@@ -439,11 +439,10 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const pathStr = this.win.location.pathname;
-    const base = this.win.location.protocol + '//' + this.win.location.host;
+    const loc = this.win.location;
     const useCompiledJs = shouldUseCompiledJs();
-    const scriptSrc = calculateExtensionScriptUrl(pathStr, base, extensionId,
-        getMode().test, useCompiledJs);
+    const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
+        getMode().version, getMode().localDev, getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -453,17 +452,19 @@ export class Extensions {
 /**
  * Calculate script url for amp-ad.
  * @visibleForTesting
- * @param {string} path Pathname of the window's location
- * @param {string} base Protocol and Host of the window's location
+ * @param {!Location} location The window's location
  * @param {string} extensionId
+ * @param {string} version
+ * @param {boolean=} isLocalDev
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
- * @visibleForTesting
  */
-export function calculateExtensionScriptUrl(path, base, extensionId, isTest,
-    isUsingCompiledJs) {
-  if (getMode().localDev) {
+export function calculateExtensionScriptUrl(location, extensionId, version,
+    isLocalDev, isTest, isUsingCompiledJs) {
+  const path = location.pathname;
+  const base = location.protocol + '//' + location.host + ':' location.port;
+  if (isLocalDev) {
     if ((isTest && !isUsingCompiledJs)
         || path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
       return `${base}/dist/v0/${extensionId}-0.1.max.js`;
@@ -472,10 +473,10 @@ export function calculateExtensionScriptUrl(path, base, extensionId, isTest,
         || path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
       return `${base}/dist/v0/${extensionId}-0.1.js`;
     }
-    return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
+    return `${urls.cdn}/v0/${extensionId}-0.1.js`;
   }
-  const folderPath = getMode().version == '$internalRuntimeVersion$' ?
-      '' : `rtv/${getMode().version}/`;
+  const folderPath = version == '$internalRuntimeVersion$' ?
+      '' : `rtv/${version}/`;
   return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
 }
 
