@@ -29,7 +29,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
-import {setModeForTesting, getMode} from '../../src/mode';
+import {getMode} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -369,7 +369,7 @@ describe('Extensions', () => {
 
   describe('get correct script source', () => {
     it('with local mode for testing with compiled js', () => {
-      setModeForTesting({localDev: true});
+      window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
           'amp-ad', true, true);
@@ -377,7 +377,7 @@ describe('Extensions', () => {
     });
 
     it('with local mode for testing without compiled js', () => {
-      setModeForTesting({localDev: true});
+      window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
         'amp-ad', true, false);
@@ -385,7 +385,7 @@ describe('Extensions', () => {
     });
 
     it('with local mode normal pathname', () => {
-      setModeForTesting({localDev: true});
+      window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
           'amp-ad');
@@ -393,7 +393,7 @@ describe('Extensions', () => {
     });
 
     it('with local mode min pathname', () => {
-      setModeForTesting({localDev: true});
+      window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl(
           'examples.build/ads.amp.min.html', 'amp-ad');
@@ -401,7 +401,7 @@ describe('Extensions', () => {
     });
 
     it('with local mode max pathname', () => {
-      setModeForTesting({localDev: true});
+      window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl(
           'examples.build/ads.amp.max.html', 'amp-ad');
@@ -410,7 +410,7 @@ describe('Extensions', () => {
     });
 
     it('with remote mode', () => {
-      setModeForTesting({localDev: false, version: 123});
+      window.AMP_MODE = {localDev: false, version: 123};
       expect(getMode().localDev).to.be.false;
       expect(getMode().version).to.equal(123);
       const script = calculateExtensionScriptUrl('', 'amp-ad');
