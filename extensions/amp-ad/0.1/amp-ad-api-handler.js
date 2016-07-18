@@ -152,7 +152,7 @@ export class AmpAdApiHandler {
           'embed-size-changed',
           {requestedHeight: height, requestedWidth: width},
           targetOrigin,
-          this.is3p);
+          this.is3p_);
     });
   }
 
