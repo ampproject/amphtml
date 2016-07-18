@@ -18,8 +18,12 @@ import {calculateScriptBase} from '../insert-extension';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 
+/** @const */
 const TAG = 'cache-service-worker';
 
+/**
+ * Registers the Google AMP Cache service worker if the browser supports SWs.
+ */
 export function installCacheServiceWorker(win) {
   if (isExperimentOn(win, TAG) && 'serviceWorker' in navigator) {
     // TODO Switch this to `sw.js` after testing.

@@ -75,7 +75,7 @@ export default class SyncPromise {
 function FulfilledPromise(value, onFulfilled, unused, deferred) {
   if (!onFulfilled) { return this; }
   if (!deferred) {
-    deferred = new Deferred(this.constructor);
+    deferred = Deferred();
   }
   tryCatchDeferred(deferred, onFulfilled, value);
   return deferred.promise;
@@ -84,7 +84,7 @@ function FulfilledPromise(value, onFulfilled, unused, deferred) {
 function RejectedPromise(reason, unused, onRejected, deferred) {
   if (!onRejected) { return this; }
   if (!deferred) {
-    deferred = new Deferred(this.constructor);
+    deferred = Deferred();
   }
   tryCatchDeferred(deferred, onRejected, reason);
   return deferred.promise;
@@ -93,7 +93,7 @@ function RejectedPromise(reason, unused, onRejected, deferred) {
 function PendingPromise(queue, onFulfilled, onRejected, deferred) {
   if (!onFulfilled && !onRejected) { return this; }
   if (!deferred) {
-    deferred = new Deferred(this.constructor);
+    deferred = Deferred();
   }
   queue.push({
     deferred,
@@ -103,8 +103,8 @@ function PendingPromise(queue, onFulfilled, onRejected, deferred) {
   return deferred.promise;
 }
 
-function Deferred(SyncPromise) {
-  const deferred = this;
+function Deferred() {
+  const deferred = {};
   deferred.promise = new SyncPromise((resolve, reject) => {
     deferred.resolve = resolve;
     deferred.reject = reject;
@@ -165,7 +165,7 @@ function doResolve(promise, resolve, reject, value, context) {
       throw new TypeError('Cannot fulfill promise with itself');
     }
     const isObj = isObject(value);
-    if (isObj && value instanceof promise.constructor) {
+    if (isObj && value instanceof SyncPromise) {
       adopt(promise, value.state_, value.value_);
     } else if (isObj && (then = value.then) && isFunction(then)) {
       _resolve = (value) => {

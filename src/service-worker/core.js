@@ -17,33 +17,77 @@
 import '../../third_party/babel/custom-babel-helpers';
 import indexedDBP from "../../third_party/indexed-db-as-promised/index"
 
+/**
+ * The SW's current version. We conveniently use JS Date timestamps as version
+ * numbers, so we use this to determine how old a given versioned file is
+ * compared to the latest version (this version).
+ * @const
+ */
 const VERSION = '$internalRuntimeVersion$';
+
+/**
+ * The release date of the latest version.
+ * @const
+ */
 const RELEASE_DATE = versionToDate(VERSION);
 
+/**
+ * Returns the release date of a given AMP release version.
+ *
+ * @param {string} ampVersion
+ * @return {!Date}
+ */
 function versionToDate(ampVersion) {
   return new Date(parseInt(ampVersion, 10));
 }
 
+/**
+ * Returns the version of a given versioned JS file.
+ *
+ * @param {string} url
+ * @return {string}
+ */
 function ampVersion(url) {
   const matches = /rtv\/(\d+)/.exec(url);
   return matches ? matches[1] : VERSION;
 }
 
+/**
+ * Determines if the given `ampVersion` is stale (older than `days` days).
+ *
+ * @param {string} ampVersion
+ * @param {number=} days
+ * @return {boolean}
+ */
 function isStale(ampVersion, days = 8) {
-  const delta = RELEASE_DATE - new Date(parseInt(ampVersion, 10));
+  const delta = RELEASE_DATE - versionToDate(ampVersion);
   return delta > days * (/* 1 day in ms */ 1000 * 60 * 60 * 24);
 }
 
+/**
+ * Returns the basename (AKA the filename) of a url, used to key a url (since
+ * our JS filenames are unique).
+ *
+ * @param {string} url
+ * @return {string}
+ */
 function basename(url) {
   return url.substr(url.lastIndexOf('/') + 1);
 }
 
+/**
+ * Returns the url with the requested version changed to `version`.
+ *
+ * @param {string} url
+ * @param {string=} version
+ * @return {string}
+ */
 function versionedUrl(url, version = VERSION) {
   return url.replace(ampVersion(url), version);
 }
 
 /**
- * Is this a CDN JS file?
+ * Determines if a url is a request to a CDN JS file.
  * @param {string} url
  * @return {boolean}
  */
@@ -53,16 +97,54 @@ function isCdnJsFile(url) {
 }
 
 
+/**
+ * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
+ * release version we are serving it.
+ *
+ * @const
+ */
 const clients = Object.create(null);
 
+/**
+ * Our cache of CDN JS files.
+ *
+ * @type {Cache}
+ */
 let cache;
+
+/**
+ * A (wrapped) IndexedDB Database, where we record which versions of a file
+ * have been cached. Used to determine if we have another version of the same
+ * file cached when we miss.
+ *
+ * @type {../../third_party/indexed-db-as-promised/classes/database.Database}
+ */
 let db;
+
+/**
+ * A promise that will be overridden when upgrading our SW that waits until all
+ * extremely stale versions of all files are purged.
+ *
+ * @type {!Promise}
+ */
 let cacheCleanup = Promise.resolve();
 
+/**
+ * A promise to open up our CDN JS cache, which will be resolved before any
+ * requests are intercepted by the SW.
+ *
+ * @type {!Promise}
+ */
 const cachePromise = caches.open('cdn-js').then(result => {
   cache = result;
 });
 
+/**
+ * A promise to open up our Indexed DB database, which will be resolved before
+ * any requests are intercepted by the SW.
+ *
+ * @type {!Promise}
+ */
 const dbPromise = cachePromise.then(() => {
   return indexedDBP.open('cdn-js', VERSION, {
     upgrade(db, event) {
@@ -81,10 +163,10 @@ const dbPromise = cachePromise.then(() => {
       const cutoff = Number(RELEASE_DATE.setDate(-14));
       const range = IDBKeyRange.upperBound(cutoff);
 
-      // We need to find file that has an old version, then prune that version
-      // from the db and cache.
-      cacheCleanup = versions.openCursor(range).while(cursor => {
-        const item = cursor.value;
+      // We need to find every file that has an old version, then prune that
+      // version from the db and cache.
+      cacheCleanup = Promise.resolve(versions.openCursor(range).while(cur => {
+        const item = cur.value;
         const removal = {
           url: item.url,
           versions: item.versions.filter(v => (v <= cutoff))
@@ -92,8 +174,8 @@ const dbPromise = cachePromise.then(() => {
 
         // Remove old versions from our db.
         item.versions = item.versions.filter(v => v > cutoff);
-        return cursor.put(item).then(() => removal);
-      }).then(removals => {
+        return cur.put(item).then(() => removal);
+      })).then(removals => {
         // Prune all versions of all files from the cache.
         const deletes = removals.map(removal => {
           // Prune all versions of this file from the cache
@@ -118,8 +200,8 @@ self.addEventListener('install', function(install) {
 
   // Setup the Fetch listener
   // My assumptions:
-  //   - Doc requests one uniform AMP version for all files, anything else
-  //     is malarkey.
+  //   - Doc requests one uniform AMP release version for all files, anything
+  //     else is malarkey.
   self.addEventListener('fetch', function(event) {
     const request = event.request;
     const clientId = event.clientId;
@@ -142,7 +224,7 @@ self.addEventListener('install', function(install) {
         // If not, do we have this version cached, if so serve it.
         // do we have a newer version cached? Check the db, if so serve it.
         // If not, get the newest version, cache it, serve it.
-        return db.transaction('js-files', 'readonly').then(transaction => {
+        return db.transaction('js-files', 'readonly').run(transaction => {
           const files = transaction.objectStore('js-files');
           return files.get(requestFile);
         }).then((item = {}) => {
@@ -179,16 +261,20 @@ self.addEventListener('install', function(install) {
               // This intentionally does not block the request to speed things
               // up. This is likely fine since you don't have multiple
               // `<script>`s with the same `src` on a page.
-              db.transaction('js-files', 'readwrite').then(transaction => {
+              db.transaction('js-files', 'readwrite').run(transaction => {
                 const files = transaction.objectStore('js-files');
                 return files.get(requestFile).then(item => {
                   if (!item) {
                     item = {
                       file: requestFile,
+                      // We store a "version-less" url so we may purge our
+                      // versioned urls at a later time from the cache (which
+                      // keys things based on url).
                       url: versionedUrl(url, '0000000000000'),
                       versions: [],
                     };
                   }
+
                   const versions = item.versions;
                   if (versions.indexOf(version) == -1) {
                     versions.push(version);
