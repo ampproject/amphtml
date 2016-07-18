@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
+import {writeScript, validateDataExists, checkData} from '../3p/3p';
+
 /**
  * @param {!Window} global
- * @return {number}
+ * @param {!Object} data
  */
-export function getCorrelator(global) {
-  const clientId = global.context.clientId;
-  const pageViewId = global.context.pageViewId;
-  if (global.context.clientId) {
-    return pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
-  } else {
-    return pageViewId;
-  }
+export function widespace(global, data) {
+  checkData(data, ['sid']);
+  validateDataExists(data, ['sid']);
+
+  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + encodeURIComponent(data.sid);
+
+  writeScript(global, url);
 }

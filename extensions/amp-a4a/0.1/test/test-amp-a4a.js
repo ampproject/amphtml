@@ -18,6 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
+import {base64UrlDecode} from '../crypto-verifier';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -38,13 +39,40 @@ class MockA4AImpl extends AmpA4A {
 
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
-      creativeArrayBuffer: responseArrayBuffer,
+      creative: responseArrayBuffer,
       signature: responseHeaders.get('X-Google-header'),
     });
   }
 
   supportsAmpCreativeRender() { return true; }
 }
+
+
+/**
+ * Create a promise for an iframe that has a super-minimal mock AMP environment
+ * in it.
+ *
+ * @return {!Promise<{
+ *   win: !Window,
+ *   doc: !Document,
+ *   iframe: !Element,
+ *   addElement: function(!Element):!Promise
+ * }>
+ */
+function createAdTestingIframePromise() {
+  return createIframePromise().then(fixture => {
+    const doc = fixture.doc;
+    // TODO(a4a-cam@): This is necessary in the short term, until A4A is
+    // smarter about host document styling.  The issue is that it needs to
+    // inherit the AMP runtime style element in order for shadow DOM-enclosed
+    // elements to behave properly.  So we have to set up a minimal one here.
+    const ampStyle = doc.createElement('style');
+    ampStyle.setAttribute('amp-runtime', 'scratch-fortesting');
+    doc.head.appendChild(ampStyle);
+    return fixture;
+  });
+}
+
 
 describe('amp-a4a', () => {
   let sandbox;
@@ -58,7 +86,7 @@ describe('amp-a4a', () => {
     headers: {
       get: function(name) {
         const headerValues = {
-          'X-Google-header': validCSSAmp.signature,
+          'X-Google-header': base64UrlDecode(validCSSAmp.signature),
         };
         return headerValues[name];
       },
@@ -88,7 +116,7 @@ describe('amp-a4a', () => {
         method: 'GET',
         credentials: 'include',
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('width', 200);
@@ -98,6 +126,7 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const extractCreativeAndSignatureSpy = sandbox.spy(
           a4a, 'extractCreativeAndSignature');
+        doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
@@ -123,7 +152,7 @@ describe('amp-a4a', () => {
     it('should run end-to-end w/o shadow DOM support', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('width', 200);
@@ -155,7 +184,7 @@ describe('amp-a4a', () => {
     it('must not be position:fixed', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('width', 200);
@@ -173,7 +202,7 @@ describe('amp-a4a', () => {
     it('#onLayoutMeasure #layoutCallback not valid AMP', () => {
       viewerForMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('width', 200);
@@ -184,7 +213,7 @@ describe('amp-a4a', () => {
         sandbox.stub(a4a, 'supportsShadowDom').returns(false);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-          Promise.resolve({creativeArrayBuffer: mockResponse.arrayBuffer()}));
+          Promise.resolve({creative: mockResponse.arrayBuffer()}));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
         return a4a.adPromise_.then(() => {
@@ -213,7 +242,7 @@ describe('amp-a4a', () => {
 
   describe('#preconnectCallback', () => {
     it('validate adsense', () => {
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         a4aElement.setAttribute('type', 'adsense');
@@ -301,7 +330,7 @@ describe('amp-a4a', () => {
           baseTestDoc.slice(splicePoint));
     }
     it('should not render AMP natively', () => {
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
@@ -317,7 +346,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should render AMP natively', () => {
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
@@ -330,11 +359,13 @@ describe('amp-a4a', () => {
           expect(a4aElement.shadowRoot).to.not.be.null;
           expect(rendered).to.be.true;
           const root = a4aElement.shadowRoot;
-          expect(root.children[0].tagName).to.equal('STYLE');
-          expect(root.children[0].innerHTML).to
-            .equal('p { background: green }');
-          expect(root.children[1].tagName).to.equal('AMP-AD-BODY');
-          expect(root.children[1].innerHTML).to.equal('<p>some text</p>');
+          const styles = root.querySelectorAll('style');
+          expect(Array.prototype.some.call(styles,
+              s => { return s.innerHTML == 'p { background: green }'; }),
+              'Some style is "background: green"').to.be.true;
+          const adBody = root.querySelector('amp-ad-body');
+          expect(adBody).to.be.ok;
+          expect(adBody.innerHTML).to.equal('<p>some text</p>');
         });
       });
     });
@@ -393,7 +424,7 @@ describe('amp-a4a', () => {
 
   describe('#relocateFonts_', () => {
     it('should be a no-op when there are no style sheets', () => {
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const metaData = {};
         const a4a = new AmpA4A(doc.createElement('amp-a4a'));
@@ -407,7 +438,7 @@ describe('amp-a4a', () => {
     });
 
     it('should create head tags with attributes', () => {
-      return createIframePromise().then(fixture => {
+      return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const metaData = {
           customStylesheets: [
@@ -452,7 +483,7 @@ describe('amp-a4a', () => {
 
     describe('#unlayoutCallback', () => {
       it('verify state reset', () => {
-        return createIframePromise().then(fixture => {
+        return createAdTestingIframePromise().then(fixture => {
           const doc = fixture.doc;
           const a4aElement = doc.createElement('amp-a4a');
           a4aElement.setAttribute('width', 200);
@@ -485,7 +516,7 @@ describe('amp-a4a', () => {
         });
       });
       it('verify cancelled promise', () => {
-        return createIframePromise().then(fixture => {
+        return createAdTestingIframePromise().then(fixture => {
           let whenFirstVisibleResolve = null;
           viewerForMock.returns(new Promise(resolve => {
             whenFirstVisibleResolve = resolve;
@@ -514,7 +545,7 @@ describe('amp-a4a', () => {
         });
       });
       it('verify unhandled error', () => {
-        return createIframePromise().then(fixture => {
+        return createAdTestingIframePromise().then(fixture => {
           viewerForMock.returns(Promise.resolve());
           let rejectResolve = null;
           const sendXhrRequestMock =

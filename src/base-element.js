@@ -214,6 +214,24 @@ export class BaseElement {
   }
 
   /**
+   * This method is called when the element is added to DOM for the first time
+   * and before `buildCallback` to give the element a chance to redirect its
+   * implementation to another `BaseElement` implementation. The returned
+   * value can be either `null` or `undefined` to indicate that no redirection
+   * will take place; `BaseElement` instance to upgrade immediately; or a
+   * promise to upgrade with the resolved `BaseElement` instance.
+   *
+   * Notice that calls to `upgradeCallback` are not recursive. I.e. this
+   * callback will not be called on the returned instance again.
+   *
+   * @return {!BaseElement|!Promise<!BaseElement>|null}
+   */
+  upgradeCallback() {
+    // Subclasses may override.
+    return null;
+  }
+
+  /**
    * Called when the element is first created. Note that for element created
    * using createElement this may be before any children are added.
    */
@@ -702,6 +720,24 @@ export class BaseElement {
    */
   cancelFullOverlay() {
     viewerFor(this.getWin()).cancelFullOverlay();
+  }
+
+  /**
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  collapse() {
+    this.resources_.collapseElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement collapses itself.
+   * See {@link collapse}.
+   * @param {!AmpElement} unusedElement
+   */
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
   }
 
   /**

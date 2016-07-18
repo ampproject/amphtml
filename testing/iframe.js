@@ -16,7 +16,9 @@
 
 
 import {Timer} from '../src/timer';
+import {installExtensionsService} from '../src/service/extensions-impl';
 import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
+import {cssText} from '../build/css';
 
 let iframeCount = 0;
 
@@ -187,6 +189,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
+        '<style>.-amp-element {display: block;}</style>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
@@ -194,6 +197,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.

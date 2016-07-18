@@ -35,12 +35,4 @@ test('sync - valueOrDefault', t => {
   t.is(res, 'hello');
   res = m.valueOrDefault('world', 'hello');
   t.is(res, 'world');
-})
-
-test.before('setup', t => {
-  return fs.writeFileAsync(targetFile, 'var a = 1 + 1;');
-});
-
-test.after.always('cleanup', t => {
-  return fs.unlinkAsync(targetFile);
 });

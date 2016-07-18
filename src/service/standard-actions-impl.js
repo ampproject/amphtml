@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {getServiceForDoc} from '../service';
+import {fromClassForDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
+import {toggle} from '../style';
 
 
 /**
@@ -44,8 +45,13 @@ export class StandardActions {
    * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    this.resources_.mutateElement(invocation.target, () => {
-      invocation.target.style.display = 'none';
+    const target = invocation.target;
+    this.resources_.mutateElement(target, () => {
+      if (target.classList.contains('-amp-element')) {
+        target./*OK*/collapse();
+      } else {
+        toggle(target, false);
+      }
     });
   }
 }
@@ -56,8 +62,6 @@ export class StandardActions {
  * @return {!StandardActions}
  */
 export function installStandardActionsForDoc(ampdoc) {
-  return /** @type {!StandardActions} */ (
-      getServiceForDoc(ampdoc, 'standard-actions', ampdoc => {
-        return new StandardActions(ampdoc);
-      }));
+  return fromClassForDoc(
+      ampdoc, 'standard-actions', StandardActions);
 };

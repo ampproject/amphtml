@@ -17,6 +17,7 @@
 import {cidForOrNull} from './cid';
 import {clientIdScope} from '../ads/_config';
 import {userNotificationManagerFor} from './user-notification';
+import {dev} from '../src/log';
 
 
 /**
@@ -45,6 +46,10 @@ export function getAdCid(adElement) {
         return consent;
       }
     }
-    return cidService.get(scope, consent);
+    return cidService.get(scope, consent).catch(error => {
+      // Not getting a CID is not fatal.
+      dev.error('ad-cid', error);
+      return undefined;
+    });
   });
 }

@@ -1,4 +1,4 @@
-/* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {AmpAd3PImpl, TAG_3P_IMPL} from './amp-ad-3p-impl';
-import {a4aRegistry} from '../../../ads/_config';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {AmpAd3PImpl} from './amp-ad-3p-impl';
+import {a4aRegistry} from '../../../ads/_a4a-config';
+import {dev} from '../../../src/log';
+import {extensionsFor} from '../../../src/extensions';
 
 
 /**
@@ -54,8 +55,31 @@ function copyAttributes(sourceElement, targetElement) {
 }
 
 export class AmpAd extends AMP.BaseElement {
-  constructor(element) {
-    super(element);
+
+  /** @override */
+  upgradeCallback() {
+    const type = this.element.getAttribute('type');
+    if (!type) {
+      // Unspecified or empty type.  Nothing to do here except bail out.
+      return null;
+    }
+    // TODO(tdrl): Check amp-ad registry to see if they have this already.
+    if (!a4aRegistry[type] ||
+        !a4aRegistry[type](this.getWin(), this.element)) {
+      // Network either has not provided any A4A implementation or the
+      // implementation exists, but has explicitly chosen not to handle this
+      // tag as A4A.  Fall back to the 3p implementation.
+      return new AmpAd3PImpl(this.element);
+    }
+    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
+    // as following:
+    /*
+      const extensions = extensionsFor(this.getWin());
+      return extensions.loadElementClass(extensionTag).then(ctor => {
+        return new ctor(this.element);
+      });
+     */
+    return null;
   }
 
   /** @override */
@@ -65,28 +89,18 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const type = this.element.getAttribute('type');
-    if (!type) {
-      // Unspecified or empty type.  Nothing to do here except bail out.
-      return;
-    }
-    let newChild;
-    // TODO(tdrl): Check amp-ad registry to see if they have this already.
-    if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.getWin(), this.element)) {
-      // Network either has not provided any A4A implementation or the
-      // implementation exists, but has explicitly chosen not to handle this
-      // tag as A4A.  Fall back to the 3p implementation.
-      newChild = this.element.ownerDocument.createElement(TAG_3P_IMPL);
-    } else {
-      // Note: The insertAmpExtensionScript method will pick the version number.
-      // If we ever reach a point at which there are different extensions with
-      // different version numbers at play simultaneously, we'll have to make sure
-      // that the loader can handle the case.
-      const extensionTag = networkImplementationTag(type);
-      newChild = this.element.ownerDocument.createElement(extensionTag);
-      /*OK*/insertAmpExtensionScript(this.getWin(), extensionTag, true);
-    }
+    // This is only called for a4a. All other cases are redirected to
+    // `AmpAd3PImpl` in `upgradeCallback`.
+    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
+    const type = dev.assert(this.element.getAttribute('type'),
+        'Required attribute type');
+    // Note: The loadExtension method will pick the version number.
+    // If we ever reach a point at which there are different extensions with
+    // different version numbers at play simultaneously, we'll have to make sure
+    // that the loader can handle the case.
+    const extensionTag = networkImplementationTag(type);
+    const newChild = this.element.ownerDocument.createElement(extensionTag);
+    extensionsFor(this.getWin()).loadExtension(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }
@@ -94,4 +108,3 @@ export class AmpAd extends AMP.BaseElement {
 
 AMP.registerElement('amp-ad', AmpAd);
 AMP.registerElement('amp-embed', AmpAd);
-AMP.registerElement(TAG_3P_IMPL, AmpAd3PImpl);

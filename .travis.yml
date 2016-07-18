@@ -27,7 +27,7 @@ before_script:
 script:
   - npm run ava
   - gulp lint
-  - gulp build --fortesting
+  - gulp build --fortesting --css-only
   - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit

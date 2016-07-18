@@ -52,7 +52,10 @@ export const adPrefetch = {
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
-  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  yieldbot: [
+    'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
+    'https://msg.yldbt.com/js/ybmsg.html',
+  ],
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
@@ -67,6 +70,10 @@ export const adPrefetch = {
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
+<<<<<<< HEAD
+=======
+  amoad: 'https://j.amoad.com/js/a.js',
+>>>>>>> d1240075960801d0c560644507eebbe60d3b943e
 };
 
 /**
@@ -119,6 +126,7 @@ export const adPreconnect = {
     'https://resize.mantisadnetwork.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  widespace: 'https://engine.widespace.com',
   improvedigital: 'https://ad.360yield.com/',
   openx: [
     'https://partner.googleadservices.com',
@@ -188,6 +196,15 @@ export const adPreconnect = {
     'https://prg.kargo.com',
   ],
   pulsepoint: 'https://tag.contextweb.com',
+<<<<<<< HEAD
+=======
+  amoad: [
+    'https://d.amoad.com',
+    'https://i.amoad.com',
+    'https://m.amoad.com',
+    'https://v.amoad.com',
+  ],
+>>>>>>> d1240075960801d0c560644507eebbe60d3b943e
 };
 
 /**
@@ -200,21 +217,4 @@ export const clientIdScope = {
   // adNetworkType: 'cidScope' here.
   adsense: 'AMP_ECID_GOOGLE',
   doubleclick: 'AMP_ECID_GOOGLE',
-};
-
-/**
- * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
- * If an ad network, {@code ${NETWORK}}, is registered in this object, then the
- * {@code <amp-ad type="${NETWORK}">} implementation will look up its predicate
- * here. If there is a predicate and it and returns {@code true}, then
- * {@code amp-ad} will attempt to render the ad via the A4A pathway (fetch
- * ad creative via early XHR CORS request; verify that it is validated AMP;
- * and then render directly in the host page by splicing into the host DOM).
- * Otherwise, it will attempt to render the ad via the existing "3p iframe"
- * pathway (delay load into a cross-domain iframe).
- *
- * @type {!Object<!string, !function(!Window, !Element): boolean>}
- */
-export const a4aRegistry = {
-  // Add mappings for specific ad networks here.
 };

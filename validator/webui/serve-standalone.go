@@ -129,7 +129,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		var netClient = &http.Client{
 			Timeout: time.Second * 20,
 		}
-		resp, err := netClient.Get(param)
+		req, err := http.NewRequest("GET", param, nil)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),
+				http.StatusBadGateway)
+			return
+		}
+		req.Header.Add("User-Agent",
+			"Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MTC19V) "+
+				"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.81 Mobile "+
+				"Safari/537.36 (compatible; validator.ampproject.org)")
+		resp, err := netClient.Do(req)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Bad gateway (%v)", err.Error()),
 				http.StatusBadGateway)

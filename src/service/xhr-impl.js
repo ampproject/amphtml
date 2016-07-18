@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {
   addParamToUrl,
   getSourceOrigin,
@@ -184,9 +184,7 @@ export class Xhr {
   }
 
   /**
-   * @param {!string} input URL
-   * @param {Array<string>} opt_responseHeaderNames List of response headers to
-   * extract and return.
+   * @param {string} input URL
    * @param {FetchInitDef} opt_init Fetch options object.
    * @return {!Promise<!FetchResponse>}
    */
@@ -237,22 +235,6 @@ export class Xhr {
     return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
   }
 
-  /**
-   * @param {!ArrayBuffer} bytes
-   * @return {!Promise<string>}
-   */
-  utf8FromArrayBuffer(bytes) {
-    if (window.TextDecoder) {
-      return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-    }
-    return new Promise(function(resolve, unusedReject) {
-      const reader = new FileReader();
-      reader.onloadend = function(unusedEvent) {
-        resolve(reader.result);
-      };
-      reader.readAsText(new Blob([bytes]));
-    });
-  }
 }
 
 
@@ -535,7 +517,5 @@ class FetchResponseHeaders {
  * @return {!Xhr}
  */
 export function installXhrService(window) {
-  return getService(window, 'xhr', () => {
-    return new Xhr(window);
-  });
+  return fromClass(window, 'xhr', Xhr);
 };

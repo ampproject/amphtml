@@ -37,6 +37,8 @@ var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
+var cssOnly = argv['css-only'];
+
 require('./build-system/tasks');
 
 
@@ -53,6 +55,8 @@ function buildExtensions(options) {
   buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-ad', '0.1', false, options);
+  buildExtension('amp-ad-network-adsense-impl', 0.1, false, options);
+  buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -95,6 +99,7 @@ function buildExtensions(options) {
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
+  buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
@@ -216,6 +221,9 @@ function watch() {
  * @return {!Stream} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
+  if (cssOnly && !hasCss) {
+    return Promise.resolve();
+  }
   options = options || {};
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
@@ -247,6 +255,9 @@ function buildExtension(name, version, hasCss, options) {
       var jsCss = 'export const CSS = ' + css + ';\n';
       var builtName = 'build/' + name + '-' + version + '.css.js';
       fs.writeFileSync(builtName, jsCss, 'utf-8');
+      if (cssOnly) {
+        return Promise.resolve();
+      }
       return buildExtensionJs(path, name, version, options);
     });
   } else {
@@ -273,9 +284,17 @@ function buildExtensionJs(path, name, version, options) {
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
     latestName: name + '-latest.js',
+    // Wrapper that either registers the extension or schedules it for
+    // execution after the main binary comes back.
+    // The `function` is wrapped in `()` to avoid lazy parsing it,
+    // since it will be immediately executed anyway.
+    // See https://github.com/ampproject/amphtml/issues/3977
+    // DO NOT SUBMIT: this has to go in a separate later PR.
     wrapper: '(window.AMP = window.AMP || [])' +
-        '.push(function(AMP) {<%= contents %>\n});',
+        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});',
   });
+  // TODO(dvoytenko): Switch to new wrapper format:
+  //   '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'
 }
 
 /**
@@ -345,6 +364,7 @@ function buildExamples(watch) {
       });
 
   // Also update test-example-validation.js
+  buildExample('a4a.amp.html');
   buildExample('ads.amp.html');
   buildExample('ads.with.script.amp.html');
   buildExample('adsense.amp.html');
@@ -391,6 +411,7 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('vrview.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');
   buildExample('openx.amp.html');

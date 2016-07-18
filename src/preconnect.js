@@ -20,7 +20,7 @@
  */
 
 
-import {getService} from './service';
+import {fromClass} from './service';
 import {parseUrl} from './url';
 import {timer} from './timer';
 import {platformFor} from './platform';
@@ -125,6 +125,18 @@ export class Preconnect {
     }, 10000);
 
     this.preconnectPolyfill_(origin);
+  }
+
+  /**
+   * Temporary to not break prod when versions are misaligned across binaries.
+   * DO NOT USE!
+   * This should be safe to remove 1 version after 1468017284333 hits prod.
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @deprecated
+   */
+  prefetch(url, opt_preloadAs) {
+    this.preload(url, opt_preloadAs);
   }
 
   /**
@@ -237,7 +249,5 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectFor(window) {
-  return getService(window, 'preconnect', () => {
-    return new Preconnect(window);
-  });
+  return fromClass(window, 'preconnect', Preconnect);
 };

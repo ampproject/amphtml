@@ -23,7 +23,7 @@
  */
 
 import {getCookie, setCookie} from '../../../src/cookies';
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {
   getSourceOrigin,
   isProxyOrigin,
@@ -261,9 +261,8 @@ function getBaseCid(cid, persistenceConsent) {
   }
 
   // We need to make a new one.
-  const seed = getEntropy(win);
   cid.baseCid_ = cryptoFor(win)
-      .then(crypto => crypto.sha384Base64(seed));
+      .then(crypto => crypto.sha384Base64(getEntropy(win)));
 
   // Storing the value may require consent. We wait for the respective
   // promise.
@@ -355,7 +354,7 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * a string of other values that might be hard to guess including
  * `Math.random` and the current time.
  * @param {!Window} win
- * @return {!Array<number>|string} Entropy.
+ * @return {!Uint8Array|string} Entropy.
  */
 function getEntropy(win) {
   // Widely available in browsers we support:
@@ -363,14 +362,7 @@ function getEntropy(win) {
   if (win.crypto && win.crypto.getRandomValues) {
     const uint8array = new Uint8Array(16);  // 128 bit
     win.crypto.getRandomValues(uint8array);
-    // While closure's Hash interface would except a Uint8Array
-    // sha384 does not in practice, so we copy the values into
-    // a plain old array.
-    const array = new Array(16);
-    for (let i = 0; i < uint8array.length; i++) {
-      array[i] = uint8array[i];
-    }
-    return array;
+    return uint8array;
   }
   // Support for legacy browsers.
   return String(win.location.href + timer.now() +
@@ -382,7 +374,5 @@ function getEntropy(win) {
  * @return {!Cid}
  */
 export function installCidService(window) {
-  return getService(window, 'cid', () => {
-    return new Cid(window);
-  });
+  return fromClass(window, 'cid', Cid);
 }

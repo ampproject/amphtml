@@ -80,6 +80,7 @@ describe('amp-social-share', () => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'unknown-provider');
       expect(() => {
+        share.tryUpgrade_();
         share.build(true);
       }).to.throw('data-share-endpoint attribute is required');
     });
@@ -89,6 +90,7 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       expect(() => {
+        share.tryUpgrade_();
         share.build(true);
       }).to.throw('type attribute is required');
     });

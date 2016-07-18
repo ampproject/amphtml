@@ -15,11 +15,11 @@
  */
 
 import * as sinon from 'sinon';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
   installXhrService,
   fetchPolyfill,
   FetchResponse,
-  utf8FromArrayBuffer,
   assertSuccess,
 } from '../../src/service/xhr-impl';
 

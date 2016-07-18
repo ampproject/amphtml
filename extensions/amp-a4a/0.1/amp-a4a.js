@@ -23,7 +23,7 @@ import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {extensionsFor} from '../../../src/extensions';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
@@ -72,20 +72,22 @@ export function setPublicKeys(publicKeys) {
   publicKeyInfos = publicKeys.map(importPublicKey);
 }
 
-
 /**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
+ * @param {!ArrayBuffer} bytes
+ * @return {!Promise<string>}
  */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
+// TODO(taymonbeal): move this somewhere more sensible
+export function utf8FromArrayBuffer(bytes) {
+  if (window.TextDecoder) {
+    return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
   }
-  return bytes;
+  return new Promise(function(resolve, unusedReject) {
+    const reader = new FileReader();
+    reader.onloadend = function(unusedEvent) {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
 }
 
 /**
@@ -102,7 +104,7 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creativeArrayBuffer: !ArrayBuffer, signature: ?string}} */
+/** @typedef {{creative: ArrayBuffer, signature: ?ArrayBuffer}} */
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
@@ -193,6 +195,17 @@ export class AmpA4A extends AMP.BaseElement {
    */
   isValidElement() {
     return true;
+  }
+
+  /**
+   * Returns true if this element is the child of an amp-ad element.  For use by
+   * network-specific implementations that don't want to allow themselves to be
+   * embedded directly into a page.
+   * @return {boolean}
+   */
+  isInAmpAdTag() {
+    return !!this.element.parentElement &&
+        this.element.parentElement.tagName == 'AMP-AD';
   }
 
   /**
@@ -357,7 +370,6 @@ export class AmpA4A extends AMP.BaseElement {
       this.adUrl_ = null;
       this.rendered_ = false;
       this.timerId_ = 0;
-      this.intersectionObserver_ = null;
       if (this.apiHandler_) {
         this.apiHandler_.unlayoutCallback();
         this.apiHandler_ = null;
@@ -457,13 +469,19 @@ export class AmpA4A extends AMP.BaseElement {
    */
   validateAdResponse_(fetchResponse, bytes) {
     return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(adResponse => {
+        .then(response => {
           // Validate when we have a signature and we have native crypto.
-          if (adResponse.signature && verifySignatureIsAvailable()) {
+          if (response.signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
-              return verifySignature(adResponse.creativeArrayBuffer,
-                  base64ToByteArray(adResponse.signature), publicKeyInfos);
+              // TODO(a4a-cam): This call used to be missing the conversion
+              // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
+              // any unit tests to fail, either locally or on Travis.  That
+              // indicates that the tests are too weak or aren't reporting
+              // correctly.  Check out and fix the tests.
+              return verifySignature(
+                  new Uint8Array(response.creative),
+                  response.signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;
@@ -473,6 +491,7 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Render the validated AMP creative directly in the parent page.
    * @param {boolean} valid If the ad response signature was valid.
+   * @param {!ArrayBuffer} The creative as raw bytes.
    * @return {Promise<boolean>} Whether the creative was successfully
    *     rendered.
    * @private
@@ -487,7 +506,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.timerId_) {
       decrementLoadingAds(this.timerId_, this.getWin());
     }
-    return xhrFor(this.getWin()).utf8FromArrayBuffer(bytes).then(creative => {
+    // AMP documents are required to be UTF-8
+    return utf8FromArrayBuffer(bytes).then(creative => {
       // Find the json blob located at the end of the body and parse it.
       const creativeMetaData = this.getAmpAdMetadata_(creative);
       if (!creativeMetaData || !this.supportsShadowDom()) {
@@ -531,6 +551,15 @@ export class AmpA4A extends AMP.BaseElement {
             // Finally, add body and re-formatted CSS styling to the shadow root.
             const shadowRoot =
                 this.element.shadowRoot || this.element.createShadowRoot();
+            // TODO(dvoytenko, tdrl): Cloning the amp-runtime style from the
+            // host document is a short-term fix.  Ultimately, AMP will provide
+            // a better mechanism for this, and this code will have to be
+            // updated to coordinate with their approach.
+            const style = this.getWin().document.querySelector(
+                'style[amp-runtime]') ||
+                this.getWin().document.createElement('style');
+            shadowRoot.appendChild(style.cloneNode(true));
+            // End TODO.
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
@@ -753,10 +782,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (!metaData.customElementExtensions) {
       return;
     }
-    metaData.forEach(extension => {
-      /*OK*/insertAmpExtensionScript(this.getWin(), extension, true);
+    const extensions = extensionsFor(this.getWin());
+    metaData.forEach(extensionId => {
+      extensions.loadExtension(extensionId);
     });
   }
 }
-
-AMP.registerElement('amp-a4a', AmpA4A);

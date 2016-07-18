@@ -72,6 +72,9 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js'
     ]
   },
+  '\\.prefetch\\(': {
+    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -214,6 +217,7 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
@@ -356,6 +360,7 @@ var forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       '3p/integration.js',
+      'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
@@ -432,7 +437,6 @@ var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
 var forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
-  '\\.postMessage(?!_)': bannedTermsHelpString,
   '\\.offsetLeft(?!_)': bannedTermsHelpString,
   '\\.offsetTop(?!_)': bannedTermsHelpString,
   '\\.offsetWidth(?!_)': bannedTermsHelpString,
@@ -442,40 +446,53 @@ var forbiddenTermsSrcInclusive = {
   '\\.clientTop(?!_)': bannedTermsHelpString,
   '\\.clientWidth(?!_)': bannedTermsHelpString,
   '\\.clientHeight(?!_)': bannedTermsHelpString,
-  '\\.getClientRects(?!_)': bannedTermsHelpString,
-  '\\.getBoundingClientRect(?!_)': bannedTermsHelpString,
-  '\\.scrollBy(?!_)': bannedTermsHelpString,
-  '\\.scrollTo(?!_|p|p_)': bannedTermsHelpString,
-  '\\.scrollIntoView(?!_)': bannedTermsHelpString,
-  '\\.scrollIntoViewIfNeeded(?!_)': bannedTermsHelpString,
   '\\.scrollWidth(?!_)': 'please use `getScrollWidth()` from viewport',
   '\\.scrollHeight(?!_)': bannedTermsHelpString,
   '\\.scrollTop(?!_)': bannedTermsHelpString,
   '\\.scrollLeft(?!_)': bannedTermsHelpString,
-  '\\.focus(?!_)': bannedTermsHelpString,
   '\\.computedRole(?!_)': bannedTermsHelpString,
   '\\.computedName(?!_)': bannedTermsHelpString,
   '\\.innerText(?!_)': bannedTermsHelpString,
-  '\\.getComputedStyle(?!_)': bannedTermsHelpString,
   '\\.scrollX(?!_)': bannedTermsHelpString,
   '\\.scrollY(?!_)': bannedTermsHelpString,
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
   '\\.innerHeight(?!_)': bannedTermsHelpString,
-  '\\.getMatchedCSSRules(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
-  '\\.getBBox(?!_)': bannedTermsHelpString,
-  '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
-  '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
-  '\\.changeHeight(?!_)': bannedTermsHelpString,
-  '\\.changeSize(?!_)': bannedTermsHelpString,
-  'insertAmpExtensionScript': {
+  // Functions
+  '\\.changeHeight\\(': bannedTermsHelpString,
+  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.collapse\\(': bannedTermsHelpString,
+  '\\.focus\\(': bannedTermsHelpString,
+  '\\.getBBox\\(': bannedTermsHelpString,
+  '\\.getBoundingClientRect\\(': bannedTermsHelpString,
+  '\\.getClientRects\\(': bannedTermsHelpString,
+  '\\.getComputedStyle\\(': bannedTermsHelpString,
+  '\\.getMatchedCSSRules\\(': bannedTermsHelpString,
+  '\\.postMessage\\(': bannedTermsHelpString,
+  '\\.scrollBy\\(': bannedTermsHelpString,
+  '\\.scrollIntoView\\(': bannedTermsHelpString,
+  '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
+  '\\.scrollTo\\(': bannedTermsHelpString,
+  '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
+  '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
-      'src/insert-extension.js',
       'src/element-stub.js',
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+    ],
+  },
+  'loadElementClass': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
@@ -596,11 +613,12 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /3p|ads/.test(pathname) ||
+  var is3pFile = /\/(3p|ads)\//.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
-  var isImplFile = basename == 'amp-ad-3p-impl.js';
-  if (is3pFile && !isTestFile &&!isImplFile) {
+  // Yet another reason to move ads/google/a4a somewhere else
+  var isA4A = /\/a4a\//.test(pathname);
+  if (is3pFile && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

@@ -46,8 +46,21 @@ let ServiceHolderDef;
  * @return {*}
  */
 export function getService(win, id, opt_factory) {
-  return getServiceInternal(win, id,
-      opt_factory ? () => opt_factory(win) : undefined);
+  return getServiceInternal(win, win, id,
+      opt_factory ? opt_factory : undefined);
+}
+
+/**
+ * Returns a service and registers it given a class to be used as
+ * implementation.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {function(new:T, !Window)} constructor
+ * @return {T}
+ * @template T
+ */
+export function fromClass(win, id, constructor) {
+  return getServiceInternal(win, win, id, undefined, constructor);
 }
 
 /**
@@ -90,8 +103,28 @@ export function getServiceForDoc(nodeOrDoc, id, opt_factory) {
   const ampdoc = getAmpdoc(nodeOrDoc);
   return getServiceInternal(
       ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      ampdoc,
       id,
-      opt_factory ? () => opt_factory(ampdoc) : undefined);
+      opt_factory);
+}
+
+/**
+ * Returns a service and registers it given a class to be used as
+ * implementation.
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} win
+ * @param {string} id of the service.
+ * @param {function(new:T, !./service/ampdoc-impl.AmpDoc)} constructor
+ * @return {T}
+ * @template T
+ */
+export function fromClassForDoc(nodeOrDoc, id, constructor) {
+  const ampdoc = getAmpdoc(nodeOrDoc);
+  return getServiceInternal(
+      ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc,
+      ampdoc,
+      id,
+      undefined,
+      constructor);
 }
 
 /**
@@ -147,14 +180,18 @@ function getAmpdocService(win) {
 }
 
 /**
- * @param {!Object} holder
+ * @param {!Object} holder Object holding the service instance.
+ * @param {!Object} context Win or AmpDoc.
  * @param {string} id of the service.
- * @param {function():!Object=} opt_factory Should create the service
+ * @param {!Function=} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
- *     if the service does not exist yet.
+ *     if the service does not exist yet. Called with context.
+ * @param {!Function} opt_constructor Constructor function to new the service.
+ *     Called with context.
  * @return {*}
  */
-function getServiceInternal(holder, id, opt_factory) {
+function getServiceInternal(holder, context, id, opt_factory,
+    opt_constructor) {
   const services = getServices(holder);
   let s = services[id];
   if (!s) {
@@ -166,8 +203,11 @@ function getServiceInternal(holder, id, opt_factory) {
   }
 
   if (!s.obj) {
-    dev.assert(opt_factory, 'Factory not given and service missing %s', id);
-    s.obj = opt_factory();
+    dev.assert(opt_factory || opt_constructor,
+        'Factory or class not given and service missing %s', id);
+    s.obj = opt_constructor
+        ? new opt_constructor(context)
+        : opt_factory(context);
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
