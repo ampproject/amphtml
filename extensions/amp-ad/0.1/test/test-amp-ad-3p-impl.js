@@ -172,11 +172,6 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          // sandbox.stub(impl,
-          //   'attemptChangeSize',
-          //   function(height, width) {
-          //     return Promise.resolve();
-          // });
           const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217, 114);
           expect(attemptChangeSizeSpy.callCount).to.equal(1);

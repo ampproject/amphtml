@@ -415,7 +415,7 @@ export class AmpIframe extends AMP.BaseElement {
         if (newWidth !== undefined) {
           this.element.setAttribute('width', newWidth);
         }
-      }).catch(() => {
+      }, () => {
         user.error(TAG_,
           'ignoring embed-size request because'
           + 'no width or height value is provided',

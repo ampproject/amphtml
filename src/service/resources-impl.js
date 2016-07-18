@@ -537,7 +537,7 @@ export class Resources {
           if (status) {
             resolve();
           } else {
-            reject(new Error('Attempt ChangeSize failed now'));
+            reject(new Error('changeSize attempt denied'));
           }
         });
     });
