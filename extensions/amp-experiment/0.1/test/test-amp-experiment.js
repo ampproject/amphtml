@@ -25,14 +25,12 @@ describe('amp-experiment', () => {
 
   const config = {
     'experiment-1': {
-      grouping: 'xyz',
       variants: {
         'variant-a': 50,
         'variant-b': 50,
       },
     },
     'experiment-2': {
-      grouping: 'xyz',
       variants: {
         'variant-c': 50,
         'variant-d': 50,
