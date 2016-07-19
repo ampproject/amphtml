@@ -118,13 +118,13 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           slot.setTargeting(key, data.targeting[key]);
         }
       }
-
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
         if (event.isEmpty) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         }
+        global.context.renderStart();
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
 
@@ -181,6 +181,7 @@ function doubleClickWithGlade(global, data) {
     if (event.detail.empty) {
       global.context.noContentAvailable();
     }
+    global.context.renderStart();
   });
 
   window.glade = {correlator: getCorrelator(global)};

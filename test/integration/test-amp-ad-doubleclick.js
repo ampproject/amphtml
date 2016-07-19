@@ -87,18 +87,25 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
       expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
           {sport: ['rugby', 'cricket']});
+      console.log('before the timeout function');
       return poll('main ad JS is injected', () => {
+        console.log('aaaaaaaaaaaaaaaaaa');
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
       }, undefined,  /* timeout */ 5000);
     }).then(() => {
       return poll('render-start message received', () => {
+        console.log('render-start message receive poll');
         return fixture.messages.filter(message => {
+          console.log('render-start in test-amp-ad-doubleclick');
           return message.type == 'render-start';
         }).length;
       });
     }).then(() => {
+      console.log('after render start');
       expect(iframe.style.visibility).to.equal('');
+      console.log('iframe is', iframe);
+      console.log(iframe.contentWindow);
       const win = iframe.contentWindow;
       return poll('GPT loaded', () => {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();

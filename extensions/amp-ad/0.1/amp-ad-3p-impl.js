@@ -205,6 +205,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     });
   }
 
+  // Get the renderStartPromise_
+  getRenderStartPromise() {
+    return this.RenderStartPromise_;
+  }
+
   /**
    * Prefetches and preconnects URLs related to the ad.
    * @override
@@ -276,7 +281,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    console.log('ad start to layout');
     if (!this.iframe_) {
       let renderPromise = new Promise((render) => {
         if (render) {

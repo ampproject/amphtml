@@ -168,6 +168,10 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
+const defaultAllowedTypesWaitForRenderStart = [
+  'doubleclick',
+];
+
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -274,6 +278,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       window.context.updateDimensions = triggerDimensions;
     }
 
+    // if (defaultAllowedTypesWaitForRenderStart.indexOf(data.type) != -1) {
+    //   window.context.renderStart = triggerRenderStart;
+    // }
+
     // This only actually works for ads.
     const initialIntersection = window.context.initialIntersection;
     window.context.observeIntersection = cb => {
@@ -295,9 +303,11 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
-    nonSensitiveDataPostMessage('render-start');
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
+    //if (defaultAllowedTypesWaitForRenderStart.indexOf(data.type) < 0) {
+      nonSensitiveDataPostMessage('render-start');
+    //}
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
@@ -316,6 +326,10 @@ function triggerDimensions(width, height) {
 
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
+}
+
+function triggerRenderStart() {
+  nonSensitiveDataPostMessage('render-start');
 }
 
 /**
