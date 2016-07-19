@@ -25,7 +25,7 @@ min_validator_revision_required: 143
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 237
+spec_file_revision: 241
 
 # Validator extensions.
 # =====================
@@ -714,6 +714,7 @@ attr_lists: {
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "fb-messenger"
+      allowed_protocol: "skype"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
       allowed_protocol: "threema"
@@ -799,6 +800,7 @@ tags: {
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "fb-messenger"
+      allowed_protocol: "skype"
       allowed_protocol: "sms"
       allowed_protocol: "tel"
       allowed_protocol: "threema"
