@@ -103,7 +103,7 @@ function isCdnJsFile(url) {
  *
  * @const
  */
-const clients = Object.create(null);
+const clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
@@ -197,103 +197,103 @@ const dbPromise = cachePromise.then(() => {
 
 self.addEventListener('install', function(install) {
   install.waitUntil(Promise.all([cachePromise, cacheCleanup, dbPromise]));
+});
 
-  // Setup the Fetch listener
-  // My assumptions:
-  //   - Doc requests one uniform AMP release version for all files, anything
-  //     else is malarkey.
-  self.addEventListener('fetch', function(event) {
-    const request = event.request;
-    const clientId = event.clientId;
-    const url = request.url;
-    let response;
+// Setup the Fetch listener
+// My assumptions:
+//   - Doc requests one uniform AMP release version for all files, anything
+//     else is malarkey.
+self.addEventListener('fetch', function(event) {
+  const request = event.request;
+  const clientId = event.clientId;
+  const url = request.url;
+  let response;
 
-    // We only cache CDN JS files, and we need a clientId to do our magic.
-    if (clientId && isCdnJsFile(url)) {
-      const requestFile = basename(url);
-      const requestVersion = ampVersion(url);
+  // We only cache CDN JS files, and we need a clientId to do our magic.
+  if (clientId && isCdnJsFile(url)) {
+    const requestFile = basename(url);
+    const requestVersion = ampVersion(url);
 
-      // What version do we have for this client?
-      response = Promise.resolve(clients[clientId]).then(version => {
-        // If we already registered this client, we must always use the same
-        // version.
-        if (version) {
-          return version;
+    // What version do we have for this client?
+    response = Promise.resolve(clientsMap[clientId]).then(version => {
+      // If we already registered this client, we must always use the same
+      // version.
+      if (version) {
+        return version;
+      }
+
+      // If not, do we have this version cached, if so serve it.
+      // do we have a newer version cached? Check the db, if so serve it.
+      // If not, get the newest version, cache it, serve it.
+      return db.transaction('js-files', 'readonly').run(transaction => {
+        const files = transaction.objectStore('js-files');
+        return files.get(requestFile);
+      }).then((item = {}) => {
+        const versions = item.versions;
+        if (!versions || versions.length === 0) {
+          return VERSION;
         }
 
-        // If not, do we have this version cached, if so serve it.
-        // do we have a newer version cached? Check the db, if so serve it.
-        // If not, get the newest version, cache it, serve it.
-        return db.transaction('js-files', 'readonly').run(transaction => {
-          const files = transaction.objectStore('js-files');
-          return files.get(requestFile);
-        }).then((item = {}) => {
-          const versions = item.versions;
-          if (!versions || versions.length === 0) {
-            return VERSION;
-          }
+        const isVersionCached = versions.indexOf(requestVersion) > -1;
+        // TODO Make this smarter. We should probably select the version
+        // with the most other-files.
+        return isVersionCached ? requestVersion : versions[versions.length - 1];
+      });
+    }).then(version => {
+      const versionedRequest = version === requestVersion ?
+          request :
+          new Request(versionedUrl(url, version), request);
+      clientsMap[clientId] = version;
 
-          const isVersionCached = versions.indexOf(requestVersion) > -1;
-          // TODO Make this smarter. We should probably select the version
-          // with the most other-files.
-          return isVersionCached ? requestVersion : versions[versions.length - 1];
-        });
-      }).then(version => {
-        const versionedRequest = version === requestVersion ?
-            request :
-            new Request(versionedUrl(url, version), request);
-        clients[clientId] = version;
+      return cache.match(versionedRequest).then(function(response) {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
 
-        return cache.match(versionedRequest).then(function(response) {
-          // Cache hit - return response
-          if (response) {
-            return response;
-          }
+        // Must always fetch.
+        return fetch(versionedRequest).then(function(response) {
+          // Did we receive a valid response (200 <= status < 300)?
+          if (response && response.ok) {
+            // You must clone to prevent double reading the body.
+            cache.put(versionedRequest, response.clone());
 
-          // Must always fetch.
-          return fetch(versionedRequest).then(function(response) {
-            // Did we receive a valid response (200 <= status < 300)?
-            if (response && response.ok) {
-              // You must clone to prevent double reading the body.
-              cache.put(versionedRequest, response.clone());
+            // Store the file version in IndexedDB
+            // This intentionally does not block the request to speed things
+            // up. This is likely fine since you don't have multiple
+            // `<script>`s with the same `src` on a page.
+            db.transaction('js-files', 'readwrite').run(transaction => {
+              const files = transaction.objectStore('js-files');
+              return files.get(requestFile).then(item => {
+                if (!item) {
+                  item = {
+                    file: requestFile,
+                    // We store a "version-less" url so we may purge our
+                    // versioned urls at a later time from the cache (which
+                    // keys things based on url).
+                    url: versionedUrl(url, '0000000000000'),
+                    versions: [],
+                  };
+                }
 
-              // Store the file version in IndexedDB
-              // This intentionally does not block the request to speed things
-              // up. This is likely fine since you don't have multiple
-              // `<script>`s with the same `src` on a page.
-              db.transaction('js-files', 'readwrite').run(transaction => {
-                const files = transaction.objectStore('js-files');
-                return files.get(requestFile).then(item => {
-                  if (!item) {
-                    item = {
-                      file: requestFile,
-                      // We store a "version-less" url so we may purge our
-                      // versioned urls at a later time from the cache (which
-                      // keys things based on url).
-                      url: versionedUrl(url, '0000000000000'),
-                      versions: [],
-                    };
-                  }
-
-                  const versions = item.versions;
-                  if (versions.indexOf(version) == -1) {
-                    versions.push(version);
-                    versions.sort((a, b) => a - b);
-                    return files.put(item);
-                  }
-                });
+                const versions = item.versions;
+                if (versions.indexOf(version) == -1) {
+                  versions.push(version);
+                  versions.sort((a, b) => a - b);
+                  return files.put(item);
+                }
               });
-            }
+            });
+          }
 
-            return response;
-          });
+          return response;
         });
       });
-    } else {
-      response = fetch(request);
-    }
+    });
+  } else {
+    response = fetch(request);
+  }
 
-    // You must always respond with a Response.
-    event.respondWith(response);
-  });
+  // You must always respond with a Response.
+  event.respondWith(response);
 });

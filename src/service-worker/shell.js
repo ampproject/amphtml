@@ -22,5 +22,5 @@ import {calculateExtensionScriptUrl} from '../service/extensions-impl';
  * thus, if a new SW must be installed) will be very fast.
  */
 const url = calculateExtensionScriptUrl(self.location.pathname,
-    'cache-service-worker', 'version', true);
+    'cache-service-worker', '$internalRuntimeVersion$', true);
 importScripts(url);
