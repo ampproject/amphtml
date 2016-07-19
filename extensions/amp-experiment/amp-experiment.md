@@ -16,6 +16,7 @@ limitations under the License.
 
 # <a name="amp-experiment"></a> `amp-experiment`
 
+| | |
 |-----------------------|------------------------------|
 | **Description** | Conduct user experience experiments on an AMP document and collect corresponding data with `amp-pixel` or `amp-analytics` | 
 | **Availability** | In Experiment |
