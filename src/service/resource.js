@@ -641,6 +641,21 @@ export class Resource {
   }
 
   /**
+   * Calls element's pauseCallback callback.
+   */
+  pauseOnRemove() {
+    if (this.state_ == ResourceState.NOT_BUILT) {
+      return;
+    }
+    this.setInViewport(false);
+    if (this.paused_) {
+      return;
+    }
+    this.paused_ = true;
+    this.element.pauseCallback();
+  }
+
+  /**
    * Calls element's resumeCallback callback.
    */
   resume() {

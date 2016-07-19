@@ -606,6 +606,26 @@ describe('Resource', () => {
         expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       });
     });
+
+    describe('when remove from DOM', () => {
+      it('should not call pauseCallback on remove for unbuilt ele', () => {
+        resource.state_ = ResourceState.NOT_BUILT;
+        resource.pauseOnRemove();
+        elementMock.expects('pauseCallback').never();
+        elementMock.expects('viewportCallback').never();
+      });
+
+      it('should call pauseCallback on remove for built ele', () => {
+        resource.state_ = ResourceState.LAYOUT_COMPLETE;
+        resource.isInViewport_ = true;
+        resource.paused_ = false;
+        elementMock.expects('pauseCallback').once();
+        elementMock.expects('viewportCallback').once();
+        resource.pauseOnRemove();
+        expect(resource.isInViewport_).to.equal(false);
+        expect(resource.paused_).to.equal(true);
+      });
+    });
   });
 
   describe('resumeCallback', () => {
