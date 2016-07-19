@@ -32,7 +32,7 @@ import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
-describe.only('runtime', () => {
+describe('runtime', () => {
 
   let win;
   let sandbox;
