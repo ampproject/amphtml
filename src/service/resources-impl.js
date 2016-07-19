@@ -766,7 +766,6 @@ export class Resources {
           if (isScrollingStopped) {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
-            resize = false;
             scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
@@ -782,7 +781,6 @@ export class Resources {
           if (request.callback) {
             request.callback(false);
           }
-          resize = false;
         } else {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
@@ -1219,6 +1217,9 @@ export class Resources {
             resource.debugid);
       }
       // Nothing to do.
+      if (opt_callback) {
+        opt_callback(false);
+      }
       return;
     }
 
