@@ -85,6 +85,7 @@ class AmpLightbox extends AMP.BaseElement {
     }).then(() => {
       this.updateInViewport(this.container_, true);
       this.scheduleLayout(this.container_);
+      this.scheduleResume(this.container_);
     });
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
