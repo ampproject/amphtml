@@ -15,7 +15,9 @@
  */
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timer} from '../../../src/timer';
@@ -108,6 +110,11 @@ export class AmpSlideScroll extends BaseCarousel {
      * @private {number}
      */
     this.elasticScrollState_ = 0;
+
+
+    const gestures =
+        Gestures.get(this.element, /* shouldNotPreventDefault */true);
+    gestures.onGesture(SwipeXRecognizer, () => {});
 
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
