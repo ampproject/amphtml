@@ -27,7 +27,7 @@ const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 const NATIVE_SNAP_TIMEOUT = 35;
 
 /** @const {number} */
-const NATIVE_TOUCH_TIMEOUT = 100;
+const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
@@ -98,8 +98,8 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {?number} */
     this.touchEndTimeout_ = null;
 
-    /** @private {?boolean} */
-    this.hasTouchMoved_ = null;
+    /** @private {boolean} */
+    this.hasTouchMoved_ = false;
 
     /**
      * 0 - not in an elastic state.
@@ -112,7 +112,7 @@ export class AmpSlideScroll extends BaseCarousel {
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
 
-    if(this.hasNativeSnapPoints_) {
+    if (this.hasNativeSnapPoints_) {
       this.slidesContainer_.addEventListener(
           'touchend', this.touchEndHandler_.bind(this));
 
@@ -123,6 +123,9 @@ export class AmpSlideScroll extends BaseCarousel {
 
   touchMoveHandler_() {
     this.hasTouchMoved_ = true;
+    if (this.touchEndTimeout_) {
+      timer.cancel(this.touchEndTimeout_);
+    }
   }
 
   touchEndHandler_() {
@@ -132,7 +135,7 @@ export class AmpSlideScroll extends BaseCarousel {
       }
       // Timer that detects scroll end and/or end of snap scroll.
       this.touchEndTimeout_ = timer.delay(() => {
-        const currentScrollLeft = this.slidesContainer_./*REVIEW*/scrollLeft;
+        const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
         if (this.snappingInProgress_) {
           return;
@@ -141,7 +144,7 @@ export class AmpSlideScroll extends BaseCarousel {
         this.touchEndTimeout_ = null;
       }, NATIVE_TOUCH_TIMEOUT);
     }
-    this.hasTouchMoved_ = null;
+    this.hasTouchMoved_ = false;
   }
 
   /** @override */
@@ -216,7 +219,6 @@ export class AmpSlideScroll extends BaseCarousel {
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
-    console.log(this.element.id, 'scrolling at ' + currentScrollLeft);
     if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
@@ -226,7 +228,6 @@ export class AmpSlideScroll extends BaseCarousel {
           this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
       this.scrollTimeout_ = timer.delay(() => {
-        console.log(this.element.id, 'scroll Ended at ' + currentScrollLeft);
 
         if (this.snappingInProgress_) {
           return;
