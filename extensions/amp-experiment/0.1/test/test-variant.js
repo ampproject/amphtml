@@ -24,6 +24,7 @@ describe('allocateVariant', () => {
   let fakeWin;
   let getCidStub;
   let uniformStub;
+  let getParamStub;
   let getNotificationStub;
 
   beforeEach(() => {
@@ -38,6 +39,7 @@ describe('allocateVariant', () => {
     sandbox = sinon.sandbox.create();
     getCidStub = stubService(sandbox, fakeWin, 'cid', 'get');
     uniformStub = stubService(sandbox, fakeWin, 'crypto', 'uniform');
+    getParamStub = stubService(sandbox, fakeWin, 'viewer', 'getParam');
     getNotificationStub = stubService(
         sandbox, fakeWin, 'userNotificationManager', 'getNotification');
   });
@@ -113,6 +115,14 @@ describe('allocateVariant', () => {
     }).to.throw(/Invalid name/);
 
     expect(() => {
+      allocateVariant(fakeWin, '', {
+        variants: {
+          'variant_1': 50,
+        },
+      });
+    }).to.throw(/Invalid name/);
+
+    expect(() => {
       allocateVariant(fakeWin, 'name', {
         group: 'invalid_group_name!',
         variants: {
@@ -165,6 +175,28 @@ describe('allocateVariant', () => {
         '-Variant_3': 20.123,
       },
     })).to.eventually.equal(null);
+  });
+
+  it('allow variant override from URL fragment', () => {
+    getParamStub.withArgs('amp-x-name').returns('-Variant_1');
+    return expect(allocateVariant(fakeWin, 'name', {
+      sticky: false,
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_1');
+  });
+
+  it('variant override should ignore non-existed variant name', () => {
+    getParamStub.withArgs('amp-x-name').returns('-Variant_3');
+    return expect(allocateVariant(fakeWin, 'name', {
+      sticky: false,
+      variants: {
+        '-Variant_1': 50,
+        '-Variant_2': 50,
+      },
+    })).to.eventually.equal('-Variant_2');
   });
 
   it('should work in sticky mode with default CID scope', () => {
