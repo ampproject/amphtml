@@ -282,7 +282,7 @@ export class Resource {
         width: requestedWidth,
       };
     }
-    this.element.overflowCallback(overflown);
+    this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
   /** @private */
