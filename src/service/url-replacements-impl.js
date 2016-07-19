@@ -198,7 +198,7 @@ export class UrlReplacements {
     this.set_('VARIANTS', () => {
       return this.variants_.then(variants => {
         user.assert(variants,
-            'To use variable VARIANT, amp-experiment should be configured');
+            'To use variable VARIANTS, amp-experiment should be configured');
 
         const experiments = [];
         for (const experiment in variants) {
