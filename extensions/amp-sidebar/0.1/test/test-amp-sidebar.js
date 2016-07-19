@@ -236,6 +236,8 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
+      impl.schedulePause = sandbox.spy();
+      impl.scheduleResume = sandbox.spy();
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
@@ -245,10 +247,24 @@ describe('amp-sidebar', () => {
         callback();
       });
       expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(0);
+      expect(impl.scheduleResume.callCount).to.equal(0);
       impl.toggle_();
       expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause.callCount).to.equal(0);
+      expect(impl.scheduleResume.callCount).to.equal(1);
       impl.toggle_();
       expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.scheduleResume.callCount).to.equal(1);
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.true;
+      expect(impl.schedulePause.callCount).to.equal(1);
+      expect(impl.scheduleResume.callCount).to.equal(2);
+      impl.toggle_();
+      expect(impl.isOpen_()).to.be.false;
+      expect(impl.schedulePause.callCount).to.equal(2);
+      expect(impl.scheduleResume.callCount).to.equal(2);
     });
   });
 

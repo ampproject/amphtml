@@ -145,7 +145,9 @@ export class AmpSidebar extends AMP.BaseElement {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         timer.delay(() => {
-          this.scheduleLayout(this.getRealChildren());
+          const children = this.getRealChildren();
+          this.scheduleLayout(children);
+          this.scheduleResume(children);
         }, ANIMATION_TIMEOUT);
       });
     });
