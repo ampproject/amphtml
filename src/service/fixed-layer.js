@@ -101,21 +101,7 @@ export class FixedLayer {
       this.discoverFixedSelectors_(stylesheet.cssRules, fixedSelectors);
     }
 
-    try {
-      fixedSelectors.forEach(selector => {
-        const elements = this.doc.querySelectorAll(selector);
-        for (let i = 0; i < elements.length; i++) {
-          if (i > 10) {
-            // We shouldn't have too many of `fixed` elements.
-            break;
-          }
-          this.setupFixedElement_(elements[i], selector);
-        }
-      });
-    } catch (e) {
-      // Fail quietly.
-      dev.error(TAG, 'Failed to setup fixed elements:', e);
-    }
+    this.trySetupFixedSelectorsNoInline(fixedSelectors);
 
     // Sort in document order.
     this.sortInDomOrder_();
@@ -321,6 +307,44 @@ export class FixedLayer {
    */
   isAllowedCoord_(s) {
     return (!!s && parseInt(s, 10) == 0);
+  }
+
+  /**
+   * Calls `setupFixedSelectors` in a try-catch.
+   * Fails quietly with a dev error if call fails.
+   * This method should not be inlined to prevent TryCatch deoptimization.
+   * NoInline keyword at the end of function name also prevents Closure compiler
+   * from inlining the function.
+   * @param {!Array<string>} fixedSelectors
+   * @private
+   */
+  trySetupFixedSelectorsNoInline(fixedSelectors) {
+    try {
+      this.setupFixedSelectors(fixedSelectors);
+    } catch (e) {
+      // Fail quietly.
+      dev.error(TAG, 'Failed to setup fixed elements:', e);
+    }
+  }
+
+  /**
+   * Calls `setupFixedElement_` for up to 10 elements matching each selector
+   * in `fixedSelectors`.
+   * @param {!Array<string>} fixedSelectors
+   * @private
+   */
+  setupFixedSelectors(fixedSelectors) {
+    for (let i = 0; i < fixedSelectors.length; i++) {
+      const fixedSelector = fixedSelectors[i];
+      const elements = this.doc.querySelectorAll(fixedSelector);
+      for (let j = 0; j < elements.length; j++) {
+        if (j > 10) {
+          // We shouldn't have too many of `fixed` elements.
+          break;
+        }
+        this.setupFixedElement_(elements[j], fixedSelector);
+      }
+    }
   }
 
   /**
