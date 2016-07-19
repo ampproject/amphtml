@@ -1649,25 +1649,25 @@ class ParsedAttrSpec {
  * around the attr lists with ParsedAttrSpec instances.
  * @private
  */
-class ParsedAttrLists {
+class ParsedAttrSpecs {
   /**
    * @param {!Array<!amp.validator.AttrList>} attrLists
    */
   constructor(attrLists) {
     /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
     this.attrListsByName = {};
-    /**
-     * The next id to assign to a ParsedAttrSpec instance. This is
-     * a globally unique id.
-     * @type {!number}
-     */
-    this.nextId = 0;
+
+    /** @private @type {!Array<!ParsedAttrSpec>} */
+    this.parsedAttrSpecs_ = [];
 
     for (const attrList of attrLists) {
       /** @type {!Array<!ParsedAttrSpec>} */
       const parsedAttrList = [];
       for (const attrSpec of attrList.attrs) {
-        parsedAttrList.push(new ParsedAttrSpec(attrSpec, this.nextId++));
+        const parsed =
+            new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        parsedAttrList.push(parsed);
       }
       this.attrListsByName[attrList.name] = parsedAttrList;
     }
@@ -1687,7 +1687,7 @@ class ParsedAttrLists {
    * @param {!amp.validator.TagSpec} tagSpec
    * @return {!Array<!ParsedAttrSpec>} all of the ParsedAttrSpec pointers
    */
-  GetAttrsFor(tagSpec) {
+  getAttrsFor(tagSpec) {
     /** @type {!Array<!ParsedAttrSpec>} */
     const attrs = [];
     /** @type {!Object<string, ?>} */
@@ -1710,7 +1710,9 @@ class ParsedAttrLists {
       const name = spec.name;
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
-        attrs.push(new ParsedAttrSpec(spec, this.nextId++));
+        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        attrs.push(parsed);
       }
     }
     // (3) attributes specified via reference to an attr_list.
@@ -1739,6 +1741,12 @@ class ParsedAttrLists {
     }
     return attrs;
   }
+
+  /**
+   * @param {number} id
+   * @return {!ParsedAttrSpec}
+   */
+  getById(id) { return this.parsedAttrSpecs_[id]; }
 }
 
 
@@ -1936,14 +1944,14 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
 class ParsedTagSpec {
   /**
    * @param {?string} templateSpecUrl
-   * @param {!ParsedAttrLists} parsedAttrLists
+   * @param {!ParsedAttrSpecs} parsedAttrSpecs
    * @param {!Object<string, number>} tagspecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} tagId
    */
   constructor(
-      templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
+      templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
       shouldRecordTagspecValidated, tagSpec, tagId) {
     /**
      * @type {!amp.validator.TagSpec}
@@ -1956,12 +1964,6 @@ class ParsedTagSpec {
      * @private
      */
     this.id_ = tagId;
-    /**
-     * ParsedAttributes keyed by id.
-     * @type {!Object<number, !ParsedAttrSpec>}
-     * @private
-     */
-    this.attrsById_ = {};
     /**
      * ParsedAttributes keyed by name.
      * @type {!Object<string, !ParsedAttrSpec>}
@@ -1985,6 +1987,11 @@ class ParsedTagSpec {
      */
     this.templateSpecUrl_ = templateSpecUrl;
     /**
+     * @type {!ParsedAttrSpecs}
+     * @private
+     */
+    this.parsedAttrSpecs_ = parsedAttrSpecs;
+    /**
      * @type {boolean}
      * @private
      */
@@ -2005,9 +2012,8 @@ class ParsedTagSpec {
      */
     this.implicitAttrspecs_ = [];
 
-    const parsedAttrs = parsedAttrLists.GetAttrsFor(tagSpec);
+    const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
     for (const parsedAttrSpec of parsedAttrs) {
-      this.attrsById_[parsedAttrSpec.getId()] = parsedAttrSpec;
       this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
@@ -2609,7 +2615,10 @@ class ParsedTagSpec {
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
             context.getDocLocator(),
             /* params */
-            [this.attrsById_[diff].getSpec().name, getTagSpecName(this.spec_)],
+            [
+              this.parsedAttrSpecs_.getById(diff).getSpec().name,
+              getTagSpecName(this.spec_)
+            ],
             this.spec_.specUrl, result);
       }
     } else {
@@ -2993,7 +3002,7 @@ class ParsedValidatorRules {
     /** @type {!amp.validator.ValidatorRules} */
     const rules = amp.validator.RULES;
 
-    const parsedAttrLists = new ParsedAttrLists(rules.attrLists);
+    const parsedAttrSpecs = new ParsedAttrSpecs(rules.attrLists);
 
     /** @type {!Object<string, number>} */
     const tagspecIdsByTagSpecName = {};
@@ -3018,7 +3027,7 @@ class ParsedValidatorRules {
         goog.asserts.assert(rules.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          rules.templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
+          rules.templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
       if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
