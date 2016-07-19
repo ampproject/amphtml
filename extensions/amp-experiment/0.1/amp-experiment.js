@@ -44,10 +44,11 @@ export class AmpExperiment extends AMP.BaseElement {
     const config = this.getConfig_();
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(this.getWin(), config[experimentName])
-          .then(variantName => {
-            results[experimentName] = variantName;
-          });
+      return allocateVariant(
+          this.getWin(), experimentName, config[experimentName])
+              .then(variantName => {
+                results[experimentName] = variantName;
+              });
     });
 
     /** @private @const {!Promise<!Object<string, ?string>>} */
