@@ -265,7 +265,7 @@ export class Resource {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
     if (opt_callback) {
-      opt_callback(true);
+      opt_callback(/* hasSizeChanged */true);
     }
   }
 

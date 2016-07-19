@@ -533,8 +533,8 @@ export class Resources {
   attemptChangeSize(element, newHeight, newWidth) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, status => {
-          if (status) {
+        newWidth, /* force */ false, hasSizeChanged => {
+          if (hasSizeChanged) {
             resolve();
           } else {
             reject(new Error('changeSize attempt denied'));
@@ -779,13 +779,13 @@ export class Resources {
         } else if (diff < 0) {
           // 6. The new height is smaller than the current one.
           if (request.callback) {
-            request.callback(false);
+            request.callback(/* hasSizeChanged */false);
           }
         } else {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
           if (request.callback) {
-            request.callback(false);
+            request.callback(/* hasSizeChanged */false);
           }
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
@@ -1218,7 +1218,7 @@ export class Resources {
       }
       // Nothing to do.
       if (opt_callback) {
-        opt_callback(false);
+        opt_callback(/* hasSizeChanged */false);
       }
       return;
     }
