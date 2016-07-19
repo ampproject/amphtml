@@ -68,7 +68,9 @@ function getMode_(win) {
     return win.context.mode;
   }
 
-  const isLocalDev = !!(location.hostname == 'localhost' ||
+  const IS_DEV = true;
+
+  const isLocalDev = IS_DEV && !!(location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
         location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
@@ -94,8 +96,8 @@ function getMode_(win) {
     // available categories, see ErrorCategory in validator/validator.proto.
     filter: developmentQuery['filter'],
     /* global process: false */
-    minified: process.env.NODE_ENV == 'production',
-    test: !!(win.AMP_TEST || win.__karma__),
+    minified: !IS_DEV || process.env.NODE_ENV == 'production',
+    test: IS_DEV && !!(win.AMP_TEST || win.__karma__),
     log: developmentQuery['log'],
     version: fullVersion,
   };

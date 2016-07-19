@@ -72,6 +72,14 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js'
     ]
   },
+  '(?:var|let|const) +IS_DEV +=': {
+    message: 'IS_DEV local var only allowed in mode.js and ' +
+        'dist.3p/current/integration.js',
+    whitelist: [
+      'src/mode.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
   '\\.prefetch\\(': {
     message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
   },
