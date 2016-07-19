@@ -796,7 +796,10 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, request.callback);
+              request.newHeight, request.newWidth);
+          if (request.callback) {
+            request.callback(/* hasSizeChanged */true);
+          }
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
         }
@@ -819,7 +822,10 @@ export class Resources {
               const box = request.resource.getLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth, request.callback);
+                  request.newHeight, request.newWidth);
+              if (request.callback) {
+                request.callback(/* hasSizeChanged */true);
+              }
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
