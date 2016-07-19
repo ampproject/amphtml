@@ -118,7 +118,7 @@ amp.validator.ValidationResult.prototype.mergeFrom = function(other) {
 };
 
 /**
- * Copyies results from another ValidationResult.
+ * Copies results from another ValidationResult.
  * @param {!amp.validator.ValidationResult} other
  */
 amp.validator.ValidationResult.prototype.copyFrom = function(other) {
