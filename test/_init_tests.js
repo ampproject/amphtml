@@ -21,7 +21,6 @@ import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platform} from '../src/platform';
-import {setModeForTesting} from '../src/mode';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 // Needs to be called before the custom elements are first made.
@@ -138,7 +137,7 @@ sinon.sandbox.create = function(config) {
 beforeEach(beforeTest);
 
 function beforeTest() {
-  setModeForTesting(null);
+  window.AMP_MODE = null;
   window.AMP_TEST = true;
   installDocService(window, true);
 }

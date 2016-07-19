@@ -123,12 +123,12 @@ describe('amp-experiment', () => {
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
     const stub = sandbox.stub(variant, 'allocateVariant');
-    stub.withArgs(
-        win, config['experiment-1']).returns(Promise.resolve('variant-a'));
-    stub.withArgs(
-        win, config['experiment-2']).returns(Promise.resolve('variant-d'));
-    stub.withArgs(
-        win, config['experiment-3']).returns(Promise.resolve(null));
+    stub.withArgs(win, 'experiment-1', config['experiment-1'])
+        .returns(Promise.resolve('variant-a'));
+    stub.withArgs(win, 'experiment-2', config['experiment-2'])
+        .returns(Promise.resolve('variant-d'));
+    stub.withArgs(win, 'experiment-3', config['experiment-3'])
+        .returns(Promise.resolve(null));
 
     experiment.buildCallback();
     return variantForOrNull(win).then(variants => {

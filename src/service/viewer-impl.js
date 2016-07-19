@@ -208,7 +208,7 @@ export class Viewer {
     // realistic iOS environment.
     if (platform.isIos() &&
             this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode().localDev || getMode().development)) {
+            (getMode(win).localDev || getMode(win).development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
