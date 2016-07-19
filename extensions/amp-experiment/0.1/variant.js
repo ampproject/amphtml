@@ -20,7 +20,7 @@ import {cidFor} from '../../../src/cid';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 
-const nameValidator = /^[\w-]+$/;
+export const nameValidator = /^[\w-]+$/;
 
 /**
  * Allocates the current page view to an experiment variant based on the given
