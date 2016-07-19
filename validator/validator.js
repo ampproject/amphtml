@@ -260,7 +260,7 @@ class ChildTagMatcher {
       return;
     }
     const expected = this.parentSpec_.childTags.mandatoryNumChildTags;
-    if (expected === null || expected === this.numChildTagsSeen_) {
+    if (expected === -1 || expected === this.numChildTagsSeen_) {
       return;
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -497,7 +497,6 @@ function computeAtRuleParsingSpec(cssSpec) {
   /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
-    goog.asserts.assert(atRuleSpec.name !== null);
     if (atRuleSpec.type === amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR ||
         atRuleSpec.type ===
             amp.validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE) {
@@ -617,7 +616,7 @@ class CdataMatcher {
       return;
     }
     // Max CDATA Byte Length
-    if (cdataSpec.maxBytes !== null) {
+    if (cdataSpec.maxBytes !== -1) {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -1237,7 +1236,6 @@ class ParsedAttrTriggerSpec {
      */
     this.spec_ = attrSpec.trigger;
 
-    goog.asserts.assert(attrSpec.name !== null);
     /**
      * @type {string} attrName
      * @private
@@ -1671,7 +1669,6 @@ class ParsedAttrLists {
       for (const attrSpec of attrList.attrs) {
         parsedAttrList.push(new ParsedAttrSpec(attrSpec, this.nextId++));
       }
-      goog.asserts.assert(attrList.name !== null);
       this.attrListsByName[attrList.name] = parsedAttrList;
     }
   }
@@ -1701,7 +1698,6 @@ class ParsedAttrLists {
       if (layoutSpecs !== undefined) {
         for (const spec of layoutSpecs) {
           const name = spec.getSpec().name;
-          goog.asserts.assert(name !== null);
           if (!namesSeen.hasOwnProperty(name)) {
             namesSeen[name] = 0;
             attrs.push(spec);
@@ -1712,7 +1708,6 @@ class ParsedAttrLists {
     // (2) attributes specified within |tagSpec|.
     for (const spec of tagSpec.attrs) {
       const name = spec.name;
-      goog.asserts.assert(name !== null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(new ParsedAttrSpec(spec, this.nextId++));
@@ -1724,7 +1719,6 @@ class ParsedAttrLists {
       goog.asserts.assert(specs !== undefined);
       for (const spec of specs) {
         const name = spec.getSpec().name;
-        goog.asserts.assert(name !== null);
         if (!namesSeen.hasOwnProperty(name)) {
           namesSeen[name] = 0;
           attrs.push(spec);
@@ -1738,7 +1732,6 @@ class ParsedAttrLists {
     }
     for (const spec of globalSpecs) {
       const name = spec.getSpec().name;
-      goog.asserts.assert(name !== null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(spec);
@@ -1758,11 +1751,8 @@ class ParsedAttrLists {
  * @private
  */
 function getTagSpecName(tagSpec) {
-  if (tagSpec.specName !== null) {
-    return tagSpec.specName;
-  }
-  goog.asserts.assert(tagSpec.tagName !== null);
-  return tagSpec.tagName.toLowerCase();
+  return (tagSpec.specName !== null) ? tagSpec.specName :
+                                       tagSpec.tagName.toLowerCase();
 }
 
 
@@ -2030,7 +2020,7 @@ class ParsedTagSpec {
       for (const altName of altNames) {
         this.attrsByName_[altName] = parsedAttrSpec;
       }
-      if (parsedAttrSpec.getSpec().dispatchKey !== null) {
+      if (parsedAttrSpec.getSpec().dispatchKey) {
         this.dispatchKeyAttrSpec_ = parsedAttrSpec;
       }
       if (parsedAttrSpec.getSpec().implicit) {
@@ -2076,7 +2066,6 @@ class ParsedTagSpec {
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
     const attrName = parsedSpec.getSpec().name;
-    goog.asserts.assert(attrName !== null);
     const attrValue = parsedSpec.getSpec().value;
     goog.asserts.assert(attrValue !== null);
     return makeDispatchKey(attrName, attrValue, mandatoryParent);
@@ -3025,13 +3014,13 @@ class ParsedValidatorRules {
 
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
-      if (amp.validator.GENERATE_DETAILED_ERRORS)
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
         goog.asserts.assert(rules.templateSpecUrl !== null);
+      }
       const parsedTagSpec = new ParsedTagSpec(
           rules.templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
-      goog.asserts.assert(tag.tagName !== null);
       if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
         this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
       }
@@ -3041,7 +3030,9 @@ class ParsedValidatorRules {
       } else {
         tagnameDispatch.registerTagSpec(i);
       }
-      if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
+      if (tag.mandatory) {
+        this.mandatoryTagSpecs_.push(i);
+      }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** type {!Object<!amp.validator.ValidationError.Code, string>} */
