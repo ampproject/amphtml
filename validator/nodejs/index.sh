@@ -6,12 +6,19 @@
 # so we probe which command it is.
 for CMD in node nodejs; do
   if [ "42" = "$(${CMD} --eval 'console.log("42")' 2>/dev/null)" ]; then
+
+    # Compute the absolute path for the directory that index.sh is installed in.
     DIR="$(dirname $(readlink -f $0))"
+
+    # If index.js is also in this directory, use it; otherwise we're probably
+    # in a bin directory in the NPM directory structure, so we look up the
+    # amphtml-validator module in the lib directory.
     if [ -f "${DIR}/index.js" ]; then
       MOD="${DIR}/index.js"
     else
       MOD="${DIR}/../lib/node_modules/amphtml-validator/index.js"
     fi
+    
     exec "$CMD" "$MOD" "$@"
   fi
 done
