@@ -180,8 +180,8 @@ describes.sandboxed('amp-accordion', {}, () => {
       const getSessionStateSpy = sandbox.spy(impl, 'getSessionState_');
       const getSessionStorageKeySpy =
           sandbox.spy(impl, 'getSessionStorageKey_');
-      toggleExperiment(iframe.win, 'amp-accordion-store-state-opt-out', true);
-      ampAccordion.setAttribute('store-state-opt-out', null);
+      toggleExperiment(iframe.win, 'amp-accordion-session-state-optout', true);
+      ampAccordion.setAttribute('disable-session-states', null);
       impl.buildCallback();
       expect(setSessionStateSpy).to.not.have.been.called;
       expect(getSessionStateSpy).to.not.have.been.called;

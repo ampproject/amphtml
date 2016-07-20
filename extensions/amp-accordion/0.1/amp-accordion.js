@@ -21,7 +21,7 @@ import {dev, user} from '../../../src/log';
 import {removeFragment} from '../../../src/url';
 
 /** @const */
-const TAG = 'amp-accordion-store-state-opt-out';
+const TAG = 'amp-accordion-session-state-optout';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -54,7 +54,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sessionId_ = this.getSessionStorageKey_();
 
     if (isExperimentOn(this.win, TAG)) {
-      this.sessionOptOut_ = this.element.hasAttribute('store-state-opt-out');
+      this.sessionOptOut_ = this.element.hasAttribute('disable-session-states');
     }
 
     this.element.setAttribute('role', 'tablist');

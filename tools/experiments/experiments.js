@@ -229,7 +229,7 @@ const EXPERIMENTS = [
         'amp-selector/amp-selector.md',
   },
   {
-    id: 'amp-accordion-store-state-opt-out',
+    id: 'amp-accordion-session-state-optout',
     name: 'AMP Accordion attribute to opt out of preserved state.',
     Spec: 'https://github.com/ampproject/amphtml/issues/3813',
   },
