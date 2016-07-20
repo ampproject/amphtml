@@ -178,8 +178,8 @@ describe('allocateVariant', () => {
   });
 
   it('allow variant override from URL fragment', () => {
-    getParamStub.withArgs('amp-x-name').returns('-Variant_1');
-    return expect(allocateVariant(fakeWin, 'name', {
+    getParamStub.withArgs('amp-x-Name').returns('-Variant_1');
+    return expect(allocateVariant(fakeWin, 'Name', {
       sticky: false,
       variants: {
         '-Variant_1': 50,
