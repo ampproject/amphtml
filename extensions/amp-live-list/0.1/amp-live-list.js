@@ -112,9 +112,6 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @const {!Window} */
-    this.win = this.win;
-
     /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
 
