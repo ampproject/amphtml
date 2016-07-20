@@ -21,8 +21,8 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
     type="industrybrains"
-    width="300"
-    height="250"
+    data-width="300"
+    data-height="250"
     data-cid="19626-3798936394">
 </amp-ad>
 ```
