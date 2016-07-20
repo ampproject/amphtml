@@ -48,7 +48,8 @@ function versionToDate(ampVersion) {
  * @return {string}
  */
 function ampVersion(url) {
-  const matches = /rtv\/(\d+)/.exec(url);
+  // RTVs are 2 digit prefixes followed by the current timestamp.
+  const matches = /rtv\/(?:\d{2})(\d{13,})/.exec(url);
   return matches ? matches[1] : VERSION;
 }
 
@@ -71,16 +72,18 @@ function basename(url) {
  * @return {string}
  */
 function versionedUrl(url, version = VERSION) {
-  return url.replace(ampVersion(url), version);
+  // Ensure we do not replace the prefix.
+  return url.replace(ampVersion(url) + '/', version + '/');
 }
 
 /**
  * Determines if a url is a request to a CDN JS file.
+ * We only consider "prod" (RTV 01) files.
  * @param {string} url
  * @return {boolean}
  */
 function isCdnJsFile(url) {
-  return url.startsWith('https://cdn.ampproject.org/') &&
+  return url.startsWith('https://cdn.ampproject.org/rtv/01') &&
     url.endsWith('.js');
 }
 
