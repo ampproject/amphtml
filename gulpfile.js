@@ -31,7 +31,6 @@ var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
-var windowConfig = require('./build-system/window-config');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
@@ -148,8 +147,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: windowConfig.getTemplate() +
-        'try{(function(){<%= contents %>})()}catch(e){' +
+    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
         'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
@@ -166,7 +164,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
-    wrapper: windowConfig.getTemplate() + '<%= contents %>'
+    wrapper: '<%= contents %>'
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -756,7 +754,6 @@ function buildAlp(options) {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
-    includeWindowConfig: true,
     includePolyfills: true,
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
