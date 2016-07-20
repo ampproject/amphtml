@@ -360,6 +360,7 @@ describe('Resources pause/resume scheduling', () => {
     it('should be ok with non amp children', () => {
       expect(() => {
         resources.schedulePause(parent, children);
+        resources.schedulePause(parent, child0);
       }).to.not.throw();
     });
 
@@ -404,6 +405,7 @@ describe('Resources pause/resume scheduling', () => {
     it('should be ok with non amp children', () => {
       expect(() => {
         resources.scheduleResume(parent, children);
+        resources.scheduleResume(parent, child0);
       }).to.not.throw();
     });
 

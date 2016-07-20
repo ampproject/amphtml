@@ -354,6 +354,7 @@ export class AmpSlideScroll extends BaseCarousel {
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
       if (showIndex == newIndex) {
         this.scheduleLayout(this.slides_[showIndex]);
+        this.scheduleResume(this.slides_[showIndex]);
       } else {
         this.schedulePreload(this.slides_[showIndex]);
       }
