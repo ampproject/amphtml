@@ -45,12 +45,12 @@ it('deployed validator rejects the empty file', function(done) {
 });
 
 it('validator_minified.js was built (run build.py if this fails)', function() {
-  expect(fs.statSync('dist/validator_minified.js').isFile()).toBe(true);
+  expect(fs.statSync('../dist/validator_minified.js').isFile()).toBe(true);
 });
 
 it('built validator rejects the empty file', function(done) {
   // Note: This will use the validator that was built with build.py.
-  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+  ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
@@ -65,8 +65,8 @@ it('built validator rejects the empty file', function(done) {
 it('accepts the minimum valid AMP file', function(done) {
   // Note: This will use the validator that was built with build.py.
   var mini =
-      fs.readFileSync('testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
-  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+      fs.readFileSync('../testdata/feature_tests/minimum_valid_amp.html', 'utf-8');
+  ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString('');
         expect(validationResult.status).toBe('FAIL');
@@ -81,10 +81,10 @@ it('accepts the minimum valid AMP file', function(done) {
 it('rejects a specific file that is known to have errors', function(done) {
   // Note: This will use the validator that was built with build.py.
   var severalErrorsHtml =
-      fs.readFileSync('testdata/feature_tests/several_errors.html', 'utf-8');
+      fs.readFileSync('../testdata/feature_tests/several_errors.html', 'utf-8');
   var severalErrorsOut =
-      fs.readFileSync('testdata/feature_tests/several_errors.out', 'utf-8');
-  ampValidator.getInstance(/*validatorJs*/ 'dist/validator_minified.js')
+      fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8');
+  ampValidator.getInstance(/*validatorJs*/ '../dist/validator_minified.js')
       .then(function(instance) {
         var validationResult = instance.validateString(severalErrorsHtml);
         expect(validationResult.status).toBe('FAIL');
@@ -111,7 +111,7 @@ it('rejects a specific file that is known to have errors', function(done) {
 
 it('handles syntax errors in validator file', function(done) {
   // Note: This points the library at a file that's not even Javascript.
-  ampValidator.getInstance(/*validatorJs*/ 'dist/validator.protoascii')
+  ampValidator.getInstance(/*validatorJs*/ '../dist/validator.protoascii')
       .then(function(instance) {
         fail('We should not get here since this is not a good validator.');
         done();
@@ -126,7 +126,7 @@ it('handles syntax errors in validator file', function(done) {
 
 it('emits text if --format=text is specified on command line', function(done) {
   var severalErrorsOut =
-      fs.readFileSync('testdata/feature_tests/several_errors.out', 'utf-8')
+      fs.readFileSync('../testdata/feature_tests/several_errors.out', 'utf-8')
           .split('\n')
           .splice(1)  // trim 1st line
           .join('\n')
@@ -134,12 +134,12 @@ it('emits text if --format=text is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../index.js', '--format=text',
+        '../nodejs/index.js', '--format=text',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html'
       ],
-      {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
+      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
       function (error, stdout, stderr) {
         expect(error).toBeDefined();  // At least one file had errors.
         expect(stderr).toBe(severalErrorsOut);
@@ -148,16 +148,17 @@ it('emits text if --format=text is specified on command line', function(done) {
       });
 }, 5000);
 
+
 it('emits json if --format=json is specified on command line', function(done) {
   execFile(
       process.execPath,
       [
-        '../index.js', '--format=json',
+        '../nodejs/index.js', '--format=json',
         '--validator_js=../dist/validator_minified.js',
         'feature_tests/several_errors.html',
         'feature_tests/minimum_valid_amp.html'
       ],
-      {'cwd': 'testdata'},  // Run inside the testdata dir to match paths.
+      {'cwd': '../testdata'},  // Run inside the testdata dir to match paths.
       function (error, stdout, stderr) {
         expect(error).toBeDefined();  // At least one file had errors
         expect(stderr).toBe('');      // entire json results will be on stdout
@@ -176,6 +177,7 @@ it('emits json if --format=json is specified on command line', function(done) {
         done();
       });
 }, 5000);
+
 
 jasmine.onComplete(function(passed) { process.exit(passed ? 0 : 1); });
 jasmine.execute();

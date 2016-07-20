@@ -6,7 +6,13 @@
 # so we probe which command it is.
 for CMD in node nodejs; do
   if [ "42" = "$(${CMD} --eval 'console.log("42")' 2>/dev/null)" ]; then
-    exec "$CMD" index.js "$@"
+    DIR="$(dirname $(readlink -f $0))"
+    if [ -f "${DIR}/index.js" ]; then
+      MOD="${DIR}/index.js"
+    else
+      MOD="${DIR}/../lib/node_modules/amphtml-validator/index.js"
+    fi
+    exec "$CMD" "$MOD" "$@"
   fi
 done
 echo "No working Node.js binary found (tried 'node', 'nodejs')." > /dev/stderr

@@ -127,9 +127,12 @@ def InstallNodeDependencies():
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
+  logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(['npm', 'install'])
-  logging.info('installing webui dependencies ...')
+  logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(['npm', 'install'], cwd='webui')
+  logging.info('installing AMP Validator nodejs dependencies ...')
+  subprocess.check_call(['npm', 'install'], cwd='nodejs')
   logging.info('... done')
 
 
@@ -284,7 +287,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('entering ...')
   # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
-      [nodejs_cmd, 'index.js', '--validator_js',
+      [nodejs_cmd, 'nodejs/index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/minimum_valid_amp.html'],
       stdout=subprocess.PIPE,
@@ -297,7 +300,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
 
   # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
-      [nodejs_cmd, 'index.js', '--validator_js',
+      [nodejs_cmd, 'nodejs/index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/empty.html'],
       stdout=subprocess.PIPE,
@@ -318,9 +321,9 @@ def RunIndexTest(nodejs_cmd):
     nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  p = subprocess.Popen([nodejs_cmd, 'index_test.js'],
+  p = subprocess.Popen([nodejs_cmd, './index_test.js'],
                        stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
+                       stderr=subprocess.PIPE, cwd='nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
