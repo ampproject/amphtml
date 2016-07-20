@@ -169,7 +169,10 @@ export class AmpAdApiHandler {
     this.pendingResizeRequest_ = {source, origin, width, height};
 
     this.baseInstance_.attemptChangeSize(height, width, () => {
-      this.sendEmbedSizeResponse_(true /* success */);
+      if (this.pendingResizeRequest_) {
+        this.sendEmbedSizeResponse_(true /* success */);
+        this.pendingResizeRequest_ = null;
+      }
     });
   }
 
@@ -192,7 +195,6 @@ export class AmpAdApiHandler {
         success ? 'embed-size-changed' : 'embed-size-denied',
         data,
         this.is3p_);
-    this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -233,6 +235,7 @@ export class AmpAdApiHandler {
   overflowCallback(overflown, unusedRequestedHeight, unusedRequestedWidth) {
     if (overflown && this.iframe_ && this.pendingResizeRequest_) {
       this.sendEmbedSizeResponse_(false /* success */);
+      this.pendingResizeRequest_ = null;
     }
   }
 }
