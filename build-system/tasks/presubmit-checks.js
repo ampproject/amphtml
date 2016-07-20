@@ -53,10 +53,9 @@ var forbiddenTerms = {
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-    // TODO: temporary, remove when validator is up to date
     whitelist: [
       'build-system/server.js',
-      'validator/index.js',  // NodeJs only.
+      'validator/nodejs/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-full.js',
       'validator/validator-in-browser.js',
