@@ -25,7 +25,7 @@ import {
 } from './service/extensions-impl';
 import {ampdocFor} from './ampdoc';
 import {cssText} from '../build/css';
-import {dev} from './log';
+import {dev, user} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {childElementsByTag} from './dom';
 import {getMode} from './mode';
@@ -538,7 +538,7 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
             extensionIds.push(customElement);
           }
         } else {
-          dev.warn(TAG, '- unknown script: ', n, src);
+          user.error(TAG, '- unknown script: ', n, src);
         }
       } else if (n.tagName == 'SCRIPT') {
         // Non-src version of script.
@@ -547,12 +547,12 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           shadowRoot.appendChild(global.document.importNode(n, true));
           dev.fine(TAG, '- non-src script: ', n);
         } else {
-          dev.warn(TAG, '- unallowed inline javascript: ', n);
+          user.error(TAG, '- unallowed inline javascript: ', n);
         }
       } else if (n.tagName == 'NOSCRIPT') {
         // Ignore.
       } else {
-        dev.warn(TAG, '- UNKNOWN head element:', n);
+        user.error(TAG, '- UNKNOWN head element:', n);
       }
     }
   }
