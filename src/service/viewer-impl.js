@@ -208,7 +208,7 @@ export class Viewer {
     // realistic iOS environment.
     if (platform.isIos() &&
             this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode().localDev || getMode().development)) {
+            (getMode(win).localDev || getMode(win).development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
@@ -226,7 +226,8 @@ export class Viewer {
      * a web view.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = this.isIframed_ || this.params_['webview'] === '1';
+    this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
+        !this.win.AMP_TEST_IFRAME;
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();

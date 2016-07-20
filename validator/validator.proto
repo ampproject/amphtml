@@ -241,7 +241,7 @@ message ChildTagSpec {
 // multiple meta tags (with different attributes).
 // NEXT AVAILABLE TAG: 20
 message TagSpec {
-  // Use lower-case tag names only. If adding the same tag twice, then they must
+  // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
   optional string tag_name = 1;
 

@@ -88,7 +88,8 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   }
 
   c.client.amp = {
-    useCompiledJs: !!argv.compiled
+    useCompiledJs: !!argv.compiled,
+    saucelabs: !!argv.saucelabs,
   };
 
   if (argv.grep) {

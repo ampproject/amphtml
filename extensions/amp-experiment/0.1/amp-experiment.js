@@ -17,7 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {waitForBody} from '../../../src/dom';
+import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
 import {getService} from '../../../src/service';
 
@@ -44,15 +44,17 @@ export class AmpExperiment extends AMP.BaseElement {
     const config = this.getConfig_();
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
-      return allocateVariant(this.getWin(), config[experimentName])
-          .then(variantName => {
-            results[experimentName] = variantName;
-          });
+      return allocateVariant(
+          this.getWin(), experimentName, config[experimentName])
+              .then(variantName => {
+                results[experimentName] = variantName;
+              });
     });
 
-    /** @private @const {!Promise<Object<string, ?string>>} */
-    this.experimentVariants_ = Promise.all(variants).then(() => results);
-    this.experimentVariants_.then(this.addToBody_.bind(this));
+    /** @private @const {!Promise<!Object<string, ?string>>} */
+    this.experimentVariants_ = Promise.all(variants)
+        .then(() => results)
+        .then(this.addToBody_.bind(this));
 
     getService(this.getWin(), 'variant', () => this.experimentVariants_);
   }
@@ -73,16 +75,19 @@ export class AmpExperiment extends AMP.BaseElement {
    * Adds the given experiment and variant pairs to body element as attributes
    * and values. Experiment with no variant assigned (null) will be skipped.
    * @param {!Object<string, ?string>} experiments
+   * @return {!Promise<!Object<string, ?string>>} a promise of the original
+   *     param passed in
    * @private
    */
   addToBody_(experiments) {
     const doc = this.getWin().document;
-    waitForBody(doc, () => {
+    return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {
           doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
         }
       }
+      return experiments;
     });
   }
 }

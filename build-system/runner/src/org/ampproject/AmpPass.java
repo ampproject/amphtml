@@ -15,6 +15,7 @@
  */
 package org.ampproject;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -43,12 +44,15 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
   private final Set<String> stripTypeSuffixes;
+  private final Map<String, Node> assignmentReplacements;
   final boolean isProd;
 
-  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes) {
+  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes,
+        Map<String, Node> assignmentReplacements) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
+    this.assignmentReplacements = assignmentReplacements;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -74,6 +78,23 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("minified"))) {
       replaceWithBooleanExpression(true, n, parent);
+    } else if (isProd) {
+      maybeReplaceRValueInVar(n, assignmentReplacements);
+    }
+  }
+
+  private void maybeReplaceRValueInVar(Node n, Map<String, Node> map) {
+    if (n != null && (n.isVar() || n.isLet() || n.isConst())) {
+      Node varNode = n.getFirstChild();
+      if (varNode != null) {
+        for (Map.Entry<String, Node> mapping : map.entrySet()) {
+          if (varNode.getString() == mapping.getKey()) {
+            varNode.replaceChild(varNode.getFirstChild(), mapping.getValue());
+            compiler.reportCodeChange();
+            return;
+          }
+        }
+      }
     }
   }
 
@@ -85,7 +106,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
     // mode.getMode().localDev
     // mode [property] ->
-    //   getMode [call] 
+    //   getMode [call]
     //   ${property} [string]
     if (!n.isGetProp()) {
       return false;

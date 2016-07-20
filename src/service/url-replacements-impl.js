@@ -31,7 +31,8 @@ import {activityFor} from '../activity';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
-
+const EXPERIMENT_DELIMITER = '!';
+const VARIANT_DELIMITER = '.';
 
 /**
  * This class replaces substitution variables with their values.
@@ -190,6 +191,23 @@ export class UrlReplacements {
         const variant = variants[experiment];
         // When no variant assigned, use reserved keyword 'none'.
         return variant === null ? 'none' : variant;
+      });
+    });
+
+    // Returns all assigned experiment variants in a serialized form.
+    this.set_('VARIANTS', () => {
+      return this.variants_.then(variants => {
+        user.assert(variants,
+            'To use variable VARIANTS, amp-experiment should be configured');
+
+        const experiments = [];
+        for (const experiment in variants) {
+          const variant = variants[experiment];
+          experiments.push(
+              experiment + VARIANT_DELIMITER + (variant || 'none'));
+        }
+
+        return experiments.join(EXPERIMENT_DELIMITER);
       });
     });
 

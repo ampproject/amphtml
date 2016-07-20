@@ -2,10 +2,13 @@
 package org.ampproject;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.CompilerPass;
 import com.google.javascript.jscomp.Es6CompilerTestCase;
+import com.google.javascript.rhino.IR;
+import com.google.javascript.rhino.Node;
 
 
 /**
@@ -16,8 +19,12 @@ public class AmpPassTest extends Es6CompilerTestCase {
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev.fine");
 
+  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_DEV",
+      IR.falseNode());
+
   @Override protected CompilerPass getProcessor(Compiler compiler) {
-    return new AmpPass(compiler, /* isProd */ true, suffixTypes);
+    return new AmpPass(compiler, /* isProd */ true, suffixTypes, assignmentReplacements);
   }
 
   @Override protected int getNumRepetitions() {
@@ -190,6 +197,50 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
+  public void testGetModeWinTestPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true } }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode(win).test) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { test: true }; }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if (false) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
+  public void testGetModeWinMinifiedPropertyReplacement() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false } }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if ($mode.getMode(win).minified) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "function getMode() { return { minified: false }; }",
+             "var win = {};",
+             "var $mode = { getMode: getMode };",
+             "  if (true) {",
+             "    console.log('hello world');",
+             "  }",
+            "})()"));
+  }
+
   public void testGetModePreserve() throws Exception {
     test(
         LINE_JOINER.join(
@@ -224,6 +275,20 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  if ($mode.getMode().otherProp) {",
              "    console.log('hello world');",
              "  }",
+            "})()"));
+  }
+
+  public void testOptimizeGetModeFunction() throws Exception {
+    testEs6(
+        LINE_JOINER.join(
+             "(function() {",
+             "const IS_DEV = true;",
+             "const IS_SOMETHING = true;",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "const IS_DEV = false;",
+             "const IS_SOMETHING = true;",
             "})()"));
   }
 }
