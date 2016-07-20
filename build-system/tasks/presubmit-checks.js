@@ -55,6 +55,7 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/server.js',
+      'validator/index.js',  // NodeJs only.
       'validator/nodejs/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-full.js',
