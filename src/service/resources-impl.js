@@ -742,7 +742,10 @@ export class Resources {
         const iniBox = resource.getInitialLayoutBox();
         const diff = request.newHeight - box.height;
         if (diff == 0) {
-          // Nothing to do.
+          // Nothing to resize, resolve attemptChangeSize promise.
+          if (request.callback) {
+            request.callback(/* hasSizeChanged */true);
+          }
           continue;
         }
         // Check resize rules. It will either resize element immediately, or
@@ -772,6 +775,7 @@ export class Resources {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
           }
+          continue;
         } else if (iniBox.bottom >= docBottomOffset ||
                       box.bottom >= docBottomOffset) {
           // 5. Elements close to the bottom of the document (not viewport)
@@ -779,15 +783,9 @@ export class Resources {
           resize = true;
         } else if (diff < 0) {
           // 6. The new height is smaller than the current one.
-          if (request.callback) {
-            request.callback(/* hasSizeChanged */false);
-          }
         } else {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
-          if (request.callback) {
-            request.callback(/* hasSizeChanged */false);
-          }
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
         }
@@ -803,6 +801,10 @@ export class Resources {
           }
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
+        } else {
+          if (request.callback) {
+            request.callback(/* hasSizeChanged */false);
+          }
         }
       }
 
