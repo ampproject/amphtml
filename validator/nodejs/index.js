@@ -317,7 +317,7 @@ exports.getInstance = getInstance;
  */
 function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
-    console /*OK*/.log(
+    console.log(
         filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
   }
   for (var ii = 0; ii < validationResult.errors.length; ii++) {
@@ -400,7 +400,7 @@ function main() {
                 }
               }
               if (program.format === 'json') {
-                console /*OK*/.log(JSON.stringify(jsonOut));
+                console.log(JSON.stringify(jsonOut));
               }
             })
             .catch(function(error) {
