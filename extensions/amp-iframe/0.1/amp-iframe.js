@@ -273,7 +273,7 @@ export class AmpIframe extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timerFor(this.getWin()).promise(trackingIframeTimeout).then(() => {
+        timerFor(this.win).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -296,7 +296,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timerFor(this.getWin()).delay(() => {
+        timerFor(this.win).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });

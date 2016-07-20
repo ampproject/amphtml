@@ -34,7 +34,7 @@ export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
     if (!this.isExperimentOn_) {
       dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
@@ -45,7 +45,7 @@ export class AmpExperiment extends AMP.BaseElement {
     const results = Object.create(null);
     const variants = Object.keys(config).map(experimentName => {
       return allocateVariant(
-          this.getWin(), experimentName, config[experimentName])
+          this.win, experimentName, config[experimentName])
               .then(variantName => {
                 results[experimentName] = variantName;
               });
@@ -56,7 +56,7 @@ export class AmpExperiment extends AMP.BaseElement {
         .then(() => results)
         .then(this.addToBody_.bind(this));
 
-    getService(this.getWin(), 'variant', () => this.experimentVariants_);
+    getService(this.win, 'variant', () => this.experimentVariants_);
   }
 
   getConfig_() {
@@ -80,7 +80,7 @@ export class AmpExperiment extends AMP.BaseElement {
    * @private
    */
   addToBody_(experiments) {
-    const doc = this.getWin().document;
+    const doc = this.win.document;
     return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
         if (experiments[name]) {

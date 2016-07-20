@@ -28,7 +28,7 @@ class AmpFacebook extends AMP.BaseElement {
     // Hosts the facebook SDK.
     this.preconnect.preload(
         'https://connect.facebook.net/en_US/sdk.js', 'script');
-    preloadBootstrap(this.getWin());
+    preloadBootstrap(this.win);
   }
 
   /** @override */

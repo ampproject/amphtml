@@ -36,14 +36,10 @@ let ServiceHolderDef;
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  * @param {!Window} win
+ * @param {string} id
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
-  if (getMode().localDev) {
-    dev.assert(
-       win.services && win.services[id] && win.services[id].obj,
-        'Window service does not exist %s', id);
-  }
   return win.services[id].obj;
 }
 
@@ -51,16 +47,10 @@ export function getExistingServiceForWindow(win, id) {
  * Returns a service with the given id. Assumes that it has been constructed
  * already.
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {string} id
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
-  if (getMode().localDev) {
-    const holder = getAmpdocServiceHolder(nodeOrDoc);
-    dev.assert(
-       holder.services && holder.services[id] &&
-       holder.services[id].obj,
-        'AmpDoc service does not exist %s', id);
-  }
   return getAmpdocServiceHolder(nodeOrDoc).services[id].obj;
 }
 
@@ -205,7 +195,7 @@ function getAmpdoc(nodeOrDoc) {
  */
 function getAmpdocServiceHolder(nodeOrDoc) {
   const ampdoc = getAmpdoc(nodeOrDoc);
-  return ampdoc.isSingleDoc() ? ampdoc.getWin() : ampdoc;
+  return ampdoc.isSingleDoc() ? ampdoc.win : ampdoc;
 }
 
 /**

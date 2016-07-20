@@ -31,7 +31,7 @@ class AmpTwitter extends AMP.BaseElement {
     // Hosts the script that renders tweets.
     this.preconnect.preload(
         'https://platform.twitter.com/widgets.js', 'script');
-    preloadBootstrap(this.getWin());
+    preloadBootstrap(this.win);
   }
 
   /** @override */

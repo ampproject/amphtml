@@ -44,7 +44,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.getWin()) &&
+    return isGoogleAdsA4AValidEnvironment(this.win) &&
         this.isInAmpAdTag() &&
         !document.querySelector('meta[name=amp-3p-iframe-src]');
   }
@@ -52,7 +52,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   /** @override */
   getAdUrl() {
     const startTime = timer.now();
-    const global = this.getWin();
+    const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const slotRect = this.getIntersectionElementLayoutBox();
     const rawJson = this.element.getAttribute('json');

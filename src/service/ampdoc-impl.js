@@ -116,13 +116,6 @@ export class AmpDoc {
   }
 
   /**
-   * @return {!Window}
-   */
-  getWin() {
-    return dev.assert(null, 'not implemented');
-  }
-
-  /**
    * Returns the root node for this ampdoc. It will either be a `Document` for
    * the single-doc runtime mode, or a `ShadowRoot` for shadow-doc mode. This
    * node can be used, among other things, to add ampdoc-wide event listeners.
@@ -158,18 +151,13 @@ export class AmpDocSingle extends AmpDoc {
    */
   constructor(win) {
     super();
-    /** @private @const {!Window} */
+    /** @public @const {!Window} */
     this.win = win;
   }
 
   /** @override */
   isSingleDoc() {
     return true;
-  }
-
-  /** @override */
-  getWin() {
-    return this.win;
   }
 
   /** @override */
@@ -200,11 +188,6 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   isSingleDoc() {
     return false;
-  }
-
-  /** @override */
-  getWin() {
-    return this.win;
   }
 
   /** @override */

@@ -158,8 +158,8 @@ describe('amp-social-share', () => {
   it('opens share window in _blank', () => {
     return getShare('twitter').then(el => {
       el.implementation_.handleClick_();
-      expect(el.implementation_.getWin().open.called).to.be.true;
-      expect(el.implementation_.getWin().open.calledWith(
+      expect(el.implementation_.win.open.called).to.be.true;
+      expect(el.implementation_.win.open.calledWith(
         'https://twitter.com/intent/tweet?text=doc%20title&' +
           'url=https%3A%2F%2Fcanonicalexample.com%2F',
           '_blank', 'resizable,scrollbars,width=640,height=480'

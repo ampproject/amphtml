@@ -168,7 +168,7 @@ describe('amp-analytics', function() {
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';
@@ -738,7 +738,7 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
       sandbox.stub(crypto, 'uniform')
           .withArgs('0').returns(Promise.resolve(0.005));

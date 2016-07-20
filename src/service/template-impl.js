@@ -48,12 +48,10 @@ export class BaseTemplate {
     /** @public @const */
     this.element = element;
 
-    this.compileCallback();
-  }
+    /** @public @const */
+    this.win = this.element.ownerDocument.defaultView;
 
-  /** @protected @return {!Window} */
-  getWin() {
-    return this.element.ownerDocument.defaultView;
+    this.compileCallback();
   }
 
   /**

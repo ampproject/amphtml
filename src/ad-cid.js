@@ -33,13 +33,13 @@ export function getAdCid(adElement) {
   if (!(scope || consentId)) {
     return Promise.resolve();
   }
-  return cidForOrNull(adElement.getWin()).then(cidService => {
+  return cidForOrNull(adElement.win).then(cidService => {
     if (!cidService) {
       return;
     }
     let consent = Promise.resolve();
     if (consentId) {
-      consent = userNotificationManagerFor(adElement.getWin()).then(service => {
+      consent = userNotificationManagerFor(adElement.win).then(service => {
         return service.get(consentId);
       });
       if (!scope && consentId) {

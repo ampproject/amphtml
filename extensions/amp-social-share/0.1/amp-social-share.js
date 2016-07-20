@@ -52,7 +52,7 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {string} */
     this.href_ = null;
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsFor(this.getWin());
+    const urlReplacements = urlReplacementsFor(this.win);
     urlReplacements.expand(hrefWithVars).then(href => {
       this.href_ = href;
     });
@@ -68,7 +68,7 @@ class AmpSocialShare extends AMP.BaseElement {
       return;
     }
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    openWindowDialog(this.getWin(), this.href_, '_blank', windowFeatures);
+    openWindowDialog(this.win, this.href_, '_blank', windowFeatures);
   }
 
 };

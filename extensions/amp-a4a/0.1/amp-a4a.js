@@ -179,7 +179,7 @@ export class AmpA4A extends AMP.BaseElement {
     // buildCallback promise chain.
     // If another ad is currently loading we only load ads that are currently
     // in viewport.
-    const allowRender = allowRenderOutsideViewport(this.element, this.getWin());
+    const allowRender = allowRenderOutsideViewport(this.element, this.win);
     if (allowRender !== true) {
       return allowRender;
     }
@@ -242,7 +242,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.layoutMeasureExecuted_ = true;
-    user.assert(!isPositionFixed(this.element, this.getWin()),
+    user.assert(!isPositionFixed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
     // OnLayoutMeasure can be called when page is in prerender so delay until
@@ -259,7 +259,7 @@ export class AmpA4A extends AMP.BaseElement {
     // promise chain due to cancel from unlayout, the promise will be rejected.
     this.promiseId_++;
     const promiseId = this.promiseId_;
-    this.adPromise_ = viewerFor(this.getWin()).whenFirstVisible()
+    this.adPromise_ = viewerFor(this.win).whenFirstVisible()
       .then(() => {
         if (promiseId != this.promiseId_) {
           return Promise.reject(cancellation());
@@ -338,7 +338,7 @@ export class AmpA4A extends AMP.BaseElement {
     // creatives which rendered via the buildCallback promise chain.  Ensure
     // slot counts towards 3p loading count until we know that the creative is
     // valid AMP.
-    this.timerId_ = incrementLoadingAds(this.getWin());
+    this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
@@ -448,7 +448,7 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(kjwright):  Add requireAmpResponseSourceOrigin once supported
       // server-side
     };
-    return xhrFor(this.getWin())
+    return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(unusedReason => {
           // Error so set rendered_ so iframe will not be written on
@@ -504,7 +504,7 @@ export class AmpA4A extends AMP.BaseElement {
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
     if (this.timerId_) {
-      decrementLoadingAds(this.timerId_, this.getWin());
+      decrementLoadingAds(this.timerId_, this.win);
     }
     // AMP documents are required to be UTF-8
     return utf8FromArrayBuffer(bytes).then(creative => {
@@ -555,9 +555,9 @@ export class AmpA4A extends AMP.BaseElement {
             // host document is a short-term fix.  Ultimately, AMP will provide
             // a better mechanism for this, and this code will have to be
             // updated to coordinate with their approach.
-            const style = this.getWin().document.querySelector(
+            const style = this.win.document.querySelector(
                 'style[amp-runtime]') ||
-                this.getWin().document.createElement('style');
+                this.win.document.createElement('style');
             shadowRoot.appendChild(style.cloneNode(true));
             // End TODO.
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
@@ -595,7 +595,7 @@ export class AmpA4A extends AMP.BaseElement {
     // TODO: remove call to getCorsUrl and instead have fetch API return
     // modified url.
     iframe.setAttribute(
-      'src', xhrFor(this.getWin()).getCorsUrl(this.getWin(), this.adUrl_));
+      'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
     this.vsync_.mutate(() => {
       // TODO(keithwrightbos): noContentCallback?
       this.apiHandler_ = new AmpAdApiHandler(this, this.element);
@@ -782,7 +782,8 @@ export class AmpA4A extends AMP.BaseElement {
     if (!metaData.customElementExtensions) {
       return;
     }
-    const extensions = extensionsFor(this.getWin());
+    const win = this.win;
+    const extensions = extensionsFor(win);
     metaData.forEach(extensionId => {
       extensions.loadExtension(extensionId);
     });

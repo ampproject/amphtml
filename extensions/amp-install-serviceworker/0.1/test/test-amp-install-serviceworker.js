@@ -42,7 +42,7 @@ describe('amp-install-serviceworker', () => {
     install.setAttribute('src', 'https://example.com/sw.js');
     let calledSrc;
     const p = new Promise(() => {});
-    implementation.getWin = () => {
+    implementation.win = {
       return {
         location: {
           href: 'https://example.com/some/path',
@@ -67,7 +67,7 @@ describe('amp-install-serviceworker', () => {
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
-    implementation.getWin = () => {
+    implementation.win = {
       return {
         location: {
           href: 'https://example.com/some/path',
@@ -85,7 +85,7 @@ describe('amp-install-serviceworker', () => {
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
-    implementation.getWin = () => {
+    implementation.win = {
       return {
         location: {
           href: 'https://example.com/some/path',
@@ -110,7 +110,7 @@ describe('amp-install-serviceworker', () => {
     install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
     let calledSrc;
     const p = new Promise(() => {});
-    implementation.getWin = () => {
+    implementation.win = {
       return {
         location: {
           href: 'https://cdn.ampproject.org/some/path',
@@ -158,7 +158,7 @@ describe('amp-install-serviceworker', () => {
           },
         },
       };
-      implementation.getWin = () => win;
+      implementation.win = win;
       documentInfo = {
         canonicalUrl: 'https://www.example.com/path',
         sourceUrl: 'https://source.example.com/path',

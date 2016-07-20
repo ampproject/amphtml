@@ -148,7 +148,7 @@ describe('service', () => {
       });
       ampdoc = {
         isSingleDoc: () => false,
-        getWin: () => windowApi,
+        win: windowApi,
       };
       ampdocMock = sandbox.mock(ampdoc);
       const ampdocServiceApi = {getAmpDoc: () => ampdoc};

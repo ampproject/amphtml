@@ -133,7 +133,7 @@ describe('AmpDocSingle', () => {
   });
 
   it('should return window', () => {
-    expect(ampdoc.getWin()).to.equal(window);
+    expect(ampdoc.win).to.equal(window);
   });
 
   it('should return document as root', () => {
@@ -170,7 +170,7 @@ describe('AmpDocShadow', () => {
     if (!ampdoc) {
       return;
     }
-    expect(ampdoc.getWin()).to.equal(window);
+    expect(ampdoc.win).to.equal(window);
     expect(ampdoc.isSingleDoc()).to.be.false;
   });
 
