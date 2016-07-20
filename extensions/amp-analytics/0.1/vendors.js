@@ -75,10 +75,10 @@ export const ANALYTICS_CONFIG = {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
       'base': 'https://${log}${domain}/hit.xiti?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
-      'suffix': '&ref=${documentReferrer}',
+      'suffix': '&medium=amp&${extraUrlParams}&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}&${extraUrlParams}${suffix}',
+        's2=${level2}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -752,9 +752,10 @@ export const ANALYTICS_CONFIG = {
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
-      'parameterPrefix': '?p=431,${contentId},1,' +
-        '${screenWidth}x${screenHeight},${screenColorDepth},' +
-        '${documentReferrer},${timestamp},0,,0&tz=${timezone}' +
+      'parameterPrefix': '?p=432,${contentId},1,' +
+        '${screenWidth}x${screenHeight},${screenColorDepth},1,' +
+        '${timestamp},${documentReferrer},${viewportWidth}x' +
+        '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
       'parameterSuffix': '&pu=${canonicalUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +

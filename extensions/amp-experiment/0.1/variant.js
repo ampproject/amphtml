@@ -26,18 +26,20 @@ const nameValidator = /^[\w-]+$/;
  * Allocates the current page view to an experiment variant based on the given
  * experiment config.
  * @param {!Window} win
+ * @param {string} experimentName
  * @param {!Object} config
  * @return {!Promise<?string>}
  */
-export function allocateVariant(win, config) {
+export function allocateVariant(win, experimentName, config) {
+  assertName(experimentName);
   validateConfig(config);
 
-  const cidScope =
-      config.cidScope === undefined ? 'amp-experiment' : config.cidScope;
+  const sticky = config.sticky !== false;
+  const cidScope = config.cidScope || 'amp-experiment';
 
   let hasConsentPromise = Promise.resolve(true);
 
-  if (cidScope && config.consentNotificationId) {
+  if (sticky && config.consentNotificationId) {
     hasConsentPromise = userNotificationManagerFor(win)
         .then(manager => manager.getNotification(config.consentNotificationId))
         .then(userNotification => {
@@ -47,12 +49,13 @@ export function allocateVariant(win, config) {
         });
   }
 
-  return hasConsentPromise
-      .then(hasConsent => {
-        if (!hasConsent) {
-          return null;
-        }
-        return getBucketTicket(win, cidScope).then(bucketTicket => {
+  return hasConsentPromise.then(hasConsent => {
+    if (!hasConsent) {
+      return null;
+    }
+    const group = config.group || experimentName;
+    return getBucketTicket(win, group, sticky ? cidScope : null)
+        .then(ticket => {
           let upperBound = 0;
 
           // Loop through keys in a specific order since the default object key
@@ -60,13 +63,13 @@ export function allocateVariant(win, config) {
           const variantNames = Object.keys(config.variants).sort();
           for (let i = 0; i < variantNames.length; i++) {
             upperBound += config.variants[variantNames[i]];
-            if (bucketTicket < upperBound) {
+            if (ticket < upperBound) {
               return variantNames[i];
             }
           }
           return null;
         });
-      });
+  });
 }
 
 /**
@@ -78,14 +81,13 @@ function validateConfig(config) {
   const variants = config.variants;
   user.assert(isObject(variants) && Object.keys(variants).length > 0,
     'Missing experiment variants config.');
-
+  if (config.group) {
+    assertName(config.group);
+  }
   let totalPercentage = 0;
   for (const variantName in variants) {
     if (variants.hasOwnProperty(variantName)) {
-      user.assert(nameValidator.test(variantName),
-          'Invalid variant name: %s. Allowed chars are [a-zA-Z0-9-_].',
-          variantName);
-
+      assertName(variantName);
       const percentage = variants[variantName];
       user.assert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
@@ -103,10 +105,11 @@ function validateConfig(config) {
  * is hashed from the CID of the given scope (opt_cidScope). If the
  * scope is not provided, a random number is used.
  * @param {!Window} win
+ * @param {string} group
  * @param {string=} opt_cidScope
  * @return {!Promise<!number>} a float number in the range of [0, 100)
  */
-function getBucketTicket(win, opt_cidScope) {
+function getBucketTicket(win, group, opt_cidScope) {
   if (!opt_cidScope) {
     return Promise.resolve(win.Math.random() * 100);
   }
@@ -116,6 +119,11 @@ function getBucketTicket(win, opt_cidScope) {
         Promise.resolve()));
 
   return Promise.all([cidPromise, cryptoFor(win)])
-      .then(results => results[1].uniform(results[0]))
+      .then(results => results[1].uniform(group + ':' + results[0]))
       .then(hash => hash * 100);
+}
+
+function assertName(name) {
+  user.assert(nameValidator.test(name),
+      `Invalid name ${name}: %s. Allowed chars are [a-zA-Z0-9-_].`);
 }

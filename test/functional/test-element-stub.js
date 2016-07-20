@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../../src/element-stub';
+import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
 import {
     createIframePromise,
     doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
-import {resetExtensionScriptInsertedOrPresentForTesting,}
-    from '../../src/insert-extension';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+
 
 describe('test-element-stub', () => {
 
   let iframe;
 
   afterEach(() => {
-    resetExtensionScriptInsertedOrPresentForTesting();
+    resetLoadingCheckForTests();
   });
 
   function getElementStubIframe(name) {

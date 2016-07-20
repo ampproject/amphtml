@@ -72,6 +72,17 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js'
     ]
   },
+  '(?:var|let|const) +IS_DEV +=': {
+    message: 'IS_DEV local var only allowed in mode.js and ' +
+        'dist.3p/current/integration.js',
+    whitelist: [
+      'src/mode.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
+  '\\.prefetch\\(': {
+    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
+  },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
         'temporary workarounds.',
@@ -475,11 +486,21 @@ var forbiddenTermsSrcInclusive = {
   '\\.scrollTo\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
-  'insertAmpExtensionScript': {
+  'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
-      'src/insert-extension.js',
       'src/element-stub.js',
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+    ],
+  },
+  'loadElementClass': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
     ],

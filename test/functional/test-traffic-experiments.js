@@ -59,6 +59,7 @@ describe('all-traffic-experiments-tests', () => {
         },
         document: {
           cookie: null,
+          querySelector: () => {},
         },
       };
       accurateRandomStub = sandbox.stub().returns(-1);

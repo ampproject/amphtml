@@ -16,12 +16,15 @@
 package org.ampproject;
 
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.javascript.jscomp.CommandLineRunner;
 import com.google.javascript.jscomp.CompilerOptions;
 import com.google.javascript.jscomp.CustomPassExecutionTime;
 import com.google.javascript.jscomp.PropertyRenamingPolicy;
 import com.google.javascript.jscomp.VariableRenamingPolicy;
+import com.google.javascript.rhino.IR;
+import com.google.javascript.rhino.Node;
 
 import java.io.IOException;
 
@@ -45,6 +48,11 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev.fine");
+  
+  
+  ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
+      "IS_DEV",
+      IR.falseNode());
 
   protected AmpCommandLineRunner(String[] args) {
     super(args);
@@ -56,7 +64,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
     }
     CompilerOptions options = super.createOptions();
     options.setCollapseProperties(true);
-    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes);
+    AmpPass ampPass = new AmpPass(getCompiler(), is_production_env, suffixTypes, assignmentReplacements);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     options.setDevirtualizePrototypeMethods(true);
     options.setExtractPrototypeMemberDeclarations(true);

@@ -82,6 +82,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdTech](../ads/adtech.md)
 - [Ad Generation](../ads/adgeneration.md)
 - [Ad Up Technology](../ads/aduptech.md)
+- [AMoAd](../ads/amoad.md)
 - [AppNexus](../ads/appnexus.md)
 - [Chargeads](../ads/chargeads.md)
 - [Colombia](../ads/colombia.md)

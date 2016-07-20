@@ -47,14 +47,13 @@
           }
         },
         "font-color-test": {
-          "cidScope": null,
+          "sticky": false,
           "variants": {
             "blue": 20,
             "red": 20
           }
         },
         "border-test": {
-          "cidScope": "custom-scope",
           "consentNotificationId": "amp-user-notification",
           "variants": {
             "solid": 50,
@@ -64,7 +63,7 @@
       }
     </script>
   </amp-experiment>
-  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&font-color-test=VARIANT(font-color-test)"></amp-pixel>
+  <amp-pixel src="https://donot.worry/?background-color-test=VARIANT(background-color-test)&font-color-test=VARIANT(font-color-test)&variants=VARIANTS"></amp-pixel>
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification">

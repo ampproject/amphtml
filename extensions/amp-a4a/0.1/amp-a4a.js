@@ -23,7 +23,7 @@ import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {insertAmpExtensionScript} from '../../../src/insert-extension';
+import {extensionsFor} from '../../../src/extensions';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
@@ -474,8 +474,14 @@ export class AmpA4A extends AMP.BaseElement {
           if (response.signature && verifySignatureIsAvailable()) {
             try {
               // Among other things, the signature might not be proper base64.
+              // TODO(a4a-cam): This call used to be missing the conversion
+              // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
+              // any unit tests to fail, either locally or on Travis.  That
+              // indicates that the tests are too weak or aren't reporting
+              // correctly.  Check out and fix the tests.
               return verifySignature(
-                  response.creative, response.signature, publicKeyInfos);
+                  new Uint8Array(response.creative),
+                  response.signature, publicKeyInfos);
             } catch (e) {}
           }
           return false;
@@ -545,6 +551,15 @@ export class AmpA4A extends AMP.BaseElement {
             // Finally, add body and re-formatted CSS styling to the shadow root.
             const shadowRoot =
                 this.element.shadowRoot || this.element.createShadowRoot();
+            // TODO(dvoytenko, tdrl): Cloning the amp-runtime style from the
+            // host document is a short-term fix.  Ultimately, AMP will provide
+            // a better mechanism for this, and this code will have to be
+            // updated to coordinate with their approach.
+            const style = this.getWin().document.querySelector(
+                'style[amp-runtime]') ||
+                this.getWin().document.createElement('style');
+            shadowRoot.appendChild(style.cloneNode(true));
+            // End TODO.
             shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
@@ -767,10 +782,9 @@ export class AmpA4A extends AMP.BaseElement {
     if (!metaData.customElementExtensions) {
       return;
     }
-    metaData.forEach(extension => {
-      /*OK*/insertAmpExtensionScript(this.getWin(), extension, true);
+    const extensions = extensionsFor(this.getWin());
+    metaData.forEach(extensionId => {
+      extensions.loadExtension(extensionId);
     });
   }
 }
-
-AMP.registerElement('amp-a4a', AmpA4A);

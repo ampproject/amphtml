@@ -58,6 +58,13 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
    * delivery), this could go away there.
    */
   @Override public boolean isExported(String name, boolean local) {
+    // This stops compiler from inlining functions (local or not) that end with
+    // NoInline in their name. Mostly used for externing try-catch to avoid v8
+    // de-optimization (https://goo.gl/gvzlDp)
+    if (name.endsWith("NoInline")) {
+      return true;
+    }
+
     if (local) {
       return false;
     }

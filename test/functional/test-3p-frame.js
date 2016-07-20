@@ -25,7 +25,6 @@ import {
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {resetServiceForTesting} from '../../src/service';
-import {setModeForTesting} from '../../src/mode';
 import {validateData} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
@@ -44,7 +43,6 @@ describe('3p-frame', () => {
     sandbox.restore();
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     resetCountForTesting();
-    setModeForTesting(null);
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
     if (m) {
@@ -83,13 +81,13 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
-    setModeForTesting({
+    window.AMP_MODE = {
       localDev: true,
       development: false,
       minified: false,
       test: false,
       version: '$internalRuntimeVersion$',
-    });
+    };
 
     clock.tick(1234567888);
     const link = document.createElement('link');
@@ -180,19 +178,19 @@ describe('3p-frame', () => {
 
 
   it('should pick the right bootstrap url for local-dev mode', () => {
-    setModeForTesting({localDev: true});
+    window.AMP_MODE = {localDev: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap url for testing mode', () => {
-    setModeForTesting({test: true});
+    window.AMP_MODE = {test: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
         'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
-    setModeForTesting({});
+    window.AMP_MODE = {};
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
@@ -218,7 +216,7 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
-    setModeForTesting({localDev: true});
+    window.AMP_MODE = {localDev: true};
     preloadBootstrap(window);
     // Wait for visible promise
     return Promise.resolve().then(() => {
@@ -272,7 +270,7 @@ describe('3p-frame', () => {
     viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/').twice();
 
-    setModeForTesting({});
+    window.AMP_MODE = {};
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');

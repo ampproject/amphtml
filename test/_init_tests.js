@@ -21,7 +21,6 @@ import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platform} from '../src/platform';
-import {setModeForTesting} from '../src/mode';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 // Needs to be called before the custom elements are first made.
@@ -32,19 +31,24 @@ adopt(window);
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 /**
- * Helper class to skip tests under specific environment.
- * Should be instantiated via describe.skipper() or it.skipper().
+ * Helper class to skip or retry tests under specific environment.
+ * Should be instantiated via describe.configure() or it.configure().
  * Get permission before use!
  *
  * Example usages:
- * describe.skipper().skipFirefox().skipSafari().run('Bla bla ...', ... );
- * it.skipper().skipEdge().run('Should ...', ...);
+ * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
+ * it.configure().skipEdge().run('Should ...', ...);
 */
-class TestSkipper {
+class TestConfig {
 
   constructor(runner) {
     this.runner = runner;
     this.skippedUserAgents = [];
+    /**
+     * Called for each test suite (things created by `describe`).
+     * @type {!Array<function(!TestSuite)>}
+     */
+    this.configTasks = [];
   }
 
   skipOnTravis() {
@@ -72,6 +76,16 @@ class TestSkipper {
     return this;
   }
 
+  retryOnSaucelabs() {
+    if (!window.ampTestRuntimeConfig.saucelabs) {
+      return this;
+    }
+    this.configTasks.push(mocha => {
+      mocha.retries(4);
+    });
+    return this;
+  }
+
   /**
    * @param {string} desc
    * @param {function()} fn
@@ -83,16 +97,23 @@ class TestSkipper {
         return;
       }
     }
-    this.runner(desc, fn);
+
+    const tasks = this.configTasks;
+    this.runner(desc, function() {
+      tasks.forEach(task => {
+        task(this);
+      });
+      return fn.apply(this, arguments);
+    });
   }
 }
 
-describe.skipper = function() {
-  return new TestSkipper(describe);
+describe.configure = function() {
+  return new TestConfig(describe);
 };
 
-it.skipper = function() {
-  return new TestSkipper(it);
+it.configure = function() {
+  return new TestConfig(it);
 };
 
 // Used to check if an unrestored sandbox exists
@@ -116,7 +137,7 @@ sinon.sandbox.create = function(config) {
 beforeEach(beforeTest);
 
 function beforeTest() {
-  setModeForTesting(null);
+  window.AMP_MODE = null;
   window.AMP_TEST = true;
   installDocService(window, true);
 }

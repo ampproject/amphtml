@@ -439,6 +439,11 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
+    // If outside of viewport's x-axis, element is not in viewport.
+    if (viewportBox.right < layoutBox.left ||
+        viewportBox.left > layoutBox.right) {
+      return false;
+    }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
@@ -633,6 +638,21 @@ export class Resource {
     if (this.element.unlayoutOnPause()) {
       this.unlayout();
     }
+  }
+
+  /**
+   * Calls element's pauseCallback callback.
+   */
+  pauseOnRemove() {
+    if (this.state_ == ResourceState.NOT_BUILT) {
+      return;
+    }
+    this.setInViewport(false);
+    if (this.paused_) {
+      return;
+    }
+    this.paused_ = true;
+    this.element.pauseCallback();
   }
 
   /**

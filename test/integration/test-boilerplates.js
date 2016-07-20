@@ -20,7 +20,7 @@ import {
 } from '../../testing/iframe.js';
 import {getStyle} from '../../src/style';
 
-describe('Old Opacity Boilerplate', () => {
+describe.configure().retryOnSaucelabs().run('Old Opacity Boilerplate', () => {
 
   let fixture;
   beforeEach(() => {

@@ -170,7 +170,7 @@ function selectRandomProperty(obj) {
  */
 export function setupPageExperiments(win, experiments) {
   win.pageExperimentBranches = win.pageExperimentBranches || {};
-  if (getMode().localDev) {
+  if (getMode(win).localDev) {
     // In local dev mode, it can be difficult to configure AMP_CONFIG
     // externally.  Default it here if necessary.
     win.AMP_CONFIG = win.AMP_CONFIG || {};
@@ -182,7 +182,7 @@ export function setupPageExperiments(win, experiments) {
         win.pageExperimentBranches.hasOwnProperty(experimentId)) {
       continue;
     }
-    if (getMode().localDev) {
+    if (getMode(win).localDev) {
       win.AMP_CONFIG[experimentId] = win.AMP_CONFIG[experimentId] || 0.0;
     }
     // If we're in the experiment, but we haven't already forced a specific

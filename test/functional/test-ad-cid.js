@@ -74,6 +74,24 @@ function tests(name) {
         });
       });
 
+      it('proceeds on failed CID', () => {
+        clientIdScope['with_cid'] = cidScope;
+        return getAd({
+          width: 300,
+          height: 250,
+          type: 'with_cid',
+          src: 'testsrc',
+        }, 'https://schema.org', function(ad) {
+          const win = ad.ownerDocument.defaultView;
+          const service = installCidService(win);
+          sandbox.stub(service, 'get',
+              () => Promise.reject(new Error('nope')));
+          return ad;
+        }).then(ad => {
+          expect(ad.getAttribute('ampcid')).to.be.null;
+        });
+      });
+
       it('waits for consent', () => {
         clientIdScope['with_cid'] = cidScope;
         return getAd({

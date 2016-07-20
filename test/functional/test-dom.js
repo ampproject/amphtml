@@ -205,6 +205,33 @@ describe('DOM', () => {
     testChildElementByTag();
   });
 
+  function testChildElementsByTag() {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element23');
+    parent.appendChild(element2);
+
+    const element3 = document.createElement('element23');
+    parent.appendChild(element3);
+
+    expect(dom.childElementsByTag(parent, 'element1'))
+        .to.deep.equal([element1]);
+    expect(dom.childElementsByTag(parent, 'element23'))
+        .to.deep.equal([element2, element3]);
+    expect(dom.childElementsByTag(parent, 'element3'))
+        .to.deep.equal([]);
+  }
+
+  it('childElementsByTag should find first match', testChildElementsByTag);
+
+  it('childElementsByTag should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testChildElementsByTag();
+  });
+
   function testChildElementByAttr() {
     const parent = document.createElement('parent');
 

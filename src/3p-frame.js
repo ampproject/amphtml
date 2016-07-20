@@ -18,6 +18,7 @@
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
+import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
@@ -150,10 +151,8 @@ export function addDataAndJsonAttributes_(element, attributes) {
   }
   const json = element.getAttribute('json');
   if (json) {
-    let obj;
-    try {
-      obj = JSON.parse(json);
-    } catch (e) {
+    const obj = tryParseJson(json);
+    if (obj === undefined) {
       throw user.createError(
           'Error parsing JSON in json attribute in element %s',
           element);
