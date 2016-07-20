@@ -43,20 +43,18 @@ describe('amp-install-serviceworker', () => {
     let calledSrc;
     const p = new Promise(() => {});
     implementation.win = {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: src => {
-              expect(calledSrc).to.be.undefined;
-              calledSrc = src;
-              return p;
-            },
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: src => {
+            expect(calledSrc).to.be.undefined;
+            calledSrc = src;
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(calledSrc).to.equal('https://example.com/sw.js');
@@ -86,18 +84,16 @@ describe('amp-install-serviceworker', () => {
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
     implementation.win = {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: () => {
-              return p;
-            },
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: () => {
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(install.children).to.have.length(0);
@@ -111,19 +107,17 @@ describe('amp-install-serviceworker', () => {
     let calledSrc;
     const p = new Promise(() => {});
     implementation.win = {
-      return {
-        location: {
-          href: 'https://cdn.ampproject.org/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: src => {
-              calledSrc = src;
-              return p;
-            },
+      location: {
+        href: 'https://cdn.ampproject.org/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: src => {
+            calledSrc = src;
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(calledSrc).to.undefined;

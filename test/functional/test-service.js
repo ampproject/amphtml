@@ -27,7 +27,7 @@ import {
 import * as sinon from 'sinon';
 
 
-describe('service', () => {
+describe.only('service', () => {
 
   let sandbox;
 
