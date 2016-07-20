@@ -527,6 +527,7 @@ export class Resources {
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @return {!Promise}
    * @protected
    */
 

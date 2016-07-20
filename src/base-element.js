@@ -653,6 +653,7 @@ export class BaseElement {
    * requested height is greater than 0.)
    * The promise is resolved if the height is successfully updated.
    * @param {number} newHeight
+   * @return {!Promise}
    * @protected
    */
   attemptChangeHeight(newHeight) {
@@ -672,6 +673,7 @@ export class BaseElement {
   * The promise is resolved if the height is successfully updated.
   * @param {number|undefined} newHeight
   * @param {number|undefined} newWidth
+  * @return {!Promise}
   * @protected
   */
   attemptChangeSize(newHeight, newWidth) {
