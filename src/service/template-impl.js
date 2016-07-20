@@ -49,7 +49,7 @@ export class BaseTemplate {
     this.element = element;
 
     /** @public @const */
-    this.win = this.element.ownerDocument.defaultView;
+    this.win = element.ownerDocument.defaultView;
 
     this.compileCallback();
   }

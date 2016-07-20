@@ -66,13 +66,11 @@ describe('amp-install-serviceworker', () => {
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
     implementation.win = {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-        },
-      };
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+      },
     };
     implementation.buildCallback();
   });

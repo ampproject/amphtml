@@ -139,7 +139,7 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @public @const {!Window}  */
-    this.win = baseElement.element.ownerDocument.defaultView;
+    this.win = element.ownerDocument.defaultView;
 
     /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
     this.actionMap_ = this.win.Object.create(null);

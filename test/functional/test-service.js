@@ -27,7 +27,7 @@ import {
 import * as sinon from 'sinon';
 
 
-describe.only('service', () => {
+describe('service', () => {
 
   let sandbox;
 
@@ -107,7 +107,7 @@ describe.only('service', () => {
       getService(window, 'another service to avoid NPE', () => {});
       expect(() => {
         getExistingServiceForWindow(window, 'c');
-      }).to.throw(/Window service does not exist c/);
+      }).to.throw();
     });
 
     it('should fail without factory on initial setup', () => {
@@ -146,13 +146,14 @@ describe.only('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
+      windowApi = {};
       ampdoc = {
         isSingleDoc: () => false,
         win: windowApi,
       };
       ampdocMock = sandbox.mock(ampdoc);
       const ampdocServiceApi = {getAmpDoc: () => ampdoc};
-      windowApi = {};
+
       getService(windowApi, 'ampdoc', () => ampdocServiceApi);
       node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
       resetServiceForTesting(windowApi, 'a');
