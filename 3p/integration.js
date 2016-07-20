@@ -168,7 +168,10 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
-const defaultAllowedTypesWaitForRenderStart = [
+// List of ad networks that will manually call `window.context.renderStart` to
+// emit render-start event when ad actually starts rendering. Please add
+// yourself here if you'd like to do so (which we encourage).
+const waitForRenderStart = [
   'doubleclick',
 ];
 
@@ -278,9 +281,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       window.context.updateDimensions = triggerDimensions;
     }
 
-    // if (defaultAllowedTypesWaitForRenderStart.indexOf(data.type) != -1) {
-    //   window.context.renderStart = triggerRenderStart;
-    // }
+    if (waitForRenderStart.indexOf(data.type) != -1) {
+      window.context.renderStart = triggerRenderStart;
+    }
 
     // This only actually works for ads.
     const initialIntersection = window.context.initialIntersection;
@@ -305,9 +308,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
-    //if (defaultAllowedTypesWaitForRenderStart.indexOf(data.type) < 0) {
+    if (waitForRenderStart.indexOf(data.type) < 0) {
       nonSensitiveDataPostMessage('render-start');
-    //}
+    }
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
