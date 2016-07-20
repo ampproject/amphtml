@@ -25,14 +25,21 @@ const TAG = 'cache-service-worker';
  * Registers the Google AMP Cache service worker if the browser supports SWs.
  */
 export function installCacheServiceWorker(win) {
-  if (isExperimentOn(win, TAG) && 'serviceWorker' in navigator) {
-    const base = calculateScriptBaseUrl(win.location.pathname,
-      getMode().isLocalDev, getMode().test);
-    const url = `${base}/sw.js`;
-    navigator.serviceWorker.register(url).then(reg => {
-      dev.info(TAG, 'ServiceWorker registration successful: ', reg);
-    }).catch(err => {
-      dev.error(TAG, 'ServiceWorker registration failed: ', err);
-    });
+  if (!isExperimentOn(win, TAG)) {
+    return;
   }
+  if (!('serviceWorker' in navigator)) {
+    return;
+  }
+  if (!getMode().isLocalDev || win.location.hostname !== 'cdn.ampproject.org') {
+    return;
+  }
+  const base = calculateScriptBaseUrl(win.location.pathname,
+    getMode().isLocalDev, getMode().test);
+  const url = `${base}/sw.js`;
+  navigator.serviceWorker.register(url).then(reg => {
+    dev.info(TAG, 'ServiceWorker registration successful: ', reg);
+  }, err => {
+    dev.error(TAG, 'ServiceWorker registration failed: ', err);
+  });
 }
