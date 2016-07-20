@@ -309,7 +309,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
     if (waitForRenderStart.indexOf(data.type) < 0) {
-      nonSensitiveDataPostMessage('render-start');
+      triggerRenderStart();
     }
   } catch (e) {
     if (!window.context.mode.test) {
