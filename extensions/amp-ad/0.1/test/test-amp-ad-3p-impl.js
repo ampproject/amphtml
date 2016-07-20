@@ -257,6 +257,47 @@ function tests(name) {
       })).to.be.not.be.rejected;
     });
 
+    describe('embed-context API', () => {
+      it('should respond to send-embed-context messages', () => {
+        const iframeSrc = 'http://ads.localhost:' + location.port +
+            '/base/test/fixtures/served/iframe-embed-context.html';
+        return getAd({
+          width: 100,
+          height: 100,
+          type: '_ping_',
+          src: 'testsrc',
+        }, 'https://schema.org').then(element => {
+          return new Promise((resolve, unusedReject) => {
+            const impl = element.implementation_;
+            impl.layoutCallback();
+            impl.apiHandler_.sendEmbedContext_ = (win, origin, context) => {
+              expect(win).to.equal(impl.iframe_.contentWindow);
+              expect(origin).to.equal('http://ads.localhost:' + location.port);
+              // Verify that all expected keys exist in the context object.
+              expect(context).to.contain.all.keys(
+                  'location',
+                  'referrer',
+                  'canonicalUrl',
+                  'pageViewId',
+                  'clientId',
+                  'startTime');
+              resolve(impl);
+            };
+            impl.iframe_.onload = function() {
+              impl.iframe_.contentWindow.postMessage({
+                sentinel: 'amp-test',
+                type: 'requestEmbedContext',
+                is3p: true,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
+              }, '*');
+            };
+            impl.iframe_.src = iframeSrc;
+          });
+        });
+      });
+    });
+
     describe('has no-content', () => {
       it('should display fallback', () => {
         return getAd({
