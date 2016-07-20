@@ -126,7 +126,7 @@ describe('UrlReplacements', () => {
           if (name == 'href') {
             return opt_href !== undefined ? opt_href :
               'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b';
-          } else if (name == 'data-orig-href') {
+          } else if (name == 'data-amp-orig-href') {
             return undefined;
           }
           fail('unknown attribute: ' + name);
@@ -693,25 +693,33 @@ describe('UrlReplacements', () => {
         });
   });
 
-  it('expand sync', () => {
+  it('should expand sync w/ collect vars', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
     urlReplacements.win_.performance.timing.loadEventStart = 109;
-    expect(urlReplacements.expandSync(
+    let collectVars = {};
+    const expanded = urlReplacements.expandSync(
       'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
       {
         'CONST': 'ABC',
         'FUNCT': function(a, b) { return a + b; },
         'PROM': function() { return Promise.resolve('boo'); },
-      })).to.match(/r=(\d\.\d+)&c=ABC&f=helloworld&a=b&d=&e=9$/);
+      }, collectVars);
+    expect(expanded).to.match(/^r=\d\.\d+&c=ABC&f=helloworld&a=b&d=&e=9$/);
+    expect(collectVars).to.deep.equal({
+      'RANDOM': /^r=(\d\.\d+)/.exec(expanded)[1],
+      'CONST': 'ABC',
+      'FUNCT(hello,world)': 'helloworld',
+      'PAGE_LOAD_TIME': '9'
+    });
   });
 
-  it ('anchor href expand', () => {
+  it ('should expand anchor href', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
     urlReplacements.win_.performance.timing.loadEventStart = 109;
     expect(urlReplacements.getExpandAnchorHref_(buildClickEvent())).to.match(
-      /r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
+      /^r=\d\.\d+&nx=123&ny=456&plt=9&a=b$/);
     // Verify missing href does not expand
     expect(urlReplacements.getExpandAnchorHref_(
       buildClickEvent(null))).to.equal('');
@@ -721,15 +729,34 @@ describe('UrlReplacements', () => {
     // Verify original href precendence
     let event = buildClickEvent();
     event.target.getAttribute = function(name) {
-      expect(name).to.equal('data-orig-href');
+      expect(name).to.equal('data-amp-orig-href');
       return 'foo=CLICK_X&hello=world';
     };
     expect(urlReplacements.getExpandAnchorHref_(event)).to.equal(
       'foo=123&hello=world');
   });
 
-  it ('verify document click listener', () => {
-    let clickObservable = new Observable();
+  it ('should expand anchor href clickx/y relative to shadow root host', () => {
+    const win = getFakeWindow();
+    const urlReplacements = installUrlReplacementsService(win);
+    urlReplacements.win_.performance.timing.loadEventStart = 109;
+    const event = buildClickEvent();
+    event.target.parentElement = {
+      nodeType: 123,
+      parentElement: {
+        host: {
+          offsetTop: 11,
+          offsetLeft: 16
+        },
+        nodeType: 11
+      }
+    };
+    expect(urlReplacements.getExpandAnchorHref_(event)).to.match(
+      /^r=\d\.\d+&nx=107&ny=445&plt=9&a=b$/);
+  });
+
+  it ('should verify document click listener', () => {
+    const clickObservable = new Observable();
     const win = getFakeWindow();
     win.document = {
       addEventListener: function(eventName, callback) {
@@ -741,19 +768,24 @@ describe('UrlReplacements', () => {
     installUrlReplacementsService(win);
     expect(clickObservable.getHandlerCount()).to.equal(1);
     const event = buildClickEvent();
-    const attributes = {};
+    const attributes = {href: event.target.getAttribute('href')};
     event.target.setAttribute = function(name, val) {
       attributes[name] = val;
     }
+    event.target.getAttribute = function(name) {
+      return attributes[name];
+    }
     clickObservable.fire(event);
-    expect(attributes['href']).to.match(
-      /r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
-    expect(attributes['data-orig-href']).to.equal(
+    expect(attributes['href']).to.match(/r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
+    expect(attributes['data-amp-orig-href']).to.equal(
       'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b');
-    // Fire again and verify new values are set
-    const currHref = attributes['href'];
+    // Fire again with different X/Y and verify new values are set
+    event.clientX = 789;
+    event.clientY = 468;
     clickObservable.fire(event);
-    expect(attributes['href']).to.not.equal(currHref);
+    expect(attributes['href']).to.match(/r=(\d\.\d+)&nx=789&ny=468&plt=9&a=b$/);
+    expect(attributes['data-amp-orig-href']).to.equal(
+      'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b');
   });
 
   describe('access values', () => {

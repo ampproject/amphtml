@@ -28,13 +28,14 @@ import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
 import {timer} from '../timer';
+import {closest} from '../dom';
 
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 
 /** @private @const {string} */
-const ORIGINAL_HREF_ATTRIBUTE = 'data-orig-href';
+const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
 
 /** @typedef {string|undefined} */
 let ResolverReturnDef;
@@ -114,7 +115,7 @@ export class UrlReplacements {
     });
 
     // Returns the referrer URL.
-    this.set_('DOCUMENT_REFERRER', null, () => {
+    this.setAsync_('DOCUMENT_REFERRER', () => {
       return viewerFor(this.win_).getReferrerUrl();
     });
 
@@ -167,18 +168,19 @@ export class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('QUERY_PARAM', (param, defaultValue = '') => {
+    this.set_('QUERY_PARAM',
+        (/** @type {string} */param, defaultValue = '') => {
       user.assert(param,
           'The first argument to QUERY_PARAM, the query string ' +
           'param is required');
       const url = parseUrl(this.win_.location.href);
       const params = parseQueryString(url.search);
-      const val = params[/** @type {string} */ (param)];
+      const val = params[param];
 
       return (typeof val !== 'undefined') ? val : defaultValue;
     });
 
-    this.set_('CLIENT_ID', null, (scope, opt_userNotificationId) => {
+    this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
       user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
@@ -199,7 +201,7 @@ export class UrlReplacements {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.set_('VARIANT', null, experiment => {
+    this.setAsync_('VARIANT', experiment => {
       return this.variants_.then(variants => {
         user.assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
@@ -223,27 +225,27 @@ export class UrlReplacements {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set_('SCROLL_TOP', null, () => {
+    this.setAsync_('SCROLL_TOP', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollTop());
+        () => String(viewportFor(this.win_).getScrollTop()));
     });
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set_('SCROLL_LEFT', null, () => {
+    this.setAsync_('SCROLL_LEFT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollLeft());
+        () => String(viewportFor(this.win_).getScrollLeft()));
     });
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set_('SCROLL_HEIGHT', null, () => {
+    this.setAsync_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollHeight());
+        () => String(viewportFor(this.win_).getScrollHeight()));
     });
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set_('SCROLL_WIDTH', null, () => {
+    this.setAsync_('SCROLL_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getScrollWidth());
+        () => String(viewportFor(this.win_).getScrollWidth()));
     });
 
     // Returns screen.width.
@@ -272,13 +274,13 @@ export class UrlReplacements {
     });
 
     // Returns the viewport height.
-    this.set_('VIEWPORT_HEIGHT', null, () => {
+    this.setAsync_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().height);
     });
 
     // Returns the viewport width.
-    this.set_('VIEWPORT_WIDTH', null, () => {
+    this.setAsync_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().width);
     });
@@ -329,14 +331,14 @@ export class UrlReplacements {
       'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
-    this.set_('ACCESS_READER_ID', null, () => {
+    this.setAsync_('ACCESS_READER_ID', () => {
       return this.getAccessValue_(accessService => {
         return accessService.getAccessReaderId();
       }, 'ACCESS_READER_ID');
     });
 
     // Access: data from the authorization response.
-    this.set_('AUTHDATA', null, field => {
+    this.setAsync_('AUTHDATA', field => {
       user.assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
@@ -345,12 +347,12 @@ export class UrlReplacements {
     });
 
     // Returns an identifier for the viewer.
-    this.set_('VIEWER', null, () => {
+    this.setAsync_('VIEWER', () => {
       return viewerFor(this.win_).getViewerOrigin();
     });
 
     // Returns the total engaged time since the content became viewable.
-    this.set_('TOTAL_ENGAGED_TIME', null, () => {
+    this.setAsync_('TOTAL_ENGAGED_TIME', () => {
       return activityFor(this.win_).then(activity => {
         return activity.getTotalEngagedTime();
       });
@@ -366,7 +368,7 @@ export class UrlReplacements {
       (startAttribute, endAttribute) => {
         user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
             'start attribute name, is required');
-        return this.getTimingData_(/**@type {string}*/(startAttribute),
+        return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
             /**@type {string}*/(endAttribute));
       });
 
@@ -388,6 +390,9 @@ export class UrlReplacements {
    * called) with additional support for CLICK_X & CLICK_Y based on clientX &
    * clientY. If the target is within a shadowRoot, the x/y location is offset
    * by the shadowRoot host's offset.
+   * Note that other click listeners may execute which modify the href.  Because
+   * execution order of click listeners is non-deterministic across browsers,
+   * click listeners should not expect their modifications to be expanded.
    * @private
    */
   registerClickListener_() {
@@ -404,7 +409,10 @@ export class UrlReplacements {
           // by later executing click listener.  We want to ensure that later
           // click stores freshest value.
           evt.target.setAttribute('href', href);
-          evt.target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, originalHref);
+          // Only update original if not already present
+          if (!evt.target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
+            evt.target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, originalHref);
+          }
         }
       }
     });
@@ -438,7 +446,7 @@ export class UrlReplacements {
    * @return {!Promise<string|undefined>}
    * @private
    */
-  getTimingData_(startEvent, endEvent) {
+  getTimingDataAsync_(startEvent, endEvent) {
     const syncMetric = this.getTimingDataSync_(startEvent, endEvent);
     if (syncMetric === '') {
       // Metric is not yet available. Retry after a delay.
@@ -507,19 +515,39 @@ export class UrlReplacements {
   }
 
   /**
-   * Sets the value resolver for the variable with the specified name. The
-   * value resolver may optionally take an extra parameter.
-   * Allows for sync or async resolver depending on usage of expandSync.
+   * Sets a synchronous value resolver for the variable with the specified name.
+   * The value resolver may optionally take an extra parameter.
+   * Can be called in conjuction with setAsync to allow for additional
+   * asynchronous resolver where expand will use async and expandSync the sync
+   * version.
    * @param {string} varName
    * @param {?SyncResolverDef} syncResolver
-   * @param {AsyncResolverDef=} opt_asyncResolver
    * @return {!UrlReplacements}
    * @private
    */
-  set_(varName, syncResolver, opt_asyncResolver) {
+  set_(varName, syncResolver) {
     dev.assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        {sync: syncResolver, async: opt_asyncResolver};
+    this.replacements_[varName] = this.replacements_[varName] || {};
+    this.replacements_[varName].sync = syncResolver;
+    this.replacementExpr_ = undefined;
+    return this;
+  }
+
+  /**
+  * Sets an async value resolver for the variable with the specified name.
+  * The value resolver may optionally take an extra parameter.
+  * Can be called in conjuction with setAsync to allow for additional
+  * asynchronous resolver where expand will use async and expandSync the sync
+  * version.
+   * @param {string} varName
+   * @param {AsyncResolverDef=} asyncResolver
+   * @return {!UrlReplacements}
+   * @private
+   */
+  setAsync_(varName, asyncResolver) {
+    dev.assert(varName.indexOf('RETURN') == -1);
+    this.replacements_[varName] = this.replacements_[varName] || {};
+    this.replacements_[varName].async = asyncResolver;
     this.replacementExpr_ = undefined;
     return this;
   }
@@ -535,20 +563,24 @@ export class UrlReplacements {
    */
   setTimingResolver_(varName, startEvent, endEvent) {
     return this.set_(varName, () => {
-      return this.getTimingDataSync_(startEvent, endEvent);
-    }, () => {
-      return this.getTimingData_(startEvent, endEvent);
-    });
+        return this.getTimingDataSync_(startEvent, endEvent);
+      }).setAsync_(varName, () => {
+        return this.getTimingDataAsync_(startEvent, endEvent);
+      });
   }
 
   /**
+   * Calling encodeURIComponent with non-string type fails type check despite
+   * browser supporting it (simply converts to string).  This allows for being
+   * explicit about the behavior.
    * @param {*} val
    * @return {!string}
    * @private
    */
   encodeValue_(val) {
     switch (typeof val) {
-      case 'string': return encodeURIComponent(val);
+      case 'string':
+        return encodeURIComponent(val);
       case 'number':
       case 'boolean':
         return String(val);
@@ -558,6 +590,9 @@ export class UrlReplacements {
   }
 
 /**
+ * Synchronously expands the provided URL by replacing all known variables with
+ * their resolved values. Optional `opt_bindings` can be used to add new
+ * variables or override existing ones.
  * @param {string} url
  * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
  * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
@@ -589,12 +624,16 @@ expandSync(url, opt_bindings, opt_collectVars) {
     try {
       val = (typeof binding == 'function' ?
         binding.apply(null, args) : binding);
+      if (val && val.then) {
+        user.error('ignoring promise value for key: ' + name);
+        return '';
+      }
     } catch (e) {
       user.error('Error evaluating replacement: ' + name, e);
       val = '';
     }
     if (opt_collectVars) {
-      opt_collectVars[name] = val;
+      opt_collectVars[match] = val;
     }
     return this.encodeValue_(val);
   });
@@ -743,26 +782,32 @@ expandSync(url, opt_bindings, opt_collectVars) {
   }
 
   /**
-   * Determines the offset of an element's shadowRoot host if it has one.
+   * Determines the offset of an element's shadowRoot host if it has one
+   * otherwise return top/left 0.
    * @param {EventTarget} element
    * @return {!{top: number, left: number}}
    * @private
    */
   getShadowHostOffset_(element) {
     if (element) {
-      var currElement = element;
-      while (currElement && currElement.nodeType != 11) {
-        currElement = currElement.parentElement; // 11 = DOC FRAGMENT NODE
-      }
-      if (currElement && currElement.host) {
-        return {top: currElement.host./*REVIEW*/offsetTop,
-          left: currElement.host./*REVIEW*/offsetLeft};
+      const shadowRoot = closest(element, parent => {
+        return parent.nodeType == 11;
+      });
+      if (shadowRoot && shadowRoot.host) {
+        // Can we guarantee offsetTop/Left are correct values without
+        // forcing a promise measure?  Given we cannot wait, what values would
+        // we expect here?
+        return {top: shadowRoot.host./*REVIEW*/offsetTop,
+          left: shadowRoot.host./*REVIEW*/offsetLeft};
       }
     }
     return {top: 0, left: 0};
   }
 
   /**
+   * If event target is anchor, expand href synchronously via expandSync.
+   * Original href is stored in data-amp-orig-href so that subsequent calls
+   * will generate newest href value.
    * @param {Event} evt click event
    * @return {string} expanded url from event target href
    * @private
@@ -773,7 +818,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
     }
     const href = evt.target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) ||
         evt.target.getAttribute('href');
-    // Ensure href is present and not hash
+    // Ensure href is present
     if (!href) {
       return '';
     }
@@ -785,7 +830,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
         }
         shadowHostOffset =
           shadowHostOffset || this.getShadowHostOffset_(evt.target);
-        return evt.clientX - shadowHostOffset.left;
+        return String(evt.clientX - shadowHostOffset.left);
       }).bind(this),
       'CLICK_Y': (function() {
         if (evt.clientY === undefined) {
@@ -793,7 +838,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
         }
         shadowHostOffset =
           shadowHostOffset || this.getShadowHostOffset_(evt.target);
-        return evt.clientY - shadowHostOffset.top;
+        return String(evt.clientY - shadowHostOffset.top);
       }).bind(this),
     };
     return this.expandSync(href, vars);
