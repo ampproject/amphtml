@@ -17,6 +17,7 @@
 import {calculateScriptBaseUrl} from '../service/extensions-impl';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
+import {getMode} from '../mode';
 
 /** @const */
 const TAG = 'cache-service-worker';

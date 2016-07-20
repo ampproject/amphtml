@@ -31,7 +31,6 @@ import {
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
 import * as cust from '../../src/custom-element';
-import {getMode} from '../../src/mode';
 import * as sinon from 'sinon';
 
 

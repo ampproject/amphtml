@@ -15,7 +15,7 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
-import indexedDBP from "../../third_party/indexed-db-as-promised/index"
+import indexedDBP from '../../third_party/indexed-db-as-promised/index';
 
 /**
  * The SW's current version. We conveniently use JS Date timestamps as version
@@ -50,18 +50,6 @@ function versionToDate(ampVersion) {
 function ampVersion(url) {
   const matches = /rtv\/(\d+)/.exec(url);
   return matches ? matches[1] : VERSION;
-}
-
-/**
- * Determines if the given `ampVersion` is stale (older than `days` days).
- *
- * @param {string} ampVersion
- * @param {number=} days
- * @return {boolean}
- */
-function isStale(ampVersion, days = 8) {
-  const delta = RELEASE_DATE - versionToDate(ampVersion);
-  return delta > days * (/* 1 day in ms */ 1000 * 60 * 60 * 24);
 }
 
 /**
@@ -153,7 +141,7 @@ const dbPromise = cachePromise.then(() => {
       // Do we need to create our database?
       if (oldVersion == 0) {
         const files = db.createObjectStore('js-files', {keyPath: 'file'});
-        files.createIndex('versions', 'versions', { multiEntry: true });
+        files.createIndex('versions', 'versions', {multiEntry: true});
       }
 
       const files = transaction.objectStore('js-files');
@@ -169,7 +157,7 @@ const dbPromise = cachePromise.then(() => {
         const item = cur.value;
         const removal = {
           url: item.url,
-          versions: item.versions.filter(v => (v <= cutoff))
+          versions: item.versions.filter(v => (v <= cutoff)),
         };
 
         // Remove old versions from our db.
@@ -189,7 +177,7 @@ const dbPromise = cachePromise.then(() => {
 
         return Promise.all(deletes);
       });
-    }
+    },
   });
 }).then(result => {
   db = result;
