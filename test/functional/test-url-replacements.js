@@ -220,6 +220,17 @@ describe('UrlReplacements', () => {
         .to.eventually.equal('?x1=&x2=&x3=');
   });
 
+  it('should replace VARIANTS', () => {
+    return expect(
+        expandWithVariant('?VARIANTS'))
+        .to.eventually.equal('?x1.v1!x2.none');
+  });
+
+  it('should replace VARIANTS with empty string if ' +
+      'amp-experiment is not configured ', () => {
+    return expect(expand('?VARIANTS')).to.eventually.equal('?');
+  });
+
   it('should replace TIMESTAMP', () => {
     return expand('?ts=TIMESTAMP').then(res => {
       expect(res).to.match(/ts=\d+/);
