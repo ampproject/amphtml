@@ -17,7 +17,6 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 import {dev} from './log';
-import {getMode} from './mode';
 
 /**
  * Holds info about a service.

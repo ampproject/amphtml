@@ -166,6 +166,14 @@ export class BaseElement {
     return this.layout_;
   }
 
+  /**
+   * DO NOT CALL. Retained for backward compat during rollout.
+   * @protected @return {!Window}
+   */
+  getWin() {
+    return this.win;
+  }
+
   /** @protected @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.win);

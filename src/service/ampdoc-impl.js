@@ -127,6 +127,14 @@ export class AmpDoc {
   }
 
   /**
+   * DO NOT CALL. Retained for backward compat during rollout.
+   * @return {!Window}
+   */
+  getWin() {
+    return dev.assert(null, 'not implemented');
+  }
+
+  /**
    * Locates an element with the specified ID within the ampdoc. In the
    * shadow-doc mode, when multiple documents could be present, this method
    * localizes search only to the DOM subtree specific to this ampdoc.
@@ -153,6 +161,11 @@ export class AmpDocSingle extends AmpDoc {
     super();
     /** @public @const {!Window} */
     this.win = win;
+  }
+
+  /** @override */
+  getWin() {
+    return this.win;
   }
 
   /** @override */
@@ -183,6 +196,11 @@ export class AmpDocShadow extends AmpDoc {
     this.win = win;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
+  }
+
+  /** @override */
+  getWin() {
+    return this.win;
   }
 
   /** @override */

@@ -36,6 +36,9 @@ var privateServiceFactory = 'This service should only be installed in ' +
 var shouldNeverBeUsed =
     'Usage of this API is not allowed - only for internal purposes.';
 
+var backwardCompat = 'This method must not be called. It is only retained ' +
+    'for backward compatibility during rollout.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -412,6 +415,11 @@ var forbiddenTerms = {
     message: 'Use dom.openWindowDialog',
     whitelist: [
       'src/dom.js',
+    ],
+  },
+  '\\.getWin\\(': {
+    message: backwardCompat,
+    whitelist: [
     ],
   },
 };
