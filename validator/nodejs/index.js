@@ -317,7 +317,8 @@ exports.getInstance = getInstance;
  */
 function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
-    console.log(filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
+    console.log(
+        filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
   }
   for (var ii = 0; ii < validationResult.errors.length; ii++) {
     var error = validationResult.errors[ii];
