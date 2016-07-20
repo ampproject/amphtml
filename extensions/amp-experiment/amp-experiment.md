@@ -16,12 +16,24 @@ limitations under the License.
 
 # <a name="amp-experiment"></a> `amp-experiment`
 
-| | |
-|-----------------------|------------------------------|
-| **Description** | Conduct user experience experiments on an AMP document and collect corresponding data with `amp-pixel` or `amp-analytics` | 
-| **Availability** | [Experimental](https://cdn.ampproject.org/experiments.html) |
-| **Required Script** | `<script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>` |
-| **Examples** | [experiment.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/experiment.amp.html) |
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Conduct user experience experiments on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td><a href="https://cdn.ampproject.org/experiments.html">Experimental</a></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/experiment.amp.html">experiment.amp.html</a></td>
+  </tr>
+</table>
 
 ## Behavior
 The `<amp-experiment>` element is used to conduct user experience experiments on an AMP document. It provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.
