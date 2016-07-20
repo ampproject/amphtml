@@ -744,7 +744,7 @@ export class Resources {
         if (diff == 0) {
           // Nothing to resize, resolve attemptChangeSize promise.
           if (request.callback) {
-            request.callback(/* hasSizeChanged */true);
+            request.callback(/* hasSizeChanged */false);
           }
           continue;
         }
@@ -796,15 +796,12 @@ export class Resources {
           }
           request.resource./*OK*/changeSize(
               request.newHeight, request.newWidth);
-          if (request.callback) {
-            request.callback(/* hasSizeChanged */true);
-          }
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
-        } else {
-          if (request.callback) {
-            request.callback(/* hasSizeChanged */false);
-          }
+        }
+
+        if (request.callback) {
+          request.callback(/* hasSizeChanged */resize);
         }
       }
 
