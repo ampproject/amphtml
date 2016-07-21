@@ -43,19 +43,18 @@ export class AmpShareTracking extends AMP.BaseElement {
       return;
     }
 
-    /** @private @const {!Window} */
-    this.win_ = this.win;
+    /** @private {string} */
+    this.vendorHref_ = this.element.getAttribute('data-href');
+    dev.fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    this.vendorHref = this.element.getAttribute('data-href');
-    dev.fine(TAG, 'vendorHref: ', this.vendorHref);
-
-    this.shareTrackingFragments = Promise.all([
-      this.getIncomingFragment(),
-      this.getOutgoingFragment(this.vendorHref)]).then(results => {
-        const fragments = {};
-        fragments.incomingFragment = results[0];
-        fragments.outgoingFragment = results[1];
-        return fragments;
+    /** @private {!Promise<!Object>} */
+    this.shareTrackingFragments_ = Promise.all([
+      this.getIncomingFragment_(),
+      this.getOutgoingFragment_(this.vendorHref_)]).then(results => {
+        return {
+          incomingFragment: results[0],
+          outgoingFragment: results[1],
+        }
       });
 
   }
@@ -65,64 +64,58 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @return {!Promise<string>}
    * @private
    */
-  getIncomingFragment() {
-    return viewerFor(this.win_).getFragment().then(hash => {
-      if (!hash) {
+  getIncomingFragment_() {
+    return viewerFor(this.win).getFragment().then(fragment => {
+      if (!fragment || fragment.indexOf('.') != 0) {
         return Promise.resolve();
       }
-
-      if (hash.indexOf('.') == 0) {
-        const endIndex = hash.indexOf('&');
-        if (endIndex != -1) {
-          return Promise.resolve(hash.substr(1, (endIndex - 1)));
-        } else {
-          return Promise.resolve(hash.substr(1));
-        }
+      const endIndex = fragment.indexOf('&');
+      if (endIndex != -1) {
+        return fragment.substr(1, (endIndex - 1));
+      } else {
+        return fragment.substr(1);
       }
-      return Promise.resolve();
     });
   }
 
   /**
    * Get an outgoing share-tracking fragment
-   * @param {string=} vendorUrl
+   * @param {string=} opt_vendorUrl
    * @return {!Promise<string>}
    * @private
    */
-  getOutgoingFragment(vendorUrl) {
-    if (vendorUrl) {
-      return this.getOutgoingFragmentFromVendor(vendorUrl).then(
-        response => {
-          if (!response.outgoingFragment) {
-            dev.warn(TAG, 'The response from [' + vendorUrl +
-                '] does not have an outgoingFragment value. ' +
-                'Generating outgoing fragment using random generator.');
-            return this.getOutgoingFragmentRandomly();
-          } else {
-            return response.outgoingFragment;
-          }
-        }
-      );
-    } else {
-      return this.getOutgoingFragmentRandomly();
-    }
+  getOutgoingFragment_(opt_vendorUrl) {
+    return this.getOutgoingFragmentFromVendor_(opt_vendorUrl).then(
+      fragment => (fragment || this.getOutgoingRandomFragment_())
+    );
   }
 
   /**
    * Get an outgoing share-tracking fragment from vendor
    * by issueing a post request to the url the vendor provided
-   * @return {!Promise<!{
-   *   outgoingFragment: string
-   * }>}
+   * @param {string=} opt_vendorUrl
+   * @return {!Promise<string>}
    * @private
    */
-  getOutgoingFragmentFromVendor(vendorUrl) {
+  getOutgoingFragmentFromVendor_(opt_vendorUrl) {
+    if (!opt_vendorUrl) {
+      return Promise.resolve();
+    }
     const postReq = {
       method: 'POST',
       credentials: 'include',
       body: {},
     };
-    return xhrFor(this.win_).fetchJson(vendorUrl, postReq);
+    return xhrFor(this.win).fetchJson(opt_vendorUrl, postReq).then(response => {
+      if (response.outgoingFragment) {
+        return response.outgoingFragment;
+      } else {
+        dev.warn(TAG, 'The response from [' + opt_vendorUrl +
+            '] does not have an outgoingFragment value. ' +
+            'Generating outgoing fragment using random generator.');
+        return Promise.resolve();
+      }
+    });
   }
 
   /**
@@ -130,7 +123,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @return {!Promise<string>}
    * @private
    */
-  getOutgoingFragmentRandomly() {
+  getOutgoingRandomFragment_() {
     const randomFragment = 'rAmDoM';
     return Promise.resolve(randomFragment);
   }

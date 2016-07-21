@@ -802,7 +802,8 @@ export class Viewer {
   }
 
   /**
-   * Get the fragment from the url or the viewer
+   * Get the fragment from the url or the viewer.
+   * Strip leading '#' in the fragment
    * @return {!Promise<string>}
    */
   getFragment() {

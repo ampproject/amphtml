@@ -21,7 +21,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
-describe('amp-share-tracking', () => {
+describe.only('amp-share-tracking', () => {
   let sandbox;
   let viewerForMock;
   let xhrMock;
@@ -46,11 +46,11 @@ describe('amp-share-tracking', () => {
       }
       const ampShareTracking = new AmpShareTracking(el);
       if (optStubGetIncomingFragment) {
-        sandbox.stub(ampShareTracking, 'getIncomingFragment',
+        sandbox.stub(ampShareTracking, 'getIncomingFragment_',
             () => optStubGetIncomingFragment);
       }
       if (optStubGetOutgoingFragment) {
-        sandbox.stub(ampShareTracking, 'getOutgoingFragment',
+        sandbox.stub(ampShareTracking, 'getOutgoingFragment_',
             () => optStubGetOutgoingFragment);
       }
       return ampShareTracking;
@@ -63,8 +63,8 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/Promise.resolve(),
       /*stubGetOutgoingFragment*/Promise.resolve()).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(() => {
-          expect(ampShareTracking.vendorHref).to.equal('http://foo.bar');
+        return ampShareTracking.shareTrackingFragments_.then(() => {
+          expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
         });
       });
   });
@@ -76,7 +76,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/undefined,
       /*stubGetOutgoingFragment*/Promise.resolve()).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.equal('12345');
           expect(fragments.outgoingFragment).to.be.undefined;
         });
@@ -91,7 +91,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/undefined,
       /*stubGetOutgoingFragment*/Promise.resolve()).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.equal('12345');
           expect(fragments.outgoingFragment).to.be.undefined;
         });
@@ -105,7 +105,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/undefined,
       /*stubGetOutgoingFragment*/Promise.resolve()).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
           expect(fragments.outgoingFragment).to.be.undefined;
         });
@@ -119,7 +119,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/undefined,
       /*stubGetOutgoingFragment*/Promise.resolve()).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
           expect(fragments.outgoingFragment).to.be.undefined;
         });
@@ -133,7 +133,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/Promise.resolve(),
       /*stubGetOutgoingFragment*/undefined).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
           expect(fragments.outgoingFragment).to.equal('rAmDoM');
         });
@@ -149,7 +149,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/Promise.resolve(),
       /*stubGetOutgoingFragment*/undefined).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
           expect(fragments.outgoingFragment).to.equal('54321');
         });
@@ -165,7 +165,7 @@ describe('amp-share-tracking', () => {
       /*stubGetIncomingFragment*/Promise.resolve(),
       /*stubGetOutgoingFragment*/undefined).then(ampShareTracking => {
         ampShareTracking.buildCallback();
-        return ampShareTracking.shareTrackingFragments.then(fragments => {
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
           expect(fragments.outgoingFragment).to.equal('rAmDoM');
         });
