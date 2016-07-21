@@ -99,7 +99,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!Resources} resources
+   * @param {!./resources-impl.Resources} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -113,7 +113,7 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
-    /** @private {!Resources} */
+    /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
     /** @private {boolean} */
@@ -156,7 +156,7 @@ export class Resource {
 
    /**
     * Pending change size that was requested but could not be satisfied.
-    * @private {!SizeDef|undefined}
+    * @private {!./resources-impl.SizeDef|undefined}
     */
     this.pendingChangeSize_ = undefined;
 
@@ -291,7 +291,7 @@ export class Resource {
   }
 
   /**
-   * @return {!SizeDef|undefined}
+   * @return {!./resources-impl.SizeDef|undefined}
    */
   getPendingChangeSize() {
     return this.pendingChangeSize_;
