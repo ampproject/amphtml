@@ -221,10 +221,6 @@ export class Viewer {
     this.performanceTracking_ = this.params_['csi'] === '1';
     dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
-    this.shareTrackingIncomingFragment_ = this.params_['share-tracking'];
-    dev.fine(TAG_, '- shareTrackingIncomingFragment:',
-        this.shareTrackingIncomingFragment_);
-
     /**
      * Whether the AMP document is embedded in a viewer, such as an iframe or
      * a web view.
@@ -806,15 +802,21 @@ export class Viewer {
   }
 
   /**
-   * Retrieves the share-tracking identifier from the viewer
+   * Get the fragment from the url or the viewer
    * @return {!Promise<string>}
    */
-  getShareTrackingIncomingFragment() {
-    if (this.shareTrackingIncomingFragment_) {
-      return Promise.resolve(this.shareTrackingIncomingFragment_);
+  getFragment() {
+    if (!this.isEmbedded_) {
+      let hash = this.win.location.hash;
+      if (hash.indexOf('#') == 0) {
+        hash = hash.substr(1);
+      }
+      return Promise.resolve(hash);
     }
-    return this.sendMessageUnreliable_(
-        'shareTrackingIncomingFragment', undefined, true);
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return this.sendMessageUnreliable_('fragment', undefined, true);
   }
 
   /**

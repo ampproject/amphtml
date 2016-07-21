@@ -15,7 +15,6 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {fromClass} from '../../../src/service';
 import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
 import {dev} from '../../../src/log';
@@ -23,40 +22,18 @@ import {dev} from '../../../src/log';
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
 
-/**
- * @export
- * @typedef {{
- *   outgoingFragment: string
- * }}
- */
-let ShareTrackingPostResponseDef;
-
 export class AmpShareTracking extends AMP.BaseElement {
   /**
     * @return {boolean}
     * @private
     */
   isExperimentOn_() {
-    return isExperimentOn(this.getWin(), TAG);
+    return isExperimentOn(this.win, TAG);
   }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
-  }
-
-  /** @override */
-  createdCallback() {
-    if (!this.isExperimentOn_()) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
-
-    /** @private @const {!Window} */
-    this.win_ = this.getWin();
-
-    /** @private @const {!ShareTrackingService} */
-    this.shareTrackingService_ = getShareTrackingService_(this.win_);
   }
 
   /** @override */
@@ -66,54 +43,51 @@ export class AmpShareTracking extends AMP.BaseElement {
       return;
     }
 
+    /** @private @const {!Window} */
+    this.win_ = this.win;
+
     this.vendorHref = this.element.getAttribute('data-href');
     dev.fine(TAG, 'vendorHref: ', this.vendorHref);
 
-    return Promise.all([
-      this.shareTrackingService_.getIncomingFragment(),
-      this.shareTrackingService_.getOutgoingFragment(this.vendorHref)]).then(
-        results => {
-          this.incomingFragment = results[0];
-          this.outgoingFragment = results[1];
-          dev.fine(TAG, 'get incoming fragment: ' + this.incomingFragment);
-          dev.fine(TAG, 'get outgoing fragment: ' + this.outgoingFragment);
-        });
-  }
-}
+    this.shareTrackingFragments = Promise.all([
+      this.getIncomingFragment(),
+      this.getOutgoingFragment(this.vendorHref)]).then(results => {
+        const fragments = {};
+        fragments.incomingFragment = results[0];
+        fragments.outgoingFragment = results[1];
+        return fragments;
+      });
 
-/**
- * ShareTrackingService processes the incoming and outgoing url fragment
- */
-export class ShareTrackingService {
-  constructor(window) {
-    this.win_ = window;
   }
 
   /**
-   * Get the incoming share-tracking fragment from the url
+   * Get the incoming share-tracking fragment from the viewer
    * @return {!Promise<string>}
+   * @private
    */
   getIncomingFragment() {
-    // remove the #
-    const hash = this.win_.location.hash.substr(1);
-
-    // when the url contains the share-tracking identifier directly
-    if (hash.indexOf('.') == 0) {
-      const endIndex = hash.indexOf('&');
-      if (endIndex != -1) {
-        return Promise.resolve(hash.substr(1, (endIndex - 1)));
-      } else {
-        return Promise.resolve(hash.substr(1));
+    return viewerFor(this.win_).getFragment().then(hash => {
+      if (!hash) {
+        return Promise.resolve();
       }
-    }
 
-    // get the share-tracking identifier from the viewer
-    return viewerFor(this.win_).getShareTrackingIncomingFragment();
+      if (hash.indexOf('.') == 0) {
+        const endIndex = hash.indexOf('&');
+        if (endIndex != -1) {
+          return Promise.resolve(hash.substr(1, (endIndex - 1)));
+        } else {
+          return Promise.resolve(hash.substr(1));
+        }
+      }
+      return Promise.resolve();
+    });
   }
 
   /**
    * Get an outgoing share-tracking fragment
+   * @param {string=} vendorUrl
    * @return {!Promise<string>}
+   * @private
    */
   getOutgoingFragment(vendorUrl) {
     if (vendorUrl) {
@@ -125,7 +99,7 @@ export class ShareTrackingService {
                 'Generating outgoing fragment using random generator.');
             return this.getOutgoingFragmentRandomly();
           } else {
-            return Promise.resolve(response.outgoingFragment);
+            return response.outgoingFragment;
           }
         }
       );
@@ -137,7 +111,10 @@ export class ShareTrackingService {
   /**
    * Get an outgoing share-tracking fragment from vendor
    * by issueing a post request to the url the vendor provided
-   * @return {!Promise<!ShareTrackingPostResponseDef>}
+   * @return {!Promise<!{
+   *   outgoingFragment: string
+   * }>}
+   * @private
    */
   getOutgoingFragmentFromVendor(vendorUrl) {
     const postReq = {
@@ -151,39 +128,12 @@ export class ShareTrackingService {
   /**
    * Get a random outgoing share-tracking fragment
    * @return {!Promise<string>}
+   * @private
    */
   getOutgoingFragmentRandomly() {
-    const randomFragment = this.getRandomFragment();
+    const randomFragment = 'rAmDoM';
     return Promise.resolve(randomFragment);
   }
-
-  /**
-   * Get a random fragment
-   * @return {!string}
-   */
-  getRandomFragment() {
-    // TODO(yuxichen): generate random fragment
-    return 'rAmDoM';
-  }
 }
-
-/**
- * @param {!Window} window
- * @return {!ShareTrackingService}
- * @private
- */
-function getShareTrackingService_(window) {
-  return fromClass(window, 'shareTrackingService', ShareTrackingService);
-}
-
-/**
- * @param {!Window} window
- * @return {!ShareTrackingService}
- */
-export function installShareTrackingService(window) {
-  return getShareTrackingService_(window);
-}
-
-installShareTrackingService(AMP.win);
 
 AMP.registerElement('amp-share-tracking', AmpShareTracking);

@@ -204,24 +204,40 @@ describe('Viewer', () => {
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
-  it('should configure shareTrackingIncomingFragment from url', () => {
-    windowApi.location.hash = '#share-tracking=12345';
+  it('should get fragment from the url in non-embedded mode', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.hash = '#foo';
     const viewer = new Viewer(windowApi);
-    return viewer.getShareTrackingIncomingFragment().then(fragment => {
-      expect(fragment).to.be.equal('12345');
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.equal('foo');
     });
   });
 
-  it('should configure shareTrackingIncomingFragment from viewer ' +
-      'if it is not provided in url', () => {
-    windowApi.location.hash = '';
+  it('should get fragment from the viewer in embedded mode' +
+      'if the viewer has capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
     const viewer = new Viewer(windowApi);
     sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
-      expect(name).to.equal('shareTrackingIncomingFragment');
+      expect(name).to.equal('fragment');
       return Promise.resolve('from-viewer');
     });
-    return viewer.getShareTrackingIncomingFragment().then(fragment => {
+    return viewer.getFragment().then(fragment => {
       expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT has capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.undefined;
     });
   });
 
