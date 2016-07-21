@@ -208,6 +208,10 @@ export class IntersectionObserver extends Observable {
    * @private
    */
   flush_() {
+    if (!this.iframe_) {
+      return;
+    }
+
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;

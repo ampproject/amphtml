@@ -325,4 +325,26 @@ describe('IntersectionObserver', () => {
     expect(onChangeSpy.callCount).to.equal(1);
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
+
+  it('should not send intersection when element is removed from DOM', () => {
+    const messages = [];
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    insert(testIframe);
+    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+      // Copy because arg is modified in place.
+      messages.push(JSON.parse(JSON.stringify(message)));
+    });
+    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.startSendingIntersectionChanges_();
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(messages).to.have.length(1);
+    clock.tick(98);
+    ioInstance.iframe_ = null;
+    clock.tick(5);
+    ioInstance.fire();
+    expect(ioInstance.pendingChanges_).to.have.length(1);
+    expect(messages).to.have.length(1);
+    clock.tick(100);
+    expect(messages).to.have.length(1);
+  });
 });
