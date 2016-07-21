@@ -15,7 +15,7 @@
  */
 
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
@@ -24,5 +24,5 @@ import {getService} from './service';
  * @return {!History}
  */
 export function historyFor(window) {
-  return getService(window, 'history');
+  return getExistingServiceForWindow(window, 'history');
 };

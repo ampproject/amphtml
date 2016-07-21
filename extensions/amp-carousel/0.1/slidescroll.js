@@ -37,7 +37,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   buildCarousel() {
     /** @private @const {!Window} */
-    this.win_ = this.getWin();
+    this.win_ = this.win;
 
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();

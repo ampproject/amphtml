@@ -56,7 +56,7 @@ export class AmpAdApiHandler {
     this.unlisteners_ = [];
 
     /** @private @const */
-    this.viewer_ = viewerFor(this.baseInstance_.getWin());
+    this.viewer_ = viewerFor(this.baseInstance_.win);
   }
 
   /**

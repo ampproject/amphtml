@@ -32,7 +32,7 @@ class AmpAccordion extends AMP.BaseElement {
     this.sections_ = this.getRealChildren();
 
     /** @const @private {!Window} */
-    this.win_ = this.getWin();
+    this.win_ = this.win;
 
     /** @const @private {string} */
     this.id_ = this.getSessionStorageKey_();

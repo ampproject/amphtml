@@ -90,7 +90,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   createdCallback() {
 
     /** @private @const {!Window} */
-    this.win_ = this.getWin();
+    this.win_ = this.win;
 
     /** @private @const {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(this.win_);

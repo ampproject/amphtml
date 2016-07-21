@@ -97,7 +97,7 @@ export class ActionService {
     this.globalMethodHandlers_ = {};
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.getWin());
+    this.vsync_ = vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');

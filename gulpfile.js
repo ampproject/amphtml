@@ -500,6 +500,23 @@ var activeBundleOperationCount = 0;
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  if (options.minify) {
+    function minify() {
+      console.log('Minifying ' + srcFilename);
+      closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
+          options)
+          .then(function() {
+            fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+            if (options.latestName) {
+              fs.copySync(
+                  destDir + '/' + options.minifiedName,
+                  destDir + '/' + options.latestName);
+            }
+          });
+    }
+    minify();
+    return;
+  }
   var bundler = browserify(srcDir + srcFilename, {debug: true})
       .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
   if (options.watch) {
@@ -553,49 +570,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     });
   }
 
-  function minify() {
-    console.log('Minifying ' + srcFilename);
-    closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
-        options)
-        .then(function() {
-          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-          if (options.latestName) {
-            fs.copySync(
-                destDir + '/' + options.minifiedName,
-                destDir + '/' + options.latestName);
-          }
-        });
-  }
-
-  /*
-  Pre closure compiler minification. Add this back, should we have problems
-  with closure.
-  function minify() {
-    console.log('Minifying ' + srcFilename);
-    bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(lazybuild())
-      .pipe($$.uglify({
-        preserveComments: 'some'
-      }))
-      .pipe($$.rename(options.minifiedName))
-      .pipe(lazywrite())
-      .on('end', function() {
-        fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-        if (options.latestName) {
-          fs.copySync(
-              destDir + '/' + options.minifiedName,
-              destDir + '/' + options.latestName);
-        }
-      });
-  }
-  */
-
-  if (options.minify) {
-    minify();
-  } else {
-    rebundle();
-  }
+  rebundle();
 }
 
 /**

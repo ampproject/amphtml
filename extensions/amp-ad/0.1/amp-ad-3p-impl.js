@@ -139,7 +139,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   }
 
   renderOutsideViewport() {
-    const allowRender = allowRenderOutsideViewport(this.element, this.getWin());
+    const allowRender = allowRenderOutsideViewport(this.element, this.win);
     if (allowRender !== true) {
       return allowRender;
     }
@@ -189,7 +189,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
-    setupA2AListener(this.getWin());
+    setupA2AListener(this.win);
   }
 
   /**
@@ -198,7 +198,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
-    preloadBootstrap(this.getWin());
+    preloadBootstrap(this.win);
     const type = this.element.getAttribute('type');
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
@@ -229,7 +229,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isInFixedContainer_ = isPositionFixed(this.element, this.getWin());
+    this.isInFixedContainer_ = isPositionFixed(this.element, this.win);
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -267,7 +267,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       user.assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
-      incrementLoadingAds(this.getWin());
+      incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
         if (cid) {
           this.element.setAttribute('ampcid', cid);

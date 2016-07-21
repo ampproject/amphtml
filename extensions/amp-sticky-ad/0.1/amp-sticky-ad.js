@@ -146,7 +146,7 @@ class AmpStickyAd extends AMP.BaseElement {
    * @private
    */
   addCloseButton_() {
-    const closeButton = this.getWin().document.createElement('button');
+    const closeButton = this.win.document.createElement('button');
     closeButton.classList.add('amp-sticky-ad-close-button');
     closeButton.setAttribute('aria-label',
         this.element.getAttribute('data-close-button-aria-label') || 'Close');

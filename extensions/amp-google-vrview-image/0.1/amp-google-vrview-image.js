@@ -33,7 +33,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
@@ -87,7 +87,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();

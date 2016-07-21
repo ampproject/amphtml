@@ -280,9 +280,15 @@ describe('Template', () => {
 
 describe('BaseTemplate', () => {
 
+  let templateElement;
+
+  beforeEach(() => {
+    templateElement = document.createElement('div');
+  });
+
   it('should require render override', () => {
     expect(() => {
-      new BaseTemplate().render();
+      new BaseTemplate(templateElement).render();
     }).to.throw(/Not implemented/);
   });
 
@@ -290,7 +296,7 @@ describe('BaseTemplate', () => {
     const root = document.createElement('div');
     const element1 = document.createElement('div');
     root.appendChild(element1);
-    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
   });
 
   it('should unwrap with empty/whitespace text', () => {
@@ -299,20 +305,20 @@ describe('BaseTemplate', () => {
     root.appendChild(document.createTextNode('   '));
     root.appendChild(element1);
     root.appendChild(document.createTextNode(' \n\t  '));
-    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(element1);
   });
 
   it('should NOT unwrap multiple elements', () => {
     const root = document.createElement('div');
     root.appendChild(document.createElement('div'));
     root.appendChild(document.createElement('div'));
-    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
   });
 
   it('should NOT unwrap with non-empty/whitespace text', () => {
     const root = document.createElement('div');
     root.appendChild(document.createTextNode('a'));
     root.appendChild(document.createElement('div'));
-    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+    expect(new BaseTemplate(templateElement).unwrap(root)).to.equal(root);
   });
 });

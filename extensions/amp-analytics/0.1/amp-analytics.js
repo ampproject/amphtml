@@ -84,7 +84,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.consentPromise_ = Promise.resolve();
 
     if (this.consentNotificationId_ != null) {
-      this.consentPromise_ = userNotificationManagerFor(this.getWin())
+      this.consentPromise_ = userNotificationManagerFor(this.win)
           .then(service => service.get(this.consentNotificationId_));
     }
   }
@@ -170,11 +170,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             // Expand the selector using variable expansion.
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
                 trigger);
-            addListener(this.getWin(), trigger, this.handleEvent_.bind(this,
+            addListener(this.win, trigger, this.handleEvent_.bind(this,
                   trigger));
 
           } else {
-            addListener(this.getWin(), trigger,
+            addListener(this.win, trigger,
                 this.handleEvent_.bind(this, trigger));
           }
         }));
@@ -239,10 +239,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    return urlReplacementsFor(this.getWin()).expand(remoteConfigUrl)
+    const win = this.win;
+    return urlReplacementsFor(win).expand(remoteConfigUrl)
         .then(expandedUrl => {
           remoteConfigUrl = expandedUrl;
-          return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig);
+          return xhrFor(win).fetchJson(remoteConfigUrl, fetchConfig);
         })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
@@ -319,7 +320,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const props = this.config_['optout'].split('.');
-    let k = this.getWin();
+    let k = this.win;
     for (let i = 0; i < props.length; i++) {
       if (!k) {
         return false;
@@ -393,7 +394,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     request = this.expandTemplate_(request, trigger, event);
 
     // For consistency with amp-pixel we also expand any url replacements.
-    return urlReplacementsFor(this.getWin()).expand(request).then(request => {
+    return urlReplacementsFor(this.win).expand(request).then(request => {
       this.sendRequest_(request, trigger);
       return request;
     });
@@ -418,8 +419,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
     if (threshold >= 0 && threshold <= 100) {
       const key = this.expandTemplate_(spec['sampleOn'], trigger);
-      const keyPromise = urlReplacementsFor(this.getWin()).expand(key);
-      const cryptoPromise = cryptoFor(this.getWin());
+      const keyPromise = urlReplacementsFor(this.win).expand(key);
+      const cryptoPromise = cryptoFor(this.win);
       return Promise.all([keyPromise, cryptoPromise])
           .then(results => results[1].uniform(results[0]))
           .then(digest => digest * 100 < spec['threshold']);
@@ -488,9 +489,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (trigger['iframePing']) {
       user.assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
-      sendRequestUsingIframe(this.getWin(), request);
+      sendRequestUsingIframe(this.win, request);
     } else {
-      sendRequest(this.getWin(), request, this.config_['transport'] || {});
+      sendRequest(this.win, request, this.config_['transport'] || {});
     }
   }
 
