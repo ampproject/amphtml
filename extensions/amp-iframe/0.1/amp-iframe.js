@@ -15,6 +15,7 @@
  */
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
+import {isPositionFixed} from '../../amp-ad/0.1/amp-ad-3p-impl';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
@@ -236,6 +237,18 @@ export class AmpIframe extends AMP.BaseElement {
             'https://github.com/ampproject/amphtml/issues/new');
         return Promise.resolve();
       }
+    }
+
+
+
+    const isFixedAd = isPositionFixed(this.element, this.win)
+        && isAdLike(this.element);
+    if (isFixedAd) {
+      console/*OK*/.error('amp-iframe is not used for displaying fixed ad.' +
+          'Please use amp-sticky-ad instead or file a GitHub issue ' +
+          'for your use case: ' +
+          'https://github.com/ampproject/amphtml/issues/new');
+      return Promise.resolve();
     }
 
     const width = this.element.getAttribute('width');
