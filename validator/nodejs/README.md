@@ -47,12 +47,12 @@ You may save the following example into a file, e.g., `demo.js`.
 'use strict';
 var amphtmlValidator = require('amphtml-validator');
 
-amphtmlValidator.getInstance().then((validator) => {
-  const result = validator.validateString('<html>Hello, world.</html>');
+amphtmlValidator.getInstance().then(function (validator) {
+  var result = validator.validateString('<html>Hello, world.</html>');
   ((result.status === 'PASS') ? console.log : console.error)(result.status);
   for (var ii = 0; ii < result.errors.length; ii++) {
     var error = result.errors[ii];
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
+    var msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
     if (error.specUrl !== null) {
       msg += ' (see ' + error.specUrl + ')';
     }
