@@ -23,7 +23,7 @@ import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
-import {extensionsFor} from '../../../src/extensions';
+import {createShadowEmbedRoot} from '../../../src/shadow-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
@@ -544,23 +544,26 @@ export class AmpA4A extends AMP.BaseElement {
           //    all of the enclosed mutations are fairly simple and unlikely
           //    to fail.
           this.vsync_.mutate(() => {
+            const doc = this.element.ownerDocument;
             // Copy fonts to host document head.
             this.relocateFonts_(creativeMetaData);
-            // Add extensions to head.
-            this.addCreativeExtensions_(creativeMetaData);
-            // Finally, add body and re-formatted CSS styling to the shadow root.
-            const shadowRoot =
-                this.element.shadowRoot || this.element.createShadowRoot();
-            // TODO(dvoytenko, tdrl): Cloning the amp-runtime style from the
-            // host document is a short-term fix.  Ultimately, AMP will provide
-            // a better mechanism for this, and this code will have to be
-            // updated to coordinate with their approach.
-            const style = this.win.document.querySelector(
-                'style[amp-runtime]') ||
-                this.win.document.createElement('style');
-            shadowRoot.appendChild(style.cloneNode(true));
-            // End TODO.
-            shadowRoot./*OK*/innerHTML += (cssBlock + bodyBlock);
+            // Create and setup shadow root.
+            const shadowRoot = createShadowEmbedRoot(this.element,
+                creativeMetaData.customElementExtensions || []);
+            // Add custom CSS.
+            const customStyle = doc.createElement('style');
+            customStyle.setAttribute('amp-custom', '');
+            customStyle.textContent = cssBlock;
+            shadowRoot.appendChild(customStyle);
+            // Add body.
+            const bodyAttrString = creativeMetaData.bodyAttributes ?
+                  ' ' + creativeMetaData.bodyAttributes : '';
+            const temp = doc.createElement('div');
+            temp./*OK*/innerHTML =
+                `<${AMP_BODY_STRING}${bodyAttrString}></${AMP_BODY_STRING}>`;
+            const bodyElement = temp.firstElementChild;
+            shadowRoot.appendChild(bodyElement);
+            bodyElement./*OK*/innerHTML = bodyBlock;
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
           });
@@ -714,11 +717,8 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   formatBody_(creative, metaData) {
-    const body = creative.substring(metaData.bodyUtf16CharOffsets[0],
+    return creative.substring(metaData.bodyUtf16CharOffsets[0],
         metaData.bodyUtf16CharOffsets[1]);
-    const bodyAttrString = metaData.bodyAttributes ?
-          ' ' + metaData.bodyAttributes : '';
-    return `<${AMP_BODY_STRING}${bodyAttrString}>${body}</${AMP_BODY_STRING}>`;
   }
 
   /**
@@ -744,7 +744,7 @@ export class AmpA4A extends AMP.BaseElement {
       rangesToKeep.push(css.substring(startIndex, css.length));
       css = rangesToKeep.join(AMP_BODY_STRING);
     }
-    return '<style amp-custom>' + css + '</style>';
+    return css;
   }
 
   /**
@@ -768,24 +768,6 @@ export class AmpA4A extends AMP.BaseElement {
       }
       doc.head.appendChild(linkElem);
       this.stylesheets_.push(linkElem);
-    });
-  }
-
-  /**
-   * Add fonts from the ad metaData block to the host document head (if
-   * they're not already present there).
-   *
-   * @param {!CreativeMetaDataDef} metaData Reserialization metadata object.
-   * @private
-   */
-  addCreativeExtensions_(metaData) {
-    if (!metaData.customElementExtensions) {
-      return;
-    }
-    const win = this.win;
-    const extensions = extensionsFor(win);
-    metaData.forEach(extensionId => {
-      extensions.loadExtension(extensionId);
     });
   }
 }

@@ -42,6 +42,7 @@ let ExtensionDef;
  * @typedef {{
  *   extension: !ExtensionDef,
  *   docFactories: !Array<function(!./ampdoc-impl.AmpDoc)>,
+ *   shadowRootFactories: !Array<function(!ShadowRoot)>,
  *   promise: (!Promise<!ExtensionDef>|undefined),
  *   resolve: (function(!ExtensionDef)|undefined),
  *   reject: (function(!Error)|undefined),
@@ -118,6 +119,21 @@ export function addElementToExtension(extensions, name, implementationClass) {
  */
 export function addDocFactoryToExtension(extensions, factory, opt_forName) {
   extensions.addDocFactory_(factory, opt_forName);
+}
+
+
+/**
+ * Add a shadow-root factory to the extension currently being registered. This
+ * is a restricted method and it's allowed to be called only during the overall
+ * extension registration.
+ * @param {!Extensions} extensions
+ * @param {function(!ShadowRoot)} factory
+ * @param {string=} opt_forName
+ * @restricted
+ */
+export function addShadowRootFactoryToExtension(extensions, factory,
+    opt_forName) {
+  extensions.addShadowRootFactory_(factory, opt_forName);
 }
 
 
@@ -231,7 +247,7 @@ export class Extensions {
 
   /**
    * Registers an ampdoc factory.
-   * @param {function()} factory
+   * @param {function(!./ampdoc-impl.AmpDoc)} factory
    * @param {string=} opt_forName
    * @private
    * @restricted
@@ -239,6 +255,18 @@ export class Extensions {
   addDocFactory_(factory, opt_forName) {
     const holder = this.getCurrentExtensionHolder_(opt_forName);
     holder.docFactories.push(factory);
+  }
+
+  /**
+   * Registers a shadow-root factory.
+   * @param {function(!ShadowRoot)} factory
+   * @param {string=} opt_forName
+   * @private
+   * @restricted
+   */
+  addShadowRootFactory_(factory, opt_forName) {
+    const holder = this.getCurrentExtensionHolder_(opt_forName);
+    holder.shadowRootFactories.push(factory);
   }
 
   /**
@@ -255,11 +283,43 @@ export class Extensions {
     extensionIds.forEach(extensionId => {
       const holder = this.getExtensionHolder_(extensionId);
       promises.push(this.waitFor_(holder).then(() => {
+        holder.shadowRootFactories.forEach(factory => {
+          try {
+            factory(ampdoc.getRootNode());
+          } catch (e) {
+            rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
+          }
+        });
         holder.docFactories.forEach(factory => {
           try {
             factory(ampdoc);
           } catch (e) {
             rethrowAsync('Doc factory failed: ', e, extensionId);
+          }
+        });
+      }));
+    });
+    return Promise.all(promises);
+  }
+
+  /**
+   * Installs all shadow-root factories previously registered with
+   * `addShadowRootFactory_`.
+   * @param {!ShadowRoot} shadowRoot
+   * @param {!Array<string>} extensionIds
+   * @return {!Promise}
+   * @restricted
+   */
+  installFactoriesInShadowRoot(shadowRoot, extensionIds) {
+    const promises = [];
+    extensionIds.forEach(extensionId => {
+      const holder = this.getExtensionHolder_(extensionId);
+      promises.push(this.waitFor_(holder).then(() => {
+        holder.shadowRootFactories.forEach(factory => {
+          try {
+            factory(shadowRoot);
+          } catch (e) {
+            rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
         });
       }));
@@ -282,6 +342,7 @@ export class Extensions {
       holder = {
         extension,
         docFactories: [],
+        shadowRootFactories: [],
         promise: undefined,
         resolve: undefined,
         reject: undefined,
