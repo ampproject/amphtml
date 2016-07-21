@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=200
+<amp-ad width=300 height=250
     type="adspirit"
     data-asm-params="&amp;pid=4"
     data-asm-host="help.adspirit.de">
