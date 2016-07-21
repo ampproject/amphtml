@@ -45,12 +45,13 @@ or add `amphtml-validator` as a dependency to your package.json.
 You may save the following example into a file, e.g., `demo.js`.
 ```js
 'use strict';
-const ampValidator = require('amphtml-validator');
+var amphtmlValidator = require('amphtml-validator');
 
-ampValidator.getInstance().then((validator) => {
+amphtmlValidator.getInstance().then((validator) => {
   const result = validator.validateString('<html>Hello, world.</html>');
   ((result.status === 'PASS') ? console.log : console.error)(result.status);
-  for (const error of result.errors) {
+  for (var ii = 0; ii < result.errors.length; ii++) {
+    var error = result.errors[ii];
     let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
     if (error.specUrl !== null) {
       msg += ' (see ' + error.specUrl + ')';
