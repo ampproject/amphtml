@@ -776,14 +776,14 @@ describe('UrlReplacements', () => {
       return attributes[name];
     }
     clickObservable.fire(event);
-    expect(attributes['href']).to.match(/r=(\d\.\d+)&nx=123&ny=456&plt=9&a=b$/);
+    expect(attributes['href']).to.match(/r=\d\.\d+&nx=123&ny=456&plt=9&a=b$/);
     expect(attributes['data-amp-orig-href']).to.equal(
       'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b');
     // Fire again with different X/Y and verify new values are set
     event.clientX = 789;
     event.clientY = 468;
     clickObservable.fire(event);
-    expect(attributes['href']).to.match(/r=(\d\.\d+)&nx=789&ny=468&plt=9&a=b$/);
+    expect(attributes['href']).to.match(/r=\d\.\d+&nx=789&ny=468&plt=9&a=b$/);
     expect(attributes['data-amp-orig-href']).to.equal(
       'r=RANDOM&nx=CLICK_X&ny=CLICK_Y&plt=PAGE_LOAD_TIME&a=b');
   });

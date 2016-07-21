@@ -276,13 +276,13 @@ export class UrlReplacements {
     // Returns the viewport height.
     this.setAsync_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().height);
+        () => String(viewportFor(this.win_).getSize().height));
     });
 
     // Returns the viewport width.
     this.setAsync_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
-        () => viewportFor(this.win_).getSize().width);
+        () => String(viewportFor(this.win_).getSize().width));
     });
 
     // Returns document characterset.
@@ -390,7 +390,7 @@ export class UrlReplacements {
    * called) with additional support for CLICK_X & CLICK_Y based on clientX &
    * clientY. If the target is within a shadowRoot, the x/y location is offset
    * by the shadowRoot host's offset.
-   * Note that other click listeners may execute which modify the href.  Because
+   * Note that other click listeners may execute, which modify the href.  Because
    * execution order of click listeners is non-deterministic across browsers,
    * click listeners should not expect their modifications to be expanded.
    * @private
@@ -521,7 +521,7 @@ export class UrlReplacements {
    * asynchronous resolver where expand will use async and expandSync the sync
    * version.
    * @param {string} varName
-   * @param {?SyncResolverDef} syncResolver
+   * @param {!SyncResolverDef} syncResolver
    * @return {!UrlReplacements}
    * @private
    */
@@ -540,7 +540,7 @@ export class UrlReplacements {
   * asynchronous resolver where expand will use async and expandSync the sync
   * version.
    * @param {string} varName
-   * @param {AsyncResolverDef=} asyncResolver
+   * @param {!AsyncResolverDef} asyncResolver
    * @return {!UrlReplacements}
    * @private
    */
@@ -592,7 +592,7 @@ export class UrlReplacements {
 /**
  * Synchronously expands the provided URL by replacing all known variables with
  * their resolved values. Optional `opt_bindings` can be used to add new
- * variables or override existing ones.
+ * variables or override existing ones.  Any async bindings are ignored.
  * @param {string} url
  * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
  * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
@@ -782,7 +782,7 @@ expandSync(url, opt_bindings, opt_collectVars) {
   }
 
   /**
-   * Determines the offset of an element's shadowRoot host if it has one
+   * Determines the offset of an element's shadowRoot host if it has one,
    * otherwise return top/left 0.
    * @param {EventTarget} element
    * @return {!{top: number, left: number}}
