@@ -22,7 +22,7 @@ import {timer} from '../timer';
  * The internal structure for the task.
  * @typedef {{
  *   id: string,
- *   resource: !Resource,
+ *   resource: !./resource.Resource,
  *   priority: number,
  *   callback: function(boolean),
  *   scheduleTime: time,
@@ -30,7 +30,7 @@ import {timer} from '../timer';
  *   promise: (!Promise|undefined)
  * }}
  */
-let TaskDef;
+export let TaskDef;
 
 
 /**
