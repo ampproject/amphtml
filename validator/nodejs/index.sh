@@ -18,7 +18,7 @@ for CMD in node nodejs; do
     else
       MOD="${DIR}/../lib/node_modules/amphtml-validator/index.js"
     fi
-    
+
     exec "$CMD" "$MOD" "$@"
   fi
 done
