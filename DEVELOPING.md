@@ -51,12 +51,14 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`             | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`                  | Builds the AMP library.                                               |
+| `gulp build` --css-only       | Builds only the embedded css into js files for the AMP library.       |
 | `gulp clean`                  | Removes build output.                                                 |
 | `gulp css`                    | Recompile css to build directory.                                     |
 | `gulp extensions`             | Build AMP Extensions.                                                 |
 | `gulp watch`                  | Watches for changes in files, re-build.                               |
 | `gulp test`                   | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
+| `gulp test --nobuild`         | Runs tests without re-build.                                          |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
@@ -64,6 +66,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
+| `npm run ava` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 
 #### Saucelabs
@@ -79,7 +82,7 @@ Also for local testing, download [saucelabs connect](https://docs.saucelabs.com/
 
 If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically built and tested on [Travis](https://travis-ci.org/ampproject/amphtml/builds). After the travis run completes, the result will be logged to your PR.
 
-If a test flaked on a pull request you can ask a project owner to restart the tests for you.
+If a test flaked on a pull request you can ask a project owner to restart the tests for you. Use [`this.retries(x)`](https://mochajs.org/#retry-tests) as the last resort.
 
 ### Manual testing
 

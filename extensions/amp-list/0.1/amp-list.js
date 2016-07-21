@@ -36,7 +36,7 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @const {!Element} */
-    this.container_ = this.getWin().document.createElement('div');
+    this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
     if (!this.element.hasAttribute('role')) {
@@ -44,26 +44,27 @@ export class AmpList extends AMP.BaseElement {
     }
 
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.getWin());
+    this.urlReplacements_ = urlReplacementsFor(this.win);
   }
 
   /** @override */
   layoutCallback() {
     return this.urlReplacements_.expand(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
-          const opts = {
-            credentials: this.element.getAttribute('credentials'),
-          };
+          const opts = {};
+          if (this.element.hasAttribute('credentials')) {
+            opts.credentials = this.element.getAttribute('credentials');
+          }
           if (opts.credentials) {
             opts.requireAmpResponseSourceOrigin = true;
           }
-          return xhrFor(this.getWin()).fetchJson(src, opts);
+          return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
           user.assert(typeof data == 'object' && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];
-          return templatesFor(this.getWin()).findAndRenderTemplateArray(
+          return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
         });
   }

@@ -15,9 +15,10 @@
  */
 
 import {closestByTag} from './dom';
-import {getService} from './service';
+import {fromClass} from './service';
 import {dev} from './log';
 import {historyFor} from './history';
+import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -42,9 +43,7 @@ export function uninstallGlobalClickListener(window) {
  * @param {!Window} window
  */
 function clickHandlerFor(window) {
-  return getService(window, 'clickhandler', () => {
-    return new ClickHandler(window);
-  });
+  return fromClass(window, 'clickhandler', ClickHandler);
 }
 
 /**
@@ -60,13 +59,13 @@ export class ClickHandler {
     /** @private @const {!Window} */
     this.win = window;
 
-    /** @private @const {!Viewport} */
+    /** @private @const {!./service/viewport-impl.Viewport} */
     this.viewport_ = viewportFor(this.win);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
-    /** @private @const {!History} */
+    /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
     // Only intercept clicks when iframed.
@@ -107,8 +106,8 @@ export class ClickHandler {
  * on iOS Safari.
  *
  * @param {!Event} e
- * @param {!Viewport} viewport
- * @param {!History} history
+ * @param {!./service/viewport-impl.Viewport} viewport
+ * @param {!./service/history-impl.History} history
  */
 export function onDocumentElementClick_(e, viewport, history) {
   if (e.defaultPrevented) {
@@ -134,13 +133,13 @@ export function onDocumentElementClick_(e, viewport, history) {
 
   // In case of FTP Links in embedded documents always open then in _blank.
   if (isFTP) {
-    win.open(target.href, '_blank');
+    openWindowDialog(win, target.href, '_blank');
     e.preventDefault();
   }
 
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
   if (isSafariIOS && !isNormalProtocol) {
-    win.open(target.href, '_top');
+    openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
     e.preventDefault();

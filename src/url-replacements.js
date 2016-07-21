@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
  * @param {!Window} window
- * @return {!UrlReplacements}
+ * @return {!./service/url-replacements-impl.UrlReplacements}
  */
 export function urlReplacementsFor(window) {
-  return getService(window, 'url-replace');
+  return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
+      getExistingServiceForWindow(window, 'url-replace'));
 };

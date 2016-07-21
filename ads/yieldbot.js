@@ -31,7 +31,7 @@ export function yieldbot(global, data) {
 
   global.ybotq = global.ybotq || [];
 
-  loadScript(global, 'https://cdn.yldbt.com/js/yieldbot.intent.js', () => {
+  loadScript(global, 'https://cdn.yldbt.com/js/yieldbot.intent.amp.js', () => {
     global.ybotq.push(() => {
       try {
         const dimensions = [[

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
  * @param {!Window} window
- * @return {!Vsync}
+ * @return {!./service/vsync-impl.Vsync}
  */
 export function vsyncFor(window) {
-  return getService(window, 'vsync');
+  return /** @type {!./service/vsync-impl.Vsync} */ (
+      getExistingServiceForWindow(window, 'vsync'));
 };

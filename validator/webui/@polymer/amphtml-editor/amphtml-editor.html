@@ -1,0 +1,101 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!-- An editor control using CodeMirror. This fires 'amphtml-editor-changes'
+     events which are not parameterized, and allows clients to get / set
+     the editor value, add line widgets (inline displays of errors) and move
+     the cursor around. See https://codemirror.net/doc/manual.html when
+     adding additional features. -->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-material/paper-material.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<script src="../../codemirror/lib/codemirror.js"></script>
+<script src="../../codemirror/addon/selection/selection-pointer.js"></script>
+<script src="../../codemirror/mode/css/css.js"></script>
+<script src="../../codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="../../codemirror/mode/javascript/javascript.js"></script>
+<script src="../../codemirror/mode/xml/xml.js"></script>
+<link rel="stylesheet" href="../../codemirror/lib/codemirror.css">
+<dom-module id="amphtml-editor">
+  <style scope="amphtml-editor">
+    .CodeMirror-cursor {
+      border-left: 3px solid black;
+      border-right: none;
+      width: 3;
+    }
+  </style>
+  <template>
+    <paper-material elevation="1">
+      <textarea id="code" name="code"></textarea>
+    </paper-material>
+  </template>
+  <script>
+    Polymer({
+      is: 'amphtml-editor',
+      behaviors: [
+        Polymer.IronResizableBehavior
+      ],
+      listeners: {
+        'iron-resize': '_onIronResize'
+      },
+      ready: function() {
+        this.editor = CodeMirror.fromTextArea(this.$.code, {
+          mode: "text/html",
+          selectionPointer: true,
+          lineNumbers: true,
+          showCursorWhenSelecting: true,
+          cursorBlinkRate: 300
+        });
+        // By default, we delay validation for 300ms to avoid locking up
+        // the UI thread while a user is typing into the editor. However,
+        // when .setEditorValue is called (below), for instance because
+        // a new doc was fetched from the web that needs to be validated,
+        // we set the delay to 0ms and validate immediately.
+        this.nextValidationDelayMs = 300;
+        this.editor.on('changes', function() {
+          this.fire('amphtml-editor-changes',
+                    {'validationDelayMs': this.nextValidationDelayMs});
+          this.nextValidationDelayMs = 300;
+        }.bind(this));
+      },
+      attached: function() {
+        this.async(this.notifyResize, 1);
+      },
+      setEditorValue: function(text) {
+        this.nextValidationDelayMs = 0;  // Validate immediately.
+        this.editor.setValue(text);
+      },
+      getEditorValue: function() {
+        return this.editor.getValue();
+      },
+      setCursorAndFocus: function(line, col) {
+        // We first scroll further than the actual line / col we care about,
+        // to get the error line widget into view. This doesn't seem
+        // to work perfectly yet.
+        this.editor.getDoc().setCursor(line + 1, col + 80, {'scroll': true});
+        this.editor.getDoc().setCursor(line, col, {'scroll': true});
+        this.editor.focus();
+      },
+      addLineWidget(line, domElement) {
+        return this.editor.getDoc().addLineWidget(line, domElement);
+      },
+      _onIronResize: function() {
+        this.editor.setSize('100%', '' + (window.innerHeight - 460) + 'px');
+      }
+    });
+  </script>
+</dom-module>

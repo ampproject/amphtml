@@ -18,6 +18,7 @@
 import './polyfills';
 
 import {user} from './log';
+import {fromClass} from './service';
 
 /**
  * Helper with all things Timer.
@@ -87,7 +88,7 @@ export class Timer {
 
   /**
    * Cancels the previously scheduled callback.
-   * @param {number|string} timeoutId
+   * @param {number|string|null} timeoutId
    */
   cancel(timeoutId) {
     if (typeof timeoutId == 'string') {
@@ -159,5 +160,13 @@ export class Timer {
   }
 }
 
+/**
+ * @param {!Window} window
+ * @return {!Timer}
+ */
+export function timerFor(window) {
+  return fromClass(window, 'timer', Timer);
+};
 
-export const timer = new Timer(window);
+
+export const timer = timerFor(window);

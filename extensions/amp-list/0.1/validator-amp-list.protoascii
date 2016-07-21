@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-list
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-list extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,9 +47,7 @@ tags: {  # amp-list
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
 }
 tags: {  # <amp-list>
-  tag_name: "amp-list"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-LIST"
   also_requires_tag: "amp-list extension .js script"
   attrs: { name: "credentials" }
   attrs: {

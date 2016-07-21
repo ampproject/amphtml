@@ -72,3 +72,83 @@ amp-carousel .amp-carousel-button.amp-disabled {
   opacity: 0;
   visibility: hidden;
 }
+
+/* Begin SlideScroll */
+.-amp-slidescroll {
+}
+
+.-amp-slides-container {
+  display: flex !important;
+  flex-wrap: nowrap;
+  height: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  position: relative !important;
+  white-space: nowrap !important;
+  width: 100% !important;
+  scroll-snap-type: mandatory !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slides-container.-amp-no-scroll {
+  overflow-x: hidden !important;
+}
+
+
+.-amp-slide-item {
+  align-items: center !important;
+  display: none !important;
+  flex: 0 0 100% !important;
+  height: 100% !important;
+  justify-content: center !important;
+  position: relative !important;
+  scroll-snap-coordinate: 0 0 !important;
+  width: 100% !important;
+}
+
+.-amp-slide-item-show {
+  display: flex !important;
+}
+
+.-amp-carousel-start-marker,
+.-amp-carousel-end-marker {
+  display: block !important;
+  height: 100% !important;
+  width: 1px !important;
+  background-color: transparent !important;
+  scroll-snap-coordinate: 0 0 !important;
+  flex: 0 0 1px !important;
+}
+
+.-amp-carousel-start-marker {
+  order: -1 !important;
+  margin-left: -1px !important;
+}
+
+.-amp-carousel-end-marker {
+  order: 100000000 !important;
+  margin-right: -1px !important;
+}
+
+.-amp-carousel-start-marker,
+.-amp-carousel-end-marker {
+  background-color: transparent !important;
+  display: block !important;
+  flex: 0 0 1px !important;
+  height: 100% !important;
+  position: relative !important;
+  scroll-snap-coordinate: 0 0 !important;
+  width: 1px !important;
+}
+
+.-amp-carousel-start-marker {
+  order: -1 !important;
+  margin-left: -1px !important;
+}
+
+.-amp-carousel-end-marker {
+  order: 100000000 !important;
+  margin-right: -1px !important;
+}
+
+/* End SlideScroll */

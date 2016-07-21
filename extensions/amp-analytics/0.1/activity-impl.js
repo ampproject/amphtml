@@ -19,7 +19,7 @@
  * has performed on the page.
  */
 
-import {getService} from '../../../src/service';
+import {fromClass} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
@@ -79,7 +79,7 @@ class ActivityHistory {
 
   /**
    * Indicate that an activity took place at the given time.
-   * @param {ActivityEventDef}
+   * @param {ActivityEventDef} activityEvent
    */
   push(activityEvent) {
     if (!this.prevActivityEvent_) {
@@ -145,16 +145,16 @@ export class Activity {
     /** @private @const */
     this.win_ = win;
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundStopIgnore_ = this.stopIgnore_.bind(this);
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundHandleInactive_ = this.handleInactive_.bind(this);
 
-    /** @private @const {function} */
+    /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
 
     /** @private {Array<!UnlistenDef>} */
@@ -245,7 +245,7 @@ export class Activity {
   }
 
   /**
-   * @param {ActivityEventType}
+   * @param {ActivityEventType} type
    * @private
    */
   handleActivityEvent_(type) {
@@ -257,7 +257,7 @@ export class Activity {
     setTimeout(this.boundStopIgnore_, timeToWait);
 
     this.activityHistory_.push({
-      type: type,
+      type,
       time: secondKey,
     });
   }
@@ -308,7 +308,5 @@ export class Activity {
  * @return {!Activity}
  */
 export function installActivityService(win) {
-  return getService(win, 'activity', () => {
-    return new Activity(win);
-  });
+  return fromClass(win, 'activity', Activity);
 };

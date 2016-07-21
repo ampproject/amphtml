@@ -18,6 +18,8 @@ import {writeScript, loadScript, checkData} from '../3p/3p';
 import {getSourceUrl} from '../src/url';
 import {doubleclick} from '../ads/google/doubleclick';
 
+/* global rubicontag: false */
+
 /**
  * @param {!Window} global
  * @param {!Object} data

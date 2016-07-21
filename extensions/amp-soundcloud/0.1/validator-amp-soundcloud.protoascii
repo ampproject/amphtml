@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-soundcloud
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-soundcloud extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true
@@ -47,11 +47,14 @@ tags: {  # amp-soundcloud
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
 }
 tags: {  # <amp-soundcloud>
-  tag_name: "amp-soundcloud"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
+  tag_name: "AMP-SOUNDCLOUD"
+  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-soundcloud extension .js script"
   attrs: { name: "data-color" value_regex_casei: "([0-9a-f]{3}){1,2}" }
+  attrs: {
+    name: "data-secret-token"
+    value_regex: "[A-Za-z0-9_-]+"
+  }
   attrs: {
     name: "data-trackid"
     mandatory: true

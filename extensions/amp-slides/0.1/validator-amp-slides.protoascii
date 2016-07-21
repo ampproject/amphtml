@@ -15,9 +15,9 @@
 #
 
 tags: {  # amp-slides
-  tag_name: "script"
+  tag_name: "SCRIPT"
   spec_name: "amp-slides extension .js script"
-  mandatory_parent: "head"
+  mandatory_parent: "HEAD"
   attrs: {
     name: "async"
     mandatory: true

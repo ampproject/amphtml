@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {getValueForExpr, recreateNonProtoObject} from '../../src/json';
+import {
+  getValueForExpr,
+  recreateNonProtoObject,
+  tryParseJson,
+} from '../../src/json';
 
 describe('json', () => {
 
@@ -30,7 +34,7 @@ describe('json', () => {
 
     it('should return a nested value', () => {
       const child = {str: 'A', num: 1, bool: true, val: null};
-      const obj = {child: child};
+      const obj = {child};
       expect(getValueForExpr(obj, 'child')).to.deep.equal(child);
       expect(getValueForExpr(obj, 'child.str')).to.equal('A');
       expect(getValueForExpr(obj, 'child.num')).to.equal(1);
@@ -41,7 +45,7 @@ describe('json', () => {
 
     it('should return a nested value without proto', () => {
       const child = {str: 'A', num: 1, bool: true, val: null};
-      const obj = recreateNonProtoObject({child: child});
+      const obj = recreateNonProtoObject({child});
       expect(getValueForExpr(obj, 'child')).to.deep.equal(child);
       expect(getValueForExpr(obj, 'child.str')).to.equal('A');
       expect(getValueForExpr(obj, 'child.num')).to.equal(1);
@@ -52,7 +56,7 @@ describe('json', () => {
 
     it('should shortcircuit if a parent in chain missing', () => {
       const child = {str: 'A'};
-      const obj = {child: child};
+      const obj = {child};
       expect(getValueForExpr(obj, 'child.str')).to.equal('A');
       expect(getValueForExpr(obj, 'unknown.str')).to.be.undefined;
       expect(getValueForExpr(obj, 'unknown.chain.str')).to.be.undefined;
@@ -60,7 +64,7 @@ describe('json', () => {
 
     it('should shortcircuit if a parent in chain is not an object', () => {
       const child = {str: 'A'};
-      const obj = {child: child, nonobj: 'B'};
+      const obj = {child, nonobj: 'B'};
       expect(getValueForExpr(obj, 'child.str')).to.equal('A');
       expect(getValueForExpr(obj, 'nonobj')).to.equal('B');
       expect(getValueForExpr(obj, 'nonobj.str')).to.be.undefined;
@@ -104,6 +108,37 @@ describe('json', () => {
       expect(copy.child).to.deep.equal(original.child);
       expect(copy.child === original.child).to.be.false;
       expect(copy.child.__proto__).to.be.undefined;
+    });
+  });
+
+  describe('tryParseJson', () => {
+    it('should return object for valid json', () => {
+      const json = '{"key": "value"}';
+      const result = tryParseJson(json);
+      expect(result.key).to.equal('value');
+    });
+
+    it('should not throw and return undefined for invalid json', () => {
+      const json = '{"key": "val';
+      expect(tryParseJson.bind(null, json)).to.not.throw;
+      const result = tryParseJson(json);
+      expect(result).to.be.undefined;
+    });
+
+    it('should call onFailed for invalid and not call for valid json', () => {
+      let onFailedCalled = false;
+      const validJson = '{"key": "value"}';
+      tryParseJson(validJson, () => {
+        onFailedCalled = true;
+      });
+      expect(onFailedCalled).to.be.false;
+
+      const invalidJson = '{"key": "val';
+      tryParseJson(invalidJson, err => {
+        onFailedCalled = true;
+        expect(err).to.exist;
+      });
+      expect(onFailedCalled).to.be.true;
     });
   });
 });

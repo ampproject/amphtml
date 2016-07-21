@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {fromClass} from './service';
 
 
 /**
@@ -89,6 +89,46 @@ export class Platform {
   isWebKit() {
     return /WebKit/i.test(this.navigator.userAgent) && !this.isEdge();
   }
+
+  /**
+   * Returns the major version of the browser.
+   * @return {number}
+   */
+  getMajorVersion() {
+    if (this.isSafari()) {
+      return this.evalMajorVersion_(/\sVersion\/(\d+)/, 1);
+    }
+    if (this.isChrome()) {
+      return this.evalMajorVersion_(/\Chrome\/(\d+)/, 1);
+    }
+    if (this.isFirefox()) {
+      return this.evalMajorVersion_(/\Firefox\/(\d+)/, 1);
+    }
+    if (this.isIe()) {
+      return this.evalMajorVersion_(/\MSIE\s(\d+)/, 1);
+    }
+    if (this.isEdge()) {
+      return this.evalMajorVersion_(/\Edge\/(\d+)/, 1);
+    }
+    return 0;
+  }
+
+  /**
+   * @param {!RegExp} expr
+   * @param {number} index The index in the result that's interpreted as the
+   *   major version (integer).
+   * @return {number}
+   */
+  evalMajorVersion_(expr, index) {
+    if (!this.navigator.userAgent) {
+      return 0;
+    }
+    const res = this.navigator.userAgent.match(expr);
+    if (!res || index >= res.length) {
+      return 0;
+    }
+    return parseInt(res[index], 10);
+  }
 };
 
 
@@ -97,9 +137,7 @@ export class Platform {
  * @return {!Platform}
  */
 export function platformFor(window) {
-  return getService(window, 'platform', () => {
-    return new Platform(window);
-  });
+  return fromClass(window, 'platform', Platform);
 };
 
 export const platform = platformFor(window);

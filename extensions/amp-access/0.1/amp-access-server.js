@@ -63,7 +63,7 @@ export class AccessServerAdapter {
 
   /**
    * @param {!Window} win
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @param {!AccessTypeAdapterContextDef} context
    */
   constructor(win, configJson, context) {
@@ -192,7 +192,7 @@ export class AccessServerAdapter {
         const section = sections[i];
         const sectionId = section.getAttribute('i-amp-access-id');
         const target = this.win.document.querySelector(
-            '[i-amp-access-id=' + sectionId + ']');
+            '[i-amp-access-id="' + sectionId + '"]');
         if (!target) {
           dev.warn(TAG, 'Section not found: ', sectionId);
           continue;

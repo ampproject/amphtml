@@ -32,7 +32,7 @@ const TAG = 'amp-install-serviceworker';
 class AmpInstallServiceWorker extends AMP.BaseElement {
   /** @override */
   buildCallback() {
-    const win = this.getWin();
+    const win = this.win;
     if (!('serviceWorker' in win.navigator)) {
       return;
     }
@@ -63,7 +63,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     }
 
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
-      install(this.getWin(), src);
+      install(this.win, src);
     } else {
       user.error(TAG,
           'Did not install ServiceWorker because it does not ' +
@@ -73,7 +73,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerFor(this.getWin()).whenFirstVisible().then(() => {
+    viewerFor(this.win).whenFirstVisible().then(() => {
       // If the user is longer than 20 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
@@ -88,7 +88,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerFor(this.getWin()).isVisible()) {
+    if (!viewerFor(this.win).isVisible()) {
       return;
     }
     this.insertedIframe_ = true;

@@ -30,57 +30,13 @@ system (tested with v4.4.2). E.g.,
 [by using a package manager](https://nodejs.org/en/download/package-manager/) or
 [by using NVM](https://github.com/creationix/nvm).
 
-## Using the command-line tool (Beta!)
+## Node.js based command line tool and API
 
-* Type `./index.js` in this directory to get started:
+Please see (https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
 
-```
-$ ./index.js testdata/feature_tests/minimum_valid_amp.html
-testdata/feature_tests/minimum_valid_amp.html: PASS
+## Web UI
 
-$ ./index.js testdata/feature_tests/several_errors.html
-testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
-testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
-testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)
-testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://www.ampproject.org/docs/reference/amp-ad.html)
-...
-```
-
-If you wish to install the Validator as a system command,
-install the NPM package manager (e.g. using apt-get in Ubuntu Linux) and
-run `npm install -g` in this directory. After that, you may type
-`amp-validator` in any directory to invoke the validator.
-
-## Using the web UI (Beta!)
-
-This is a simple web editor which validates AMP HTML documents on the fly.
-This feature is new and experimental, feedback is especially welcome.
-
-* Type `./index.js webui` in this directory.
-* Point your web browser to http://127.0.0.1:8765/
-
-## Using the NodeJS API (Beta!)
-
-This API is new and still experimental, feedback is especially welcome. We may
-try to port to earlier versions of NodeJS if sufficient interest exists.
-
-```js
-'use strict';
-
-const ampValidator = require('amp-validator');
-ampValidator.getInstance((instance) => {
-  const result = instance.validateString('<html>Hello, world</html>');
-  ((result.status === 'PASS') ? console.log : console.error)(result.status);
-  for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' +
-        error.message;
-    if (error.specUrl !== null) {
-      msg += ' (see ' + error.specUrl + ')';
-    }
-    ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
-  }
-});
-```
+Please see (https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
 
 ## Building a Custom Validator
 

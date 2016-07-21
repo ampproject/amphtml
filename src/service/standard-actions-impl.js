@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import {getService} from '../service';
-import {installActionService} from './action-impl';
+import {fromClassForDoc} from '../service';
+import {installActionServiceForDoc} from './action-impl';
 import {installResourcesService} from './resources-impl';
+import {toggle} from '../style';
 
 
 /**
@@ -26,14 +27,14 @@ import {installResourcesService} from './resources-impl';
  */
 export class StandardActions {
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(win) {
-    /** @const @private {!ActionService} */
-    this.actions_ = installActionService(win);
+  constructor(ampdoc) {
+    /** @const @private {!./action-impl.ActionService} */
+    this.actions_ = installActionServiceForDoc(ampdoc);
 
-    /** @const @private {!Resources} */
-    this.resources_ = installResourcesService(win);
+    /** @const @private {!./resources-impl.Resources} */
+    this.resources_ = installResourcesService(ampdoc.win);
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }
@@ -41,22 +42,26 @@ export class StandardActions {
   /**
    * Handles "hide" action. This is a very simple action where "display: none"
    * is applied to the target element.
-   * @param {!ActionInvocation} invocation
+   * @param {!./action-impl.ActionInvocation} invocation
    */
   handleHide(invocation) {
-    this.resources_.mutateElement(invocation.target, () => {
-      invocation.target.style.display = 'none';
+    const target = invocation.target;
+    this.resources_.mutateElement(target, () => {
+      if (target.classList.contains('-amp-element')) {
+        target./*OK*/collapse();
+      } else {
+        toggle(target, false);
+      }
     });
   }
 }
 
 
 /**
- * @param {!Window} win
- * @return {!ActionService}
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!StandardActions}
  */
-export function installStandardActions(win) {
-  return getService(win, 'standard-actions', () => {
-    return new StandardActions(win);
-  });
+export function installStandardActionsForDoc(ampdoc) {
+  return fromClassForDoc(
+      ampdoc, 'standard-actions', StandardActions);
 };

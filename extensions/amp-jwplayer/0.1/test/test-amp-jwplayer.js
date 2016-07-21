@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-jwplayer');
+import '../amp-jwplayer';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

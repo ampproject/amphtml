@@ -19,41 +19,102 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
+import {installDocService} from '../src/service/ampdoc-impl';
+import {platform} from '../src/platform';
+import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
+// Needs to be called before the custom elements are first made.
+beforeTest();
 adopt(window);
 
 // Make amp section in karma config readable by tests.
 window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
-
-// Hack for skipping tests on Travis that don't work there.
-// Get permission before use!
 /**
- * @param {string} desc
- * @param {function()} fn
- */
-it.skipOnTravis = function(desc, fn) {
-  if (navigator.userAgent.match(/Chromium/)) {
-    it.skip(desc, fn);
-    return;
+ * Helper class to skip or retry tests under specific environment.
+ * Should be instantiated via describe.configure() or it.configure().
+ * Get permission before use!
+ *
+ * Example usages:
+ * describe.configure().skipFirefox().skipSafari().run('Bla bla ...', ... );
+ * it.configure().skipEdge().run('Should ...', ...);
+*/
+class TestConfig {
+
+  constructor(runner) {
+    this.runner = runner;
+    this.skippedUserAgents = [];
+    /**
+     * Called for each test suite (things created by `describe`).
+     * @type {!Array<function(!TestSuite)>}
+     */
+    this.configTasks = [];
   }
-  it(desc, fn);
+
+  skipOnTravis() {
+    this.skippedUserAgents.push('Chromium');
+    return this;
+  }
+
+  skipChrome() {
+    this.skippedUserAgents.push('Chrome');
+    return this;
+  }
+
+  skipEdge() {
+    this.skippedUserAgents.push('Edge');
+    return this;
+  }
+
+  skipFirefox() {
+    this.skippedUserAgents.push('Firefox');
+    return this;
+  }
+
+  skipSafari() {
+    this.skippedUserAgents.push('Safari');
+    return this;
+  }
+
+  retryOnSaucelabs() {
+    if (!window.ampTestRuntimeConfig.saucelabs) {
+      return this;
+    }
+    this.configTasks.push(mocha => {
+      mocha.retries(4);
+    });
+    return this;
+  }
+
+  /**
+   * @param {string} desc
+   * @param {function()} fn
+   */
+  run(desc, fn) {
+    for (let i = 0; i < this.skippedUserAgents.length; i++) {
+      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+        this.runner.skip(desc, fn);
+        return;
+      }
+    }
+
+    const tasks = this.configTasks;
+    this.runner(desc, function() {
+      tasks.forEach(task => {
+        task(this);
+      });
+      return fn.apply(this, arguments);
+    });
+  }
+}
+
+describe.configure = function() {
+  return new TestConfig(describe);
 };
 
-// Hack for skipping tests on Travis that don't work there.
-// Get permission before use!
-/**
- * @param {string} desc
- * @param {function()} fn
- */
-it.skipOnFirefox = function(desc, fn) {
-  if (navigator.userAgent.match(/Firefox/)) {
-    it.skip(desc, fn);
-    return;
-  }
-  it(desc, fn);
+it.configure = function() {
+  return new TestConfig(it);
 };
-
 
 // Used to check if an unrestored sandbox exists
 const sandboxes = [];
@@ -73,10 +134,23 @@ sinon.sandbox.create = function(config) {
   return sandbox;
 };
 
+beforeEach(beforeTest);
+
+function beforeTest() {
+  window.AMP_MODE = null;
+  window.AMP_TEST = true;
+  installDocService(window, true);
+}
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta');
+  const cleanupTagNames = ['link', 'meta'];
+  if (!platform.isSafari()) {
+    // TODO(#3315): Removing test iframes break tests on Safari.
+    cleanupTagNames.push('iframe');
+  }
+  const cleanup = document.querySelectorAll(cleanupTagNames.join(','));
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
@@ -99,6 +173,7 @@ afterEach(() => {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
   }
+  setDefaultBootstrapBaseUrlForTesting(null);
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

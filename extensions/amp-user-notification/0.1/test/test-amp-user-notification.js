@@ -64,13 +64,14 @@ describe('amp-user-notification', () => {
   function buildElement(doc, attrs = {}) {
     const elem = doc.createElement('amp-user-notification');
 
-    for (attr in attrs) {
+    for (const attr in attrs) {
       elem.setAttribute(attr, attrs[attr]);
     }
     const button = doc.createElement('button');
     button.setAttribute('on', 'tap:' + elem.getAttribute('id') + 'dismiss');
     elem.appendChild(button);
 
+    elem.tryUpgrade_();
     const impl = elem.implementation_;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
@@ -112,6 +113,57 @@ describe('amp-user-notification', () => {
     }).then(el => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl)).to.not.throw;
+    });
+  });
+
+  it('isDismissed should return true if dismissal has been recorded', () => {
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('get')
+          .withExactArgs('amp-user-notification:n1')
+          .returns(Promise.resolve(true))
+          .once();
+      return expect(impl.isDismissed()).to.eventually.equal(true);
+    });
+  });
+
+  it('isDismissed should return false if dismissal has not been recorded',
+      () => {
+        return getUserNotification(dftAttrs).then(el => {
+          const impl = el.implementation_;
+          impl.buildCallback();
+
+          storageMock.expects('get')
+              .withExactArgs('amp-user-notification:n1')
+              .returns(Promise.resolve(null))
+              .once();
+          return expect(impl.isDismissed()).to.eventually.equal(false);
+        });
+      });
+
+  it('isDismissed should return false if data-persist-dismissal=false', () => {
+    dftAttrs['data-persist-dismissal'] = false;
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('get').never();
+      return expect(impl.isDismissed()).to.eventually.equal(false);
+    });
+  });
+
+  it('isDismissed should return false if storage throws error', () => {
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('get')
+          .withExactArgs('amp-user-notification:n1')
+          .returns(Promise.reject('intentional'))
+          .once();
+      return expect(impl.isDismissed()).to.eventually.equal(false);
     });
   });
 
@@ -347,9 +399,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should have class `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -373,9 +425,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should not have `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -397,12 +449,12 @@ describe('amp-user-notification', () => {
   });
 
   it('should have `amp-hidden` and no `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
-    stub2 = sandbox.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
-        .returns(Promise.resolve());
+    sandbox.stub(AmpUserNotification.prototype,
+        'getShowEndpoint_').returns(Promise.resolve({showNotification: true}));
+    const stub2 = sandbox.stub(AmpUserNotification.prototype,
+        'postDismissEnpoint_').returns(Promise.resolve());
 
     return getUserNotification(dftAttrs).then(el => {
       const impl = el.implementation_;
@@ -471,10 +523,31 @@ describe('amp-user-notification', () => {
       };
     });
 
-    it('should be able to get a resolved service', () => {
-      service.registerUserNotification('n1', tag);
+    it('getNotificaiton should return notification object after ' +
+        'registration', () => {
+      return getUserNotification().then(element => {
+        const notification = new AmpUserNotification(element);
+        service.registerUserNotification('n1', notification);
+        return Promise.all([
+          expect(service.getNotification('n1'))
+              .to.eventually.equal(notification),
+          expect(service.getNotification('n2'))
+              .to.eventually.equal(undefined),
+        ]);
+      });
+    });
 
-      return service.get('n1');
+    it('should be able to get AmpUserNotification object by ID', () => {
+      let userNotification;
+
+      return getUserNotification().then(element => {
+        return new AmpUserNotification(element);
+      }).then(un => {
+        userNotification = un;
+        service.registerUserNotification('n1', userNotification);
+      }).then(() => {
+        return expect(service.get('n1')).to.eventually.equal(userNotification);
+      });
     });
 
     it('should queue up multiple amp-user-notification elements', () => {

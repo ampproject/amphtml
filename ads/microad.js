@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, checkData} from '../3p/3p';
+import {loadScript, checkData} from '../3p/3p';
+
+/* global MicroAd: false */
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function microad(global, data) {
-  checkData(data, ['spot']);
-  validateDataExists(data, ['spot']);
+  const microadData = ['spot', 'url', 'referrer', 'ifa', 'appid', 'geo'];
+  checkData(data, microadData);
+
   global.document.getElementById('c').setAttribute('id', data.spot);
   loadScript(global, 'https://j.microad.net/js/camp.js', () => {
     MicroAd.Compass.showAd(data);

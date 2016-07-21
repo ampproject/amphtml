@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
  * @param {!Window} window
- * @return {!Viewer}
+ * @return {!./service/viewer-impl.Viewer}
  */
 export function viewerFor(window) {
-  return getService(window, 'viewer');
+  return /** @type {!./service/viewer-impl.Viewer} */ (
+      getExistingServiceForWindow(window, 'viewer'));
 };

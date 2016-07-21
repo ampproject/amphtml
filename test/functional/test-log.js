@@ -23,7 +23,6 @@ import {
   rethrowAsync,
   user,
 } from '../../src/log';
-import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 describe('Logging', () => {
@@ -44,7 +43,7 @@ describe('Logging', () => {
     sandbox = sinon.sandbox.create();
 
     mode = {};
-    setModeForTesting(mode);
+    window.AMP_MODE = mode;
 
     logSpy = sandbox.spy();
     timeoutSpy = sandbox.spy();
@@ -57,7 +56,6 @@ describe('Logging', () => {
   });
 
   afterEach(() => {
-    setModeForTesting(null);
     sandbox.restore();
     sandbox = null;
   });
@@ -86,6 +84,7 @@ describe('Logging', () => {
     });
 
     it('should be enabled when forced for tests', () => {
+      mode.test = true;
       win.ENABLE_LOG = true;
       expect(new Log(win, RETURNS_OFF).level_).to.equal(LogLevel.FINE);
     });

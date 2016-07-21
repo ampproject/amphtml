@@ -56,6 +56,8 @@ message UrlSpec {
   optional bool allow_relative = 2 [default = true];
   // Whether the empty string '' is allowed for this URL value.
   optional bool allow_empty = 3;
+  // Must be lowercase.
+  repeated string disallowed_domain = 4;
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -148,20 +150,11 @@ message AtRuleSpec {
   optional BlockType type = 2 [default=PARSE_AS_ERROR];
 }
 
-message CssRuleSpec {
-  // TODO: Add fields such as
-  // optional bool top_level_only = 1;
-  // optional bool mandatory = 2;
-  // optional string selector_tag_regex = 3;
-  // optional string selector_id_regex = 4;
-  // repeated string pseudo_selector = 5;
-}
-
+// NEXT AVAILABLE TAG: 5
 message CssSpec {
   // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
-  repeated CssRuleSpec css_rule = 2;
   // urls within the CSS are checked against this spec.
   optional UrlSpec image_url_spec = 3;
   optional UrlSpec font_url_spec = 4;
@@ -248,7 +241,7 @@ message ChildTagSpec {
 // multiple meta tags (with different attributes).
 // NEXT AVAILABLE TAG: 20
 message TagSpec {
-  // Use lower-case tag names only. If adding the same tag twice, then they must
+  // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
   optional string tag_name = 1;
 
@@ -397,7 +390,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 62
+  // NEXT AVAILABLE TAG: 64
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -427,6 +420,7 @@ message ValidationError {
     MISSING_URL = 35;
     INVALID_URL = 36;
     INVALID_URL_PROTOCOL = 37;
+    DISALLOWED_DOMAIN = 62;
     DISALLOWED_RELATIVE_URL = 49;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
@@ -459,6 +453,7 @@ message ValidationError {
     CSS_SYNTAX_MISSING_URL = 52;
     CSS_SYNTAX_INVALID_URL = 53;
     CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
+    CSS_SYNTAX_DISALLOWED_DOMAIN = 63;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
     CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }

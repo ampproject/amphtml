@@ -24,6 +24,7 @@
  * <code>
  * <amp-instagram
  *   data-shortcode="fBwFP"
+ *   alt="Fastest page in the west."
  *   width="320"
  *   height="392"
  *   layout="responsive">
@@ -79,14 +80,18 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('div');
+    const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.getWin().document.createElement('amp-img');
+    const image = this.win.document.createElement('amp-img');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
+    image.setAttribute('referrerpolicy', 'origin');
+
+    this.propagateAttributes(['alt'], image);
+
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
@@ -110,6 +115,9 @@ class AmpInstagram extends AMP.BaseElement {
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
+    //Add title to the iframe for better accessibility.
+    iframe.setAttribute('title', 'Instagram: ' +
+        this.element.getAttribute('alt'));
     iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/embed/?v=4';
     this.applyFillContent(iframe);

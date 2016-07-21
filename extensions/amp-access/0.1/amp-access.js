@@ -18,14 +18,14 @@ import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {CSS} from '../../../build/amp-access-0.1.css';
-import {actionServiceFor} from '../../../src/action';
+import {actionServiceForDoc} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
@@ -90,12 +90,9 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    let configJson;
-    try {
-      configJson = JSON.parse(this.accessElement_.textContent);
-    } catch (e) {
+    const configJson = tryParseJson(this.accessElement_.textContent, e => {
       throw user.createError('Failed to parse "amp-access" JSON: ' + e);
-    }
+    });
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(configJson);
@@ -103,7 +100,7 @@ export class AccessService {
     /** @const @private {!Object<string, string>} */
     this.loginConfig_ = this.buildConfigLoginMap_(configJson);
 
-    /** @const @private {!JSONObject} */
+    /** @const @private {!JSONType} */
     this.authorizationFallbackResponse_ =
         configJson['authorizationFallbackResponse'];
 
@@ -146,7 +143,7 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
-    /** @private {?JSONObject} */
+    /** @private {?JSONType} */
     this.authResponse_ = null;
 
     /** @const @private {!Promise} */
@@ -182,7 +179,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @return {!AccessTypeAdapterDef}
    * @private
    */
@@ -199,11 +196,11 @@ export class AccessService {
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
-    throw dev.createError('Unsuported access type: ', this.type_);
+    throw dev.createError('Unsupported access type: ', this.type_);
   }
 
   /**
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @return {!AccessType}
    */
   buildConfigType_(configJson) {
@@ -214,11 +211,15 @@ export class AccessService {
       user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;
     }
+    if (type == AccessType.CLIENT && this.isServerEnabled_) {
+      user.info(TAG, 'Forcing access type: SERVER');
+      type = AccessType.SERVER;
+    }
     return type;
   }
 
   /**
-   * @param {!JSONObject} configJson
+   * @param {!JSONType} configJson
    * @return {?Object<string, string>}
    * @private
    */
@@ -280,7 +281,9 @@ export class AccessService {
     dev.fine(TAG, 'config:', this.type_, this.loginConfig_,
         this.adapter_.getConfig());
 
-    actionServiceFor(this.win).installActionHandler(
+    // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
+    // is migrated to ampdoc as well.
+    actionServiceForDoc(this.win.document.documentElement).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
     // Calculate login URLs right away.
@@ -393,7 +396,12 @@ export class AccessService {
     }
 
     this.toggleTopClass_('amp-access-loading', true);
-    const responsePromise = this.adapter_.authorize().catch(error => {
+    const startPromise = isExperimentOn(this.win, 'no-auth-in-prerender')
+        ? this.viewer_.whenFirstVisible()
+        : Promise.resolve();
+    const responsePromise = startPromise.then(() => {
+      return this.adapter_.authorize();
+    }).catch(error => {
       this.analyticsEvent_('access-authorization-failed');
       if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.
@@ -427,7 +435,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONObject} authResponse
+   * @param {!JSONType} authResponse
    * @private
    */
   setAuthResponse_(authResponse) {
@@ -480,7 +488,7 @@ export class AccessService {
   }
 
   /**
-   * @param {!JSONObjectDef} response
+   * @param {!JSONTypeDef} response
    * @return {!Promise}
    * @private
    */
@@ -495,7 +503,7 @@ export class AccessService {
 
   /**
    * @param {!Element} element
-   * @param {!JSONObjectDef} response
+   * @param {!JSONTypeDef} response
    * @return {!Promise}
    * @private
    */
@@ -536,7 +544,7 @@ export class AccessService {
   /**
    * Discovers and renders templates.
    * @param {!Element} element
-   * @param {!JSONObjectDef} response
+   * @param {!JSONTypeDef} response
    * @return {!Promise}
    * @private
    */
@@ -560,7 +568,7 @@ export class AccessService {
   /**
    * @param {!Element} element
    * @param {!Element} templateOrPrev
-   * @param {!JSONObjectDef} response
+   * @param {!JSONTypeDef} response
    * @return {!Promise}
    * @private
    */
@@ -813,7 +821,7 @@ export class AccessService {
           this.buildUrl_(this.loginConfig_[k], /* useAuthData */ true)
               .then(url => {
                 this.loginUrlMap_[k] = url;
-                return {type: k, url: url};
+                return {type: k, url};
               }));
     }
     return Promise.all(promises);
@@ -823,8 +831,8 @@ export class AccessService {
 
 /**
  * @typedef {{
- *   buildUrl: function(url:string, useAuthData:boolean):!Promise<string>,
- *   collectUrlVars: function(url:string, useAuthData:boolean):
+ *   buildUrl: function(string, boolean):!Promise<string>,
+ *   collectUrlVars: function(string, boolean):
  *       !Promise<!Object<string, *>>
  * }}
  */
@@ -837,7 +845,7 @@ let AccessTypeAdapterContextDef;
 class AccessTypeAdapterDef {
 
   /**
-   * @return {!JSONObject}
+   * @return {!JSONType}
    */
   getConfig() {}
 
@@ -847,12 +855,12 @@ class AccessTypeAdapterDef {
   isAuthorizationEnabled() {}
 
   /**
-   * @return {!Promise<!JSONObject>}
+   * @return {!Promise<!JSONType>}
    */
   authorize() {}
 
   /**
-   * @return {!Promise<>}
+   * @return {!Promise}
    */
   pingback() {}
 }

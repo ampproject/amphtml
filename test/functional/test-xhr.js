@@ -15,10 +15,12 @@
  */
 
 import * as sinon from 'sinon';
+import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
 import {
   installXhrService,
   fetchPolyfill,
   FetchResponse,
+  assertSuccess,
 } from '../../src/service/xhr-impl';
 
 describe('XHR', function() {
@@ -29,14 +31,19 @@ describe('XHR', function() {
   this.timeout(5000);
 
   const scenarios = [
-    {xhr: installXhrService({
-      fetch: window.fetch,
-      location: {href: 'https://acme.com/path'},
-    }), desc: 'Native'},
-    {xhr: installXhrService({
-      fetch: fetchPolyfill,
-      location: {href: 'https://acme.com/path'},
-    }), desc: 'Polyfill'},
+    {
+      xhr: installXhrService({
+        fetch: window.fetch,
+        location: {href: 'https://acme.com/path'},
+      }),
+      desc: 'Native',
+    }, {
+      xhr: installXhrService({
+        fetch: fetchPolyfill,
+        location: {href: 'https://acme.com/path'},
+      }),
+      desc: 'Polyfill',
+    },
   ];
 
   function setupMockXhr() {
@@ -67,7 +74,7 @@ describe('XHR', function() {
   scenarios.forEach(test => {
     const xhr = test.xhr;
 
-    // Since if its the Native fetch, it wont use the XHR object so
+    // Since if it's the Native fetch, it won't use the XHR object so
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
@@ -107,6 +114,19 @@ describe('XHR', function() {
           expect(put).to.throw();
           expect(patch).to.throw();
           expect(deleteMethod).to.throw();
+        });
+
+        it('should allow FormData as body', () => {
+          const formData = new FormData();
+          sandbox.stub(JSON, 'stringify');
+          formData.append('name', 'John Miller');
+          formData.append('age', 56);
+          const post = xhr.fetchJson.bind(xhr, '/post', {
+            method: 'POST',
+            body: formData,
+          });
+          expect(post).to.not.throw();
+          expect(JSON.stringify.called).to.be.false;
         });
 
         it('should do `GET` as default method', () => {
@@ -204,6 +224,61 @@ describe('XHR', function() {
 
     describe(test.desc, () => {
 
+      describe('assertSuccess', () => {
+        function createResponseInstance(body, init) {
+          if (test.desc == 'Native') {
+            return new Response(body, init);
+          } else {
+            init.responseText = body;
+            return new FetchResponse(init);
+          }
+        }
+        const mockXhr = {
+          status: 200,
+          headers: {
+            'Content-Type': 'plain/text',
+          },
+          getResponseHeader: () => '',
+        };
+
+        it('should resolve if success', () => {
+          mockXhr.status = 200;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .then(response => {
+                expect(response.status).to.equal(200);
+              }).should.not.be.rejected;
+        });
+
+        it('should reject if error', () => {
+          mockXhr.status = 500;
+          return assertSuccess(createResponseInstance('', mockXhr))
+              .then(response => {
+                expect(response.status).to.equal(500);
+              }).should.be.rejectedWith(/HTTP error 500/);
+        });
+
+        it('should parse json content when error', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json';
+          mockXhr.getResponseHeader = () => 'application/json';
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .catch(error => {
+                expect(error.responseJson).to.be.defined;
+                expect(error.responseJson.a).to.equal(2);
+              });
+        });
+
+        it('should not resolve after rejecting promise', () => {
+          mockXhr.status = 500;
+          mockXhr.responseText = '{"a": "hello"}';
+          mockXhr.headers['Content-Type'] = 'application/json';
+          mockXhr.getResponseHeader = () => 'application/json';
+          return assertSuccess(createResponseInstance('{"a": 2}', mockXhr))
+              .should.not.be.fulfilled;
+        });
+      });
+
       it('should do simple JSON fetch', () => {
         return xhr.fetchJson('https://httpbin.org/get?k=v1').then(res => {
           expect(res).to.exist;
@@ -261,6 +336,12 @@ describe('XHR', function() {
         });
       });
 
+      it('should NOT succeed CORS with invalid credentials', () => {
+        expect(() => {
+          xhr.fetchJson('https://acme.org/', {credentials: null});
+        }).to.throw(/Only credentials=include support: null/);
+      });
+
       it('should expose HTTP headers', () => {
         const url = 'https://httpbin.org/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
@@ -271,7 +352,6 @@ describe('XHR', function() {
     });
 
     describe('#fetchDocument', () => {
-
       it('should be able to fetch a document', () => {
         setupMockXhr();
         expect(requests[0]).to.be.undefined;
@@ -337,6 +417,36 @@ describe('XHR', function() {
               .to.match(/responseXML should exist/);
         });
       });
+    });
+
+    describe('#fetch ' + test.desc, () => {
+      const creative = '<html><body>This is a creative</body></html>';
+
+      // Using the Native fetch, we can't mock the XHR request, so an actual
+      // HTTP request would be sent to the server.  Only execute this test
+      // when we're on the PolyFill case, so that we can mock the XHR and
+      // control the response.
+      if (test.desc != 'Native') {
+        it('should be able to fetch a response', () => {
+          setupMockXhr();
+          expect(requests[0]).to.be.undefined;
+          const promise = xhr.fetch(
+            '/index.html').then(response => {
+              expect(response.headers.get('X-foo-header')).to.equal('foo data');
+              expect(response.headers.get('X-bar-header')).to.equal('bar data');
+              response.arrayBuffer().then(
+                bytes => utf8FromArrayBuffer(bytes)).then(text => {
+                  expect(text).to.equal(creative);
+                });
+            });
+          requests[0].respond(200, {
+            'Content-Type': 'text/xml',
+            'X-foo-header': 'foo data',
+            'X-bar-header': 'bar data',
+          }, creative);
+          return promise;
+        });
+      }
     });
   });
 

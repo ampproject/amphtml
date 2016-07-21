@@ -18,7 +18,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-require('../amp-instagram');
+import '../amp-instagram';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -32,6 +32,7 @@ describe('amp-instagram', () => {
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
+      ins.setAttribute('alt', 'Testing');
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
@@ -44,6 +45,8 @@ describe('amp-instagram', () => {
     expect(image.getAttribute('src')).to.equal(
         'https://www.instagram.com/p/fBwFP/media/?size=l');
     expect(image.getAttribute('layout')).to.equal('fill');
+    expect(image.getAttribute('alt')).to.equal('Testing');
+    expect(image.getAttribute('referrerpolicy')).to.equal('origin');
   }
 
   function testIframe(iframe) {
@@ -51,6 +54,7 @@ describe('amp-instagram', () => {
     expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
     expect(iframe.getAttribute('width')).to.equal('111');
     expect(iframe.getAttribute('height')).to.equal('222');
+    expect(iframe.getAttribute('title')).to.equal('Instagram: Testing');
   }
 
   it('renders', () => {

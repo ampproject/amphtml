@@ -60,6 +60,12 @@
       height: 40px;
     }
 
+    @media screen and (min-width: 380px) {
+      .logo {
+        top: auto;
+      }
+    }
+
     @media screen and (min-width: 420px) {
       .logo {
         position: static;
@@ -122,10 +128,9 @@
   <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
 </head>
 <body class="comic-amp-font-loading">
+<div class="logo"></div>
 
 <article>
-
-<div class="logo"></div>
 
 <h1 id="top">AMP #0</h1>
 <a href="#amp-iframe">Go to iframe</a>

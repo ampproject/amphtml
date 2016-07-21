@@ -203,19 +203,19 @@ describe('3p', () => {
     const slave0 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     const slave1 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     const slave2 = {
       context: {
         isMaster: false,
-        master: master,
+        master,
       },
     };
     let done;

@@ -98,7 +98,7 @@ AMP HTML documents MUST
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) in their head tag. [🔗](#boilerplate)
+- <a name="boilerplate"></a>contain the [AMP boilerplate code ('head > style[amp-boilerplate]' and 'noscript > style[amp-boilerplate]')](amp-boilerplate.md) in their head tag. [🔗](#boilerplate)
 
 (1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
@@ -362,6 +362,9 @@ Some actions, if documented, may accept arguments. The arguments are defined bet
  - boolean values: `true` or `false`;
  - numbers: `11` or `1.1`.
 
+You can listen to multiple events on an element by separating the two events with a semicolon `;`.
+
+Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
 ### Extended components
 

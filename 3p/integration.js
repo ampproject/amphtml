@@ -33,6 +33,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {amoad} from '../ads/amoad';
 import {plista} from '../ads/plista';
 import {criteo} from '../ads/criteo';
 import {doubleclick} from '../ads/google/doubleclick';
@@ -40,6 +41,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {nativo} from '../ads/nativo';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
@@ -52,6 +54,7 @@ import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {widespace} from '../ads/widespace';
 import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
@@ -73,10 +76,16 @@ import {sharethrough} from '../ads/sharethrough';
 import {eplanning} from '../ads/eplanning';
 import {microad} from '../ads/microad';
 import {yahoojp} from '../ads/yahoojp';
+import {chargeads} from '../ads/chargeads';
+import {nend} from '../ads/nend';
+import {adgeneration} from '../ads/adgeneration';
+import {genieessp} from '../ads/genieessp';
+import {kargo} from '../ads/kargo';
+import {pulsepoint} from '../ads/pulsepoint';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
- * @const {!Object<string: boolean>}
+ * @const {!Object<string, boolean>}
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
@@ -93,6 +102,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('amoad', amoad);
 register('plista', plista);
 register('criteo', criteo);
 register('doubleclick', doubleclick);
@@ -105,12 +115,14 @@ register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
+register('nativo', nativo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('widespace', widespace);
 register('sovrn', sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
@@ -132,6 +144,12 @@ register('sharethrough', sharethrough);
 register('eplanning', eplanning);
 register('microad', microad);
 register('yahoojp', yahoojp);
+register('chargeads', chargeads);
+register('nend', nend);
+register('adgeneration', adgeneration);
+register('genieessp', genieessp);
+register('kargo', kargo);
+register('pulsepoint', pulsepoint);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -204,6 +222,13 @@ function masterSelection(type) {
 }
 
 /**
+ * @return {boolean} Whether this is the master iframe.
+ */
+function isMaster() {
+  return window.context.master == window;
+}
+
+/**
  * Draws an embed, optionally synchronously, to the DOM.
  * @param {function(!Object, function(!Object))} opt_configCallback If provided
  *     will be invoked with two arguments:
@@ -227,8 +252,15 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    window.context.master = masterSelection(data.type);
-    window.context.isMaster = window.context.master == window;
+    // Define master related properties to be lazily read.
+    Object.defineProperties(window.context, {
+      master: {
+        get: () => masterSelection(data.type),
+      },
+      isMaster: {
+        get: isMaster,
+      },
+    });
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
@@ -262,8 +294,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
   } catch (e) {
-    lightweightErrorReport(e);
-    throw e;
+    if (!window.context.mode.test) {
+      lightweightErrorReport(e);
+      throw e;
+    }
   }
 };
 
@@ -272,17 +306,11 @@ function triggerNoContentAvailable() {
 }
 
 function triggerDimensions(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 function triggerResizeRequest(width, height) {
-  nonSensitiveDataPostMessage('embed-size', {
-    width: width,
-    height: height,
-  });
+  nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
 /**
@@ -292,7 +320,7 @@ function triggerResizeRequest(width, height) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @returns {!function()} A function which removes the event listener that
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
@@ -322,8 +350,8 @@ function updateVisibilityState(global) {
 
 /**
  * Registers a callback for communicating when a resize request succeeds.
- * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @param {function(number, number)} observerCallback
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
@@ -334,8 +362,8 @@ function onResizeSuccess(observerCallback) {
 
 /**
  * Registers a callback for communicating when a resize request is denied.
- * @param {function(number)} observerCallback
- * @returns {!function} A function which removes the event listener that
+ * @param {function(number, number)} observerCallback
+ * @returns {!function()} A function which removes the event listener that
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
@@ -460,7 +488,7 @@ export function ensureFramed(window) {
 /**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
- * @return {!JSONObject}
+ * @return {!JSONType}
  * @visibleForTesting
  */
 export function parseFragment(fragment) {
@@ -471,7 +499,7 @@ export function parseFragment(fragment) {
   if (json.indexOf('{%22') == 0) {
     json = decodeURIComponent(json);
   }
-  return json ? JSON.parse(json) : {};
+  return /** @type {!JSONType} */ (json ? JSON.parse(json) : {});
 }
 
 /**

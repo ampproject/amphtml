@@ -24,7 +24,7 @@ goog.provide('amp.validator.validateUrlAndLog');
 /**
  * Fetches the contents of a URL as a Promise.
  * @param {string} url
- * @return {!goog.Promise<!string>} The fetched document.
+ * @return {!goog.Promise<string>} The fetched document.
  */
 function getUrl(url) {
   return new goog.Promise(function(resolve, reject) {
@@ -67,10 +67,11 @@ amp.validator.validateInBrowser = function(doc) {
  * Validates a URL input, logging to the console the result.
  * Careful when modifying this; it's called from
  * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js
- * and https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
+ * and
+ * https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
- * @param {!string=} opt_errorCategoryFilter
+ * @param {string=} opt_errorCategoryFilter
  * @export
  */
 amp.validator.validateUrlAndLog = function(

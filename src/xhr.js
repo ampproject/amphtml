@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
  * @param {!Window} window
- * @return {!Xhr}
+ * @return {!./service/xhr-impl.Xhr}
  */
 export function xhrFor(window) {
-  return getService(window, 'xhr');
+  return /** @type {!./service/xhr-impl.Xhr} */ (
+      getExistingServiceForWindow(window, 'xhr'));
 };

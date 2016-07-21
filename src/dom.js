@@ -15,6 +15,8 @@
  */
 
 import {dashToCamelCase} from './string';
+import {dev} from './log';
+import {toArray} from './types';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -159,6 +161,23 @@ export function closest(element, callback) {
 
 
 /**
+ * Finds the closest node that satisfies the callback from this node
+ * up the DOM subtree.
+ * @param {!Node} node
+ * @param {function(!Node):boolean} callback
+ * @return {?Node}
+ */
+export function closestNode(node, callback) {
+  for (let n = node; n; n = n.parentNode) {
+    if (callback(n)) {
+      return n;
+    }
+  }
+  return null;
+}
+
+
+/**
  * Finds the closest element with the specified name from this element
  * up the DOM subtree.
  * @param {!Element} element
@@ -209,7 +228,7 @@ export function childElement(parent, callback) {
  * Finds all child elements that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElements(parent, callback) {
   const children = [];
@@ -320,20 +339,14 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
-    // Convert NodeList into Array.<Element>.
-    const children = [];
-    for (let i = 0; i < nodeList.length; i++) {
-      children.push(nodeList[i]);
-    }
-    return children;
+    return toArray(parent.querySelectorAll(':scope > [' + attr + ']'));
   }
   return childElements(parent, el => {
     return el.hasAttribute(attr);
@@ -356,6 +369,26 @@ export function childElementByTag(parent, tagName) {
   }
   tagName = tagName.toUpperCase();
   return childElement(parent, el => {
+    return el.tagName == tagName;
+  });
+}
+
+
+/**
+ * Finds all child elements with the specified tag name.
+ * @param {!Element} parent
+ * @param {string} tagName
+ * @return {!Array<!Element>}
+ */
+export function childElementsByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+  }
+  tagName = tagName.toUpperCase();
+  return childElements(parent, el => {
     return el.tagName == tagName;
   });
 }
@@ -399,6 +432,38 @@ export function hasNextNodeInDocumentOrder(element) {
     if (currentElement.nextSibling) {
       return true;
     }
-  } while (currentElement = element.parentNode);
+  } while (currentElement = currentElement.parentNode);
   return false;
+}
+
+
+/**
+ * This method wraps around window's open method. It first tries to execute
+ * `open` call with the provided target and if it fails, it retries the call
+ * with the `_top` target. This is necessary given that in some embedding
+ * scenarios, such as iOS' WKWebView, navigation to `_blank` and other targets
+ * is blocked by default.
+ *
+ * @param {!Window} win
+ * @param {string} url
+ * @param {string} target
+ * @param {string=} opt_features
+ * @return {?Window}
+ */
+export function openWindowDialog(win, url, target, opt_features) {
+  // Try first with the specified target. If we're inside the WKWebView or
+  // a similar environments, this method is expected to fail by default for
+  // all targets except `_top`.
+  let res;
+  try {
+    res = win.open(url, target, opt_features);
+  } catch (e) {
+    dev.error('dom', 'Failed to open url on target: ', target, e);
+  }
+
+  // Then try with `_top` target.
+  if (!res && target != '_top') {
+    res = win.open(url, '_top');
+  }
+  return res;
 }

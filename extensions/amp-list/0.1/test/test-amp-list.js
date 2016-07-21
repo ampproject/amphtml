@@ -65,11 +65,11 @@ describe('amp-list component', () => {
     const newHeight = 127;
     const itemElement = document.createElement('div');
     itemElement.style.height = newHeight + 'px';
-    const xhrPromise = Promise.resolve({items: items});
+    const xhrPromise = Promise.resolve({items});
     const renderPromise = Promise.resolve([itemElement]);
     let measureFunc;
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -94,10 +94,10 @@ describe('amp-list component', () => {
       {title: 'Title1'},
     ];
     const itemElement = document.createElement('div');
-    const xhrPromise = Promise.resolve({items: items});
+    const xhrPromise = Promise.resolve({items});
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -117,10 +117,10 @@ describe('amp-list component', () => {
     element.setAttribute('role', 'list1');
     const itemElement = document.createElement('div');
     itemElement.setAttribute('role', 'listitem1');
-    const xhrPromise = Promise.resolve({items: items});
+    const xhrPromise = Promise.resolve({items});
     const renderPromise = Promise.resolve([itemElement]);
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => !opts.credentials))
+        sinon.match(opts => opts.credentials === undefined))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)
@@ -135,7 +135,7 @@ describe('amp-list component', () => {
 
   it('should request credentials', () => {
     const items = [];
-    const xhrPromise = Promise.resolve({items: items});
+    const xhrPromise = Promise.resolve({items});
     element.setAttribute('credentials', 'include');
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
         sinon.match(opts => {
