@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>Allow usage of `<form>` and input tags.</td>
+    <td>Allow usage of <code>form</code> and <code>input</code> tags.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
