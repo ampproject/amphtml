@@ -43,7 +43,6 @@ import {maybeTrackImpression} from './impression';
 try {
   // Should happen first.
   installErrorReporting(self);  // Also calls makeBodyVisible on errors.
-  installCacheServiceWorker(self);
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
@@ -73,6 +72,7 @@ try {
 
       maybeValidate(self);
       makeBodyVisible(document, /* waitForExtensions */ true);
+      installCacheServiceWorker(self);
     } catch (e) {
       makeBodyVisible(document);
       throw e;

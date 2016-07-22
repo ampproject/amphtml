@@ -18,6 +18,7 @@ import {calculateScriptBaseUrl} from '../service/extensions-impl';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
+import {timer} from '../timer';
 
 /** @const */
 const TAG = 'cache-service-worker';
@@ -26,21 +27,23 @@ const TAG = 'cache-service-worker';
  * Registers the Google AMP Cache service worker if the browser supports SWs.
  */
 export function installCacheServiceWorker(win) {
-  if (!isExperimentOn(win, TAG)) {
-    return;
-  }
-  if (!('serviceWorker' in navigator)) {
-    return;
-  }
-  if (!getMode().isLocalDev || win.location.hostname !== 'cdn.ampproject.org') {
-    return;
-  }
-  const base = calculateScriptBaseUrl(win.location.pathname,
-    getMode().isLocalDev, getMode().test);
-  const url = `${base}/sw.js`;
-  navigator.serviceWorker.register(url).then(reg => {
-    dev.info(TAG, 'ServiceWorker registration successful: ', reg);
-  }, err => {
-    dev.error(TAG, 'ServiceWorker registration failed: ', err);
+  timer.delay(() => {
+    if (!isExperimentOn(win, TAG)) {
+      return;
+    }
+    if (!('serviceWorker' in navigator)) {
+      return;
+    }
+    if (!getMode().isLocalDev || win.location.hostname !== 'cdn.ampproject.org') {
+      return;
+    }
+    const base = calculateScriptBaseUrl(win.location.pathname,
+      getMode().isLocalDev, getMode().test);
+    const url = `${base}/sw.js`;
+    navigator.serviceWorker.register(url).then(reg => {
+      dev.info(TAG, 'ServiceWorker registration successful: ', reg);
+    }, err => {
+      dev.error(TAG, 'ServiceWorker registration failed: ', err);
+    });
   });
 }
