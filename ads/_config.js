@@ -199,6 +199,10 @@ export const adPreconnect = {
     'https://m.amoad.com',
     'https://v.amoad.com',
   ],
+  zergnet: [
+    'https://www.zergnet.com',
+    'https://zergnet.com',
+  ],
 };
 
 /**

@@ -68,6 +68,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('genieessp');
     expect(registrations).to.include.key('kargo');
     expect(registrations).to.include.key('amoad');
+    expect(registrations).to.include.key('zergnet');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
