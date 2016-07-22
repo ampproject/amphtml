@@ -36,6 +36,15 @@ import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
 
+/** @define @const {boolean} */
+const TYPECHECK_ONLY = false;
+
+/** @define @const {boolean} */
+const FORTESTING = false;
+
+/** @define @const {boolean} */
+const PSEUDO_NAMES = false;
+
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
 // a completely blank page.
