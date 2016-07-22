@@ -118,6 +118,20 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
 
 
 /**
+ * Copies runtime styles from the ampdoc context into a shadow root.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!ShadowRoot} shadowRoot
+ */
+export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
+  const style = dev.assert(
+      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
+      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
+  const cssText = style.textContent;
+  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
+}
+
+
+/**
  * Sets the document's body opacity to 1.
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
