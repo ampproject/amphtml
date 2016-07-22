@@ -293,6 +293,8 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
+    // Subscribe to page visibility updates.
+    nonSensitiveDataPostMessage('send-embed-state');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
