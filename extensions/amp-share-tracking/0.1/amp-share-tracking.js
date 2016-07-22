@@ -108,10 +108,9 @@ export class AmpShareTracking extends AMP.BaseElement {
     return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
       if (response.fragment) {
         return response.fragment;
-      } else {
-        user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
-            'have an outgoingFragment value. The outgoing fragment is empty.');
       }
+      user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+          'have an outgoingFragment value.');
     }).catch(error => {
       user.error(TAG, error);
     });
