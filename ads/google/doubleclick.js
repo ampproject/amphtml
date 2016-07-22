@@ -118,6 +118,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
           slot.setTargeting(key, data.targeting[key]);
         }
       }
+
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
         global.context.renderStart();

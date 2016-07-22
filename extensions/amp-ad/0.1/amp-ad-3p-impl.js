@@ -191,10 +191,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     setupA2AListener(this.win);
 
-    /** @private @const {function()|null}*/
+    /** @private @const {function()|null} */
     this.renderStartResolve_ = null;
 
-    /** @private @const {!Promise}*/
+    /** @private @const {!Promise} */
     this.renderStartPromise_ = new Promise(resolve => {
       this.renderStartResolve_ = resolve;
     });
