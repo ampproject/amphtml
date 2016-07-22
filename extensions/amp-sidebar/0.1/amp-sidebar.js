@@ -36,11 +36,8 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Window} */
-    this.win_ = this.win;
-
     /** @private @const {!Document} */
-    this.document_ = this.win_.document;
+    this.document_ = this.win.document;
 
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
@@ -55,7 +52,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.maskElement_ = false;
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win_);
+    this.vsync_ = vsyncFor(this.win);
 
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
@@ -255,7 +252,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!History}
    */
   getHistory_() {
-    return historyFor(this.win_);
+    return historyFor(this.win);
   }
 }
 
