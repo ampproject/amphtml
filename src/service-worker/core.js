@@ -62,13 +62,14 @@ function versionedUrl(url, version) {
 
 /**
  * Determines if a url is a request to a CDN JS file.
- * We only consider "prod" (RTV 01) files.
  * @param {string} url
  * @return {boolean}
  */
 function isCdnJsFile(url) {
-  return url.startsWith('https://cdn.ampproject.org/') &&
-    url.endsWith('.js');
+  return url.endsWith('.js') && (
+    url.startsWith('https://cdn.ampproject.org/rtv') ||
+    url.startsWith('https://cdn.ampproject.org/v0')
+  );
 }
 
 
