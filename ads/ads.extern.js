@@ -138,3 +138,5 @@ data.delayByTime;
 window.PulsePointHeaderTag;
 data.tagid;
 data.tagtype;
+data.zergid;
+window.zergnetWidgetId;

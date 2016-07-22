@@ -239,7 +239,8 @@ describe('IntersectionObserver', () => {
       messages.push(JSON.parse(JSON.stringify(message)));
     });
     clock.tick(33);
-    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(messages).to.have.length(1);
@@ -256,7 +257,8 @@ describe('IntersectionObserver', () => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     });
-    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(messages).to.have.length(1);

@@ -45,6 +45,7 @@ describe('runtime', () => {
     ampdocService = {
       isSingleDoc: () => true,
       getAmpDoc: () => null,
+      installShadowDoc_: () => null,
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
@@ -431,6 +432,7 @@ describe('runtime', () => {
       // No installStyles calls and no factories.
       expect(installStylesStub.callCount).to.equal(0);
       expect(extHolder.docFactories).to.have.length(0);
+      expect(extHolder.shadowRootFactories).to.have.length(0);
 
       // Register is called immediately as well.
       expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))
@@ -467,12 +469,11 @@ describe('runtime', () => {
 
       // No installStyles calls, but there's a factory.
       expect(installStylesStub.callCount).to.equal(0);
-      expect(extHolder.docFactories).to.have.length(1);
+      expect(extHolder.shadowRootFactories).to.have.length(1);
 
       // Execute factory to install style.
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
-      extHolder.docFactories[0](ampdoc);
+      extHolder.shadowRootFactories[0](shadowRoot);
       expect(installStylesStub.callCount).to.equal(1);
       expect(installStylesStub.calledWithExactly(
           shadowRoot,
@@ -534,6 +535,10 @@ describe('runtime', () => {
       importDoc.body.appendChild(document.createElement('child'));
       ampdoc = new AmpDocShadow(win, document.createElement('div'));
 
+      ampdocServiceMock.expects('installShadowDoc_')
+          .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
+          .returns(ampdoc)
+          .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
           .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
           .returns(ampdoc)

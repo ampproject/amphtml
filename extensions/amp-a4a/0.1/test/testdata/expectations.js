@@ -15,13 +15,9 @@
  */
 
 export const data = {
-  minimumDocBodyFormatted: `<amp-ad-body>
-Hello, world.
+  minimumDocBodyFormatted: '\nHello, world.\n\n\n',
 
-
-</amp-ad-body>`,
-
-  regexpDocBodyFormatted: `<amp-ad-body>
+  regexpDocBodyFormatted: `
 
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="">
   <amp-audio src="https://example.com/audio" layout="fixed" autoplay="desktop">
@@ -29,9 +25,9 @@ Hello, world.
 
 
 
-</amp-audio></amp-audio></amp-ad-body>`,
+</amp-audio></amp-audio>`,
 
-  validCssDocCssBlockFormatted: `<style amp-custom>
+  validCssDocCssBlockFormatted: `
     @supports (animation-name) {
     }
 
@@ -63,5 +59,5 @@ Hello, world.
       -o-animation: fadeIn ease-in 1s 1 forwards;
       animation: fadeIn ease-in 1s 1 forwards;
     }
-  </style>`,
+  `,
 };

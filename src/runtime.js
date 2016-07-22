@@ -19,6 +19,7 @@ import {BaseTemplate, registerExtendedTemplate} from './service/template-impl';
 import {
   addDocFactoryToExtension,
   addElementToExtension,
+  addShadowRootFactoryToExtension,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
@@ -35,6 +36,7 @@ import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
+import {installShadowDoc} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles, installStylesForShadowRoot} from './styles';
 import {installTemplatesService} from './service/template-impl';
@@ -329,8 +331,8 @@ function prepareAndRegisterElementShadowMode(global, extensions,
   addElementToExtension(extensions, name, implementationClass);
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
-    addDocFactoryToExtension(extensions, ampdoc => {
-      installStylesForShadowRoot(ampdoc.getRootNode(), opt_css,
+    addShadowRootFactoryToExtension(extensions, shadowRoot => {
+      installStylesForShadowRoot(shadowRoot, opt_css,
           /* isRuntimeCss */ false, name);
     });
   }
@@ -427,12 +429,11 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
-  const ampdoc = ampdocService.getAmpDoc(shadowRoot);
+  const ampdoc = installShadowDoc(ampdocService, shadowRoot);
   dev.fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
   // Install runtime CSS.
-  installStylesForShadowRoot(shadowRoot, cssText,
-      /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
+  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 
   // Instal doc services.
   installAmpdocServices(ampdoc);

@@ -23,6 +23,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
 import {data as regexpsAmpData} from './testdata/regexps.reserialized';
 import {
@@ -61,6 +62,7 @@ class MockA4AImpl extends AmpA4A {
  */
 function createAdTestingIframePromise() {
   return createIframePromise().then(fixture => {
+    installDocService(fixture.win, /* isSingleDoc */ true);
     const doc = fixture.doc;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
     // smarter about host document styling.  The issue is that it needs to
@@ -359,7 +361,8 @@ describe('amp-a4a', () => {
           expect(a4aElement.shadowRoot).to.not.be.null;
           expect(rendered).to.be.true;
           const root = a4aElement.shadowRoot;
-          const styles = root.querySelectorAll('style');
+          expect(root.querySelector('style[amp-runtime]')).to.be.ok;
+          const styles = root.querySelectorAll('style[amp-custom]');
           expect(Array.prototype.some.call(styles,
               s => { return s.innerHTML == 'p { background: green }'; }),
               'Some style is "background: green"').to.be.true;
@@ -400,7 +403,7 @@ describe('amp-a4a', () => {
         cssReplacementRanges: [],
       };
       expect(AmpA4A.prototype.formatCSSBlock_(creative, metaData)).to.equal(
-        '<style amp-custom>div { background-color: red }</style>');
+        'div { background-color: red }');
     });
 
     it('can rewrite CSS text blob', () => {
@@ -410,7 +413,7 @@ describe('amp-a4a', () => {
         cssReplacementRanges: [[0, 4]],
       };
       expect(AmpA4A.prototype.formatCSSBlock_(creative, metaData)).to.equal(
-        '<style amp-custom>amp-ad-body { color: purple }</style>');
+        'amp-ad-body { color: purple }');
     });
 
     it('should rewrite CSS from validCSSAmp', () => {
