@@ -24,6 +24,8 @@ import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 
+/** @define yo */
+
 /** @const {string} */
 const TAG_ = 'amp-iframe';
 
