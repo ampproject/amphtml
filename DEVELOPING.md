@@ -153,6 +153,7 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 ## Eng docs
 
+- [Design Principles](DESIGN_PRINCIPLES.md)
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
 - [AMP Layout system](spec/amp-html-layout.md)
 
