@@ -3,20 +3,21 @@
 These design principles are meant to guide the ongoing design and development of AMP. They should help us make internally consistent decisions.
 
 
+## User Experience > Developer Experience > Ease of Implementation.
+
+When in doubt, do what’s best for the end user experience, even if it means that it’s harder for the page creator to build or for the library developer to implement.
+
+
 ## Don’t design for a hypothetical faster future browser.
 
 We’ve chosen to build AMP as a library in the spirit of the [extensible web manifesto](https://github.com/extensibleweb/manifesto/blob/master/README.md) to be able to fix the web of today, not the web of tomorrow.
 
 AMP should be fast in today's browsers. When certain optimizations aren't possible with today's platform, AMP developers should participate in standards development to get these added to the web platform.
 
+
 ## Don’t break the web.
 
 Ensure that if AMP has outages or problems it doesn’t hurt the rest of the web. That means if the Google AMP Cache, the URL API or the library fails it should be possible for websites and consumption apps to gracefully degrade. If something works with an AMP cache it should also work without a cache.
-
-
-## User Experience > Developer Experience > ease of implementation.
-
-When in doubt, do what’s best for the end user experience, even if it means that it’s harder for the page creator to build or for the library developer to implement.
 
 
 ## Solve problems on the right layer.
