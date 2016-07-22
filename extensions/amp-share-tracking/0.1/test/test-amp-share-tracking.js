@@ -21,7 +21,7 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
-describe.only('amp-share-tracking', () => {
+describe('amp-share-tracking', () => {
   let sandbox;
   let viewerForMock;
   let xhrMock;
@@ -142,7 +142,7 @@ describe.only('amp-share-tracking', () => {
 
   it('should get outgoing fragment from vendor if vendor url is provided ' +
       'and the response format is correct', () => {
-    const mockJsonResponse = {outgoingFragment: '54321'};
+    const mockJsonResponse = {fragment: '54321'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking(
       /*vendorUrl*/'http://foo.bar',
@@ -156,7 +156,7 @@ describe.only('amp-share-tracking', () => {
       });
   });
 
-  it('should get outgoing fragment randomly if vendor url is provided ' +
+  it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
     const mockJsonResponse = {foo: 'bar'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
@@ -167,7 +167,22 @@ describe.only('amp-share-tracking', () => {
         ampShareTracking.buildCallback();
         return ampShareTracking.shareTrackingFragments_.then(fragments => {
           expect(fragments.incomingFragment).to.be.undefined;
-          expect(fragments.outgoingFragment).to.equal('rAmDoM');
+          expect(fragments.outgoingFragment).to.be.undefined;
+        });
+      });
+  });
+
+  it('should get empty outgoing fragment if vendor url is provided ' +
+      'but the endpoint does not exist', () => {
+    xhrMock.onFirstCall().returns(Promise.reject('404'));
+    return getAmpShareTracking(
+      /*vendorUrl*/'http://foo.bar',
+      /*stubGetIncomingFragment*/Promise.resolve(),
+      /*stubGetOutgoingFragment*/undefined).then(ampShareTracking => {
+        ampShareTracking.buildCallback();
+        return ampShareTracking.shareTrackingFragments_.then(fragments => {
+          expect(fragments.incomingFragment).to.be.undefined;
+          expect(fragments.outgoingFragment).to.be.undefined;
         });
       });
   });

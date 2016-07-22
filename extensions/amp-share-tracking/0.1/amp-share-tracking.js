@@ -17,7 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
@@ -51,23 +51,24 @@ export class AmpShareTracking extends AMP.BaseElement {
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_(this.vendorHref_)]).then(results => {
+        dev.fine(TAG, 'incomingFragment: ', results[0]);
+        dev.fine(TAG, 'outgoingFragment: ', results[1]);
         return {
           incomingFragment: results[0],
           outgoingFragment: results[1],
-        }
+        };
       });
-
   }
 
   /**
    * Get the incoming share-tracking fragment from the viewer
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    * @private
    */
   getIncomingFragment_() {
     return viewerFor(this.win).getFragment().then(fragment => {
       if (!fragment || fragment.indexOf('.') != 0) {
-        return Promise.resolve();
+        return;
       }
       const endIndex = fragment.indexOf('&');
       if (endIndex != -1) {
@@ -81,40 +82,38 @@ export class AmpShareTracking extends AMP.BaseElement {
   /**
    * Get an outgoing share-tracking fragment
    * @param {string=} opt_vendorUrl
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    * @private
    */
   getOutgoingFragment_(opt_vendorUrl) {
-    return this.getOutgoingFragmentFromVendor_(opt_vendorUrl).then(
-      fragment => (fragment || this.getOutgoingRandomFragment_())
-    );
+    if (opt_vendorUrl) {
+      return this.getOutgoingFragmentFromVendor_(opt_vendorUrl);
+    }
+    return this.getOutgoingRandomFragment_();
   }
 
   /**
    * Get an outgoing share-tracking fragment from vendor
    * by issueing a post request to the url the vendor provided
-   * @param {string=} opt_vendorUrl
-   * @return {!Promise<string>}
+   * @param {string} vendorUrl
+   * @return {!Promise<string|undefined>}
    * @private
    */
-  getOutgoingFragmentFromVendor_(opt_vendorUrl) {
-    if (!opt_vendorUrl) {
-      return Promise.resolve();
-    }
+  getOutgoingFragmentFromVendor_(vendorUrl) {
     const postReq = {
       method: 'POST',
       credentials: 'include',
       body: {},
     };
-    return xhrFor(this.win).fetchJson(opt_vendorUrl, postReq).then(response => {
-      if (response.outgoingFragment) {
-        return response.outgoingFragment;
+    return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
+      if (response.fragment) {
+        return response.fragment;
       } else {
-        dev.warn(TAG, 'The response from [' + opt_vendorUrl +
-            '] does not have an outgoingFragment value. ' +
-            'Generating outgoing fragment using random generator.');
-        return Promise.resolve();
+        user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+            'have an outgoingFragment value. The outgoing fragment is empty.');
       }
+    }).catch(error => {
+      user.error(TAG, error);
     });
   }
 

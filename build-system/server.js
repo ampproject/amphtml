@@ -117,7 +117,7 @@ app.use('/form/echo-json/post', function(req, res) {
 
 app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
   res.json({
-    outgoingFragment: '54321'
+    fragment: '54321'
   });
 });
 

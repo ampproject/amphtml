@@ -804,7 +804,7 @@ export class Viewer {
   /**
    * Get the fragment from the url or the viewer.
    * Strip leading '#' in the fragment
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    */
   getFragment() {
     if (!this.isEmbedded_) {
