@@ -177,7 +177,7 @@ export class UrlReplacements {
       const params = parseQueryString(url.search);
       const val = params[param];
 
-      return (typeof val !== 'undefined') ? val : defaultValue;
+      return (typeof val == 'undefined') ? defaultValue : val;
     });
 
     this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
@@ -447,21 +447,15 @@ export class UrlReplacements {
    * @private
    */
   getTimingDataAsync_(startEvent, endEvent) {
-    const syncMetric = this.getTimingDataSync_(startEvent, endEvent);
-    if (syncMetric === '') {
+    let metric = this.getTimingDataSync_(startEvent, endEvent);
+    if (metric === '') {
       // Metric is not yet available. Retry after a delay.
       return loadPromise(this.win_).then(() => {
-        const timingInfo = this.win_['performance']
-            && this.win_['performance']['timing'];
-        const metric = (endEvent === undefined)
-            ? timingInfo[startEvent]
-            : timingInfo[endEvent] - timingInfo[startEvent];
-        return (isNaN(metric) || metric == Infinity || metric < 0)
-            ? undefined
-            : String(metric);
+        metric = this.getTimingDataSync_(startEvent, endEvent);
+        return metric === '' ? undefined : metric;
       });
     }
-    return Promise.resolve(syncMetric);
+    return Promise.resolve(metric);
   }
 
   /**
@@ -527,7 +521,8 @@ export class UrlReplacements {
    */
   set_(varName, syncResolver) {
     dev.assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] = this.replacements_[varName] || {};
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].sync = syncResolver;
     this.replacementExpr_ = undefined;
     return this;
@@ -546,7 +541,8 @@ export class UrlReplacements {
    */
   setAsync_(varName, asyncResolver) {
     dev.assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] = this.replacements_[varName] || {};
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
     this.replacements_[varName].async = asyncResolver;
     this.replacementExpr_ = undefined;
     return this;
@@ -589,55 +585,56 @@ export class UrlReplacements {
     }
   }
 
-/**
- * Synchronously expands the provided URL by replacing all known variables with
- * their resolved values. Optional `opt_bindings` can be used to add new
- * variables or override existing ones.  Any async bindings are ignored.
- * @param {string} url
- * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
- * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
- * @return {string}
- * @private
- */
-expandSync(url, opt_bindings, opt_collectVars) {
-  if (!this.initialized_) {
-    this.initialize_();
-  }
-  const expr = this.getExpr_(opt_bindings);
-  url = url.replace(expr, (match, name, opt_strargs) => {
-    let args = [];
-    if (typeof opt_strargs == 'string') {
-      args = opt_strargs.split(',');
-    }
-    const replacement = this.getReplacement_(name);
-    let binding;
-    if (opt_bindings && (name in opt_bindings)) {
-      binding = opt_bindings[name];
-    } else if (replacement) {
-      binding = replacement.sync;
-      if (!binding) {
-        user.error('ignoring async replacement key: ' + name);
-        return '';
-      }
-    }
-    let val;
-    try {
-      val = (typeof binding == 'function' ?
-        binding.apply(null, args) : binding);
-      if (val && val.then) {
-        user.error('ignoring promise value for key: ' + name);
-        return '';
-      }
-    } catch (e) {
-      user.error('Error evaluating replacement: ' + name, e);
-      val = '';
-    }
-    if (opt_collectVars) {
-      opt_collectVars[match] = val;
-    }
-    return this.encodeValue_(val);
-  });
-  return url;
+  /**
+   * Synchronously expands the provided URL by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} url
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @return {string}
+   * @private
+   */
+   expandSync(url, opt_bindings, opt_collectVars) {
+     if (!this.initialized_) {
+       this.initialize_();
+     }
+     const expr = this.getExpr_(opt_bindings);
+     url = url.replace(expr, (match, name, opt_strargs) => {
+       let args = [];
+       if (typeof opt_strargs == 'string') {
+         args = opt_strargs.split(',');
+       }
+       const replacement = this.getReplacement_(name);
+       let binding;
+       if (opt_bindings && (name in opt_bindings)) {
+         binding = opt_bindings[name];
+       } else if (replacement) {
+         binding = replacement.sync;
+         if (!binding) {
+           user.error('ignoring async replacement key: ' + name);
+           return '';
+         }
+       }
+       let val;
+       try {
+         val = (typeof binding == 'function' ?
+         binding.apply(null, args) : binding);
+         if (val && val.then) {
+           user.error('ignoring promise value for key: ' + name);
+           return '';
+         }
+       } catch (e) {
+         user.error('Error evaluating replacement: ' + name, e);
+         val = '';
+       }
+       if (opt_collectVars) {
+         opt_collectVars[match] = val;
+       }
+       return this.encodeValue_(val);
+     }
+   );
+   return url;
 }
 
   /**
@@ -824,22 +821,22 @@ expandSync(url, opt_bindings, opt_collectVars) {
     }
     let shadowHostOffset;
     const vars = {
-      'CLICK_X': (function() {
+      'CLICK_X': () => {
         if (evt.clientX === undefined) {
           return '';
         }
         shadowHostOffset =
           shadowHostOffset || this.getShadowHostOffset_(evt.target);
         return String(evt.clientX - shadowHostOffset.left);
-      }).bind(this),
-      'CLICK_Y': (function() {
+      },
+      'CLICK_Y': () => {
         if (evt.clientY === undefined) {
           return '';
         }
         shadowHostOffset =
           shadowHostOffset || this.getShadowHostOffset_(evt.target);
         return String(evt.clientY - shadowHostOffset.top);
-      }).bind(this),
+      },
     };
     return this.expandSync(href, vars);
   }
