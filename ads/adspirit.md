@@ -28,7 +28,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see ad network documentation at http://help.adspirit.de/help/.
 
 Supported parameters:
 
