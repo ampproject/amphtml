@@ -28,6 +28,7 @@ export const adPrefetch = {
   ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
+  // TODO: Remove this once we switch over to the direct request version of adsense.js.
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   aduptech: 'https://s.d.adup-tech.com/jsapi',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -51,7 +52,10 @@ export const adPrefetch = {
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
-  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  yieldbot: [
+    'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
+    'https://msg.yldbt.com/js/ybmsg.html',
+  ],
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
@@ -65,6 +69,8 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
+  amoad: 'https://j.amoad.com/js/a.js',
 };
 
 /**
@@ -117,6 +123,7 @@ export const adPreconnect = {
     'https://resize.mantisadnetwork.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  widespace: 'https://engine.widespace.com',
   improvedigital: 'https://ad.360yield.com/',
   openx: [
     'https://partner.googleadservices.com',
@@ -159,7 +166,10 @@ export const adPreconnect = {
   appnexus: 'https://ib.adnxs.com',
   microad: [
     'https://s-rtb.send.microad.jp',
+    'https://s-rtb.send.microadinc.com',
     'https://cache.send.microad.jp',
+    'https://cache.send.microadinc.com',
+    'https://deb.send.microad.jp',
   ],
   yahoojp: [
     'https://s.yimg.jp',
@@ -176,6 +186,18 @@ export const adPreconnect = {
   adtech: [
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
+  ],
+  kargo: [
+    'https://storage.cloud.kargo.com',
+    'https://pubads.g.doubleclick.net',
+    'https://prg.kargo.com',
+  ],
+  pulsepoint: 'https://tag.contextweb.com',
+  amoad: [
+    'https://d.amoad.com',
+    'https://i.amoad.com',
+    'https://m.amoad.com',
+    'https://v.amoad.com',
   ],
 };
 

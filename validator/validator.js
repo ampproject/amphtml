@@ -31,10 +31,10 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
-goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
+goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
@@ -118,7 +118,7 @@ amp.validator.ValidationResult.prototype.mergeFrom = function(other) {
 };
 
 /**
- * Copyies results from another ValidationResult.
+ * Copies results from another ValidationResult.
  * @param {!amp.validator.ValidationResult} other
  */
 amp.validator.ValidationResult.prototype.copyFrom = function(other) {
@@ -207,7 +207,7 @@ class ChildTagMatcher {
     this.numChildTagsSeen_++;  // Increment this first to allow early exit.
     if (childTags.childTagNameOneof.length > 0) {
       const names = childTags.childTagNameOneof;
-      if (names.indexOf(tagName) == -1) {
+      if (names.indexOf(tagName) === -1) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           const allowedNames = '[\'' + names.join('\', \'') + '\']';
           context.addError(
@@ -215,8 +215,10 @@ class ChildTagMatcher {
               amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
-               allowedNames.toLowerCase()],
+              [
+                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                allowedNames.toLowerCase()
+              ],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -225,7 +227,7 @@ class ChildTagMatcher {
       }
     }
     if (childTags.firstChildTagNameOneof.length > 0 &&
-        (this.numChildTagsSeen_ - 1) == 0) {
+        (this.numChildTagsSeen_ - 1) === 0) {
       const names = childTags.firstChildTagNameOneof;
       if (names.indexOf(tagName) == -1) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -236,8 +238,10 @@ class ChildTagMatcher {
                   .DISALLOWED_FIRST_CHILD_TAG_NAME,
               context.getDocLocator(),
               /* params */
-              [tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
-               allowedNames.toLowerCase()],
+              [
+                tagName.toLowerCase(), getTagSpecName(this.parentSpec_),
+                allowedNames.toLowerCase()
+              ],
               this.parentSpec_.specUrl, result);
         } else {
           result.status = amp.validator.ValidationResult.Status.FAIL;
@@ -256,7 +260,7 @@ class ChildTagMatcher {
       return;
     }
     const expected = this.parentSpec_.childTags.mandatoryNumChildTags;
-    if (expected === null || expected === this.numChildTagsSeen_) {
+    if (expected === -1 || expected === this.numChildTagsSeen_) {
       return;
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -493,7 +497,6 @@ function computeAtRuleParsingSpec(cssSpec) {
   /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
-    goog.asserts.assert(atRuleSpec.name !== null);
     if (atRuleSpec.type === amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR ||
         atRuleSpec.type ===
             amp.validator.AtRuleSpec.BlockType.PARSE_AS_IGNORE) {
@@ -559,13 +562,13 @@ class CdataMatcher {
      * @private
      */
     this.cdataRegex_ = null;
-    if (tagSpec.cdata && tagSpec.cdata.cdataRegex) {
+    if (tagSpec.cdata !== null && tagSpec.cdata.cdataRegex !== null) {
       this.cdataRegex_ = new RegExp('^(' + tagSpec.cdata.cdataRegex + ')$');
     }
 
     /** @type {string} */
     var blacklistedCdataRegexStr = '';
-    if (tagSpec.cdata) {
+    if (tagSpec.cdata !== null) {
       for (const blacklist of tagSpec.cdata.blacklistedCdataRegex) {
         blacklistedCdataRegexStr += blacklist + '|';
       }
@@ -613,7 +616,7 @@ class CdataMatcher {
       return;
     }
     // Max CDATA Byte Length
-    if (cdataSpec.maxBytes !== null) {
+    if (cdataSpec.maxBytes !== -1) {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -895,7 +898,8 @@ class Context {
   setCdataMatcher(matcher) {
     if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
       // We store away the position from when the matcher was created
-      // so we can use it to generate error messages relating to the opening tag.
+      // so we can use it to generate error messages relating to the opening
+      // tag.
       matcher.setLineCol(
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
@@ -908,8 +912,8 @@ class Context {
   /** @param {?ChildTagMatcher} matcher */
   setChildTagMatcher(matcher) {
     if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
-        matcher.setLineCol(
-            new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+      matcher.setLineCol(
+          new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
     this.tagStack_.setChildTagMatcher(matcher);
   }
@@ -935,13 +939,24 @@ class ParsedUrlSpec {
     this.spec_ = spec;
 
     /**
-     * @type {!Object<string, ?>}
+     * @type {!Object<string, number>}
      * @private
      */
     this.allowedProtocols_ = {};
     if (this.spec_ !== null) {
       for (const protocol of this.spec_.allowedProtocol) {
         this.allowedProtocols_[protocol] = 0;
+      }
+    }
+
+    /**
+     * @type {!Object<string, number>}
+     * @private
+     */
+    this.disallowedDomains_ = {};
+    if (this.spec_ !== null) {
+      for (const domain of this.spec_.disallowedDomain) {
+        this.disallowedDomains_[domain] = 0;
       }
     }
   }
@@ -990,10 +1005,8 @@ class ParsedUrlSpec {
       }
       return;
     }
-    let uri;
-    try {
-      uri = goog.Uri.parse(url);
-    } catch (ex) {
+    const urlComponents = goog.uri.utils.split(url);
+    if (urlComponents === null) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrl(context, url, tagSpec, result);
       } else {
@@ -1001,19 +1014,32 @@ class ParsedUrlSpec {
       }
       return;
     }
-    if (uri.hasScheme() &&
-        !this.allowedProtocols_.hasOwnProperty(uri.getScheme().toLowerCase())) {
+    const scheme = urlComponents[goog.uri.utils.ComponentIndex.SCHEME];
+    if (scheme !== undefined && scheme.length > 0 &&
+        !this.allowedProtocols_.hasOwnProperty(scheme.toLowerCase())) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.invalidUrlProtocol(
-            context, uri.getScheme().toLowerCase(), tagSpec, result);
+            context, scheme.toLowerCase(), tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
       return;
     }
-    if (!this.spec_.allowRelative && !uri.hasScheme()) {
+    if (!this.spec_.allowRelative &&
+        (scheme === undefined || scheme.length == 0)) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         adapter.disallowedRelativeUrl(context, url, tagSpec, result);
+      } else {
+        result.status = amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+    const domain = urlComponents[goog.uri.utils.ComponentIndex.DOMAIN];
+    if (domain !== undefined && domain.length > 0 &&
+        this.disallowedDomains_.hasOwnProperty(domain.toLowerCase())) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        adapter.disallowedDomain(
+            context, domain.toLowerCase(), tagSpec, result);
       } else {
         result.status = amp.validator.ValidationResult.Status.FAIL;
       }
@@ -1070,6 +1096,21 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
         context.getDocLocator(),
         /* params */[this.attrName_, getTagSpecName(tagSpec), protocol],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {string} domain
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedDomain(context, domain, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.DISALLOWED_DOMAIN,
+        context.getDocLocator(),
+        /* params */[this.attrName_, getTagSpecName(tagSpec), domain],
         tagSpec.specUrl, result);
   }
 
@@ -1149,6 +1190,20 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 
   /**
    * @param {!Context} context
+   * @param {string} domain
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedDomain(context, domain, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN,
+        this.lineCol_,
+        /* params */[getTagSpecName(tagSpec), domain], tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
    * @param {string} url
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -1181,7 +1236,6 @@ class ParsedAttrTriggerSpec {
      */
     this.spec_ = attrSpec.trigger;
 
-    goog.asserts.assert(attrSpec.name != null);
     /**
      * @type {string} attrName
      * @private
@@ -1194,7 +1248,7 @@ class ParsedAttrTriggerSpec {
      */
     this.ifValueRegex_ = null;
 
-    if (this.spec_ && this.spec_.ifValueRegex) {
+    if (this.spec_ !== null && this.spec_.ifValueRegex !== null) {
       this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
     }
   }
@@ -1249,7 +1303,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.triggerSpec_ = null;
-    if (this.spec_.trigger) {
+    if (this.spec_.trigger !== null) {
       this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
     }
     /**
@@ -1283,7 +1337,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueRegex_ = null;
-    if (this.spec_ && this.spec_.valueRegex) {
+    if (this.spec_ !== null && this.spec_.valueRegex !== null) {
       this.valueRegex_ = new RegExp('^(' + this.spec_.valueRegex + ')$');
     }
 
@@ -1292,7 +1346,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.valueRegexCasei_ = null;
-    if (this.spec_ && this.spec_.valueRegexCasei) {
+    if (this.spec_ !== null && this.spec_.valueRegexCasei !== null) {
       this.valueRegexCasei_ =
           new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
     }
@@ -1302,7 +1356,7 @@ class ParsedAttrSpec {
      * @private
      */
     this.blacklistedValueRegex_ = null;
-    if (this.spec_ && this.spec_.blacklistedValueRegex) {
+    if (this.spec_ !== null && this.spec_.blacklistedValueRegex !== null) {
       this.blacklistedValueRegex_ =
           new RegExp(this.spec_.blacklistedValueRegex, 'i');
     }
@@ -1433,11 +1487,11 @@ class ParsedAttrSpec {
   validateAttrValueUrl(context, attrName, attrValue, tagSpec, result) {
     /** @type {!Array<string>} */
     let maybeUris = [];
-    if (attrName != 'srcset') {
+    if (attrName !== 'srcset') {
       maybeUris.push(goog.string.trim(attrValue));
     } else {
       let srcset = goog.string.trim(attrValue);
-      if (srcset == '') {
+      if (srcset === '') {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
@@ -1535,7 +1589,7 @@ class ParsedAttrSpec {
       }
       const propertySpec = this.valuePropertyByName_[name];
       if (propertySpec.value !== null) {
-        if (propertySpec.value != value.toLowerCase()) {
+        if (propertySpec.value !== value.toLowerCase()) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -1550,7 +1604,7 @@ class ParsedAttrSpec {
           }
         }
       } else if (propertySpec.valueDouble !== null) {
-        if (parseFloat(value) != propertySpec.valueDouble) {
+        if (parseFloat(value) !== propertySpec.valueDouble) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
@@ -1595,27 +1649,26 @@ class ParsedAttrSpec {
  * around the attr lists with ParsedAttrSpec instances.
  * @private
  */
-class ParsedAttrLists {
+class ParsedAttrSpecs {
   /**
    * @param {!Array<!amp.validator.AttrList>} attrLists
    */
   constructor(attrLists) {
     /** @type {!Object<string, !Array<!ParsedAttrSpec>>} */
     this.attrListsByName = {};
-    /**
-     * The next id to assign to a ParsedAttrSpec instance. This is
-     * a globally unique id.
-     * @type {!number}
-     */
-    this.nextId = 0;
+
+    /** @private @type {!Array<!ParsedAttrSpec>} */
+    this.parsedAttrSpecs_ = [];
 
     for (const attrList of attrLists) {
       /** @type {!Array<!ParsedAttrSpec>} */
       const parsedAttrList = [];
       for (const attrSpec of attrList.attrs) {
-        parsedAttrList.push(new ParsedAttrSpec(attrSpec, this.nextId++));
+        const parsed =
+            new ParsedAttrSpec(attrSpec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        parsedAttrList.push(parsed);
       }
-      goog.asserts.assert(attrList.name !== null);
       this.attrListsByName[attrList.name] = parsedAttrList;
     }
   }
@@ -1634,7 +1687,7 @@ class ParsedAttrLists {
    * @param {!amp.validator.TagSpec} tagSpec
    * @return {!Array<!ParsedAttrSpec>} all of the ParsedAttrSpec pointers
    */
-  GetAttrsFor(tagSpec) {
+  getAttrsFor(tagSpec) {
     /** @type {!Array<!ParsedAttrSpec>} */
     const attrs = [];
     /** @type {!Object<string, ?>} */
@@ -1642,10 +1695,9 @@ class ParsedAttrLists {
     // (1) layout attrs.
     if (tagSpec.ampLayout !== null) {
       const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
-      if (layoutSpecs) {
+      if (layoutSpecs !== undefined) {
         for (const spec of layoutSpecs) {
           const name = spec.getSpec().name;
-          goog.asserts.assert(name != null);
           if (!namesSeen.hasOwnProperty(name)) {
             namesSeen[name] = 0;
             attrs.push(spec);
@@ -1656,10 +1708,11 @@ class ParsedAttrLists {
     // (2) attributes specified within |tagSpec|.
     for (const spec of tagSpec.attrs) {
       const name = spec.name;
-      goog.asserts.assert(name != null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
-        attrs.push(new ParsedAttrSpec(spec, this.nextId++));
+        const parsed = new ParsedAttrSpec(spec, this.parsedAttrSpecs_.length);
+        this.parsedAttrSpecs_.push(parsed);
+        attrs.push(parsed);
       }
     }
     // (3) attributes specified via reference to an attr_list.
@@ -1668,7 +1721,6 @@ class ParsedAttrLists {
       goog.asserts.assert(specs !== undefined);
       for (const spec of specs) {
         const name = spec.getSpec().name;
-        goog.asserts.assert(name != null);
         if (!namesSeen.hasOwnProperty(name)) {
           namesSeen[name] = 0;
           attrs.push(spec);
@@ -1677,12 +1729,11 @@ class ParsedAttrLists {
     }
     // (4) attributes specified in the global_attr list.
     const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
-    if (!globalSpecs) {
+    if (globalSpecs === undefined) {
       return attrs;
     }
     for (const spec of globalSpecs) {
       const name = spec.getSpec().name;
-      goog.asserts.assert(name != null);
       if (!namesSeen.hasOwnProperty(name)) {
         namesSeen[name] = 0;
         attrs.push(spec);
@@ -1690,6 +1741,12 @@ class ParsedAttrLists {
     }
     return attrs;
   }
+
+  /**
+   * @param {number} id
+   * @return {!ParsedAttrSpec}
+   */
+  getById(id) { return this.parsedAttrSpecs_[id]; }
 }
 
 
@@ -1702,11 +1759,8 @@ class ParsedAttrLists {
  * @private
  */
 function getTagSpecName(tagSpec) {
-  if (tagSpec.specName !== null) {
-    return tagSpec.specName;
-  }
-  goog.asserts.assert(tagSpec.tagName !== null);
-  return tagSpec.tagName.toLowerCase();
+  return (tagSpec.specName !== null) ? tagSpec.specName :
+                                       tagSpec.tagName.toLowerCase();
 }
 
 
@@ -1860,7 +1914,6 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
  */
 function shouldRecordTagspecValidated(tag, tagSpecNamesToTrack) {
   return tag.mandatory || tag.unique ||
-      getTagSpecName(tag) != null &&
       tagSpecNamesToTrack.hasOwnProperty(getTagSpecName(tag));
 }
 
@@ -1890,15 +1943,15 @@ function makeDispatchKey(attrName, attrValue, mandatoryParent) {
  */
 class ParsedTagSpec {
   /**
-   * @param {string} templateSpecUrl
-   * @param {!ParsedAttrLists} parsedAttrLists
+   * @param {?string} templateSpecUrl
+   * @param {!ParsedAttrSpecs} parsedAttrSpecs
    * @param {!Object<string, number>} tagspecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} tagId
    */
   constructor(
-      templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
+      templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
       shouldRecordTagspecValidated, tagSpec, tagId) {
     /**
      * @type {!amp.validator.TagSpec}
@@ -1911,12 +1964,6 @@ class ParsedTagSpec {
      * @private
      */
     this.id_ = tagId;
-    /**
-     * ParsedAttributes keyed by id.
-     * @type {!Object<number, !ParsedAttrSpec>}
-     * @private
-     */
-    this.attrsById_ = {};
     /**
      * ParsedAttributes keyed by name.
      * @type {!Object<string, !ParsedAttrSpec>}
@@ -1935,10 +1982,15 @@ class ParsedTagSpec {
      */
     this.mandatoryOneofs_ = [];
     /**
-     * @type {string}
+     * @type {?string}
      * @private
      */
     this.templateSpecUrl_ = templateSpecUrl;
+    /**
+     * @type {!ParsedAttrSpecs}
+     * @private
+     */
+    this.parsedAttrSpecs_ = parsedAttrSpecs;
     /**
      * @type {boolean}
      * @private
@@ -1960,9 +2012,8 @@ class ParsedTagSpec {
      */
     this.implicitAttrspecs_ = [];
 
-    const parsedAttrs = parsedAttrLists.GetAttrsFor(tagSpec);
+    const parsedAttrs = parsedAttrSpecs.getAttrsFor(tagSpec);
     for (const parsedAttrSpec of parsedAttrs) {
-      this.attrsById_[parsedAttrSpec.getId()] = parsedAttrSpec;
       this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(parsedAttrSpec.getId());
@@ -2021,7 +2072,6 @@ class ParsedTagSpec {
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
     const attrName = parsedSpec.getSpec().name;
-    goog.asserts.assert(attrName !== null);
     const attrValue = parsedSpec.getSpec().value;
     goog.asserts.assert(attrValue !== null);
     return makeDispatchKey(attrName, attrValue, mandatoryParent);
@@ -2093,7 +2143,7 @@ class ParsedTagSpec {
    * @param {!amp.validator.ValidationResult} result
    */
   validateLayout(context, attrsByKey, result) {
-    goog.asserts.assert(this.spec_.ampLayout != null);
+    goog.asserts.assert(this.spec_.ampLayout !== null);
 
     const layoutAttr = attrsByKey['layout'];
     const widthAttr = attrsByKey['width'];
@@ -2326,7 +2376,7 @@ class ParsedTagSpec {
     // At this point, it's an error either way, but we try to give a
     // more specific error in the case of Mustache template characters.
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      if (attrName.indexOf('{{') != -1) {
+      if (attrName.indexOf('{{') !== -1) {
         context.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
@@ -2426,6 +2476,13 @@ class ParsedTagSpec {
         this.validateAttrNotFoundInSpec(context, attrName, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
+        }
+        if (hasTemplateAncestor) {
+          this.validateAttrValueBelowTemplateTag(
+              context, attrName, attrValue, result);
+          if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+            return;
+          }
         }
         continue;
       }
@@ -2558,7 +2615,10 @@ class ParsedTagSpec {
             amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
             context.getDocLocator(),
             /* params */
-            [this.attrsById_[diff].getSpec().name, getTagSpecName(this.spec_)],
+            [
+              this.parsedAttrSpecs_.getById(diff).getSpec().name,
+              getTagSpecName(this.spec_)
+            ],
             this.spec_.specUrl, result);
       }
     } else {
@@ -2625,8 +2685,11 @@ class ParsedTagSpec {
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
                 context.getDocLocator(),
-                /* params */[this.spec_.tagName.toLowerCase(),
-                             mandatoryAncestor.toLowerCase()],
+                /* params */
+                [
+                  this.spec_.tagName.toLowerCase(),
+                  mandatoryAncestor.toLowerCase()
+                ],
                 this.spec_.specUrl, validationResult);
           }
         } else {
@@ -2642,8 +2705,11 @@ class ParsedTagSpec {
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
               context.getDocLocator(),
-              /* params */[this.spec_.tagName.toLowerCase(),
-                           disallowedAncestor.toLowerCase()],
+              /* params */
+              [
+                this.spec_.tagName.toLowerCase(),
+                disallowedAncestor.toLowerCase()
+              ],
               this.spec_.specUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2727,7 +2793,7 @@ class TagSpecDispatch {
 
     // Special case for foo=foo. We consider this a match for a dispatch key of
     // foo="" or just <tag foo>.
-    if (attrName == attrValue)
+    if (attrName === attrValue)
       return this.matchingDispatchKey(attrName, '', mandatoryParent);
 
     return -1;
@@ -2830,50 +2896,54 @@ function specificity(code) {
       return 35;
     case amp.validator.ValidationError.Code.MISSING_URL:
       return 36;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.DISALLOWED_DOMAIN:
       return 37;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 38;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 42;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 43;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 45;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 46;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 47;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 48;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 49;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 49;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 50;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 51;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN:
       return 52;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
       return 53;
-    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
       return 54;
-    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
       return 55;
-    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
       return 56;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
       return 57;
+    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+      return 58;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+      return 59;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
       return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
@@ -2894,7 +2964,7 @@ function specificity(code) {
 amp.validator.maxSpecificity = function(validationResult) {
   let max = 0;
   for (const error of validationResult.errors) {
-    goog.asserts.assert(error.code != null);
+    goog.asserts.assert(error.code !== null);
     const thisSpecificity = specificity(error.code);
     max = Math.max(thisSpecificity, max);
   }
@@ -2932,7 +3002,7 @@ class ParsedValidatorRules {
     /** @type {!amp.validator.ValidatorRules} */
     const rules = amp.validator.RULES;
 
-    const parsedAttrLists = new ParsedAttrLists(rules.attrLists);
+    const parsedAttrSpecs = new ParsedAttrSpecs(rules.attrLists);
 
     /** @type {!Object<string, number>} */
     const tagspecIdsByTagSpecName = {};
@@ -2953,12 +3023,13 @@ class ParsedValidatorRules {
 
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
-      goog.asserts.assert(rules.templateSpecUrl != null);
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        goog.asserts.assert(rules.templateSpecUrl !== null);
+      }
       const parsedTagSpec = new ParsedTagSpec(
-          rules.templateSpecUrl, parsedAttrLists, tagspecIdsByTagSpecName,
+          rules.templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
-      goog.asserts.assert(tag.tagName !== null);
       if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
         this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
       }
@@ -2968,7 +3039,9 @@ class ParsedValidatorRules {
       } else {
         tagnameDispatch.registerTagSpec(i);
       }
-      if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
+      if (tag.mandatory) {
+        this.mandatoryTagSpecs_.push(i);
+      }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** type {!Object<!amp.validator.ValidationError.Code, string>} */
@@ -3030,7 +3103,9 @@ class ParsedValidatorRules {
         let attrValue = encounteredAttrs[i + 1];
         // Our html parser repeats the key as the value if there is no value. We
         // replace the value with an empty string instead in this case.
-        if (attrName === attrValue) attrValue = '';
+        if (attrName === attrValue) {
+          attrValue = '';
+        }
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
@@ -3102,7 +3177,7 @@ class ParsedValidatorRules {
         return;
       }
       // If this is the first attempt, always use it.
-      if (resultForBestAttempt.errors.length == 0) {
+      if (resultForBestAttempt.errors.length === 0) {
         resultForBestAttempt.copyFrom(resultForAttempt);
         return;
       }
@@ -3167,8 +3242,7 @@ class ParsedValidatorRules {
     }
     // (Re)set the cdata matcher to the expectations that this tag
     // brings with it.
-    if (spec.cdata !== null)
-      context.setCdataMatcher(new CdataMatcher(spec));
+    if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
     if (spec.childTags !== null)
       context.setChildTagMatcher(new ChildTagMatcher(spec));
   }

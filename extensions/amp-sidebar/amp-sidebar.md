@@ -88,7 +88,7 @@ Example:
 
 **side**
 
-The `side` attribute may be set to `left` or `right` depending upon whether sidebar should open in the left or right side of the page. If a `side` is not set on the `amp-sidebar` then it will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => right') and if one does not exist then the `side` is defaulted to `left`.
+The `side` attribute may be set to `left` or `right` depending upon whether sidebar should open in the left or right side of the page. If a `side` is not set on the `amp-sidebar` then it will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => `right`) and if one does not exist then the `side` is defaulted to `left`.
 
 **open**
 

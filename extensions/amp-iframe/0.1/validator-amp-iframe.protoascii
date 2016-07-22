@@ -53,6 +53,7 @@ tags: {  # <amp-iframe>
   attrs: { name: "allowfullscreen" value: "" }
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "frameborder" value_regex: "0|1" }
+  attrs: { name: "referrerpolicy" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "sandbox" }
   attrs: { name: "scrolling" value_regex: "auto|yes|no" }

@@ -1,0 +1,75 @@
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+    <title>AMP A4A examples</title>
+    <link rel="canonical" href="http://nonblocking.io/" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+
+    <h1>A4A Examples</h1>
+
+    <h2>Adsense</h2>
+    <amp-ad width=300 height=300
+        type="adsense"
+        data-ad-client="ca-pub-8125901705757971"
+        data-ad-slot="7783467241">
+    </amp-ad>
+
+  <h2>Doubleclick</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      >
+  </amp-ad>
+
+  <h2>Doubleclick with JSON based parameters</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'
+      >
+  </amp-ad>
+
+  <h2>Doubleclick no ad with fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+      <div fallback>
+        <b>Thank you for trying AMP!</b>
+
+        <p>You got lucky! We have no ad to show to you!</p>
+      </div>
+  </amp-ad>
+
+  <h2>Doubleclick no ad with placeholder and fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+      <div placeholder>
+        <b>Placeholder here!!!</b>
+      </div>
+      <div fallback>
+        <b>Thank you for trying AMP!</b>
+
+        <p>You got lucky! We have no ad to show to you!</p>
+      </div>
+  </amp-ad>
+
+  <h2>Doubleclick with overriden size</h2>
+  <amp-ad width=420 height=100
+      data-override-width=320 data-override-height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      class="red"
+      >
+  </amp-ad>
+
+  </body>
+</html>

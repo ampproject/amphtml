@@ -21,6 +21,7 @@ data.bn;
 data.mid;
 data.ws;
 data.s;
+data.sid;
 data.zid;
 data.pid;
 data.custom3
@@ -134,3 +135,6 @@ PostRelease.Start;
 PostRelease.checkIsAdVisible;
 var _prx;
 data.delayByTime;
+window.PulsePointHeaderTag;
+data.tagid;
+data.tagtype;

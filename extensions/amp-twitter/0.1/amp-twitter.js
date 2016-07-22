@@ -15,7 +15,7 @@
  */
 
 
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
@@ -29,9 +29,9 @@ class AmpTwitter extends AMP.BaseElement {
     // All images
     this.preconnect.url('https://pbs.twimg.com', onLayout);
     // Hosts the script that renders tweets.
-    this.preconnect.prefetch(
+    this.preconnect.preload(
         'https://platform.twitter.com/widgets.js', 'script');
-    prefetchBootstrap(this.getWin());
+    preloadBootstrap(this.win);
   }
 
   /** @override */
@@ -46,7 +46,6 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // TODO(malteubl): Preconnect to twitter.
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'twitter');
     this.applyFillContent(iframe);

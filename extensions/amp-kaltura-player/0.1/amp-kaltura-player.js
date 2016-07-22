@@ -96,6 +96,7 @@ class AmpKaltura extends AMP.BaseElement {
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.width = this.width_;
     imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
     this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);

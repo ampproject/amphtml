@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {getService} from './service';
+import {fromClass} from './service';
 import {getVendorJsPropertyName} from './style';
 
 
@@ -120,7 +120,5 @@ export class DocumentState {
  * @return {!DocumentState}
  */
 export function documentStateFor(window) {
-  return getService(window, 'documentState', () => {
-    return new DocumentState(window);
-  });
+  return fromClass(window, 'documentState', DocumentState);
 };

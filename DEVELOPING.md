@@ -51,6 +51,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`             | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`                  | Builds the AMP library.                                               |
+| `gulp build` --css-only       | Builds only the embedded css into js files for the AMP library.       |
 | `gulp clean`                  | Removes build output.                                                 |
 | `gulp css`                    | Recompile css to build directory.                                     |
 | `gulp extensions`             | Build AMP Extensions.                                                 |
@@ -65,7 +66,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
-| `npm run node-test` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| `npm run ava` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 
 #### Saucelabs

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {fromClass} from './service';
 
 
 /**
@@ -137,9 +137,7 @@ export class Platform {
  * @return {!Platform}
  */
 export function platformFor(window) {
-  return getService(window, 'platform', () => {
-    return new Platform(window);
-  });
+  return fromClass(window, 'platform', Platform);
 };
 
 export const platform = platformFor(window);

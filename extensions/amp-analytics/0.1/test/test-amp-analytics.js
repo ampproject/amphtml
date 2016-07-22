@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {Crypto} from '../crypto-impl';
 import {instrumentationServiceFor} from '../instrumentation';
 import {
   installUserNotificationManager,
@@ -45,6 +46,7 @@ describe('amp-analytics', function() {
   let sendRequestSpy;
   let configWithCredentials;
   let uidService;
+  let crypto;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
@@ -68,6 +70,7 @@ describe('amp-analytics', function() {
       installCidService(iframe.win);
       installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
+
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
@@ -80,6 +83,10 @@ describe('amp-analytics', function() {
           return Promise.resolve(JSON.parse(jsonMockResponses[url]));
         }};
       });
+
+      resetServiceForTesting(iframe.win, 'crypto');
+      crypto = new Crypto(iframe.win);
+      getService(iframe.win, 'crypto', () => crypto);
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', './test-canonical.html');
@@ -161,7 +168,7 @@ describe('amp-analytics', function() {
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';
@@ -719,7 +726,7 @@ describe('amp-analytics', function() {
     it('allows a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(analytics, 'sha384_').returns([0, 100, 0, 100]);
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -731,9 +738,10 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
-      sandbox.stub(analytics, 'sha384_').withArgs('0').returns([0]);
+      sandbox.stub(crypto, 'uniform')
+          .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -742,7 +750,7 @@ describe('amp-analytics', function() {
     it('does not allow a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(analytics, 'sha384_').returns([1, 2, 3, 4]);
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
       return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(0);
       });
@@ -778,6 +786,30 @@ describe('amp-analytics', function() {
         }],
       };
       const analytics = getAnalyticsTag(incompleteConfig);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (Infinity)', () => {
+      const analytics = getAnalyticsTag(getConfig(Infinity));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (NaN)', () => {
+      const analytics = getAnalyticsTag(getConfig(NaN));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (-1)', () => {
+      const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);

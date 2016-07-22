@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 
 /**
@@ -23,5 +23,5 @@ import {getService} from './service';
  */
 export function urlReplacementsFor(window) {
   return /** @type {!./service/url-replacements-impl.UrlReplacements} */ (
-      getService(window, 'url-replace'));
+      getExistingServiceForWindow(window, 'url-replace'));
 };

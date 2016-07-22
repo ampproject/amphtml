@@ -362,6 +362,9 @@ Some actions, if documented, may accept arguments. The arguments are defined bet
  - boolean values: `true` or `false`;
  - numbers: `11` or `1.1`.
 
+You can listen to multiple events on an element by separating the two events with a semicolon `;`.
+
+Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
 ### Extended components
 

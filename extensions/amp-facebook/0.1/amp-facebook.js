@@ -15,7 +15,7 @@
  */
 
 
-import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
+import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
@@ -26,9 +26,9 @@ class AmpFacebook extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     this.preconnect.url('https://facebook.com', onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.prefetch(
+    this.preconnect.preload(
         'https://connect.facebook.net/en_US/sdk.js', 'script');
-    prefetchBootstrap(this.getWin());
+    preloadBootstrap(this.win);
   }
 
   /** @override */

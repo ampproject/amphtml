@@ -228,7 +228,7 @@ export function childElement(parent, callback) {
  * Finds all child elements that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElements(parent, callback) {
   const children = [];
@@ -339,7 +339,7 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
@@ -369,6 +369,26 @@ export function childElementByTag(parent, tagName) {
   }
   tagName = tagName.toUpperCase();
   return childElement(parent, el => {
+    return el.tagName == tagName;
+  });
+}
+
+
+/**
+ * Finds all child elements with the specified tag name.
+ * @param {!Element} parent
+ * @param {string} tagName
+ * @return {!Array<!Element>}
+ */
+export function childElementsByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+  }
+  tagName = tagName.toUpperCase();
+  return childElements(parent, el => {
     return el.tagName == tagName;
   });
 }

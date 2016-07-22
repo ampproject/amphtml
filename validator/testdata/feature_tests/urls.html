@@ -42,7 +42,6 @@
   <a href="vbscript:bar">Invalid protocol</a>
   <a href="data:baz">Invalid protocol</a>
   <a href="ftp://google.com/">Valid protocol</a>
-  <a href="http://site:80808/%AFpage">Malformed URL</a>
   <!-- invalid (javascript is not an allowed protocol: singluar src element) -->
   <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
   <!-- invalid (javascript is not an allwoed protocol: second src element) -->
@@ -57,8 +56,6 @@
   <amp-img srcset="javascript:alert('boo') 1x, foo 2x" layout="fill"></amp-img>
   <!-- invalid (javascript is not an allowed protocol: case insensitive) -->
   <amp-img srcset="image-1x.png 1x, JavaScript:baz 2x" layout="fill"></amp-img>
-  <!-- invalid (not a valid URL) -->
-  <amp-img srcset="http://site:80808/%AFimg 1x, img 2x" layout="fill"></amp-img>
   <!-- invalid (empty) -->
   <amp-img srcset="" layout="fill"></amp-img>
   <!-- invalid (duplicate pixel density) -->

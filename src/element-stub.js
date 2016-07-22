@@ -15,22 +15,31 @@
  */
 
 import {BaseElement} from './base-element';
-import {insertAmpExtensionScript} from './insert-extension';
+import {dev} from './log';
+import {extensionsFor} from './extensions';
 
 /** @type {!Array} */
 export const stubbedElements = [];
+
+/** @type {!Object<string, boolean>} */
+const loadingChecked = {};
+
 
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
     // Fetch amp-ad script if it is not present.
-    insertAmpExtensionScript(this.getWin(), element, 'amp-ad');
+    const name = element.tagName.toLowerCase();
+    if (!loadingChecked[name]) {
+      loadingChecked[name] = true;
+      extensionsFor(this.win).loadExtension(name);
+    }
     stubbedElements.push(this);
   }
 
   /** @override */
   getPriority() {
-    throw new Error('Cannot get priority of stubbed element');
+    return dev.assert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */
@@ -38,5 +47,19 @@ export class ElementStub extends BaseElement {
     // Always returns true and will eventually call this method on the actual
     // element.
     return true;
+  }
+}
+
+
+/**
+ * @visibleForTesting
+ */
+export function resetLoadingCheckForTests() {
+  const keys = Object.keys(loadingChecked);
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    if (loadingChecked.hasOwnProperty(key)) {
+      delete loadingChecked[key];
+    }
   }
 }

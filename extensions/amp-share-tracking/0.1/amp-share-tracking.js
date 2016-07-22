@@ -25,7 +25,7 @@ class AmpShareTracking extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `TAG ${TAG} disabled`);
       return;

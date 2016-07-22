@@ -101,11 +101,11 @@ export class AmpFont extends AMP.BaseElement {
     this.fontVariant_ =
         this.element.getAttribute('font-variant') || DEFAULT_VARIANT_;
     /** @private @const {!Document} */
-    this.document_ = this.getWin().document;
+    this.document_ = this.win.document;
     /** @private @const {!Element} */
     this.documentElement_ = this.document_.documentElement;
     /** @private @const {!FontLoader} */
-    this.fontLoader_ = new FontLoader(this.getWin());
+    this.fontLoader_ = new FontLoader(this.win);
     this.startLoad_();
   }
 

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 /**
  * @param {!Window} window
  * @return {!Performance}
  */
 export function performanceFor(window) {
-  return getService(window, 'performance');
+  return getExistingServiceForWindow(window, 'performance');
 };

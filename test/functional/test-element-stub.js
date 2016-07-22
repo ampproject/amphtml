@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-import {ElementStub} from '../../src/element-stub';
+import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
 import {
     createIframePromise,
     doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
-import {resetExtensionScriptInsertedOrPresentForTesting,}
-    from '../../src/insert-extension';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+
 
 describe('test-element-stub', () => {
 
   let iframe;
 
   afterEach(() => {
-    resetExtensionScriptInsertedOrPresentForTesting();
+    resetLoadingCheckForTests();
   });
 
   function getElementStubIframe(name) {
@@ -47,14 +46,6 @@ describe('test-element-stub', () => {
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'blah');
       iframe.doc.head.appendChild(link);
-      return iframe.addElement(testElement);
-    });
-  }
-
-  function getAnalyticsIframe() {
-    return createIframePromise().then(f => {
-      iframe = f;
-      const testElement = iframe.doc.createElement('amp-analytics');
       return iframe.addElement(testElement);
     });
   }
@@ -83,21 +74,6 @@ describe('test-element-stub', () => {
           .to.have.length(0);
       expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
           .to.have.length(1);
-    });
-  });
-
-  it('not insert script when element is not amp-ad amp-embed', () => {
-    return getAnalyticsIframe().then(() => {
-      resetExtensionScriptInsertedOrPresentForTesting('amp-analytics');
-      expect(iframe.doc.querySelectorAll('amp-analytics')).to.have.length(1);
-      expect(iframe.doc.head.querySelectorAll(
-          '[custom-element="amp-analytics"]')).to.have.length(0);
-      new ElementStub(iframe.doc.body.querySelector('#parent')
-          .firstChild);
-      expect(iframe.doc.head.querySelectorAll('[custom-element="amp-ad"]'))
-          .to.have.length(0);
-      expect(iframe.doc.head.querySelectorAll(
-          '[custom-element="amp-analytics"]')).to.have.length(0);
     });
   });
 });

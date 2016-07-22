@@ -1,0 +1,75 @@
+<!--
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+  This tests looks at specific errors related to forms.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
+</head>
+<body>
+  <!-- Valid form -->
+  <form method="post" action="https://example.com/subscribe" target="_blank">
+    <fieldset>
+      <label>
+        <span>Your name</span>
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        <span>Your email</span>
+        <input type="email" name="email" required>
+      </label>
+      <input type="submit" value="Subscribe">
+    </fieldset>
+  </form>
+  <!-- Invalid form action must not be a relative url -->
+  <form method="post" action="/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be https. -->
+  <form method="post" action="http://example.com/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form action must be a non-cdn link. -->
+  <form method="post" action="https://cdn.ampproject.org/subscribe" target="_blank">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: form target must be _blank or _top -->
+  <form method="post" action="https://example/subscribe" target="_new">
+    <input type="submit" value="Subscribe">
+  </form>
+  <!-- Invalid: input, select, option and textarea must be children of form. -->
+  <input type="text" name="name">
+  <select name="language">
+    <option value="1">English</option>
+  </select>
+  <textarea name="comment"></textarea>
+  <!-- Invalid: input can not be type="button|file|image|password". -->
+  <form method="post" action="https://example.com/subscribe" target="_blank">
+    <input type="button" name="button">
+    <input type="file" name="file">
+    <input type="image" name="image">
+    <input type="password" name="password">
+  </form>
+</body>
+</html>

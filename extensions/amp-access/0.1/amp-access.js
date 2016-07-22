@@ -25,7 +25,7 @@ import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
-import {getValueForExpr} from '../../../src/json';
+import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
@@ -90,12 +90,9 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    let configJson;
-    try {
-      configJson = JSON.parse(this.accessElement_.textContent);
-    } catch (e) {
+    const configJson = tryParseJson(this.accessElement_.textContent, e => {
       throw user.createError('Failed to parse "amp-access" JSON: ' + e);
-    }
+    });
 
     /** @const @private {!AccessType} */
     this.type_ = this.buildConfigType_(configJson);
@@ -199,7 +196,7 @@ export class AccessService {
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
-    throw dev.createError('Unsuported access type: ', this.type_);
+    throw dev.createError('Unsupported access type: ', this.type_);
   }
 
   /**
@@ -213,6 +210,10 @@ export class AccessService {
     if (type == AccessType.SERVER && !this.isServerEnabled_) {
       user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;
+    }
+    if (type == AccessType.CLIENT && this.isServerEnabled_) {
+      user.info(TAG, 'Forcing access type: SERVER');
+      type = AccessType.SERVER;
     }
     return type;
   }

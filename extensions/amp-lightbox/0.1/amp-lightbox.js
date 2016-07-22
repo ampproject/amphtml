@@ -70,7 +70,7 @@ class AmpLightbox extends AMP.BaseElement {
   activate() {
     /**  @private {function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-    this.getWin().document.documentElement.addEventListener(
+    this.win.document.documentElement.addEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.getViewport().enterLightboxMode();
 
@@ -79,7 +79,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.element.style.opacity = 0;
       // TODO(dvoytenko): use new animations support instead.
       this.element.style.transition = 'opacity 0.1s ease-in';
-      vsyncFor(this.getWin()).mutate(() => {
+      vsyncFor(this.win).mutate(() => {
         this.element.style.opacity = '';
       });
     }).then(() => {
@@ -109,7 +109,7 @@ class AmpLightbox extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
-    this.getWin().document.documentElement.removeEventListener(
+    this.win.document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(this.container_);

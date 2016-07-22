@@ -20,12 +20,15 @@ import {user} from '../../src/log';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
+import {installCryptoService,} from
+    '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
   installUrlReplacementsService,
 } from '../../src/service/url-replacements-impl';
+import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 
@@ -48,7 +51,7 @@ describe('UrlReplacements', () => {
     sandbox.restore();
   });
 
-  function getReplacements(withCid, withActivity) {
+  function getReplacements(withCid, withActivity, withVariant) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
@@ -58,10 +61,18 @@ describe('UrlReplacements', () => {
       if (withCid) {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installCidService(iframe.win);
+        installCryptoService(iframe.win);
       }
       if (withActivity) {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installActivityService(iframe.win);
+      }
+      if (withVariant) {
+        markElementScheduledForTesting(iframe.win, 'amp-experiment');
+        getService(iframe.win, 'variant', () => Promise.resolve({
+          'x1': 'v1',
+          'x2': null,
+        }));
       }
       viewerService = installViewerService(iframe.win);
       installUrlReplacementsService(iframe.win);
@@ -71,9 +82,13 @@ describe('UrlReplacements', () => {
   }
 
   function expand(url, withCid, withActivity, opt_bindings) {
-    return getReplacements(withCid, withActivity).then(replacements => {
-      return replacements.expand(url, opt_bindings);
-    });
+    return getReplacements(withCid, withActivity)
+        .then(replacements => replacements.expand(url, opt_bindings));
+  }
+
+  function expandWithVariant(url) {
+    return getReplacements(false, false, true)
+        .then(replacements => replacements.expand(url));
   }
 
   function getFakeWindow() {
@@ -193,6 +208,29 @@ describe('UrlReplacements', () => {
         });
   });
 
+  it('should replace VARIANT', () => {
+    return expect(
+        expandWithVariant('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
+            .to.eventually.equal('?x1=v1&x2=none&x3=');
+  });
+
+  it('should replace VARIANT with empty string if ' +
+      'amp-experiment is not configured ', () => {
+    return expect(expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
+        .to.eventually.equal('?x1=&x2=&x3=');
+  });
+
+  it('should replace VARIANTS', () => {
+    return expect(
+        expandWithVariant('?VARIANTS'))
+        .to.eventually.equal('?x1.v1!x2.none');
+  });
+
+  it('should replace VARIANTS with empty string if ' +
+      'amp-experiment is not configured ', () => {
+    return expect(expand('?VARIANTS')).to.eventually.equal('?');
+  });
+
   it('should replace TIMESTAMP', () => {
     return expand('?ts=TIMESTAMP').then(res => {
       expect(res).to.match(/ts=\d+/);
@@ -267,7 +305,9 @@ describe('UrlReplacements', () => {
     const urlReplacements = installUrlReplacementsService(win);
     const validMetric = urlReplacements.expand('?sh=PAGE_LOAD_TIME&s');
     urlReplacements.win_.performance.timing.loadEventStart = 109;
-    loadObservable.fire(document.createEvent('Event')); // Mimics load event.
+    loadObservable.fire({
+      target: win,
+    }); // Mimics load event.
     return validMetric.then(res => {
       expect(res).to.match(/sh=9&s/);
     });

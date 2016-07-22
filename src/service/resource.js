@@ -99,7 +99,7 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
-   * @param {!Resources} resources
+   * @param {!./resources-impl.Resources} resources
    */
   constructor(id, element, resources) {
     element[RESOURCE_PROP_] = this;
@@ -113,7 +113,7 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
-    /** @private {!Resources} */
+    /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
     /** @private {boolean} */
@@ -156,7 +156,7 @@ export class Resource {
 
    /**
     * Pending change size that was requested but could not be satisfied.
-    * @private {!SizeDef|undefined}
+    * @private {!./resources-impl.SizeDef|undefined}
     */
     this.pendingChangeSize_ = undefined;
 
@@ -291,7 +291,7 @@ export class Resource {
   }
 
   /**
-   * @return {!SizeDef|undefined}
+   * @return {!./resources-impl.SizeDef|undefined}
    */
   getPendingChangeSize() {
     return this.pendingChangeSize_;
@@ -439,6 +439,11 @@ export class Resource {
     const multipler = Math.max(renders, 0);
     let scrollPenalty = 1;
     let distance;
+    // If outside of viewport's x-axis, element is not in viewport.
+    if (viewportBox.right < layoutBox.left ||
+        viewportBox.left > layoutBox.right) {
+      return false;
+    }
     if (viewportBox.bottom < layoutBox.top) {
       // Element is below viewport
       distance = layoutBox.top - viewportBox.bottom;
@@ -633,6 +638,21 @@ export class Resource {
     if (this.element.unlayoutOnPause()) {
       this.unlayout();
     }
+  }
+
+  /**
+   * Calls element's pauseCallback callback.
+   */
+  pauseOnRemove() {
+    if (this.state_ == ResourceState.NOT_BUILT) {
+      return;
+    }
+    this.setInViewport(false);
+    if (this.paused_) {
+      return;
+    }
+    this.paused_ = true;
+    this.element.pauseCallback();
   }
 
   /**

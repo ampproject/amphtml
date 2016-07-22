@@ -17,7 +17,6 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platform} from '../../src/platform';
-import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -218,12 +217,11 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
     sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
-    setModeForTesting({
+    windowApi.AMP_MODE = {
       localDev: false,
       development: false,
-    });
+    };
     const viewportType = new Viewer(windowApi).getViewportType();
-    setModeForTesting(null);
     expect(viewportType).to.equal('natural');
   });
 
@@ -449,6 +447,31 @@ describe('Viewer', () => {
     viewer.postDocumentReady();
     expect(viewer.messageQueue_.length).to.equal(1);
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
+  });
+
+  it('should not request cid', () => {
+    sandbox.stub(viewer, 'isTrustedViewer', () => {
+      return Promise.resolve(false);
+    });
+    sandbox.stub(viewer, 'sendMessage', () => {
+      return Promise.reject('should not be requested');
+    });
+    return viewer.getBaseCid().then(cid => {
+      expect(cid).to.be.undefined;
+    });
+  });
+
+  it('should request cid for trusted viewer', () => {
+    sandbox.stub(viewer, 'isTrustedViewer', () => {
+      return Promise.resolve(true);
+    });
+    sandbox.stub(viewer, 'sendMessage', name => {
+      expect(name).to.equal('cid');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getBaseCid().then(cid => {
+      expect(cid).to.be.equal('from-viewer');
+    });
   });
 
   it('should dequeue events when deliverer set', () => {

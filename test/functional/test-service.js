@@ -15,6 +15,9 @@
  */
 
 import {
+  fromClass,
+  getExistingServiceForWindow,
+  getExistingServiceForDoc,
   getService,
   getServicePromise,
   getServiceForDoc,
@@ -38,6 +41,7 @@ describe('service', () => {
 
   describe('window singletons', () => {
 
+    let Class;
     let count;
     let factory;
 
@@ -46,6 +50,11 @@ describe('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
+      Class = class {
+        constructor() {
+          this.count = ++count;
+        }
+      };
       resetServiceForTesting(window, 'a');
       resetServiceForTesting(window, 'b');
       resetServiceForTesting(window, 'c');
@@ -68,6 +77,19 @@ describe('service', () => {
       expect(factory.args[1][0]).to.equal(window);
     });
 
+    it('should make instances from class', () => {
+
+      const a1 = fromClass(window, 'a', Class);
+      const a2 = fromClass(window, 'a', Class);
+      expect(a1).to.equal(a2);
+      expect(a1.count).to.equal(1);
+
+      const b1 = fromClass(window, 'b', Class);
+      const b2 = fromClass(window, 'b', Class);
+      expect(b1).to.equal(b2);
+      expect(b1).to.not.equal(a1);
+    });
+
     it('should work without a factory', () => {
       const c1 = getService(window, 'c', factory);
       const c2 = getService(window, 'c');
@@ -75,10 +97,23 @@ describe('service', () => {
       expect(factory.callCount).to.equal(1);
     });
 
+    it('should return the service when it exists', () => {
+      const c1 = getService(window, 'c', factory);
+      const c2 = getExistingServiceForWindow(window, 'c');
+      expect(c1).to.equal(c2);
+    });
+
+    it('should throw before creation', () => {
+      getService(window, 'another service to avoid NPE', () => {});
+      expect(() => {
+        getExistingServiceForWindow(window, 'c');
+      }).to.throw();
+    });
+
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getService(window, 'not-present');
-      }).to.throw(/Factory not given and service missing not-present/);
+      }).to.throw(/not given and service missing not-present/);
     });
 
     it('should provide a promise that resolves when registered', () => {
@@ -111,13 +146,14 @@ describe('service', () => {
       factory = sandbox.spy(() => {
         return ++count;
       });
+      windowApi = {};
       ampdoc = {
         isSingleDoc: () => false,
-        getWin: () => windowApi,
+        win: windowApi,
       };
       ampdocMock = sandbox.mock(ampdoc);
       const ampdocServiceApi = {getAmpDoc: () => ampdoc};
-      windowApi = {};
+
       getService(windowApi, 'ampdoc', () => ampdocServiceApi);
       node = {nodeType: 1, ownerDocument: {defaultView: windowApi}};
       resetServiceForTesting(windowApi, 'a');
@@ -140,7 +176,9 @@ describe('service', () => {
 
       const b1 = getServiceForDoc(node, 'b', factory);
       const b2 = getServiceForDoc(node, 'b', factory);
+      const b3 = getExistingServiceForDoc(node, 'b');
       expect(b1).to.equal(b2);
+      expect(b1).to.equal(b3);
       expect(b1).to.not.equal(a1);
       expect(factory.callCount).to.equal(2);
       expect(factory.args[1][0]).to.equal(ampdoc);
@@ -153,7 +191,9 @@ describe('service', () => {
 
       const a1 = getServiceForDoc(ampdoc, 'a', factory);
       const a2 = getServiceForDoc(ampdoc, 'a', factory);
+      const a3 = getExistingServiceForDoc(ampdoc, 'a', factory);
       expect(a1).to.equal(a2);
+      expect(a1).to.equal(a3);
       expect(a1).to.equal(1);
       expect(factory.callCount).to.equal(1);
       expect(factory.args[0][0]).to.equal(ampdoc);
@@ -193,7 +233,7 @@ describe('service', () => {
     it('should fail without factory on initial setup', () => {
       expect(() => {
         getServiceForDoc(node, 'not-present');
-      }).to.throw(/Factory not given and service missing not-present/);
+      }).to.throw(/not given and service missing not-present/);
     });
 
     it('should provide a promise that resolves when registered', () => {

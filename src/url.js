@@ -24,7 +24,7 @@ const a = window.document.createElement('a');
 // We cached all parsed URLs. As of now there are no use cases
 // of AMP docs that would ever parse an actual large number of URLs,
 // but we often parse the same one over and over again.
-const cache = Object.create(null);
+const cache = window.UrlCache || (window.UrlCache = Object.create(null));
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -75,6 +75,7 @@ export function parseUrl(url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
+    origin: null,  // Set below.
   };
 
   // Some IE11 specific polyfills.

@@ -325,6 +325,25 @@
       data-target="foo=bar">
   </amp-ad>
 
+  <h2>Widespace 300x50 Ad</h2>
+  <amp-ad width=300 height=50
+      type="widespace"
+      data-sid="93f1a996-52f5-46b4-8dc8-ccd8886a8fbf"
+      layout="responsive"
+      >
+  </amp-ad>
+
+  <h2>Widespace 300x300 no-ad fallback</h2>
+  <amp-ad width=300 height=300
+      type="widespace"
+      data-sid="911b4848-ef76-4ec1-9713-517d1c91eefb"
+      layout="responsive"
+      >
+      <div fallback>
+        <p>You got lucky! We have no ad to show to you!</p>
+      </div>
+  </amp-ad>
+
   <h2>SOVRN</h2>
   <amp-ad width=300 height=250
       type="sovrn"
@@ -463,9 +482,13 @@
       height="50"
       type="microad"
       data-spot="b4bf837c5ddd69758d5ac924d04cf502"
-      data-url="siteUrl"
-      data-referrer="referrerUrl">
+      data-url="${COMPASS_EXT_URL}"
+      data-referrer="${COMPASS_EXT_REF}"
+      data-ifa="${COMPASS_EXT_IFA}"
+      data-appid="${COMPASS_EXT_APPID}"
+      data-geo="${COMPASS_EXT_GEO}">
   </amp-ad>
+
 
   <h2>YahooJP YDN</h2>
   <amp-ad width="300"
@@ -508,6 +531,41 @@
     layout="responsive"
     data-premium
     data-request-url="http://localhost:9876">
+  </amp-ad>
+
+  <h2>Kargo</h2>
+  <amp-ad
+    width=300
+    height=250
+    type="kargo"
+    data-site="_tt9gZ3qxCc2RCg6CADfLAAFR"
+    data-slot="_vypM8bkVCf"
+    data-options='{"targetParams":{"AD_ID":"test-middle","ad_id":"test-middle"}}'>
+  </amp-ad>
+
+  
+  <h2>PulsePoint 300x250</h2>
+  <amp-ad width=300 height=250
+      type="pulsepoint"
+      data-pid="512379"
+      data-tagid="472988">
+  </amp-ad>
+
+  <h2>PulsePoint Header Bidding 300x250</h2>
+  <amp-ad width=300 height=250
+      type="pulsepoint"
+      data-pid="521732"
+      data-tagid="76835"
+      data-tagtype="hb"
+      data-timeout="1000"
+      data-slot="/1066621/ExchangeTech_Prebid_AdUnit">
+  </amp-ad>
+
+  <h2>AMoAd</h2>
+  <amp-ad width="300"
+    height="250"
+    type="amoad"
+    data-sid="62056d310111552c951d19c06bfa71e16e615e39493eceff667912488bc576a6">
   </amp-ad>
 
 </body>

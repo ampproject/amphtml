@@ -33,6 +33,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
+import {amoad} from '../ads/amoad';
 import {plista} from '../ads/plista';
 import {criteo} from '../ads/criteo';
 import {doubleclick} from '../ads/google/doubleclick';
@@ -53,6 +54,7 @@ import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {widespace} from '../ads/widespace';
 import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
@@ -78,6 +80,8 @@ import {chargeads} from '../ads/chargeads';
 import {nend} from '../ads/nend';
 import {adgeneration} from '../ads/adgeneration';
 import {genieessp} from '../ads/genieessp';
+import {kargo} from '../ads/kargo';
+import {pulsepoint} from '../ads/pulsepoint';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -98,6 +102,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('aduptech', aduptech);
+register('amoad', amoad);
 register('plista', plista);
 register('criteo', criteo);
 register('doubleclick', doubleclick);
@@ -117,6 +122,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('widespace', widespace);
 register('sovrn', sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
@@ -142,6 +148,8 @@ register('chargeads', chargeads);
 register('nend', nend);
 register('adgeneration', adgeneration);
 register('genieessp', genieessp);
+register('kargo', kargo);
+register('pulsepoint', pulsepoint);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -214,6 +222,13 @@ function masterSelection(type) {
 }
 
 /**
+ * @return {boolean} Whether this is the master iframe.
+ */
+function isMaster() {
+  return window.context.master == window;
+}
+
+/**
  * Draws an embed, optionally synchronously, to the DOM.
  * @param {function(!Object, function(!Object))} opt_configCallback If provided
  *     will be invoked with two arguments:
@@ -237,8 +252,15 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    window.context.master = masterSelection(data.type);
-    window.context.isMaster = window.context.master == window;
+    // Define master related properties to be lazily read.
+    Object.defineProperties(window.context, {
+      master: {
+        get: () => masterSelection(data.type),
+      },
+      isMaster: {
+        get: isMaster,
+      },
+    });
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
@@ -271,6 +293,8 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
+    // Subscribe to page visibility updates.
+    nonSensitiveDataPostMessage('send-embed-state');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);

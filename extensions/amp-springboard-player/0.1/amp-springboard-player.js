@@ -132,6 +132,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
     this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
     loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {
