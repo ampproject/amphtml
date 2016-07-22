@@ -20,6 +20,7 @@ import {dev} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'Crypto';
+const FALLBACK_MSG = 'SubtleCrypto failed, fallback to closure lib.';
 
 export class Crypto {
 
@@ -43,12 +44,16 @@ export class Crypto {
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
                 e => {
-                  dev.info(TAG, 'Crypto digest promise has rejected, ' +
-                      'fallback to closure lib.', e);
+                  // Chrome doesn't allow the usage of Crypto API under
+                  // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
+                  if (e.message.indexOf('secure origin') < 0) {
+                    // Log unexpected fallback.
+                    dev.error(TAG, FALLBACK_MSG, e);
+                  }
                   return lib.sha384(input);
                 });
       } catch (e) {
-        dev.info(TAG, 'Crypto digest has thrown, fallback to closure lib.', e);
+        dev.error(TAG, FALLBACK_MSG, e);
       }
     }
     return Promise.resolve(lib.sha384(input));
