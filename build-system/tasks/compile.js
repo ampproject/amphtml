@@ -178,7 +178,7 @@ function compile(entryModuleFilename, outputDir,
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
-      continueWithWarnings: true,
+      continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
         compilation_level: 'SIMPLE_OPTIMIZATIONS',
@@ -203,6 +203,9 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        // Turn off warning for "Unknown @define" since we use define to pass
+        // args such as FORTESTING to our runner.
+        jscomp_off: 'unknownDefines',
         define: [],
         hide_warnings_for: [
           'node_modules/',
