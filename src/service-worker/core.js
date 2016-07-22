@@ -250,57 +250,57 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const clientId = event.clientId;
   const url = request.url;
-  let response;
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
-  if (clientId && isCdnJsFile(url)) {
-    const requestFile = basename(url);
-    const requestVersion = ampVersion(url);
+  if (!clientId || !isCdnJsFile(url)) {
+    event.respondWith(fetch(request));
+    return;
+  }
 
-    // What version do we have for this client?
-    response = Promise.resolve(clientsMap[clientId]).then(version => {
-      // If we already registered this client, we must always use the same
-      // version.
+  const requestFile = basename(url);
+  const requestVersion = ampVersion(url);
+
+  // What version do we have for this client?
+  const response = Promise.resolve(clientsMap[clientId]).then(version => {
+    // If we already registered this client, we must always use the same
+    // version.
+    if (version) {
+      return version;
+    }
+
+    // If not, do we have this version cached?
+    return getCachedVersion(requestFile, requestVersion).then(version => {
+      // We have a cached version! Serve it up!
       if (version) {
         return version;
       }
 
-      // If not, do we have this version cached?
-      return getCachedVersion(requestFile, requestVersion).then(version => {
-        // We have a cached version! Serve it up!
-        if (version) {
-          return version;
-        }
-
-        // Tears! We have nothing cached, so we'll have to make a request.
-        return requestVersion;
-      });
-    }).then(version => {
-      const versionedRequest = version === requestVersion ?
-          request :
-          new Request(versionedUrl(url, version), request);
-      clientsMap[clientId] = version;
-
-      return cache.match(versionedRequest).then(response => {
-        // Cache hit!
-        if (response) {
-          // Now, was it because we served an old cached version or because
-          // they requested this exact version; If we served an old version,
-          // let's get the new one.
-          if (versionedRequest !== request) {
-            fetchAndCache(request);
-          }
-
-          return response;
-        }
-
-        // If not, let's fetch and cache the request.
-        return fetchAndCache(versionedRequest);
-      });
+      // Tears! We have nothing cached, so we'll have to make a request.
+      return requestVersion;
     });
-  } else {
-    response = fetch(request);
-  }
+  }).then(version => {
+    const versionedRequest = version === requestVersion ?
+        request :
+        new Request(versionedUrl(url, version), request);
+    clientsMap[clientId] = version;
+
+    return cache.match(versionedRequest).then(response => {
+      // Cache hit!
+      if (response) {
+        // Now, was it because we served an old cached version or because
+        // they requested this exact version; If we served an old version,
+        // let's get the new one.
+        if (versionedRequest !== request) {
+          fetchAndCache(request);
+        }
+
+        return response;
+      }
+
+      // If not, let's fetch and cache the request.
+      return fetchAndCache(versionedRequest);
+    });
+  });
 
   // You must always respond with a Response.
   event.respondWith(response);
