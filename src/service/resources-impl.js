@@ -433,7 +433,9 @@ export class Resources {
    * @package
    */
   setOwner(element, owner) {
-    Resource.setOwner(element, owner);
+    this.discoverResourcesForElement_(element, resource => {
+      resource.setOwner(owner);
+    });
   }
 
   /**
