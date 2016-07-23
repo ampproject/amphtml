@@ -38,7 +38,6 @@ export class AmpVizVega extends AMP.BaseElement {
 
     /** @private {?string} */
     this._specUrl = null;
-
   }
 
   /** @override */
