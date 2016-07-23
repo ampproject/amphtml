@@ -169,7 +169,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!HTMLDocument>}
+   * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
     const init = opt_init || {};
@@ -417,10 +417,10 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
     /** @type {number} */
@@ -463,7 +463,7 @@ export class FetchResponse {
 
   /**
    * Reads the xhr responseXML.
-   * @return {!Promise<!HTMLDocument>}
+   * @return {!Promise<!Document>}
    * @private
    */
   document_() {
@@ -495,10 +495,10 @@ export class FetchResponse {
  */
 class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
   }
 
