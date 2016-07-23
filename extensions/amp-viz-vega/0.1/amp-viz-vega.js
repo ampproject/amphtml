@@ -95,7 +95,7 @@ export class AmpVizVega extends AMP.BaseElement {
     if (inlineSpec && this._specUrl) {
       const err = this.getName_() + ' both the spec-url attribute and a valid' +
         '<script type="application/json"> child were found for Vega spec.' +
-        'only one is allowed.';
+        'Only one way of specifying the spec is allowed.';
       return Promise.reject(new Error(err));
     }
 
@@ -113,7 +113,10 @@ export class AmpVizVega extends AMP.BaseElement {
     }
   }
 
-  /** @private */
+  /**
+   * @return {?string}
+   * @private
+   */
   getInlineSpec() {
     let inlineConfig;
 
