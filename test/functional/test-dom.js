@@ -639,4 +639,24 @@ describe('DOM', () => {
       expect(res).to.be.null;
     });
   });
+
+  describe('isJsonScriptTag', () => {
+    it('should return true for <script type="application/json">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'application/json');
+      expect(dom.isJsonScriptTag(element)).to.be.true;
+    });
+
+    it('should return false for <script type="text/javascript">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'text/javascript');
+      expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+
+    it('should return false for <div type="application/json">', () => {
+      const element = document.createElement('div');
+      element.setAttribute('type', 'application/json');
+      expect(dom.isJsonScriptTag(element)).to.be.false;
+    });
+  });
 });

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {isJsonScriptTag, childElementsByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {toggle} from '../../../src/style';
@@ -28,8 +30,15 @@ export class AmpVizVega extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @priasdvate {?Element} */
+    /** @private {?Element} */
     this.container_ = null;
+
+    /** @private {?JSONType} */
+    this._spec = null;
+
+    /** @private {?string} */
+    this._specUrl = null;
+
   }
 
   /** @override */
@@ -46,10 +55,10 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    /** @private @const {!HTMLDivElement} */
     this.container_ = this.element.ownerDocument.createElement('div');
-    this.applyFillContent(this.container_, true);
+    this._specUrl = this.element.getAttribute('spec-url');
 
+    this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
   }
 
@@ -65,14 +74,90 @@ export class AmpVizVega extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.initialize_();
+    return this.loadSpec_().then(() => this.renderGraph_());
+  }
 
-    return new Promise((resolve, reject) => {
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  loadSpec_() {
+    if (this._spec) {
+      return Promise.resolve();
+    }
+    const inlineSpec = this.getInlineSpec();
+    if (!inlineSpec && !this._specUrl) {
+      const err = this.getName_() + ' neither the spec-url attribute nor a' +
+        'valid <script type="application/json"> child was found for Vega spec';
+      return Promise.reject(new Error(err));
+    }
+
+    if (inlineSpec && this._specUrl) {
+      const err = this.getName_() + ' both the spec-url attribute and a valid' +
+        '<script type="application/json"> child were found for Vega spec.' +
+        'only one is allowed.';
+      return Promise.reject(new Error(err));
+    }
+
+    if (this._specUrl) {
+      // TODO(aghassemi): Fetch and validate the spec file.
+      this._spec = {
+        'url': this._specUrl,
+      };
+      return Promise.resolve();
+    }
+
+    if (inlineSpec) {
+      this._spec = inlineSpec;
+      return Promise.resolve();
+    }
+  }
+
+  /** @private */
+  getInlineSpec() {
+    let inlineConfig;
+
+    const scripts = childElementsByTag(this.element, 'SCRIPT');
+    if (scripts.length == 1) {
+      const child = scripts[0];
+      if (isJsonScriptTag(child)) {
+        inlineConfig = tryParseJson(scripts[0].textContent, err => {
+          user.error(this.getName_(), 'spec could not be ' +
+            'parsed. Is it in a valid JSON format?', err);
+        });
+      } else {
+        user.error(this.getName_(), 'spec should ' +
+          'be put in a <script type="application/json" tag.');
+      }
+    }
+    return inlineConfig;
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  renderGraph_() {
+    //TODO(aghassemi): Replace with actual rendering implementation.
+    return new Promise((resolve, unused) => {
       setTimeout(() => {
-        let textNode = this.element.ownerDocument.createTextNode('Hello Vega!');
+        const text = 'To be replaced with Vega graph with spec: ' +
+          JSON.stringify(this._spec);
+        const textNode = this.element.ownerDocument.createTextNode(text);
         this.container_.appendChild(textNode);
         resolve();
       }, 1000);
     });
+  }
+
+  /**
+   * @return {string} Returns a string to identify this tag. May not be unique
+   * if the element id is not unique.
+   * @private
+   */
+  getName_() {
+    return 'amp-viz-vega ' +
+      (this.element.getAttribute('id') || '<unknown id>');
   }
 }
 
