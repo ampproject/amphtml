@@ -15,7 +15,6 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
-import {ElementStub} from '../../src/element-stub';
 import {
   Extensions,
   addDocFactoryToExtension,
