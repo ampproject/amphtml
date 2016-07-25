@@ -69,4 +69,3 @@ purposes only.  It does not exist for `amp-ad` or A4A in general.
 _Note 2_: Currently, there is no equivalent "fake" network implementation for
 the delayed iframe (a.k.a., "3p") ad rendering pathway.  So attempts to use
 fake impl _without_ the `data-use-a4a` parameter will fail.
- 
