@@ -278,19 +278,30 @@ export class AmpA4A extends AMP.BaseElement {
           return Promise.reject(cancellation());
         }
         if (fetchResponse && fetchResponse.arrayBuffer) {
-          return fetchResponse.arrayBuffer().then(
-            bytes => {
-              if (promiseId != this.promiseId_) {
-                return Promise.reject(cancellation());
-              }
-              return this.validateAdResponse_(fetchResponse, bytes)
-                .then(valid => {
+          return fetchResponse.arrayBuffer().then(bytes => {
+            if (promiseId != this.promiseId_) {
+              return Promise.reject(cancellation());
+            }
+            return this.extractCreativeAndSignature(
+                bytes, fetchResponse.headers).then(responseParts => {
                   if (promiseId != this.promiseId_) {
                     return Promise.reject(cancellation());
                   }
-                  return this.maybeRenderAmpAd_(valid, bytes);
+                  return this.validateAdResponse_(
+                      responseParts.creative, responseParts.signature)
+                      .then(valid => {
+                        if (promiseId != this.promiseId_) {
+                          return Promise.reject(cancellation());
+                        }
+                        // Note: It's critical that #maybeRenderAmpAd_ be called
+                        // on precisely the same creative that was validated
+                        // via #validateAdResponse_.  See GitHub issue
+                        // https://github.com/ampproject/amphtml/issues/4187
+                        return this.maybeRenderAmpAd_(valid,
+                            responseParts.creative);
+                      });
                 });
-            });
+          });
         } else {
           return Promise.resolve(false);
         }
@@ -462,30 +473,27 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Try to validate creative is AMP through crypto signature.
-   * @param {!FetchResponse} fetchResponse
-   * @param {!ArrayBuffer} bytes
+   * @param {!ArrayBuffer} creative
+   * @param {?ArrayBuffer} signature
    * @return {!Promise<boolean>}
    * @private
    */
-  validateAdResponse_(fetchResponse, bytes) {
-    return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(response => {
-          // Validate when we have a signature and we have native crypto.
-          if (response.signature && verifySignatureIsAvailable()) {
-            try {
-              // Among other things, the signature might not be proper base64.
-              // TODO(a4a-cam): This call used to be missing the conversion
-              // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
-              // any unit tests to fail, either locally or on Travis.  That
-              // indicates that the tests are too weak or aren't reporting
-              // correctly.  Check out and fix the tests.
-              return verifySignature(
-                  new Uint8Array(response.creative),
-                  response.signature, publicKeyInfos);
-            } catch (e) {}
-          }
-          return false;
-        });
+  validateAdResponse_(creative, signature) {
+    // Validate when we have a signature and we have native crypto.
+    if (signature && verifySignatureIsAvailable()) {
+      try {
+        // Among other things, the signature might not be proper base64.
+        // TODO(a4a-cam): This call used to be missing the conversion
+        // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
+        // any unit tests to fail, either locally or on Travis.  That
+        // indicates that the tests are too weak or aren't reporting
+        // correctly.  Check out and fix the tests.
+        return verifySignature(
+            new Uint8Array(creative), signature, publicKeyInfos);
+      } catch (e) {
+      }
+    }
+    return Promise.resolve(false);
   }
 
   /**
