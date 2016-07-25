@@ -176,9 +176,6 @@ export const adPreconnect = {
   adtech: [
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
-  ],
-  yieldone: [
-    'https://img.ak.impact-ad.jp'
   ]
 };
 
