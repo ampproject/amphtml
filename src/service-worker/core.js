@@ -179,7 +179,11 @@ function fetchAndCache(request) {
             return;
           }
 
-          cache.delete(versionedUrl(url, version));
+          const deleteUrl = versionedUrl(url, version);
+          // We only want to delete RTV files.
+          if (url !== deleteUrl) {
+            cache.delete(deleteUrl);
+          }
         });
       });
     }
@@ -200,10 +204,9 @@ function fetchAndCache(request) {
  * @return {!Promise<string>} Not really a promise, but a Promise-like.
  */
 function getCachedVersion(requestFile, requestVersion) {
-  const id = [requestFile, requestVersion];
-
   return db.transaction('js-files', 'readonly').run(transaction => {
     const files = transaction.objectStore('js-files');
+    const id = [requestFile, requestVersion];
 
     // First check if we have this exact file-version.
     return files.index('fileVersions').get(id).then(file => {
