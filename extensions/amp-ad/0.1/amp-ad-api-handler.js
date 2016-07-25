@@ -132,6 +132,10 @@ export class AmpAdApiHandler {
       if (!this.iframe_) {
         return;
       }
+      if (this.baseInstance_.renderStartResolve_) {
+        this.baseInstance_.renderStartResolve_();
+        this.baseInstance_.renderStartResolve_ = null;
+      }
       this.iframe_.style.visibility = '';
     }, this.is3p_);
     this.viewer_.onVisibilityChanged(() => {
