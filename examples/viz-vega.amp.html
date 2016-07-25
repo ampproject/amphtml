@@ -1,6 +1,5 @@
 <!doctype html>
 <html ⚡>
-
 <head>
   <meta charset="utf-8">
   <title>Vega Visualization examples</title>
@@ -9,90 +8,23 @@
   <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <script async custom-element="amp-viz-vega" src="https://cdn.ampproject.org/v0/amp-viz-vega-0.1.js"></script>
-  <style amp-boilerplate>
-    body {
-      -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
-      animation: -amp-start 8s steps(1, end) 0s 1 normal both
-    }
-
-    @-webkit-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-      to {
-        visibility: visible
-      }
-    }
-
-    @-moz-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-      to {
-        visibility: visible
-      }
-    }
-
-    @-ms-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-      to {
-        visibility: visible
-      }
-    }
-
-    @-o-keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-      to {
-        visibility: visible
-      }
-    }
-
-    @keyframes -amp-start {
-      from {
-        visibility: hidden
-      }
-      to {
-        visibility: visible
-      }
-    }
-
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <style amp-custom>
     amp-lightbox amp-viz-vega {
       background-color: yellow;
     }
   </style>
-  <noscript>
-    <style amp-boilerplate>
-      body {
-        -webkit-animation: none;
-        -moz-animation: none;
-        -ms-animation: none;
-        animation: none
-      }
-    </style>
-  </noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
-
 <body>
-  <h2>Vega Visualization</h2>
+  <h1>Vega Visualization</h1>
 
-  <button onClick="AMP.toggleExperiment('amp-viz-vega'); location.reload();">
-    Toggle Experiment
-  </button>
-
-  <h2>Fixed size with remote spec</h2>
-  <amp-viz-vega width="400" height="200" layout="fixed" spec-url="vega-data/bar.json">
+  <h2>Fixed size with remote data</h2>
+  <amp-viz-vega width="400" height="200" layout="fixed" data-url="vega-data/bar.json">
   </amp-viz-vega>
 
-  <h2>Responsive size with inline spec</h2>
+  <h2>Responsive size with inline data</h2>
   <amp-viz-vega width="400" height="200" layout="responsive">
-
     <!-- http://vega.github.io/vega-editor/index.html?mode=vega&spec=arc -->
     <script type="application/json">
         {
@@ -158,13 +90,12 @@
     </amp-img>
   </amp-viz-vega>
 
-
   <h2>Responsive size inside lightbox</h2>
   <button on="tap:vega-lightbox.activate">
   Open Lightbox
   </button>
   <amp-lightbox id="vega-lightbox" layout="nodisplay">
-    <amp-viz-vega width="400" height="200" layout="responsive" spec-url="vega-data/bar.json">
+    <amp-viz-vega width="400" height="200" layout="responsive" data-url="vega-data/bar.json">
     </amp-viz-vega>
   </amp-lightbox>
 </body>

@@ -18,8 +18,8 @@ import {isJsonScriptTag, childElementsByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
-import {toggle} from '../../../src/style';
+import {user} from '../../../src/log';
+import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
@@ -34,10 +34,10 @@ export class AmpVizVega extends AMP.BaseElement {
     this.container_ = null;
 
     /** @private {?JSONType} */
-    this._spec = null;
+    this.data_ = null;
 
     /** @private {?string} */
-    this._specUrl = null;
+    this.dataUrl_ = null;
   }
 
   /** @override */
@@ -55,7 +55,7 @@ export class AmpVizVega extends AMP.BaseElement {
     }
 
     this.container_ = this.element.ownerDocument.createElement('div');
-    this._specUrl = this.element.getAttribute('spec-url');
+    this.dataUrl_ = this.element.getAttribute('data-url');
 
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
@@ -63,60 +63,57 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    if (!isExperimentOn(this.win, EXPERIMENT)) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
-      toggle(this.element, false);
-      return;
-    }
+    user.assert(isExperimentOn(this.win, EXPERIMENT),
+      `Experiment ${EXPERIMENT} disabled`);
   }
 
   /** @override */
   layoutCallback() {
     this.initialize_();
-    return this.loadSpec_().then(() => this.renderGraph_());
+    return this.loadData_().then(() => this.renderGraph_());
   }
 
   /**
    * @return {!Promise}
    * @private
    */
-  loadSpec_() {
-    if (this._spec) {
+  loadData_() {
+    if (this.data_) {
       return Promise.resolve();
     }
-    const inlineSpec = this.getInlineSpec();
-    if (!inlineSpec && !this._specUrl) {
-      const err = this.getName_() + ' neither the spec-url attribute nor a' +
-        'valid <script type="application/json"> child was found for Vega spec';
-      return Promise.reject(new Error(err));
+    const inlineData = this.getInlineData();
+    if (!inlineData && !this.dataUrl_) {
+      const err = this.getName_() + ' neither `data-url` attribute nor a ' +
+        'valid <script type="application/json"> child was found for Vega data';
+      return Promise.reject(user.createError(err));
     }
 
-    if (inlineSpec && this._specUrl) {
-      const err = this.getName_() + ' both the spec-url attribute and a valid' +
-        '<script type="application/json"> child were found for Vega spec.' +
-        'Only one way of specifying the spec is allowed.';
-      return Promise.reject(new Error(err));
+    if (inlineData && this.dataUrl_) {
+      const err = this.getName_() + ' both `data-url` attribute and a valid ' +
+        '<script type="application/json"> child were found for Vega data. ' +
+        'Only one way of specifying the data is allowed.';
+      return Promise.reject(user.createError(err));
     }
 
-    if (this._specUrl) {
-      // TODO(aghassemi): Fetch and validate the spec file.
-      this._spec = {
-        'url': this._specUrl,
+    if (this.dataUrl_) {
+      // TODO(aghassemi): Fetch and validate the data file.
+      this.data_ = {
+        'url': this.dataUrl_,
       };
       return Promise.resolve();
     }
 
-    if (inlineSpec) {
-      this._spec = inlineSpec;
+    if (inlineData) {
+      this.data_ = inlineData;
       return Promise.resolve();
     }
   }
 
   /**
-   * @return {?string}
+   * @return {?string|undefined}
    * @private
    */
-  getInlineSpec() {
+  getInlineData() {
     let inlineConfig;
 
     const scripts = childElementsByTag(this.element, 'SCRIPT');
@@ -124,13 +121,16 @@ export class AmpVizVega extends AMP.BaseElement {
       const child = scripts[0];
       if (isJsonScriptTag(child)) {
         inlineConfig = tryParseJson(scripts[0].textContent, err => {
-          user.error(this.getName_(), 'spec could not be ' +
+          user.error(this.getName_(), 'data could not be ' +
             'parsed. Is it in a valid JSON format?', err);
         });
       } else {
-        user.error(this.getName_(), 'spec should ' +
-          'be put in a <script type="application/json" tag.');
+        user.error(this.getName_(), 'data should ' +
+          'be put in a <script type="application/json"> tag.');
       }
+    } else if (scripts.length > 1) {
+      user.error(this.getName_(), 'more than one' +
+        '<script type="application/json"> tags found. Only one allowed.');
     }
     return inlineConfig;
   }
@@ -140,13 +140,15 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    //TODO(aghassemi): Replace with actual rendering implementation.
+    // TODO(aghassemi): Replace with actual rendering implementation.
     return new Promise((resolve, unused) => {
       setTimeout(() => {
-        const text = 'To be replaced with Vega graph with spec: ' +
-          JSON.stringify(this._spec);
-        const textNode = this.element.ownerDocument.createTextNode(text);
-        this.container_.appendChild(textNode);
+        const text = 'To be replaced with Vega graph with data: ' +
+          JSON.stringify(this.data_);
+        vsyncFor(this.win).mutate(() => {
+          const textNode = this.element.ownerDocument.createTextNode(text);
+          this.container_.appendChild(textNode);
+        });
         resolve();
       }, 1000);
     });

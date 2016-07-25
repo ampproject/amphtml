@@ -127,7 +127,7 @@ const EXPERIMENTS = [
   },
   {
     id: 'amp-viz-vega',
-    name: 'AMP Visualization using Vega grammer',
+    name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
