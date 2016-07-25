@@ -1,4 +1,4 @@
-/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+/* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpAd3PImpl} from './amp-ad-3p-impl';
 import {a4aRegistry} from '../../../ads/_a4a-config';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {extensionsFor} from '../../../src/extensions';
 
 
@@ -65,21 +65,25 @@ export class AmpAd extends AMP.BaseElement {
     }
     // TODO(tdrl): Check amp-ad registry to see if they have this already.
     if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.win, this.element)) {
+        !a4aRegistry[type](this.getWin(), this.element)) {
       // Network either has not provided any A4A implementation or the
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
       return new AmpAd3PImpl(this.element);
     }
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
-    // as following:
-    /*
-      const extensions = extensionsFor(this.win);
-      return extensions.loadElementClass(extensionTag).then(ctor => {
+    const extensionTagName = networkImplementationTag(type);
+    this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
+    return extensionsFor(this.getWin()).loadElementClass(extensionTagName)
+      .then(ctor => {
         return new ctor(this.element);
+      }).catch(error => {
+        // Report error and fallback to 3p
+        user.error(
+          this.element.tagName,
+          'Unable to load ad implementation for type ', type,
+          ', falling back to 3p, error: ', error);
+        return new AmpAd3PImpl(this.element);
       });
-     */
-    return null;
   }
 
   /** @override */
@@ -89,20 +93,9 @@ export class AmpAd extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // This is only called for a4a. All other cases are redirected to
-    // `AmpAd3PImpl` in `upgradeCallback`.
-    // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`.
-    const type = dev.assert(this.element.getAttribute('type'),
-        'Required attribute type');
-    // Note: The loadExtension method will pick the version number.
-    // If we ever reach a point at which there are different extensions with
-    // different version numbers at play simultaneously, we'll have to make sure
-    // that the loader can handle the case.
-    const extensionTag = networkImplementationTag(type);
-    const newChild = this.element.ownerDocument.createElement(extensionTag);
-    extensionsFor(this.win).loadExtension(extensionTag);
-    copyAttributes(this.element, newChild);
-    this.element.appendChild(newChild);
+    // This is only called when no type was set on the element and thus
+    // upgrade element fell through.
+    dev.assert(this.element.getAttribute('type'), 'Required attribute type');
   }
 }
 

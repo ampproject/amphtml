@@ -19,6 +19,7 @@ import {a4aRegistry} from '../../../../ads/_a4a-config';
 import {AmpAd} from '../amp-ad';
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {childElement} from '../../../../src/dom';
+import {extensionsFor} from '../../../../src/extensions';
 import * as sinon from 'sinon';
 
 describe('A4A loader', () => {
@@ -47,7 +48,7 @@ describe('A4A loader', () => {
 
     describe(tag, () => {
 
-      describe('#buildCallback', () => {
+      describe('#upgradeCallback', () => {
         it('falls back to 3p for unregistered type', () => {
           return createIframePromise().then(fixture => {
             const doc = fixture.doc;
@@ -89,33 +90,62 @@ describe('A4A loader', () => {
         });
       });
 
-      it('adds network-specific child for registered, A4A type', () => {
+      it('upgrades to registered, A4A type network-specific element', () => {
         return createIframePromise().then(fixture => {
           const doc = fixture.doc;
+          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
           a4aRegistry['zort'] = function() {
             return true;
           };
           const element = doc.createElement(tag);
           element.setAttribute('type', 'zort');
-          element.setAttribute('width', '300');
-          element.setAttribute('height', '200');
           doc.body.appendChild(element);
+          const zortInstance = {};
+          const zortConstructor = function() { return zortInstance; };
+          extensionsMock.expects('loadElementClass')
+            .withExactArgs('amp-ad-network-zort-impl')
+            .returns(Promise.resolve(zortConstructor)).once();
           const handler = new AmpAd(element);
-          expect(handler.upgradeCallback()).to.be.null;
-          handler.buildCallback();
-          const expectedChild = childElement(element,
-              c => {
-                return c.tagName.indexOf('ZORT') >= 0;
-              });
-          expect(expectedChild).to.not.be.null;
-          expect(childElement(element,
-              c => {
-                return c.tagName === 'AMP-AD-3P-IMPL';
-              })).to.be.null;
-          expect(expectedChild).to.not.be.null;
-          expect(expectedChild.getAttribute('type')).to.equal('zort');
-          expect(expectedChild.getAttribute('width')).to.equal('300');
-          expect(expectedChild.getAttribute('height')).to.equal('200');
+          const upgradedElementPromise = handler.upgradeCallback();
+          extensionsMock.verify();
+          expect(upgradedElementPromise).not.to.be.null;
+          expect(element.getAttribute(
+            'data-a4a-upgrade-type', 'amp-ad-network-zort-impl'));
+          return upgradedElementPromise.then(baseElement => {
+            expect(
+              doc.head.querySelector('script[src*="amp-ad-network-zort-impl"]'))
+              .to.not.be.null;
+            expect(baseElement).to.equals(zortInstance);
+          });
+        });
+      });
+
+      it('falls back to 3p impl on upgrade with loadElementClass error', () => {
+        return createIframePromise().then(fixture => {
+          const doc = fixture.doc;
+          const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
+          a4aRegistry['zort'] = function() {
+            return true;
+          };
+          const element = doc.createElement(tag);
+          element.setAttribute('type', 'zort');
+          doc.body.appendChild(element);
+          extensionsMock.expects('loadElementClass')
+            .withExactArgs('amp-ad-network-zort-impl')
+            .returns(Promise.resolve(new Error('I failed!')))
+            .once();
+          const handler = new AmpAd(element);
+          const upgradedElementPromise = handler.upgradeCallback();
+          extensionsMock.verify();
+          expect(upgradedElementPromise).not.to.be.null;
+          expect(element.getAttribute(
+            'data-a4a-upgrade-type', 'amp-ad-network-zort-impl'));
+          return upgradedElementPromise.then(baseElement => {
+            expect(
+              doc.head.querySelector('script[src*="amp-ad-network-zort-impl"]'))
+              .to.not.be.null;
+            expect(baseElement instanceof AmpAd3PImpl).to.be.true;
+          });
         });
       });
 
@@ -131,8 +161,7 @@ describe('A4A loader', () => {
           element.setAttribute('height', '200');
           doc.body.appendChild(element);
           const handler = new AmpAd(element);
-          expect(handler.upgradeCallback()).to.be.null;
-          handler.buildCallback();
+          expect(handler.upgradeCallback()).to.not.be.null;
           expect(childElement(doc.head,
               c => {
                 return c.tagName == 'SCRIPT' &&
