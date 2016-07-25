@@ -326,7 +326,7 @@ describe('IntersectionObserver', () => {
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 
-  it('should not send intersection when element is removed from DOM', () => {
+  it('should not send intersection after destroy is called', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
@@ -334,17 +334,14 @@ describe('IntersectionObserver', () => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
     });
-    ioInstance.clientWindows_ = [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();
-    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(messages).to.have.length(1);
-    clock.tick(98);
-    ioInstance.iframe_ = null;
-    clock.tick(5);
     ioInstance.fire();
-    expect(ioInstance.pendingChanges_).to.have.length(1);
-    expect(messages).to.have.length(1);
-    clock.tick(100);
+    clock.tick(50);
+    ioInstance.destroy();
+    clock.tick(50);
     expect(messages).to.have.length(1);
   });
 });

@@ -208,10 +208,6 @@ export class IntersectionObserver extends Observable {
    * @private
    */
   flush_() {
-    if (!this.iframe_) {
-      return;
-    }
-
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;
@@ -219,5 +215,13 @@ export class IntersectionObserver extends Observable {
     // Note that SubscribeApi multicasts the update to all interested windows.
     this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
     this.pendingChanges_.length = 0;
+  }
+
+  /**
+   * Provice a function to clear timeout before set this intersection to null.
+   */
+  destroy() {
+    timer.cancel(this.flushTimeout_);
+    this.flushTimeout_ = 0;
   }
 }
