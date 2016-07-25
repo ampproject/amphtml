@@ -34,7 +34,8 @@ export function installCacheServiceWorker(win) {
     if (!('serviceWorker' in navigator)) {
       return;
     }
-    if (!getMode().isLocalDev || win.location.hostname !== 'cdn.ampproject.org') {
+    if (!getMode().isLocalDev ||
+        win.location.hostname !== 'cdn.ampproject.org') {
       return;
     }
     const base = calculateScriptBaseUrl(win.location.pathname,
