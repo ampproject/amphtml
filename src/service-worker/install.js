@@ -34,12 +34,12 @@ export function installCacheServiceWorker(win) {
     if (!('serviceWorker' in navigator)) {
       return;
     }
-    if (!getMode().isLocalDev ||
+    if (!getMode().localDev &&
         win.location.hostname !== 'cdn.ampproject.org') {
       return;
     }
     const base = calculateScriptBaseUrl(win.location.pathname,
-      getMode().isLocalDev, getMode().test);
+      getMode().localDev, getMode().test);
     const url = `${base}/sw.js`;
     navigator.serviceWorker.register(url).then(reg => {
       dev.info(TAG, 'ServiceWorker registration successful: ', reg);

@@ -119,9 +119,7 @@ const dbPromise = indexedDBP.open('cdn-js', 1, {
     if (oldVersion == 0) {
       const files = db.createObjectStore('js-files', {autoIncrement: true});
       files.createIndex('files', 'file');
-      files.createIndex('fileVersions', {
-        keyPath: ['file', 'version'],
-      });
+      files.createIndex('fileVersions', ['file', 'version']);
     }
   },
 }).then(result => {
@@ -202,10 +200,7 @@ function fetchAndCache(request) {
  * @return {!Promise<string>} Not really a promise, but a Promise-like.
  */
 function getCachedVersion(requestFile, requestVersion) {
-  const id = {
-    file: requestFile,
-    version: requestVersion,
-  };
+  const id = [requestFile, requestVersion];
 
   return db.transaction('js-files', 'readonly').run(transaction => {
     const files = transaction.objectStore('js-files');
@@ -214,7 +209,7 @@ function getCachedVersion(requestFile, requestVersion) {
     return files.index('fileVersions').get(id).then(file => {
       // We have it cached!
       if (file) {
-        return file.requestVersion;
+        return file.version;
       }
 
       // Do we have any versions of this file cached?
