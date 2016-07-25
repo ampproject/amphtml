@@ -244,6 +244,7 @@ self.addEventListener('install', install => {
 // My assumptions:
 //   - Doc requests one uniform AMP release version for all files, anything
 //     else is malarkey.
+//   - The requested version is always the newest AMP version.
 self.addEventListener('fetch', event => {
   const request = event.request;
   const clientId = event.clientId;
