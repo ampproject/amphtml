@@ -21,6 +21,10 @@ import {
   doubleclickIsA4AEnabled,
 } from
 '../extensions/amp-ad-network-doubleclick-impl/0.1/doubleclick-a4a-config';
+import {
+  fakeIsA4AEnabled,
+} from
+'../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -35,9 +39,8 @@ import {
  *
  * @type {!Object<!string, !function(!Window, !Element): boolean>}
  */
-// TODO(bobcassels): look into moving this to a different file with fewer
-// dependency restrictions
 export const a4aRegistry = {
   'adsense': adsenseIsA4AEnabled,
   'doubleclick': doubleclickIsA4AEnabled,
+  'fake': fakeIsA4AEnabled,
 };
