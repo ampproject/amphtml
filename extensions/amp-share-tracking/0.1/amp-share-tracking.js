@@ -17,6 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
+import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
@@ -32,16 +33,13 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
   }
 
   /** @override */
   buildCallback() {
-    if (!this.isExperimentOn_()) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return;
-    }
+    user.assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
 
     /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
@@ -50,7 +48,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     /** @private {!Promise<!Object>} */
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
-      this.getOutgoingFragment_(this.vendorHref_)]).then(results => {
+      this.getOutgoingFragment_()]).then(results => {
         dev.fine(TAG, 'incomingFragment: ', results[0]);
         dev.fine(TAG, 'outgoingFragment: ', results[1]);
         return {
@@ -81,13 +79,12 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /**
    * Get an outgoing share-tracking fragment
-   * @param {string=} opt_vendorUrl
    * @return {!Promise<string|undefined>}
    * @private
    */
-  getOutgoingFragment_(opt_vendorUrl) {
-    if (opt_vendorUrl) {
-      return this.getOutgoingFragmentFromVendor_(opt_vendorUrl);
+  getOutgoingFragment_() {
+    if (this.vendorHref_) {
+      return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
     return this.getOutgoingRandomFragment_();
   }
@@ -103,6 +100,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     const postReq = {
       method: 'POST',
       credentials: 'include',
+      requireAmpResponseSourceOrigin: true,
       body: {},
     };
     return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
@@ -110,9 +108,9 @@ export class AmpShareTracking extends AMP.BaseElement {
         return response.fragment;
       }
       user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
-          'have an outgoingFragment value.');
+          'have a fragment value.');
     }).catch(error => {
-      user.error(TAG, error);
+      user.error(TAG, 'The request to share-tracking endpoint failed:' + error);
     });
   }
 
@@ -122,6 +120,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingRandomFragment_() {
+    // TODO(yuxichen): Generate random outgoing fragment
     const randomFragment = 'rAmDoM';
     return Promise.resolve(randomFragment);
   }

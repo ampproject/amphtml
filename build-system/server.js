@@ -116,6 +116,8 @@ app.use('/form/echo-json/post', function(req, res) {
 });
 
 app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.protocol + '://' + req.headers.host);
   res.json({
     fragment: '54321'
   });
