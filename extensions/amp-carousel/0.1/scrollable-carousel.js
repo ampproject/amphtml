@@ -77,11 +77,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  updateViewportState(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
-    if (inViewport) {
-      this.hintControls();
-    }
   }
 
   /** @override */
