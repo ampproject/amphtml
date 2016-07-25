@@ -18,27 +18,13 @@ import {isJsonScriptTag, childElementsByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
 
 export class AmpVizVega extends AMP.BaseElement {
-
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?Element} */
-    this.container_ = null;
-
-    /** @private {?JSONType} */
-    this.data_ = null;
-
-    /** @private {?string} */
-    this.dataUrl_ = null;
-  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -54,7 +40,13 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
+    /** @private {?JSONType} */
+    this.data_ = null;
+
+    /** @private {?Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
+
+    /** @private {?string} */
     this.dataUrl_ = this.element.getAttribute('data-url');
 
     this.applyFillContent(this.container_, true);
@@ -103,14 +95,12 @@ export class AmpVizVega extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    if (inlineData) {
-      this.data_ = inlineData;
-      return Promise.resolve();
-    }
+    this.data_ = dev.assert(inlineData);
+    return Promise.resolve();
   }
 
   /**
-   * @return {?string|undefined}
+   * @return {?JSONObject|undefined}
    * @private
    */
   getInlineData_() {

@@ -647,6 +647,12 @@ describe('DOM', () => {
       expect(dom.isJsonScriptTag(element)).to.be.true;
     });
 
+    it('should return true for <script type="aPPLication/jSon">', () => {
+      const element = document.createElement('script');
+      element.setAttribute('type', 'aPPLication/jSon');
+      expect(dom.isJsonScriptTag(element)).to.be.true;
+    });
+
     it('should return false for <script type="text/javascript">', () => {
       const element = document.createElement('script');
       element.setAttribute('type', 'text/javascript');
