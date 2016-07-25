@@ -81,7 +81,7 @@ export class AmpVizVega extends AMP.BaseElement {
     if (this.data_) {
       return Promise.resolve();
     }
-    const inlineData = this.getInlineData();
+    const inlineData = this.getInlineData_();
     if (!inlineData && !this.dataUrl_) {
       const err = this.getName_() + ' neither `data-url` attribute nor a ' +
         'valid <script type="application/json"> child was found for Vega data';
@@ -113,7 +113,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @return {?string|undefined}
    * @private
    */
-  getInlineData() {
+  getInlineData_() {
     let inlineConfig;
 
     const scripts = childElementsByTag(this.element, 'SCRIPT');
