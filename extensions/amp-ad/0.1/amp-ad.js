@@ -65,7 +65,7 @@ export class AmpAd extends AMP.BaseElement {
     }
     // TODO(tdrl): Check amp-ad registry to see if they have this already.
     if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.getWin(), this.element)) {
+        !a4aRegistry[type](this.win, this.element)) {
       // Network either has not provided any A4A implementation or the
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
@@ -74,7 +74,7 @@ export class AmpAd extends AMP.BaseElement {
     // TODO(dvoytenko): Reimplement a4a via `upgradeCallback`. It will look
     // as following:
     /*
-      const extensions = extensionsFor(this.getWin());
+      const extensions = extensionsFor(this.win);
       return extensions.loadElementClass(extensionTag).then(ctor => {
         return new ctor(this.element);
       });
@@ -100,7 +100,7 @@ export class AmpAd extends AMP.BaseElement {
     // that the loader can handle the case.
     const extensionTag = networkImplementationTag(type);
     const newChild = this.element.ownerDocument.createElement(extensionTag);
-    extensionsFor(this.getWin()).loadExtension(extensionTag);
+    extensionsFor(this.win).loadExtension(extensionTag);
     copyAttributes(this.element, newChild);
     this.element.appendChild(newChild);
   }

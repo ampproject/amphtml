@@ -31,7 +31,6 @@ var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
-var windowConfig = require('./build-system/window-config');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
@@ -148,8 +147,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: windowConfig.getTemplate() +
-        'try{(function(){<%= contents %>})()}catch(e){' +
+    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
         'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
@@ -166,7 +164,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     watch: watch,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
-    wrapper: windowConfig.getTemplate() + '<%= contents %>'
+    wrapper: '<%= contents %>'
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -502,6 +500,23 @@ var activeBundleOperationCount = 0;
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
+  if (options.minify) {
+    function minify() {
+      console.log('Minifying ' + srcFilename);
+      closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
+          options)
+          .then(function() {
+            fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+            if (options.latestName) {
+              fs.copySync(
+                  destDir + '/' + options.minifiedName,
+                  destDir + '/' + options.latestName);
+            }
+          });
+    }
+    minify();
+    return;
+  }
   var bundler = browserify(srcDir + srcFilename, {debug: true})
       .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
   if (options.watch) {
@@ -555,49 +570,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     });
   }
 
-  function minify() {
-    console.log('Minifying ' + srcFilename);
-    closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
-        options)
-        .then(function() {
-          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-          if (options.latestName) {
-            fs.copySync(
-                destDir + '/' + options.minifiedName,
-                destDir + '/' + options.latestName);
-          }
-        });
-  }
-
-  /*
-  Pre closure compiler minification. Add this back, should we have problems
-  with closure.
-  function minify() {
-    console.log('Minifying ' + srcFilename);
-    bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(lazybuild())
-      .pipe($$.uglify({
-        preserveComments: 'some'
-      }))
-      .pipe($$.rename(options.minifiedName))
-      .pipe(lazywrite())
-      .on('end', function() {
-        fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-        if (options.latestName) {
-          fs.copySync(
-              destDir + '/' + options.minifiedName,
-              destDir + '/' + options.latestName);
-        }
-      });
-  }
-  */
-
-  if (options.minify) {
-    minify();
-  } else {
-    rebundle();
-  }
+  rebundle();
 }
 
 /**
@@ -756,7 +729,6 @@ function buildAlp(options) {
     toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
-    includeWindowConfig: true,
     includePolyfills: true,
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,

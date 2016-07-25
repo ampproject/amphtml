@@ -71,51 +71,51 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 ## Supported ad networks
 
-- [A9](../ads/a9.md)
-- [Adblade](../ads/adblade.md)
-- [ADITION](../ads/adition.md)
-- [Adform](../ads/adform.md)
-- [Adman](../ads/adman.md)
-- [AdReactor](../ads/adreactor.md)
-- [AdSense](../ads/google/adsense.md)
-- [AdStir](../ads/adstir.md)
-- [AdTech](../ads/adtech.md)
-- [Ad Generation](../ads/adgeneration.md)
-- [Ad Up Technology](../ads/aduptech.md)
-- [AMoAd](../ads/amoad.md)
-- [AppNexus](../ads/appnexus.md)
-- [Chargeads](../ads/chargeads.md)
-- [Colombia](../ads/colombia.md)
-- [Criteo](../ads/criteo.md)
-- [Dot and Media](../ads/dotandads.md)
-- [Doubleclick](../ads/google/doubleclick.md)
-- [E-Planning](../ads/eplanning.md)
-- [Flite](../ads/flite.md)
-- [GenieeSSP](../ads/genieessp.md)
-- [GMOSSP](../ads/gmossp.md)
-- [I-Mobile](../ads/imobile.md)
-- [Improve Digital](../ads/improvedigital.md)
-- [Industrybrains](../ads/industrybrains.md)
-- [MANTIS](../ads/mantis.md)
-- [MediaImpact](../ads/mediaimpact.md)
-- [Nend](../ads/nend.md)
-- [Open AdStream (OAS)](../ads/openadstream.md)
-- [MicroAd](../ads/microad.md)
-- [OpenX](../ads/openx.md)
-- [plista](../ads/plista.md)
-- [PubMatic](../ads/pubmatic.md)
-- [Revcontent](../ads/revcontent.md)
-- [Rubicon Project](../ads/rubicon.md)
-- [Sharethrough](../ads/sharethrough.md)
-- [Smart AdServer](../ads/smartadserver.md)
-- [Sortable](../ads/sortable.md)
-- [TripleLift](../ads/triplelift.md)
-- [Teads](../ads/teads.md)
-- [Webediads](../ads/webediads.md)
-- [Weborama](../ads/weborama.md)
-- [Yieldbot](../ads/yieldbot.md)
-- [Yieldmo](../ads/yieldmo.md)
-- [YahooJP](../ads/yahoojp.md)
+- [A9](../../ads/a9.md)
+- [Adblade](../../ads/adblade.md)
+- [ADITION](../../ads/adition.md)
+- [Adform](../../ads/adform.md)
+- [Adman](../../ads/adman.md)
+- [AdReactor](../../ads/adreactor.md)
+- [AdSense](../../ads/google/adsense.md)
+- [AdStir](../../ads/adstir.md)
+- [AdTech](../../ads/adtech.md)
+- [Ad Generation](../../ads/adgeneration.md)
+- [Ad Up Technology](../../ads/aduptech.md)
+- [AMoAd](../../ads/amoad.md)
+- [AppNexus](../../ads/appnexus.md)
+- [Chargeads](../../ads/chargeads.md)
+- [Colombia](../../ads/colombia.md)
+- [Criteo](../../ads/criteo.md)
+- [Dot and Media](../../ads/dotandads.md)
+- [Doubleclick](../../ads/google/doubleclick.md)
+- [E-Planning](../../ads/eplanning.md)
+- [Flite](../../ads/flite.md)
+- [GenieeSSP](../../ads/genieessp.md)
+- [GMOSSP](../../ads/gmossp.md)
+- [I-Mobile](../../ads/imobile.md)
+- [Improve Digital](../../ads/improvedigital.md)
+- [Industrybrains](../../ads/industrybrains.md)
+- [MANTIS](../../ads/mantis.md)
+- [MediaImpact](../../ads/mediaimpact.md)
+- [Nend](../../ads/nend.md)
+- [Open AdStream (OAS)](../../ads/openadstream.md)
+- [MicroAd](../../ads/microad.md)
+- [OpenX](../../ads/openx.md)
+- [plista](../../ads/plista.md)
+- [PubMatic](../../ads/pubmatic.md)
+- [Revcontent](../../ads/revcontent.md)
+- [Rubicon Project](../../ads/rubicon.md)
+- [Sharethrough](../../ads/sharethrough.md)
+- [Smart AdServer](../../ads/smartadserver.md)
+- [Sortable](../../ads/sortable.md)
+- [TripleLift](../../ads/triplelift.md)
+- [Teads](../../ads/teads.md)
+- [Webediads](../../ads/webediads.md)
+- [Weborama](../../ads/weborama.md)
+- [Yieldbot](../../ads/yieldbot.md)
+- [Yieldmo](../../ads/yieldmo.md)
+- [YahooJP](../../ads/yahoojp.md)
 
 ## Styling
 
@@ -142,7 +142,7 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 ### data-consent-notification-id
 
-Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+Optional attribute. If provided will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
 ### Experimental: data-loading-strategy
 
@@ -173,7 +173,7 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
 
-To enable this, copy the file [remote.html](../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
+To enable this, copy the file [remote.html](../../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
 
 ```html
 <meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
@@ -198,7 +198,7 @@ Enforcing origins can be done with the 3rd argument to `draw3p` and must additio
 
 This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
 
-This is supported by passing a callback to the `draw3p` function call in the [remote.html](../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+This is supported by passing a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
 
 Example:
 

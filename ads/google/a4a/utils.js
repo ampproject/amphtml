@@ -70,7 +70,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
  */
 export function googleAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams) {
-  const referrerPromise = viewerFor(a4a.getWin()).getReferrerUrl();
+  const referrerPromise = viewerFor(a4a.win).getReferrerUrl();
   return getAdCid(a4a).then(clientId => referrerPromise.then(referrer =>
       buildAdUrl(
           a4a, baseUrl, startTime, slotNumber, queryParams,
@@ -124,7 +124,7 @@ export function extractGoogleAdCreativeAndSignature(
 function buildAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
     clientId, referrer) {
-  const global = a4a.getWin();
+  const global = a4a.win;
   const documentInfo = documentInfoFor(global);
   if (!global.gaGlobal) {
     // Read by GPT for GA/GPT integration.

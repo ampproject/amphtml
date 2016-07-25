@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 /**
  * Returns the global instance of the `AmpDocService` service that can be
@@ -25,5 +25,5 @@ import {getService} from './service';
  */
 export function ampdocFor(window) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
-      getService(window, 'ampdoc'));
+      getExistingServiceForWindow(window, 'ampdoc'));
 }

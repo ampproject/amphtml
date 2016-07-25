@@ -34,7 +34,7 @@ export class StandardActions {
     this.actions_ = installActionServiceForDoc(ampdoc);
 
     /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = installResourcesService(ampdoc.getWin());
+    this.resources_ = installResourcesService(ampdoc.win);
 
     this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
   }

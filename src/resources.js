@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {getExistingServiceForWindow} from './service';
 
 /**
  * @param {!Window} window
@@ -22,5 +22,5 @@ import {getService} from './service';
  */
 export function resourcesFor(window) {
   return /** @type {!./service/resources-impl.Resources} */ (
-      getService(window, 'resources'));
+      getExistingServiceForWindow(window, 'resources'));
 };

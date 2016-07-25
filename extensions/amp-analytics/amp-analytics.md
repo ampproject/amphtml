@@ -208,7 +208,7 @@ Type attribute value: `parsely`
 
 Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
 
-##### Piano
+### Piano
 
 Type attribute value: `piano`
 
@@ -299,7 +299,7 @@ The `<amp-analytics>` configuration object uses the following format:
 ```
 ### Requests
 The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
-in the trigger configuration to specify what request should be sent in response to a pariticular event. The `request-value`
+in the trigger configuration to specify what request should be sent in response to a particular event. The `request-value`
 is an https URL. These values may include placeholder tokens that can reference other requests or variables.
 
 ```javascript

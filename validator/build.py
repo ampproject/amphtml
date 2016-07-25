@@ -124,12 +124,16 @@ def SetupOutDir(out_dir):
 
 
 def InstallNodeDependencies():
+  """Installs the dependencies using npm."""
   logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
+  logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(['npm', 'install'])
-  logging.info('installing webui dependencies ...')
+  logging.info('installing AMP Validator webui dependencies ...')
   subprocess.check_call(['npm', 'install'], cwd='webui')
+  logging.info('installing AMP Validator nodejs dependencies ...')
+  subprocess.check_call(['npm', 'install'], cwd='nodejs')
   logging.info('... done')
 
 
@@ -284,7 +288,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('entering ...')
   # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
-      [nodejs_cmd, 'index.js', '--validator_js',
+      [nodejs_cmd, 'nodejs/index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/minimum_valid_amp.html'],
       stdout=subprocess.PIPE,
@@ -297,7 +301,7 @@ def RunSmokeTest(out_dir, nodejs_cmd):
 
   # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
-      [nodejs_cmd, 'index.js', '--validator_js',
+      [nodejs_cmd, 'nodejs/index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/empty.html'],
       stdout=subprocess.PIPE,
@@ -318,9 +322,9 @@ def RunIndexTest(nodejs_cmd):
     nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  p = subprocess.Popen([nodejs_cmd, 'index_test.js'],
+  p = subprocess.Popen([nodejs_cmd, './index_test.js'],
                        stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
+                       stderr=subprocess.PIPE, cwd='nodejs')
   (stdout, stderr) = p.communicate()
   if p.returncode != 0:
     Die('index_test.js failed. returncode=%d stdout="%s" stderr="%s"' %
@@ -329,6 +333,12 @@ def RunIndexTest(nodejs_cmd):
 
 
 def CompileValidatorTestMinified(out_dir):
+  """Runs closure compiler for validator_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
@@ -341,6 +351,12 @@ def CompileValidatorTestMinified(out_dir):
 
 
 def CompileValidatorLightTestMinified(out_dir):
+  """Runs closure compiler for validator-light_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
@@ -354,6 +370,12 @@ def CompileValidatorLightTestMinified(out_dir):
 
 
 def CompileHtmlparserTestMinified(out_dir):
+  """Runs closure compiler for htmlparser_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   CompileWithClosure(js_files=['htmlparser.js', 'htmlparser-interface.js',
                                'htmlparser_test.js'],
@@ -363,6 +385,12 @@ def CompileHtmlparserTestMinified(out_dir):
 
 
 def CompileParseCssTestMinified(out_dir):
+  """Runs closure compiler for parse-css_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
@@ -374,6 +402,12 @@ def CompileParseCssTestMinified(out_dir):
 
 
 def CompileParseSrcsetTestMinified(out_dir):
+  """Runs closure compiler for parse-srcset_test.js.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['parse-srcset.js', 'json-testutil.js', 'parse-srcset_test.js',
@@ -384,7 +418,12 @@ def CompileParseSrcsetTestMinified(out_dir):
 
 
 def GenerateTestRunner(out_dir):
-  """Generates a test runner: a nodejs script that runs our minified tests."""
+  """Generates a test runner: a nodejs script that runs our minified tests.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   f = open('%s/test_runner' % out_dir, 'w')
   extensions_dir = 'extensions'
@@ -414,12 +453,25 @@ def GenerateTestRunner(out_dir):
 
 
 def RunTests(out_dir, nodejs_cmd):
+  """Runs all the minified tests.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+    nodejs_cmd: the command for calling Node.js
+  """
   logging.info('entering ...')
   subprocess.check_call([nodejs_cmd, '%s/test_runner' % out_dir])
   logging.info('... success')
 
 
 def CreateWebuiAppengineDist(out_dir):
+  """Creates the webui vulcanized directory to deploy to Appengine.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
   logging.info('entering ...')
   try:
     tempdir = tempfile.mkdtemp()

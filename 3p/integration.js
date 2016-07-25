@@ -82,6 +82,7 @@ import {adgeneration} from '../ads/adgeneration';
 import {genieessp} from '../ads/genieessp';
 import {kargo} from '../ads/kargo';
 import {pulsepoint} from '../ads/pulsepoint';
+import {zergnet} from '../ads/zergnet';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -91,6 +92,7 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   'mantis-recommend': true,
   plista: true,
+  zergnet: true,
 };
 
 register('a9', a9);
@@ -150,6 +152,7 @@ register('adgeneration', adgeneration);
 register('genieessp', genieessp);
 register('kargo', kargo);
 register('pulsepoint', pulsepoint);
+register('zergnet', zergnet);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -293,6 +296,8 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
     nonSensitiveDataPostMessage('render-start');
+    // Subscribe to page visibility updates.
+    nonSensitiveDataPostMessage('send-embed-state');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);

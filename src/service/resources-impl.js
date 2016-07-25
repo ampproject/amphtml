@@ -48,6 +48,7 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
+
 /**
  * The internal structure of a ChangeHeightRequest.
  * @typedef {{
@@ -1094,7 +1095,7 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   calcTaskScore_(task) {
@@ -1125,7 +1126,7 @@ export class Resources {
    * against the age of the executing task. If it has been in executing for
    * some time, the penalty is reduced.
    *
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   calcTaskTimeout_(task) {
@@ -1159,7 +1160,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   reschedule_(task) {
@@ -1169,7 +1170,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @param {boolean} success
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
@@ -1545,9 +1546,8 @@ function elements_(elements) {
  *   height: (number|undefined),
  *   width: (number|undefined)
  * }}
- * @private
  */
-let SizeDef;
+export let SizeDef;
 
 /**
  * @param {!Window} win

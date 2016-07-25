@@ -19,6 +19,7 @@ import {
   Extensions,
   addDocFactoryToExtension,
   addElementToExtension,
+  addShadowRootFactoryToExtension,
   calculateExtensionScriptUrl,
   installExtensionsInShadowDoc,
   installExtensionsService,
@@ -29,6 +30,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
+import * as cust from '../../src/custom-element';
 import {getMode} from '../../src/mode';
 import * as sinon from 'sinon';
 
@@ -236,6 +238,79 @@ describe('Extensions', () => {
       });
     });
 
+    it('should add shadow-root factory in registration', () => {
+      const factory = function() {};
+      registerExtension(extensions, 'amp-ext', () => {
+        addShadowRootFactoryToExtension(extensions, factory);
+      }, {});
+
+      const holder = extensions.getExtensionHolder_('amp-ext');
+      expect(holder.shadowRootFactories).to.exist;
+      expect(holder.shadowRootFactories).to.have.length(1);
+      expect(holder.shadowRootFactories[0]).to.equal(factory);
+    });
+
+    it('should add shadow-root factory out of registration', () => {
+      const factory = function() {};
+      addShadowRootFactoryToExtension(extensions, factory);
+
+      const holder = extensions.getExtensionHolder_('_UNKNOWN_');
+      expect(holder.shadowRootFactories).to.exist;
+      expect(holder.shadowRootFactories).to.have.length(1);
+      expect(holder.shadowRootFactories[0]).to.equal(factory);
+    });
+
+    it('should install all shadow factories to doc', () => {
+      const factory1 = sandbox.spy();
+      const factory2 = function() {
+        throw new Error('intentional');
+      };
+      const factory3 = sandbox.spy();
+      registerExtension(extensions, 'amp-ext', () => {
+        addShadowRootFactoryToExtension(extensions, factory1);
+        addShadowRootFactoryToExtension(extensions, factory2);
+        addShadowRootFactoryToExtension(extensions, factory3);
+      }, {});
+
+      // Install into shadow doc.
+      const shadowRoot = document.createDocumentFragment();
+      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
+      const promise = installExtensionsInShadowDoc(
+          extensions, ampdoc, ['amp-ext']);
+      return promise.then(() => {
+        expect(factory1.callCount).to.equal(1);
+        expect(factory1.args[0][0]).to.equal(shadowRoot);
+        // Should survive errors in one factory.
+        expect(factory3.callCount).to.equal(1);
+        expect(factory3.args[0][0]).to.equal(shadowRoot);
+      });
+    });
+
+    it('should install all shadow factories to root', () => {
+      const factory1 = sandbox.spy();
+      const factory2 = function() {
+        throw new Error('intentional');
+      };
+      const factory3 = sandbox.spy();
+      registerExtension(extensions, 'amp-ext', () => {
+        addShadowRootFactoryToExtension(extensions, factory1);
+        addShadowRootFactoryToExtension(extensions, factory2);
+        addShadowRootFactoryToExtension(extensions, factory3);
+      }, {});
+
+      // Install into shadow doc.
+      const shadowRoot = document.createDocumentFragment();
+      const promise = extensions.installFactoriesInShadowRoot(
+          shadowRoot, ['amp-ext']);
+      return promise.then(() => {
+        expect(factory1.callCount).to.equal(1);
+        expect(factory1.args[0][0]).to.equal(shadowRoot);
+        // Should survive errors in one factory.
+        expect(factory3.callCount).to.equal(1);
+        expect(factory3.args[0][0]).to.equal(shadowRoot);
+      });
+    });
+
     it('should load extension class via load extension', () => {
       const ctor = function() {};
       registerExtension(extensions, 'amp-ext', () => {
@@ -256,6 +331,7 @@ describe('Extensions', () => {
         doNotLoadExternalResourcesInTest(win);
         adopt(win);
         const extensions = installExtensionsService(win);
+        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
 
         expect(doc.head.querySelectorAll(
             '[custom-element="amp-analytics"]')).to.have.length(0);
@@ -267,6 +343,7 @@ describe('Extensions', () => {
             '[custom-element="amp-analytics"]')).to.have.length(1);
         expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
             .to.be.true;
+        expect(stub.callCount).to.equal(1);
       });
     });
 
@@ -302,6 +379,7 @@ describe('Extensions', () => {
         doNotLoadExternalResourcesInTest(win);
         adopt(win);
         const extensions = installExtensionsService(win);
+        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
 
         const ampTestScript = doc.createElement('script');
         ampTestScript.setAttribute('custom-element', 'amp-analytics');
@@ -318,6 +396,7 @@ describe('Extensions', () => {
             '[custom-element="amp-analytics"]')).to.have.length(1);
         expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
             .to.be.true;
+        expect(stub.callCount).to.equal(0);
       });
     });
 

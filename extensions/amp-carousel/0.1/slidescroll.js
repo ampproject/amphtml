@@ -15,7 +15,9 @@
  */
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timer} from '../../../src/timer';
@@ -25,6 +27,9 @@ const SHOWN_CSS_CLASS = '-amp-slide-item-show';
 
 /** @const {number} */
 const NATIVE_SNAP_TIMEOUT = 35;
+
+/** @const {number} */
+const NATIVE_TOUCH_TIMEOUT = 120;
 
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
@@ -37,7 +42,7 @@ export class AmpSlideScroll extends BaseCarousel {
   /** @override */
   buildCarousel() {
     /** @private @const {!Window} */
-    this.win_ = this.getWin();
+    this.win_ = this.win;
 
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
@@ -92,6 +97,12 @@ export class AmpSlideScroll extends BaseCarousel {
     /** @private {?number} */
     this.scrollTimeout_ = null;
 
+    /** @private {?number} */
+    this.touchEndTimeout_ = null;
+
+    /** @private {boolean} */
+    this.hasTouchMoved_ = false;
+
     /**
      * 0 - not in an elastic state.
      * -1 - elastic scrolling (back) to the left of scrollLeft 0.
@@ -100,8 +111,47 @@ export class AmpSlideScroll extends BaseCarousel {
      */
     this.elasticScrollState_ = 0;
 
+
+    const gestures =
+        Gestures.get(this.element, /* shouldNotPreventDefault */true);
+    gestures.onGesture(SwipeXRecognizer, () => {});
+
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
+
+    if (this.hasNativeSnapPoints_) {
+      this.slidesContainer_.addEventListener(
+          'touchend', this.touchEndHandler_.bind(this));
+
+      this.slidesContainer_.addEventListener(
+          'touchmove', this.touchMoveHandler_.bind(this));
+    }
+  }
+
+  touchMoveHandler_() {
+    this.hasTouchMoved_ = true;
+    if (this.touchEndTimeout_) {
+      timer.cancel(this.touchEndTimeout_);
+    }
+  }
+
+  touchEndHandler_() {
+    if (this.hasTouchMoved_) {
+      if (this.scrollTimeout_) {
+        timer.cancel(this.scrollTimeout_);
+      }
+      // Timer that detects scroll end and/or end of snap scroll.
+      this.touchEndTimeout_ = timer.delay(() => {
+        const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
+
+        if (this.snappingInProgress_) {
+          return;
+        }
+        this.updateOnScroll_(currentScrollLeft);
+        this.touchEndTimeout_ = null;
+      }, NATIVE_TOUCH_TIMEOUT);
+    }
+    this.hasTouchMoved_ = false;
   }
 
   /** @override */
@@ -174,24 +224,28 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
+
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (!this.hasNativeSnapPoints_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
-    const timeout =
-        this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
-    // Timer that detects scroll end and/or end of snap scroll.
-    this.scrollTimeout_ = timer.delay(() => {
-      if (this.snappingInProgress_) {
-        return;
-      }
-      if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft);
-      } else {
-        this.customSnap_(currentScrollLeft);
-      }
-    }, timeout);
+    if (!this.touchEndTimeout_) {
+      const timeout =
+          this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
+      // Timer that detects scroll end and/or end of snap scroll.
+      this.scrollTimeout_ = timer.delay(() => {
+
+        if (this.snappingInProgress_) {
+          return;
+        }
+        if (this.hasNativeSnapPoints_) {
+          this.updateOnScroll_(currentScrollLeft);
+        } else {
+          this.customSnap_(currentScrollLeft);
+        }
+      }, timeout);
+    }
     this.previousScrollLeft_ = currentScrollLeft;
   }
 
@@ -406,6 +460,6 @@ export class AmpSlideScroll extends BaseCarousel {
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
     return Animation.animate(this.slidesContainer_, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
-    }, 80, 'ease-in-out').thenAlways();
+    }, 80, 'ease-out').thenAlways();
   }
 }

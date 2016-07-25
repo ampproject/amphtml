@@ -53,13 +53,13 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.getWin()) && this.isInAmpAdTag();
+    return isGoogleAdsA4AValidEnvironment(this.win) && this.isInAmpAdTag();
   }
 
   /** @override */
   getAdUrl() {
     const startTime = timer.now();
-    const global = this.getWin();
+    const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
@@ -106,7 +106,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       return null;
     }
     const ctypesReMatch = /[?&]force_a4a_ctypes=([^&]+)/.exec(
-        this.getWin().location.search);
+        this.win.location.search);
     // If the RE passes, then length is necessarily > 1.
     if (ctypesReMatch) {
       return ctypesReMatch[1];

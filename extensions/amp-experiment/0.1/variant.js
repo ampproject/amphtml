@@ -17,9 +17,11 @@
 import {isObject} from '../../../src/types';
 import {user} from '../../../src/log';
 import {cidFor} from '../../../src/cid';
+import {viewerFor} from '../../../src/viewer';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {cryptoFor} from '../../../src/crypto';
 
+const ATTR_PREFIX = 'amp-x-';
 const nameValidator = /^[\w-]+$/;
 
 /**
@@ -33,6 +35,12 @@ const nameValidator = /^[\w-]+$/;
 export function allocateVariant(win, experimentName, config) {
   assertName(experimentName);
   validateConfig(config);
+
+  // Variant can be overridden from URL fragment.
+  const override = viewerFor(win).getParam(ATTR_PREFIX + experimentName);
+  if (override && config.variants.hasOwnProperty(override)) {
+    return Promise.resolve(override);
+  }
 
   const sticky = config.sticky !== false;
   const cidScope = config.cidScope || 'amp-experiment';

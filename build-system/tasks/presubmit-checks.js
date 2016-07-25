@@ -36,6 +36,9 @@ var privateServiceFactory = 'This service should only be installed in ' +
 var shouldNeverBeUsed =
     'Usage of this API is not allowed - only for internal purposes.';
 
+var backwardCompat = 'This method must not be called. It is only retained ' +
+    'for backward compatibility during rollout.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -53,10 +56,10 @@ var forbiddenTerms = {
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-    // TODO: temporary, remove when validator is up to date
     whitelist: [
       'build-system/server.js',
       'validator/index.js',  // NodeJs only.
+      'validator/nodejs/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-full.js',
       'validator/validator-in-browser.js',
@@ -414,6 +417,11 @@ var forbiddenTerms = {
       'src/dom.js',
     ],
   },
+  '\\.getWin\\(': {
+    message: backwardCompat,
+    whitelist: [
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -492,6 +500,7 @@ var forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
+      'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
