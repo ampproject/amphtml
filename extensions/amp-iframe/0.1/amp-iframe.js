@@ -326,6 +326,7 @@ export class AmpIframe extends AMP.BaseElement {
       this.iframe_ = null;
       // IntersectionObserver's listeners were cleaned up by
       // setInViewport(false) before #unlayoutCallback
+      this.intersectionObserver_.destroy();
       this.intersectionObserver_ = null;
     }
     return true;
