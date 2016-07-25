@@ -76,7 +76,7 @@ export const adPrefetch = {
 
 /**
  * URLs to connect to for a given ad type.
- *
+ * No need to add URLs that have same hosts as in the adPrefetch.
  * This MUST be kept in sync with actual implementation.
  *
  * @const {!Object<string, (string|!Array<string>)>}
