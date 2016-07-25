@@ -18,9 +18,7 @@ import '../../third_party/babel/custom-babel-helpers';
 import indexedDBP from '../../third_party/indexed-db-as-promised/index';
 
 /**
- * The SW's current version. We conveniently use JS Date timestamps as version
- * numbers, so we use this to determine how old a given versioned file is
- * compared to the latest version (this version).
+ * The SW's current version.
  * @const
  */
 const VERSION = '$internalRuntimeVersion$';
@@ -32,7 +30,7 @@ const VERSION = '$internalRuntimeVersion$';
  * @return {string}
  */
 function ampVersion(url) {
-  // RTVs are 2 digit prefixes followed by the current timestamp.
+  // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
   return matches ? matches[1] : VERSION;
 }
