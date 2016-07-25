@@ -20,10 +20,8 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
-  postMessage,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
