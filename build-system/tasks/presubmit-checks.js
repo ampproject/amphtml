@@ -354,8 +354,9 @@ var forbiddenTerms = {
   },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
-  // No destructuring allowed since we dont ship with Array polyfills.
-  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]|{[^}]+}) *=': es6polyfill,
+  // No Array destructuring allowed since the closure output is awful and
+  // there is no loose mode.
+  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]) *=': es6polyfill,
   // No spread (eg. test(...args) allowed since we dont ship with Array
   // polyfills except `arguments` spread as babel does not polyfill
   // it since it can assume that it can `slice` w/o the use of helpers.
