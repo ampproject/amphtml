@@ -31,6 +31,38 @@ export class AmpVizVega extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /** @override */
+  buildCallback() {
+    user.assert(isExperimentOn(this.win, EXPERIMENT),
+      `Experiment ${EXPERIMENT} disabled`);
+
+    /** @private {?JSONType} */
+    this.data_ = null;
+
+    /** @private {?string} */
+    this.inlineData_ = this.getInlineData_();
+
+    /** @private {?string} */
+    this.dataUrl_ = this.element.getAttribute('data-url');
+
+    user.assert(this.inlineData_ || this.dataUrl_,
+      '%s: neither `data-url` attribute nor a ' +
+      'valid <script type="application/json"> child was found for Vega data.',
+      this.getName_());
+
+    user.assert(!(this.inlineData_ && this.dataUrl_),
+      '%s: both `data-url` attribute and a valid ' +
+      '<script type="application/json"> child were found for Vega data. ' +
+      'Only one way of specifying the data is allowed.',
+      this.getName_());
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.initialize_();
+    return this.loadData_().then(() => this.renderGraph_());
+  }
+
   /**
    * Create the vega container.
    * Called lazily in the first `#layoutCallback`.
@@ -40,29 +72,11 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    /** @private {?JSONType} */
-    this.data_ = null;
-
     /** @private {?Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
 
-    /** @private {?string} */
-    this.dataUrl_ = this.element.getAttribute('data-url');
-
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
-  }
-
-  /** @override */
-  buildCallback() {
-    user.assert(isExperimentOn(this.win, EXPERIMENT),
-      `Experiment ${EXPERIMENT} disabled`);
-  }
-
-  /** @override */
-  layoutCallback() {
-    this.initialize_();
-    return this.loadData_().then(() => this.renderGraph_());
   }
 
   /**
@@ -73,34 +87,28 @@ export class AmpVizVega extends AMP.BaseElement {
     if (this.data_) {
       return Promise.resolve();
     }
-    const inlineData = this.getInlineData_();
-    if (!inlineData && !this.dataUrl_) {
-      const err = this.getName_() + ' neither `data-url` attribute nor a ' +
-        'valid <script type="application/json"> child was found for Vega data';
-      return Promise.reject(user.createError(err));
-    }
 
-    if (inlineData && this.dataUrl_) {
-      const err = this.getName_() + ' both `data-url` attribute and a valid ' +
-        '<script type="application/json"> child were found for Vega data. ' +
-        'Only one way of specifying the data is allowed.';
-      return Promise.reject(user.createError(err));
-    }
+    // Validation in buildCallback should ensure one and only one of
+    // dataUrl_/inlineData_ is ever set.
+    dev.assert(!this.dataUrl_ != !this.inlineData_);
 
-    if (this.dataUrl_) {
+    if (this.inlineData_) {
+      this.data_ = tryParseJson(this.inlineData_, err => {
+        user.assert(!err, 'data could not be ' +
+        'parsed. Is it in a valid JSON format?: %s', err);
+      });
+    } else {
       // TODO(aghassemi): Fetch and validate the data file.
       this.data_ = {
         'url': this.dataUrl_,
       };
-      return Promise.resolve();
     }
 
-    this.data_ = dev.assert(inlineData);
     return Promise.resolve();
   }
 
   /**
-   * @return {?JSONObject|undefined}
+   * @return {?string|undefined}
    * @private
    */
   getInlineData_() {
@@ -110,10 +118,7 @@ export class AmpVizVega extends AMP.BaseElement {
     if (scripts.length == 1) {
       const child = scripts[0];
       if (isJsonScriptTag(child)) {
-        inlineConfig = tryParseJson(scripts[0].textContent, err => {
-          user.error(this.getName_(), 'data could not be ' +
-            'parsed. Is it in a valid JSON format?', err);
-        });
+        inlineConfig = child.textContent;
       } else {
         user.error(this.getName_(), 'data should ' +
           'be put in a <script type="application/json"> tag.');
