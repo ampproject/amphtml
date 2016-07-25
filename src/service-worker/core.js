@@ -258,6 +258,11 @@ self.addEventListener('fetch', event => {
   const requestVersion = ampVersion(url);
 
   // What version do we have for this client?
+  // TODO(jridgewell): We have a bit of a race condition here, where multiple
+  // fetch events can be issued before we decide which version to use. Thus,
+  // those that are already issued will have skipped this check and fall back
+  // on whichever version they already have cached. That version may not be
+  // uniform, which is a horrible thing. Fix this.
   const response = Promise.resolve(clientsMap[clientId]).then(version => {
     // If we already registered this client, we must always use the same
     // version.
