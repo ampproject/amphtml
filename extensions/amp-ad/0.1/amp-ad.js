@@ -54,7 +54,6 @@ export class AmpAd extends AMP.BaseElement {
     this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
     return extensionsFor(this.getWin()).loadElementClass(extensionTagName)
       .then(ctor => {
-        console.log('upgraded', type, extensionTagName, ctor);
         return new ctor(this.element);
       }).catch(error => {
         // Report error and fallback to 3p
