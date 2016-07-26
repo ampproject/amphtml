@@ -307,7 +307,7 @@ export class AmpA4A extends AMP.BaseElement {
         // fetchResponse.headers.
         return fetchResponse.arrayBuffer().then(bytes => {
           return {
-            bytes: bytes,
+            bytes,
             headers: fetchResponse.headers,
           };
         });
