@@ -96,6 +96,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
   },
   {
+    id: 'amp-scrollable-carousel',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
+  },
+  {
     id: 'form-submit',
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
