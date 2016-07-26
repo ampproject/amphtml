@@ -39,7 +39,7 @@ limitations under the License.
   </tr>
 </table>
 
-## Examples 
+## Examples
 
 Visual Mode:
 ```html
@@ -64,6 +64,10 @@ Classic Mode:
 The ID of the track, an integer.
 
 ## Optional attributes
+
+**data-secret-token**
+
+The secret token of the track, if it is private.
 
 **data-visual**
 

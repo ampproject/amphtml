@@ -28,6 +28,7 @@ import {
   markElementScheduledForTesting,
   registerElement,
   resetScheduledElementForTesting,
+  stubElementIfNotKnown,
   stubElements,
   upgradeOrRegisterElement,
 } from '../../src/custom-element';
@@ -1748,6 +1749,20 @@ describe('CustomElement Overflow Element', () => {
       expect(win.ampExtendedElements['amp-test2']).to.be.true;
       expect(doc.registerElement.callCount).to.equal(2);
       expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
+    });
+
+    it('should stub element when not stubbed yet', () => {
+      // First stub is allowed.
+      stubElementIfNotKnown(win, 'amp-test1');
+
+      expect(win.ampExtendedElements).to.exist;
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+
+      // Second stub is ignored.
+      stubElementIfNotKnown(win, 'amp-test1');
+      expect(doc.registerElement.callCount).to.equal(1);
     });
 
     it('getElementService should wait for body when not available', () => {

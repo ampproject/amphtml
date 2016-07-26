@@ -16,8 +16,8 @@
 
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-
 import {fromClass} from '../service';
+import {stubElementIfNotKnown} from '../custom-element';
 
 
 const TAG = 'extensions';
@@ -404,6 +404,7 @@ export class Extensions {
       const scriptElement = this.createExtensionScript_(extensionId);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
+      stubElementIfNotKnown(this.win, extensionId);
     }
   }
 

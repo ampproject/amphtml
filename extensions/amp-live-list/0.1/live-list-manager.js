@@ -117,7 +117,7 @@ export class LiveListManager {
   /**
    * Queries the document for all `amp-live-list` tags.
    *
-   * @param {!HTMLDocument} doc
+   * @param {!Document} doc
    */
   getLiveLists_(doc) {
     const lists = Array.prototype.slice.call(

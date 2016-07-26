@@ -55,19 +55,27 @@ class AmpSoundcloud extends AMP.BaseElement {
         (this.element.getAttribute('data-trackid')),
         'The data-trackid attribute is required for <amp-soundcloud> %s',
         this.element);
+    const secret = this.element.getAttribute('data-secret-token');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
-    iframe.src = 'https://w.soundcloud.com/player/?' +
-      'url=' + encodeURIComponent(url + trackid);
 
-    if (visual === 'true') {
-      iframe.src += '&visual=true';
-    } else if (color) {
-      iframe.src += '&color=' + encodeURIComponent(color);
+    let src = 'https://w.soundcloud.com/player/?' +
+      'url=' + encodeURIComponent(url + trackid);
+    if (secret) {
+      // It's very important the entire thing is encoded, since it's part of
+      // the `url` query param added above.
+      src += encodeURIComponent('?secret_token=' + secret);
     }
+    if (visual === 'true') {
+      src += '&visual=true';
+    } else if (color) {
+      src += '&color=' + encodeURIComponent(color);
+    }
+
+    iframe.src = src;
 
     this.applyFillContent(iframe);
     iframe.height = height;
