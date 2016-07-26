@@ -173,6 +173,17 @@ export class AmpAdApiHandler {
     });
   }
 
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  sendEmbedInfo_(inViewport) {
+    this.embedStateApi_.send('embed-state', {
+      inViewport,
+      pageHidden: !this.viewer_.isVisible(),
+    });
+  }
+
   /** @override  */
   viewportCallback(inViewport) {
     if (this.intersectionObserver_) {
