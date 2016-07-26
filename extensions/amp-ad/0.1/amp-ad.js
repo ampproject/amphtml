@@ -33,27 +33,6 @@ function networkImplementationTag(type) {
   return `amp-ad-network-${type}-impl`;
 }
 
-/** @private @enum {!number} */
-const BOOKKEEPING_ATTRIBUTES_ = {'class': 1, 'style': 2, 'id': 3};
-
-/**
- * Copies (almost) all attributes from one Element to another.  Skips AMP
- * and other bookkeeping attributes.  Doesn't check for existence of any
- * attribute on the target Element, so may overwrite existing attributes.
- *
- * @param {!Element} sourceElement  Element to copy attributes from.
- * @param {!Element} targetElement  Element to copy attributes to.
- */
-function copyAttributes(sourceElement, targetElement) {
-  const attrs = sourceElement.attributes;
-  for (let i = attrs.length - 1; i >= 0; --i) {
-    const attr = attrs[i];
-    if (!BOOKKEEPING_ATTRIBUTES_.hasOwnProperty(attr.name)) {
-      targetElement.setAttribute(attr.name, attr.value);
-    }
-  }
-}
-
 export class AmpAd extends AMP.BaseElement {
 
   /** @override */
@@ -75,6 +54,7 @@ export class AmpAd extends AMP.BaseElement {
     this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
     return extensionsFor(this.getWin()).loadElementClass(extensionTagName)
       .then(ctor => {
+        console.log('upgraded', type, extensionTagName, ctor);
         return new ctor(this.element);
       }).catch(error => {
         // Report error and fallback to 3p

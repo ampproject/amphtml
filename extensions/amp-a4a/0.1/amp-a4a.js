@@ -198,14 +198,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if this element is the child of an amp-ad element.  For use by
+   * Returns true if this element was loaded from an amp-ad element.  For use by
    * network-specific implementations that don't want to allow themselves to be
    * embedded directly into a page.
    * @return {boolean}
    */
   isInAmpAdTag() {
-    return !!this.element.parentElement &&
-        this.element.parentElement.tagName == 'AMP-AD';
+    return this.element.tagName == 'AMP-AD' ||
+        this.element.tagName == 'AMP-EMBED';
   }
 
   /**

@@ -115,7 +115,7 @@ describe('A4A loader', () => {
             expect(
               doc.head.querySelector('script[src*="amp-ad-network-zort-impl"]'))
               .to.not.be.null;
-            expect(baseElement).to.equals(zortInstance);
+            expect(baseElement).to.equal(zortInstance);
           });
         });
       });

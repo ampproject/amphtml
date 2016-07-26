@@ -26,7 +26,8 @@ describe('amp-ad-network-adsense-impl', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    adsenseImplElem = document.createElement('amp-ad-network-adsense-impl');
+    adsenseImplElem = document.createElement('amp-ad');
+    adsenseImplElem.setAttribute('data-ad-client', 'adsense');
     adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
   });
 
@@ -36,26 +37,24 @@ describe('amp-ad-network-adsense-impl', () => {
 
   describe('#isValidElement', () => {
     it('should be valid', () => {
-      const ampAdElem = document.createElement('amp-ad');
-      adsenseImplElem.setAttribute('data-ad-client', 'adsense');
-      ampAdElem.appendChild(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.true;
     });
-    it('should NOT be valid (missing parent)', () => {
+    it('should NOT be valid (impl tag name)', () => {
+      adsenseImplElem = document.createElement('amp-ad-network-adsense-impl');
       adsenseImplElem.setAttribute('data-ad-client', 'adsense');
+      adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
     it.skip('should be NOT valid (missing ad client)', () => {
       // TODO(taymonbeal): reenable this test after clarifying validation
-      const ampAdElem = document.createElement('amp-ad');
-      ampAdElem.appendChild(adsenseImplElem);
+      adsenseImplElem.setAttribute('data-ad-client', '');
       expect(adsenseImpl.isValidElement()).to.be.false;
     });
-    it('should be NOT valid (non-amp-ad parent)', () => {
-      const divElem = document.createElement('div');
+    it('should be valid (amp-embed)', () => {
+      adsenseImplElem = document.createElement('amp-embed');
       adsenseImplElem.setAttribute('data-ad-client', 'adsense');
-      divElem.appendChild(adsenseImplElem);
-      expect(adsenseImpl.isValidElement()).to.be.false;
+      adsenseImpl = new AmpAdNetworkAdsenseImpl(adsenseImplElem);
+      expect(adsenseImpl.isValidElement()).to.be.true;
     });
   });
 
