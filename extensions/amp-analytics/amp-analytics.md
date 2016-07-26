@@ -388,7 +388,7 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 
 #### Click trigger (`"on": "click"`)
 Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of this configuration can contain variables defined elsewhere in the analytics config.
+  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.  The value of `selector` can include variables that are defined in inline or remote config. The variables will be expanded to determine the elements to be tracked.
 
     ```javascript
     "vars": {
