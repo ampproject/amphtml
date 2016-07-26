@@ -36,7 +36,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
     "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
     "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "https://example.com/visibility?a=${maxContinuousTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&eventName=${eventName}&subTitle=${subTitle}"
+    "visibility": "https://example.com/visibility?a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&eventName=${eventName}&subTitle=${subTitle}"
   },
   "vars": {
     "title": "Example Request"
@@ -73,6 +73,16 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "eventName": "visibility event"
       }
+    },
+    "hidden": {
+      "on": "hidden",
+      "request": "visibility",
+      "visibilitySpec": {
+        "selector": "#anim-id",
+        "visiblePercentageMin": 20,
+        "continuousTimeMax": 5000
+      },
+      "extraUrlParams": { "on": "hidden"}
     },
     "scrollPings": {
       "on": "scroll",
