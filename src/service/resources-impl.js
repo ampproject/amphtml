@@ -488,6 +488,8 @@ export class Resources {
    * Schedules unlayout for specified sub-elements that are children of the
    * parent element. The parent element can choose to send this signal when
    * it want to unload resources for its children.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
    */
   scheduleUnlayout(parentElement, subElements) {
     const parentResource = Resource.forElement(parentElement);
