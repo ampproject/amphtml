@@ -259,41 +259,87 @@ export class AmpA4A extends AMP.BaseElement {
     // promise chain due to cancel from unlayout, the promise will be rejected.
     this.promiseId_++;
     const promiseId = this.promiseId_;
+    // Shorthand for: reject promise if current promise chain is out of date.
+    const checkStillCurrent = promiseId => {
+      if (promiseId != this.promiseId_) {
+        throw cancellation();
+      }
+    };
+    // Return value from this chain: True iff rendering was "successful"
+    // (i.e., shouldn't try to render later via iframe); false iff should
+    // try to render later in iframe.
+    // Cases to handle in this chain:
+    //   - Everything ok  => Render; return true
+    //   - Empty network response returned => Don't render; return true
+    //   - Can't parse creative out of response => Don't render; return false
+    //   - Can parse, but creative is empty => Don't render; return true
+    //   - Validation fails => return false
+    //   - Rendering fails => return false
+    //   - Chain cancelled => don't return; drop error
+    //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerFor(this.win).whenFirstVisible()
+      // This block returns the ad URL, if one is available.
+      /** @return {!Promise<?string>} */
       .then(() => {
-        if (promiseId != this.promiseId_) {
-          return Promise.reject(cancellation());
-        }
+        checkStillCurrent(promiseId);
         return this.getAdUrl();
       })
+      // This block returns the (possibly empty) response to the XHR request.
+      /** @return {!Promise<?Response>} */
       .then(adUrl => {
-        if (promiseId != this.promiseId_) {
-          return Promise.reject(cancellation());
-        }
+        checkStillCurrent(promiseId);
         this.adUrl_ = adUrl;
-        return this.sendXhrRequest_(adUrl);
+        return adUrl && this.sendXhrRequest_(adUrl);
       })
+      // The following block returns either the response (as a {bytes, headers}
+      // object), or null if no response is available / response is empty.
+      /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
       .then(fetchResponse => {
-        if (promiseId != this.promiseId_) {
-          return Promise.reject(cancellation());
+        checkStillCurrent(promiseId);
+        if (!fetchResponse || !fetchResponse.arrayBuffer) {
+          return null;
         }
-        if (fetchResponse && fetchResponse.arrayBuffer) {
-          return fetchResponse.arrayBuffer().then(
-            bytes => {
-              if (promiseId != this.promiseId_) {
-                return Promise.reject(cancellation());
-              }
-              return this.validateAdResponse_(fetchResponse, bytes)
-                .then(valid => {
-                  if (promiseId != this.promiseId_) {
-                    return Promise.reject(cancellation());
-                  }
-                  return this.maybeRenderAmpAd_(valid, bytes);
-                });
-            });
-        } else {
-          return Promise.resolve(false);
-        }
+        // Note: Resolving a .then inside a .then because we need to capture
+        // two fields of fetchResponse, one of which is, itself, a promise,
+        // and one of which isn't.  If we just return
+        // fetchResponse.arrayBuffer(), the next step in the chain will
+        // resolve it to a concrete value, but we'll lose track of
+        // fetchResponse.headers.
+        return fetchResponse.arrayBuffer().then(bytes => {
+          return {
+            bytes,
+            headers: fetchResponse.headers,
+          };
+        });
+      })
+      // This block returns the ad creative and signature, if available; null
+      // otherwise.
+      /**
+       * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
+       */
+      .then(responseParts => {
+        checkStillCurrent(promiseId);
+        return responseParts && this.extractCreativeAndSignature(
+                responseParts.bytes, responseParts.headers);
+      })
+      // This block returns the ad creative if it exists and validates as AMP;
+      // null otherwise.
+      /** @return {!Promise<?string>} */
+      .then(creativeParts => {
+        checkStillCurrent(promiseId);
+        return creativeParts && this.validateAdResponse_(
+            creativeParts.creative, creativeParts.signature);
+      })
+      // This block returns true iff the creative was rendered in the shadow
+      // DOM.
+      /** @return {!Promise<!boolean>} */
+      .then(creative => {
+        checkStillCurrent(promiseId);
+        // Note: It's critical that #maybeRenderAmpAd_ be called
+        // on precisely the same creative that was validated
+        // via #validateAdResponse_.  See GitHub issue
+        // https://github.com/ampproject/amphtml/issues/4187
+        return creative && this.maybeRenderAmpAd_(creative);
       })
       .catch(error => this.promiseErrorHandler_(error));
   }
@@ -462,44 +508,42 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * Try to validate creative is AMP through crypto signature.
-   * @param {!FetchResponse} fetchResponse
-   * @param {!ArrayBuffer} bytes
-   * @return {!Promise<boolean>}
+   * @param {!ArrayBuffer} creative  Bytes of the entire signed creative.
+   * @param {?ArrayBuffer} signature  Bytes for creative signature (decoded from
+   *   base64, if necessary.)
+   * @return {!Promise<ArrayBuffer>}  Promise to a guaranteed-valid AMP creative
+   *   or null if the creative is unsigned or invalid.
    * @private
    */
-  validateAdResponse_(fetchResponse, bytes) {
-    return this.extractCreativeAndSignature(bytes, fetchResponse.headers)
-        .then(response => {
-          // Validate when we have a signature and we have native crypto.
-          if (response.signature && verifySignatureIsAvailable()) {
-            try {
-              // Among other things, the signature might not be proper base64.
-              // TODO(a4a-cam): This call used to be missing the conversion
-              // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
-              // any unit tests to fail, either locally or on Travis.  That
-              // indicates that the tests are too weak or aren't reporting
-              // correctly.  Check out and fix the tests.
-              return verifySignature(
-                  new Uint8Array(response.creative),
-                  response.signature, publicKeyInfos);
-            } catch (e) {}
-          }
-          return false;
-        });
+  validateAdResponse_(creative, signature) {
+    // Validate when we have a signature and we have native crypto.
+    if (!signature) {
+      // Guaranteed not a AMP creative.
+      return Promise.resolve(null);
+    }
+    if (verifySignatureIsAvailable()) {
+      // Among other things, the signature might not be proper base64.
+      // TODO(a4a-cam): This call used to be missing the conversion
+      // from ArrayBuffer to Uint8Array.  Strangely, that didn't cause
+      // any unit tests to fail, either locally or on Travis.  That
+      // indicates that the tests are too weak or aren't reporting
+      // correctly.  Check out and fix the tests.
+      return verifySignature(
+          new Uint8Array(creative), signature, publicKeyInfos).then(isValid => {
+            return isValid ? creative : null;
+          });
+    }
+    return Promise.reject('Public key validation of A4A ads not available');
   }
 
   /**
-   * Render the validated AMP creative directly in the parent page.
-   * @param {boolean} valid If the ad response signature was valid.
-   * @param {!ArrayBuffer} The creative as raw bytes.
+   * Render a validated AMP creative directly in the parent page.
+   * @param {!ArrayBuffer} bytes The creative, as raw bytes.
    * @return {Promise<boolean>} Whether the creative was successfully
    *     rendered.
    * @private
    */
-  maybeRenderAmpAd_(valid, bytes) {
-    if (!valid) {
-      return Promise.resolve(false);
-    }
+  maybeRenderAmpAd_(bytes) {
     // Timer id will be set if we have entered layoutCallback at which point
     // 3p throttling count was incremented.  We want to "release" the throttle
     // immediately since we now know we are not a 3p ad.
