@@ -20,6 +20,7 @@ import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
+import {getModeObject} from './mode-object';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
@@ -78,7 +79,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
       href: locationHref,
     },
     tagName: element.tagName,
-    mode: getMode(),
+    mode: getModeObject(),
     hidden: !viewer.isVisible(),
     startTime,
     amp3pSentinel: generateSentinel(parentWindow),
