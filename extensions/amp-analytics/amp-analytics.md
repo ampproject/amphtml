@@ -336,12 +336,37 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   - `selector` (required when `on` is set to `click`) This configuration is used on conjunction with the `click` trigger. Please see below for details.
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used on conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
+  - `sampleSpec` This object is used to define how the requests can be sampled before they are sent. This setting allows sampling based on random input or other platform supported vars. The object contains configuration to specify an input that is used to generate a hash and a threshold that the hash must meet.
+    - `sampleOn` This string template is expanded by filling in the platform variables and then hashed to generate a number to sample based on.
+    - `threshold` This configuration is used to filter out requests that do not meet the criteria. For a request to go through to the analytics vendor, the following logic should be true `HASH(sampleOn) < threshold`.
 
-#### Page visible trigger (`"on": "visible"`)
+  As an example, following configuration can be used to sample 50% of the requests based on random input or at 1% based on client id.
+  ```
+  'triggers': {
+    'sampledOnRandom': {
+      'on': 'visible',
+      'request': 'request',
+      'sampleSpec': {
+        'sampleOn': '${random}',
+        'threshold': 50,
+      },
+    },
+    'sampledOnClientId': {
+      'on': 'visible',
+      'request': 'request',
+      'sampleSpec': {
+        'sampleOn': '${clientId(cookieName)}',
+        'threshold': 1,
+      },
+    },
+  },
+  ```
+
+#### Page visible trigger (`"on": "visible"`) 
 Use this configuration to fire a request when the page becomes visible. The firing of this trigger can be configured using `visibilitySpec`. If multiple properties are specified, they must all be true in order for a request to fire. Configuration properties supported in `visibilitySpec` are:
-  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply.
-  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
-  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.
+  - `selector` This property can be used to specify the element to which all the `visibilitySpec` conditions apply. The selector needs to be an css id that points to an [AMP extended  element](https://github.com/ampproject/amphtml/blob/master/spec/amp-tag-addendum.md#amp-specific-tags).
+  - `continuousTimeMin` and `continuousTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a continuous amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds. Due to semantic restrictions, `continuousTimeMax` only works when the page is being hidden. Hence `continuousTimeMax` is not yet supported.
+  - `totalTimeMin` and `totalTimeMax` These properties indicate that a request should be fired when (any part of) an element has been within the viewport for a total amount of time that is between the minimum and maximum specified times. The times are expressed in milliseconds.  Due to semantic restrictions, `totalTimeMax` only works when the page is being hidden. Hence `totalTimeMax` is not yet supported.
   - `visiblePercentageMin` and `visiblePercentageMax` These properties indicate that a request should be fired when the proportion of an element that is visible within the viewport is between the minimum and maximum specified percentages. Percentage values between 0 and 100 are valid. Note that the lower bound (`visiblePercentageMin`) is inclusive while the upper bound (`visiblePercentageMax`) is not. When these properties are defined along with other timing related properties, only the time when these properties are met are counted.
 
 In addition to the conditions above, `visibilitySpec` also enables certain variables which are documented [here](./analytics-vars.md#visibility-variables).
@@ -363,13 +388,17 @@ In addition to the conditions above, `visibilitySpec` also enables certain varia
 
 #### Click trigger (`"on": "click"`)
 Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
+  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. The value of this configuration can contain variables defined elsewhere in the analytics config.
 
     ```javascript
+    "vars": {
+      "id1": "socialButtonId",
+      "id2": "shareButtonClass"
+    },
     "triggers": {
       "anchorClicks": {
         "on": "click",
-        "selector": "a",
+        "selector": "a, #${id1}, .${id2}",
         "request": "event",
         "vars": {
           "eventId": 128
