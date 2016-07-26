@@ -59,6 +59,9 @@ class AmpLightbox extends AMP.BaseElement {
 
     /** @private {number} */
     this.historyId_ = -1;
+
+    /** @private {boolean} */
+    this.active_ = false;
   }
 
   /** @override */
@@ -68,6 +71,9 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   activate() {
+    if (this.active_) {
+      return;
+    }
     /**  @private {function(this:AmpLightbox, Event)}*/
     this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
     this.win.document.documentElement.addEventListener(
@@ -85,11 +91,14 @@ class AmpLightbox extends AMP.BaseElement {
     }).then(() => {
       this.updateInViewport(this.container_, true);
       this.scheduleLayout(this.container_);
+      this.scheduleResume(this.container_);
     });
 
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
+
+    this.active_ = true;
   }
 
   /**
@@ -104,6 +113,9 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   close() {
+    if (!this.active_) {
+      return;
+    }
     this.getViewport().leaveLightboxMode();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
@@ -113,6 +125,7 @@ class AmpLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
     this.schedulePause(this.container_);
+    this.active_ = false;
   }
 
   getHistory_() {

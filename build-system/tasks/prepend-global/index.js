@@ -24,6 +24,19 @@ var util = require('gulp-util');
 
 
 /**
+ * Checks that only 1 AMP_CONFIG should exist after append.
+ *
+ * @param {string} str
+ * @return {boolean}
+ */
+function sanityCheck(str) {
+  var re = /\/\*AMP_CONFIG\*\//g;
+  // There must be one and exactly 1 match.
+  var matches = str.match(re)
+  return matches != null && matches.length == 1;
+}
+
+/**
  * @param {string} filename
  * @param {string=} opt_branch
  * @return {!Promise}
@@ -122,6 +135,10 @@ function main() {
         return prependConfig(configFile, targetFile);
       })
       .then(fileString => {
+        if (!sanityCheck(fileString)) {
+          throw new Error('Found 0 or > 1 AMP_CONFIG(s) before write. ' +
+              'aborting');
+        }
         return writeTarget(target, fileString, argv.dryrun);
       });
 }
@@ -142,3 +159,4 @@ exports.checkoutBranchConfigs = checkoutBranchConfigs;
 exports.prependConfig = prependConfig;
 exports.writeTarget = writeTarget;
 exports.valueOrDefault = valueOrDefault;
+exports.sanityCheck = sanityCheck;

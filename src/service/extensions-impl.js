@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {urls} from '../config';
 import {dev, rethrowAsync} from '../log';
 import {getMode} from '../mode';
-
 import {fromClass} from '../service';
+import {stubElementIfNotKnown} from '../custom-element';
 
 
 const TAG = 'extensions';
@@ -404,6 +405,7 @@ export class Extensions {
       const scriptElement = this.createExtensionScript_(extensionId);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
+      stubElementIfNotKnown(this.win, extensionId);
     }
   }
 
@@ -474,10 +476,9 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
-  const domain = 'https://cdn.ampproject.org/';
   const folderPath = getMode().version == '$internalRuntimeVersion$' ?
       '' : `rtv/${getMode().version}/`;
-  return `${domain}${folderPath}v0/${extensionId}-0.1.js`;
+  return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
 }
 
 

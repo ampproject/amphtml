@@ -30,6 +30,7 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
+import * as cust from '../../src/custom-element';
 import {getMode} from '../../src/mode';
 import * as sinon from 'sinon';
 
@@ -330,6 +331,7 @@ describe('Extensions', () => {
         doNotLoadExternalResourcesInTest(win);
         adopt(win);
         const extensions = installExtensionsService(win);
+        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
 
         expect(doc.head.querySelectorAll(
             '[custom-element="amp-analytics"]')).to.have.length(0);
@@ -341,6 +343,7 @@ describe('Extensions', () => {
             '[custom-element="amp-analytics"]')).to.have.length(1);
         expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
             .to.be.true;
+        expect(stub.callCount).to.equal(1);
       });
     });
 
@@ -376,6 +379,7 @@ describe('Extensions', () => {
         doNotLoadExternalResourcesInTest(win);
         adopt(win);
         const extensions = installExtensionsService(win);
+        const stub = sandbox.stub(cust, 'stubElementIfNotKnown');
 
         const ampTestScript = doc.createElement('script');
         ampTestScript.setAttribute('custom-element', 'amp-analytics');
@@ -392,6 +396,7 @@ describe('Extensions', () => {
             '[custom-element="amp-analytics"]')).to.have.length(1);
         expect(extensions.getExtensionHolder_('amp-analytics').scriptPresent)
             .to.be.true;
+        expect(stub.callCount).to.equal(0);
       });
     });
 

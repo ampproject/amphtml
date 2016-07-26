@@ -23,6 +23,7 @@ import {
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
+import {urls} from './config';
 
 
 /** @private @const {string} */
@@ -337,7 +338,7 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   }
 
   // Rewrite as a proxy URL.
-  return 'https://cdn.ampproject.org/i/' +
+  return `${urls.cdn}/i/` +
       (src.protocol == 'https:' ? 's/' : '') +
       encodeURIComponent(src.host) +
       src.pathname + (src.search || '') + (src.hash || '');

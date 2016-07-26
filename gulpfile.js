@@ -236,7 +236,7 @@ function buildExtension(name, version, hasCss, options) {
       return;
     }
   }
-  console.log('Bundling ' + name);
+  $$.util.log('Bundling ' + name);
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -362,7 +362,7 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('a4a.amp.html');
   buildExample('ads.amp.html');
-  buildExample('ads.with.script.amp.html');
+  buildExample('ads-legacy.amp.html');
   buildExample('adsense.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
@@ -427,7 +427,7 @@ function buildExamples(watch) {
  */
 function buildExample(name) {
   var input = 'examples/' + name;
-  console.log('Processing ' + name);
+  $$.util.log('Processing ' + name);
   var html = fs.readFileSync(input, 'utf8');
   var max = html;
   max = max.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
@@ -459,7 +459,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       thirdPartyBootstrap(false);
     });
   }
-  console.log('Processing ' + input);
+  $$.util.log('Processing ' + input);
   var html = fs.readFileSync(input, 'utf8');
   var min = html;
   // By default we use an absolute URL, that is independent of the
@@ -554,16 +554,17 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.rename(options.toName || srcFilename))
       .pipe(lazywrite())
       .on('end', function() {
+        $$.util.log('Compiled ' + srcFilename);
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
-          console.info($$.util.colors.green('All current JS updates done.'));
+          $$.util.log($$.util.colors.green('All current JS updates done.'));
         }
       });
   }
 
   if (options.watch) {
     bundler.on('update', function() {
-      console.log('-> bundling ' + srcDir + '...');
+      $$.util.log('-> bundling ' + srcDir + '...');
       rebundle();
       // Touch file in unit test set. This triggers rebundling of tests because
       // karma only considers changes to tests files themselves re-bundle
@@ -582,7 +583,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
  */
 function buildExperiments(options) {
   options = options || {};
-  console.log('Bundling experiments.html/js');
+  $$.util.log('Bundling experiments.html/js');
 
   function copyHandler(name, err) {
     if (err) {
@@ -612,7 +613,7 @@ function buildExperiments(options) {
   }
 
   // Build HTML.
-  console.log('Processing ' + htmlPath);
+  $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
       'https://cdn.ampproject.org/v0/experiments.js');
@@ -656,7 +657,7 @@ function buildLoginDone(options) {
  */
 function buildLoginDoneVersion(version, options) {
   options = options || {};
-  console.log('Bundling amp-login-done.html/js');
+  $$.util.log('Bundling amp-login-done.html/js');
 
   function copyHandler(name, err) {
     if (err) {
@@ -686,7 +687,7 @@ function buildLoginDoneVersion(version, options) {
   }
 
   // Build HTML.
-  console.log('Processing ' + htmlPath);
+  $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace(
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
@@ -725,7 +726,7 @@ function buildLoginDoneVersion(version, options) {
  */
 function buildAlp(options) {
   options = options || {};
-  console.log('Bundling alp.js');
+  $$.util.log('Bundling alp.js');
 
   compileJs('./ads/alp/', 'install-alp.js', './dist/', {
     toName: 'alp.max.js',
@@ -745,8 +746,8 @@ function buildAlp(options) {
 function checkMinVersion() {
   var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
   if (majorVersion < 4) {
-    console.log('Please run AMP with node.js version 4 or newer.');
-    console.log('Your version is', process.version);
+    $$.util.log('Please run AMP with node.js version 4 or newer.');
+    $$.util.log('Your version is', process.version);
     process.exit(1);
   }
 }

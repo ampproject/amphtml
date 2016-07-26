@@ -20,6 +20,7 @@ import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
+import {getModeObject} from './mode-object';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
@@ -28,6 +29,7 @@ import {timer} from './timer';
 import {user} from './log';
 import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
+import {urls} from './config';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -77,7 +79,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
       href: locationHref,
     },
     tagName: element.tagName,
-    mode: getMode(),
+    mode: getModeObject(),
     hidden: !viewer.isVisible(),
     startTime,
     amp3pSentinel: generateSentinel(parentWindow),
@@ -175,7 +177,7 @@ export function preloadBootstrap(window) {
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   preconnect.preload(
-      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js', 'script');
+      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
 }
 
 /**
@@ -214,7 +216,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
         '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
-      '.ampproject.net/$internalRuntimeVersion$/frame.html';
+      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
 }
 
 /**

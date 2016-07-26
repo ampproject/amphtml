@@ -22,6 +22,7 @@ import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {timer} from '../../../src/timer';
+import {isObject} from '../../../src/types';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
@@ -147,10 +148,11 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    if (!event.data || event.data.indexOf('{') != 0) {
+    if (!event.data ||
+        !(isObject(event.data) || event.data.indexOf('{') == 0)) {
       return;  // Doesn't look like JSON.
     }
-    const data = tryParseJson(event.data);
+    const data = isObject(event.data) ? event.data : tryParseJson(event.data);
     if (data === undefined) {
       return; // We only process valid JSON.
     }

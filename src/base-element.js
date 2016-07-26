@@ -607,6 +607,14 @@ export class BaseElement {
   }
 
   /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  scheduleResume(elements) {
+    this.resources_.scheduleResume(this.element, elements);
+  }
+
+  /**
    * Schedule the preload request for the children element or elements
    * specified. Resource manager will perform the actual preload based on the
    * priority of this element and its children.
@@ -616,6 +624,14 @@ export class BaseElement {
    */
   schedulePreload(elements) {
     this.resources_.schedulePreload(this.element, elements);
+  }
+
+  /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  scheduleUnlayout(elements) {
+    this.resources_.scheduleUnlayout(this.element, elements);
   }
 
   /**

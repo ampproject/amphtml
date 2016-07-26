@@ -61,7 +61,7 @@ equivalent to the validator deployed at cdn.ampproject.org. You may now
 use the `--validator_js` command line flag to `index.js` to use this validator.
 
 ```
-$ node index.js --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
+$ node nodejs/index.js --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
 testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
 testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
 testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html)

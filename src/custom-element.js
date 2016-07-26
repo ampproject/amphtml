@@ -156,6 +156,22 @@ export function stubElements(win) {
   }
 }
 
+/**
+ * Stub element if not yet known.
+ * @param {!Window} win
+ * @param {string} name
+ */
+export function stubElementIfNotKnown(win, name) {
+  if (knownElements[name]) {
+    return;
+  }
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
+  win.ampExtendedElements[name] = true;
+  registerElement(win, name, ElementStub);
+}
+
 
 /**
  * Applies layout to the element. Visible for testing only.

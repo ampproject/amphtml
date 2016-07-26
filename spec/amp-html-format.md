@@ -292,10 +292,12 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
-- https://fast.fonts.net
-- https://fonts.googleapis.com
+- Typography.com: https://cloud.typography.com
+- Fonts.com: https://fast.fonts.net
+- Google Fonts: https://fonts.googleapis.com
+- Font Awesome: https://maxcdn.bootstrapcdn.com
 
-IMPLEMENTERS NOTE: Adding to this list requires a change to the Google AMP Cache CSP rule.
+IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP Cache CSP rule.
 
 Authors are free to include all custom fonts via an `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 

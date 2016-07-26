@@ -15,6 +15,7 @@
  */
 
 import {getMode} from './mode';
+import {getModeObject} from './mode-object';
 
 
 /** @const Time when this JS loaded.  */
@@ -108,7 +109,7 @@ export class Log {
     }
 
     // Delegate to the specific resolver.
-    return this.levelFunc_(getMode());
+    return this.levelFunc_(getModeObject());
   }
 
   /**
