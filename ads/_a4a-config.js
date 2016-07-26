@@ -25,6 +25,7 @@ import {
   fakeIsA4AEnabled,
 } from
 '../extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config';
+import {getMode} from '../src/mode';
 
 /**
  * Registry for A4A (AMP Ads for AMPHTML pages) "is supported" predicates.
@@ -42,5 +43,8 @@ import {
 export const a4aRegistry = {
   'adsense': adsenseIsA4AEnabled,
   'doubleclick': doubleclickIsA4AEnabled,
-  'fake': fakeIsA4AEnabled,
 };
+
+if (getMode().localDev || getMode().test) {
+  a4aRegistry['fake'] = fakeIsA4AEnabled;
+}
