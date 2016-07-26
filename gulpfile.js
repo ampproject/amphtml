@@ -361,7 +361,7 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('a4a.amp.html');
   buildExample('ads.amp.html');
-  buildExample('ads.with.script.amp.html');
+  buildExample('ads-legacy.amp.html');
   buildExample('adsense.amp.html');
   buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
