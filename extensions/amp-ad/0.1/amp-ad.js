@@ -44,7 +44,7 @@ export class AmpAd extends AMP.BaseElement {
     }
     // TODO(tdrl): Check amp-ad registry to see if they have this already.
     if (!a4aRegistry[type] ||
-        !a4aRegistry[type](this.getWin(), this.element)) {
+        !a4aRegistry[type](this.win, this.element)) {
       // Network either has not provided any A4A implementation or the
       // implementation exists, but has explicitly chosen not to handle this
       // tag as A4A.  Fall back to the 3p implementation.
@@ -52,7 +52,7 @@ export class AmpAd extends AMP.BaseElement {
     }
     const extensionTagName = networkImplementationTag(type);
     this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
-    return extensionsFor(this.getWin()).loadElementClass(extensionTagName)
+    return extensionsFor(this.win).loadElementClass(extensionTagName)
       .then(ctor => {
         return new ctor(this.element);
       }).catch(error => {
