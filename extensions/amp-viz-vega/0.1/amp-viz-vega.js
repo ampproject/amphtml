@@ -68,10 +68,6 @@ export class AmpVizVega extends AMP.BaseElement {
    * Called lazily in the first `#layoutCallback`.
    */
   initialize_() {
-    if (this.container_) {
-      return;
-    }
-
     /** @private {?Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
 
@@ -84,10 +80,6 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   loadData_() {
-    if (this.data_) {
-      return Promise.resolve();
-    }
-
     // Validation in buildCallback should ensure one and only one of
     // dataUrl_/inlineData_ is ever set.
     dev.assert(!this.dataUrl_ != !this.inlineData_);
@@ -112,22 +104,19 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    let inlineConfig;
-
     const scripts = childElementsByTag(this.element, 'SCRIPT');
-    if (scripts.length == 1) {
-      const child = scripts[0];
-      if (isJsonScriptTag(child)) {
-        inlineConfig = child.textContent;
-      } else {
-        user.error(this.getName_(), 'data should ' +
-          'be put in a <script type="application/json"> tag.');
-      }
-    } else if (scripts.length > 1) {
-      user.error(this.getName_(), 'more than one' +
-        '<script type="application/json"> tags found. Only one allowed.');
+    if (scripts.length == 0) {
+      return;
     }
-    return inlineConfig;
+
+    user.assert(scripts.length == 1, '%s: more than one ' +
+        '<script> tags found. Only one allowed.', this.getName_());
+
+    const child = scripts[0];
+    user.assert(isJsonScriptTag(child), '%s: data should ' +
+        'be put in a <script type="application/json"> tag.', this.getName_());
+
+    return child.textContent;
   }
 
   /**
