@@ -259,12 +259,24 @@ export class AmpA4A extends AMP.BaseElement {
     // promise chain due to cancel from unlayout, the promise will be rejected.
     this.promiseId_++;
     const promiseId = this.promiseId_;
-    // Shorthand for: reject promise if current chain is out of date.
+    // Shorthand for: reject promise if current promise chain is out of date.
     const checkStillCurrent = promiseId => {
       if (promiseId != this.promiseId_) {
         throw cancellation();
       }
     };
+    // Return value from this chain: True iff rendering was "successful"
+    // (i.e., shouldn't try to render later via iframe); false iff should
+    // try to render later in iframe.
+    // Cases to handle in this chain:
+    //   - Everything ok  => Render; return true
+    //   - Empty network response returned => Don't render; return true
+    //   - Can't parse creative out of response => Don't render; return false
+    //   - Can parse, but creative is empty => Don't render; return true
+    //   - Validation fails => return false
+    //   - Rendering fails => return false
+    //   - Chain cancelled => don't return; drop error
+    //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerFor(this.win).whenFirstVisible()
       // The following block returns the ad URL, if one is available.
       .then(() => {
@@ -277,23 +289,28 @@ export class AmpA4A extends AMP.BaseElement {
         this.adUrl_ = adUrl;
         return this.sendXhrRequest_(adUrl);
       })
-      // The following block returns either a valid ad creative or null, if
-      // no valid creative is available.
+      // The following block returns either the response byte stream, or null
+      // if no byte stream was available.
       .then(fetchResponse => {
         checkStillCurrent(promiseId);
         if (!fetchResponse || !fetchResponse.arrayBuffer) {
           return null;
         }
-        return fetchResponse.arrayBuffer().then(bytes => {
-          checkStillCurrent(promiseId);
-          return this.extractCreativeAndSignature(bytes,
-              fetchResponse.headers);
-        })
-        .then(responseParts => {
-          checkStillCurrent(promiseId);
-          return this.validateAdResponse_(
-              responseParts.creative, responseParts.signature);
-        });
+        return fetchResponse.arrayBuffer();
+      })
+      // This block returns the ad creative and signature, if available; null
+      // otherwise.
+      .then(bytes => {
+        checkStillCurrent(promiseId);
+        return bytes && this.extractCreativeAndSignature(bytes,
+          fetchResponse.headers);
+      })
+      // This block returns the ad creative if it exists and validates as AMP;
+      // null otherwise.
+      .then(responseParts => {
+        checkStillCurrent(promiseId);
+        return responseParts && this.validateAdResponse_(
+            responseParts.creative, responseParts.signature);
       })
       // This block returns true iff the creative was rendered in the shadow
       // DOM.
