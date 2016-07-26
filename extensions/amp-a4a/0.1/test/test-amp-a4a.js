@@ -403,8 +403,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(false, bytes).then(rendered => {
+        return a4a.maybeRenderAmpAd_(null).then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
