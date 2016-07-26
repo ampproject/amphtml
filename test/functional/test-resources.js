@@ -273,7 +273,7 @@ describe('Resources', () => {
   });
 });
 
-describe('Resources pause/resume scheduling', () => {
+describe('Resources pause/resume/unlayout scheduling', () => {
 
   let sandbox;
   let resources;
@@ -421,6 +421,34 @@ describe('Resources pause/resume scheduling', () => {
 
       resources.scheduleResume(parent, children);
       expect(stub2.calledOnce).to.be.false;
+    });
+  });
+
+  describe('scheduleUnlayout', () => {
+    it('should not throw with a single element', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, child1);
+      }).to.not.throw();
+    });
+
+    it('should not throw with an array of elements', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, [child1, child2]);
+      }).to.not.throw();
+    });
+
+    it('should be ok with non amp children', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, children);
+      }).to.not.throw();
+    });
+
+    it('should schedule on custom element with multiple children', () => {
+      const stub1 = sandbox.stub(child1, 'unlayoutCallback');
+      const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+      resources.scheduleUnlayout(parent, children);
+      expect(stub1.called).to.be.true;
+      expect(stub2.called).to.be.true;
     });
   });
 });

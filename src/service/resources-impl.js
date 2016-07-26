@@ -485,6 +485,22 @@ export class Resources {
   }
 
   /**
+   * Schedules unlayout for specified sub-elements that are children of the
+   * parent element. The parent element can choose to send this signal when
+   * it want to unload resources for its children.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleUnlayout(parentElement, subElements) {
+    const parentResource = Resource.forElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.unlayout();
+    });
+  }
+
+  /**
    * Schedules preload for the specified sub-elements that are children of the
    * parent element. The parent element may choose to send this signal either
    * because it's an owner (see {@link setOwner}) or because it wants the

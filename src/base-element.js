@@ -627,6 +627,14 @@ export class BaseElement {
   }
 
   /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  scheduleUnlayout(elements) {
+    this.resources_.scheduleUnlayout(this.element, elements);
+  }
+
+  /**
    * Update inViewport state of the specified children element or elements.
    * Resource manager will perform the actual changes to the inViewport state
    * based on the state of these elements and their parent subtree.
