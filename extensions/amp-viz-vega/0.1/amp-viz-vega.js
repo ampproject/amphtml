@@ -34,7 +34,7 @@ export class AmpVizVega extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     user.assert(isExperimentOn(this.win, EXPERIMENT),
-      `Experiment ${EXPERIMENT} disabled`);
+        `Experiment ${EXPERIMENT} disabled`);
 
     /** @private {?JSONType} */
     this.data_ = null;
@@ -43,18 +43,18 @@ export class AmpVizVega extends AMP.BaseElement {
     this.inlineData_ = this.getInlineData_();
 
     /** @private {?string} */
-    this.dataUrl_ = this.element.getAttribute('data-url');
+    this.src_ = this.element.getAttribute('src');
 
-    user.assert(this.inlineData_ || this.dataUrl_,
-      '%s: neither `data-url` attribute nor a ' +
-      'valid <script type="application/json"> child was found for Vega data.',
-      this.getName_());
+    user.assert(this.inlineData_ || this.src_,
+        '%s: neither `src` attribute nor a ' +
+        'valid <script type="application/json"> child was found for Vega data.',
+        this.getName_());
 
-    user.assert(!(this.inlineData_ && this.dataUrl_),
-      '%s: both `data-url` attribute and a valid ' +
-      '<script type="application/json"> child were found for Vega data. ' +
-      'Only one way of specifying the data is allowed.',
-      this.getName_());
+    user.assert(!(this.inlineData_ && this.src_),
+        '%s: both `src` attribute and a valid ' +
+        '<script type="application/json"> child were found for Vega data. ' +
+        'Only one way of specifying the data is allowed.',
+        this.getName_());
   }
 
   /** @override */
@@ -81,18 +81,18 @@ export class AmpVizVega extends AMP.BaseElement {
    */
   loadData_() {
     // Validation in buildCallback should ensure one and only one of
-    // dataUrl_/inlineData_ is ever set.
-    dev.assert(!this.dataUrl_ != !this.inlineData_);
+    // src_/inlineData_ is ever set.
+    dev.assert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
       this.data_ = tryParseJson(this.inlineData_, err => {
         user.assert(!err, 'data could not be ' +
-        'parsed. Is it in a valid JSON format?: %s', err);
+            'parsed. Is it in a valid JSON format?: %s', err);
       });
     } else {
       // TODO(aghassemi): Fetch and validate the data file.
       this.data_ = {
-        'url': this.dataUrl_,
+        'url': this.src_,
       };
     }
 
@@ -126,15 +126,13 @@ export class AmpVizVega extends AMP.BaseElement {
   renderGraph_() {
     // TODO(aghassemi): Replace with actual rendering implementation.
     return new Promise((resolve, unused) => {
-      setTimeout(() => {
-        const text = 'To be replaced with Vega graph with data: ' +
+      const text = 'To be replaced with Vega graph with data: ' +
           JSON.stringify(this.data_);
-        vsyncFor(this.win).mutate(() => {
-          const textNode = this.element.ownerDocument.createTextNode(text);
-          this.container_.appendChild(textNode);
-        });
-        resolve();
-      }, 1000);
+      vsyncFor(this.win).mutate(() => {
+        const textNode = this.element.ownerDocument.createTextNode(text);
+        this.container_.appendChild(textNode);
+      });
+      resolve();
     });
   }
 
