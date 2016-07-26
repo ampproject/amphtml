@@ -409,7 +409,7 @@ describe('Resources pause/resume scheduling', () => {
       }).to.not.throw();
     });
 
-    it('should call resumeCallback on puased custom elements', () => {
+    it('should call resumeCallback on paused custom elements', () => {
       const stub1 = sandbox.stub(child1, 'resumeCallback');
 
       resources.scheduleResume(parent, children);
