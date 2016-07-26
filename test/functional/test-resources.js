@@ -273,7 +273,7 @@ describe('Resources', () => {
   });
 });
 
-describe('Resources pause/resume scheduling', () => {
+describe('Resources pause/resume/unlayout scheduling', () => {
 
   let sandbox;
   let resources;
@@ -423,6 +423,34 @@ describe('Resources pause/resume scheduling', () => {
       expect(stub2.calledOnce).to.be.false;
     });
   });
+
+  describe('scheduleUnlayout', () => {
+    it('should not throw with a single element', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, child1);
+      }).to.not.throw();
+    });
+
+    it('should not throw with an array of elements', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, [child1, child2]);
+      }).to.not.throw();
+    });
+
+    it('should be ok with non amp children', () => {
+      expect(() => {
+        resources.scheduleUnlayout(parent, children);
+      }).to.not.throw();
+    });
+
+    it('should schedule on custom element with multiple children', () => {
+      const stub1 = sandbox.stub(child1, 'unlayoutCallback');
+      const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+      resources.scheduleUnlayout(parent, children);
+      expect(stub1.called).to.be.true;
+      expect(stub2.called).to.be.true;
+    });
+  });
 });
 
 describe('Resources schedulePreload', () => {
@@ -558,113 +586,6 @@ describe('Resources schedulePreload', () => {
   });
 });
 
-
-describe('Resources scheduleUnlayout', () => {
-
-  let sandbox;
-  let resources;
-  let parent;
-  let children;
-  let child0;
-  let child1;
-  let child2;
-  let placeholder;
-
-  function createElement() {
-    return {
-      tagName: 'amp-test',
-      isBuilt() {
-        return true;
-      },
-      isUpgraded() {
-        return true;
-      },
-      getAttribute() {
-        return null;
-      },
-      contains() {
-        return true;
-      },
-      classList: {
-        contains() {
-          return true;
-        },
-      },
-      getPlaceholder() {
-        return placeholder;
-      },
-      renderOutsideViewport() {
-        return false;
-      },
-      layoutCallback() {
-      },
-      pauseCallback() {
-      },
-      unlayoutCallback() {
-        return false;
-      },
-      unlayoutOnPause() {
-        return false;
-      },
-      getPriority() {
-        return 0;
-      },
-    };
-  }
-
-  function createElementWithResource(id) {
-    const element = createElement();
-    const resource = new Resource(id, element, resources);
-    resource.state_ = ResourceState.READY_FOR_LAYOUT;
-    resource.element['__AMP__RESOURCE'] = resource;
-    resource.measure = sandbox.spy();
-    resource.isDisplayed = () => true;
-    resource.isInViewport = () => true;
-    return [element, resource];
-  }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
-    const parentTuple = createElementWithResource(1);
-    parent = parentTuple[0];
-    placeholder = document.createElement('div');
-    child0 = document.createElement('div');
-    child1 = createElementWithResource(2)[0];
-    child2 = createElementWithResource(3)[0];
-    children = [child0, child1, child2];
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
-  it('should not throw with a single element', () => {
-    expect(() => {
-      resources.scheduleUnlayout(parent, child1);
-    }).to.not.throw();
-  });
-
-  it('should not throw with an array of elements', () => {
-    expect(() => {
-      resources.scheduleUnlayout(parent, [child1, child2]);
-    }).to.not.throw();
-  });
-
-  it('should be ok with non amp children', () => {
-    expect(() => {
-      resources.scheduleUnlayout(parent, children);
-    }).to.not.throw();
-  });
-
-  it('should schedule on custom element with multiple children', () => {
-    const stub1 = sandbox.stub(child1, 'unlayoutCallback');
-    const stub2 = sandbox.stub(child2, 'unlayoutCallback');
-    resources.scheduleUnlayout(parent, children);
-    expect(stub1.called).to.be.true;
-    expect(stub2.called).to.be.true;
-  });
-});
 
 describe('Resources discoverWork', () => {
 
