@@ -24,6 +24,7 @@
 
 import './polyfills';
 import {installEmbedStateListener} from './environment';
+import {urls} from '../src/config';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adition} from '../ads/adition';
@@ -172,6 +173,13 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
+// List of ad networks that will manually call `window.context.renderStart` to
+// emit render-start event when ad actually starts rendering. Please add
+// yourself here if you'd like to do so (which we encourage).
+const waitForRenderStart = [
+  'doubleclick',
+];
+
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -278,6 +286,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
       window.context.updateDimensions = triggerDimensions;
     }
 
+    if (waitForRenderStart.indexOf(data.type) != -1) {
+      window.context.renderStart = triggerRenderStart;
+    }
+
     // This only actually works for ads.
     const initialIntersection = window.context.initialIntersection;
     window.context.observeIntersection = cb => {
@@ -299,9 +311,11 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
-    nonSensitiveDataPostMessage('render-start');
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
+    if (waitForRenderStart.indexOf(data.type) < 0) {
+      triggerRenderStart();
+    }
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
@@ -320,6 +334,10 @@ function triggerDimensions(width, height) {
 
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
+}
+
+function triggerRenderStart() {
+  nonSensitiveDataPostMessage('render-start');
 }
 
 /**
@@ -430,11 +448,13 @@ export function validateParentOrigin(window, parentLocation) {
  * @visiblefortesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
+  const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
+
   // Everything allowed in default iframe.
-  if (window.location.hostname == '3p.ampproject.net') {
+  if (window.location.hostname == thirdPartyHost) {
     return;
   }
-  if (/^d-\d+\.ampproject\.net$/.test(window.location.hostname)) {
+  if (urls.thirdPartyFrameRegex.test(window.location.hostname)) {
     return;
   }
   if (window.location.hostname == 'ads.localhost') {
@@ -462,7 +482,8 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
   let hostname = parseUrl(ancestor).hostname;
-  const onDefault = hostname == 'cdn.ampproject.org';
+  const cdnHostname = parseUrl(urls.cdn).hostname;
+  const onDefault = hostname == cdnHostname;
   if (onDefault) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
@@ -536,7 +557,7 @@ export function isTagNameAllowed(type, tagName) {
  * @param {!Error} e
  */
 function lightweightErrorReport(e) {
-  new Image().src = 'https://amp-error-reporting.appspot.com/r' +
+  new Image().src = urls.errorReporting +
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
       '&r=' + encodeURIComponent(document.referrer);

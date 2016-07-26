@@ -325,4 +325,23 @@ describe('IntersectionObserver', () => {
     expect(onChangeSpy.callCount).to.equal(1);
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
+
+  it('should not send intersection after destroy is called', () => {
+    const messages = [];
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    insert(testIframe);
+    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+      // Copy because arg is modified in place.
+      messages.push(JSON.parse(JSON.stringify(message)));
+    });
+    ioInstance.postMessageApi_.clientWindows_ =
+        [{win: testIframe.contentWindow, origin: '*'}];
+    ioInstance.startSendingIntersectionChanges_();
+    expect(messages).to.have.length(1);
+    ioInstance.fire();
+    clock.tick(50);
+    ioInstance.destroy();
+    clock.tick(50);
+    expect(messages).to.have.length(1);
+  });
 });

@@ -126,6 +126,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
+    if (this.isOpen_()) {
+      return;
+    }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
       setStyles(this.element, {
@@ -156,6 +159,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
+    if (!this.isOpen_()) {
+      return;
+    }
     this.viewport_.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => {
       this.closeMask_();
