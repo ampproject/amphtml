@@ -282,7 +282,7 @@ export class AmpA4A extends AMP.BaseElement {
       .then(fetchResponse => {
         checkStillCurrent(promiseId);
         if (!fetchResponse || !fetchResponse.arrayBuffer) {
-          return Promise.resolve(null);
+          return null;
         }
         return fetchResponse.arrayBuffer().then(bytes => {
           checkStillCurrent(promiseId);
@@ -300,7 +300,7 @@ export class AmpA4A extends AMP.BaseElement {
       .then(creative => {
         checkStillCurrent(promiseId);
         if (!creative) {
-          return Promise.resolve(false);
+          return false;
         }
         // Note: It's critical that #maybeRenderAmpAd_ be called
         // on precisely the same creative that was validated
