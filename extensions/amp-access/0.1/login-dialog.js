@@ -20,6 +20,7 @@ import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
+import {urls} from '../../../src/config';
 
 /** @const */
 const TAG = 'amp-access-login';
@@ -281,7 +282,7 @@ class WebLoginDialog {
       returnUrl = loc.protocol + '//' + loc.host +
           '/extensions/amp-access/0.1/amp-login-done.html';
     } else {
-      returnUrl = 'https://cdn.ampproject.org/v0/amp-login-done-0.1.html';
+      returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
     }
     return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }

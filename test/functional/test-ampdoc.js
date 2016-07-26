@@ -18,6 +18,7 @@ import {
   AmpDocService,
   AmpDocSingle,
   AmpDocShadow,
+  installShadowDoc,
 } from '../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
@@ -100,11 +101,17 @@ describe('AmpDocService', () => {
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
-    it('should create and cached shadow-doc', () => {
+    it('should create and cache shadow-doc', () => {
       if (!shadowRoot) {
         return;
       }
+      expect(() => {
+        service.getAmpDoc(content);
+      }).to.throw(/No ampdoc found/);
+
+      const newAmpDoc = installShadowDoc(service, shadowRoot);
       const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
       expect(ampDoc).to.exist;
       expect(service.getAmpDoc(shadowRoot)).to.equal(ampDoc);
       expect(ampDoc).to.be.instanceOf(AmpDocShadow);
@@ -118,7 +125,41 @@ describe('AmpDocService', () => {
       }
       expect(() => {
         service.getAmpDoc(host);
-      }).to.throw(/No root found/);
+      }).to.throw(/No ampdoc found/);
+    });
+
+    it('should fail to install shadow doc twice', () => {
+      if (!shadowRoot) {
+        return;
+      }
+      installShadowDoc(service, shadowRoot);
+      expect(() => {
+        installShadowDoc(service, shadowRoot);
+      }).to.throw(/The shadow root already contains ampdoc/);
+    });
+
+    it('should navigate via host', () => {
+      if (!shadowRoot) {
+        return;
+      }
+
+      const newAmpDoc = installShadowDoc(service, shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+
+      const content2 = document.createElement('span');
+      const host2 = document.createElement('div');
+      const shadowRoot2 = host2.createShadowRoot();
+      shadowRoot2.appendChild(content2);
+      shadowRoot.appendChild(host2);
+      expect(content2.parentNode).to.equal(shadowRoot2);
+      expect(shadowRoot2.host).to.equal(host2);
+      expect(host2.shadowRoot).to.equal(shadowRoot2);
+      expect(host2.parentNode).to.equal(shadowRoot);
+
+      expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
     });
   });
 });
@@ -133,7 +174,7 @@ describe('AmpDocSingle', () => {
   });
 
   it('should return window', () => {
-    expect(ampdoc.getWin()).to.equal(window);
+    expect(ampdoc.win).to.equal(window);
   });
 
   it('should return document as root', () => {
@@ -170,7 +211,7 @@ describe('AmpDocShadow', () => {
     if (!ampdoc) {
       return;
     }
-    expect(ampdoc.getWin()).to.equal(window);
+    expect(ampdoc.win).to.equal(window);
     expect(ampdoc.isSingleDoc()).to.be.false;
   });
 

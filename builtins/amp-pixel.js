@@ -42,9 +42,6 @@ export function installPixel(win) {
 
     /** @override */
     buildCallback() {
-      // Remove user defined size. Pixels should always be the default size.
-      this.element.style.width = '';
-      this.element.style.height = '';
       // Consider the element invisible.
       this.element.setAttribute('aria-hidden', 'true');
     }
@@ -55,14 +52,10 @@ export function installPixel(win) {
       // resource consumption.
       toggle(this.element, false);
       const src = this.element.getAttribute('src');
-      return urlReplacementsFor(this.getWin()).expand(this.assertSource(src))
+      return urlReplacementsFor(this.win).expand(this.assertSource(src))
           .then(src => {
             const image = new Image();
             image.src = src;
-            image.width = 1;
-            image.height = 1;
-            // Make it take zero space
-            this.element.style.width = 0;
             this.element.appendChild(image);
           });
     }

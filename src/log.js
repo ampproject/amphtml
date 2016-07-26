@@ -70,7 +70,7 @@ export class Log {
      * the tests runs because only the former is relayed to the console.
      * @const {!Window}
      */
-    this.win = win.AMP_TEST_IFRAME ? win.parent : win;
+    this.win = (getMode().test && win.AMP_TEST_IFRAME) ? win.parent : win;
 
     /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
@@ -98,7 +98,7 @@ export class Log {
     }
 
     // Logging is enabled for tests directly.
-    if (this.win.ENABLE_LOG) {
+    if (getMode().test && this.win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 

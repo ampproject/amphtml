@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
+import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {getStyle} from '../../src/style';
-import {platformFor} from '../../src/platform';
 import * as sinon from 'sinon';
 import * as styles from '../../src/styles';
+
 
 describe('Styles', () => {
   let sandbox;
   let clock;
-  let platform;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    platform = platformFor(window);
   });
 
   afterEach(() => {
@@ -43,13 +42,51 @@ describe('Styles', () => {
     expect(getStyle(document.body, 'animation')).to.equal('none');
   });
 
-  it('should set cursor:pointer on document element correctly on iOS', () => {
-    const elem = document.documentElement;
-    expect(elem.style.cursor).to.not.be.ok;
-    sandbox.stub(platform, 'isIos').returns(true);
-    styles.installStyles(document, '', () => {});
-    expect(elem.style.cursor).to.not.be.ok;
-    styles.installStyles(document, '', () => {}, true);
-    expect(elem.style.cursor).to.equal('pointer');
+  it('should install runtime styles', () => {
+    const cssText = '/*amp-runtime*/';
+    return new Promise(resolve => {
+      styles.installStyles(document, cssText, () => {
+        resolve();
+      }, true);
+    }).then(() => {
+      const styleEl = document.head.querySelector('style');
+      expect(styleEl.hasAttribute('amp-runtime')).to.be.true;
+      expect(styleEl.textContent).to.equal(cssText);
+      document.head.removeChild(styleEl);
+    });
+  });
+
+  it('should install extension styles after runtime', () => {
+    const runtimeCssText = '/*amp-runtime*/';
+    const extCssText = '/*amp-ext1*/';
+    styles.installStyles(document, runtimeCssText, () => {}, true);
+    return new Promise(resolve => {
+      styles.installStyles(document, extCssText, () => {
+        resolve();
+      }, false, 'amp-ext1');
+    }).then(() => {
+      const styleEls = document.head.querySelectorAll('style');
+      expect(styleEls[0].hasAttribute('amp-runtime')).to.be.true;
+      expect(styleEls[1].getAttribute('amp-extension')).to.equal('amp-ext1');
+      expect(styleEls[1].textContent).to.equal(extCssText);
+      document.head.removeChild(styleEls[0]);
+      document.head.removeChild(styleEls[1]);
+    });
+  });
+
+  it('should copy runtime styles from ampdoc', () => {
+    const parentRoot = document.createElement('div');
+    const style = document.createElement('style');
+    style.setAttribute('amp-runtime', '');
+    style.textContent = '/*runtime*/';
+    parentRoot.appendChild(style);
+    const ampdoc = new AmpDocShadow(window, parentRoot);
+    const shadowRoot = document.createElement('div');
+    styles.copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
+
+    const copy = shadowRoot.querySelector('style[amp-runtime]');
+    expect(copy).to.exist;
+    expect(copy.textContent).to.equal('/*runtime*/');
+    expect(copy).to.not.equal(style);
   });
 });

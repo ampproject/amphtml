@@ -8,12 +8,20 @@ window.addEventListener('message', function(event) {
   if (event.data && event.data.sentinel == 'amp-test') {
     if (event.data.type == 'requestHeight') {
       var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
-      parent./*OK*/postMessage({
-        sentinel: sentinel,
-        type: 'embed-size',
-        height: event.data.height,
-        width: event.data.width,
-      }, '*');
+      parent./*OK*/postMessage(
+          {
+            sentinel: sentinel,
+            type: 'embed-size',
+            height: event.data.height,
+            width: event.data.width,
+          }, '*');
+    } else if (event.data.type == 'subscribeToEmbedState') {
+      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      parent./*OK*/postMessage(
+          {
+            sentinel: sentinel,
+            type: 'send-embed-state',
+          }, '*');
     }
   }
 });

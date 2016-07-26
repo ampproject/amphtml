@@ -606,6 +606,26 @@ describe('Resource', () => {
         expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       });
     });
+
+    describe('when remove from DOM', () => {
+      it('should not call pauseCallback on remove for unbuilt ele', () => {
+        resource.state_ = ResourceState.NOT_BUILT;
+        resource.pauseOnRemove();
+        elementMock.expects('pauseCallback').never();
+        elementMock.expects('viewportCallback').never();
+      });
+
+      it('should call pauseCallback on remove for built ele', () => {
+        resource.state_ = ResourceState.LAYOUT_COMPLETE;
+        resource.isInViewport_ = true;
+        resource.paused_ = false;
+        elementMock.expects('pauseCallback').once();
+        elementMock.expects('viewportCallback').once();
+        resource.pauseOnRemove();
+        expect(resource.isInViewport_).to.equal(false);
+        expect(resource.paused_).to.equal(true);
+      });
+    });
   });
 
   describe('resumeCallback', () => {
@@ -1075,6 +1095,86 @@ describe('Resource renderOutsideViewport', () => {
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is on the left of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is on the right of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is fully in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(0, 0, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+    });
+
+    describe('when element is partially in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-50, -50, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
       });
     });
   });

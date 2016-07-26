@@ -90,9 +90,10 @@ amp-carousel .amp-carousel-button.amp-disabled {
   -webkit-overflow-scrolling: touch !important;
 }
 
-.-amp-slides-container.no-scroll {
+.-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
+
 
 .-amp-slide-item {
   align-items: center !important;

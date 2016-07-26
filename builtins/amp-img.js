@@ -23,10 +23,20 @@ import {srcsetFromElement} from '../src/srcset';
 
 export class AmpImg extends BaseElement {
 
-  /** @override */
-  createdCallback() {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
     /** @private @const {function(!Element, number=): !Promise<!Element>} */
     this.loadPromise_ = loadPromise;
+
+    /** @private {boolean} */
+    this.allowImgLoadFallback_ = true;
+
+    /** @private {?Element} */
+    this.img_ = null;
+
+    /** @private {?../src/srcset.Srcset} */
+    this.srcset_ = null;
   }
 
   /** @override */
@@ -34,24 +44,27 @@ export class AmpImg extends BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
-  /** @override */
-  buildCallback() {
+  /**
+   * Create the actual image element and set up instance variables.
+   * Called lazily in the first `#layoutCallback`.
+   */
+  initialize_() {
+    if (this.img_) {
+      return;
+    }
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
-
     // If this amp-img IS the fallback then don't allow it to have its own
     // fallback to stop from nested fallback abuse.
     if (this.element.hasAttribute('fallback')) {
       this.allowImgLoadFallback_ = false;
     }
 
-    /** @private @const {!Element} */
     this.img_ = new Image();
-
     if (this.element.id) {
       this.img_.setAttribute('amp-img-id', this.element.id);
     }
-    this.propagateAttributes(['alt'], this.img_);
+    this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
     this.applyFillContent(this.img_, true);
 
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
@@ -59,7 +72,6 @@ export class AmpImg extends BaseElement {
 
     this.element.appendChild(this.img_);
 
-    /** @private @const {!../src/srcset.Srcset} */
     this.srcset_ = srcsetFromElement(this.element);
   }
 
@@ -75,6 +87,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.initialize_();
     let promise = this.updateImageSrc_();
 
     // We only allow to fallback on error on the initial layoutCallback

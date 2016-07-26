@@ -28,6 +28,8 @@ import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
+import {actionServiceForDoc} from '../../../src/action';
+import {urls} from '../../../src/config';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -52,7 +54,7 @@ export class AmpForm {
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
 
-    /** @const @private {!Element} */
+    /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
@@ -64,6 +66,9 @@ export class AmpForm {
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(this.win_);
 
+    /** @const @private {!../../../src/service/action-impl.Action} */
+    this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
+
     /** @const @private {string} */
     this.method_ = this.form_.getAttribute('method') || 'GET';
 
@@ -74,7 +79,7 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user.assert(!startsWith(this.xhrAction_, 'https://cdn.ampproject.org'),
+      user.assert(!startsWith(this.xhrAction_, urls.cdn),
           'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
@@ -94,23 +99,32 @@ export class AmpForm {
 
   /** @private */
   installSubmitHandler_() {
-    this.form_.addEventListener('submit', e => this.handleSubmit_(e));
+    this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
   }
 
   /**
+   * Note on stopImmediatePropagation usage here, it is important to emulate native
+   * browser submit event blocking. Otherwise any other submit listeners would get the
+   * event.
+   *
+   * For example, action service shouldn't trigger 'submit' event if form is actually
+   * invalid. stopImmediatePropagation allows us to make sure we don't trigger it
+   *
+   *
    * @param {!Event} e
    * @private
    */
   handleSubmit_(e) {
     if (this.state_ == FormState_.SUBMITTING) {
-      e.preventDefault();
+      e.stopImmediatePropagation();
       return;
     }
 
     const shouldValidate = !this.form_.hasAttribute('novalidate');
-    if (shouldValidate &&
-        this.form_.checkValidity && !this.form_.checkValidity()) {
-      e.preventDefault();
+    const isInvalid = shouldValidate &&
+        this.form_.checkValidity && !this.form_.checkValidity();
+    if (isInvalid) {
+      e.stopImmediatePropagation();
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
         measure: undefined,
@@ -129,9 +143,11 @@ export class AmpForm {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).then(response => {
+        this.actions_.trigger(this.form_, 'submit-success', null);
         this.setState_(FormState_.SUBMIT_SUCCESS);
         this.renderTemplate_(response || {});
       }).catch(error => {
+        this.actions_.trigger(this.form_, 'submit-error', null);
         this.setState_(FormState_.SUBMIT_ERROR);
         this.renderTemplate_(error.responseJson || {});
         rethrowAsync('Form submission failed:', error);

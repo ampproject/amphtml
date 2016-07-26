@@ -689,6 +689,7 @@ describe('ViewportBindingNatural', () => {
   let binding;
   let windowApi;
   let documentElement;
+  let documentBody;
   let windowEventHandlers;
 
   beforeEach(() => {
@@ -702,7 +703,14 @@ describe('ViewportBindingNatural', () => {
     documentElement = {
       style: {},
     };
-    windowApi.document = {documentElement};
+    documentBody = {
+      style: {},
+    };
+    windowApi.document = {
+      documentElement,
+      body: documentBody,
+      defaultView: windowApi,
+    };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNatural_(windowApi);
   });
@@ -710,6 +718,10 @@ describe('ViewportBindingNatural', () => {
   afterEach(() => {
     windowMock.verify();
     sandbox.restore();
+  });
+
+  it('should setup overflow:visible on body', () => {
+    expect(documentBody.style.overflow).to.equal('visible');
   });
 
   it('should NOT require fixed layer transferring', () => {

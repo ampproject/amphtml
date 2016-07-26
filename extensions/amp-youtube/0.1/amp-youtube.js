@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
+import {tryParseJson} from '../../../src/json';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {getDataParamsFromAttributes} from '../../../src/dom';
 import {timer} from '../../../src/timer';
-import {user} from '../../../src/log';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
@@ -105,7 +106,7 @@ class AmpYoutube extends AMP.BaseElement {
       this.playerReadyResolver_ = resolve;
     });
 
-    this.getWin().addEventListener(
+    this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
 
     return loadPromise(iframe)
@@ -146,13 +147,11 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    let data;
     if (!event.data || event.data.indexOf('{') != 0) {
       return;  // Doesn't look like JSON.
     }
-    try {
-      data = JSON.parse(event.data);
-    } catch (unused) {
+    const data = tryParseJson(event.data);
+    if (data === undefined) {
       return; // We only process valid JSON.
     }
     if (data.event == 'onReady') {
@@ -194,6 +193,7 @@ class AmpYoutube extends AMP.BaseElement {
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.width = this.width_;
     imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
     this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);

@@ -273,7 +273,7 @@ describe('Resources', () => {
   });
 });
 
-describe('Resources schedulePause', () => {
+describe('Resources pause/resume scheduling', () => {
 
   let sandbox;
   let resources;
@@ -306,6 +306,8 @@ describe('Resources schedulePause', () => {
       getPlaceholder() {
       },
       pauseCallback() {
+      },
+      resumeCallback() {
       },
       unlayoutCallback() {
         return false;
@@ -342,45 +344,86 @@ describe('Resources schedulePause', () => {
     sandbox.restore();
   });
 
-  it('should not throw with a single element', () => {
-    expect(() => {
-      resources.schedulePause(parent, child1);
-    }).to.not.throw();
-  });
+  describe('schedulePause', () => {
+    it('should not throw with a single element', () => {
+      expect(() => {
+        resources.schedulePause(parent, child1);
+      }).to.not.throw();
+    });
 
-  it('should not throw with an array of elements', () => {
-    expect(() => {
-      resources.schedulePause(parent, [child1, child2]);
-    }).to.not.throw();
-  });
+    it('should not throw with an array of elements', () => {
+      expect(() => {
+        resources.schedulePause(parent, [child1, child2]);
+      }).to.not.throw();
+    });
 
-  it('should be ok with non amp children', () => {
-    expect(() => {
+    it('should be ok with non amp children', () => {
+      expect(() => {
+        resources.schedulePause(parent, children);
+        resources.schedulePause(parent, child0);
+      }).to.not.throw();
+    });
+
+    it('should call pauseCallback on custom element', () => {
+      const stub1 = sandbox.stub(child1, 'pauseCallback');
+      const stub2 = sandbox.stub(child2, 'pauseCallback');
+
       resources.schedulePause(parent, children);
-    }).to.not.throw();
+      expect(stub1.calledOnce).to.be.true;
+      expect(stub2.calledOnce).to.be.true;
+    });
+
+    it('should call unlayoutCallback when unlayoutOnPause', () => {
+      const stub1 = sandbox.stub(child1, 'unlayoutCallback');
+      const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+      sandbox.stub(child1, 'unlayoutOnPause').returns(true);
+
+      resources.schedulePause(parent, children);
+      expect(stub1.calledOnce).to.be.true;
+      expect(stub2.calledOnce).to.be.false;
+    });
   });
 
-  it('should call pauseCallback on custom element', () => {
-    const stub1 = sandbox.stub(child1, 'pauseCallback');
-    const stub2 = sandbox.stub(child2, 'pauseCallback');
+  describe('scheduleResume', () => {
+    beforeEach(() => {
+      // Pause one child.
+      resources.schedulePause(parent, child1);
+    });
 
-    resources.schedulePause(parent, children);
-    expect(stub1.calledOnce).to.be.true;
-    expect(stub2.calledOnce).to.be.true;
+    it('should not throw with a single element', () => {
+      expect(() => {
+        resources.scheduleResume(parent, child1);
+      }).to.not.throw();
+    });
+
+    it('should not throw with an array of elements', () => {
+      expect(() => {
+        resources.scheduleResume(parent, [child1, child2]);
+      }).to.not.throw();
+    });
+
+    it('should be ok with non amp children', () => {
+      expect(() => {
+        resources.scheduleResume(parent, children);
+        resources.scheduleResume(parent, child0);
+      }).to.not.throw();
+    });
+
+    it('should call resumeCallback on paused custom elements', () => {
+      const stub1 = sandbox.stub(child1, 'resumeCallback');
+
+      resources.scheduleResume(parent, children);
+      expect(stub1.calledOnce).to.be.true;
+    });
+
+    it('should not call resumeCallback on non-paused custom elements', () => {
+      const stub2 = sandbox.stub(child2, 'resumeCallback');
+
+      resources.scheduleResume(parent, children);
+      expect(stub2.calledOnce).to.be.false;
+    });
   });
-
-  it('should call unlayoutCallback when unlayoutOnPause', () => {
-    const stub1 = sandbox.stub(child1, 'unlayoutCallback');
-    const stub2 = sandbox.stub(child2, 'unlayoutCallback');
-    sandbox.stub(child1, 'unlayoutOnPause').returns(true);
-
-    resources.schedulePause(parent, children);
-    expect(stub1.calledOnce).to.be.true;
-    expect(stub2.calledOnce).to.be.false;
-  });
-
 });
-
 
 describe('Resources schedulePreload', () => {
 

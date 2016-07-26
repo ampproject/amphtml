@@ -16,7 +16,6 @@
 
 var fs = require('fs-extra');
 var argv = require('minimist')(process.argv.slice(2));
-var windowConfig = require('../window-config');
 var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
@@ -89,9 +88,7 @@ function compile(entryModuleFilename, outputDir,
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
-    var wrapper = (options.includeWindowConfig ?
-        windowConfig.getTemplate() : '') +
-        '(function(){var process={env:{NODE_ENV:"production"}};' +
+    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
         '%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',
@@ -181,7 +178,7 @@ function compile(entryModuleFilename, outputDir,
       // applied
       compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
-      continueWithWarnings: true,
+      continueWithWarnings: false,
       tieredCompilation: true,  // Magic speed up.
       compilerFlags: {
         compilation_level: 'SIMPLE_OPTIMIZATIONS',
@@ -206,10 +203,19 @@ function compile(entryModuleFilename, outputDir,
         source_map_location_mapping:
             '|' + sourceMapBase,
         warning_level: 'DEFAULT',
+        // Turn off warning for "Unknown @define" since we use define to pass
+        // args such as FORTESTING to our runner.
+        jscomp_off: 'unknownDefines',
         define: [],
         hide_warnings_for: [
           'node_modules/',
           'build/patched-module/',
+          // TODO: The following three are whitelisted only because they're
+          // blocking an unrelated PR.  But they appear to contain real type
+          // errors and should be fixed at some point.
+          'src/service.js',
+          '3p/environment.js',
+          'src/document-state.js'
         ],
       }
     };
@@ -221,7 +227,9 @@ function compile(entryModuleFilename, outputDir,
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
       compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
     }
-
+    if (argv.pseudo_names) {
+      compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');
+    }
     if (argv.fortesting) {
       compilerOptions.compilerFlags.define.push('FORTESTING=true');
     }

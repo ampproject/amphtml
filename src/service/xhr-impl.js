@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {
   addParamToUrl,
   getSourceOrigin,
@@ -47,6 +47,13 @@ const allowedMethods_ = ['GET', 'POST'];
 /** @private @const {!Array<function(*):boolean>} */
 const allowedJsonBodyTypes_ = [isArray, isObject];
 
+/** @private @enum {number} Allowed fetch responses. */
+const allowedFetchTypes_ = {
+  document: 1,
+  text: 2,
+  arraybuffer: 3,
+};
+
 /** @private @const {string} */
 const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
@@ -56,7 +63,9 @@ const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
+ *
  * @package Visible for type.
+ * @visibleForTesting
  */
 export class Xhr {
 
@@ -86,7 +95,7 @@ export class Xhr {
           'Only credentials=include support: %s', opt_init.credentials);
     }
     // Fallback to xhr polyfill since `fetch` api does not support
-    // responseType = 'document'. We do this so we dont have to do any parsing
+    // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
     if (opt_init && opt_init.responseType == 'document') {
       return fetchPolyfill.apply(null, arguments);
@@ -98,7 +107,7 @@ export class Xhr {
    * Performs the final initialization and requests the fetch. It does three
    * main things: (1) It adds "__amp_source_origin" URL parameter with source
    * origin; (2) It verifies "AMP-Access-Control-Allow-Source-Origin" if it's
-   * returned in the response; and (3) If requires
+   * returned in the response; and (3) It requires
    * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
    * if the `init.requireAmpResponseSourceOrigin = true`.
    *
@@ -108,15 +117,7 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, opt_init) {
-    // Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
-    // able to set a header (e.g. AMP-Source-Origin), but this will force
-    // preflight request on all CORS request.
-    const sourceOrigin = getSourceOrigin(this.win.location.href);
-    const url = parseUrl(input);
-    const query = parseQueryString(url.search);
-    user.assert(!(SOURCE_ORIGIN_PARAM in query),
-        'Source origin is not allowed in %s', input);
-    input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    input = this.getCorsUrl(this.win, input);
     return this.fetch_(input, opt_init).catch(reason => {
       user.assert(false, 'Fetch failed %s: %s', input,
           reason && reason.message);
@@ -124,6 +125,7 @@ export class Xhr {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
+        const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user.assert(allowSourceOriginHeader == sourceOrigin,
@@ -167,7 +169,7 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!HTMLDocument>}
+   * @return {!Promise<!Document>}
    */
   fetchDocument(input, opt_init) {
     const init = opt_init || {};
@@ -179,6 +181,24 @@ export class Xhr {
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response);
     }).then(response => response.document_());
+  }
+
+  /**
+   * @param {string} input URL
+   * @param {FetchInitDef} opt_init Fetch options object.
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetch(input, opt_init) {
+    const init = opt_init || {};
+    // The "real" fetch API does not specify the response type in the request.
+    // The fetch response object lets you extract the body in any of the types.
+    // Here, specify 'arraybuffer' in case we use the polyfill, since that is
+    // what we will use when we use fetch.
+    init.responseType = 'arraybuffer';
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    return this.fetchAmpCors_(input, init).then(response =>
+      assertSuccess(response));
   }
 
   /**
@@ -197,6 +217,24 @@ export class Xhr {
       return assertSuccess(response);
     });
   }
+
+  /**
+   * Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
+   * able to set a header (e.g. AMP-Source-Origin), but this will force
+   * preflight request on all CORS request.
+   * @param {!Window} win
+   * @param {string} url
+   * @return {string}
+   */
+  getCorsUrl(win, url) {
+    const sourceOrigin = getSourceOrigin(win.location.href);
+    const parsedUrl = parseUrl(url);
+    const query = parseQueryString(parsedUrl.search);
+    user.assert(!(SOURCE_ORIGIN_PARAM in query),
+        'Source origin is not allowed in %s', url);
+    return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+  }
+
 }
 
 
@@ -269,8 +307,8 @@ export function fetchPolyfill(input, opt_init) {
       xhr.withCredentials = true;
     }
 
-    if (init.responseType == 'document') {
-      xhr.responseType = 'document';
+    if (init.responseType in allowedFetchTypes_) {
+      xhr.responseType = init.responseType;
     }
 
     if (init.headers) {
@@ -310,7 +348,6 @@ export function fetchPolyfill(input, opt_init) {
     }
   });
 }
-
 
 /**
  * @param {string} method
@@ -380,10 +417,10 @@ export function assertSuccess(response) {
  */
 export class FetchResponse {
   /**
-   * @param {!XMLHttpRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
 
     /** @type {number} */
@@ -426,7 +463,7 @@ export class FetchResponse {
 
   /**
    * Reads the xhr responseXML.
-   * @return {!Promise<!HTMLDocument>}
+   * @return {!Promise<!Document>}
    * @private
    */
   document_() {
@@ -437,6 +474,19 @@ export class FetchResponse {
         'Content-Type: text/html header.');
     return Promise.resolve(this.xhr_.responseXML);
   }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * ArrayBuffer.
+   * @return {!Promise<ArrayBuffer>}
+   */
+  arrayBuffer() {
+    dev.assert(this.xhr_.responseType == 'arraybuffer',
+               'responseType was not "arraybuffer"');
+    dev.assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    return Promise.resolve(this.xhr_.response);
+  }
 }
 
 
@@ -445,10 +495,10 @@ export class FetchResponse {
  */
 class FetchResponseHeaders {
   /**
-   * @param {!XMLHttpRequest} xhr
+   * @param {!XMLHttpRequest|!XDomainRequest} xhr
    */
   constructor(xhr) {
-    /** @private @const {!XMLHttpRequest} */
+    /** @private @const {!XMLHttpRequest|!XDomainRequest} */
     this.xhr_ = xhr;
   }
 
@@ -467,7 +517,5 @@ class FetchResponseHeaders {
  * @return {!Xhr}
  */
 export function installXhrService(window) {
-  return getService(window, 'xhr', () => {
-    return new Xhr(window);
-  });
+  return fromClass(window, 'xhr', Xhr);
 };

@@ -15,7 +15,7 @@
  */
 
 import {closestByTag} from './dom';
-import {getService} from './service';
+import {fromClass} from './service';
 import {dev} from './log';
 import {historyFor} from './history';
 import {openWindowDialog} from './dom';
@@ -43,9 +43,7 @@ export function uninstallGlobalClickListener(window) {
  * @param {!Window} window
  */
 function clickHandlerFor(window) {
-  return getService(window, 'clickhandler', () => {
-    return new ClickHandler(window);
-  });
+  return fromClass(window, 'clickhandler', ClickHandler);
 }
 
 /**

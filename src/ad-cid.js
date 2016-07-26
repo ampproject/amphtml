@@ -17,6 +17,7 @@
 import {cidForOrNull} from './cid';
 import {clientIdScope} from '../ads/_config';
 import {userNotificationManagerFor} from './user-notification';
+import {dev} from '../src/log';
 
 
 /**
@@ -32,19 +33,23 @@ export function getAdCid(adElement) {
   if (!(scope || consentId)) {
     return Promise.resolve();
   }
-  return cidForOrNull(adElement.getWin()).then(cidService => {
+  return cidForOrNull(adElement.win).then(cidService => {
     if (!cidService) {
       return;
     }
     let consent = Promise.resolve();
     if (consentId) {
-      consent = userNotificationManagerFor(adElement.getWin()).then(service => {
+      consent = userNotificationManagerFor(adElement.win).then(service => {
         return service.get(consentId);
       });
       if (!scope && consentId) {
         return consent;
       }
     }
-    return cidService.get(scope, consent);
+    return cidService.get(scope, consent).catch(error => {
+      // Not getting a CID is not fatal.
+      dev.error('ad-cid', error);
+      return undefined;
+    });
   });
 }

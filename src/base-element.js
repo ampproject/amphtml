@@ -54,7 +54,8 @@ import {vsyncFor} from './vsync';
  *           ||
  *           || buildCallback
  *           || !getPlaceholder() => createPlaceholderCallback
- *           || preconnectCallback may be called N times after this.
+ *           || preconnectCallback may be called N times after this, but only
+ *           || after the doc becomes visible.
  *           || pauseCallback may be called N times after this.
  *           || resumeCallback may be called N times after this.
  *           ||
@@ -137,14 +138,17 @@ export class BaseElement {
     /** @package {boolean} */
     this.inViewport_ = false;
 
+    /** @public @const {!Window}  */
+    this.win = element.ownerDocument.defaultView;
+
     /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
-    this.actionMap_ = this.getWin().Object.create(null);
+    this.actionMap_ = this.win.Object.create(null);
 
     /** @protected {!./preconnect.Preconnect} */
-    this.preconnect = preconnectFor(this.getWin());
+    this.preconnect = preconnectFor(this.win);
 
     /** @private {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(this.getWin());
+    this.resources_ = resourcesFor(this.win);
   }
 
   /**
@@ -162,14 +166,17 @@ export class BaseElement {
     return this.layout_;
   }
 
-  /** @protected @return {!Window} */
+  /**
+   * DO NOT CALL. Retained for backward compat during rollout.
+   * @protected @return {!Window}
+   */
   getWin() {
-    return this.element.ownerDocument.defaultView;
+    return this.win;
   }
 
   /** @protected @return {!./service/vsync-impl.Vsync} */
   getVsync() {
-    return vsyncFor(this.getWin());
+    return vsyncFor(this.win);
   }
 
   /**
@@ -210,6 +217,24 @@ export class BaseElement {
    */
   isInViewport() {
     return this.inViewport_;
+  }
+
+  /**
+   * This method is called when the element is added to DOM for the first time
+   * and before `buildCallback` to give the element a chance to redirect its
+   * implementation to another `BaseElement` implementation. The returned
+   * value can be either `null` or `undefined` to indicate that no redirection
+   * will take place; `BaseElement` instance to upgrade immediately; or a
+   * promise to upgrade with the resolved `BaseElement` instance.
+   *
+   * Notice that calls to `upgradeCallback` are not recursive. I.e. this
+   * callback will not be called on the returned instance again.
+   *
+   * @return {!BaseElement|!Promise<!BaseElement>|null}
+   */
+  upgradeCallback() {
+    // Subclasses may override.
+    return null;
   }
 
   /**
@@ -551,7 +576,7 @@ export class BaseElement {
    * @return {!./service/viewport-impl.Viewport}
    */
   getViewport() {
-    return viewportFor(this.getWin());
+    return viewportFor(this.win);
   }
 
  /**
@@ -579,6 +604,14 @@ export class BaseElement {
    */
   schedulePause(elements) {
     this.resources_.schedulePause(this.element, elements);
+  }
+
+  /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  scheduleResume(elements) {
+    this.resources_.scheduleResume(this.element, elements);
   }
 
   /**
@@ -690,7 +723,7 @@ export class BaseElement {
    * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   requestFullOverlay() {
-    viewerFor(this.getWin()).requestFullOverlay();
+    viewerFor(this.win).requestFullOverlay();
   }
 
   /**
@@ -700,7 +733,25 @@ export class BaseElement {
    * TODO(dvoytenko, #3406): Remove as deprecated.
    */
   cancelFullOverlay() {
-    viewerFor(this.getWin()).cancelFullOverlay();
+    viewerFor(this.win).cancelFullOverlay();
+  }
+
+  /**
+   * Collapses the element, setting it to `display: none`, and notifies its
+   * owner (if there is one) through {@link collapsedCallback} that the element
+   * is no longer visible.
+   */
+  collapse() {
+    this.resources_.collapseElement(this.element);
+  }
+
+  /**
+   * Called every time an owned AmpElement collapses itself.
+   * See {@link collapse}.
+   * @param {!AmpElement} unusedElement
+   */
+  collapsedCallback(unusedElement) {
+    // Subclasses may override.
   }
 
   /**

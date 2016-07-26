@@ -49,6 +49,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('industrybrains');
     expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
+    expect(registrations).to.include.key('widespace');
     expect(registrations).to.include.key('yieldmo');
     expect(registrations).to.include.key('sortable');
     expect(registrations).to.include.key('triplelift');
@@ -66,6 +67,9 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('adgeneration');
     expect(registrations).to.include.key('genieessp');
     expect(registrations).to.include.key('yieldone');
+    expect(registrations).to.include.key('kargo');
+    expect(registrations).to.include.key('amoad');
+    expect(registrations).to.include.key('zergnet');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {

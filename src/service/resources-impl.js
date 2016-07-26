@@ -24,9 +24,8 @@ import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {inputFor} from '../input';
-import {installFramerateService} from './framerate-impl';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
@@ -34,6 +33,7 @@ import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
+import {toggle} from '../style';
 
 
 const TAG_ = 'Resources';
@@ -47,6 +47,7 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+
 
 /**
  * The internal structure of a ChangeHeightRequest.
@@ -118,7 +119,7 @@ export class Resources {
     this.lastVelocity_ = 0;
 
     /** @const {!Pass} */
-    this.pass_ = new Pass(() => this.doPass_());
+    this.pass_ = new Pass(this.win, () => this.doPass_());
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -155,9 +156,6 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
-    /** @private @const {!./framerate-impl.Framerate}  */
-    this.framerate_ = installFramerateService(this.win);
-
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
       this.viewer_.getVisibilityState()
@@ -173,7 +171,6 @@ export class Resources {
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = timer.now();
-      this.framerate_.collect();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
@@ -406,6 +403,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev.fine(TAG_, 'element removed:', resource.debugid);
   }
@@ -457,6 +455,7 @@ export class Resources {
   /**
    * Invokes `unload` on the elements' resource which in turn will invoke
    * the `documentBecameInactive` callback on the custom element.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -466,6 +465,22 @@ export class Resources {
 
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.pause();
+    });
+  }
+
+  /**
+   * Invokes `resume` on the elements' resource which in turn will invoke
+   * `resumeCallback` only on paused custom elements.
+   * Resources that call `schedulePause` must also call `scheduleResume`.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleResume(parentElement, subElements) {
+    const parentResource = Resource.forElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.resume();
     });
   }
 
@@ -605,12 +620,29 @@ export class Resources {
     });
   }
 
+  collapseElement(element) {
+    const box = this.viewport_.getLayoutRect(element);
+    const resource = Resource.forElement(element);
+    if (box.width != 0 && box.height != 0) {
+      this.setRelayoutTop_(box.top);
+    }
+    toggle(element, false);
+
+    const owner = resource.getOwner();
+    if (owner) {
+      owner.collapsedCallback(element);
+    }
+
+    this.schedulePass(FOUR_FRAME_DELAY_);
+  }
+
   /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
+   * @return {boolean}
    */
   schedulePass(opt_delay) {
-    this.pass_.schedule(opt_delay);
+    return this.pass_.schedule(opt_delay);
   }
 
   /**
@@ -794,7 +826,7 @@ export class Resources {
               const box = request.resource.getLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth);
+                  request.newHeight, request.newWidth, request.callback);
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
@@ -886,7 +918,7 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    const toUnload = [];
+    let toUnload;
     if (relayoutCount > 0 || remeasureCount > 0 ||
             relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -901,6 +933,9 @@ export class Resources {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
+            if (!toUnload) {
+              toUnload = [];
+            }
             toUnload.push(r);
           }
         }
@@ -908,7 +943,7 @@ export class Resources {
     }
 
     // Unload all in one cycle.
-    if (toUnload.length > 0) {
+    if (toUnload) {
       this.vsync_.mutate(() => {
         toUnload.forEach(r => {
           r.unload();
@@ -936,7 +971,23 @@ export class Resources {
       ? expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Schedule elements for layout within a reasonable distance from
+    // Phase 3: Trigger "viewport enter/exit" events.
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (r.hasOwner()) {
+        continue;
+      }
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
+      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
+          (r.isFixed() || r.overlaps(visibleRect)));
+      r.setInViewport(shouldBeInViewport);
+    }
+
+    // Phase 4: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -951,22 +1002,6 @@ export class Resources {
           this.scheduleLayoutOrPreload_(r, /* layout */ true);
         }
       }
-    }
-
-    // Phase 4: Trigger "viewport enter/exit" events.
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      if (r.hasOwner()) {
-        continue;
-      }
-      // Note that when the document is not visible, neither are any of its
-      // elements to reduce CPU cycles.
-      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-      // layers. This is currently a short-term fix to the problem that
-      // the fixed elements get incorrect top coord.
-      const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          (r.isFixed() || r.overlaps(visibleRect)));
-      r.setInViewport(shouldBeInViewport);
     }
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
@@ -1036,9 +1071,6 @@ export class Resources {
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
             .catch(reportError);
-        if (task.resource.getState() == ResourceState.LAYOUT_SCHEDULED) {
-          this.framerate_.collect(task.resource.element);
-        }
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
@@ -1080,7 +1112,7 @@ export class Resources {
    * This priority also depends on whether or not the user is scrolling towards
    * this element or away from it.
    *
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   calcTaskScore_(task) {
@@ -1111,7 +1143,7 @@ export class Resources {
    * against the age of the executing task. If it has been in executing for
    * some time, the penalty is reduced.
    *
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   calcTaskTimeout_(task) {
@@ -1145,7 +1177,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @private
    */
   reschedule_(task) {
@@ -1155,7 +1187,7 @@ export class Resources {
   }
 
   /**
-   * @param {!TaskDef} task
+   * @param {!./task-queue.TaskDef} task
    * @param {boolean} success
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
@@ -1403,7 +1435,6 @@ export class Resources {
     const hidden = VisibilityState.HIDDEN;
     const paused = VisibilityState.PAUSED;
     const inactive = VisibilityState.INACTIVE;
-
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
@@ -1418,8 +1449,11 @@ export class Resources {
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
         }
         if (this.visible_) {
-          dev.fine(TAG_, 'next pass:', delay);
-          this.schedulePass(delay);
+          if (this.schedulePass(delay)) {
+            dev.fine(TAG_, 'next pass:', delay);
+          } else {
+            dev.fine(TAG_, 'pass already scheduled');
+          }
         } else {
           dev.fine(TAG_, 'document is not visible: no scheduling');
         }
@@ -1529,16 +1563,13 @@ function elements_(elements) {
  *   height: (number|undefined),
  *   width: (number|undefined)
  * }}
- * @private
  */
-let SizeDef;
+export let SizeDef;
 
 /**
  * @param {!Window} win
  * @return {!Resources}
  */
 export function installResourcesService(win) {
-  return getService(win, 'resources', () => {
-    return new Resources(win);
-  });
+  return fromClass(win, 'resources', Resources);
 };

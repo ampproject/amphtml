@@ -18,6 +18,7 @@
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
+import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
@@ -27,6 +28,7 @@ import {timer} from './timer';
 import {user} from './log';
 import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
+import {urls} from './config';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -78,6 +80,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    startTime,
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
         timer.now(),
@@ -149,10 +152,8 @@ export function addDataAndJsonAttributes_(element, attributes) {
   }
   const json = element.getAttribute('json');
   if (json) {
-    let obj;
-    try {
-      obj = JSON.parse(json);
-    } catch (e) {
+    const obj = tryParseJson(json);
+    if (obj === undefined) {
       throw user.createError(
           'Error parsing JSON in json attribute in element %s',
           element);
@@ -164,18 +165,18 @@ export function addDataAndJsonAttributes_(element, attributes) {
 }
 
 /**
- * Prefetches URLs related to the bootstrap iframe.
+ * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} parentWindow
  * @return {string}
  */
-export function prefetchBootstrap(window) {
+export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
-  preconnect.prefetch(url, 'document');
+  preconnect.preload(url, 'document');
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.prefetch(
-      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js', 'script');
+  preconnect.preload(
+      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
 }
 
 /**
@@ -214,7 +215,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
         '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
-      '.ampproject.net/$internalRuntimeVersion$/frame.html';
+      `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
 }
 
 /**

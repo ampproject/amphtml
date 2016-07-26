@@ -64,12 +64,13 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
+   * @param {boolean=} shouldPreventDefault
    * @return {!Gestures}
    */
-  static get(element) {
+  static get(element, shouldNotPreventDefault = false) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element);
+      res = new Gestures(element, shouldNotPreventDefault);
       element[PROP_] = res;
     }
     return res;
@@ -78,7 +79,7 @@ export class Gestures {
   /**
    * @param {!Element} element
    */
-  constructor(element) {
+  constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -97,6 +98,9 @@ export class Gestures {
     /** @private {?GestureRecognizer} */
     this.eventing_ = null;
 
+    /** @private {boolean} */
+    this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+
     /**
      * This variable indicates that the eventing has stopped on this
      * event cycle.
@@ -105,7 +109,8 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(this.doPass_.bind(this));
+    this.pass_ = new Pass(element.ownerDocument.defaultView,
+        this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();
@@ -378,7 +383,9 @@ export class Gestures {
     }
     if (cancelEvent) {
       event.stopPropagation();
-      event.preventDefault();
+      if (!this.shouldNotPreventDefault_) {
+        event.preventDefault();
+      }
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;

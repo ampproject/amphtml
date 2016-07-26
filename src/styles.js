@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {setStyles, setStyle} from './style';
-import {platformFor} from './platform';
+import {setStyles} from './style';
 import {waitForBody} from './dom';
+import {platform} from './platform';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
 
@@ -39,48 +39,97 @@ import {dev} from './log';
  * @param {string=} opt_ext
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
-  if (platformFor(doc.defaultView).isIos() && opt_isRuntimeCss) {
-    setStyle(doc.documentElement, 'cursor', 'pointer');
-  }
-  const style = doc.createElement('style');
-  style.textContent = cssText;
-  let afterElement = null;
-  // Make sure that we place style tags after the main runtime CSS. Otherwise
-  // the order is random.
-  if (opt_isRuntimeCss) {
-    style.setAttribute('amp-runtime', '');
-  } else {
-    style.setAttribute('amp-extension', opt_ext || '');
-    afterElement = doc.querySelector('style[amp-runtime]');
-  }
-  insertAfterOrAtStart(dev.assert(doc.head), style, afterElement);
+  const style = insertStyleElement(
+      doc,
+      dev.assert(doc.head),
+      cssText,
+      opt_isRuntimeCss || false,
+      opt_ext || null);
+
   // Styles aren't always available synchronously. E.g. if there is a
   // pending style download, it will have to finish before the new
   // style is visible.
   // For this reason we poll until the style becomes available.
-  const done = () => {
-    const sheets = doc.styleSheets;
-    for (let i = 0; i < sheets.length; i++) {
-      const sheet = sheets[i];
-      if (sheet.ownerNode == style) {
-        return true;
-      }
-    }
-    return false;
-  };
   // Sync case.
-  if (done()) {
+  if (styleLoaded(doc, style)) {
     cb();
     return;
   }
   // Poll until styles are available.
   const interval = setInterval(() => {
-    if (done()) {
+    if (styleLoaded(doc, style)) {
       clearInterval(interval);
       cb();
     }
   }, 4);
 }
+
+
+/**
+ * Adds the given css text to the given shadow root.
+ *
+ * The style tags will be at the beginning of the shadow root before all author
+ * styles. One element can be the main runtime CSS. This is guaranteed
+ * to always be the first stylesheet in the doc.
+ *
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} cssText
+ * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
+ *     as the first element in head and all style elements will be positioned
+ *     after.
+ * @param {string=} opt_ext
+ */
+export function installStylesForShadowRoot(shadowRoot, cssText,
+    opt_isRuntimeCss, opt_ext) {
+  insertStyleElement(
+      shadowRoot.ownerDocument,
+      shadowRoot,
+      cssText,
+      opt_isRuntimeCss || false,
+      opt_ext || null);
+}
+
+
+/**
+ * Creates the properly configured style element.
+ * @param {!Document} doc
+ * @param {!Element|!ShadowRoot} cssRoot
+ * @param {string} cssText
+ * @param {boolean} isRuntimeCss
+ * @param {?string} ext
+ * @return {!Element}
+ */
+function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
+  const style = doc.createElement('style');
+  style.textContent = cssText;
+  let afterElement = null;
+  // Make sure that we place style tags after the main runtime CSS. Otherwise
+  // the order is random.
+  if (isRuntimeCss) {
+    style.setAttribute('amp-runtime', '');
+    cssRoot.runtimeStyleElement = style;
+  } else {
+    style.setAttribute('amp-extension', ext || '');
+    afterElement = cssRoot.runtimeStyleElement;
+  }
+  insertAfterOrAtStart(cssRoot, style, afterElement);
+  return style;
+}
+
+
+/**
+ * Copies runtime styles from the ampdoc context into a shadow root.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!ShadowRoot} shadowRoot
+ */
+export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
+  const style = dev.assert(
+      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
+      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
+  const cssText = style.textContent;
+  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
+}
+
 
 /**
  * Sets the document's body opacity to 1.
@@ -97,6 +146,17 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
       visibility: 'visible',
       animation: 'none',
     });
+
+    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
+    // the fix for https://github.com/ampproject/amphtml/issues/4047
+    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
+    if (platform.isSafari()) {
+      if (doc.body.style['webkitAnimation'] !== undefined) {
+        doc.body.style['webkitAnimation'] = 'none';
+      } else if (doc.body.style['WebkitAnimation'] !== undefined) {
+        doc.body.style['WebkitAnimation'] = 'none';
+      }
+    }
   };
   waitForBody(doc, () => {
     const extensionsPromise = opt_waitForExtensions ?
@@ -109,6 +169,22 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
   });
 }
 
+/**
+ * Checks whether a style element was registered in the DOM.
+ * @param {!Document} doc
+ * @param {!Element} style
+ * @return {boolean}
+ */
+function styleLoaded(doc, style) {
+  const sheets = doc.styleSheets;
+  for (let i = 0; i < sheets.length; i++) {
+    const sheet = sheets[i];
+    if (sheet.ownerNode == style) {
+      return true;
+    }
+  }
+  return false;
+};
 
 /**
  * Insert the element in the root after the element named after or

@@ -17,14 +17,14 @@
 import {Observable} from '../observable';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 import {timer} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-
+import {urls} from '../config';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -208,7 +208,7 @@ export class Viewer {
     // realistic iOS environment.
     if (platform.isIos() &&
             this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
-            (getMode().localDev || getMode().development)) {
+            (getMode(win).localDev || getMode(win).development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     dev.fine(TAG_, '- viewportType:', this.viewportType_);
@@ -226,7 +226,8 @@ export class Viewer {
      * a web view.
      * @private @const {boolean}
      */
-    this.isEmbedded_ = this.isIframed_ || this.params_['webview'] === '1';
+    this.isEmbedded_ = (this.isIframed_ || this.params_['webview'] === '1') &&
+        !this.win.AMP_TEST_IFRAME;
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -431,7 +432,7 @@ export class Viewer {
    *     requested the navigation.
    */
   navigateTo(url, requestedBy) {
-    dev.assert(url.indexOf('https://cdn.ampproject.org/') == 0,
+    dev.assert(url.indexOf(urls.cdn) == 0,
         'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', {
@@ -672,7 +673,7 @@ export class Viewer {
   /**
    * Whether the viewer has been whitelisted for more sensitive operations
    * such as customizing referrer.
-   * @return {boolean}
+   * @return {!Promise<boolean>}
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
@@ -789,10 +790,15 @@ export class Viewer {
 
   /**
    * Retrieves the Base CID from the viewer
-   * @return {!Promise<string>}
+   * @return {!Promise<string|undefined>}
    */
   getBaseCid() {
-    return this.sendMessage('cid', undefined, true);
+    return this.isTrustedViewer().then(trusted => {
+      if (!trusted) {
+        return undefined;
+      }
+      return this.sendMessage('cid', undefined, true);
+    });
   }
 
   /**
@@ -1051,7 +1057,5 @@ export let ViewerHistoryPoppedEventDef;
  * @return {!Viewer}
  */
 export function installViewerService(window) {
-  return getService(window, 'viewer', () => {
-    return new Viewer(window);
-  });
+  return fromClass(window, 'viewer', Viewer);
 };

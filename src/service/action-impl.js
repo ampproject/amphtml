@@ -15,7 +15,7 @@
  */
 
 import {dev, user} from '../log';
-import {getServiceForDoc} from '../service';
+import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
@@ -97,10 +97,11 @@ export class ActionService {
     this.globalMethodHandlers_ = {};
 
     /** @private {!./vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(ampdoc.getWin());
+    this.vsync_ = vsyncFor(ampdoc.win);
 
     // Add core events.
     this.addEvent('tap');
+    this.addEvent('submit');
   }
 
   /**
@@ -116,6 +117,10 @@ export class ActionService {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
+      });
+    } else if (name == 'submit') {
+      this.ampdoc.getRootNode().addEventListener('submit', event => {
+        this.trigger(event.target, 'submit', event);
       });
     }
   }
@@ -608,7 +613,5 @@ function isNum(c) {
  * @return {!ActionService}
  */
 export function installActionServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'action', ampdoc => {
-    return new ActionService(ampdoc);
-  });
+  return fromClassForDoc(ampdoc, 'action', ActionService);
 };

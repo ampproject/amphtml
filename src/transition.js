@@ -26,7 +26,7 @@ import * as st from './style';
  * transition and "false" for ongoing.
  * @typedef {function(number, boolean):?}
  */
-let TransitionDef;
+export let TransitionDef;
 
 
 export const NOOP = function(unusedTime) {return null;};
@@ -52,7 +52,7 @@ export function all(transitions) {
  * Returns the specified transition with the time curved via specified curve
  * function.
  * @param {!TransitionDef<RESULT>} transition
- * @param {!Curve|string} curve
+ * @param {!./curve.CurveDef|string} curve
  * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */

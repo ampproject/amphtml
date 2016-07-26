@@ -772,13 +772,13 @@ describe('Slides functional', () => {
       slides.scheduleLayout = sandbox.spy();
       slides.updateInViewport = sandbox.spy();
       slides.schedulePause = sandbox.spy();
+      slides.scheduleResume = sandbox.spy();
       slides.schedulePreload = sandbox.spy();
-
-      Animation.animate = () => {
+      sandbox.stub(Animation, 'animate', () => {
         return {
           thenAlways: cb => cb(),
         };
-      };
+      });
     });
     afterEach(() => {
       sandbox.restore();
@@ -818,7 +818,13 @@ describe('Slides functional', () => {
       slides.scheduleLayout = sandbox.spy();
       slides.updateInViewport = sandbox.spy();
       slides.schedulePause = sandbox.spy();
+      slides.scheduleResume = sandbox.spy();
       slides.schedulePreload = sandbox.spy();
+      sandbox.stub(Animation, 'animate', () => {
+        return {
+          thenAlways: cb => cb(),
+        };
+      });
     });
     afterEach(() => {
       sandbox.restore();
@@ -858,6 +864,19 @@ describe('Slides functional', () => {
       expect(slide2.style.visibility).to.be.equal('hidden');
       expect(slides.scheduleLayout.calledWith(slide0)).to.be.true;
       expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
+    });
+
+    it('should pause hidden slides and resume visible ones', () => {
+      expect(slides.schedulePause.callCount).to.equal(0);
+      expect(slides.scheduleResume.callCount).to.equal(0);
+
+      slides.goCallback(1, /*animate*/ true);
+      expect(slides.schedulePause.withArgs(slide0).callCount).to.equal(1);
+      expect(slides.scheduleResume.withArgs(slide1).callCount).to.equal(1);
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slides.schedulePause.withArgs(slide1).callCount).to.equal(1);
+      expect(slides.scheduleResume.withArgs(slide0).callCount).to.equal(1);
     });
   });
 });

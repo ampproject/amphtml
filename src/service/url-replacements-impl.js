@@ -16,9 +16,10 @@
 
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
+import {variantForOrNull} from '../variant-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
@@ -30,7 +31,8 @@ import {activityFor} from '../activity';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
-
+const EXPERIMENT_DELIMITER = '!';
+const VARIANT_DELIMITER = '.';
 
 /**
  * This class replaces substitution variables with their values.
@@ -50,8 +52,20 @@ export class UrlReplacements {
     this.replacements_ = this.win_.Object.create(null);
 
     /** @private @const {function():!Promise<?AccessService>} */
-    this.getAccessService_ = accessServiceForOrNull.bind(null);
+    this.getAccessService_ = accessServiceForOrNull;
 
+    /** @private @const {!Promise<?Object<string, string>>} */
+    this.variants_ = variantForOrNull(win);
+
+    /** @private {boolean} */
+    this.initialized_ = false;
+  }
+
+  /**
+   * Lazily initialize the default replacements.
+   */
+  initialize_() {
+    this.initialized_ = true;
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
       return Math.random();
@@ -158,11 +172,42 @@ export class UrlReplacements {
           return service.get(opt_userNotificationId);
         });
       }
-      return cidFor(win).then(cid => {
+      return cidFor(this.win_).then(cid => {
         return cid.get({
           scope,
           createCookieIfNotPresent: true,
         }, consent);
+      });
+    });
+
+    // Returns assigned variant name for the given experiment.
+    this.set_('VARIANT', experiment => {
+      return this.variants_.then(variants => {
+        user.assert(variants,
+            'To use variable VARIANT, amp-experiment should be configured');
+        user.assert(variants[experiment] !== undefined,
+            'The value passed to VARIANT() is not a valid experiment name:' +
+                experiment);
+        const variant = variants[experiment];
+        // When no variant assigned, use reserved keyword 'none'.
+        return variant === null ? 'none' : variant;
+      });
+    });
+
+    // Returns all assigned experiment variants in a serialized form.
+    this.set_('VARIANTS', () => {
+      return this.variants_.then(variants => {
+        user.assert(variants,
+            'To use variable VARIANTS, amp-experiment should be configured');
+
+        const experiments = [];
+        for (const experiment in variants) {
+          const variant = variants[experiment];
+          experiments.push(
+              experiment + VARIANT_DELIMITER + (variant || 'none'));
+        }
+
+        return experiments.join(EXPERIMENT_DELIMITER);
       });
     });
 
@@ -449,6 +494,9 @@ export class UrlReplacements {
    * @private
    */
   expand_(url, opt_bindings, opt_collectVars) {
+    if (!this.initialized_) {
+      this.initialize_();
+    }
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
@@ -520,6 +568,7 @@ export class UrlReplacements {
   }
 
   /**
+   * Method exists to assist stubbing in tests.
    * @param {string} name
    * @return {function(*):*}
    */
@@ -574,7 +623,5 @@ export class UrlReplacements {
  * @return {!UrlReplacements}
  */
 export function installUrlReplacementsService(window) {
-  return getService(window, 'url-replace', () => {
-    return new UrlReplacements(window);
-  });
+  return fromClass(window, 'url-replace', UrlReplacements);
 };

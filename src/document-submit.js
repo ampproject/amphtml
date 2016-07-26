@@ -17,6 +17,7 @@
 import {startsWith} from './string';
 import {user} from './log';
 import {assertHttpsUrl} from './url';
+import {urls} from './config';
 
 
 /** @const {string} */
@@ -54,8 +55,8 @@ export function onDocumentFormSubmit_(e) {
   const action = form.getAttribute('action');
   user.assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
-  user.assert(!startsWith(action, 'https://cdn.ampproject.org'),
-      'form action should not be on cdn.ampproject.org: %s', form);
+  user.assert(!startsWith(action, urls.cdn),
+      'form action should not be on AMP CDN: %s', form);
 
   const target = form.getAttribute('target');
   user.assert(target, 'form target attribute is required: %s', form);

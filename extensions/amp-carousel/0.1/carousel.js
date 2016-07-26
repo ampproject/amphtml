@@ -155,6 +155,7 @@ export class AmpCarousel extends BaseCarousel {
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
       this.scheduleLayout(cell);
+      this.scheduleResume(cell);
     });
   }
 

@@ -29,6 +29,7 @@ import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
+import {waitForBody} from '../dom';
 
 
 const TAG_ = 'Viewport';
@@ -740,6 +741,15 @@ export class ViewportBindingNatural_ {
 
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    // Override a user-supplied `body{overflow}` to be always visible. This
+    // style is set in runtime vs css to avoid conflicts with ios-embedded
+    // mode and fixed transfer layer.
+    if (this.win.document.defaultView) {
+      waitForBody(this.win.document, () => {
+        this.win.document.body.style.overflow = 'visible';
+      });
+    }
 
     dev.fine(TAG_, 'initialized natural viewport');
   }
