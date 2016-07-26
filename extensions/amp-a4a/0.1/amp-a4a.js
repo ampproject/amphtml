@@ -278,52 +278,68 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerFor(this.win).whenFirstVisible()
-      // The following block returns the ad URL, if one is available.
+      // This block returns the ad URL, if one is available.
+      /** @return {!Promise<?string>} */
       .then(() => {
         checkStillCurrent(promiseId);
         return this.getAdUrl();
       })
       // This block returns the (possibly empty) response to the XHR request.
+      /** @return {!Promise<?Response>} */
       .then(adUrl => {
         checkStillCurrent(promiseId);
         this.adUrl_ = adUrl;
-        return this.sendXhrRequest_(adUrl);
+        return adUrl && this.sendXhrRequest_(adUrl);
       })
-      // The following block returns either the response byte stream, or null
-      // if no byte stream was available.
+      // The following block returns either the response (as a {bytes, headers}
+      // object), or null if no response is available / response is empty.
+      /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
       .then(fetchResponse => {
         checkStillCurrent(promiseId);
         if (!fetchResponse || !fetchResponse.arrayBuffer) {
           return null;
         }
-        return fetchResponse.arrayBuffer();
+        // Note: Resolving a .then inside a .then because we need to capture
+        // two fields of fetchResponse, one of which is, itself, a promise,
+        // and one of which isn't.  If we just return
+        // fetchResponse.arrayBuffer(), the next step in the chain will
+        // resolve it to a concrete value, but we'll lose track of
+        // fetchResponse.headers.
+        return fetchResponse.arrayBuffer().then(bytes => {
+          return {
+            bytes: bytes,
+            headers: fetchResponse.headers,
+          };
+        });
       })
       // This block returns the ad creative and signature, if available; null
       // otherwise.
-      .then(bytes => {
+      /**
+       * @return {!Promise<?{creative: !ArrayBuffer, signature: !ArrayBuffer}>}
+       */
+      .then(responseParts => {
         checkStillCurrent(promiseId);
-        return bytes && this.extractCreativeAndSignature(bytes,
-          fetchResponse.headers);
+        return responseParts && this.extractCreativeAndSignature(
+                responseParts.bytes, responseParts.headers);
       })
       // This block returns the ad creative if it exists and validates as AMP;
       // null otherwise.
-      .then(responseParts => {
+      /** @return {!Promise<?string>} */
+      .then(creativeParts => {
         checkStillCurrent(promiseId);
-        return responseParts && this.validateAdResponse_(
-            responseParts.creative, responseParts.signature);
+        return creativeParts && this.validateAdResponse_(
+            creativeParts.creative, creativeParts.signature);
       })
       // This block returns true iff the creative was rendered in the shadow
       // DOM.
+      /** @return {!Promise<!boolean>} */
       .then(creative => {
         checkStillCurrent(promiseId);
-        if (!creative) {
-          return false;
-        }
         // Note: It's critical that #maybeRenderAmpAd_ be called
         // on precisely the same creative that was validated
         // via #validateAdResponse_.  See GitHub issue
         // https://github.com/ampproject/amphtml/issues/4187
-        return this.maybeRenderAmpAd_(creative);
+        return creative && this.maybeRenderAmpAd_(creative);
       })
       .catch(error => this.promiseErrorHandler_(error));
   }

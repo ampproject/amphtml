@@ -41,7 +41,7 @@ class MockA4AImpl extends AmpA4A {
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
-      signature: responseHeaders.get('X-Google-header'),
+      signature: base64UrlDecode(responseHeaders.get('X-Google-header')),
     });
   }
 
@@ -96,7 +96,7 @@ describe('amp-a4a', () => {
       headers: {
         get: function(name) {
           const headerValues = {
-            'X-Google-header': base64UrlDecode(validCSSAmp.signature),
+            'X-Google-header': validCSSAmp.signature,
           };
           return headerValues[name];
         },
@@ -131,6 +131,8 @@ describe('amp-a4a', () => {
             a4a, 'extractCreativeAndSignature');
         const validateAdResponseSpy = sandbox.spy(
             a4a, 'validateAdResponse_');
+        const maybeRenderAmpAdSpy = sandbox.spy(
+            a4a, 'maybeRenderAmpAd_');
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
@@ -146,6 +148,8 @@ describe('amp-a4a', () => {
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
           expect(validateAdResponseSpy.calledOnce,
               'validateAdResponse_ called exactly once').to.be.true;
+          expect(maybeRenderAmpAdSpy.calledOnce,
+              'maybeRenderAmpAd_ called exactly once').to.be.true;
           expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;
           expect(a4aElement.shadowRoot.querySelector('style'),
               'style tag in shadow root').to.not.be.null;
@@ -301,6 +305,8 @@ describe('amp-a4a', () => {
         });
       });
     });
+    // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
+    // add one test for each case / ensure that all cases are covered.
   });
 
   describe('#preconnectCallback', () => {
