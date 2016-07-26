@@ -99,7 +99,7 @@ describe('amp-img', () => {
 
     beforeEach(() => {
       el = document.createElement('amp-img');
-      el.setAttribute('src', 'test.jpg');
+      el.setAttribute('src', 'base/examples/img/ampicon.png');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
       impl = new AmpImg(el);

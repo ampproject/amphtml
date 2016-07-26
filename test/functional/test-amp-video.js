@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
 import * as sinon from 'sinon';
 
 describe('amp-video', () => {
 
   let sandbox;
+  let videoPath = 'base/examples/video/The-Audience-Is-Programming.mp4';
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -37,6 +41,7 @@ describe('amp-video', () => {
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
+          doNotLoadExternalResourcesInTest(iframe.win);
           installVideo(iframe.win);
           const v = iframe.doc.createElement('amp-video');
           for (const key in attributes) {
@@ -53,20 +58,20 @@ describe('amp-video', () => {
 
   it('should load a video', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
     }).then(v => {
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
-      expect(video.getAttribute('src')).to.equal('video.mp4');
+      expect(video.getAttribute('src')).to.equal(videoPath);
       expect(video.hasAttribute('controls')).to.be.false;
     });
   });
 
   it('should load a video', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'controls': '',
@@ -94,7 +99,7 @@ describe('amp-video', () => {
       sources.push(source);
     }
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'controls': '',
@@ -127,7 +132,7 @@ describe('amp-video', () => {
       sources.push(source);
     }
     return expect(getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'controls': '',
@@ -139,7 +144,7 @@ describe('amp-video', () => {
 
   it('should not set src or preload in prerender mode', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'preload': 'auto',
@@ -160,7 +165,7 @@ describe('amp-video', () => {
 
   it('should remove preload attribute when not provided', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'poster': 'img.png',
@@ -189,7 +194,7 @@ describe('amp-video', () => {
       sources.push(source);
     }
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'controls': '',
@@ -217,7 +222,7 @@ describe('amp-video', () => {
 
   it('should set src and preload in non-prerender mode', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
       'preload': 'auto',
@@ -237,7 +242,7 @@ describe('amp-video', () => {
 
   it('should pause the video when document inactive', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
     }).then(v => {
@@ -251,7 +256,7 @@ describe('amp-video', () => {
 
   it('should fallback if video element is not supported', () => {
     return getVideo({
-      src: 'video.mp4',
+      src: videoPath,
       width: 160,
       height: 90,
     }, null, function(element) {
