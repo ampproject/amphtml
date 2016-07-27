@@ -23,6 +23,9 @@ import {dev, user} from '../../../src/log';
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
 
+/**
+ * @visibleForTesting
+ */
 export class AmpShareTracking extends AMP.BaseElement {
   /**
     * @return {boolean}
@@ -60,20 +63,13 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /**
    * Get the incoming share-tracking fragment from the viewer
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<string>}
    * @private
    */
   getIncomingFragment_() {
     return viewerFor(this.win).getFragment().then(fragment => {
-      if (!fragment || fragment.indexOf('.') != 0) {
-        return;
-      }
-      const endIndex = fragment.indexOf('&');
-      if (endIndex != -1) {
-        return fragment.substr(1, (endIndex - 1));
-      } else {
-        return fragment.substr(1);
-      }
+      const match = fragment.match(/\.([^&]*)/);
+      return match && match[1];
     });
   }
 

@@ -228,7 +228,7 @@ describe('Viewer', () => {
   });
 
   it('should NOT get fragment from the viewer in embedded mode' +
-      'if the viewer does NOT has capability of getting fragment', () => {
+      'if the viewer does NOT have capability of getting fragment', () => {
     windowApi.parent = {};
     windowApi.location.hash = '#foo';
     const viewer = new Viewer(windowApi);
@@ -237,7 +237,21 @@ describe('Viewer', () => {
       return Promise.resolve('from-viewer');
     });
     return viewer.getFragment().then(fragment => {
-      expect(fragment).to.be.undefined;
+      expect(fragment).to.equal('');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT return a fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve();
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
     });
   });
 

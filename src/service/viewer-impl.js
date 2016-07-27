@@ -804,20 +804,21 @@ export class Viewer {
   /**
    * Get the fragment from the url or the viewer.
    * Strip leading '#' in the fragment
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<string>}
    */
   getFragment() {
     if (!this.isEmbedded_) {
       let hash = this.win.location.hash;
-      if (hash.indexOf('#') == 0) {
-        hash = hash.substr(1);
-      }
+      /* Strip leading '#' */
+      hash = hash.substr(1);
       return Promise.resolve(hash);
     }
     if (!this.hasCapability('fragment')) {
-      return Promise.resolve();
+      return Promise.resolve('');
     }
-    return this.sendMessageUnreliable_('fragment', undefined, true);
+    return this.sendMessageUnreliable_('fragment', undefined, true).then(
+      hash => hash || ''
+    );
   }
 
   /**

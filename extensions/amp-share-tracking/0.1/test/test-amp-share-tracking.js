@@ -75,13 +75,13 @@ describe('amp-share-tracking', () => {
   });
 
   it('should ignore incoming fragment if it is empty', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve());
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
       return ampShareTracking.shareTrackingFragments_.then(fragments => {
-        expect(fragments.incomingFragment).to.be.undefined;
+        expect(fragments.incomingFragment).to.be.null;
       });
     });
   });
@@ -93,7 +93,7 @@ describe('amp-share-tracking', () => {
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
       return ampShareTracking.shareTrackingFragments_.then(fragments => {
-        expect(fragments.incomingFragment).to.be.undefined;
+        expect(fragments.incomingFragment).to.be.null;
       });
     });
   });
