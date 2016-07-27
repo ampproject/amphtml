@@ -85,6 +85,7 @@ import {genieessp} from '../ads/genieessp';
 import {kargo} from '../ads/kargo';
 import {pulsepoint} from '../ads/pulsepoint';
 import {zergnet} from '../ads/zergnet';
+import {yieldone} from '../ads/yieldone';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -154,6 +155,7 @@ register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
+register('yieldone', yieldone);
 
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
