@@ -279,15 +279,12 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
+    window.context.renderStart = triggerRenderStart;
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
       // generic solution is available.
       window.context.updateDimensions = triggerDimensions;
-    }
-
-    if (waitForRenderStart.indexOf(data.type) != -1) {
-      window.context.renderStart = triggerRenderStart;
     }
 
     // This only actually works for ads.
