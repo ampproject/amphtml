@@ -219,6 +219,7 @@ export class Log {
    * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {T} The value of shouldBeTrueish.
    * @template T
+   * @throws {Error}
    */
   /*eslint "google-camelcase/google-camelcase": 0*/
   assert(shouldBeTrueish, opt_message, var_args) {

@@ -95,7 +95,7 @@ export class Xhr {
     if (opt_init && opt_init.responseType == 'document') {
       return fetchPolyfill(input, opt_init);
     }
-    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
+    return fetchPolyfill(input, opt_init);
   }
 
   /**
