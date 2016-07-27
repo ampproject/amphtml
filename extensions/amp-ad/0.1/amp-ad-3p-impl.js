@@ -25,6 +25,7 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
+import {setStyles} from '../../../src/style';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
@@ -311,7 +312,11 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.fallback_) {
       this.attemptChangeHeight(0).then(() => {
         this./*OK*/collapse();
-      }, () => {});
+      }, () => {
+        this.deferMutate(() => {
+          this.addDefaultFallback();
+        })
+      });
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
@@ -351,5 +356,21 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_ = null;
     }
     return true;
+  }
+
+  addDefaultFallback() {
+    if (this.placeholder_) {
+      this.togglePlaceholder(false);
+    }
+    const defaultFallback = this.win.document.createElement('div');
+    setStyles(defaultFallback, {
+      position: 'absolute',
+      top: '0',
+      bottom: '0',
+      left: '0',
+      right: '0',
+      background: '#D3D3D3',
+    });
+    this.element.appendChild(defaultFallback);
   }
 }
