@@ -162,7 +162,7 @@ class AmpStickyAd extends AMP.BaseElement {
   onCloseButtonClick_() {
     this.vsync_.mutate(() => {
       this.visible_ = false;
-      this.scheduleUnlayout(this.ad_);
+      this./*OK*/scheduleUnlayout(this.ad_);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });

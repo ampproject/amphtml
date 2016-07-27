@@ -510,6 +510,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.scrollTo\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -535,14 +536,6 @@ var forbiddenTermsSrcInclusive = {
         'error.cancellation() may be applicable.',
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
-    ],
-  },
-  'scheduleUnlayout': {
-    message: bannedTermsHelpString,
-    whitelist: [
-      'src/service/resources-impl.js',
-      'src/base-element.js',
-      'extensions/amp-sticky-ad/0.1/amp-sticky-ad.js',
     ],
   },
 };

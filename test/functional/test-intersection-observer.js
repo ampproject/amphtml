@@ -222,9 +222,6 @@ describe('IntersectionObserver', () => {
 
   it('should not send intersection', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
-    sandbox.stub(ioInstance, 'isElementInDoc_', function() {
-      return true;
-    });
     insert(testIframe);
     const postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow,
         'postMessage');
@@ -236,9 +233,6 @@ describe('IntersectionObserver', () => {
   it('should send intersection', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
-    sandbox.stub(ioInstance, 'isElementInDoc_', function() {
-      return true;
-    });
     insert(testIframe);
     sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
       // Copy because arg is modified in place.
@@ -258,9 +252,6 @@ describe('IntersectionObserver', () => {
   it('should send more intersections', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
-    sandbox.stub(ioInstance, 'isElementInDoc_', function() {
-      return true;
-    });
     insert(testIframe);
     sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
       // Copy because arg is modified in place.
@@ -327,9 +318,6 @@ describe('IntersectionObserver', () => {
   it('should go into in-viewport state for initially visible element', () => {
     element.isInViewport = () => true;
     const ioInstance = new IntersectionObserver(element, testIframe);
-    sandbox.stub(ioInstance, 'isElementInDoc_', function() {
-      return true;
-    });
     insert(testIframe);
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
@@ -341,9 +329,6 @@ describe('IntersectionObserver', () => {
   it('should not send intersection after destroy is called', () => {
     const messages = [];
     const ioInstance = new IntersectionObserver(element, testIframe);
-    sandbox.stub(ioInstance, 'isElementInDoc_', function() {
-      return true;
-    });
     insert(testIframe);
     sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
       // Copy because arg is modified in place.
