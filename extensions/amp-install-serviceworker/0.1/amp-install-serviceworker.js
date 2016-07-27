@@ -17,7 +17,7 @@
 import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
 import {documentInfoFor} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 
@@ -78,7 +78,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
       // only engaged with superficially.
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         this.deferMutate(this.insertIframe_.bind(this));
       }, 20000);
     });

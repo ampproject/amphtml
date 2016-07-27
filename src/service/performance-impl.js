@@ -19,7 +19,7 @@ import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {viewerFor} from '../viewer';
 
 
@@ -96,6 +96,7 @@ export class Performance {
           // (this `#then` block) so that Resources' onDocumentReady event
           // is guaranteed to fire.
         });
+
     // Tick window.onload event.
     loadPromise(win).then(() => {
       this.tick('ol');

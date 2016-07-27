@@ -21,7 +21,7 @@ import {fromClass} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platformFor} from '../platform';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 import {urls} from '../config';
@@ -244,7 +244,7 @@ export class Viewer {
      * @private @const {?Promise}
      */
     this.messagingReadyPromise_ = this.isEmbedded_ ?
-        timer.timeoutPromise(
+        timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
               /** @private @const {function()|undefined} */
@@ -303,7 +303,7 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        timer.delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        setTimeout(resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         /** @private @const {!function(string)|undefined} */
         this.viewerOriginResolver_ = resolve;
       }

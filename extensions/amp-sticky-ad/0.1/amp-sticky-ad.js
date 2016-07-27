@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 
 
@@ -129,7 +129,7 @@ class AmpStickyAd extends AMP.BaseElement {
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
-        timer.delay(() => {
+        timerFor(this.win).delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.

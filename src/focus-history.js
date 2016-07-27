@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {timer} from './timer';
+import {timerFor} from './timer';
 
 
 /**
@@ -51,7 +51,7 @@ export class FocusHistory {
       // IFrame elements do not receive `focus` event. An alternative way is
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
-      timer.delay(() => {
+      timerFor(win).delay(() => {
         this.pushFocus_(this.win.document.activeElement);
       }, 500);
     };

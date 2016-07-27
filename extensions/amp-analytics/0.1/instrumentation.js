@@ -17,7 +17,7 @@
 import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
@@ -85,6 +85,9 @@ export class InstrumentationService {
     /** @const {string} */
     this.TAG_ = 'Analytics.Instrumentation';
 
+    /** @const {!Timer} */
+    this.timer_ = timerFor(window);
+
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
 
@@ -115,7 +118,7 @@ export class InstrumentationService {
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
-    timer.delay(() => {
+    this.timer_.delay(() => {
       this.customEventBuffer_ = undefined;
     }, 10000);
   }
@@ -169,7 +172,7 @@ export class InstrumentationService {
       if (this.customEventBuffer_) {
         const buffer = this.customEventBuffer_[eventType];
         if (buffer) {
-          timer.delay(() => {
+          this.timer_.delay(() => {
             buffer.forEach(event => {
               listener(event);
             });

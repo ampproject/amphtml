@@ -17,7 +17,7 @@
 import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
 
@@ -180,7 +180,7 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (currentQueue) {
-      timer.delay(() => {
+      timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {

@@ -20,7 +20,7 @@ import {historyFor} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;
@@ -145,7 +145,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
-        timer.delay(() => {
+        timerFor(this.win).delay(() => {
           const children = this.getRealChildren();
           this.scheduleLayout(children);
           this.scheduleResume(children);
@@ -170,7 +170,7 @@ export class AmpSidebar extends AMP.BaseElement {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {

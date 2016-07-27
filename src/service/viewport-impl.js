@@ -26,7 +26,7 @@ import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {waitForBody} from '../dom';
@@ -394,7 +394,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -553,7 +553,7 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -585,7 +585,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timer.delay(() => this.vsync_.measure(
+      timerFor(this.win_).delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }

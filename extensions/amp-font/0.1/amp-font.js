@@ -35,7 +35,7 @@
  */
 
 import {FontLoader} from './fontloader';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
@@ -191,7 +191,9 @@ export class AmpFont extends AMP.BaseElement {
     timeoutInMs = isNaN(timeoutInMs) || timeoutInMs < 0 ?
         DEFAULT_TIMEOUT_ : timeoutInMs;
     timeoutInMs = Math.max(
-      (timeoutInMs - timer.timeSinceStart()), CACHED_FONT_LOAD_TIME_);
+      (timeoutInMs - timerFor(this.win).timeSinceStart()),
+      CACHED_FONT_LOAD_TIME_
+    );
     return timeoutInMs;
   }
 }

@@ -38,7 +38,7 @@ import {parseQueryString} from '../../../src/url';
 import {performanceFor} from '../../../src/performance';
 import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
@@ -112,7 +112,7 @@ export class AccessService {
     this.pubOrigin_ = getSourceOrigin(win.location);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);

@@ -46,7 +46,7 @@ export class AmpSlides extends BaseSlides {
     /** @private {number} */
     this.currentIndex_ = 0;
 
-    user.assert(this.slides_.length >= 1,
+    user().assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
   }
 

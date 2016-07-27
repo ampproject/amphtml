@@ -18,7 +18,7 @@ import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
 import {resourcesFor} from '../../../src/resources';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
 import {viewerFor} from '../../../src/viewer';
@@ -174,6 +174,9 @@ export class Visibility {
      */
     this.listeners_ = Object.create(null);
 
+    /** @const {!Timer} */
+    this.timer_ = timerFor(win);
+
     /** @private {Array<!Resource>} */
     this.resources_ = [];
 
@@ -253,7 +256,7 @@ export class Visibility {
     this.resources_.push(res);
 
     if (this.scheduledRunId_ == null) {
-      this.scheduledRunId_ = timer.delay(() => {
+      this.scheduledRunId_ = this.timer_.delay(() => {
         this.scrollListener_();
       }, LISTENER_INITIAL_RUN_DELAY_);
     }
@@ -271,7 +274,7 @@ export class Visibility {
   /** @private */
   scrollListener_() {
     if (this.scheduledRunId_ != null) {
-      timer.cancel(this.scheduledRunId_);
+      this.timer_.cancel(this.scheduledRunId_);
       this.scheduledRunId_ = null;
     }
 
@@ -311,7 +314,7 @@ export class Visibility {
     // expected to be satisfied.
     if (this.scheduledRunId_ == null &&
         this.timeToWait_ < Infinity && this.timeToWait_ > 0) {
-      this.scheduledRunId_ = timer.delay(() => {
+      this.scheduledRunId_ = this.timer_.delay(() => {
         this.scrollListener_();
       }, this.timeToWait_);
     }

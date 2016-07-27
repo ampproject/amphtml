@@ -17,7 +17,7 @@
 import {assertHttpsUrl, parseUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
@@ -123,7 +123,7 @@ export function sendRequestUsingIframe(win, request) {
   const iframe = win.document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.onload = iframe.onerror = () => {
-    timer.delay(() => {
+    timerFor(win).delay(() => {
       removeElement(iframe);
     }, 5000);
   };

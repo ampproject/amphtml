@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {dev, user} from './log';
 
 
@@ -160,7 +160,7 @@ function racePromise_(promise, unlisten1, unlisten2, timeout) {
     racePromise = promise;
   } else {
     // Timeout has been specified: add a timeout condition.
-    racePromise = timer.timeoutPromise(timeout || 0, promise);
+    racePromise = timerFor(window).timeoutPromise(timeout || 0, promise);
   }
   if (unlisten1) {
     racePromise.then(unlisten1, unlisten1);
