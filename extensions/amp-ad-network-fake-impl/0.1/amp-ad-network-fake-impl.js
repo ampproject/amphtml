@@ -39,7 +39,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   }
 
   /** @override */
-  extractCreativeAndSignature(responseText, unused_responseHeaders) {
+  extractCreativeAndSignature(responseText, unusedResponseHeaders) {
     return utf8FromArrayBuffer(responseText).then(deserialized => {
       const decoded = JSON.parse(deserialized);
       dev.info('Fake', 'Decoded response text =', decoded['creative']);
