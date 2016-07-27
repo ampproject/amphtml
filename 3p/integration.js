@@ -152,7 +152,6 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('yahoojp', yahoojp);
-register('chargeads', chargeads);
 register('nend', nend);
 register('adgeneration', adgeneration);
 register('genieessp', genieessp);
