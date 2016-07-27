@@ -554,7 +554,7 @@ export class AmpA4A extends AMP.BaseElement {
         // will run efficiently.
         this.renderViaIframe_();
         this.rendered_ = true;
-        return Promise.resolve(true);
+        return true;
       } else {
         try {
           // Do extraction processing on CSS and body before creating the
@@ -603,12 +603,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
           });
-          return Promise.resolve(true);
+          return true;
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
-          return Promise.resolve(false);
+          return false;
         }
       }
     });
