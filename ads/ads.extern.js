@@ -140,3 +140,5 @@ data.tagid;
 data.tagtype;
 data.zergid;
 window.zergnetWidgetId;
+window.MADSAdrequest = {};
+window.MADSAdrequest.adrequest;

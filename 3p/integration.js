@@ -83,6 +83,7 @@ import {nend} from '../ads/nend';
 import {adgeneration} from '../ads/adgeneration';
 import {genieessp} from '../ads/genieessp';
 import {kargo} from '../ads/kargo';
+import {mads} from '../ads/mads';
 import {pulsepoint} from '../ads/pulsepoint';
 import {zergnet} from '../ads/zergnet';
 
@@ -126,6 +127,7 @@ register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('kargo', kargo);
+register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
