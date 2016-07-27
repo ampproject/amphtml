@@ -209,7 +209,7 @@ export const adPreconnect = {
   adtech: [
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
-  ]
+  ],
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
