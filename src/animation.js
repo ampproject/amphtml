@@ -16,7 +16,6 @@
 
 import {getCurve} from './curve';
 import {dev} from './log';
-import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
@@ -239,7 +238,7 @@ class AnimationPlayer {
    * @private
    */
   start_() {
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.running_ = true;
     if (this.vsync_.canAnimate(this.contextNode_)) {
       this.task_(this.state_);
@@ -298,7 +297,7 @@ class AnimationPlayer {
     if (!this.running_) {
       return;
     }
-    const currentTime = timer.now();
+    const currentTime = Date.now();
     const normLinearTime = Math.min((currentTime - this.startTime_) /
         this.duration_, 1);
 

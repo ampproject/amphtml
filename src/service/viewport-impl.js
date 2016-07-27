@@ -552,7 +552,7 @@ export class Viewport {
     this.scrollTop_ = newScrollTop;
     if (!this.scrollTracking_) {
       this.scrollTracking_ = true;
-      const now = timer.now();
+      const now = Date.now();
       // Wait 2 frames and then request an animation frame.
       timer.delay(() => {
         this.vsync_.measure(() => {
@@ -573,7 +573,7 @@ export class Viewport {
    */
   throttledScroll_(referenceTime, referenceTop) {
     const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
-    const now = timer.now();
+    const now = Date.now();
     let velocity = 0;
     if (now != referenceTime) {
       velocity = (newScrollTop - referenceTop) /

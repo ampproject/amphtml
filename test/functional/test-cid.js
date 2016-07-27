@@ -179,7 +179,7 @@ describe('cid', () => {
   it('should pick up the cid value from storage', () => {
     storage['amp-cid'] = JSON.stringify({
       cid: 'YYY',
-      time: timer.now(),
+      time: Date.now(),
     });
     return compare(
         'e2',
@@ -205,7 +205,7 @@ describe('cid', () => {
     isIframed = true;
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
-      time: timer.now(),
+      time: Date.now(),
     });
     return compare(
         'e2',

@@ -765,7 +765,7 @@ export class AccessService {
    * @return {!Promise}
    */
   login(type) {
-    const now = this.timer_.now();
+    const now = Date.now();
 
     // If login is pending, block a new one from starting for 1 second. After
     // 1 second, however, the new login request will be allowed to proceed,

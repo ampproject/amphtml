@@ -865,7 +865,7 @@ function createBaseAmpElementProto(win) {
     const box = this.implementation_.getIntersectionElementLayoutBox();
     const rootBounds = this.implementation_.getViewport().getRect();
     return getIntersectionChangeEntry(
-        timerFor(this.ownerDocument.defaultView).now(),
+        Date.now(),
         rootBounds,
         box);
   };

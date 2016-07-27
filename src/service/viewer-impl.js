@@ -389,7 +389,7 @@ export class Viewer {
   onVisibilityChange_() {
     if (this.isVisible()) {
       if (!this.firstVisibleTime_) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.hasBeenVisible_ = true;
       this.whenFirstVisibleResolve_();

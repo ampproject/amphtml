@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../log';
-import {timer} from '../timer';
 import {platformFor} from '../platform';
 
 
@@ -39,9 +38,9 @@ export function checkAndFix(win, opt_platform) {
 
   // Poll until the expression resolves correctly, but only up to a point.
   return new Promise(resolve => {
-    const endTime = timer.now() + 2000;
+    const endTime = Date.now() + 2000;
     const interval = win.setInterval(() => {
-      const now = timer.now();
+      const now = Date.now();
       const matches = matchMediaIeQuite(win);
       if (matches || now > endTime) {
         win.clearInterval(interval);

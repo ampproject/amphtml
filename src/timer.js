@@ -40,15 +40,7 @@ export class Timer {
     this.canceled_ = {};
 
     /** @const {number} */
-    this.startTime_ = this.now();
-  }
-
-  /**
-   * Returns the current EPOC time in milliseconds.
-   * @return {number}
-   */
-  now() {
-    return Date.now();
+    this.startTime_ = Date.now();
   }
 
  /**
@@ -56,7 +48,7 @@ export class Timer {
   * @return {number}
   */
   timeSinceStart() {
-    return this.now() - this.startTime_;
+    return Date.now() - this.startTime_;
   }
 
   /**

@@ -18,7 +18,6 @@ import {Pass} from '../pass';
 import {cancellation} from '../error';
 import {getService} from '../service';
 import {dev} from '../log';
-import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
 
 
@@ -284,11 +283,11 @@ export class Vsync {
       return Promise.reject(cancellation());
     }
     return new Promise((resolve, reject) => {
-      const startTime = timer.now();
+      const startTime = Date.now();
       let prevTime = 0;
       const task = this.createAnimTask(contextNode, {
         mutate: state => {
-          const timeSinceStart = timer.now() - startTime;
+          const timeSinceStart = Date.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
             resolve();
