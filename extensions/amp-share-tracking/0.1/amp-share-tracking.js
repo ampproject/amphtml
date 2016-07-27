@@ -69,7 +69,7 @@ export class AmpShareTracking extends AMP.BaseElement {
   getIncomingFragment_() {
     return viewerFor(this.win).getFragment().then(fragment => {
       const match = fragment.match(/\.([^&]*)/);
-      return match && match[1];
+      return match ? match[1] : '';
     });
   }
 
