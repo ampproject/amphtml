@@ -111,4 +111,9 @@ export class AccessClientAdapter {
       });
     });
   }
+
+  /** @override */
+  encodeReaderId(readerId) {
+    return readerId;
+  }
 }

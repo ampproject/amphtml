@@ -29,6 +29,14 @@ const TAG = 'amp-access-server';
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
 
+function convertStringToArrayBufferView(str) {
+    var bytes = new Uint8Array(str.length);
+    for (var i = 0; i < str.length; i++) {
+        bytes[i] = str.charCodeAt(i);
+    }
+    return bytes;
+}
+
 
 /**
  * This class implements server-side authorization protocol. In this approach
@@ -87,6 +95,12 @@ export class AccessServerAdapter {
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);
+
+    /** @private @const {?SubtleCrypto} */
+    this.subtle_ = null;
+
+    /** @private @const {?Promise<!CryptoKey>} */
+    this.keyPromise_ = null;
 
     const stateElement = this.win.document.querySelector(
         'meta[name="i-amp-access-state"]');
@@ -178,6 +192,45 @@ export class AccessServerAdapter {
   /** @override */
   pingback() {
     return this.clientAdapter_.pingback();
+  }
+
+  /** @override */
+  encodeReaderId(readerId) {
+    dev.error(TAG, "bernie: in encodeReaderId(): ", readerId);
+    return this.getSubtleWithKey_().then(key => {
+      return this.subtle_.encrypt(key, convertStringToArrayBufferView(readerId))
+          .then(data => {
+            const encryptedReaderId = window.btoa(new Uint8Array(data));
+            dev.error(TAG, "bernie: encryptedReaderId: ", encryptedReaderId);
+            return encryptedReaderId;
+          });
+    });
+  }
+
+  /**
+   * @return {!Promise<!CryptoKey>}
+   * @private
+   */
+  getSubtleWithKey_() {
+    if (!this.keyPromise_) {
+      if (this.win.crypto) {
+        this.subtle_ =
+            this.win.crypto.subtle || this.win.crypto.webkitSubtle || null;
+      }
+      if (this.subtle_) {
+        const testKey =
+            'public_key: {"alg":"RSA-OAEP-256","e":"AQAB","ext":true,"key_ops":["encrypt"],"kty":"RSA","n":"nNfur__0p5qW_fGaTW4BNvtqx8SVxVfE3EkY78SS4AT68vjPq1kL82FMmt2Un3FPX_BAD22NB2LVziT3PaweWhgitbyv-JMjVymnza0LRETq2j-AlmETEpcHKtVSO70axZBzj8A0kIx_5d_ZSaScDYstVcWlSOfDh0575N-v4wWj5gyCSjIY0AJlmqToU2wIHrVdQwrvCj-2m4K86GRf_UF8NCt0RntN4CfRCqihoSIRKxHz12-CiCKhFwB3JyLcpMmMy_68h3jSYUP_YrVUXCYKnNNWmfLSDrP00juKBaQgwzPhpS_hkRkHgw9MxUit7JgxJH8JmCv5zWH1B8Un3w"}';
+        this.keyPromise_ = this.subtle_.importKey(
+            'jwk',
+            testKey,
+            { name: "RSA-OAEP", hash: {name: "SHA-256"}},
+            /*extractable=*/true,
+            ['encrypt']);
+      } else {
+        this.keyPromise_ = Promise.reject(new Error('No WebCrypto'));
+      }
+    }
+    return this.keyPromise_;
   }
 
   /**
