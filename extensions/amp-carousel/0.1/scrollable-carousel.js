@@ -21,11 +21,14 @@ import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
+import {dev} from '../../../src/log';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
+/** @const {string} */
+const TAG = 'amp-scrollable-carousel';
 
-export class AmpCarousel extends BaseCarousel {
+export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -34,6 +37,8 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
+    dev.fine(TAG, 'Building scrollable carousel');
+
     /** @private {number} */
     this.pos_ = 0;
 
@@ -155,7 +160,6 @@ export class AmpCarousel extends BaseCarousel {
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
       this.scheduleLayout(cell);
-      this.scheduleResume(cell);
     });
   }
 

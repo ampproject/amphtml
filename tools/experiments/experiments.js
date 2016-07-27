@@ -96,6 +96,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
   },
   {
+    id: 'amp-scrollable-carousel',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
+  },
+  {
     id: 'form-submit',
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
@@ -124,6 +130,12 @@ const EXPERIMENTS = [
     id: 'amp-share-tracking',
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
+  },
+  {
+    id: 'amp-viz-vega',
+    name: 'AMP Visualization using Vega grammar',
+    spec: 'https://github.com/ampproject/amphtml/issues/3991',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
 ];
 

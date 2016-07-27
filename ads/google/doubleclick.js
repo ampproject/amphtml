@@ -121,6 +121,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
+        global.context.renderStart();
         if (event.isEmpty) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
@@ -178,6 +179,7 @@ function doubleClickWithGlade(global, data) {
   slot.setAttribute('data-request-width', requestWidth);
 
   slot.addEventListener('gladeAdFetched', event => {
+    global.context.renderStart();
     if (event.detail.empty) {
       global.context.noContentAvailable();
     }

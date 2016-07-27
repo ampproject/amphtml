@@ -128,43 +128,6 @@ function tests(name) {
         });
       });
 
-      it('should listen for resize events from nested frames', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe-resize-outer.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.equal(114);
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.frames[0].postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                width: 114,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
-        });
-      });
-
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
             '/base/test/fixtures/served/iframe.html';
@@ -209,11 +172,11 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          impl.attemptChangeSize = sandbox.spy();
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217, 114);
-          expect(impl.attemptChangeSize.callCount).to.equal(1);
-          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
-          expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.firstCall.args[1]).to.equal(114);
         });
       });
 
@@ -226,10 +189,10 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          impl.attemptChangeSize = sandbox.spy();
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217);
-          expect(impl.attemptChangeSize.callCount).to.equal(1);
-          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
         });
       });
     });
@@ -317,6 +280,29 @@ function tests(name) {
         });
       });
 
+      it('should attemptChangeHeight to 0 when there is no fallback', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: '_ping_',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          return ad;
+        }).then(ad => {
+          const attemptChangeHeight = sandbox.stub(ad.implementation_,
+              'attemptChangeHeight',
+              function() {
+                return Promise.resolve();
+              });
+          ad.style.position = 'absolute';
+          ad.style.top = '300px';
+          ad.style.left = '50px';
+          ad.implementation_.noContentHandler_();
+          expect(attemptChangeHeight).to.have.been.called;
+          expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+        });
+      });
+
       it('should collapse when attemptChangeHeight succeeds', () => {
         return getAd({
           width: 300,
@@ -332,20 +318,21 @@ function tests(name) {
               });
           sandbox.stub(ad.implementation_,
               'attemptChangeHeight',
-              function(height, callback) {
-                ad.style.height = height;
-                callback();
+              function() {
+                return Promise.resolve();
               });
           const collapse = sandbox.spy(ad.implementation_, 'collapse');
           ad.style.position = 'absolute';
           ad.style.top = '300px';
           ad.style.left = '50px';
           expect(ad.style.display).to.not.equal('none');
-          ad.implementation_.noContentHandler_();
-          expect(ad.style.display).to.equal('none');
-          expect(collapse).to.have.been.called;
+          ad.implementation_.attemptChangeHeight(0).then(() => {
+            expect(ad.style.display).to.equal('none');
+            expect(collapse).to.have.been.called;
+          });
         });
       });
+
 
       it('should hide placeholder when ad falls back', () => {
         return getAd({

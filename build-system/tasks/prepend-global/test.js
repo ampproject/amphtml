@@ -36,3 +36,19 @@ test('sync - valueOrDefault', t => {
   res = m.valueOrDefault('world', 'hello');
   t.is(res, 'world');
 });
+
+test('sync - sanityCheck', t => {
+  t.plan(3);
+  var badStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'var x = 1 + 1;';
+  var badStr2 = 'var x = 1 + 1;';
+  var goodStr = 'window.AMP_CONFIG||(window.AMP_CONFIG={"hello":"world"})' +
+      '/*AMP_CONFIG*/' +
+      'var x = 1 + 1;';
+  t.false(m.sanityCheck(badStr));
+  t.true(m.sanityCheck(goodStr));
+  t.false(m.sanityCheck(badStr2));
+});

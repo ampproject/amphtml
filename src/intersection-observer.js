@@ -216,4 +216,12 @@ export class IntersectionObserver extends Observable {
     this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
     this.pendingChanges_.length = 0;
   }
+
+  /**
+   * Provice a function to clear timeout before set this intersection to null.
+   */
+  destroy() {
+    timer.cancel(this.flushTimeout_);
+    this.flushTimeout_ = 0;
+  }
 }

@@ -20,8 +20,9 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
-  postMessageToWindows,
+  postMessage,
 } from '../../../src/iframe-helper';
+import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -59,16 +60,6 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
-
-    /**
-     * @private {?{
-     *   source: !Window,
-     *   origin: string,
-     *   width: (number|undefined),
-     *   height: (number|undefined),
-     * }}
-     * */
-    this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -101,28 +92,24 @@ export class AmpAdApiHandler {
     listenForOnce(this.iframe_, 'entity-id', info => {
       this.element_.creativeId = info.id;
     }, this.is3p_);
-
-    // Install iframe resize API.
-    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
-        (data, source, origin) => {
-          let newHeight, newWidth;
-          if (data.width !== undefined) {
-            newWidth = Math.max(this.element_./*OK*/offsetWidth +
-                data.width - this.iframe_./*OK*/offsetWidth, data.width);
-            this.iframe_.width = newWidth;
-            this.element_.setAttribute('width', newWidth);
-          }
-          if (data.height !== undefined) {
-            newHeight = Math.max(this.element_./*OK*/offsetHeight +
-                data.height - this.iframe_./*OK*/offsetHeight, data.height);
-            this.iframe_.height = newHeight;
-            this.element_.setAttribute('height', newHeight);
-          }
-          if (newHeight !== undefined || newWidth !== undefined) {
-            this.updateSize_(newHeight, newWidth, source, origin);
-          }
-        }, this.is3p_, this.is3p_));
-
+    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size', data => {
+      let newHeight, newWidth;
+      if (data.width !== undefined) {
+        newWidth = Math.max(this.element_./*OK*/offsetWidth +
+            data.width - this.iframe_./*OK*/offsetWidth, data.width);
+        this.iframe_.width = newWidth;
+        this.element_.setAttribute('width', newWidth);
+      }
+      if (data.height !== undefined) {
+        newHeight = Math.max(this.element_./*OK*/offsetHeight +
+            data.height - this.iframe_./*OK*/offsetHeight, data.height);
+        this.iframe_.height = newHeight;
+        this.element_.setAttribute('height', newHeight);
+      }
+      if (newHeight !== undefined || newWidth !== undefined) {
+        this.updateSize_(newHeight, newWidth);
+      }
+    }, this.is3p_));
     if (this.is3p_) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
@@ -131,6 +118,10 @@ export class AmpAdApiHandler {
     listenForOnce(this.iframe_, 'render-start', () => {
       if (!this.iframe_) {
         return;
+      }
+      if (this.baseInstance_.renderStartResolve_) {
+        this.baseInstance_.renderStartResolve_();
+        this.baseInstance_.renderStartResolve_ = null;
       }
       this.iframe_.style.visibility = '';
     }, this.is3p_);
@@ -151,53 +142,35 @@ export class AmpAdApiHandler {
     }
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
+    this.intersectionObserver_.destroy();
     this.intersectionObserver_ = null;
   }
 
   /**
    * Updates the element's dimensions to accommodate the iframe's
-   * requested dimensions. Notifies the window that request the resize
-   * of success or failure.
+   *    requested dimensions.
    * @param {number|undefined} height
    * @param {number|undefined} width
-   * @param {!Window} source
-   * @param {string} origin
-   * @private
-  */
-  updateSize_(height, width, source, origin) {
-    if (this.pendingResizeRequest_) {
-      // There is an already pending resize request, fail it.
-      this.sendEmbedSizeResponse_(false /* success */);
-    }
-    this.pendingResizeRequest_ = {source, origin, width, height};
-
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      if (this.pendingResizeRequest_) {
-        this.sendEmbedSizeResponse_(true /* success */);
-        this.pendingResizeRequest_ = null;
-      }
-    });
-  }
-
-  /**
-   * Sends a response to the window which requested a resize.
-   * @param {boolean} success
    * @private
    */
-  sendEmbedSizeResponse_(success) {
-    const data = {
-      requestedHeight: this.pendingResizeRequest_.height,
-      requestedWidth: this.pendingResizeRequest_.width,
-    };
-    postMessageToWindows(
-        this.iframe_,
-        [{
-          win: this.pendingResizeRequest_.source,
-          origin: this.pendingResizeRequest_.origin,
-        }],
-        success ? 'embed-size-changed' : 'embed-size-denied',
-        data,
-        this.is3p_);
+  updateSize_(height, width) {
+    const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+    this.baseInstance_.attemptChangeSize(height, width, () => {
+      postMessage(
+          this.iframe_,
+          'embed-size-changed',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p_);
+    }, () => {
+      postMessage(
+          this.iframe_,
+          'embed-size-denied',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p_);
+    });
   }
 
   /**
@@ -227,14 +200,6 @@ export class AmpAdApiHandler {
     // if we aren't currently in view.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
-    }
-  }
-
-  /** @override  */
-  overflowCallback(overflown, unusedRequestedHeight, unusedRequestedWidth) {
-    if (overflown && this.iframe_ && this.pendingResizeRequest_) {
-      this.sendEmbedSizeResponse_(false /* success */);
-      this.pendingResizeRequest_ = null;
     }
   }
 }

@@ -29,6 +29,7 @@ import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
+import {urls} from '../../../src/config';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -78,7 +79,7 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user.assert(!startsWith(this.xhrAction_, 'https://cdn.ampproject.org'),
+      user.assert(!startsWith(this.xhrAction_, urls.cdn),
           'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
