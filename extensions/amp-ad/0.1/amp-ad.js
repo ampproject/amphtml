@@ -1,4 +1,4 @@
-/* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+/* Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,9 +53,8 @@ export class AmpAd extends AMP.BaseElement {
     const extensionTagName = networkImplementationTag(type);
     this.element.setAttribute('data-a4a-upgrade-type', extensionTagName);
     return extensionsFor(this.win).loadElementClass(extensionTagName)
-      .then(ctor => {
-        return new ctor(this.element);
-      }).catch(error => {
+      .then(ctor => new ctor(this.element))
+      .catch(error => {
         // Report error and fallback to 3p
         user.error(
           this.element.tagName,

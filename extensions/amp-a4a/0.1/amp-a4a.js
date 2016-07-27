@@ -203,7 +203,7 @@ export class AmpA4A extends AMP.BaseElement {
    * embedded directly into a page.
    * @return {boolean}
    */
-  isInAmpAdTag() {
+  isAmpAdElement() {
     return this.element.tagName == 'AMP-AD' ||
         this.element.tagName == 'AMP-EMBED';
   }
