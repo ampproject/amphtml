@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
 import {historyFor} from '../../../src/history';
-import {platform} from '../../../src/platform';
+import {platformFor} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
@@ -54,6 +54,7 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win);
 
+    const platform = platformFor(this.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 

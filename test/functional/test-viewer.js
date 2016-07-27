@@ -16,7 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platform} from '../../src/platform';
+import {platformFor} from '../../src/platform';
 import * as sinon from 'sinon';
 
 
@@ -30,6 +30,7 @@ describe('Viewer', () => {
   let clock;
   let events;
   let errorStub;
+  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -75,6 +76,7 @@ describe('Viewer', () => {
     events = {};
     errorStub = sandbox.stub(dev, 'error');
     windowMock = sandbox.mock(windowApi);
+    platform = platformFor(windowApi);
     viewer = new Viewer(windowApi);
   });
 
