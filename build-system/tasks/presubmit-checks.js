@@ -39,6 +39,9 @@ var shouldNeverBeUsed =
 var backwardCompat = 'This method must not be called. It is only retained ' +
     'for backward compatibility during rollout.';
 
+var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
+    'DCE\'d. Use explicitly like "getMode().localDev" instead.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -68,11 +71,23 @@ var forbiddenTerms = {
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
-  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
-    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
-        ' Use explicitly like "getMode().localDev" instead.',
+  '\\bgetMode\\([^)]*\\)(?!\\.)': {
+    message: realiasGetMode,
     whitelist: [
-      'dist.3p/current/integration.js'
+      'src/mode.js',
+      'dist.3p/current/integration.js',
+    ]
+  },
+  'import[^}]*\\bgetMode as': {
+    message: realiasGetMode,
+  },
+  '\\bgetModeObject\\(': {
+    message: realiasGetMode,
+    whitelist: [
+      'src/mode-object.js',
+      'src/3p-frame.js',
+      'src/log.js',
+      'dist.3p/current/integration.js',
     ]
   },
   '(?:var|let|const) +IS_DEV +=': {
@@ -354,8 +369,9 @@ var forbiddenTerms = {
   },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
-  // No destructuring allowed since we dont ship with Array polyfills.
-  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]|{[^}]+}) *=': es6polyfill,
+  // No Array destructuring allowed since the closure output is awful and
+  // there is no loose mode.
+  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]) *=': es6polyfill,
   // No spread (eg. test(...args) allowed since we dont ship with Array
   // polyfills except `arguments` spread as babel does not polyfill
   // it since it can assume that it can `slice` w/o the use of helpers.

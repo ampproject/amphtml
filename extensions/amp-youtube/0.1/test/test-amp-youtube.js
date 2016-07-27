@@ -184,6 +184,19 @@ describe('amp-youtube', function() {
       });
 
       expect(yt.implementation_.playerState_).to.equal(1);
+
+      // YouTube Player sometimes sends parsed-JSON data. Test that we're
+      // handling it correctly.
+      yt.implementation_.handleYoutubeMessages_({
+        origin: 'https://www.youtube.com',
+        source: iframe.contentWindow,
+        data: {
+          event: 'infoDelivery',
+          info: {playerState: 2},
+        },
+      });
+
+      expect(yt.implementation_.playerState_).to.equal(2);
     });
 
   });

@@ -59,16 +59,6 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
-
-    /**
-     * @private {?{
-     *   source: !Window,
-     *   origin: string,
-     *   width: (number|undefined),
-     *   height: (number|undefined),
-     * }}
-     * */
-    this.pendingResizeRequest_ = null;
   }
 
   /**
@@ -132,6 +122,10 @@ export class AmpAdApiHandler {
       if (!this.iframe_) {
         return;
       }
+      if (this.baseInstance_.renderStartResolve_) {
+        this.baseInstance_.renderStartResolve_();
+        this.baseInstance_.renderStartResolve_ = null;
+      }
       this.iframe_.style.visibility = '';
     }, this.is3p_);
     this.viewer_.onVisibilityChanged(() => {
@@ -151,6 +145,7 @@ export class AmpAdApiHandler {
     }
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
+    this.intersectionObserver_.destroy();
     this.intersectionObserver_ = null;
   }
 
@@ -163,40 +158,30 @@ export class AmpAdApiHandler {
    * @param {!Window} source
    * @param {string} origin
    * @private
-  */
+   */
   updateSize_(height, width, source, origin) {
-    if (this.pendingResizeRequest_) {
-      // There is an already pending resize request, fail it.
-      this.sendEmbedSizeResponse_(false /* success */);
-    }
-    this.pendingResizeRequest_ = {source, origin, width, height};
-
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      if (this.pendingResizeRequest_) {
-        this.sendEmbedSizeResponse_(true /* success */);
-        this.pendingResizeRequest_ = null;
-      }
-    });
+    this.baseInstance_.attemptChangeSize(height, width,
+        () => this.sendEmbedSizeResponse_(
+            true /* success */, width, height, source, origin),
+        () => this.sendEmbedSizeResponse_(
+            false /* success */, width, height, source, origin));
   }
 
   /**
    * Sends a response to the window which requested a resize.
    * @param {boolean} success
+   * @param {number} requestedWidth
+   * @param {number} requestedHeight
+   * @param {!Window} win
+   * @param {string} origin
    * @private
    */
-  sendEmbedSizeResponse_(success) {
-    const data = {
-      requestedHeight: this.pendingResizeRequest_.height,
-      requestedWidth: this.pendingResizeRequest_.width,
-    };
+  sendEmbedSizeResponse_(success, requestedWidth, requestedHeight) {
     postMessageToWindows(
         this.iframe_,
-        [{
-          win: this.pendingResizeRequest_.source,
-          origin: this.pendingResizeRequest_.origin,
-        }],
+        [{ win, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
-        data,
+        {requestedWidth, requestedHeight},
         this.is3p_);
   }
 
@@ -227,14 +212,6 @@ export class AmpAdApiHandler {
     // if we aren't currently in view.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
-    }
-  }
-
-  /** @override  */
-  overflowCallback(overflown, unusedRequestedHeight, unusedRequestedWidth) {
-    if (overflown && this.iframe_ && this.pendingResizeRequest_) {
-      this.sendEmbedSizeResponse_(false /* success */);
-      this.pendingResizeRequest_ = null;
     }
   }
 }

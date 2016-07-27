@@ -17,6 +17,7 @@
 import {endsWith} from './string';
 import {user} from './log';
 import {getMode} from './mode';
+import {urls} from './config';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
 const a = window.document.createElement('a');
@@ -261,7 +262,7 @@ export function isProxyOrigin(url) {
   const path = url.pathname.split('/');
   const prefix = path[1];
   // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == 'https://cdn.ampproject.org' ||
+  return (url.origin == urls.cdn ||
       (url.origin.indexOf('http://localhost:') == 0 &&
        (prefix == 'c' || prefix == 'v')));
 }

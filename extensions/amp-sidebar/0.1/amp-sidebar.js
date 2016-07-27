@@ -126,6 +126,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
+    if (this.isOpen_()) {
+      return;
+    }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
       setStyles(this.element, {
@@ -142,7 +145,9 @@ export class AmpSidebar extends AMP.BaseElement {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
         timer.delay(() => {
-          this.scheduleLayout(this.getRealChildren());
+          const children = this.getRealChildren();
+          this.scheduleLayout(children);
+          this.scheduleResume(children);
         }, ANIMATION_TIMEOUT);
       });
     });
@@ -156,6 +161,9 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
+    if (!this.isOpen_()) {
+      return;
+    }
     this.viewport_.restoreOriginalTouchZoom();
     this.vsync_.mutate(() => {
       this.closeMask_();
