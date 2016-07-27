@@ -45,6 +45,11 @@ export const a4aRegistry = {
   'doubleclick': doubleclickIsA4AEnabled,
 };
 
+// Note: the 'fake' ad network implementation is only for local testing.
+// Normally, ad networks should add their *IsA4AEnabled callback directly
+// to the a4aRegistry, above.  Ad network implementations should NOT use
+// getMode() in this file.  If they need to check getMode() state, they
+// should do so inside their *IsA4AEnabled callback.
 if (getMode().localDev || getMode().test) {
   a4aRegistry['fake'] = fakeIsA4AEnabled;
 }
