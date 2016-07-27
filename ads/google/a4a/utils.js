@@ -137,37 +137,40 @@ function buildAdUrl(
   const viewportRect = viewportFor(global).getRect();
   const iframeDepth = iframeNestingDepth(global);
   const dtdParam = {name: 'dtd'};
-  const allQueryParams = [
-    ...queryParams,
-    {
-      name: 'is_amp',
-      value: a4a.supportsShadowDom() ?
-          AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
-          AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
-    },
-    {name: 'amp_v', value: '$internalRuntimeVersion$'},
-    {name: 'dt', value: startTime},
-    {name: 'adk', value: adKey(slotNumber, slotRect, viewportRect)},
-    {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
-    {name: 'output', value: 'html'},
-    {name: 'nhd', value: iframeDepth},
-    {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
-    {name: 'bih', value: viewportRect.height},
-    {name: 'biw', value: viewportRect.width},
-    {name: 'adx', value: slotRect.left},
-    {name: 'ady', value: slotRect.top},
-    {name: 'u_hist', value: getHistoryLength(global)},
-    dtdParam,
-    ...unboundedQueryParams,
-    {name: 'url', value: documentInfo.canonicalUrl},
-    {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
-    {
-      name: 'loc',
-      value: global.location.href == documentInfo.canonicalUrl ?
-          null : global.location.href,
-    },
-    {name: 'ref', value: referrer},
-  ];
+  const allQueryParams = queryParams.concat(
+    [
+      {
+        name: 'is_amp',
+        value: a4a.supportsShadowDom() ?
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP :
+            AmpAdImplementation.AMP_AD_XHR_TO_IFRAME,
+      },
+      {name: 'amp_v', value: '$internalRuntimeVersion$'},
+      {name: 'dt', value: startTime},
+      {name: 'adk', value: adKey(slotNumber, slotRect, viewportRect)},
+      {name: 'c', value: makeCorrelator(clientId, documentInfo.pageViewId)},
+      {name: 'output', value: 'html'},
+      {name: 'nhd', value: iframeDepth},
+      {name: 'eid', value: a4a.element.getAttribute('data-experiment-id')},
+      {name: 'bih', value: viewportRect.height},
+      {name: 'biw', value: viewportRect.width},
+      {name: 'adx', value: slotRect.left},
+      {name: 'ady', value: slotRect.top},
+      {name: 'u_hist', value: getHistoryLength(global)},
+      dtdParam,
+    ],
+    unboundedQueryParams,
+    [
+      {name: 'url', value: documentInfo.canonicalUrl},
+      {name: 'top', value: iframeDepth ? topWindowUrlOrDomain(global) : null},
+      {
+        name: 'loc',
+        value: global.location.href == documentInfo.canonicalUrl ?
+            null : global.location.href,
+      },
+      {name: 'ref', value: referrer},
+    ]
+  );
   dtdParam.value = elapsedTimeWithCeiling(timer.now(), startTime);
   return buildUrl(
       baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
