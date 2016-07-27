@@ -84,7 +84,7 @@ describe('A4A loader', () => {
       });
 
       it('upgrades to registered, A4A type network-specific element', () => {
-        return iframePromise.then((fixture) => {
+        return iframePromise.then(fixture => {
           const extensionsMock = sandbox.mock(extensionsFor(fixture.win));
           a4aRegistry['zort'] = function() {
             return true;
