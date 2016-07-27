@@ -15,8 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {setStyles} from '../../../src/style';
-import {user, dev} from '../../../src/log';
+import {user, dev, rethrowAsync} from '../../../src/log';
 import {platform} from '../../../src/platform';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
@@ -26,7 +25,7 @@ import {documentInfoFor} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
-import {removeElement} from '../../../src/dom';
+import {removeElement, openWindowDialog} from '../../../src/dom';
 import {storageFor} from '../../../src/storage';
 import {timer} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
@@ -73,7 +72,10 @@ class AmpAppBanner extends AMP.BaseElement {
     /** @private @const {!Xhr} */
     this.xhr_ = xhrFor(this.getWin());
 
+    /** @private @const {!../../../src/service/storage-impl.Storage} */
+    this.storagePromise_ = /*REVIEW*/storageFor(this.getWin());
 
+    /** @private @const {boolean} */
     this.platformSupported_ = platform.isIos() || platform.isAndroid();
 
     if (!this.platformSupported_) {
@@ -96,10 +98,6 @@ class AmpAppBanner extends AMP.BaseElement {
     /** @private @const {?Element} */
     this.metaTag_ = this.doc_.head.querySelector('meta[name=apple-itunes-app]');
 
-    /** @private @const {string} */
-    this.manifestHref_ = this.manifestLink_.getAttribute('href');
-    assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
-
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
     const isSafariIos = platform.isIos() && platform.isSafari();
@@ -117,6 +115,12 @@ class AmpAppBanner extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.missingDataSources_ = ((platform.isAndroid() && !this.manifestLink_) ||
         (platform.isIos() && !this.metaTag_));
+
+    if (platform.isAndroid()) {
+      /** @private @const {string} */
+      this.manifestHref_ = this.manifestLink_.getAttribute('href');
+      assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
+    }
 
     if (this.missingDataSources_) {
       this.hide_();
@@ -229,7 +233,7 @@ class AmpAppBanner extends AMP.BaseElement {
     const installAppUrl = (
         `https://play.google.com/store/apps/details?id=${app['id']}`);
     const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-    this.setupOpenLink_(openInAppUrl, installAppUrl)
+    this.setupOpenLink_(openInAppUrl, installAppUrl);
   }
 
   /** @private */
@@ -243,12 +247,11 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @private */
   setupOpenLink_(openInAppUrl, installAppUrl) {
-    this.openLink_.addEventListener('click', e => {
+    this.openLink_.addEventListener('click', () => {
       timer.delay(() => {
-        this.getWin().location.href = installAppUrl;
+        top.location.replace(installAppUrl);
       }, 1500);
-      window.open(openInAppUrl, '_top');
-      e.preventDefault();
+      openWindowDialog(this.getWin(), openInAppUrl, '_top');
     });
   }
 
@@ -332,28 +335,34 @@ function handleDismiss(state) {
   });
 }
 
+
+/**
+ * Hides the app banner.
+ * @param {!Object} state
+ */
 function hideBanner(state) {
   state.viewport.removeFromFixedLayer(state.element);
   removeElement(state.element);
   state.viewport.updatePaddingBottom(0);
 }
 
+
+/**
+ * Measures banner layout rectangle and sets it on the state.
+ * @param {!Object} state
+ */
 function measureBanner(state) {
   state.bannerRect = state.viewport.getLayoutRect(state.element);
 }
 
+
+/**
+ * Updates viewport padding to add padding on the bottom.
+ * @param {!Object} state.
+ */
 function updateViewportPadding(state) {
   state.viewport.updatePaddingBottom(state.bannerRect.height);
-}
-
-function layoutOrHide(state) {
-  if (platform.isIos()) {
-    layoutForIos_();
-  } else if (platform.isAndroid()) {
-    layoutForAndroid_();
-  } else {
-    hide_();
-  }
+  state.viewport.addToFixedLayer(state.element);
 }
 
 
