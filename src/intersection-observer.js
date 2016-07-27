@@ -16,6 +16,7 @@
 
 import {Observable} from './observable';
 import {dev} from './log';
+import {documentContains} from './dom';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timer} from './timer';
@@ -208,6 +209,10 @@ export class IntersectionObserver extends Observable {
    * @private
    */
   flush_() {
+    if (!this.isElementInDoc_()) {
+      return;
+    }
+
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;
@@ -218,10 +223,18 @@ export class IntersectionObserver extends Observable {
   }
 
   /**
-   * Provice a function to clear timeout before set this intersection to null.
+   * Provide a function to clear timeout before set this intersection to null.
    */
   destroy() {
     timer.cancel(this.flushTimeout_);
     this.flushTimeout_ = 0;
+  }
+
+  /**
+   * Provide a method to check the element is not removed from DOM.
+   */
+  isElementInDoc_() {
+    return documentContains(
+        this.baseElement_.win.document, this.baseElement_.element);
   }
 }

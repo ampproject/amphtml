@@ -536,7 +536,15 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
+  'scheduleUnlayout': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/service/resources-impl.js',
+      'src/base-element.js',
+      'extensions/amp-sticky-ad/0.1/amp-sticky-ad.js',
+    ],
+  },
 };
 
 // Terms that must appear in a source file.
