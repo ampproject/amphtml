@@ -152,13 +152,10 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('yahoojp', yahoojp);
-register('nend', nend);
-register('adgeneration', adgeneration);
-register('genieessp', genieessp);
-register('yieldone', yieldone);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
+register('yieldone', yieldone);
 
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
