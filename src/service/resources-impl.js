@@ -755,7 +755,7 @@ export class Resources {
           // the resize is triggered by the user action or soon after.
           resize = true;
         } else if (box.bottom + Math.min(diff, 0) >=
-                      viewportRect.bottom - bottomOffset) {
+              viewportRect.bottom - bottomOffset) {
           // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
