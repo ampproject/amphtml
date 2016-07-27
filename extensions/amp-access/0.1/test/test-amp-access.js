@@ -29,7 +29,9 @@ import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
+import {viewerFor} from '../../../../src/viewer';
 import * as sinon from 'sinon';
+
 
 describe('AccessService', () => {
 
@@ -58,6 +60,8 @@ describe('AccessService', () => {
     }
     sandbox.restore();
     toggleExperiment(window, 'amp-access-server', false);
+    toggleExperiment(window, 'amp-access-signin', false);
+    delete viewerFor(window).params_['signin'];
   });
 
   it('should disable service when no config', () => {
@@ -184,6 +188,22 @@ describe('AccessService', () => {
     expect(() => {
       new AccessService(window);
     }).to.throw(/Unknown access type/);
+  });
+
+  it('should initialized with signin flag based on experiment/viewer', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+    };
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).isSignInEnabled_).to.be.false;
+
+    viewerFor(window).params_['signin'] = '1';
+    expect(new AccessService(window).isSignInEnabled_).to.be.false;
+
+    toggleExperiment(window, 'amp-access-signin', true);
+    expect(new AccessService(window).isSignInEnabled_).to.be.true;
   });
 
   it('should start when enabled', () => {
@@ -1555,5 +1575,107 @@ describe('AccessService analytics', () => {
     }).then(() => {
       expect(viewsValue).to.equal(3);
     });
+  });
+});
+
+
+describe('AccessService signin', () => {
+
+  let sandbox;
+  let clock;
+  let configElement;
+  let cidMock;
+  let analyticsMock;
+  let adapterMock;
+  let performanceMock;
+  let viewerMock;
+  let service;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    clock.tick(0);
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    const docService = installDocService(window, /* isSingleDoc */ true);
+    installActionServiceForDoc(docService.getAmpDoc());
+    installCidService(window);
+    installPerformanceService(window);
+
+    viewerFor(window).params_['signin'] = '1';
+    toggleExperiment(window, 'amp-access-signin', true);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID',
+    });
+    document.body.appendChild(configElement);
+
+    service = new AccessService(window);
+
+    const adapter = {
+      getConfig: () => {},
+      isAuthorizationEnabled: () => true,
+      authorize: () => {},
+    };
+    service.adapter_ = adapter;
+    adapterMock = sandbox.mock(adapter);
+
+    sandbox.stub(service.resources_, 'mutateElement',
+        (unusedElement, mutator) => {
+          mutator();
+          return Promise.resolve();
+        });
+    service.vsync_ = {
+      mutate: callback => {
+        callback();
+      },
+      mutatePromise: callback => {
+        callback();
+        return Promise.resolve();
+      },
+    };
+    const cid = {
+      get: () => {},
+    };
+    cidMock = sandbox.mock(cid);
+    service.cid_ = Promise.resolve(cid);
+
+    const analytics = {
+      triggerEvent: () => {},
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+
+    performanceMock = sandbox.mock(service.performance_);
+
+    service.viewer_ = {
+      isVisible: () => true,
+      whenFirstVisible: () => Promise.resolve(),
+      broadcast: () => {},
+    };
+    viewerMock = sandbox.mock(service.viewer_);
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    adapterMock.verify();
+    analyticsMock.verify();
+    performanceMock.verify();
+    viewerMock.verify();
+    cidMock.verify();
+    toggleExperiment(window, 'amp-access-signin', false);
+    delete viewerFor(window).params_['signin'];
+    sandbox.restore();
+  });
+
+  it('should be enabled', () => {
+    expect(service.isSignInEnabled_).to.be.true;
   });
 });

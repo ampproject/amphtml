@@ -146,6 +146,10 @@ export class AccessService {
     /** @private {?JSONType} */
     this.authResponse_ = null;
 
+    /** @const @private {boolean} */
+    this.isSignInEnabled_ = isExperimentOn(this.win, 'amp-access-signin') &&
+        this.viewer_.getParam('signin') == '1';
+
     /** @const @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
       /** @private {!Promise} */
