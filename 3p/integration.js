@@ -280,7 +280,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
-    window.context.isRenderStartSent = false;
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
@@ -335,10 +334,7 @@ function triggerResizeRequest(width, height) {
 }
 
 function triggerRenderStart() {
-  if (!window.context.isRenderStartSent) {
-    nonSensitiveDataPostMessage('render-start');
-    window.context.isRenderStartSent = true;
-  }
+  nonSensitiveDataPostMessage('render-start');
 }
 
 /**
