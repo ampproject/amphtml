@@ -18,7 +18,6 @@ import {getService} from '../../../src/service';
 import {getSourceOrigin} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {recreateNonProtoObject} from '../../../src/json';
-import {timer} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
@@ -217,9 +216,9 @@ export class Store {
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];
       item['v'] = value;
-      item['t'] = timer.now();
+      item['t'] = Date.now();
     } else {
-      this.values_[name] = {'v': value, 't': timer.now()};
+      this.values_[name] = {'v': value, 't': Date.now()};
     }
 
     // Purge old values.

@@ -32,7 +32,6 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
-import {timer} from '../timer';
 import {toggle} from '../style';
 
 
@@ -164,20 +163,20 @@ export class Resources {
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
     });
@@ -699,7 +698,7 @@ export class Resources {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = timer.now();
+    const now = Date.now();
     dev.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
@@ -741,7 +740,7 @@ export class Resources {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = timer.now();
+    const now = Date.now();
     const viewportRect = this.viewport_.getRect();
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
@@ -918,7 +917,7 @@ export class Resources {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = timer.now();
+    const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -1067,7 +1066,7 @@ export class Resources {
    * @private
    */
   work_() {
-    const now = timer.now();
+    const now = Date.now();
     const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
@@ -1175,7 +1174,7 @@ export class Resources {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = timer.now();
+    const now = Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1377,7 +1376,7 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback,
-      scheduleTime: timer.now(),
+      scheduleTime: Date.now(),
       startTime: 0,
       promise: null,
     };

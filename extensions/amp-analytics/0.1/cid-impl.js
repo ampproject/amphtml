@@ -29,7 +29,6 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
-import {timer} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
@@ -154,7 +153,7 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
  * @param {string} cookie
  */
 function setCidCookie(win, scope, cookie) {
-  const expiration = timer.now() + BASE_CID_MAX_AGE_MILLIS;
+  const expiration = Date.now() + BASE_CID_MAX_AGE_MILLIS;
   setCookie(win, scope, cookie, expiration, {
     highestAvailableDomain: true,
   });
@@ -288,7 +287,7 @@ function getBaseCid(cid, persistenceConsent) {
 function store(win, cidString) {
   try {
     const item = {
-      time: timer.now(),
+      time: Date.now(),
       cid: cidString,
     };
     const data = JSON.stringify(item);
@@ -331,7 +330,7 @@ function read(win) {
  */
 function isExpired(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + BASE_CID_MAX_AGE_MILLIS < now;
 }
 
@@ -344,7 +343,7 @@ function isExpired(storedCidInfo) {
  */
 function shouldUpdateStoredTime(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + ONE_DAY_MILLIS < now;
 }
 
@@ -365,7 +364,7 @@ function getEntropy(win) {
     return uint8array;
   }
   // Support for legacy browsers.
-  return String(win.location.href + timer.now() +
+  return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);
 }
 

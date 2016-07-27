@@ -25,7 +25,6 @@ import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {timer} from './timer';
 import {user} from './log';
 import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
@@ -50,7 +49,7 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
-  const startTime = timer.now();
+  const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
@@ -83,7 +82,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
-        timer.now(),
+        Date.now(),
         viewportFor(parentWindow).getRect(),
         element.getLayoutBox()),
     startTime,

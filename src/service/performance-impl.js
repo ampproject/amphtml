@@ -73,7 +73,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = timer.now();
+    this.initTime_ = Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -156,14 +156,14 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = timer.now();
+        docVisibleTime = Date.now();
       });
     }
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (timer.now() - docVisibleTime)
+            ? (Date.now() - docVisibleTime)
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
@@ -175,7 +175,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(timer.now() - docVisibleTime);
+        this.prerenderComplete_(Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -227,7 +227,7 @@ export class Performance {
    */
   tick(label, opt_from, opt_value) {
     opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? timer.now() : opt_value;
+    opt_value = opt_value == undefined ? Date.now() : opt_value;
 
     if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
@@ -258,7 +258,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = timer.now();
+    const now = Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);

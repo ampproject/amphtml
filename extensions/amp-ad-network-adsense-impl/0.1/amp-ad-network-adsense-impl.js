@@ -29,7 +29,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -58,7 +57,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const startTime = timer.now();
+    const startTime = Date.now();
     const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const screen = global.screen;
