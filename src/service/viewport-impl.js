@@ -24,7 +24,7 @@ import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady} from '../document-ready';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
 import {installVsyncService} from './vsync-impl';
@@ -70,6 +70,9 @@ export class Viewport {
 
     /** @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
+
+    /** @const {!../platform.Platform} */
+    this.platform_ = platformFor(this.win);
 
     /**
      * Used to cache the rect of the viewport.
@@ -861,7 +864,7 @@ export class ViewportBindingNatural_ {
         // scrolling purposes. This has mostly being resolved via
         // `scrollingElement` property, but this branch is still necessary
         // for backward compatibility purposes.
-        && platform.isWebKit()) {
+        && this.platform_.isWebKit()) {
       return doc.body;
     }
     return doc.documentElement;

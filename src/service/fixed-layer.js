@@ -16,7 +16,7 @@
 
 import {documentContains} from '../dom';
 import {dev, user} from '../log';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {setStyle, setStyles} from '../style';
 
 const TAG = 'FixedLayer';
@@ -106,6 +106,7 @@ export class FixedLayer {
     // Sort in document order.
     this.sortInDomOrder_();
 
+    const platform = platformFor(this.doc.defaultView);
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
       user.warn(TAG, 'Please test this page inside of an AMP Viewer such' +

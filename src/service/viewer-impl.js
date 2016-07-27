@@ -20,7 +20,7 @@ import {getMode} from '../mode';
 import {fromClass} from '../service';
 import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {timer} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
@@ -200,6 +200,7 @@ export class Viewer {
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is iframed on iOS.
+    const platform = platformFor(this.win);
     if (this.viewportType_ == ViewportType.NATURAL && this.isIframed_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
