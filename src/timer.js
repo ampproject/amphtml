@@ -159,6 +159,3 @@ export class Timer {
 export function timerFor(window) {
   return fromClass(window, 'timer', Timer);
 };
-
-
-export const timer = timerFor(window);

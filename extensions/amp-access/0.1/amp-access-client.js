@@ -16,7 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {xhrFor} from '../../../src/xhr';
 
 /** @const {string} */
@@ -55,7 +55,7 @@ export class AccessClientAdapter {
     this.xhr_ = xhrFor(win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
   }
 
   /** @override */

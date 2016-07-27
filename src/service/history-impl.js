@@ -18,7 +18,7 @@ import {Pass} from '../pass';
 import {getService} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {installViewerService} from './viewer-impl';
 
 
@@ -48,9 +48,13 @@ let HistoryIdDef;
 export class History {
 
   /**
+   * @param {!Window} win
    * @param {!HistoryBindingInterface} binding
    */
-  constructor(binding) {
+  constructor(win, binding) {
+    /** @private @const {!../timer.Timer} */
+    this.timer_ = timerFor(win);
+
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
 
@@ -132,7 +136,7 @@ export class History {
       for (let i = 0; i < toPop.length; i++) {
         // With the same delay timeouts must observe the order, although
         // there's no hard requirement in this case to follow the pop order.
-        timer.delay(toPop[i], 1);
+        this.timer_.delay(toPop[i], 1);
       }
     }
   }
@@ -469,7 +473,7 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     let resolve;
     let reject;
-    const promise = timer.timeoutPromise(500,
+    const promise = this.timer_.timeoutPromise(500,
         new Promise((aResolve, aReject) => {
           resolve = aResolve;
           reject = aReject;
@@ -648,7 +652,7 @@ function createHistory_(window) {
   } else {
     binding = new HistoryBindingNatural_(window);
   }
-  return new History(binding);
+  return new History(window, binding);
 };
 
 

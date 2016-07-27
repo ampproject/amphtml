@@ -18,7 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
@@ -83,7 +83,7 @@ export class AccessServerAdapter {
     this.xhr_ = xhrFor(win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);

@@ -22,7 +22,7 @@
 
 import {fromClass} from './service';
 import {parseUrl} from './url';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {platformFor} from './platform';
 import {viewerFor} from './viewer';
 
@@ -66,6 +66,9 @@ export class Preconnect {
 
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
+
+    /** @private @const {!./timer.Timer} */
+    this.timer_ = timerFor(win);
   }
 
   /**
@@ -115,7 +118,7 @@ export class Preconnect {
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
-    timer.delay(() => {
+    this.timer_.delay(() => {
       if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }

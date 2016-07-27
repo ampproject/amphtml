@@ -23,10 +23,10 @@ import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
-import {onDocumentReady} from '../document-ready';
+import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {waitForBody} from '../dom';
@@ -395,7 +395,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -554,7 +554,7 @@ export class Viewport {
       this.scrollTracking_ = true;
       const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -586,7 +586,7 @@ export class Viewport {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timer.delay(() => this.vsync_.measure(
+      timerFor(this.win_).delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -909,13 +909,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    onDocumentReady(this.win.document, () => {
-      // Microtask is necessary here to let Safari to recalculate scrollWidth
-      // post DocumentReady signal.
-      timer.delay(() => {
-        this.setup_();
-      }, 0);
-    });
+    whenDocumentReady(this.win.document, () => this.setup_());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
     dev.fine(TAG_, 'initialized natural viewport for iOS embeds');

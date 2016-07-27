@@ -34,7 +34,7 @@ import {
   moveLayoutRect,
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
@@ -283,7 +283,7 @@ export class ImageViewer {
     // Notice that we will wait until the next event cycle to set the "src".
     // This ensures that the already available image will show immediately
     // and then naturally upgrade to a higher quality image.
-    return timer.promise(1).then(() => {
+    return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
       return loadPromise(this.image_);
     });

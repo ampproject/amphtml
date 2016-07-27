@@ -22,7 +22,7 @@ import {
 import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
 import {parseUrl} from '../../src/url';
-import {timer} from '../../src/timer';
+import {timerFor} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
@@ -39,6 +39,7 @@ describe('cid', () => {
   let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
+  const timer = timerFor(window);
 
   beforeEach(() => {
     let call = 1;

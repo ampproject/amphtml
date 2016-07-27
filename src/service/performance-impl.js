@@ -19,7 +19,7 @@ import {onDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {viewerFor} from '../viewer';
 
 
@@ -93,7 +93,7 @@ export class Performance {
         // We need to add a delay, since this can execute earlier
         // than the onReady callback registered inside of `Resources`.
         // Should definitely think of making `getResourcesInViewport` async.
-        timer.delay(resolve);
+        timerFor(this.win).delay(resolve);
       });
     });
 
