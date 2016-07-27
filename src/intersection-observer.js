@@ -130,6 +130,18 @@ export class IntersectionObserver extends Observable {
       this.sendElementIntersection_();
     });
   }
+
+  /**
+   * Check if we need to unlisten when moving out of viewport,
+   * unlisten and reset unlistenViewportChanges_.
+   * @private
+   */
+  unlistenOnOutViewport_() {
+    if (this.unlistenViewportChanges_) {
+      this.unlistenViewportChanges_();
+      this.unlistenViewportChanges_ = null;
+    }
+  }
   /**
    * Called via postMessage from the child iframe when the ad/iframe starts
    * observing its position in the viewport.
@@ -173,9 +185,8 @@ export class IntersectionObserver extends Observable {
         unlistenScroll();
         unlistenChanged();
       };
-    } else if (this.unlistenViewportChanges_) {
-      this.unlistenViewportChanges_();
-      this.unlistenViewportChanges_ = null;
+    } else {
+      this.unlistenOnOutViewport_();
     }
   }
 
@@ -208,6 +219,7 @@ export class IntersectionObserver extends Observable {
    * @private
    */
   flush_() {
+    // TODO(zhouyx): One potential place to check if element is still in doc.
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;
@@ -223,9 +235,6 @@ export class IntersectionObserver extends Observable {
   destroy() {
     timer.cancel(this.flushTimeout_);
     this.flushTimeout_ = 0;
-    if (this.unlistenViewportChanges_) {
-      this.unlistenViewportChanges_();
-      this.unlistenViewportChanges_ = null;
-    }
+    this.unlistenOnOutViewport_();
   }
 }
