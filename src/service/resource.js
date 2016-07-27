@@ -256,16 +256,12 @@ export class Resource {
    * awaiting the measure and possibly layout.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function.
    */
-  changeSize(newHeight, newWidth, opt_callback) {
+  changeSize(newHeight, newWidth) {
     this.element./*OK*/changeSize(newHeight, newWidth);
     // Schedule for re-layout.
     if (this.state_ != ResourceState.NOT_BUILT) {
       this.state_ = ResourceState.NOT_LAID_OUT;
-    }
-    if (opt_callback) {
-      opt_callback();
     }
   }
 

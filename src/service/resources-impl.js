@@ -546,26 +546,35 @@ export class Resources {
   }
 
   /**
-   * Requests the runtime to update the size of this element to the specified
-   * value. The runtime will schedule this request and attempt to process it
+   * Return a promise that requests the runtime to update the size of
+   * this element to the specified value.
+   * The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeSize}, the runtime
-   * may refuse to make a change in which case it will call the
+   * may refuse to make a change in which case it will reject promise, call the
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
    * to update the height manually.
    * Note that the runtime does not call the `overflowCallback` method if the
    * requested height is 0 or negative.
-   * If the height is successfully updated then the opt_callback is called.
+   * If the height is successfully updated then the promise is resolved.
    * @param {!Element} element
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
-   * @param {function()=} opt_callback A callback function to be called if the
-   *    height is updated.
+   * @return {!Promise}
    * @protected
    */
-  attemptChangeSize(element, newHeight, newWidth, opt_callback) {
-    this.scheduleChangeSize_(Resource.forElement(element), newHeight,
-        newWidth, /* force */ false, opt_callback);
+
+  attemptChangeSize(element, newHeight, newWidth) {
+    return new Promise((resolve, reject) => {
+      this.scheduleChangeSize_(Resource.forElement(element), newHeight,
+        newWidth, /* force */ false, hasSizeChanged => {
+          if (hasSizeChanged) {
+            resolve();
+          } else {
+            reject(new Error('changeSize attempt denied'));
+          }
+        });
+    });
   }
 
   /**
@@ -750,7 +759,6 @@ export class Resources {
         deferredMutates[i]();
       }
     }
-
     if (this.requestsChangeSize_.length > 0) {
       dev.fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
@@ -766,49 +774,46 @@ export class Resources {
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
         const diff = request.newHeight - box.height;
-        if (diff == 0) {
-          // Nothing to do.
-          continue;
-        }
 
         // Check resize rules. It will either resize element immediately, or
         // wait until scrolling stops or will call the overflow callback.
         let resize = false;
-        if (request.force || !this.visible_) {
-          // 1. An immediate execution requested or the document is hidden.
+        if (diff == 0) {
+          // 1. Nothing to resize.
+        } else if (request.force || !this.visible_) {
+          // 2. An immediate execution requested or the document is hidden.
           resize = true;
         } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
-          // 2. Active elements are immediately resized. The assumption is that
+          // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
         } else if (box.bottom + Math.min(diff, 0) >=
-                      viewportRect.bottom - bottomOffset) {
-          // 3. Elements under viewport are resized immediately, but only if
+              viewportRect.bottom - bottomOffset) {
+          // 4. Elements under viewport are resized immediately, but only if
           // an element's boundary is not changed above the viewport after
           // resize.
           resize = true;
         } else if (box.bottom <= viewportRect.top + topOffset) {
-          // 4. Elements above the viewport can only be resized when scrolling
+          // 5. Elements above the viewport can only be resized when scrolling
           // has stopped, otherwise defer util next cycle.
           if (isScrollingStopped) {
             // These requests will be executed in the next animation cycle and
             // adjust the scroll position.
-            resize = false;
             scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
             this.requestsChangeSize_.push(request);
           }
+          continue;
         } else if (iniBox.bottom >= docBottomOffset ||
                       box.bottom >= docBottomOffset) {
-          // 5. Elements close to the bottom of the document (not viewport)
+          // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
         } else if (diff < 0) {
-          // 6. The new height is smaller than the current one.
-          resize = false;
+          // 7. The new height is smaller than the current one.
         } else {
-          // 7. Element is in viewport don't resize and try overflow callback
+          // 8. Element is in viewport don't resize and try overflow callback
           // instead.
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight, request.newWidth);
@@ -819,9 +824,13 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
-              request.newHeight, request.newWidth, request.callback);
+              request.newHeight, request.newWidth);
           request.resource.overflowCallback(/* overflown */ false,
               request.newHeight, request.newWidth);
+        }
+
+        if (request.callback) {
+          request.callback(/* hasSizeChanged */resize);
         }
       }
 
@@ -842,7 +851,10 @@ export class Resources {
               const box = request.resource.getLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
               request.resource./*OK*/changeSize(
-                  request.newHeight, request.newWidth, request.callback);
+                  request.newHeight, request.newWidth);
+              if (request.callback) {
+                request.callback(/* hasSizeChanged */true);
+              }
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
@@ -1225,10 +1237,11 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_callback A callback function.
+   * @param {function()=} opt_callback A callback function
    * @private
    */
-  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback) {
+  scheduleChangeSize_(resource, newHeight, newWidth, force,
+      opt_callback) {
     resource.resetPendingChangeSize();
     const layoutBox = resource.getLayoutBox();
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
@@ -1239,6 +1252,9 @@ export class Resources {
             resource.debugid);
       }
       // Nothing to do.
+      if (opt_callback) {
+        opt_callback(/* hasSizeChanged */false);
+      }
       return;
     }
 
