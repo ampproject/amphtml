@@ -172,14 +172,15 @@ export class AmpAdApiHandler {
    * @param {boolean} success
    * @param {number} requestedWidth
    * @param {number} requestedHeight
-   * @param {!Window} win
+   * @param {!Window} source
    * @param {string} origin
    * @private
    */
-  sendEmbedSizeResponse_(success, requestedWidth, requestedHeight) {
+  sendEmbedSizeResponse_(
+      success, requestedWidth, requestedHeight, source, origin) {
     postMessageToWindows(
         this.iframe_,
-        [{ win, origin}],
+        [{win: source, origin}],
         success ? 'embed-size-changed' : 'embed-size-denied',
         {requestedWidth, requestedHeight},
         this.is3p_);
