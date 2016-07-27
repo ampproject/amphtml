@@ -99,7 +99,7 @@ const EXPERIMENTS = [
     id: 'amp-scrollable-carousel',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
   },
   {
     id: 'form-submit',
