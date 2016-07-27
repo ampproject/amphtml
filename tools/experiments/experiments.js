@@ -125,6 +125,12 @@ const EXPERIMENTS = [
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
+  {
+    id: 'amp-viz-vega',
+    name: 'AMP Visualization using Vega grammar',
+    spec: 'https://github.com/ampproject/amphtml/issues/3991',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
+  },
 ];
 
 if (getMode().localDev) {

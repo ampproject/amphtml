@@ -74,6 +74,7 @@ function buildExtensions(options) {
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
+  buildExtension('amp-install-serviceworker', '0.1', false, options);
   buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
@@ -87,7 +88,6 @@ function buildExtensions(options) {
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-springboard-player', '0.1', false, options);
   buildExtension('amp-sticky-ad', '0.1', true, options);
-  buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -98,6 +98,7 @@ function buildExtensions(options) {
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
+  buildExtension('amp-viz-vega', '0.1', false, options);
   buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -406,6 +407,7 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('viz-vega.amp.html');
   buildExample('vrview.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');

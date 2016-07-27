@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
+import {isJsonScriptTag} from '../../../src/dom';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
@@ -292,12 +293,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       const children = this.element.children;
       if (children.length == 1) {
         const child = children[0];
-        if (child.tagName.toUpperCase() == 'SCRIPT' &&
-            child.getAttribute('type').toUpperCase() == 'APPLICATION/JSON') {
+        if (isJsonScriptTag(child)) {
           inlineConfig = JSON.parse(children[0].textContent);
         } else {
           user.error(this.getName_(), 'The analytics config should ' +
-              'be put in a <script> tag with type=application/json');
+              'be put in a <script> tag with type="application/json"');
         }
       } else if (children.length > 1) {
         user.error(this.getName_(), 'The tag should contain only one' +
