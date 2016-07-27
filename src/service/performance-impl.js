@@ -31,12 +31,6 @@ import {viewerFor} from '../viewer';
 const QUEUE_LIMIT = 50;
 
 /**
- * Added to relative relative timings so that they are never 0 which the
- * underlying library considers a non-value.
- */
-export const ENSURE_NON_ZERO = new Date().getTime();
-
-/**
  * @typedef {{
  *   label: string,
  *   opt_from: (string|null|undefined),
@@ -254,10 +248,10 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
+    // initTime_ Is added instead of non-zero, because the underlying
     // library doesn't like 0 values.
-    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
-    this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
+    this.tick('_' + label, undefined, this.initTime_);
+    this.tick(label, '_' + label, Math.round(value + this.initTime_));
   }
 
   /**
