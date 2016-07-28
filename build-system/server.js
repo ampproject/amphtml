@@ -293,9 +293,6 @@ app.use('/examples/analytics.config.json', function(req, res, next) {
 });
 
 app.get('/examples/*', function(req, res, next) {
-  if (req.path == '/examples/') {
-    return next();
-  }
   var filePath = req.path;
   var mode = null;
   if (filePath.substr(-4) == '/max') {
@@ -317,6 +314,8 @@ app.get('/examples/*', function(req, res, next) {
       file = file.replace('/dist/amp.js', '/dist/v0.js');
     }
     res.end(file);
+  }).catch(e => {
+    next();
   });
 });
 
