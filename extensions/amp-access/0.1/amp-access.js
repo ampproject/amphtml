@@ -146,9 +146,8 @@ export class AccessService {
     /** @private {?JSONType} */
     this.authResponse_ = null;
 
-    /** @const @private {boolean} */
-    this.isSignInEnabled_ = isExperimentOn(this.win, 'amp-access-signin') &&
-        this.viewer_.getParam('signin') == '1';
+    /** @const @private {!SignInConfigDef} */
+    this.signInConfig_ = this.buildSignConfig_(configJson);
 
     /** @const @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
@@ -382,6 +381,25 @@ export class AccessService {
       }
       return vars;
     });
+  }
+
+  /**
+   * @param {!JSONObject} configJson
+   * @return {!SignInConfigDef}
+   * @private
+   */
+  buildSignConfig_(configJson) {
+    if (!isExperimentOn(this.win, 'amp-access-signin') ||
+        !this.viewer_.isEmbedded() ||
+        this.viewer_.getParam('signin') != '1') {
+      // Default config prohibits all operations.
+      return {
+        acceptAccessToken: false,
+      };
+    }
+    return {
+      acceptAccessToken: configJson['acceptAccessToken'] || false,
+    };
   }
 
   /**
@@ -831,6 +849,14 @@ export class AccessService {
     return Promise.all(promises);
   }
 }
+
+
+/**
+ * @typedef {{
+ *   acceptAccessToken: boolean,
+ * }}
+ */
+let SignInConfigDef;
 
 
 /**

@@ -197,13 +197,40 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
-    expect(new AccessService(window).isSignInEnabled_).to.be.false;
+    const win = window;
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
 
-    viewerFor(window).params_['signin'] = '1';
-    expect(new AccessService(window).isSignInEnabled_).to.be.false;
+    const viewer = viewerFor(win);
+    let isEmbedded = false;
+    sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
 
-    toggleExperiment(window, 'amp-access-signin', true);
-    expect(new AccessService(window).isSignInEnabled_).to.be.true;
+    function configureSignIn() {
+      viewer.params_['signin'] = '1';
+      isEmbedded = true;
+      config['acceptAccessToken'] = true;
+      element.textContent = JSON.stringify(config);
+      toggleExperiment(win, 'amp-access-signin', true);
+    }
+
+    configureSignIn();
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.true;
+
+    configureSignIn();
+    delete viewer.params_['signin'];
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
+
+    configureSignIn();
+    delete config['acceptAccessToken'];
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
+
+    configureSignIn();
+    toggleExperiment(win, 'amp-access-signin', false);
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
+
+    configureSignIn();
+    isEmbedded = false;
+    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
   });
 
   it('should start when enabled', () => {
@@ -1602,7 +1629,9 @@ describe('AccessService signin', () => {
     installCidService(window);
     installPerformanceService(window);
 
-    viewerFor(window).params_['signin'] = '1';
+    const viewer = viewerFor(window);
+    viewer.params_['signin'] = '1';
+    sandbox.stub(viewer, 'isEmbedded', () => true);
     toggleExperiment(window, 'amp-access-signin', true);
 
     configElement = document.createElement('script');
@@ -1612,6 +1641,7 @@ describe('AccessService signin', () => {
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
       'login': 'https://acme.com/l?rid=READER_ID',
+      'acceptAccessToken': true,
     });
     document.body.appendChild(configElement);
 
@@ -1675,7 +1705,7 @@ describe('AccessService signin', () => {
     sandbox.restore();
   });
 
-  it('should be enabled', () => {
-    expect(service.isSignInEnabled_).to.be.true;
+  it('should configure correctly', () => {
+    expect(service.signInConfig_.acceptAccessToken).to.be.true;
   });
 });
