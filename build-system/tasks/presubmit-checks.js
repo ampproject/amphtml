@@ -495,6 +495,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.scrollTo\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -521,7 +522,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
 };
 
 // Terms that must appear in a source file.

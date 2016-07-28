@@ -631,7 +631,7 @@ export class BaseElement {
    * @protected
    */
   scheduleUnlayout(elements) {
-    this.resources_.scheduleUnlayout(this.element, elements);
+    this.resources_./*OK*/scheduleUnlayout(this.element, elements);
   }
 
   /**
