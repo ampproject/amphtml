@@ -272,7 +272,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.iframe_) {
-      user.assert(!this.isInFixedContainer_,
+      user().assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
       incrementLoadingAds(this.win);

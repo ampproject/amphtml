@@ -149,7 +149,7 @@ export class UrlReplacements {
     });
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user.assert(param,
+      user().assert(param,
           'The first argument to QUERY_PARAM, the query string ' +
           'param is required');
       const url = parseUrl(this.win_.location.href);
@@ -161,7 +161,7 @@ export class UrlReplacements {
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user().assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -183,9 +183,9 @@ export class UrlReplacements {
     // Returns assigned variant name for the given experiment.
     this.set_('VARIANT', experiment => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        user.assert(variants[experiment] !== undefined,
+        user().assert(variants[experiment] !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         const variant = variants[experiment];
@@ -197,7 +197,7 @@ export class UrlReplacements {
     // Returns all assigned experiment variants in a serialized form.
     this.set_('VARIANTS', () => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
 
         const experiments = [];
@@ -347,7 +347,7 @@ export class UrlReplacements {
 
     // Access: data from the authorization response.
     this.set_('AUTHDATA', field => {
-      user.assert(field,
+      user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
@@ -367,7 +367,7 @@ export class UrlReplacements {
     });
 
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return this.getTimingData_(startAttribute, endAttribute);
     });
@@ -395,7 +395,7 @@ export class UrlReplacements {
     return this.getAccessService_(this.win_).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        user.error(TAG, 'Access service is not installed to access: ', expr);
+        user().error(TAG, 'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
@@ -468,7 +468,7 @@ export class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
-    dev.assert(varName.indexOf('RETURN') == -1);
+    dev().assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;

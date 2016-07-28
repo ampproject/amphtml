@@ -133,7 +133,7 @@ export class Timer {
     const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
-        reject(user.createError(opt_message || 'timeout'));
+        reject(user().createError(opt_message || 'timeout'));
       }, delay);
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));

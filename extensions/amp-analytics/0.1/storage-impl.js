@@ -90,7 +90,7 @@ export class Storage {
    * @override
    */
   set(name, value) {
-    dev.assert(typeof value == 'boolean', 'Only boolean values accepted');
+    dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
     return this.saveStore_(store => store.set(name, value));
   }
 
@@ -114,7 +114,7 @@ export class Storage {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
-            dev.error(TAG, 'Failed to load store: ', reason);
+            dev().error(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));
@@ -142,7 +142,7 @@ export class Storage {
     this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-storage-reset' &&
               message['origin'] == this.origin_) {
-        dev.fine(TAG, 'Received reset message');
+        dev().fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
     });
@@ -150,7 +150,7 @@ export class Storage {
 
   /** @private */
   broadcastReset_() {
-    dev.fine(TAG, 'Broadcasted reset message');
+    dev().fine(TAG, 'Broadcasted reset message');
     this.viewer_.broadcast({
       'type': 'amp-storage-reset',
       'origin': this.origin_,
@@ -210,7 +210,7 @@ export class Store {
    * @private
    */
   set(name, value) {
-    dev.assert(name != '__proto__' && name != 'prototype',
+    dev().assert(name != '__proto__' && name != 'prototype',
         'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
@@ -292,7 +292,7 @@ export class LocalStorageBinding {
     this.isLocalStorageSupported_ = !!this.win.localStorage;
 
     if (!this.isLocalStorageSupported_) {
-      dev.error(TAG, 'localStorage not supported.');
+      dev().error(TAG, 'localStorage not supported.');
     }
   }
 

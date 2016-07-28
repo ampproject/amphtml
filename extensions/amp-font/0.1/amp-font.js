@@ -88,7 +88,7 @@ export class AmpFont extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @private @const {string} */
-    this.fontFamily_ = user.assert(this.element.getAttribute('font-family'),
+    this.fontFamily_ = user().assert(this.element.getAttribute('font-family'),
         'The font-family attribute is required for <amp-font> %s',
         this.element);
     /** @private @const {string} */
@@ -127,7 +127,7 @@ export class AmpFont extends AMP.BaseElement {
       this.onFontLoadSuccess_();
     }).catch(unusedError => {
       this.onFontLoadError_();
-      user.warn(TAG, 'Font download timed out for ' + this.fontFamily_);
+      user().warn(TAG, 'Font download timed out for ' + this.fontFamily_);
     });
   }
 

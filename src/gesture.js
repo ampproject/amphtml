@@ -354,7 +354,7 @@ export class Gestures {
    * @private
    */
   signalEmit_(recognizer, data, event) {
-    dev.assert(this.eventing_ == recognizer,
+    dev().assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {

@@ -131,7 +131,7 @@ export function loadPromise(element, opt_timeout) {
  * @return {!Element} The target of the event.
  */
 function getTarget(event) {
-  return dev.assert(event.target || event.testTarget,
+  return dev().assert(event.target || event.testTarget,
       'No target present %s', event);
 }
 
@@ -142,7 +142,7 @@ function getTarget(event) {
 function failedToLoad(event) {
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
-  throw user.createError('Failed HTTP request for %s.', event.target);
+  throw user().createError('Failed HTTP request for %s.', event.target);
 }
 
 /**

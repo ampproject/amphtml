@@ -99,7 +99,7 @@ export function isVisibilitySpecValid(config) {
 
   const spec = config['visibilitySpec'];
   if (!spec['selector'] || spec['selector'][0] != '#') {
-    user.error('Visibility spec requires an id selector');
+    user().error('Visibility spec requires an id selector');
     return false;
   }
 
@@ -110,30 +110,30 @@ export function isVisibilitySpecValid(config) {
 
   if (!isPositiveNumber_(ctMin) || !isPositiveNumber_(ctMax) ||
       !isPositiveNumber_(ttMin) || !isPositiveNumber_(ttMax)) {
-    user.error('Timing conditions should be positive integers when specified.');
+    user().error('Timing conditions should be positive integers when specified.');
     return false;
   }
 
   if ((ctMax || ttMax) && !spec['unload']) {
-    user.warn('Unload condition should be used when using ' +
+    user().warn('Unload condition should be used when using ' +
         ' totalTimeMax or continuousTimeMax');
     return false;
   }
 
   if (ctMax < ctMin || ttMax < ttMin) {
-    user.warn('Max value in timing conditions should be more ' +
+    user().warn('Max value in timing conditions should be more ' +
         'than the min value.');
     return false;
   }
 
   if (!isValidPercentage_(spec[VISIBLE_PERCENTAGE_MAX]) ||
       !isValidPercentage_(spec[VISIBLE_PERCENTAGE_MIN])) {
-    user.error('visiblePercentage conditions should be between 0 and 100.');
+    user().error('visiblePercentage conditions should be between 0 and 100.');
     return false;
   }
 
   if (spec[VISIBLE_PERCENTAGE_MAX] < spec[VISIBLE_PERCENTAGE_MIN]) {
-    user.error('visiblePercentageMax should be greater than ' +
+    user().error('visiblePercentageMax should be greater than ' +
         'visiblePercentageMin');
     return false;
   }
@@ -353,7 +353,7 @@ export class Visibility {
       return;  // Nothing changed.
     } else if (!state[IN_VIEWPORT] && wasInViewport) {
       // The resource went out of view. Do final calculations and reset state.
-      dev.assert(state[LAST_UPDATE] > 0, 'lastUpdated time in weird state.');
+      dev().assert(state[LAST_UPDATE] > 0, 'lastUpdated time in weird state.');
 
       state[MAX_CONTINUOUS_TIME] = Math.max(state[MAX_CONTINUOUS_TIME],
           state[CONTINUOUS_TIME] + timeSinceLastUpdate);
@@ -364,7 +364,7 @@ export class Visibility {
       state[LAST_VISIBLE_TIME] = Date.now() - state[TIME_LOADED];
     } else if (state[IN_VIEWPORT] && !wasInViewport) {
       // The resource came into view. start counting.
-      dev.assert(state[LAST_UPDATE] == undefined ||
+      dev().assert(state[LAST_UPDATE] == undefined ||
           state[LAST_UPDATE] == -1, 'lastUpdated time in weird state.');
       state[FIRST_VISIBLE_TIME] = state[FIRST_VISIBLE_TIME] ||
           Date.now() - state[TIME_LOADED];

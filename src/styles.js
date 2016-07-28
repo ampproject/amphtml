@@ -41,7 +41,7 @@ import {dev} from './log';
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       doc,
-      dev.assert(doc.head),
+      dev().assert(doc.head),
       cssText,
       opt_isRuntimeCss || false,
       opt_ext || null);
@@ -123,7 +123,7 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  * @param {!ShadowRoot} shadowRoot
  */
 export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev.assert(
+  const style = dev().assert(
       ampdoc.getRootNode().querySelector('style[amp-runtime]'),
       'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
   const cssText = style.textContent;
@@ -141,7 +141,7 @@ export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
  */
 export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    setStyles(dev.assert(doc.body), {
+    setStyles(dev().assert(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',

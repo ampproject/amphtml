@@ -68,7 +68,7 @@ export class AmpAdApiHandler {
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p) {
-    user.assert(
+    user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
@@ -84,7 +84,7 @@ export class AmpAdApiHandler {
       if (this.noContentCallback_) {
         this.noContentCallback_();
       } else {
-        user.info('no content callback was specified');
+        user().info('no content callback was specified');
       }
     }, this.is3p_);
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad

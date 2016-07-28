@@ -44,7 +44,7 @@ export function getIntersectionChangeEntry(
 
   const boundingClientRect =
       moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  dev.assert(boundingClientRect.width >= 0 &&
+  dev().assert(boundingClientRect.width >= 0 &&
       boundingClientRect.height >= 0, 'Negative dimensions in ad.');
   boundingClientRect.x = boundingClientRect.left;
   boundingClientRect.y = boundingClientRect.top;

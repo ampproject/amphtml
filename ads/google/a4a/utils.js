@@ -213,7 +213,7 @@ function iframeNestingDepth(global) {
     win = win.parent;
     depth++;
   }
-  dev.assert(win == global.top);
+  dev().assert(win == global.top);
   return depth;
 }
 
@@ -298,7 +298,7 @@ function secondWindowFromTop(global) {
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
-  dev.assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == global.top);
   return secondFromTop;
 }
 

@@ -111,7 +111,7 @@ class Cid {
     } else {
       getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
     }
-    user.assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
+    user().assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
@@ -218,12 +218,12 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user.assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
 /**
- * Returns the base cid for the current user. This string must not
+ * Returns the base cid for the current user(). This string must not
  * be exposed to users without hashing with the current source origin
  * and the externalCidScope.
  * On a proxy this value is the same for a user across all source

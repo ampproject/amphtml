@@ -147,7 +147,7 @@ const EXPERIMENTS = [
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev.assert(experiment.cleanupIssue, `experiment ${experiment.name} must ` +
+    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must ` +
         'have a `cleanupIssue` field.');
   });
 }
@@ -292,10 +292,10 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev.assert(document.getElementById('popup-container'));
-  const messageElement = dev.assert(document.getElementById('popup-message'));
-  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
-  const cancelButton = dev.assert(
+  const container = dev().assert(document.getElementById('popup-container'));
+  const messageElement = dev().assert(document.getElementById('popup-message'));
+  const confirmButton = dev().assert(document.getElementById('popup-button-ok'));
+  const cancelButton = dev().assert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {

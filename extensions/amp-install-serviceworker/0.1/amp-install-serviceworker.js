@@ -50,7 +50,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
         const docInfo = documentInfoFor(win);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
-        user.assert(
+        user().assert(
             origin == sourceUrl.origin ||
             origin == canonicalUrl.origin,
             'data-iframe-src (%s) should be a URL on the same origin as the ' +
@@ -65,7 +65,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       install(this.win, src);
     } else {
-      user.error(TAG,
+      user().error(TAG,
           'Did not install ServiceWorker because it does not ' +
           'match the current origin: ' + src);
     }
@@ -109,11 +109,11 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
 function install(win, src) {
   win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
-      user.info(TAG, 'ServiceWorker registration successful with scope: ',
+      user().info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
   }).catch(function(e) {
-    user.error(TAG, 'ServiceWorker registration failed:', e);
+    user().error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 
