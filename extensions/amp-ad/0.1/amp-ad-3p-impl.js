@@ -304,36 +304,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @private
    */
   noContentHandler_() {
-    // If iframe is null nothing to do.
+    // If iframe is null nothing to do
     if (!this.iframe_) {
       return;
     }
-    // If a fallback does not exist attempt to collapse the ad.
-    if (!this.fallback_) {
-      this.attemptChangeHeight(0).then(() => {
-        this./*OK*/collapse();
-      }, () => {
-        this.deferMutate(() => {
-          this.addDefaultFallback();
-        })
-      });
-    }
-    this.deferMutate(() => {
-      if (!this.iframe_) {
-        return;
-      }
-      if (this.fallback_) {
-        // Hide placeholder when falling back.
-        if (this.placeholder_) {
-          this.togglePlaceholder(false);
-        }
-        this.toggleFallback(true);
-      }
-      // Remove the iframe only if it is not the master.
-      if (this.iframe_.name.indexOf('_master') == -1) {
-        removeElement(this.iframe_);
-        this.iframe_ = null;
-      }
+
+    //Attempt to collapse the ad first
+    this.attemptChangeHeight(0).then(() => {
+      this./*OK*/collapse();
+    }, () => {
+      // Attempt to apply fallback
+      this.applyFallback_();
     });
   }
 
@@ -358,19 +339,35 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return true;
   }
 
-  addDefaultFallback() {
-    if (this.placeholder_) {
-      this.togglePlaceholder(false);
-    }
-    const defaultFallback = this.win.document.createElement('div');
-    setStyles(defaultFallback, {
-      position: 'absolute',
-      top: '0',
-      bottom: '0',
-      left: '0',
-      right: '0',
-      background: '#D3D3D3',
+  /* Method that will apply fallback after collapse fail */
+  applyFallback_() {
+    this.deferMutate(() => {
+      if (!this.iframe_) {
+        return;
+      }
+      if (this.placeholder_) {
+        this.togglePlaceholder(false);
+      }
+      if (this.fallback_) {
+        this.toggleFallback(true);
+      } else {
+        // create our own fallback
+        const defaultFallback = this.win.document.createElement('div');
+        setStyles(defaultFallback, {
+          position: 'absolute',
+          top: '0',
+          bottom: '0',
+          left: '0',
+          right: '0',
+          background: '#D3D3D3',
+        });
+        this.element.appendChild(defaultFallback);
+      }
+      // Remove the iframe only if it is not the master.
+      if (this.iframe_.name.indexOf('_master') == -1) {
+        removeElement(this.iframe_);
+        this.iframe_ = null;
+      }
     });
-    this.element.appendChild(defaultFallback);
   }
 }
