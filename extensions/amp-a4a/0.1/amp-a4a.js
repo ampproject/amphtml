@@ -65,8 +65,13 @@ let publicKeyInfos = [importPublicKey({
   ext: true,
 })];
 
+// If we're in local dev mode then we may be talking to a dev validation
+// instance as well.  Dev validators use different keys than production ones
+// do, so we need to add the dev key to the known key list.
+//
+// Note: This is temporary.  It will not be necessary once A4A can fetch keys
+// directly from the server.
 if (getMode().localDev) {
-  dev.info('A4A', 'TDRL: adding dev crypto key...');
   const devModulus =
       'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
       'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +

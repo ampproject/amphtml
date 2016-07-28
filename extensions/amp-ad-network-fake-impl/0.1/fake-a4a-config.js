@@ -18,6 +18,10 @@
  * Check whether the fake ad network wants to use A4A.  Returns true iff the
  * `data-use-a4a` attribute is set on the `amp-ad` element.
  *
+ * **Note:** `data-use-a4a` is a special parameter available only for this
+ * 'fake' network implementation.  It isn't present / used by A4A or other
+ * ad networks in general.
+ *
  * @param {!Window} win
  * @param {!Element} element
  * @returns {boolean}
