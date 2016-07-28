@@ -156,7 +156,7 @@ export class AmpAdApiHandler {
   updateSize_(height, width) {
     const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-    this.baseInstance_.attemptChangeSize(height, width, () => {
+    this.baseInstance_.attemptChangeSize(height, width).then(() => {
       postMessage(
           this.iframe_,
           'embed-size-changed',
