@@ -106,16 +106,21 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const status = this.status;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
-    return;
-  }
-  if (status !== amp.validator.ValidationResult.Status.FAIL) {
+    if (this.errors.length === 0)
+      return;
+  } else if (status !== amp.validator.ValidationResult.Status.FAIL) {
     terminal.error(
-        'AMP validation had unknown results. This should not happen.');
+        'AMP validation had unknown results. This indicates a validator bug. ' +
+        'Please report at https://github.com/ampproject/amphtml/issues .');
     return;
   }
   let errors;
   if (errorCategoryFilter === null) {
-    terminal.error('AMP validation had errors:');
+    if (status == amp.validator.ValidationResult.Status.FAIL) {
+      terminal.error('AMP validation had errors:');
+    } else {
+      terminal.warn('AMP validation had warnings:');
+    }
     errors = this.errors;
   } else {
     errors = [];
@@ -146,10 +151,19 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
     }
   }
   if (errorCategoryFilter === null && errors.length !== 0) {
-    terminal.info('See also https://validator.ampproject.org/#url=' +
+    terminal.info(
+        'See also https://validator.ampproject.org/#url=' +
         encodeURIComponent(goog.uri.utils.removeFragment(url)));
   }
 };
+
+/**
+ * A regex for replacing any adjacent characters that are whitespace
+ * with a single space (' ').
+ * @private
+ * @type {RegExp}
+ */
+const matchWhitespaceRE = /\s+/g;
 
 /**
  * Applies the format to render the params in the provided error.
@@ -160,8 +174,8 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
 function applyFormat(format, error) {
   let message = format;
   for (let param = 1; param <= error.params.length; ++param) {
-    message =
-        message.replace(new RegExp('%' + param, 'g'), error.params[param - 1]);
+    const value = error.params[param - 1].replace(matchWhitespaceRE, ' ');
+    message = message.replace(new RegExp('%' + param, 'g'), value);
   }
   return message.replace(new RegExp('%%', 'g'), '%');
 }
@@ -174,7 +188,6 @@ function applyFormat(format, error) {
  */
 amp.validator.renderErrorMessage = function(error) {
   goog.asserts.assert(error.code !== null);
-  goog.asserts.assert(error.params.length > 0);
   const format = parsedValidatorRulesSingleton.getFormatByCode()[error.code];
   goog.asserts.assert(format !== undefined);
   return applyFormat(format, error);
@@ -233,10 +246,9 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
  * @export
  */
 amp.validator.categorizeError = function(error) {
-  // This shouldn't happen in practice. We always set some params, and
-  // UNKNOWN_CODE would indicate that the field wasn't populated.
-  if (error.params.length === 0 ||
-      error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
+  // This shouldn't happen in practice. UNKNOWN_CODE would indicate that the
+  // field wasn't populated.
+  if (error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
       error.code === null) {
     return amp.validator.ErrorCategory.Code.UNKNOWN;
   }
@@ -257,6 +269,10 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
       amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+  }
+  if (error.code ===
+      amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // At the moment it's not possible to get this particular error since
   // all mandatory tag ancestors have hints except for noscript, but
@@ -456,7 +472,9 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The attribute 'shortcode' in tag 'amp-instagram' is deprecated -
   // use 'data-shortcode' instead."
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
-      error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
+      error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
   }
   // E.g. "The parent tag of tag 'source' is 'picture', but it can

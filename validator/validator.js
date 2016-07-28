@@ -625,7 +625,8 @@ class CdataMatcher {
               amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
               context.getDocLocator(),
               /* params */
-              [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+              [getTagSpecName(this.tagSpec_),
+               bytes.toString(), cdataSpec.maxBytes.toString()],
               cdataSpec.maxBytesSpecUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -2950,6 +2951,10 @@ function specificity(code) {
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
       return 102;
+    case amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY:
+      return 103;
+    case amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY:
+      return 104;
     default:
       goog.asserts.fail('Unrecognized Code: ' + code);
   }
@@ -3450,6 +3455,35 @@ amp.validator.ValidationHandler =
         amp.validator.ValidationResult.Status.UNKNOWN) {
       this.validationResult_.status =
           amp.validator.ValidationResult.Status.PASS;
+    }
+  }
+
+  /**
+   * Callback for informing that the parser is manufacturing a <body> tag not
+   * actually found on the page. This will be followed by a startTag() with the
+   * actual body tag in question.
+   * @override
+   */
+  markManufacturedBody() {
+    if (amp.validator.RULES.manufacturedBodyTagIsError) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        this.context_.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
+            this.context_.getDocLocator(),
+            /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+            this.validationResult_);
+      } else {
+        this.validationResult_.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
+    } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      this.context_.addError(
+          amp.validator.ValidationError.Severity.WARNING,
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
+          this.context_.getDocLocator(),
+          /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+          this.validationResult_);
     }
   }
 
