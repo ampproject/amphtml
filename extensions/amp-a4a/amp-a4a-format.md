@@ -17,14 +17,25 @@ limitations under the License.
 
 # AMP A4A AD CREATIVE FORMAT
 
-** WORK IN PROGRESS.  SUBJECT TO CHANGE. **
+** >> WORK IN PROGRESS.  SUBJECT TO CHANGE. << **
 
-A4A (AMP Ads for AMPHTML Pages) is a mechanism for rendering fast, performant ads in AMP pages.  To ensure that A4A ad documents ("A4A creatives") can be   rendered quickly and smoothly in the browser and do not degrade user    experience, A4A creatives must obey a set of validation rules.  Similar in   spirit to the [AMP format rules](../../spec/amp-html-format.md), A4A   creatives have access to a limited set of allowed tags, capabilities, and   extensions.  
+_This set of standards is still in development and is likely to be revised.
+Feedback from the community is welcome.  Please comment here or on the Intent
+to Implement_.
+
+A4A (AMP Ads for AMPHTML Pages) is a mechanism for rendering fast, performant
+ads in AMP pages.  To ensure that A4A ad documents ("A4A creatives") can be
+rendered quickly and smoothly in the browser and do not degrade user experience,
+A4A creatives must obey a set of validation rules.  Similar in spirit to the
+[AMP format rules](../../spec/amp-html-format.md), A4A creatives have access to
+a limited set of allowed tags, capabilities, and extensions.
+
 ## A4A Format Rules
  
 1. The creative must obey all rules given by the [AMP format rules](../.
 ./spec/amp-html-format.md), included here by reference.  _*In addition*_:
-1. The creative shall use `<html a4⚡>` or `<html a4amp>` as its enclosing tags.
+
+1. The creative must use `<html a4⚡>` or `<html a4amp>` as its enclosing tags.
 
    _Rationale_: Allows validators to identify a creative document as either a 
  general AMP doc or a restricted A4A doc and to dispatch appropriately.
@@ -44,6 +55,17 @@ ad.  In particular, it may not target any selectors for elements within the ad c
   _Rationale_: In some cases, A4A may choose to render an ad creative in an 
   iframe.  In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.
 
+### Boilerplate
+
+A4A creatives use the same boilerplate as [general AMP documents
+do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md)
+_except_ that they omit the `<noscript>` section:
+
+```
+<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+```
+
+Note that the same rules about mutations to the boilerplate text apply.
 
 ### CSS
 
@@ -60,7 +82,133 @@ creative CSS.
 
   _Rationale_: AMP must be able to control all animations belonging to an ad, so that it can stop them when the ad is not on screen or system resources are very low.
 
+#### CSS Animations and Transitions
+
+##### Selectors
+
+The `transition` and `animation` properties are only allowed on selectors that:
+- Contain only `transition`, `animation`, `transform`, `visibility`, or 
+  `opacity` properties.
+- Start with `.amp-animate` followed by a space.
+
+  _Rationale:_ This allows the AMP runtime to remove this  class from context
+   to deactivate animations, when necessary for page performance.
+
+**Good**
+```css
+.amp-animate .box {
+    transform: rotate(180deg);
+    transition: transform 2s;
+}
+```
+
+**Bad**
+
+Property not allowed in CSS class.
+```css
+.amp-animate .box {
+    color: red;  // non-animation property not allowed in animation selector
+    transform: rotate(180deg);
+    transition: transform 2s;
+}
+```
+
+Missing context class `.amp-animate`.
+```css
+.box {
+    transform: rotate(180deg);
+    transition: transform 2s;
+}
+```
+
+##### Transitionable and animatable properties
+
+The only properties that may be transitioned are opacity and transform.
+([Rationale](http://www.html5rocks.com/en/tutorials/speed/high-performance-animations/))
+
+**Good**
+```css
+transition: transform 2s;
+```
+
+**Bad**
+```css
+transition: background-color 2s;
+```
+
+**Good**
+```css
+@keyframes turn {
+  from {
+    transform: rotate(180deg);
+  }
+  
+  to {
+    transform: rotate(90deg);
+  }
+}
+```
+
+**Bad**
+```css
+@keyframes slidein {
+  from {
+    margin-left:100%;
+    width:300%
+  }
+  
+  to {
+    margin-left:0%;
+    width:100%;
+  }
+}
+```
+
+
 ### AMP Extensions
+
+The following are _allowed_ AMP extension modules in an A4A creative. Extensions
+not explicitly allowed are prohibited.
+
+Most of the omissions are either for performance or to make A4A creatives 
+simpler to analyze.
+
+<table>
+  <tr><td>amp-accordion</td></tr>
+  <tr><td>amp-analytics</td></tr>
+  <tr><td>amp-anim</td></tr>
+  <tr><td>amp-audio</td></tr>
+  <tr><td>amp-brid-player</td></tr>
+  <tr><td>amp-brightcove</td></tr>
+  <tr><td>amp-carousel</td></tr>
+  <tr><td>amp-dailymotion</td></tr>
+  <tr><td>amp-facebook</td></tr>
+  <tr><td>amp-fit-text</td></tr>
+  <tr><td>amp-font</td></tr>
+  <tr><td>amp-form</td></tr>
+  <tr><td>amp-fx-flying-carpet</td></tr>
+  <tr><td>amp-google-vrview-image</td></tr>
+  <tr><td>amp-image-lightbox</td></tr>
+  <tr><td>amp-instagram</td></tr>
+  <tr><td>amp-jwplayer</td></tr>
+  <tr><td>amp-kaltura-player</td></tr>
+  <tr><td>amp-lightbox</td></tr>
+  <tr><td>amp-list</td></tr>
+  <tr><td>amp-live-list</td></tr>
+  <tr><td>amp-o2-player</td></tr>
+  <tr><td>amp-pinterest</td></tr>
+  <tr><td>amp-reach-player</td></tr>
+  <tr><td>amp-share-tracking</td></tr>
+  <tr><td>amp-slides</td></tr>
+  <tr><td>amp-social-share</td></tr>
+  <tr><td>amp-soundcloud</td></tr>
+  <tr><td>amp-springboard-player</td></tr>
+  <tr><td>amp-sticky-ad</td></tr>
+  <tr><td>amp-twitter</td></tr>
+  <tr><td>amp-vimeo</td></tr>
+  <tr><td>amp-vine</td></tr>
+  <tr><td>amp-youtube</td></tr>
+</table>
 
 ### HTML Tags
 
@@ -69,16 +217,18 @@ allowed are prohibited.  This list is a subset of the general [AMP tag
 addendum whitelist](../../spec/amp-tag-addendum.md). Like that list, it is 
 ordered consistent with HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
-Most of the omissions are either for performance or because the tags are 
-not HTML5 standard.  For example, `<noscript>` is omitted because A4A depends
- on JavaScript being enabled, so a `<noscript>` block will never execute and, 
-therefore, will only bloat the creative and cost bandwidth and latency.  Similarly, `<acronym>`, `<big>`, et al. are prohibited because they are not HTML5 compatible.
-   
-### 4.1 The root element
+Most of the omissions are either for performance or because the tags are not
+HTML5 standard.  For example, `<noscript>` is omitted because A4A depends on
+JavaScript being enabled, so a `<noscript>` block will never execute and,
+therefore, will only bloat the creative and cost bandwidth and latency. 
+Similarly, `<acronym>`, `<big>`, et al. are prohibited because they are not
+HTML5 compatible.
+
+#### 4.1 The root element
 4.1.1 `<html>`
   - Must use types `<html a4⚡>` or `<html a4amp>`
 
-### 4.2 Document metadata
+#### 4.2 Document metadata
 4.2.1 `<head>`  
 4.2.2 `<title>`  
 4.2.4 `<link>`  
@@ -89,7 +239,7 @@ therefore, will only bloat the creative and cost bandwidth and latency.  Similar
 
 4.2.6 `<style>`  
 
-### 4.3 Sections
+#### 4.3 Sections
 4.3.1 `<body>`  
 4.3.2 `<article>`  
 4.3.3 `<section>`  
@@ -99,7 +249,7 @@ therefore, will only bloat the creative and cost bandwidth and latency.  Similar
 4.3.7 `<header>`  
 4.3.8 `<footer>`  
 4.3.9 `<address>`  
-### 4.4 Grouping Content
+#### 4.4 Grouping Content
 4.4.1 `<p>`  
 4.4.2 `<hr>`  
 4.4.3 `<pre>`  
@@ -114,7 +264,7 @@ therefore, will only bloat the creative and cost bandwidth and latency.  Similar
 4.4.12 `<figcaption>`  
 4.4.13 `<div>`  
 4.4.14 `<main>`  
-### 4.5 Text-level semantics
+#### 4.5 Text-level semantics
 4.5.1 `<a>`  
 4.5.2 `<em>`  
 4.5.3 `<strong>`  
@@ -145,17 +295,17 @@ therefore, will only bloat the creative and cost bandwidth and latency.  Similar
 4.5.28 `<span>`  
 4.5.29 `<br>`  
 4.5.30 `<wbr>`  
-### 4.6 Edits
+#### 4.6 Edits
 4.6.1 `<ins>`  
 4.6.2 `<del>`  
-### 4.7 Embedded Content
+#### 4.7 Embedded Content
 - Embedded content is supported only via AMP tags, such as `<amp-img>` or 
 `<amp-video>`.
 
-### 4.7.8
+#### 4.7.8
 4.7.8 `<source>`  
 
-### 4.7.15 SVG
+#### 4.7.15 SVG
 SVG tags are not in the HTML5 namespace. They are listed below without section ids.
 
 `<svg>`  
@@ -187,7 +337,7 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 `<symbol>`  
 `<desc>`  
 `<title>`  
-### 4.9 Tabular data
+#### 4.9 Tabular data
 4.9.1 `<table>`  
 4.9.2 `<caption>`  
 4.9.3 `<colgroup>`  
@@ -198,8 +348,11 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 4.9.8 `<tr>`  
 4.9.9 `<td>`  
 4.9.10 `<th>`  
-### 4.10 Forms
+#### 4.10 Forms
 4.10.8 `<button>`  
-### 4.11 Scripting
-- Neither `<script>` nor `<noscript>` are allowed.  Unlike general AMP, 
-`<script type="application/ld+json">` is not allowed.
+#### 4.11 Scripting
+- Like a general AMP document, the creative's `<head>` tag must contain a
+  `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag.
+- Other than the AMP script tag itself, though, neither `<script>` nor 
+`<noscript>` are allowed.  Unlike general AMP, `<script 
+type="application/ld+json">` is not allowed.
