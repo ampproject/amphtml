@@ -218,14 +218,13 @@ export class InstrumentationService {
       if (!isVisibilitySpecValid(config)) {
         return;
       }
-      const self = this;
       this.runOrSchedule_(() => {
         visibilityFor(this.win_).then(visibility => {
           visibility.listenOnce(spec, vars => {
             if (spec['selector']) {
               const el = this.win_.document.getElementById(spec['selector']
                 .slice(1));
-              Object.assign(vars, self.extractAnalyticsVariables_(el));
+              Object.assign(vars, this.extractAnalyticsVariables_(el));
             }
             callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
           });
@@ -308,20 +307,25 @@ export class InstrumentationService {
   createSelectiveListener_(listener, selector) {
     return e => {
       let el = e.target;
-      let analyticsVariables = null;
       // First do the cheap lookups.
       if (selector === '*' || this.matchesSelector_(el, selector)) {
-        analyticsVariables = this.extractAnalyticsVariables_(el);
         listener(
-          new AnalyticsEvent(AnalyticsEventType.CLICK, analyticsVariables));
+          new AnalyticsEvent(
+            AnalyticsEventType.CLICK,
+            this.extractAnalyticsVariables_(el)
+          )
+        );
       } else {
         // More expensive search.
         while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
           el = el.parentElement;
           if (this.matchesSelector_(el, selector)) {
-            analyticsVariables = this.extractAnalyticsVariables_(el);
             listener(
-              new AnalyticsEvent(AnalyticsEventType.CLICK, analyticsVariables));
+              new AnalyticsEvent(
+                AnalyticsEventType.CLICK,
+                this.extractAnalyticsVariables_(el)
+              )
+            );
             // Don't fire the event multiple times even if the more than one
             // ancestor matches the selector.
             return;
