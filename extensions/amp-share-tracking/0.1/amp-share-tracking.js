@@ -75,7 +75,7 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /**
    * Get an outgoing share-tracking fragment
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<string>}
    * @private
    */
   getOutgoingFragment_() {
@@ -89,7 +89,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * Get an outgoing share-tracking fragment from vendor
    * by issueing a post request to the url the vendor provided
    * @param {string} vendorUrl
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<string>}
    * @private
    */
   getOutgoingFragmentFromVendor_(vendorUrl) {
@@ -105,8 +105,10 @@ export class AmpShareTracking extends AMP.BaseElement {
       }
       user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
           'have a fragment value.');
+      return '';
     }).catch(error => {
       user.error(TAG, 'The request to share-tracking endpoint failed:' + error);
+      return '';
     });
   }
 

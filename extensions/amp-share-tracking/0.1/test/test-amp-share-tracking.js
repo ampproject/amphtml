@@ -130,7 +130,7 @@ describe('amp-share-tracking', () => {
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
       return ampShareTracking.shareTrackingFragments_.then(fragments => {
-        expect(fragments.outgoingFragment).to.be.undefined;
+        expect(fragments.outgoingFragment).to.equal('');
       });
     });
   });
@@ -161,7 +161,7 @@ describe('amp-share-tracking', () => {
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
       expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
       return ampShareTracking.shareTrackingFragments_.then(fragments => {
-        expect(fragments.outgoingFragment).to.be.undefined;
+        expect(fragments.outgoingFragment).to.equal('');
       });
     });
   });
