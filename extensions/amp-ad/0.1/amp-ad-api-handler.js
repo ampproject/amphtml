@@ -160,7 +160,7 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width, source, origin) {
-    this.baseInstance_.attemptChangeSize(height, width,
+    this.baseInstance_.attemptChangeSize(height, width).then(
         () => this.sendEmbedSizeResponse_(
             true /* success */, width, height, source, origin),
         () => this.sendEmbedSizeResponse_(
