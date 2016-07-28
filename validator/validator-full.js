@@ -146,10 +146,19 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
     }
   }
   if (errorCategoryFilter === null && errors.length !== 0) {
-    terminal.info('See also https://validator.ampproject.org/#url=' +
+    terminal.info(
+        'See also https://validator.ampproject.org/#url=' +
         encodeURIComponent(goog.uri.utils.removeFragment(url)));
   }
 };
+
+/**
+ * A regex for replacing any adjacent characters that are whitespace
+ * with a single space (' ').
+ * @private
+ * @type {RegExp}
+ */
+const matchWhitespaceRE = /\s+/g;
 
 /**
  * Applies the format to render the params in the provided error.
@@ -160,8 +169,8 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
 function applyFormat(format, error) {
   let message = format;
   for (let param = 1; param <= error.params.length; ++param) {
-    message =
-        message.replace(new RegExp('%' + param, 'g'), error.params[param - 1]);
+    const value = error.params[param - 1].replace(matchWhitespaceRE, ' ');
+    message = message.replace(new RegExp('%' + param, 'g'), value);
   }
   return message.replace(new RegExp('%%', 'g'), '%');
 }

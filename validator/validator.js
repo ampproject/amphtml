@@ -625,7 +625,8 @@ class CdataMatcher {
               amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
               context.getDocLocator(),
               /* params */
-              [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+              [getTagSpecName(this.tagSpec_),
+               bytes.toString(), cdataSpec.maxBytes.toString()],
               cdataSpec.maxBytesSpecUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
