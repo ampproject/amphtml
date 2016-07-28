@@ -100,10 +100,7 @@ export class Xhr {
     if (opt_init && opt_init.responseType == 'document') {
       return fetchPolyfill(input, opt_init);
     }
-    if (this.win.fetch) {
-      return this.win.fetch(input, opt_init);
-    }
-    return fetchPolyfill(input, opt_init);
+    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
 
   /**
@@ -503,14 +500,15 @@ export class FetchResponse {
   /**
    * Drains the response and returns a promise that resolves with the response
    * ArrayBuffer.
-   * @return {!Promise<ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
+    user().assert(this.xhr_.response, 'arrayBuffer response should exist.');
     dev().assert(this.xhr_.responseType == 'arraybuffer',
                'responseType was not "arraybuffer"');
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    return /** @type {!Promise<ArrayBuffer>} */ (
+    return /** @type {!Promise<!ArrayBuffer>} */ (
         Promise.resolve(this.xhr_.response));
   }
 }
