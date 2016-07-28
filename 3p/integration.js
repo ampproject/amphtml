@@ -85,6 +85,7 @@ import {genieessp} from '../ads/genieessp';
 import {kargo} from '../ads/kargo';
 import {pulsepoint} from '../ads/pulsepoint';
 import {zergnet} from '../ads/zergnet';
+import {yieldone} from '../ads/yieldone';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -154,6 +155,7 @@ register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
+register('yieldone', yieldone);
 
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
@@ -279,15 +281,12 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
+    window.context.renderStart = triggerRenderStart;
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
       // generic solution is available.
       window.context.updateDimensions = triggerDimensions;
-    }
-
-    if (waitForRenderStart.indexOf(data.type) != -1) {
-      window.context.renderStart = triggerRenderStart;
     }
 
     // This only actually works for ads.

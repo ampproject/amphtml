@@ -367,21 +367,6 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
-  // TODO: (erwinm) rewrite the destructure and spread warnings as
-  // eslint rules (takes more time than this quick regex fix).
-  // No Array destructuring allowed since the closure output is awful and
-  // there is no loose mode.
-  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]) *=': es6polyfill,
-  // No spread (eg. test(...args) allowed since we dont ship with Array
-  // polyfills except `arguments` spread as babel does not polyfill
-  // it since it can assume that it can `slice` w/o the use of helpers.
-  '\\.\\.\\.(?!arguments\\))[_$A-Za-z0-9]*(?:\\)|])': {
-    message: es6polyfill,
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-    ],
-  },
-
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',

@@ -67,6 +67,11 @@ export const adPrefetch = {
     'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
     'https://yads.c.yimg.jp/js/yads.js',
   ],
+  nend: 'https://js1.nend.net/js/amp.js',
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
+  genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   yieldbot: [
     'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
     'https://msg.yldbt.com/js/ybmsg.html',
@@ -201,11 +206,16 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
   ],
+  adtech: [
+    'https://mads.at.atwola.com',
+    'https://aka-cdn.adtechus.com',
+  ],
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
   ],
 };
+
 
 /**
  * The externalCidScope used to provide CIDs to ads of the given type.

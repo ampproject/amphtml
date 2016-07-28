@@ -96,8 +96,8 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       if (data.categoryExclusions) {
         if (Array.isArray(data.categoryExclusions)) {
-          for (const categoryExclusion of data.categoryExclusions) {
-            slot.setCategoryExclusion(categoryExclusion);
+          for (let i = 0; i < data.categoryExclusions.length; i++) {
+            slot.setCategoryExclusion(data.categoryExclusions[i]);
           }
         } else {
           slot.setCategoryExclusion(data.categoryExclusions);
