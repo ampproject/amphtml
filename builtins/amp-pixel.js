@@ -61,7 +61,7 @@ export function installPixel(win) {
     }
 
     assertSource(src) {
-      user.assert(
+      user().assert(
           /^(https\:\/\/|\/\/)/i.test(src),
           'The <amp-pixel> src attribute must start with ' +
           '"https://" or "//". Invalid value: ' + src);

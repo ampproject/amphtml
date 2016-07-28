@@ -199,7 +199,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
   } else {
-    dev.warn('documentElement',
+    dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 

@@ -68,7 +68,7 @@ export function waitForExtensions(win) {
  */
 function includedExtensions(win) {
   const doc = win.document;
-  dev.assert(doc.body);
+  dev().assert(doc.body);
 
   return Object.keys(EXTENSIONS).filter(extension => {
     return doc.querySelector(`[custom-element="${extension}"]`);

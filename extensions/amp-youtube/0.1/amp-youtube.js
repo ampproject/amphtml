@@ -64,7 +64,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
-    this.videoid_ = user.assert(
+    this.videoid_ = user().assert(
         (this.element.getAttribute('data-videoid') ||
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
@@ -86,7 +86,7 @@ class AmpYoutube extends AMP.BaseElement {
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
       delete params['autoplay'];
-      user.warn('Autoplay is currently not support with amp-youtube.');
+      user().warn('Autoplay is currently not support with amp-youtube.');
     }
     src = addParamsToUrl(src, params);
 

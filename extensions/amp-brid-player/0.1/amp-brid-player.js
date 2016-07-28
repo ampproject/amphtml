@@ -44,13 +44,13 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.height_ = getLengthNumeral(height);
 
     /** @private @const {string} */
-    this.partnerID_ = user.assert(
+    this.partnerID_ = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
     /** @private @const {string} */
-    this.feedID_ = user.assert(
+    this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
         this.element.getAttribute('data-playlist')),
         'Either the data-video or the data-playlist ' +
@@ -64,11 +64,11 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const playerID = user.assert(this.element.getAttribute('data-player'),
+    const playerID = user().assert(this.element.getAttribute('data-player'),
         'The data-player attribute is required for <amp-brid-player> %s',
         this.element);
 
-    const partnerID = user.assert(
+    const partnerID = user().assert(
         this.partnerID_,
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);

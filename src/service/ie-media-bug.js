@@ -46,7 +46,7 @@ export function checkAndFix(win, opt_platform) {
         win.clearInterval(interval);
         resolve();
         if (!matches) {
-          dev.error(TAG, 'IE media never resolved');
+          dev().error(TAG, 'IE media never resolved');
         }
       }
     }, 10);
@@ -64,7 +64,7 @@ function matchMediaIeQuite(win) {
   try {
     return win.matchMedia(q).matches;
   } catch (e) {
-    dev.error(TAG, 'IE matchMedia failed: ', e);
+    dev().error(TAG, 'IE matchMedia failed: ', e);
     // Return `true` to avoid polling on a broken API.
     return true;
   }

@@ -485,7 +485,7 @@ export class Viewport {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
-      dev.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
+      dev().fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
     }
@@ -520,7 +520,7 @@ export class Viewport {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
     const scrollLeft = this.getScrollLeft();
-    dev.fine(TAG_, 'changed event:',
+    dev().fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
         'left=', scrollLeft,
@@ -578,7 +578,7 @@ export class Viewport {
       velocity = (newScrollTop - referenceTop) /
           (now - referenceTime);
     }
-    dev.fine(TAG_, 'scroll: ' +
+    dev().fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
     if (Math.abs(velocity) < 0.03) {
@@ -753,7 +753,7 @@ export class ViewportBindingNatural_ {
       });
     }
 
-    dev.fine(TAG_, 'initialized natural viewport');
+    dev().fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
@@ -913,7 +913,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     whenDocumentReady(this.win.document).then(() => this.setup_());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
+    dev().fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
 
   /** @override */

@@ -42,12 +42,12 @@ export class AccessClientAdapter {
     this.context_ = context;
 
     /** @const @private {string} */
-    this.authorizationUrl_ = user.assert(configJson['authorization'],
+    this.authorizationUrl_ = user().assert(configJson['authorization'],
         '"authorization" URL must be specified');
     assertHttpsUrl(this.authorizationUrl_, '"authorization"');
 
     /** @const @private {string} */
-    this.pingbackUrl_ = user.assert(configJson['pingback'],
+    this.pingbackUrl_ = user().assert(configJson['pingback'],
         '"pingback" URL must be specified');
     assertHttpsUrl(this.pingbackUrl_, '"pingback"');
 
@@ -80,11 +80,11 @@ export class AccessClientAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Start authorization via ', this.authorizationUrl_);
+    dev().fine(TAG, 'Start authorization via ', this.authorizationUrl_);
     const urlPromise = this.context_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false);
     return urlPromise.then(url => {
-      dev.fine(TAG, 'Authorization URL: ', url);
+      dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
@@ -99,7 +99,7 @@ export class AccessClientAdapter {
     const promise = this.context_.buildUrl(this.pingbackUrl_,
         /* useAuthData */ true);
     return promise.then(url => {
-      dev.fine(TAG, 'Pingback URL: ', url);
+      dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
