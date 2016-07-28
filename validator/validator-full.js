@@ -106,16 +106,21 @@ amp.validator.ValidationResult.prototype.outputToTerminal = function(
   const status = this.status;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
-    return;
-  }
-  if (status !== amp.validator.ValidationResult.Status.FAIL) {
+    if (this.errors.length === 0)
+      return;
+  } else if (status !== amp.validator.ValidationResult.Status.FAIL) {
     terminal.error(
-        'AMP validation had unknown results. This should not happen.');
+        'AMP validation had unknown results. This indicates a validator bug. ' +
+        'Please report at https://github.com/ampproject/amphtml/issues .');
     return;
   }
   let errors;
   if (errorCategoryFilter === null) {
-    terminal.error('AMP validation had errors:');
+    if (status == amp.validator.ValidationResult.Status.FAIL) {
+      terminal.error('AMP validation had errors:');
+    } else {
+      terminal.warn('AMP validation had warnings:');
+    }
     errors = this.errors;
   } else {
     errors = [];
