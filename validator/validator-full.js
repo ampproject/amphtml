@@ -188,7 +188,6 @@ function applyFormat(format, error) {
  */
 amp.validator.renderErrorMessage = function(error) {
   goog.asserts.assert(error.code !== null);
-  goog.asserts.assert(error.params.length > 0);
   const format = parsedValidatorRulesSingleton.getFormatByCode()[error.code];
   goog.asserts.assert(format !== undefined);
   return applyFormat(format, error);
@@ -247,10 +246,9 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
  * @export
  */
 amp.validator.categorizeError = function(error) {
-  // This shouldn't happen in practice. We always set some params, and
-  // UNKNOWN_CODE would indicate that the field wasn't populated.
-  if (error.params.length === 0 ||
-      error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
+  // This shouldn't happen in practice. UNKNOWN_CODE would indicate that the
+  // field wasn't populated.
+  if (error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
       error.code === null) {
     return amp.validator.ErrorCategory.Code.UNKNOWN;
   }
@@ -271,6 +269,10 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
       amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+  }
+  if (error.code ===
+      amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // At the moment it's not possible to get this particular error since
   // all mandatory tag ancestors have hints except for noscript, but
@@ -470,7 +472,9 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The attribute 'shortcode' in tag 'amp-instagram' is deprecated -
   // use 'data-shortcode' instead."
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
-      error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
+      error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
   }
   // E.g. "The parent tag of tag 'source' is 'picture', but it can

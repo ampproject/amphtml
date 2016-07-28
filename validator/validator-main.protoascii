@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 143
+min_validator_revision_required: 150
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 246
+spec_file_revision: 247
 
 # Validator extensions.
 # =====================
@@ -2426,6 +2426,9 @@ attr_lists: {
   attrs: { name: "i-amp-access-id" }
 }
 
+manufactured_body_tag_is_error: false
+manufactured_body_spec_url: ""  # TODO(gregable)
+
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -2620,6 +2623,17 @@ error_formats {
   format: "Tag '%1' is disallowed as first child of tag '%2'. "
           "First child tag must be one of %3."
 }
+error_formats {
+  code: DISALLOWED_MANUFACTURED_BODY
+  format: "Tag or Text which is only allowed inside the body section found "
+          "outside of the body section."
+}
+error_formats {
+  code: DEPRECATED_MANUFACTURED_BODY
+  format: "Tag or Text which is only allowed inside the body section found "
+          "outside of the body section."
+}
+
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
