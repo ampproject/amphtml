@@ -18,6 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
 import {CSS} from '../../../build/amp-access-0.1.css';
+import {SignInProtocol} from './signin';
 import {actionServiceForDoc} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
@@ -146,8 +147,9 @@ export class AccessService {
     /** @private {?JSONType} */
     this.authResponse_ = null;
 
-    /** @const @private {!SignInConfigDef} */
-    this.signInConfig_ = this.buildSignConfig_(configJson);
+    /** @const @private {!SignInProtocol} */
+    this.signIn_ = new SignInProtocol(win, this.viewer_, this.pubOrigin_,
+        configJson);
 
     /** @const @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
@@ -292,6 +294,9 @@ export class AccessService {
     // Calculate login URLs right away.
     this.buildLoginUrls_();
 
+    // Start sign-in.
+    this.signIn_.start();
+
     // Start authorization XHR immediately.
     this.runAuthorization_();
 
@@ -370,6 +375,7 @@ export class AccessService {
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId,  // A synonym.
+        'ACCESS_TOKEN': () => this.signIn_.getAccessTokenPassive(),
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -381,25 +387,6 @@ export class AccessService {
       }
       return vars;
     });
-  }
-
-  /**
-   * @param {!JSONObject} configJson
-   * @return {!SignInConfigDef}
-   * @private
-   */
-  buildSignConfig_(configJson) {
-    if (!isExperimentOn(this.win, 'amp-access-signin') ||
-        !this.viewer_.isEmbedded() ||
-        this.viewer_.getParam('signin') != '1') {
-      // Default config prohibits all operations.
-      return {
-        acceptAccessToken: false,
-      };
-    }
-    return {
-      acceptAccessToken: configJson['acceptAccessToken'] || false,
-    };
   }
 
   /**
@@ -783,7 +770,9 @@ export class AccessService {
         'Login URL is not ready: %s', type);
 
     this.loginAnalyticsEvent_(type, 'started');
-    const loginPromise = this.openLoginDialog_(loginUrl).then(result => {
+    const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||
+        this.openLoginDialog_(loginUrl);
+    const loginPromise = dialogPromise.then(result => {
       dev.fine(TAG, 'Login dialog completed: ', type, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
@@ -794,14 +783,19 @@ export class AccessService {
       } else {
         this.loginAnalyticsEvent_(type, 'rejected');
       }
+      const exchangePromise = this.signIn_.postLoginResult(query) ||
+          Promise.resolve();
       if (success || !s) {
         // In case of a success, repeat the authorization and pingback flows.
         // Also do this for an empty response to avoid false negatives.
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
-        this.broadcastReauthorize_();
-        return this.runAuthorization_(/* disableFallback */ true).then(() => {
-          this.scheduleView_(/* timeToView */ 0);
+        return exchangePromise.then(() => {
+          this.broadcastReauthorize_();
+          return this.runAuthorization_(/* disableFallback */ true)
+              .then(() => {
+                this.scheduleView_(/* timeToView */ 0);
+              });
         });
       }
     }).catch(reason => {
@@ -849,14 +843,6 @@ export class AccessService {
     return Promise.all(promises);
   }
 }
-
-
-/**
- * @typedef {{
- *   acceptAccessToken: boolean,
- * }}
- */
-let SignInConfigDef;
 
 
 /**

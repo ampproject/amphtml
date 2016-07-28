@@ -29,7 +29,6 @@ import {installPerformanceService,} from
     '../../../../src/service/performance-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
-import {viewerFor} from '../../../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -60,8 +59,6 @@ describe('AccessService', () => {
     }
     sandbox.restore();
     toggleExperiment(window, 'amp-access-server', false);
-    toggleExperiment(window, 'amp-access-signin', false);
-    delete viewerFor(window).params_['signin'];
   });
 
   it('should disable service when no config', () => {
@@ -190,49 +187,6 @@ describe('AccessService', () => {
     }).to.throw(/Unknown access type/);
   });
 
-  it('should initialized with signin flag based on experiment/viewer', () => {
-    const config = {
-      'authorization': 'https://acme.com/a',
-      'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l',
-    };
-    element.textContent = JSON.stringify(config);
-    const win = window;
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
-
-    const viewer = viewerFor(win);
-    let isEmbedded = false;
-    sandbox.stub(viewer, 'isEmbedded', () => isEmbedded);
-
-    function configureSignIn() {
-      viewer.params_['signin'] = '1';
-      isEmbedded = true;
-      config['acceptAccessToken'] = true;
-      element.textContent = JSON.stringify(config);
-      toggleExperiment(win, 'amp-access-signin', true);
-    }
-
-    configureSignIn();
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.true;
-
-    configureSignIn();
-    delete viewer.params_['signin'];
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
-
-    configureSignIn();
-    delete config['acceptAccessToken'];
-    element.textContent = JSON.stringify(config);
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
-
-    configureSignIn();
-    toggleExperiment(win, 'amp-access-signin', false);
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
-
-    configureSignIn();
-    isEmbedded = false;
-    expect(new AccessService(win).signInConfig_.acceptAccessToken).to.be.false;
-  });
-
   it('should start when enabled', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
@@ -256,9 +210,11 @@ describe('AccessService', () => {
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
+    service.signIn_.start = sandbox.spy();
 
     service.startInternal_();
     expect(service.buildLoginUrls_.callCount).to.equal(1);
+    expect(service.signIn_.start.callCount).to.equal(1);
     expect(service.runAuthorization_.callCount).to.equal(1);
     expect(service.scheduleView_.callCount).to.equal(1);
     expect(service.scheduleView_.firstCall.args[0]).to.equal(2000);
@@ -366,6 +322,35 @@ describe('AccessService adapter context', () => {
         /* useAuthData */ true).then(url => {
           expect(url).to.equal('?rid=reader1&type=');
         });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, but null', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive', () => null);
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, but null promise', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+        () => Promise.resolve(null));
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, not null', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+        () => Promise.resolve('access_token'));
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=access_token');
+    });
   });
 });
 
@@ -1217,6 +1202,12 @@ describe('AccessService login', () => {
     serviceMock = sandbox.mock(service);
 
     service.loginUrlMap_[''] = 'https://acme.com/l?rid=R';
+
+    service.viewer_ = {
+      broadcast: () => {},
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
+    };
   });
 
   afterEach(() => {
@@ -1493,6 +1484,41 @@ describe('AccessService login', () => {
       expect(service.loginPromise_).to.equal(p3);
     });
   });
+
+  it('should request sign-in when configured', () => {
+    service.signIn_.requestSignIn = sandbox.stub();
+    service.signIn_.requestSignIn.returns(Promise.resolve('#signin'));
+    service.openLoginDialog_ = sandbox.stub();
+    service.openLoginDialog_.returns(Promise.resolve('#login'));
+    service.login('');
+    expect(service.signIn_.requestSignIn.callCount).to.equal(1);
+    expect(service.signIn_.requestSignIn.firstCall.args[0])
+        .to.equal('https://acme.com/l?rid=R');
+    expect(service.openLoginDialog_.callCount).to.equal(0);
+  });
+
+  it('should wait for token exchange post-login with success=true', () => {
+    service.signIn_.postLoginResult = sandbox.stub();
+    service.signIn_.postLoginResult.returns(Promise.resolve());
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs('https://acme.com/l?rid=R')
+        .returns(Promise.resolve('#success=true'))
+        .once();
+    return service.login('').then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.signIn_.postLoginResult.callCount).to.equal(1);
+      expect(service.signIn_.postLoginResult.firstCall.args[0]).to.deep.equal({
+        'success': 'true',
+      });
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(viewStub.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
+    });
+  });
 });
 
 
@@ -1602,110 +1628,5 @@ describe('AccessService analytics', () => {
     }).then(() => {
       expect(viewsValue).to.equal(3);
     });
-  });
-});
-
-
-describe('AccessService signin', () => {
-
-  let sandbox;
-  let clock;
-  let configElement;
-  let cidMock;
-  let analyticsMock;
-  let adapterMock;
-  let performanceMock;
-  let viewerMock;
-  let service;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    clock.tick(0);
-
-    markElementScheduledForTesting(window, 'amp-analytics');
-    const docService = installDocService(window, /* isSingleDoc */ true);
-    installActionServiceForDoc(docService.getAmpDoc());
-    installCidService(window);
-    installPerformanceService(window);
-
-    const viewer = viewerFor(window);
-    viewer.params_['signin'] = '1';
-    sandbox.stub(viewer, 'isEmbedded', () => true);
-    toggleExperiment(window, 'amp-access-signin', true);
-
-    configElement = document.createElement('script');
-    configElement.setAttribute('id', 'amp-access');
-    configElement.setAttribute('type', 'application/json');
-    configElement.textContent = JSON.stringify({
-      'authorization': 'https://acme.com/a?rid=READER_ID',
-      'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID',
-      'acceptAccessToken': true,
-    });
-    document.body.appendChild(configElement);
-
-    service = new AccessService(window);
-
-    const adapter = {
-      getConfig: () => {},
-      isAuthorizationEnabled: () => true,
-      authorize: () => {},
-    };
-    service.adapter_ = adapter;
-    adapterMock = sandbox.mock(adapter);
-
-    sandbox.stub(service.resources_, 'mutateElement',
-        (unusedElement, mutator) => {
-          mutator();
-          return Promise.resolve();
-        });
-    service.vsync_ = {
-      mutate: callback => {
-        callback();
-      },
-      mutatePromise: callback => {
-        callback();
-        return Promise.resolve();
-      },
-    };
-    const cid = {
-      get: () => {},
-    };
-    cidMock = sandbox.mock(cid);
-    service.cid_ = Promise.resolve(cid);
-
-    const analytics = {
-      triggerEvent: () => {},
-    };
-    analyticsMock = sandbox.mock(analytics);
-    service.analyticsPromise_ = {then: callback => callback(analytics)};
-
-    performanceMock = sandbox.mock(service.performance_);
-
-    service.viewer_ = {
-      isVisible: () => true,
-      whenFirstVisible: () => Promise.resolve(),
-      broadcast: () => {},
-    };
-    viewerMock = sandbox.mock(service.viewer_);
-  });
-
-  afterEach(() => {
-    if (configElement.parentElement) {
-      configElement.parentElement.removeChild(configElement);
-    }
-    adapterMock.verify();
-    analyticsMock.verify();
-    performanceMock.verify();
-    viewerMock.verify();
-    cidMock.verify();
-    toggleExperiment(window, 'amp-access-signin', false);
-    delete viewerFor(window).params_['signin'];
-    sandbox.restore();
-  });
-
-  it('should configure correctly', () => {
-    expect(service.signInConfig_.acceptAccessToken).to.be.true;
   });
 });
