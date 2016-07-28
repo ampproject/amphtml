@@ -34,43 +34,33 @@ describe('3p integration.js', () => {
   });
 
   it('should register integrations', () => {
-    expect(registrations).to.include.key('a9');
-    expect(registrations).to.include.key('adblade');
-    expect(registrations).to.include.key('adition');
-    expect(registrations).to.include.key('adform');
+    // Get all ad extensions from test env.
+    const extensions = window.ampTestRuntimeConfig.adExtensions;
+    const namingExceptions = {
+      // We recommend 3P ad networks use the same string for filename and ID.
+      // Write exceptions here in alpabetic order.
+      // filename: [ID1, ID2, ... ]
+      adblade: ['adblade', 'industrybrains'],
+      mantis: ['mantis-display', 'mantis-recommend'],
+      weborama: ['weborama-display'],
+    };
+
+    for (let i = 0; i < extensions.length; i++) {
+      const expanded = namingExceptions[extensions[i]];
+      if (expanded) {
+        for (let j = 0; j < expanded.length; j++) {
+          expect(registrations).to.include.key(expanded[j]);
+        }
+      } else {
+        expect(registrations).to.include.key(extensions[i]);
+      }
+    }
+
+    // Google's ad networks.
     expect(registrations).to.include.key('adsense');
-    expect(registrations).to.include.key('adtech');
-    expect(registrations).to.include.key('adreactor');
-    expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
-    expect(registrations).to.include.key('flite');
-    expect(registrations).to.include.key('mantis-display');
-    expect(registrations).to.include.key('mantis-recommend');
-    expect(registrations).to.include.key('industrybrains');
-    expect(registrations).to.include.key('openx');
-    expect(registrations).to.include.key('twitter');
-    expect(registrations).to.include.key('widespace');
-    expect(registrations).to.include.key('yieldmo');
-    expect(registrations).to.include.key('sortable');
-    expect(registrations).to.include.key('triplelift');
+
     expect(registrations).to.include.key('_ping_');
-    expect(registrations).to.include.key('imobile');
-    expect(registrations).to.include.key('gmossp');
-    expect(registrations).to.include.key('weborama-display');
-    expect(registrations).to.include.key('yieldbot');
-    expect(registrations).to.include.key('adstir');
-    expect(registrations).to.include.key('colombia');
-    expect(registrations).to.include.key('microad');
-    expect(registrations).to.include.key('yahoojp');
-    expect(registrations).to.include.key('chargeads');
-    expect(registrations).to.include.key('nend');
-    expect(registrations).to.include.key('adgeneration');
-    expect(registrations).to.include.key('genieessp');
-    expect(registrations).to.include.key('yieldone');
-    expect(registrations).to.include.key('kargo');
-    expect(registrations).to.include.key('mads');
-    expect(registrations).to.include.key('amoad');
-    expect(registrations).to.include.key('zergnet');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
