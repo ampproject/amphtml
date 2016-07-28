@@ -639,7 +639,10 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(keithwrightbos): noContentCallback?
       this.apiHandler_ = new AmpAdApiHandler(this, this.element);
       // TODO(keithwrightbos): startup returns load event, do we need to wait?
-      this.apiHandler_.startUp(iframe, opt_isNonAmpCreative);
+      // Set opt_defaultVisible to true as 3p draw code never executed causing
+      // render-start event never to fire which will remove visiblity hidden.
+      this.apiHandler_.startUp(
+        iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
     });
   }
 

@@ -63,11 +63,14 @@ export class AmpAdApiHandler {
   }
 
   /**
+   * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
-   * @param {boolean} is3p
+   * @param {boolean} is3p whether iframe was loaded via 3p.
+   * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
+   *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
    */
-  startUp(iframe, is3p) {
+  startUp(iframe, is3p, opt_defaultVisible) {
     user.assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -110,7 +113,7 @@ export class AmpAdApiHandler {
         this.updateSize_(newHeight, newWidth);
       }
     }, this.is3p_));
-    if (this.is3p_) {
+    if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
