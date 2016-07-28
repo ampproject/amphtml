@@ -57,7 +57,7 @@ tags: {  # <amp-sidebar>
     value_regex: "(left|right)"
   }
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/amp-sidebar.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
   amp_layout: {
     supported_layouts: NODISPLAY
   }
