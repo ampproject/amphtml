@@ -298,9 +298,9 @@ app.get('/examples/*', function(req, res, next) {
   }
   var filePath = req.path;
   var mode = null;
-  if (filePath.substr(filePath.length - 4) == '/max') {
+  if (filePath.substr(-4) == '/max') {
     mode = 'max';
-  } else if (filePath.substr(filePath.length - 4) == '/min') {
+  } else if (filePath.substr(-4) == '/min') {
     mode = 'min';
   }
   if (mode) {
