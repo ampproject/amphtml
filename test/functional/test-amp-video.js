@@ -137,6 +137,27 @@ describe('amp-video', () => {
     }, sources)).to.be.rejectedWith(/start with/);
   });
 
+  it('should set poster and controls in prerender mode', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'poster': 'img.png',
+      'controls': '',
+    }, null, function(element) {
+      // Should set appropriate attributes in buildCallback
+      const video = element.querySelector('video');
+      expect(video.getAttribute('poster')).to.equal('img.png');
+      expect(video.getAttribute('controls')).to.exist;
+    }).then(v => {
+      // Same attributes should still be present in layoutCallback.
+      const video = v.querySelector('video');
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('poster')).to.equal('img.png');
+      expect(video.getAttribute('controls')).to.exist;
+    });
+  });
+
   it('should not set src or preload in prerender mode', () => {
     return getVideo({
       src: 'video.mp4',
@@ -147,14 +168,12 @@ describe('amp-video', () => {
     }, null, function(element) {
       const video = element.querySelector('video');
       expect(video.getAttribute('preload')).to.equal('none');
-      expect(video.getAttribute('poster')).to.equal('img.png');
       expect(video.hasAttribute('src')).to.be.false;
     }).then(v => {
       // Should set appropriate attributes in layoutCallback.
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('preload')).to.equal('auto');
-      expect(video.getAttribute('poster')).to.equal('img.png');
     });
   });
 
