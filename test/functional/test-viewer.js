@@ -204,6 +204,57 @@ describe('Viewer', () => {
     expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
+  it('should get fragment from the url in non-embedded mode', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.equal('foo');
+    });
+  });
+
+  it('should get fragment from the viewer in embedded mode' +
+      'if the viewer has capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo&cap=fragment';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.be.equal('from-viewer');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT have capability of getting fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve('from-viewer');
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
+    });
+  });
+
+  it('should NOT get fragment from the viewer in embedded mode' +
+      'if the viewer does NOT return a fragment', () => {
+    windowApi.parent = {};
+    windowApi.location.hash = '#foo';
+    const viewer = new Viewer(windowApi);
+    sandbox.stub(viewer, 'sendMessageUnreliable_', name => {
+      expect(name).to.equal('fragment');
+      return Promise.resolve();
+    });
+    return viewer.getFragment().then(fragment => {
+      expect(fragment).to.equal('');
+    });
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
