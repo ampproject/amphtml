@@ -88,6 +88,10 @@
       background: rgba(0, 0, 0, 0.5);
     }
 
+    #lightbox {
+      background-color: rgba(0, 0, 0, 0.95);
+    }
+
   </style>
   <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
@@ -192,16 +196,42 @@
   <h2>Audio</h2>
     <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"></amp-audio>
 
+  <h2>Lightbox</h2>
+  <amp-lightbox id="lightbox" layout="nodisplay">
+    <p>
+      <button on="tap:lightbox.close">
+          Close Lightbox
+      </button>
+    </p>
+    <p>
+      <amp-twitter width=486 height=657
+          media="(min-width: 401px)"
+          layout="fixed"
+          data-tweetID="585110598171631616"></amp-twitter>
+      </p>
+    <p>
+      <amp-youtube
+          data-videoid="mGENRKrdoGY"
+          layout="fixed"
+          width="480" height="270"></amp-youtube>
+    </p>
+  </amp-lightbox>
+
+  <button on="tap:lightbox">
+      Open Lightbox
+  </button>
+
+  <h2>Images</h2>
   <p>
-  Responsive (w/srcset, w/lightbox)
+  Responsive (w/srcset, w/image-lightbox)
   <p>
-    <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+    <amp-image-lightbox id="imagelightbox1" layout="nodisplay"></amp-image-lightbox>
     <amp-img id="img0"
         srcset="
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
         width=527 height=193 layout="responsive"
-        on="tap:lightbox1" role="img" tabindex="0"></amp-img>
+        on="tap:imagelightbox1" role="img" tabindex="0"></amp-img>
   </p>
 
   <p>
