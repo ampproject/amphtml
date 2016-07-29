@@ -30,80 +30,157 @@ import {storageFor} from '../../../src/storage';
 import {timer} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
 
+
 const TAG = 'amp-app-banner';
 
-class AmpAppBanner extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    if (!this.isExperimentOn_) {
-      user.warn(TAG, `Experiment ${TAG} disabled`);
-      return;
-    }
-
-    if (platform.isIos()) {
-      this.preconnect.url('https://itunes.apple.com', onLayout);
-    } else if (platform.isAndroid()) {
-      this.preconnect.url('https://play.google.com', onLayout);
-    }
-  }
+class AbstractAppBanner extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.CONTAINER;
   }
 
+  /** @protected */
+  setupOpenLink_(openInAppUrl, installAppUrl) {
+    this.openLink_.addEventListener('click', () => {
+      timer.delay(() => {
+        top.location.replace(installAppUrl);
+      }, 1500);
+      openWindowDialog(this.win, openInAppUrl, '_top');
+    });
+  }
+
+  /**
+   * Creates and append a close button.
+   * @protected
+   */
+  addDismissButton_() {
+    const dismissButton = this.doc_.createElement('button');
+    dismissButton.classList.add('amp-app-banner-dismiss-button');
+    dismissButton.setAttribute('aria-label',
+        this.element.getAttribute('data-dismiss-button-aria-label') ||
+        'Dismiss');
+    const boundOnDismissButtonClick = this.onDismissButtonClick_.bind(this);
+    dismissButton.addEventListener('click', boundOnDismissButtonClick);
+    this.element.appendChild(dismissButton);
+  }
+
+  /**
+   * Dismisses the app banner and persist it.
+   * @protected
+   */
+  onDismissButtonClick_() {
+    this.vsync_.run({
+      measure: null,
+      mutate: handleDismiss,
+    }, {
+      element: this.element,
+      viewport: this.viewport_,
+      storagePromise: this.storagePromise_,
+      storageKey: this.storageKey_,
+    });
+  }
+
+  /** @protected */
+  isDismissed() {
+    return this.storagePromise_
+        .then(storage => storage.get(this.storageKey_))
+        .then(persistedValue => !!persistedValue, reason => {
+          dev.error(TAG, 'Failed to read storage', reason);
+          return false;
+        });
+  }
+
+  /** @protected */
+  hide_() {
+    return this.vsync_.runPromise({
+      measure: null,
+      mutate: hideBanner,
+    }, {
+      element: this.element,
+      viewport: this.viewport_,
+    });
+  }
+
+  /** @protected */
+  updateViewportPadding_() {
+    this.vsync_.run({
+      measure: measureBanner,
+      mutate: updateViewportPadding,
+    }, {
+      element: this.element,
+      viewport: this.viewport_,
+    });
+  }
+}
+
+
+class AmpAppBanner extends AbstractAppBanner {
+
   /** @override */
-  buildCallback() {
+  upgradeCallback() {
     /** @private @const {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
+    if (!this.isExperimentOn_) {
+      return null;
+    }
+
+    if (platform.isIos()) {
+      return new AmpIosAppBanner(this.element);
+    } else if (platform.isAndroid()) {
+      return new AmpAndroidAppBanner(this.element);
+    }
+    return null;
+  }
+
+  /** @override */
+  layoutCallback() {
+    /** @private @const {boolean} */
+    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
       this.element.classList.add('experiment-disabled');
       user.warn(TAG, `Experiment ${TAG} disabled`);
-      return;
+      return Promise.resolve();
     }
 
+    dev.info(TAG, 'Only iOS or Android platforms are currently supported.');
+    return this.hide_();
+  }
+}
+
+
+class AmpIosAppBanner extends AbstractAppBanner {
+
+  /** @override */
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://itunes.apple.com', onLayout);
+  }
+
+  /** @override */
+  buildCallback() {
     /** @private @const {!../../../src/service/viewport-impl.Viewport} */
-    this.viewport_ = viewportFor(this.getWin());
+    this.viewport_ = viewportFor(this.win);
 
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
-    this.vsync_ = vsyncFor(this.getWin());
+    this.vsync_ = vsyncFor(this.win);
 
-    /** @private @const {!Xhr} */
-    this.xhr_ = xhrFor(this.getWin());
-
-    /** @private @const {!../../../src/service/storage-impl.Storage} */
-    this.storagePromise_ = /*REVIEW*/storageFor(this.getWin());
-
-    /** @private @const {boolean} */
-    this.platformSupported_ = platform.isIos() || platform.isAndroid();
-
-    if (!this.platformSupported_) {
-      dev.info(TAG,
-          'Only iOS or Android platforms are currently supported.');
-      this.hide_();
-      return;
-    }
+    /** @private @const {!Storage} */
+    this.storagePromise_ = /*REVIEW*/storageFor(this.win);
 
     /** @private @const {!Document} */
-    this.doc_ = this.getWin().document;
+    this.doc_ = this.win.document;
 
     /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(this.getWin());
-
-    /** @private @const {?Element} */
-    this.manifestLink_ = this.doc_.head.querySelector(
-        'link[rel=manifest],link[rel=amp-manifest]');
+    this.viewer_ = viewerFor(this.win);
 
     /** @private @const {?Element} */
     this.metaTag_ = this.doc_.head.querySelector('meta[name=apple-itunes-app]');
 
     // We want to fallback to browser builtin mechanism when possible.
-    const isChromeAndroid = platform.isAndroid() && platform.isChrome();
     const isSafariIos = platform.isIos() && platform.isSafari();
     /** @private @const {boolean} */
-    this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded() && (
-            isChromeAndroid || isSafariIos);
+    this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded() && isSafariIos;
 
     if (this.canShowBuiltinBanner_) {
       dev.info(TAG,
@@ -113,14 +190,7 @@ class AmpAppBanner extends AMP.BaseElement {
     }
 
     /** @private @const {boolean} */
-    this.missingDataSources_ = ((platform.isAndroid() && !this.manifestLink_) ||
-        (platform.isIos() && !this.metaTag_));
-
-    if (platform.isAndroid()) {
-      /** @private @const {string} */
-      this.manifestHref_ = this.manifestLink_.getAttribute('href');
-      assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
-    }
+    this.missingDataSources_ = platform.isIos() && !this.metaTag_;
 
     if (this.missingDataSources_) {
       this.hide_();
@@ -135,7 +205,7 @@ class AmpAppBanner extends AMP.BaseElement {
     this.storageKey_ = 'amp-app-banner:' + this.elementId_;
 
     /** @private @const {!Storage} */
-    this.storagePromise_ = storageFor(this.getWin());
+    this.storagePromise_ = storageFor(this.win);
 
     /** @const @private {!Element} */
     this.openLink_ = this.element.querySelector('a[open-link]');
@@ -154,15 +224,6 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.isExperimentOn_) {
-      user.warn(TAG, `Experiment ${TAG} disabled`);
-      return Promise.resolve();
-    }
-
-    if (!this.platformSupported_) {
-      return Promise.resolve();
-    }
-
     if (this.missingDataSources_) {
       return Promise.resolve();
     }
@@ -171,37 +232,121 @@ class AmpAppBanner extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    if (platform.isIos()) {
-      return this.layoutForIos_();
-    } else if (platform.isAndroid()) {
-      return this.layoutForAndroid_();
+    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
+    return Promise.resolve();
+  }
+
+  /**
+   * @param {string} metaContent
+   * @private
+   */
+  parseIosMetaContent_(metaContent) {
+    const parts = metaContent.replace(/\s/,'').split(',');
+    const config = {};
+    parts.forEach(part => {
+      const keyValuePair = part.split('=');
+      config[keyValuePair[0]] = keyValuePair[1];
+    });
+
+    const appId = config['app-id'];
+    const openUrl = config['app-argument'];
+    const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
+    const openInAppUrl = openUrl || installAppUrl;
+    this.setupOpenLink_(openInAppUrl, installAppUrl);
+  }
+}
+
+
+class AmpAndroidAppBanner extends AbstractAppBanner {
+
+  /** @override */
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://play.google.com', onLayout);
+  }
+
+  /** @override */
+  buildCallback() {
+    /** @private @const {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = viewportFor(this.win);
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
+    /** @private @const {!Xhr} */
+    this.xhr_ = xhrFor(this.win);
+
+    /** @private @const {!Storage} */
+    this.storagePromise_ = /*REVIEW*/storageFor(this.win);
+
+    /** @private @const {!Document} */
+    this.doc_ = this.win.document;
+
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    this.viewer_ = viewerFor(this.win);
+
+    /** @private @const {?Element} */
+    this.manifestLink_ = this.doc_.head.querySelector(
+        'link[rel=manifest],link[rel=amp-manifest]');
+
+    // We want to fallback to browser builtin mechanism when possible.
+    const isChromeAndroid = platform.isAndroid() && platform.isChrome();
+    /** @private @const {boolean} */
+    this.canShowBuiltinBanner_ = !this.viewer_.isEmbedded() && isChromeAndroid;
+
+    if (this.canShowBuiltinBanner_) {
+      dev.info(TAG,
+          'Browser supports builtin banners. Not rendering amp-app-banner.');
+      this.hide_();
+      return;
     }
-    return this.hide_();
-  }
 
-  /** @private */
-  hide_() {
-    return this.vsync_.runPromise({
-      measure: null,
-      mutate: hideBanner,
-    }, {
-      element: this.element,
-      viewport: this.viewport_,
+    /** @private @const {boolean} */
+    this.missingDataSources_ = platform.isAndroid() && !this.manifestLink_;
+
+    if (this.missingDataSources_) {
+      this.hide_();
+      return;
+    }
+
+    /** @private @const {string} */
+    this.manifestHref_ = this.manifestLink_.getAttribute('href');
+    assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
+
+    /** @private @const {string} */
+    this.elementId_ = user.assert(this.element.id,
+        'amp-app-banner should have an id.');
+
+    /** @private @const {string} */
+    this.storageKey_ = 'amp-app-banner:' + this.elementId_;
+
+    /** @private @const {!Storage} */
+    this.storagePromise_ = storageFor(this.win);
+
+    /** @const @private {!Element} */
+    this.openLink_ = this.element.querySelector('a[open-link]');
+    user.assert(this.openLink_, '<a open-link> is required inside %s: %s',
+        TAG, this.element);
+
+    this.isDismissed().then(isDismissed => {
+      if (isDismissed) {
+        this.hide_();
+      } else {
+        this.addDismissButton_();
+        this.updateViewportPadding_();
+      }
     });
   }
 
-  updateViewportPadding_() {
-    this.vsync_.run({
-      measure: measureBanner,
-      mutate: updateViewportPadding,
-    }, {
-      element: this.element,
-      viewport: this.viewport_,
-    });
-  }
+  /** @override */
+  layoutCallback() {
+    if (this.missingDataSources_) {
+      return Promise.resolve();
+    }
 
-  /** @private */
-  layoutForAndroid_() {
+    if (this.canShowBuiltinBanner_) {
+      return Promise.resolve();
+    }
+
     return this.xhr_.fetchJson(this.manifestHref_)
         .then(response => this.parseManifest_(response))
         .catch(error => {
@@ -238,89 +383,12 @@ class AmpAppBanner extends AMP.BaseElement {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = documentInfoFor(this.getWin()).canonicalUrl;
+    const canonicalUrl = documentInfoFor(this.win).canonicalUrl;
     const parsedUrl = parseUrl(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
     const pathname = parsedUrl.pathname;
     return `android-app://${appId}/${cleanProtocol}/${pathname}`;
   }
-
-  /** @private */
-  setupOpenLink_(openInAppUrl, installAppUrl) {
-    this.openLink_.addEventListener('click', () => {
-      timer.delay(() => {
-        top.location.replace(installAppUrl);
-      }, 1500);
-      openWindowDialog(this.getWin(), openInAppUrl, '_top');
-    });
-  }
-
-  /** @private */
-  layoutForIos_() {
-    this.parseIosMetaContent_(this.metaTag_.getAttribute('content'));
-    return Promise.resolve();
-  }
-
-  /**
-   * @param {string} metaContent
-   * @private
-   */
-  parseIosMetaContent_(metaContent) {
-    const parts = metaContent.replace(/\s/,'').split(',');
-    const config = {};
-    parts.forEach(part => {
-      const keyValuePair = part.split('=');
-      config[keyValuePair[0]] = keyValuePair[1];
-    });
-
-    const appId = config['app-id'];
-    const openUrl = config['app-argument'];
-    const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
-    const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenLink_(openInAppUrl, installAppUrl);
-  }
-
-  /**
-   * Creates and append a close button.
-   * @private
-   */
-  addDismissButton_() {
-    const dismissButton = this.doc_.createElement('button');
-    dismissButton.classList.add('amp-app-banner-dismiss-button');
-    dismissButton.setAttribute('aria-label',
-        this.element.getAttribute('data-dismiss-button-aria-label') ||
-        'Dismiss');
-    const boundOnDismissButtonClick = this.onDismissButtonClick_.bind(this);
-    dismissButton.addEventListener('click', boundOnDismissButtonClick);
-    this.element.appendChild(dismissButton);
-  }
-
-  /**
-   * Dismisses the app banner and persist it.
-   * @private
-   */
-  onDismissButtonClick_() {
-    this.vsync_.run({
-      measure: null,
-      mutate: handleDismiss,
-    }, {
-      element: this.element,
-      viewport: this.viewport_,
-      storagePromise: this.storagePromise_,
-      storageKey: this.storageKey_,
-    });
-  }
-
-  /** @override */
-  isDismissed() {
-    return this.storagePromise_
-        .then(storage => storage.get(this.storageKey_))
-        .then(persistedValue => !!persistedValue, reason => {
-          dev.error(TAG, 'Failed to read storage', reason);
-          return false;
-        });
-  }
-
 }
 
 
