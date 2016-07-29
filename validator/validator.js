@@ -2976,6 +2976,97 @@ amp.validator.maxSpecificity = function(validationResult) {
   return max;
 };
 
+/**
+ * Validates the provided |tagName| with respect to a single tag
+ * specification.
+ * @param {!ParsedTagSpec} parsedSpec
+ * @param {!Context} context
+ * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+ * @param {!amp.validator.ValidationResult} resultForBestAttempt
+ */
+function validateTagAgainstSpec(
+    parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
+  let resultForAttempt = new amp.validator.ValidationResult();
+  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
+  parsedSpec.validateParentTag(context, resultForAttempt);
+  parsedSpec.validateAncestorTags(context, resultForAttempt);
+
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
+    if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
+    // If this is the first attempt, always use it.
+    if (resultForBestAttempt.errors.length === 0) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+      return;
+    }
+
+    // Prefer the attempt with the fewest errors.
+    if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+      return;
+    }
+    if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
+      return;
+    }
+
+    // If the same number of errors, prefer the most specific error.
+    if (amp.validator.maxSpecificity(resultForAttempt) >
+        amp.validator.maxSpecificity(resultForBestAttempt)) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+    }
+
+    return;
+  }
+  // This is the successful branch of the code: locally the tagspec matches.
+  resultForBestAttempt.copyFrom(resultForAttempt);
+
+  const spec = parsedSpec.getSpec();
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (spec.deprecation !== null) {
+      context.addError(
+          amp.validator.ValidationError.Severity.WARNING,
+          amp.validator.ValidationError.Code.DEPRECATED_TAG,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(spec), spec.deprecation],
+          spec.deprecationUrl, resultForBestAttempt);
+      // Deprecation is only a warning, so we don't return.
+    }
+  }
+
+  if (parsedSpec.shouldRecordTagspecValidated()) {
+    const isUnique = context.recordTagspecValidated(parsedSpec.getId());
+    // If a duplicate tag is encountered for a spec that's supposed
+    // to be unique, we've found an error that we must report.
+    if (spec.unique && !isUnique) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(spec)], spec.specUrl,
+            resultForBestAttempt);
+      } else {
+        resultForBestAttempt.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+  }
+
+  if (spec.mandatoryAlternatives !== null) {
+    const satisfied = spec.mandatoryAlternatives;
+    goog.asserts.assert(satisfied !== null);
+    context.recordMandatoryAlternativeSatisfied(satisfied);
+  }
+  // (Re)set the cdata matcher to the expectations that this tag
+  // brings with it.
+  if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
+  if (spec.childTags !== null)
+    context.setChildTagMatcher(new ChildTagMatcher(spec));
+}
 
 /**
  * This wrapper class provides access to the validation rules.
@@ -3118,7 +3209,7 @@ class ParsedValidatorRules {
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.tagSpecById_[maybeTagSpecId];
           goog.asserts.assert(parsedSpec !== undefined, '1');
-          this.validateTagAgainstSpec(
+          validateTagAgainstSpec(
               parsedSpec, context, encounteredAttrs, resultForBestAttempt);
           // Use the dispatched TagSpec validation results, success or fail.
           validationResult.mergeFrom(resultForBestAttempt);
@@ -3148,7 +3239,7 @@ class ParsedValidatorRules {
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
       const parsedSpec = this.tagSpecById_[tagSpecId];
-      this.validateTagAgainstSpec(
+      validateTagAgainstSpec(
           parsedSpec, context, encounteredAttrs, resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
@@ -3156,100 +3247,6 @@ class ParsedValidatorRules {
       }
     }
     validationResult.mergeFrom(resultForBestAttempt);
-  }
-
-  /**
-   * Validates the provided |tagName| with respect to a single tag
-   * specification.
-   * @param {!ParsedTagSpec} parsedSpec
-   * @param {!Context} context
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
-   * @param {!amp.validator.ValidationResult} resultForBestAttempt
-   */
-  validateTagAgainstSpec(
-      parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
-    let resultForAttempt = new amp.validator.ValidationResult();
-    resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-    parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
-    parsedSpec.validateParentTag(context, resultForAttempt);
-    parsedSpec.validateAncestorTags(context, resultForAttempt);
-
-    if (resultForAttempt.status ===
-        amp.validator.ValidationResult.Status.FAIL) {
-      if (!amp.validator.GENERATE_DETAILED_ERRORS) {
-        resultForBestAttempt.status =
-            amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-      // If this is the first attempt, always use it.
-      if (resultForBestAttempt.errors.length === 0) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-        return;
-      }
-
-      // Prefer the attempt with the fewest errors.
-      if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-        return;
-      }
-      if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
-        return;
-      }
-
-      // If the same number of errors, prefer the most specific error.
-      if (amp.validator.maxSpecificity(resultForAttempt) >
-          amp.validator.maxSpecificity(resultForBestAttempt)) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-      }
-
-      return;
-    }
-    // This is the successful branch of the code: locally the tagspec matches.
-    resultForBestAttempt.copyFrom(resultForAttempt);
-
-    const spec = parsedSpec.getSpec();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      if (spec.deprecation !== null) {
-        context.addError(
-            amp.validator.ValidationError.Severity.WARNING,
-            amp.validator.ValidationError.Code.DEPRECATED_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec), spec.deprecation],
-            spec.deprecationUrl, resultForBestAttempt);
-        // Deprecation is only a warning, so we don't return.
-      }
-    }
-
-    if (parsedSpec.shouldRecordTagspecValidated()) {
-      const isUnique = context.recordTagspecValidated(parsedSpec.getId());
-      // If a duplicate tag is encountered for a spec that's supposed
-      // to be unique, we've found an error that we must report.
-      if (spec.unique && !isUnique) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-              context.getDocLocator(),
-              /* params */[getTagSpecName(spec)], spec.specUrl,
-              resultForBestAttempt);
-        } else {
-          resultForBestAttempt.status =
-              amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-    }
-
-    if (spec.mandatoryAlternatives !== null) {
-      const satisfied = spec.mandatoryAlternatives;
-      goog.asserts.assert(satisfied !== null);
-      context.recordMandatoryAlternativeSatisfied(satisfied);
-    }
-    // (Re)set the cdata matcher to the expectations that this tag
-    // brings with it.
-    if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
-    if (spec.childTags !== null)
-      context.setChildTagMatcher(new ChildTagMatcher(spec));
   }
 
   /**
