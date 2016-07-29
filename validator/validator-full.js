@@ -252,6 +252,19 @@ amp.validator.categorizeError = function(error) {
       error.code === null) {
     return amp.validator.ErrorCategory.Code.UNKNOWN;
   }
+  // E.g. "The tag 'UL', a child tag of 'amp-live-list', does not
+  // satisfy one of the acceptable reference points: AMP-LIVE-LIST
+  // [update], AMP-LIVE-LIST [items], AMP-LIVE-LIST [pagination]."
+  if (error.code ===
+          amp.validator.ValidationError.Code
+              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT ||
+      error.code ==
+          amp.validator.ValidationError.Code
+              .MANDATORY_REFERENCE_POINT_MISSING ||
+      error.code ==
+          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
   // E.g. "The tag 'img' may only appear as a descendant of tag
   // 'noscript'. Did you mean 'amp-img'?"
   if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
