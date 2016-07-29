@@ -162,8 +162,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()|null} */
     this.renderStartResolve_ = null;
 
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
+    /** @const {!Promise} */
+    this.renderStartPromise = new Promise(resolve => {
       this.renderStartResolve_ = resolve;
     });
   }

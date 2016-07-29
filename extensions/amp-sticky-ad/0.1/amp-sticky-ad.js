@@ -18,8 +18,12 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
+<<<<<<< 5e2eb4aedb96cc6ac5b2ce0246fdfe55c40c1dec
 import {timerFor} from '../../../src/timer';
+=======
+>>>>>>> sticky-ad wait for ad to build, use render-start promise
 import {toggle} from '../../../src/style';
+
 
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -38,6 +42,7 @@ class AmpStickyAd extends AMP.BaseElement {
 
     /** @const @private {!Element} */
     this.ad_ = children[0];
+
     this.setAsOwner(this.ad_);
 
     /** @private @const {!Viewport} */
@@ -55,6 +60,10 @@ class AmpStickyAd extends AMP.BaseElement {
      */
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
+
+    this.boundDisplayAfterAdLoad_ = () => this.displayAfterAdLoad_();
+
+    this.adRenderStartPromise_ = null;
   }
 
   /** @override */
@@ -129,16 +138,33 @@ class AmpStickyAd extends AMP.BaseElement {
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
-        timerFor(this.win).delay(() => {
-          // Unfortunately we don't really have a good way to measure how long it
-          // takes to load an ad, so we'll just pretend it takes 1 second for
-          // now.
-          this.vsync_.mutate(() => {
-            this.element.classList.add('amp-sticky-ad-loaded');
-          });
-        }, 1000);
       });
+      // Get Ad promise for ad render-start
+      this.adRenderStartPromise_ = this.ad_.implementation_.renderStartPromise;
+      if (this.adRenderStartPromise_) {
+        this.adRenderStartPromise_.then(() => {
+          this.boundDisplayAfterAdLoad_();
+        });
+      } else {
+        //add listener for element not attached and not built
+        this.ad_.addEventListener('amp:attached', () => {
+          this.ad_.addEventListener('amp:built', () => {
+            this.adRenderStartPromise_ =
+                this.ad_.implementation_.renderStartPromise;
+            this.adRenderStartPromise_.then(() => {
+              this.boundDisplayAfterAdLoad_();
+            });
+            this.scheduleLayout(this.ad_);
+          });
+        });
+      }
     }
+  }
+
+  displayAfterAdLoad_() {
+    this.vsync_.mutate(() => {
+      this.element.classList.add('amp-sticky-ad-loaded');
+    });
   }
 
   /**
