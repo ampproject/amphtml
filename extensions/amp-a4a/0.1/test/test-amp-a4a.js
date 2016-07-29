@@ -403,7 +403,9 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
-        return a4a.maybeRenderAmpAd_(null).then(rendered => {
+        a4a.adUrl_ = 'http://foo.com';
+        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); }
+        return a4a.maybeRenderAmpAd_().then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
@@ -412,7 +414,6 @@ describe('amp-a4a', () => {
           expect(a4a.rendered_).to.be.false;
           // Force layout callback which will cause iframe to be attached
           a4a.adPromise_ = Promise.resolve(false);
-          a4a.adUrl_ = 'http://foo.com';
           return a4a.layoutCallback().then(() => {
             a4a.vsync_.runScheduledTasks_();
             // Verify iframe presence and lack of visibility hidden
