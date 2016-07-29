@@ -20,7 +20,7 @@ import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -131,17 +131,17 @@ export class AmpSlideScroll extends BaseCarousel {
   touchMoveHandler_() {
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
-      timer.cancel(this.touchEndTimeout_);
+      timerFor(this.win).cancel(this.touchEndTimeout_);
     }
   }
 
   touchEndHandler_() {
     if (this.hasTouchMoved_) {
       if (this.scrollTimeout_) {
-        timer.cancel(this.scrollTimeout_);
+        timerFor(this.win).cancel(this.scrollTimeout_);
       }
       // Timer that detects scroll end and/or end of snap scroll.
-      this.touchEndTimeout_ = timer.delay(() => {
+      this.touchEndTimeout_ = timerFor(this.win).delay(() => {
         const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
 
         if (this.snappingInProgress_) {
@@ -222,7 +222,7 @@ export class AmpSlideScroll extends BaseCarousel {
    */
   scrollHandler_(unusedEvent) {
     if (this.scrollTimeout_) {
-      timer.cancel(this.scrollTimeout_);
+      timerFor(this.win).cancel(this.scrollTimeout_);
     }
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
@@ -234,7 +234,7 @@ export class AmpSlideScroll extends BaseCarousel {
       const timeout =
           this.hasNativeSnapPoints_ ? NATIVE_SNAP_TIMEOUT : CUSTOM_SNAP_TIMEOUT;
       // Timer that detects scroll end and/or end of snap scroll.
-      this.scrollTimeout_ = timer.delay(() => {
+      this.scrollTimeout_ = timerFor(this.win).delay(() => {
 
         if (this.snappingInProgress_) {
           return;

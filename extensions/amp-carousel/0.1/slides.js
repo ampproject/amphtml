@@ -22,7 +22,7 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 
@@ -59,7 +59,7 @@ export class AmpSlides extends BaseCarousel {
     /** @private {?number} */
     this.autoplayTimeoutId_ = null;
 
-    user.assert(this.slides_.length >= 1,
+    user().assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
 
     this.setupAutoplay_();
@@ -153,8 +153,10 @@ export class AmpSlides extends BaseCarousel {
       return;
     }
 
-    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
-        this.autoplayDelay_);
+    this.autoplayTimeoutId_ = timerFor(this.win).delay(
+      this.go.bind(this, dir, animate),
+      this.autoplayDelay_
+    );
   }
 
   /**
@@ -163,7 +165,7 @@ export class AmpSlides extends BaseCarousel {
    */
   tryCancelAutoplayTimeout_() {
     if (this.autoplayTimeoutId_ !== null) {
-      timer.cancel(this.autoplayTimeoutId_);
+      timerFor(this.win).cancel(this.autoplayTimeoutId_);
       this.autoplayTimeoutId_ = null;
     }
   }
