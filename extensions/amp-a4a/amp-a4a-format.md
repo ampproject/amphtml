@@ -32,8 +32,13 @@ a limited set of allowed tags, capabilities, and extensions.
 
 ## A4A Format Rules
  
-1. The creative must obey all rules given by the [AMP format rules](../.
-./spec/amp-html-format.md), included here by reference.  _*In addition*_:
+1. Unless otherwise specified below, the creative must obey all rules given by 
+the [AMP format rules](../../spec/amp-html-format.md), included here by 
+reference.  For example, the
+A4A [Boilerplate](http://localhost:8000/extensions/amp-a4a/amp-a4a-format.md#2) 
+deviates from the AMP standard boilerplate.
+
+  _*In addition*_:
 
 1. The creative must use `<html a4⚡>` or `<html a4amp>` as its enclosing tags.
 
