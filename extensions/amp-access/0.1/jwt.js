@@ -29,6 +29,13 @@ let JwtTokenInternalDef;
 
 
 /**
+ * Maps web-safe base64 characters to the actual base64 chars for decoding.
+ * @const {!Object<string, string>}
+ */
+const WEB_SAFE_CHAR_MAP = {'-': '+', '_': '/', '.': '='};
+
+
+/**
  * Provides helper methods to decode and verify JWT tokens.
  */
 export class JwtHelper {
@@ -61,15 +68,17 @@ export class JwtHelper {
     const invalidTok = invalidToken.bind(null, encodedToken);
 
     // Encoded token has three parts: header.payload.sig
+    // Note! The padding is not allowed by JWT spec:
+    // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
     const parts = encodedToken.split('.');
     if (parts.length != 3) {
       invalidTok();
     }
     return {
-      header: tryParseJson(atob(parts[0]), invalidTok),
-      payload: tryParseJson(atob(parts[1]), invalidTok),
+      header: tryParseJson(decodeBase64WebSafe(parts[0]), invalidTok),
+      payload: tryParseJson(decodeBase64WebSafe(parts[1]), invalidTok),
       verifiable: `${parts[0]}.${parts[1]}`,
-      sig: atob(parts[2]),
+      sig: decodeBase64WebSafe(parts[2]),
     };
   }
 }
@@ -81,4 +90,23 @@ export class JwtHelper {
  */
 function invalidToken(encodedToken) {
   throw new Error(`Invalid token: "${encodedToken}"`);
+}
+
+
+/**
+ * @param {string} s
+ * @return {string}
+ */
+function decodeBase64WebSafe(s) {
+  // TODO(dvoytenko): refactor to a common place across AMP.
+  return atob(s.replace(/[-_.]/g, unmapWebSafeChar));
+}
+
+
+/**
+ * @param {string} c
+ * @return {string}
+ */
+function unmapWebSafeChar(c) {
+  return WEB_SAFE_CHAR_MAP[c];
 }

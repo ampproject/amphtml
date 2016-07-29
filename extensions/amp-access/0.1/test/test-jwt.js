@@ -76,5 +76,12 @@ describe('JwtHelper', () => {
             `${TOKEN_HEADER}.${TOKEN_PAYLOAD.substring(1)}.${TOKEN_SIG}`);
       }).to.throw(/Invalid token/);
     });
+
+    it('should decode web safe and non-web-safe base64', () => {
+      const body = `${TOKEN_HEADER}.${TOKEN_PAYLOAD}`;
+      const token = helper.decodeInternal_(`${body}.eyJhbGci+/`);
+      const tokenWebSafe = helper.decodeInternal_(`${body}.eyJhbGci-_`);
+      expect(token.sig).to.not.equal(tokenWebSafe);
+    });
   });
 });
