@@ -65,31 +65,24 @@ export class JwtHelper {
    */
   decodeInternal_(encodedToken) {
     // See https://jwt.io/introduction/
-    const invalidTok = invalidToken.bind(null, encodedToken);
+    function invalidToken() {
+      throw new Error(`Invalid token: "${encodedToken}"`);
+    }
 
     // Encoded token has three parts: header.payload.sig
     // Note! The padding is not allowed by JWT spec:
     // http://self-issued.info/docs/draft-goland-json-web-token-00.html#rfc.section.5
     const parts = encodedToken.split('.');
     if (parts.length != 3) {
-      invalidTok();
+      invalidToken();
     }
     return {
-      header: tryParseJson(decodeBase64WebSafe(parts[0]), invalidTok),
-      payload: tryParseJson(decodeBase64WebSafe(parts[1]), invalidTok),
+      header: tryParseJson(decodeBase64WebSafe(parts[0]), invalidToken),
+      payload: tryParseJson(decodeBase64WebSafe(parts[1]), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: decodeBase64WebSafe(parts[2]),
     };
   }
-}
-
-
-/**
- * @param {string} encodedToken
- * @throws {Error}
- */
-function invalidToken(encodedToken) {
-  throw new Error(`Invalid token: "${encodedToken}"`);
 }
 
 
