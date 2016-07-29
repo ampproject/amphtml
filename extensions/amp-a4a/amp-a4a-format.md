@@ -43,7 +43,7 @@ a limited set of allowed tags, capabilities, and extensions.
 1. Media: Videos must not enable autoplay.
 
   _Rationale_: Autoplay forces video content to be downloaded immediately, which
- slows the page load.  Further, users dislike auto-playing video ads.
+ slows the page load.
 
 1. Media: Audio must not enable autoplay.
 
