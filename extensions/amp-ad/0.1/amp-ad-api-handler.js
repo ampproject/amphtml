@@ -122,6 +122,10 @@ export class AmpAdApiHandler {
       if (!this.iframe_) {
         return;
       }
+      if (this.baseInstance_.renderStartResolve_) {
+        this.baseInstance_.renderStartResolve_();
+        this.baseInstance_.renderStartResolve_ = null;
+      }
       this.iframe_.style.visibility = '';
     }, this.is3p_);
     this.viewer_.onVisibilityChanged(() => {
@@ -141,6 +145,7 @@ export class AmpAdApiHandler {
     }
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
+    this.intersectionObserver_.destroy();
     this.intersectionObserver_ = null;
   }
 
@@ -152,12 +157,19 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width) {
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      const targetOrigin =
+    const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+    this.baseInstance_.attemptChangeSize(height, width, () => {
       postMessage(
           this.iframe_,
           'embed-size-changed',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p_);
+    }, () => {
+      postMessage(
+          this.iframe_,
+          'embed-size-denied',
           {requestedHeight: height, requestedWidth: width},
           targetOrigin,
           this.is3p_);
@@ -191,19 +203,6 @@ export class AmpAdApiHandler {
     // if we aren't currently in view.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
-    }
-  }
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown && this.iframe_) {
-      const targetOrigin = parseUrl(this.iframe_.src).origin;
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          this.is3p_);
     }
   }
 }

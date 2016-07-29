@@ -28,9 +28,9 @@ As with all pieces of software, you may end up running into bugs. Please submit 
 
 The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
 
-### Contributing Code 
+### Contributing Code
 
-The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions. 
+The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions.
 
 When contributing code, please also include appropriate tests as part of the pull request, and follow the same comment and coding style as the rest of the project. Take a look through the existing code for examples of the testing and style practices the project follows.
 
@@ -43,10 +43,11 @@ Code contributors to the AMP HTML project must sign a Contributor License Agreem
 ### Contributing Features
 
 All pull requests for new features must go through the following process:
-* Intent-to-implement GitHub issue started for discussion
+* Please familiarize yourself with the [AMP Design Principles](DESIGN_PRINCIPLES).md
+* Start an Intent-to-implement GitHub issue for discussion of the new feature.
 * LGTM from Tech Lead and one other core committer is required
 * Development occurs on a separate branch of a separate fork, noted in the intent-to-implement issue
-* A pull request is created, referencing the issue.  Once the PR is ready, please add the "NEEDS REVIEW" label.
+* A pull request is created, referencing the issue.
 * AMP HTML developers will provide feedback on pull requests, looking at code quality, style, tests, performance, and directional alignment with the goals of the project. That feedback should be discussed and incorporated
 * LGTM from Tech Lead and one other core committer, who confirm engineering quality and direction.
 
@@ -54,7 +55,7 @@ All pull requests for new features must go through the following process:
 
 A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features. The project currently accepts pull requests to include these types of extended components.
 
-Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. 
+Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized.
 
 In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 

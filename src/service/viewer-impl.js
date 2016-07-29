@@ -24,7 +24,7 @@ import {platform} from '../platform';
 import {timer} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
-
+import {urls} from '../config';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -432,7 +432,7 @@ export class Viewer {
    *     requested the navigation.
    */
   navigateTo(url, requestedBy) {
-    dev.assert(url.indexOf('https://cdn.ampproject.org/') == 0,
+    dev.assert(url.indexOf(urls.cdn) == 0,
         'Invalid A2A URL %s %s', url, requestedBy);
     if (this.hasCapability('a2a')) {
       this.sendMessage('a2a', {

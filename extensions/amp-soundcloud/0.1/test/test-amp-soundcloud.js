@@ -27,22 +27,17 @@ describe('amp-soundcloud', () => {
 
   const embedUrl = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
 
-  function getIns(trackid, optVisualMode, optColor, optFixedHeight) {
+  function getIns(trackid, opt_attrs) {
     return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const ins = iframe.doc.createElement('amp-soundcloud');
       ins.setAttribute('data-trackid', trackid);
       ins.setAttribute('height', '237');
 
-      // Optionals
-      if (optVisualMode) {
-        ins.setAttribute('data-visual', optVisualMode);
-      }
-      if (optColor) {
-        ins.setAttribute('data-color', optColor);
-      }
-      if (optFixedHeight) {
-        ins.setAttribute('layout', 'fixed-height');
+      if (opt_attrs) {
+        for (const attr in opt_attrs) {
+          ins.setAttribute(attr, opt_attrs[attr]);
+        }
       }
 
       return iframe.addElement(ins);
@@ -58,14 +53,27 @@ describe('amp-soundcloud', () => {
     });
   });
 
+  it('renders secret token', () => {
+    return getIns('243169232', {
+      'data-visual': true,
+      'data-secret-token': 'c-af',
+    }).then(ins => {
+      const iframe = ins.firstChild;
+      expect(iframe.src).to.include(encodeURIComponent('?secret_token=c-af'));
+    });
+  });
+
   it('renders fixed-height', () => {
-    return getIns('243169232', true, 'FF0000', true).then(ins => {
+    return getIns('243169232', {layout: 'fixed-height'}).then(ins => {
       expect(ins.className).to.match(/amp-layout-fixed-height/);
     });
   });
 
   it('ignores color in visual mode', () => {
-    return getIns('243169232', 'true', '00FF00').then(ins => {
+    return getIns('243169232', {
+      'data-visual': true,
+      'data-color': '00FF00',
+    }).then(ins => {
       const iframe = ins.firstChild;
       expect(iframe.src).to.include('visual=true');
       expect(iframe.src).not.to.include('color=00FF00');

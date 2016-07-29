@@ -153,7 +153,7 @@ describe('amp-fx-flying-carpet', () => {
     });
   });
 
-  it('should collapse when its children do', () => {
+  it('should attempt to change height to 0 when its children collapse', () => {
     let img;
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
@@ -167,18 +167,21 @@ describe('amp-fx-flying-carpet', () => {
       const posttext = iframe.doc.createTextNode('\n');
       return [pretext, img, posttext];
     }).then(flyingCarpet => {
-      sandbox.stub(
-        flyingCarpet.implementation_,
-        'attemptChangeHeight',
-        function(height, callback) {
-          flyingCarpet.style.height = height;
-          callback();
-        }
-      );
+      const attemptChangeHeight = sandbox.stub(flyingCarpet.implementation_,
+          'attemptChangeHeight', height => {
+            flyingCarpet.style.height = height;
+            return Promise.resolve();
+          });
+      const collapse = sandbox.spy(flyingCarpet.implementation_, 'collapse');
       expect(flyingCarpet.getBoundingClientRect().height).to.be.gt(0);
       img.collapse();
-      expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
-      expect(flyingCarpet.style.display).to.equal('none');
+      expect(attemptChangeHeight).to.have.been.called;
+      expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+      return attemptChangeHeight().then(() => {
+        expect(flyingCarpet.getBoundingClientRect().height).to.equal(0);
+        expect(collapse).to.have.been.called;
+        expect(flyingCarpet.style.display).to.equal('none');
+      });
     });
   });
 });

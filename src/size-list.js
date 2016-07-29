@@ -168,7 +168,7 @@ export class SizeList {
   select(win) {
     for (let i = 0; i < this.sizes_.length - 1; i++) {
       const option = this.sizes_[i];
-      if (win.matchMedia(option.mediaQuery).matches) {
+      if (option.mediaQuery && win.matchMedia(option.mediaQuery).matches) {
         return option.size;
       }
     }

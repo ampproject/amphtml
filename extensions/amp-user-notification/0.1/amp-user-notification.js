@@ -88,18 +88,14 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   createdCallback() {
-
-    /** @private @const {!Window} */
-    this.win_ = this.win;
-
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win_);
+    this.urlReplacements_ = urlReplacementsFor(this.win);
 
     /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win_);
+    this.userNotificationManager_ = getUserNotificationManager_(this.win);
 
     /** @const @private {!Promise<!Storage>} */
-    this.storagePromise_ = storageFor(this.win_);
+    this.storagePromise_ = storageFor(this.win);
   }
 
   /** @override */
@@ -175,7 +171,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       const getReq = {
         credentials: 'include',
       };
-      return xhrFor(this.win_).fetchJson(href, getReq);
+      return xhrFor(this.win).fetchJson(href, getReq);
     });
   }
 
@@ -185,7 +181,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win_).fetchJson(dev.assert(this.dismissHref_), {
+    return xhrFor(this.win).fetchJson(dev.assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
       body: {
@@ -221,7 +217,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   getAsyncCid_() {
-    return cidFor(this.win_).then(cid => {
+    return cidFor(this.win).then(cid => {
       // `amp-user-notification` is our cid scope, while we give it a resolved
       // promise for the 2nd argument so that the 3rd argument (the
       // persistentConsent) is the one used to resolve getting
@@ -314,8 +310,12 @@ export class AmpUserNotification extends AMP.BaseElement {
  */
 export class UserNotificationManager {
 
+  /**
+   * @param {!Window} window
+   */
   constructor(window) {
-    this.win_ = window;
+    /** @const {!Window} */
+    this.win = window;
 
     /** @private @const {!Object<string,!NotificationInterface>} */
     this.registry_ = Object.create(null);
@@ -324,10 +324,10 @@ export class UserNotificationManager {
     this.deferRegistry_ = Object.create(null);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    this.viewer_ = viewerFor(this.win);
 
     /** @private @const {!Promise} */
-    this.documentReadyPromise_ = whenDocumentReady(this.win_.document);
+    this.documentReadyPromise_ = whenDocumentReady(this.win.document);
 
     /** @private @const {!Promise} */
     this.managerReadyPromise_ = Promise.all([
@@ -347,7 +347,7 @@ export class UserNotificationManager {
    */
   get(id) {
     this.managerReadyPromise_.then(() => {
-      if (this.win_.document.getElementById(id) == null) {
+      if (this.win.document.getElementById(id) == null) {
         user.warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });

@@ -41,7 +41,7 @@ class MockA4AImpl extends AmpA4A {
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
-      signature: responseHeaders.get('X-Google-header'),
+      signature: base64UrlDecode(responseHeaders.get('X-Google-header')),
     });
   }
 
@@ -80,20 +80,7 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let viewerForMock;
-  const mockResponse = {
-    arrayBuffer: function() {
-      return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
-    },
-    bodyUsed: false,
-    headers: {
-      get: function(name) {
-        const headerValues = {
-          'X-Google-header': base64UrlDecode(validCSSAmp.signature),
-        };
-        return headerValues[name];
-      },
-    },
-  };
+  let mockResponse;
 
   setPublicKeys([JSON.parse(validCSSAmp.publicKey)]);
 
@@ -101,6 +88,20 @@ describe('amp-a4a', () => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     viewerForMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
+    mockResponse = {
+      arrayBuffer: function() {
+        return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
+      },
+      bodyUsed: false,
+      headers: {
+        get: function(name) {
+          const headerValues = {
+            'X-Google-header': validCSSAmp.signature,
+          };
+          return headerValues[name];
+        },
+      },
+    };
   });
   afterEach(() => {
     sandbox.restore();
@@ -127,7 +128,11 @@ describe('amp-a4a', () => {
         const a4a = new MockA4AImpl(a4aElement);
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const extractCreativeAndSignatureSpy = sandbox.spy(
-          a4a, 'extractCreativeAndSignature');
+            a4a, 'extractCreativeAndSignature');
+        const validateAdResponseSpy = sandbox.spy(
+            a4a, 'validateAdResponse_');
+        const maybeRenderAmpAdSpy = sandbox.spy(
+            a4a, 'maybeRenderAmpAd_');
         doc.body.appendChild(a4aElement);
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
@@ -141,6 +146,10 @@ describe('amp-a4a', () => {
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
           expect(extractCreativeAndSignatureSpy.calledOnce,
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
+          expect(validateAdResponseSpy.calledOnce,
+              'validateAdResponse_ called exactly once').to.be.true;
+          expect(maybeRenderAmpAdSpy.calledOnce,
+              'maybeRenderAmpAd_ called exactly once').to.be.true;
           expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;
           expect(a4aElement.shadowRoot.querySelector('style'),
               'style tag in shadow root').to.not.be.null;
@@ -240,6 +249,64 @@ describe('amp-a4a', () => {
         });
       });
     });
+    it('should not leak full response to rendered dom', () => {
+      viewerForMock.onFirstCall().returns(Promise.resolve());
+      xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        a4aElement.setAttribute('width', 200);
+        a4aElement.setAttribute('height', 50);
+        a4aElement.setAttribute('type', 'adsense');
+        const a4a = new MockA4AImpl(a4aElement);
+        const fullResponse = `<html amp>
+            <body>
+            <div class="forTest"></div>
+            <script class="hostile">
+            // Some hostile JavaScript
+            assert.fail('This code should never be executed!');
+            </script>
+            <noscript>${validCSSAmp.reserialized}</noscript>
+            <script type="application/json" amp-ad-metadata>
+            {
+               "bodyAttributes" : "",
+               "bodyUtf16CharOffsets" : [ 10, 1000000 ],
+               "cssUtf16CharOffsets" : [ 0, 0 ]
+            }
+            </script>
+            </body></html>`;
+        mockResponse.arrayBuffer = () => {
+          return Promise.resolve(stringToArrayBuffer(fullResponse));
+        };
+        // Return value from `#extractCreativeAndSignature` is a sub-doc of
+        // the full response.  To validate this test, comment out the following
+        // statement and verify that test fails, with full response spliced in
+        // to shadow doc.
+        sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
+            Promise.resolve({
+              creative: stringToArrayBuffer(validCSSAmp.reserialized),
+              signature: new Uint8Array([]),
+            }));
+        sandbox.stub(a4a, 'validateAdResponse_').returns(
+            Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized)));
+        a4a.onLayoutMeasure();
+        expect(a4a.adPromise_).to.be.instanceof(Promise);
+        return a4a.adPromise_.then(() => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          const root = a4aElement.shadowRoot;
+          expect(root, 'Shadow root is set').to.not.be.null;
+          expect(root.querySelector('div[class=forTest]')).to.not.be.ok;
+          expect(root.querySelector('script[class=hostile]')).to.not.be.ok;
+          expect(root.querySelector('style[amp-custom]')).to.be.ok;
+          expect(root.querySelector('amp-ad-body').innerText, 'body content')
+              .to.contain('Hello, world.');
+        });
+      });
+    });
+    // TODO(tdrl): Go through case analysis in amp-a4a.js#onLayoutMeasure and
+    // add one test for each case / ensure that all cases are covered.
   });
 
   describe('#preconnectCallback', () => {
@@ -336,8 +403,7 @@ describe('amp-a4a', () => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
-        const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(false, bytes).then(rendered => {
+        return a4a.maybeRenderAmpAd_(null).then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
@@ -366,7 +432,7 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         const bytes = buildCreativeArrayBuffer();
-        return a4a.maybeRenderAmpAd_(true, bytes).then(rendered => {
+        return a4a.maybeRenderAmpAd_(bytes).then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
           a4a.vsync_.runScheduledTasks_();
