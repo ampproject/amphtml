@@ -54,23 +54,37 @@ deviates from the AMP standard boilerplate.
 
   _Rationale_: Same as for video.
 
-1. Analytics: `<amp-analytics>` viewability tracking may only target the entire 
-ad.  In particular, it may not target any selectors for elements within the ad creative.
+1. Analytics: `<amp-analytics>` viewability tracking may only target the full-ad
+selector, as defined in
+[Issue #4018](https://github.com/ampproject/amphtml/issues/4018).  In
+particular, it may not target any selectors for elements within the ad creative.
 
   _Rationale_: In some cases, A4A may choose to render an ad creative in an 
   iframe.  In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.
 
+  _[Example to be added here, once the format is finalized in #4018]_.
+
 ### Boilerplate
 
-A4A creatives use the same boilerplate as [general AMP documents
-do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md)
-_except_ that they omit the `<noscript>` section:
+A4A creatives require a considerably simpler boilerplate style line than
+[general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```
-<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>
+<style amp-boilerplate>body{visibility:hidden}</style>
 ```
 
-Note that the same rules about mutations to the boilerplate text apply.
+_Rationale:_ The `amp-boilerplate` style hides body content until the AMP 
+runtime is ready and can unhide it.  If Javascript is disabled or the AMP 
+runtime fails to load, the default boilerplate ensures that the content is 
+eventually displayed regardless.  In A4A, however, if Javascript is entirely 
+disabled, A4A won't run and no ad will ever be shown, so there is no need for
+the `<noscript>` section.  In the absence of the AMP runtime, most of the 
+machinery that A4A and ad creatives rely on (e.g., analytics for visibility 
+tracking or `amp-img` for content display) won't be available, so it's better to 
+display no ad than a malfunctioning one.
+
+Note that the same rules about mutations to the boilerplate text apply as in 
+the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md).
 
 ### CSS
 
