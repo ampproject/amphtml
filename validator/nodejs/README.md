@@ -70,3 +70,7 @@ line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', b
 ...
 ```
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
+
+## Release Notes
+### 1.0.10
+* Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
