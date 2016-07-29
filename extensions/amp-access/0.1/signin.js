@@ -24,6 +24,35 @@ const TAG = 'amp-access-signin';
 
 
 /**
+ * This class represents the sign-in protocol, but means of which the source
+ * origin can take advantage of the identity system of the viewer.
+ *
+ * This kind of exchange strictly requires three-way opt-in: the user, the
+ * viewer and the source origin must all explicitly opt-in into this system.
+ * The source origin opts in by setting sign-in parameters in amp-access
+ * configuration. The viewer opts in by supplying `#signin=1` viewer parameter
+ * and user opt-in must be ensured by the viewer.
+ *
+ * There are two sub-protocols: access token and request sign-in.
+ *
+ * Access token is configured via `acceptAccessToken: true` configuration
+ * option. If the viewer can be asked for the access token in this case via
+ * `getAccessTokenPassive` message. Most likely, the viewer has exchanged
+ * the access token with the source origin using OAuth2 mechanism or similar.
+ * No special security measures are applied in AMP Runtime since the token is
+ * expected to be encrypted or signed by the source origin.
+ *
+ * Login dialog may return an access grant via `#access_grant` in the hash
+ * response. When `acceptAccessToken: true` is specified, the viewer may be
+ * asked to exchange this access grant for an access token using the
+ * `storeAccessToken` message.
+ *
+ * Request sign-in is configured via `signinServices: []` configuration option.
+ * E.g. `signinServices: ["https://accounts.google.com"]`. By using this option,
+ * the source origin states that it's ready to accept ID tokens produced by
+ * this authority. The viewer may be asked to implement sign-in with ID token
+ * via the `requestSignIn` message. The viewer must ensure the user's consent
+ * before sending any tokens to the source origin.
  */
 export class SignInProtocol {
 
@@ -72,6 +101,7 @@ export class SignInProtocol {
   }
 
   /**
+   * Whether this protocol has been enabled by the viewer.
    * @return {boolean}
    */
   isEnabled() {
@@ -85,6 +115,16 @@ export class SignInProtocol {
   }
 
   /**
+   * Return the promise that will possibly yield the access token from the
+   * viewer.
+   *
+   * If viewer has not opted-in into signin protocol, this method returns
+   * `null`. If source origin has not opted-in into signin protocol via
+   * `acceptAccessToken: true` configration option, this method returns `null`.
+   *
+   * If an access token is not found or cannot be retrieved, this method
+   * returns a promise that will resolve `null`.
+   *
    * @return {?Promise<?string>}
    */
   getAccessTokenPassive() {
@@ -114,6 +154,20 @@ export class SignInProtocol {
   }
 
   /**
+   * Processes login dialog's result. And if `#access_grant=` hash parameter
+   * is specified, will send this access grant to the viewer to exchange for
+   * the access token. This method returns promise that will resolve the
+   * exchanged access token.
+   *
+   * If viewer has not opted-in into signin protocol, this method returns
+   * `null`. If source origin has not opted-in into signin protocol via
+   * `acceptAccessToken: true` configration option and by returning
+   * `#access_grant=` response from the login dialog, this method returns
+   * `null`.
+   *
+   * The viewer is allowed to store the access token, but only when the user
+   * explicitly consents to it.
+   *
    * @param {!Object<string, string>} query
    * @return {?Promise<?string>}
    */
@@ -139,6 +193,18 @@ export class SignInProtocol {
   }
 
   /**
+   * Requests the viewer to perform login on behalf of the source origin
+   * with the optional ID token. The result is the promise that will resolve
+   * with the dialog's response.
+   *
+   * If viewer has not opted-in into signin protocol, this method returns
+   * `null`. If source origin has not opted-in into signin protocol via
+   * `signinServices: []` configration option that includes this viewer's
+   * service, this method returns `null`.
+   *
+   * The viewer is only allowed to propagate ID token to the login dialog
+   * when the user explicitly consents to it.
+   *
    * @param {string} url
    * @return {?Promise<?string>}
    */
