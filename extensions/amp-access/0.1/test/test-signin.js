@@ -83,8 +83,8 @@ describe('SignInProtocol', () => {
       toggleExperiment(window, 'amp-access-signin', false);
       const signin = create();
       expect(signin.isEnabled()).to.be.false;
-      expect(signin.acceptAccessToken_).to.be.undefined;
-      expect(signin.supportsSignInService_).to.be.undefined;
+      expect(signin.acceptAccessToken_).to.be.false;
+      expect(signin.supportsSignInService_).to.be.false;
     });
 
     it('should be disabled without viewer parameter', () => {
