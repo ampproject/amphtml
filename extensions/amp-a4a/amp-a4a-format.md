@@ -178,6 +178,21 @@ not explicitly allowed are prohibited.
 Most of the omissions are either for performance or to make A4A creatives 
 simpler to analyze.
 
+_Example:_ `<amp-ad>` is omitted from this list.  It is explicitly disallowed
+because allowing an `<amp-ad>` inside an `<amp-ad>` could potentially lead to
+unbounded waterfalls of ad loading, which does not meet A4A performance goals.
+
+_Example:_ `<amp-iframe>` is omitted from this list.  It is disallowed 
+because ads could use it to execute arbitrary Javascript and load arbitrary 
+content. Ads wanting to use such capabilities should return `false` from 
+their
+[a4aRegistry](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js#L40)
+entry and use the existing '3p iframe' ad rendering mechanism.
+
+_Example:_ `<amp-ad-network-*-impl>` are omitted from this list.  The 
+`<amp-ad>` tag handles delegation to these implementation tags; creatives 
+should not attempt to include them directly.
+
 <table>
   <tr><td>amp-accordion</td></tr>
   <tr><td>amp-analytics</td></tr>
