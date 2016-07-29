@@ -125,6 +125,7 @@ describe('FixedLayer', () => {
             },
           };
         },
+        navigator: window.navigator,
       },
       createElement: name => {
         return createElement(name);

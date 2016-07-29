@@ -244,6 +244,9 @@ export class HistoryBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
+    /** @private @const {!../timer.Timer} */
+    this.timer_ = timerFor(win);
+
     const history = this.win.history;
 
     /** @private {number} */

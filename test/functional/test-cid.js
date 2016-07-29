@@ -72,6 +72,7 @@ describe('cid', () => {
         },
       },
       document: {},
+      navigator: window.navigator,
       ampExtendedElements: {
         'amp-analytics': true,
       },

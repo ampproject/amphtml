@@ -72,7 +72,7 @@ export class Viewport {
     this.viewer_ = viewer;
 
     /** @const {!../platform.Platform} */
-    this.platform_ = platformFor(this.win);
+    this.platform_ = platformFor(win);
 
     /**
      * Used to cache the rect of the viewport.
