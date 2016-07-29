@@ -170,7 +170,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (trigger['selector']) {
             // Expand the selector using variable expansion.
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
-                trigger, undefined, undefined, false);
+                trigger, /* arg*/ undefined, /* arg */ undefined,
+                /* arg*/ false);
             addListener(this.win, trigger, this.handleEvent_.bind(this,
                   trigger));
 
