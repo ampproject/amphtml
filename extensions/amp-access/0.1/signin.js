@@ -24,7 +24,7 @@ const TAG = 'amp-access-signin';
 
 
 /**
- * This class represents the sign-in protocol, but means of which the source
+ * This class represents the sign-in protocol, by means of which the source
  * origin can take advantage of the identity system of the viewer.
  *
  * This kind of exchange strictly requires three-way opt-in: the user, the
@@ -94,10 +94,15 @@ export class SignInProtocol {
       /** @private @const {boolean} */
       this.supportsSignInService_ = configSignInServices &&
           configSignInServices.indexOf(viewerSignInService) != -1;
-
-      /** @private {!Promise<?string>} */
-      this.accessTokenPromise_ = null;
+    } else {
+      /** @private @const {boolean} */
+      this.acceptAccessToken_ = false;
+      /** @private @const {boolean} */
+      this.supportsSignInService_ = false;
     }
+
+    /** @private {?Promise<?string>} */
+    this.accessTokenPromise_ = null;
   }
 
   /**
@@ -109,6 +114,7 @@ export class SignInProtocol {
   }
 
   /**
+   * Starts up the sign-in protocol by passively pre-fetching the access token.
    */
   start() {
     this.getAccessTokenPassive();
