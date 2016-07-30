@@ -18,12 +18,12 @@ import {tryParseJson} from '../../../src/json';
 
 
 /**
- * @typedef {
+ * @typedef {{
  *   header: !JSONObject,
  *   payload: !JSONObject,
  *   verifiable: string,
  *   sig: string,
- * }
+ * }}
  */
 let JwtTokenInternalDef;
 
