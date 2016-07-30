@@ -41,6 +41,10 @@ export const adPrefetch = {
     'https://securepubads.g.doubleclick.net/static/glade.js',
   ],
   eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
+  ezoic: [
+    'https://www.googletagservices.com/tag/js/gpt.js',
+    'https://g.ezoic.net/ezoic/ampad.js',
+  ],
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
