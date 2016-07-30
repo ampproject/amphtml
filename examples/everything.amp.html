@@ -20,28 +20,6 @@
       border: 1px solid black;
     }
 
-    .lightbox1 {
-      background: #222;
-    }
-
-    .lightbox1-content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      flex-direction: column;
-      flex-wrap: nowrap;
-      justify-content: center;
-      align-items: center;
-    }
-    .lightbox1 amp-img {
-      max-width: 80%;
-      max-height: 80%;
-      width: 100%;
-    }
-
     .box1 {
       border: 1px solid black;
       margin: 8px 0;
@@ -108,6 +86,10 @@
       height: 200px;
       width: 200vw;
       background: rgba(0, 0, 0, 0.5);
+    }
+
+    #lightbox {
+      background-color: rgba(0, 0, 0, 0.95);
     }
 
   </style>
@@ -214,22 +196,43 @@
   <h2>Audio</h2>
     <amp-audio src="https://ia801402.us.archive.org/16/items/EDIS-SRP-0197-06/EDIS-SRP-0197-06.mp3"></amp-audio>
 
+  <h2>Lightbox</h2>
+  <amp-lightbox id="lightbox" layout="nodisplay">
+    <p>
+      <button on="tap:lightbox.close">
+          Close Lightbox
+      </button>
+    </p>
+    <p>
+      <amp-twitter width=486 height=657
+          media="(min-width: 401px)"
+          layout="fixed"
+          data-tweetID="585110598171631616"></amp-twitter>
+      </p>
+    <p>
+      <amp-youtube
+          data-videoid="mGENRKrdoGY"
+          layout="fixed"
+          width="480" height="270"></amp-youtube>
+    </p>
+  </amp-lightbox>
+
+  <button on="tap:lightbox">
+      Open Lightbox
+  </button>
+
+  <h2>Images</h2>
   <p>
-  Responsive (w/srcset, w/lightbox)
+  Responsive (w/srcset, w/image-lightbox)
   <p>
+    <amp-image-lightbox id="imagelightbox1" layout="nodisplay"></amp-image-lightbox>
     <amp-img id="img0"
         srcset="
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
         width=527 height=193 layout="responsive"
-        on="tap:lightbox1" role="img" tabindex="0"></amp-img>
+        on="tap:imagelightbox1" role="img" tabindex="0"></amp-img>
   </p>
-
-  <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
-    <div class="lightbox1-content">
-      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive" on="tap:lightbox1.close" role="img" tabindex="1"></amp-img>
-    </div>
-  </amp-lightbox>
 
   <p>
   Fixed
