@@ -29,6 +29,9 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
+    // Note: true is the default, so this method is not strictly needed here.
+    // But a network implementation might choose to implement a real check
+    // in this method.
     return true;
   }
 
