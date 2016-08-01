@@ -271,7 +271,7 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
-app.use('/examples/live-blog(-non-floating-button)?.amp.html',
+app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
