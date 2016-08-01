@@ -148,7 +148,7 @@ describe('documentReady', () => {
 
         return timer.promise().then(() => {
           expect(callback.callCount).to.equal(1);
-          expect(callCount.getCall(0).args).to.deep.equal([testDoc]);
+          expect(callback.getCall(0).args).to.deep.equal([testDoc]);
           expect(eventListeners['readystatechange']).to.equal(undefined);
         });
       });
