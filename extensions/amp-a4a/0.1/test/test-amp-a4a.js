@@ -404,7 +404,7 @@ describe('amp-a4a', () => {
         const a4aElement = doc.createElement('amp-a4a');
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'http://foo.com';
-        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); }
+        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
         return a4a.maybeRenderAmpAd_().then(rendered => {
           // Force vsync system to run all queued tasks, so that DOM mutations
           // are actually completed before testing.
