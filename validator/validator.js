@@ -24,6 +24,7 @@ goog.require('amp.validator.AttrList');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
 goog.require('amp.validator.RULES');
+goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
 goog.require('amp.validator.ValidationError.Code');
@@ -282,8 +283,203 @@ class ChildTagMatcher {
 }
 
 /**
+ * @typedef {{ point: !amp.validator.ReferencePoint,
+ *             tagSpecId: number }}
+ */
+let ParsedReferencePoint;
+
+/**
+ * Holds the reference points for a particular parent tag spec, including
+ * their resolved tagspec ids. This class is a container of
+ * |ParsedReferencePoint| for convenient iteration.
+ * @private
+ */
+class ParsedReferencePoints {
+  /**
+   * @param {!amp.validator.TagSpec} parent
+   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
+   */
+  constructor(parent, tagSpecIdsByTagSpecName) {
+    /**
+     * @type {!amp.validator.TagSpec}
+     * @private
+     */
+    this.parent_ = parent;
+
+    /**
+     * @type {!Array<ParsedReferencePoint>}
+     * @private
+     */
+    this.parsed_ = [];
+    for (const p of parent.referencePoints) {
+      goog.asserts.assert(p.tagSpecName !== null);
+      this.parsed_.push(
+          {point: p, tagSpecId: tagSpecIdsByTagSpecName[p.tagSpecName]});
+    }
+  }
+
+  /** @return {!Array<ParsedReferencePoint>} */
+  iterate() { return this.parsed_; }
+
+  /** @return {boolean} */
+  empty() { return this.parsed_.length === 0; }
+
+  /** @return {?string} */
+  parentSpecUrl() { return this.parent_.specUrl; }
+
+  /** @return {string} */
+  parentTagSpecName() { return getTagSpecName(this.parent_); }
+}
+
+/**
+ * @private
+ */
+class ReferencePointMatcher {
+  /**
+   * @param {!ParsedReferencePoints} parsedReferencePoints
+   */
+  constructor(parsedReferencePoints) {
+    /**
+     * @type {!ParsedReferencePoints}
+     * @private
+     */
+    this.parsedReferencePoints_ = parsedReferencePoints;
+
+    /**
+     * @type {!LineCol}
+     * @private
+     */
+    this.lineCol_ = new LineCol(1, 0);
+
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.referencePointsMatched_ = [];
+  }
+
+  /**
+   * @param {!LineCol} lineCol
+   */
+  setLineCol(lineCol) { this.lineCol_ = lineCol; }
+
+  /**
+   * This method gets invoked when matching a child tag of the parent
+   * that is specifying / requiring the reference points. So
+   * effectively, this method will try through the specified reference
+   * points and record them in this.referencePointsMatched_.
+   * @param {!Array<string>} attrs
+   * @param {!Context} context
+   * @param {!Array<!ParsedTagSpec>} tagSpecById
+   * @param {!amp.validator.ValidationResult} result
+   */
+  match(attrs, context, tagSpecById, result) {
+    if (this.parsedReferencePoints_.empty()) return;
+    const resultForBestAttempt = new amp.validator.ValidationResult();
+    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+    for (const p of this.parsedReferencePoints_.iterate()) {
+      const parsedSpec = tagSpecById[p.tagSpecId];
+      validateTagAgainstSpec(
+          parsedSpec, context, attrs, tagSpecById, resultForBestAttempt);
+      if (resultForBestAttempt.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        this.referencePointsMatched_.push(parsedSpec.getId());
+        return;
+      }
+    }
+    this.referencePointsMatched_.push(-1);
+    goog.asserts.assert(
+        resultForBestAttempt.status ===
+        amp.validator.ValidationResult.Status.FAIL);
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      const acceptable = [];
+      for (const p of this.parsedReferencePoints_.iterate()) {
+        acceptable.push(p.point.tagSpecName);
+      }
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code
+              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
+          context.getDocLocator(),
+          /*params*/
+          [
+            context.getTagStack().getCurrent(),
+            this.parsedReferencePoints_.parentTagSpecName(),
+            acceptable.join(', ')
+          ],
+          this.parsedReferencePoints_.parentSpecUrl(), result);
+    }
+  }
+
+  /**
+   * This method gets invoked when we're done with processing all the
+   * child tags, so now we can determine whether any reference points
+   * remain unsatisfied or duplicate.
+   * @param {!Context} context
+   * @param {!Array<!ParsedTagSpec>} tagSpecById
+   * @param {!amp.validator.ValidationResult} result
+   */
+  exitParentTag(context, tagSpecById, result) {
+    if (this.parsedReferencePoints_.empty()) return;
+
+    /** @type {!Object<number, number>} */
+    const referencePointByCount = {};
+    for (const r of this.referencePointsMatched_) {
+      referencePointByCount[r] = referencePointByCount.hasOwnProperty(r) ?
+          (referencePointByCount[r] + 1) :
+          1;
+    }
+    for (const p of this.parsedReferencePoints_.iterate()) {
+      if (p.point.mandatory &&
+          !referencePointByCount.hasOwnProperty(p.tagSpecId)) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code
+                  .MANDATORY_REFERENCE_POINT_MISSING,
+              this.lineCol_,
+              /*params*/
+              [
+                p.point.tagSpecName,
+                this.parsedReferencePoints_.parentTagSpecName()
+              ],
+              this.parsedReferencePoints_.parentSpecUrl(), result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
+      }
+      if (p.point.unique && referencePointByCount.hasOwnProperty(p.tagSpecId) &&
+          referencePointByCount[p.tagSpecId] !== 1) {
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          context.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT,
+              this.lineCol_,
+              /*params*/
+              [
+                p.point.tagSpecName,
+                this.parsedReferencePoints_.parentTagSpecName()
+              ],
+              this.parsedReferencePoints_.parentSpecUrl(), result);
+        } else {
+          result.status = amp.validator.ValidationResult.Status.FAIL;
+          return;
+        }
+      }
+    }
+  }
+
+  /**
+   * @return {!Array<number>}
+   */
+  getReferencePointsMatched() { return this.referencePointsMatched_; }
+}
+
+/**
  * @typedef {{ tagName: string,
  *             matcher: ?ChildTagMatcher,
+ *             referencePointMatcher: ?ReferencePointMatcher,
  *             dataAmpReportTestValue: ?string }}
  */
 let TagStackEntry;
@@ -336,6 +532,7 @@ class TagStack {
     this.stack_.push({
       tagName: tagName,
       matcher: null,
+      referencePointMatcher: null,
       dataAmpReportTestValue: maybeDataAmpReportTestValue
     });
   }
@@ -347,6 +544,32 @@ class TagStack {
    */
   setChildTagMatcher(matcher) {
     this.stack_[this.stack_.length - 1].matcher = matcher;
+  }
+
+  /**
+   * Sets the reference point matcher for the tag which is currently
+   * on the stack. This gets called shortly after EnterTag for a given tag.
+   * @param {?ReferencePointMatcher} matcher
+   */
+  setReferencePointMatcher(matcher) {
+    this.stack_[this.stack_.length - 1].referencePointMatcher = matcher;
+  }
+
+  /**
+   * @return {?ReferencePointMatcher}
+   */
+  currentReferencePointMatcher() {
+    return this.stack_[this.stack_.length - 1].referencePointMatcher;
+  }
+
+  /**
+   * @return {?ReferencePointMatcher}
+   */
+  parentReferencePointMatcher() {
+    if (this.stack_.length < 2) {
+      return null;
+    }
+    return this.stack_[this.stack_.length - 2].referencePointMatcher;
   }
 
   /**
@@ -625,7 +848,10 @@ class CdataMatcher {
               amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
               context.getDocLocator(),
               /* params */
-              [getTagSpecName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+              [
+                getTagSpecName(this.tagSpec_), bytes.toString(),
+                cdataSpec.maxBytes.toString()
+              ],
               cdataSpec.maxBytesSpecUrl, validationResult);
         } else {
           validationResult.status = amp.validator.ValidationResult.Status.FAIL;
@@ -916,6 +1142,15 @@ class Context {
           new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     }
     this.tagStack_.setChildTagMatcher(matcher);
+  }
+
+  /** @param {?ReferencePointMatcher} matcher */
+  setReferencePointMatcher(matcher) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS && matcher !== null) {
+      matcher.setLineCol(
+          new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    }
+    this.tagStack_.setReferencePointMatcher(matcher);
   }
 }
 
@@ -1693,7 +1928,7 @@ class ParsedAttrSpecs {
     /** @type {!Object<string, ?>} */
     const namesSeen = {};
     // (1) layout attrs.
-    if (tagSpec.ampLayout !== null) {
+    if (tagSpec.ampLayout !== null && tagSpec.tagName !== '$REFERENCE_POINT') {
       const layoutSpecs = this.attrListsByName['$AMP_LAYOUT_ATTRS'];
       if (layoutSpecs !== undefined) {
         for (const spec of layoutSpecs) {
@@ -1728,15 +1963,17 @@ class ParsedAttrSpecs {
       }
     }
     // (4) attributes specified in the global_attr list.
-    const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
-    if (globalSpecs === undefined) {
-      return attrs;
-    }
-    for (const spec of globalSpecs) {
-      const name = spec.getSpec().name;
-      if (!namesSeen.hasOwnProperty(name)) {
-        namesSeen[name] = 0;
-        attrs.push(spec);
+    if (tagSpec.tagName !== '$REFERENCE_POINT') {
+      const globalSpecs = this.attrListsByName['$GLOBAL_ATTRS'];
+      if (globalSpecs === undefined) {
+        return attrs;
+      }
+      for (const spec of globalSpecs) {
+        const name = spec.getSpec().name;
+        if (!namesSeen.hasOwnProperty(name)) {
+          namesSeen[name] = 0;
+          attrs.push(spec);
+        }
       }
     }
     return attrs;
@@ -1945,13 +2182,13 @@ class ParsedTagSpec {
   /**
    * @param {?string} templateSpecUrl
    * @param {!ParsedAttrSpecs} parsedAttrSpecs
-   * @param {!Object<string, number>} tagspecIdsByTagSpecName
+   * @param {!Object<string, number>} tagSpecIdsByTagSpecName
    * @param {boolean} shouldRecordTagspecValidated
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {number} tagId
    */
   constructor(
-      templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
+      templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
       shouldRecordTagspecValidated, tagSpec, tagId) {
     /**
      * @type {!amp.validator.TagSpec}
@@ -1964,6 +2201,17 @@ class ParsedTagSpec {
      * @private
      */
     this.id_ = tagId;
+    /**
+     * @type {!ParsedReferencePoints}
+     * @private
+     */
+    this.referencePoints_ =
+        new ParsedReferencePoints(tagSpec, tagSpecIdsByTagSpecName);
+    /**
+     * @type {boolean}
+     * @private
+     */
+    this.isReferencePoint_ = (tagSpec.tagName === '$REFERENCE_POINT');
     /**
      * ParsedAttributes keyed by name.
      * @type {!Object<string, !ParsedAttrSpec>}
@@ -2036,7 +2284,7 @@ class ParsedTagSpec {
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
-      this.alsoRequiresTag_.push(tagspecIdsByTagSpecName[tagSpecName]);
+      this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
   }
 
@@ -2436,9 +2684,10 @@ class ParsedTagSpec {
    *  Returns true iff the validation is successful.
    * @param {!Context} context
    * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  validateAttributes(context, encounteredAttrs, result) {
+  validateAttributes(context, encounteredAttrs, tagSpecById, result) {
     if (this.spec_.ampLayout !== null) {
       /** @type {!Object<string, string>} */
       const attrsByKey = {};
@@ -2473,6 +2722,22 @@ class ParsedTagSpec {
       let parsedSpec;
       if (!this.attrsByName_.hasOwnProperty(attrName) ||
           (parsedSpec = this.attrsByName_[attrName]) === undefined) {
+        // While validating a reference point, we skip attributes that
+        // we don't have a spec for. They will be validated when the
+        // TagSpec itself gets validated.
+        if (this.isReferencePoint_) continue;
+        // On the other hand, if we did just validate a reference point for
+        // this tag, we check whether that reference point covers the attribute.
+        const matcher = context.getTagStack().parentReferencePointMatcher();
+        if (matcher) {
+          const matched = matcher.getReferencePointsMatched();
+          if (matched.length > 0 && matched[matched.length - 1] != -1 &&
+              tagSpecById[matched[matched.length - 1]].hasAttrWithName(
+                  attrName)) {
+            continue;
+          }
+        }
+
         this.validateAttrNotFoundInSpec(context, attrName, result);
         if (result.status === amp.validator.ValidationResult.Status.FAIL) {
           return;
@@ -2718,6 +2983,18 @@ class ParsedTagSpec {
       }
     }
   }
+
+  /** @return {boolean} */
+  isReferencePoint() { return this.isReferencePoint_; }
+
+  /** @return {!ParsedReferencePoints} */
+  getReferencePoints() { return this.referencePoints_; }
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   */
+  hasAttrWithName(name) { return this.attrsByName_.hasOwnProperty(name); }
 }
 
 /**
@@ -2944,12 +3221,23 @@ function specificity(code) {
       return 58;
     case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
       return 59;
+    case amp.validator.ValidationError.Code
+        .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT:
+      return 60;
+    case amp.validator.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING:
+      return 61;
+    case amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT:
+      return 62;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
       return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
       return 102;
+    case amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY:
+      return 103;
+    case amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY:
+      return 104;
     default:
       goog.asserts.fail('Unrecognized Code: ' + code);
   }
@@ -2971,6 +3259,104 @@ amp.validator.maxSpecificity = function(validationResult) {
   return max;
 };
 
+/**
+ * Validates the provided |tagName| with respect to a single tag
+ * specification.
+ * @param {!ParsedTagSpec} parsedSpec
+ * @param {!Context} context
+ * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+ * @param {!Array<!ParsedTagSpec>} tagSpecById
+ * @param {!amp.validator.ValidationResult} resultForBestAttempt
+ */
+function validateTagAgainstSpec(
+    parsedSpec, context, encounteredAttrs, tagSpecById, resultForBestAttempt) {
+  let resultForAttempt = new amp.validator.ValidationResult();
+  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  parsedSpec.validateAttributes(
+      context, encounteredAttrs, tagSpecById, resultForAttempt);
+  parsedSpec.validateParentTag(context, resultForAttempt);
+  parsedSpec.validateAncestorTags(context, resultForAttempt);
+
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
+    if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
+    // If this is the first attempt, always use it.
+    if (resultForBestAttempt.errors.length === 0) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+      return;
+    }
+
+    // Prefer the attempt with the fewest errors.
+    if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+      return;
+    }
+    if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
+      return;
+    }
+
+    // If the same number of errors, prefer the most specific error.
+    if (amp.validator.maxSpecificity(resultForAttempt) >
+        amp.validator.maxSpecificity(resultForBestAttempt)) {
+      resultForBestAttempt.copyFrom(resultForAttempt);
+    }
+
+    return;
+  }
+  // This is the successful branch of the code: locally the tagspec matches.
+  resultForBestAttempt.copyFrom(resultForAttempt);
+
+  const spec = parsedSpec.getSpec();
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    if (spec.deprecation !== null) {
+      context.addError(
+          amp.validator.ValidationError.Severity.WARNING,
+          amp.validator.ValidationError.Code.DEPRECATED_TAG,
+          context.getDocLocator(),
+          /* params */[getTagSpecName(spec), spec.deprecation],
+          spec.deprecationUrl, resultForBestAttempt);
+      // Deprecation is only a warning, so we don't return.
+    }
+  }
+
+  if (parsedSpec.shouldRecordTagspecValidated()) {
+    const isUnique = context.recordTagspecValidated(parsedSpec.getId());
+    // If a duplicate tag is encountered for a spec that's supposed
+    // to be unique, we've found an error that we must report.
+    if (spec.unique && !isUnique) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        context.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+            context.getDocLocator(),
+            /* params */[getTagSpecName(spec)], spec.specUrl,
+            resultForBestAttempt);
+      } else {
+        resultForBestAttempt.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+  }
+
+  if (spec.mandatoryAlternatives !== null) {
+    const satisfied = spec.mandatoryAlternatives;
+    goog.asserts.assert(satisfied !== null);
+    context.recordMandatoryAlternativeSatisfied(satisfied);
+  }
+  // (Re)set the cdata matcher to the expectations that this tag
+  // brings with it.
+  if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
+  if (spec.childTags !== null)
+    context.setChildTagMatcher(new ChildTagMatcher(spec));
+
+  // Set the reference point matcher so it considers spec.referencePoints,
+  // if present.
+  context.setReferencePointMatcher(
+      new ReferencePointMatcher(parsedSpec.getReferencePoints()));
+}
 
 /**
  * This wrapper class provides access to the validation rules.
@@ -3005,14 +3391,14 @@ class ParsedValidatorRules {
     const parsedAttrSpecs = new ParsedAttrSpecs(rules.attrLists);
 
     /** @type {!Object<string, number>} */
-    const tagspecIdsByTagSpecName = {};
+    const tagSpecIdsByTagSpecName = {};
     /** @type {!Object<string, boolean>} */
     const tagSpecNamesToTrack = {};
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
       goog.asserts.assert(
-          !tagspecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
-      tagspecIdsByTagSpecName[getTagSpecName(tag)] = i;
+          !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
+      tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
       if (tag.alsoRequiresTag.length > 0) {
         tagSpecNamesToTrack[getTagSpecName(tag)] = true;
       }
@@ -3020,24 +3406,26 @@ class ParsedValidatorRules {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
       }
     }
-
     for (let i = 0; i < rules.tags.length; ++i) {
       const tag = rules.tags[i];
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         goog.asserts.assert(rules.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          rules.templateSpecUrl, parsedAttrSpecs, tagspecIdsByTagSpecName,
+          rules.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
-      if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
-        this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
-      }
-      const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
-      if (parsedTagSpec.hasDispatchKey()) {
-        tagnameDispatch.registerDispatchKey(parsedTagSpec.getDispatchKey(), i);
-      } else {
-        tagnameDispatch.registerTagSpec(i);
+      if (!parsedTagSpec.isReferencePoint()) {
+        if (!this.tagSpecByTagName_.hasOwnProperty(tag.tagName)) {
+          this.tagSpecByTagName_[tag.tagName] = new TagSpecDispatch();
+        }
+        const tagnameDispatch = this.tagSpecByTagName_[tag.tagName];
+        if (parsedTagSpec.hasDispatchKey()) {
+          tagnameDispatch.registerDispatchKey(
+              parsedTagSpec.getDispatchKey(), i);
+        } else {
+          tagnameDispatch.registerTagSpec(i);
+        }
       }
       if (tag.mandatory) {
         this.mandatoryTagSpecs_.push(i);
@@ -3113,8 +3501,9 @@ class ParsedValidatorRules {
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.tagSpecById_[maybeTagSpecId];
           goog.asserts.assert(parsedSpec !== undefined, '1');
-          this.validateTagAgainstSpec(
-              parsedSpec, context, encounteredAttrs, resultForBestAttempt);
+          validateTagAgainstSpec(
+              parsedSpec, context, encounteredAttrs, this.tagSpecById_,
+              resultForBestAttempt);
           // Use the dispatched TagSpec validation results, success or fail.
           validationResult.mergeFrom(resultForBestAttempt);
           return;
@@ -3143,8 +3532,9 @@ class ParsedValidatorRules {
     // Validate against all tagspecs.
     for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
       const parsedSpec = this.tagSpecById_[tagSpecId];
-      this.validateTagAgainstSpec(
-          parsedSpec, context, encounteredAttrs, resultForBestAttempt);
+      validateTagAgainstSpec(
+          parsedSpec, context, encounteredAttrs, this.tagSpecById_,
+          resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
         break;  // Exit early on success
@@ -3154,109 +3544,15 @@ class ParsedValidatorRules {
   }
 
   /**
-   * Validates the provided |tagName| with respect to a single tag
-   * specification.
-   * @param {!ParsedTagSpec} parsedSpec
-   * @param {!Context} context
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
-   * @param {!amp.validator.ValidationResult} resultForBestAttempt
-   */
-  validateTagAgainstSpec(
-      parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
-    let resultForAttempt = new amp.validator.ValidationResult();
-    resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-    parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
-    parsedSpec.validateParentTag(context, resultForAttempt);
-    parsedSpec.validateAncestorTags(context, resultForAttempt);
-
-    if (resultForAttempt.status ===
-        amp.validator.ValidationResult.Status.FAIL) {
-      if (!amp.validator.GENERATE_DETAILED_ERRORS) {
-        resultForBestAttempt.status =
-            amp.validator.ValidationResult.Status.FAIL;
-        return;
-      }
-      // If this is the first attempt, always use it.
-      if (resultForBestAttempt.errors.length === 0) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-        return;
-      }
-
-      // Prefer the attempt with the fewest errors.
-      if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-        return;
-      }
-      if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
-        return;
-      }
-
-      // If the same number of errors, prefer the most specific error.
-      if (amp.validator.maxSpecificity(resultForAttempt) >
-          amp.validator.maxSpecificity(resultForBestAttempt)) {
-        resultForBestAttempt.copyFrom(resultForAttempt);
-      }
-
-      return;
-    }
-    // This is the successful branch of the code: locally the tagspec matches.
-    resultForBestAttempt.copyFrom(resultForAttempt);
-
-    const spec = parsedSpec.getSpec();
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      if (spec.deprecation !== null) {
-        context.addError(
-            amp.validator.ValidationError.Severity.WARNING,
-            amp.validator.ValidationError.Code.DEPRECATED_TAG,
-            context.getDocLocator(),
-            /* params */[getTagSpecName(spec), spec.deprecation],
-            spec.deprecationUrl, resultForBestAttempt);
-        // Deprecation is only a warning, so we don't return.
-      }
-    }
-
-    if (parsedSpec.shouldRecordTagspecValidated()) {
-      const isUnique = context.recordTagspecValidated(parsedSpec.getId());
-      // If a duplicate tag is encountered for a spec that's supposed
-      // to be unique, we've found an error that we must report.
-      if (spec.unique && !isUnique) {
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-              context.getDocLocator(),
-              /* params */[getTagSpecName(spec)], spec.specUrl,
-              resultForBestAttempt);
-        } else {
-          resultForBestAttempt.status =
-              amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
-    }
-
-    if (spec.mandatoryAlternatives !== null) {
-      const satisfied = spec.mandatoryAlternatives;
-      goog.asserts.assert(satisfied !== null);
-      context.recordMandatoryAlternativeSatisfied(satisfied);
-    }
-    // (Re)set the cdata matcher to the expectations that this tag
-    // brings with it.
-    if (spec.cdata !== null) context.setCdataMatcher(new CdataMatcher(spec));
-    if (spec.childTags !== null)
-      context.setChildTagMatcher(new ChildTagMatcher(spec));
-  }
-
-  /**
    * Emits errors for tags that are specified to be mandatory.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
    */
   maybeEmitMandatoryTagValidationErrors(context, validationResult) {
-    for (const tagspecId of this.mandatoryTagSpecs_) {
-      if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
+    for (const tagSpecId of this.mandatoryTagSpecs_) {
+      if (!context.getTagspecsValidated().hasOwnProperty(tagSpecId)) {
         if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          const spec = this.tagSpecById_[tagspecId].getSpec();
+          const spec = this.tagSpecById_[tagSpecId].getSpec();
           context.addError(
               amp.validator.ValidationError.Severity.ERROR,
               amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
@@ -3282,8 +3578,8 @@ class ParsedValidatorRules {
     const tagspecsValidated =
         Object.keys(context.getTagspecsValidated()).map(Number);
     goog.array.sort(tagspecsValidated);
-    for (const tagspecId of tagspecsValidated) {
-      const spec = this.tagSpecById_[tagspecId];
+    for (const tagSpecId of tagspecsValidated) {
+      const spec = this.tagSpecById_[tagSpecId];
       for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().hasOwnProperty(
                 alsoRequiresTagspecId)) {
@@ -3361,6 +3657,9 @@ class ParsedValidatorRules {
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(
         context, validationResult);
   }
+
+  /** @return {!Array<!ParsedTagSpec>} */
+  getTagSpecById() { return this.tagSpecById_; }
 }
 
 const parsedValidatorRulesSingleton = new ParsedValidatorRules();
@@ -3454,6 +3753,35 @@ amp.validator.ValidationHandler =
   }
 
   /**
+   * Callback for informing that the parser is manufacturing a <body> tag not
+   * actually found on the page. This will be followed by a startTag() with the
+   * actual body tag in question.
+   * @override
+   */
+  markManufacturedBody() {
+    if (amp.validator.RULES.manufacturedBodyTagIsError) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        this.context_.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
+            this.context_.getDocLocator(),
+            /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+            this.validationResult_);
+      } else {
+        this.validationResult_.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
+    } else if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      this.context_.addError(
+          amp.validator.ValidationError.Severity.WARNING,
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
+          this.context_.getDocLocator(),
+          /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+          this.validationResult_);
+    }
+  }
+
+  /**
    * Callback for a start HTML tag.
    * @param {string} tagName ie: 'table' (already lower-cased by htmlparser.js).
    * @param {Array<string>} attrs Alternating key/value pairs.
@@ -3464,6 +3792,12 @@ amp.validator.ValidationHandler =
     this.context_.setCdataMatcher(null);
     this.context_.getTagStack().enterTag(
         tagName, this.context_, this.validationResult_, attrs);
+    const matcher = this.context_.getTagStack().parentReferencePointMatcher();
+    if (matcher !== null) {
+      matcher.match(
+          attrs, this.context_, this.rules_.getTagSpecById(),
+          this.validationResult_);
+    }
     this.rules_.validateTag(
         this.context_, tagName, attrs, this.validationResult_);
     this.context_.getTagStack().matchChildTagName(
@@ -3477,6 +3811,11 @@ amp.validator.ValidationHandler =
    */
   endTag(tagName) {
     this.context_.setCdataMatcher(null);
+    const matcher = this.context_.getTagStack().currentReferencePointMatcher();
+    if (matcher !== null) {
+      matcher.exitParentTag(
+          this.context_, this.rules_.getTagSpecById(), this.validationResult_);
+    }
     this.context_.getTagStack().exitTag(
         tagName, this.context_, this.validationResult_);
   };

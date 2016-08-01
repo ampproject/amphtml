@@ -52,7 +52,7 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.win.location.href;
 
-    /** @private {number} */
+    /** @private {time} */
     this.latestUpdateTime_ = 0;
 
     /** @private @const {function(): Promise} */
@@ -63,6 +63,10 @@ export class LiveListManager {
       // Switch out the poller interval if we can find a lower one and
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
+
+      const initialUpdateTimes = Object.keys(this.liveLists_)
+          .map(key => this.liveLists_[key].getUpdateTime());
+      this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
 
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.

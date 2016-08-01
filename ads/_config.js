@@ -45,6 +45,7 @@ export const adPrefetch = {
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
+  mads: 'https://eu2.madsone.com/js/tags.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',

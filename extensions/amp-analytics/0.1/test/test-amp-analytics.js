@@ -551,6 +551,29 @@ describe('amp-analytics', function() {
     });
   });
 
+  function selectorExpansionTest(selector) {
+    it('expand selector value: ' + selector, () => {
+      const ins = instrumentationServiceFor(windowApi);
+      const addListenerSpy = sandbox.spy(ins, 'addListener');
+      const analytics = getAnalyticsTag({
+        requests: {foo: 'https://example.com/bar'},
+        triggers: [{on: 'click', selector: '${foo}, ${bar}', request: 'foo'}],
+        vars: {foo: selector, bar: '123'},
+      });
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(addListenerSpy.callCount).to.equal(1);
+        expect(addListenerSpy.args[0][0]['selector']).to
+            .equal(selector + ', 123');
+      });
+    });
+  }
+
+  ['.clazz', 'a, div', 'a .foo', 'a #foo', 'a > div', 'div + p', 'div ~ ul',
+    '[target=_blank]', '[title~=flower]', '[lang|=en]', 'a[href^="https"]',
+    'a[href$=".pdf"]', 'a[href="w3schools"]', 'a:active', 'p::after',
+    'p:first-child', 'p:lang(it)', ':not(p)', 'p:nth-child(2)']
+        .map(selectorExpansionTest);
+
   it('does not expands selector with platform variable', () => {
     const ins = instrumentationServiceFor(windowApi);
     const addListenerSpy = sandbox.spy(ins, 'addListener');

@@ -232,6 +232,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
+      'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive
@@ -495,6 +496,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.scrollTo\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -521,7 +523,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
 };
 
 // Terms that must appear in a source file.

@@ -44,8 +44,7 @@ tags: {  # amp-reach-player
       error_message: "contents"
     }
   }
-  # Uncomment once reference is available.
-  # spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
 }
 tags: {  # <amp-reach-player>
   tag_name: "AMP-REACH-PLAYER"
@@ -58,8 +57,7 @@ tags: {  # <amp-reach-player>
     value_regex: "[0-9a-z-]+"
   }
   attr_lists: "extended-amp-global"
-  # Uncomment once reference is available.
-  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/amp-reach-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

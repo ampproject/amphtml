@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 143
+min_validator_revision_required: 153
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 242
+spec_file_revision: 250
 
 # Validator extensions.
 # =====================
@@ -48,6 +48,7 @@ tags: {
     mandatory: true
     value: ""
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 
 # Below, we list the allowed elements in the order in which they are appear
@@ -139,10 +140,10 @@ tags: {
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
         "canonical|"  # Handled separately below, has specific requirements.
         "components|"
-        "dns-prefetch|"
+        "dns-prefetch|"  # Handled separately below, has specific requirements.
         "import|"
         "manifest|"  # Handled separately below, has specific requirements.
-        "preconnect|"
+        "preconnect|"  # Handled separately below, has specific requirements.
         "prefetch|"
         "preload|"
         "prerender|"
@@ -153,6 +154,7 @@ tags: {
   }
   attrs: { name: "sizes" }
   attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 tags: {
   tag_name: "LINK"
@@ -178,6 +180,28 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# Specifically allow
+# <link href="https://fonts.gstatic.com" rel="dns-prefetch preconnect>
+# which is inserted by the AMP Cache if Google webfonts are included in the
+# document. This is an optimization to more quickly setup the necessary
+# connection..
+tags: {
+  tag_name: "LINK"
+  spec_name: "link rel=dns-prefetch preconnect for fonts"
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "href"
+    value: "https://fonts.gstatic.com"
+    mandatory: true
+  }
+  attrs: {
+    name: "rel"
+    value: "dns-prefetch preconnect"
+    mandatory: true
+    dispatch_key: true
+  }
+}
+
 # Allow <link rel="manifest" ...> but not <link rel="manifest foo" ...>
 tags: {
   tag_name: "LINK"
@@ -199,6 +223,7 @@ tags: {
     mandatory: true
     dispatch_key: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # Whitelisted font providers
 tags: {
@@ -226,6 +251,7 @@ tags: {
     value: "text/css"
   }
   attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
@@ -242,6 +268,7 @@ tags: {
     dispatch_key: true
   }
   attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # rel= isn't mandatory when itemprop= is present.
 tags: {
@@ -256,6 +283,7 @@ tags: {
     mandatory: true
   }
   attr_lists: "common-link-attrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
@@ -319,6 +347,7 @@ tags: {
       properties: { name: "chrome" value: "1" }
     }
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 tags: {
   tag_name: "META"
@@ -351,6 +380,7 @@ tags: {
     mandatory: true
     value: "text/html; charset=utf-8"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # Identical to the above, but a common case variant of content-type.
 tags: {
@@ -367,6 +397,7 @@ tags: {
     mandatory: true
     value: "text/html; charset=utf-8"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv content-language tag
 tags: {
@@ -382,6 +413,7 @@ tags: {
     name: "content"
     mandatory: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv pics-label tag
 # https://www.w3.org/PICS/
@@ -398,6 +430,7 @@ tags: {
     name: "content"
     mandatory: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv imagetoolbar tag
 # https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
@@ -414,6 +447,7 @@ tags: {
     name: "content"
     mandatory: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv content-style-type
 # https://www.w3.org/TR/REC-html40/present/styles.html#h-14.2.1
@@ -431,6 +465,7 @@ tags: {
     mandatory: true
     value: "text/css"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv content-script-type
 # https://www.w3.org/TR/html4/interact/scripts.html#h-18.2.2.1
@@ -448,6 +483,7 @@ tags: {
     mandatory: true
     value: "text/javascript"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 # http-equiv resource-type
 # http://www.metatags.info/meta_http_equiv_resource_type
@@ -464,6 +500,7 @@ tags: {
     name: "content"
     mandatory: true
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 
 # 4.2.6 The style
@@ -858,6 +895,7 @@ tags: {
   # major browsers.
   attrs: { name: "border" }
   attrs: { name: "name" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#links"
 }
 # 4.5.2 The em element
 tags: {
@@ -1135,6 +1173,7 @@ tags: {
     mandatory: true
   }
   attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 tags: {
   tag_name: "SOURCE"
@@ -1153,6 +1192,7 @@ tags: {
     mandatory: true
   }
   attrs: { name: "media" }
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 # 4.7.8 The track element
 # We have two attr_list variants to encode the requirement that if
@@ -1934,8 +1974,7 @@ tags {
     mandatory: true
     value_regex_casei: "(_blank|_top)"
   }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.4 The label element
 tags: {
@@ -1944,8 +1983,7 @@ tags: {
   also_requires_tag: "amp-form extension .js script"
   attrs: { name: "for" }
   attrs: { name: "form" }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.5 The input element
 tags: {
@@ -1990,8 +2028,7 @@ tags: {
   }
   attrs: { name: "value" }
   attrs: { name: "width" }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.6 The button element
 tags: {
@@ -2011,6 +2048,10 @@ tags: {
   }
   attrs: { name: "type" }
   attrs: { name: "value" }
+  attrs: {
+    name: "formtarget"
+    value_regex_casei: "(_blank|_top)"
+  }
 }
 # 4.10.7 The select element
 tags: {
@@ -2024,8 +2065,7 @@ tags: {
   attrs: { name: "name" }
   attrs: { name: "required" }
   attrs: { name: "size" }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.10 The option element
 tags: {
@@ -2036,8 +2076,7 @@ tags: {
   attrs: { name: "label" }
   attrs: { name: "selected" }
   attrs: { name: "value" }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.11 The textarea element
 tags: {
@@ -2061,8 +2100,7 @@ tags: {
   attrs: { name: "selectionstart" }
   attrs: { name: "spellcheck" }
   attrs: { name: "wrap"}
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
 # 4.10.16 The fieldset element
 tags: {
@@ -2392,6 +2430,9 @@ attr_lists: {
   attrs: { name: "i-amp-access-id" }
 }
 
+manufactured_body_tag_is_error: false
+manufactured_body_spec_url: ""  # TODO(gregable)
+
 # Error formats
 error_formats {
   code: UNKNOWN_CODE
@@ -2586,6 +2627,17 @@ error_formats {
   format: "Tag '%1' is disallowed as first child of tag '%2'. "
           "First child tag must be one of %3."
 }
+error_formats {
+  code: DISALLOWED_MANUFACTURED_BODY
+  format: "Tag or Text which is only allowed inside the body section found "
+          "outside of the body section."
+}
+error_formats {
+  code: DEPRECATED_MANUFACTURED_BODY
+  format: "Tag or Text which is only allowed inside the body section found "
+          "outside of the body section."
+}
+
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
@@ -2665,4 +2717,18 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
   format: "CSS syntax error in tag '%1' - invalid attribute selector."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
+  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
+          "the acceptable reference points: %3."
+}
+error_formats {
+  code: MANDATORY_REFERENCE_POINT_MISSING
+  format: "The mandatory reference point '%1' for '%2' is missing."
+}
+error_formats {
+  code: DUPLICATE_REFERENCE_POINT
+  format: "The reference point '%1' for '%2' is must be unique "
+          "but a duplicate was encountered."
 }

@@ -71,6 +71,13 @@ amp.htmlparser.HtmlSaxHandler = class {
    * Handler called when the parsing is done.
    */
   endDoc() {}
+
+  /**
+   * Callback for informing that the parser is manufacturing a <body> tag not
+   * actually found on the page. This will be followed by a startTag() with the
+   * actual body tag in question.
+   */
+  markManufacturedBody() {}
 };
 
 

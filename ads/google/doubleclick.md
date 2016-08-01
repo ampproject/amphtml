@@ -70,7 +70,7 @@ Supported via `json` attribute:
 - `useSameDomainRenderingUntilDeprecated`
 
 ### Temporary use of useSameDomainRenderingUntilDeprecated
-An experiment to use the higher performance GLADE tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated by the end of June 2016, when the GLADE tag will become the default, and all ads will always be rendered inside a second cross domain iframe
+An experiment to use the higher performance GPT Light tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated by the end of August 2016, when the GPT Light tag will become the default, and all ads will always be rendered inside a second cross domain iframe
 
 Example:
 ```html
