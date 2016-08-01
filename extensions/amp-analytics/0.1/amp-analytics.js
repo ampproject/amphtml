@@ -170,7 +170,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (trigger['selector']) {
             // Expand the selector using variable expansion.
             trigger['selector'] = this.expandTemplate_(trigger['selector'],
-                trigger);
+                trigger, /* arg*/ undefined, /* arg */ undefined,
+                /* arg*/ false);
             addListener(this.win, trigger, this.handleEvent_.bind(this,
                   trigger));
 
@@ -435,11 +436,14 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!Object} event Object with details about the event.
    * @param {number} opt_iterations Number of recursive expansions to perform.
    *    Defaults to 2 substitutions.
+   * @param {boolean=} opt_encode Used to determine if the vars should be
+   *    encoded or not. Defaults to true.
    * @return {string} The expanded string.
    * @private
    */
-  expandTemplate_(template, trigger, event, opt_iterations) {
+  expandTemplate_(template, trigger, event, opt_iterations, opt_encode) {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
+    opt_encode = opt_encode === undefined ? true : opt_encode;
     if (opt_iterations < 0) {
       user.error('Maximum depth reached while expanding variables. Please ' +
           'ensure that the variables are not recursive.');
@@ -455,11 +459,12 @@ export class AmpAnalytics extends AMP.BaseElement {
       const argList = match[2] || '';
       let raw = (event && event['vars'] && event['vars'][name]) ||
           (trigger['vars'] && trigger['vars'][name]) ||
-          (this.config_['vars'] && this.config_['vars'][name]);
+          (this.config_['vars'] && this.config_['vars'][name]) ||
+          '';
       if (typeof raw == 'string') {
         raw = this.expandTemplate_(raw, trigger, event, opt_iterations - 1);
       }
-      const val = this.encodeVars_(raw != null ? raw : '', name);
+      const val = opt_encode ? this.encodeVars_(raw, name) : raw;
       return val + argList;
     });
   }
