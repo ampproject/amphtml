@@ -52,6 +52,7 @@ Current list of extended components by category:
 | [`amp-audio`](amp-audio/amp-audio.md) | Replaces the HTML5 `audio` tag. |
 | [`amp-o2-player`](amp-o2-player/amp-o2-player.md) | Displays a AOL O2Player. |
 | [`amp-brid-player`](amp-brid-player/amp-brid-player.md) | Displays a Brid.tv player. |
+| [`amp-cxense-player`](amp-cxense-player/amp-cxense-player.md) | Displays a Cxense widget i.e. Video Player. |
 | [`amp-brightcove`](amp-brightcove/amp-brightcove.md) | Displays a Brightcove Video Cloud or Perform player. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
 | [`amp-jwplayer`](amp-jwplayer/amp-jwplayer.md) | Displays a cloud-hosted [JW Player](https://www.jwplayer.com/). |
