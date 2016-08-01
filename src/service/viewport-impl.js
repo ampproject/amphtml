@@ -212,7 +212,7 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    onDocumentReady(this.win_.document, (doc) => {
+    onDocumentReady(this.win_.document, doc => {
       doc.body.style.borderBottom = `${paddingBottom}px solid transparent`;
     });
   }
@@ -1008,7 +1008,7 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    onDocumentReady(this.win.document, (doc) => {
+    onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
       // Also tried `paddingTop` but it didn't work for `position:absolute`
       // on iOS.
@@ -1020,7 +1020,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, (doc) => {
+    onDocumentReady(this.win.document, doc => {
       doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
     });
   }
