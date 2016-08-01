@@ -26,7 +26,6 @@ describe('Viewer', () => {
   let windowMock;
   let viewer;
   let windowApi;
-  let timeouts;
   let clock;
   let events;
   let errorStub;
@@ -48,12 +47,10 @@ describe('Viewer', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    timeouts = [];
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(handler) {
-      timeouts.push(handler);
-    };
     windowApi = new WindowApi();
+    windowApi.setTimeout = window.setTimeout;
+    windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
       hash: '',
       href: '/test/viewer',
@@ -70,11 +67,12 @@ describe('Viewer', () => {
       documentElement: {style: {}},
       title: 'Awesome doc',
     };
+    windowApi.navigator = window.navigator;
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
     events = {};
-    errorStub = sandbox.stub(dev, 'error');
+    errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
     platform = platformFor(windowApi);
     viewer = new Viewer(windowApi);
@@ -1083,9 +1081,11 @@ describe('Viewer', () => {
     });
 
     it('should return viewer origin if set via handshake', () => {
+      debugger;
       windowApi.parent = {};
       const viewer = new Viewer(windowApi);
       const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        debugger;
         expect(viewerOrigin).to.equal('https://foobar.com');
       });
       viewer.setMessageDeliverer(() => {}, 'https://foobar.com');

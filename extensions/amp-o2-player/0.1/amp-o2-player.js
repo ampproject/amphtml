@@ -47,7 +47,7 @@ class AmpO2Player extends AMP.BaseElement {
         this.element);
     /** @private {string} */
     this.domain_ = 'https://delivery.' +
-      (env != 'stage' ? '' : 'dev().') + 'vidible.tv';
+      (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
     let src = `${this.domain_}/htmlembed/`;
     const queryParams = [];
     if (pid && bcid) {

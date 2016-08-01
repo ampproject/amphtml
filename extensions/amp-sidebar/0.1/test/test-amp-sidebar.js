@@ -49,7 +49,7 @@ describe('amp-sidebar', () => {
       ampSidebar.setAttribute('id', 'sidebar1');
       ampSidebar.setAttribute('layout', 'nodisplay');
       return iframe.addElement(ampSidebar).then(() => {
-        timer = timerFor(iframe.contentWindow);
+        timer = timerFor(iframe.win);
         return {iframe, ampSidebar};
       });
     });

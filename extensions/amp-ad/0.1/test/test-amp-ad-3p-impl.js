@@ -17,6 +17,7 @@
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('amp-ad-3p-impl', tests('amp-ad'));
 
@@ -438,8 +439,9 @@ function tests(name) {
       }
 
       it('should not return false after scrolling, then false for 1s', () => {
-        const clock = sandbox.useFakeTimers();
+        let clock;
         return getGoodAd(ad => {
+          clock = lolex.install(ad.win);
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }).then(ad => {
           // False because we just rendered one.
@@ -452,8 +454,9 @@ function tests(name) {
       });
 
       it('should prefer-viewability-over-views', () => {
-        const clock = sandbox.useFakeTimers();
+        let clock;
         return getGoodAd(ad => {
+          clock = lolex.install(ad.win);
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }, 'prefer-viewability-over-views').then(ad => {
           // False because we just rendered one.

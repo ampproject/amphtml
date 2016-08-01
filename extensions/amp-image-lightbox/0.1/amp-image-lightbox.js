@@ -66,10 +66,14 @@ const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
 export class ImageViewer {
   /**
    * @param {!AmpImageLightbox} lightbox
+   * @param {!Window} win
    */
-  constructor(lightbox) {
+  constructor(lightbox, win) {
     /** @private {!AmpImageLightbox} */
     this.lightbox_ = lightbox;
+
+    /** @const {!Window} */
+    this.win = win;
 
     /** @private {!Element} */
     this.viewer_ = lightbox.element.ownerDocument.createElement('div');
@@ -675,7 +679,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.element.appendChild(this.container_);
 
     /** @private {!ImageViewer} */
-    this.imageViewer_ = new ImageViewer(this);
+    this.imageViewer_ = new ImageViewer(this, this.win);
     this.container_.appendChild(this.imageViewer_.getElement());
 
     /** @private {!Element} */

@@ -303,7 +303,7 @@ export class Viewer {
         resolve(this.win.location.ancestorOrigins[0]);
       } else {
         // Race to resolve with a timer.
-        setTimeout(resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
         /** @private @const {!function(string)|undefined} */
         this.viewerOriginResolver_ = resolve;
       }
