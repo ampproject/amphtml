@@ -64,7 +64,7 @@ Example value: `example.com`
 
 Provides the AMP document's URL. The URL contains the scheme, domain, port and full path. It does not contain the fragment part of the URL.
 
-Example value: `http://example.com:8000/examples.build/analytics.amp.max.html`
+Example value: `http://example.com:8000/examples/analytics.amp.html`
 
 ### canonicalHost
 

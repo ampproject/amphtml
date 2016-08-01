@@ -29,7 +29,6 @@ function clean() {
     'dist.3p',
     'dist.tools',
     'build',
-    'examples.build',
     '.amp-build',
   ]);
 }

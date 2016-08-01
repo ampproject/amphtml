@@ -110,31 +110,31 @@ describe('3p integration.js', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +
         '"height":50,' +
         '"type":"twitter","_context":{"referrer":"http://localhost:8000/' +
-        'examples.build/","canonicalUrl":"http://localhost:8000/' +
-        'examples.build/amps.html","location":{"href":"http://' +
-        'localhost:8000/examples.build/twitter.amp.max.html"},' +
+        'examples/","canonicalUrl":"http://localhost:8000/' +
+        'examples/amps.html","location":{"href":"http://' +
+        'localhost:8000/examples/twitter.amp.html"},' +
         '"mode":{"localDev":true,"development":false,"minified":false}}}';
     const data = parseFragment(unencoded);
     expect(data).to.be.object;
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
-        'http://localhost:8000/examples.build/twitter.amp.max.html');
+        'http://localhost:8000/examples/twitter.amp.html');
   });
 
   it('should parse JSON from fragment encoded (Firefox)', () => {
     const encoded = '#{%22tweetid%22:%22638793490521001985%22,%22width' +
         '%22:390,%22height%22:50,%22initialWindowWidth%22:1290,%22initial' +
         'WindowHeight%22:165,%22type%22:%22twitter%22,%22_context%22:{%22' +
-        'referrer%22:%22http://localhost:8000/examples.build/%22,%22canoni' +
-        'calUrl%22:%22http://localhost:8000/examples.build/amps.html%22,%22' +
-        'location%22:{%22href%22:%22http://localhost:8000/examples.build/t' +
-        'witter.amp.max.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
+        'referrer%22:%22http://localhost:8000/examples/%22,%22canoni' +
+        'calUrl%22:%22http://localhost:8000/examples/amps.html%22,%22' +
+        'location%22:{%22href%22:%22http://localhost:8000/examples/t' +
+        'witter.amp.html%22},%22mode%22:{%22localDev%22:true,%22develop' +
         'ment%22:false,%22minified%22:false}}}';
     const data = parseFragment(encoded);
     expect(data).to.be.object;
     expect(data.tweetid).to.equal('638793490521001985');
     expect(data._context.location.href).to.equal(
-        'http://localhost:8000/examples.build/twitter.amp.max.html');
+        'http://localhost:8000/examples/twitter.amp.html');
   });
 
   it('should be ok with empty fragment', () => {

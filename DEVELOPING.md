@@ -65,7 +65,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
 | `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
-| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
+| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/          |
 | `npm run ava` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
 
@@ -88,13 +88,13 @@ If a test flaked on a pull request you can ask a project owner to restart the te
 
 #### Examples
 
-The content in the `examples` directory can be reached at: http://localhost:8000/examples.build/
+The content in the `examples` directory can be reached at: http://localhost:8000/examples/
 
-For each example there are 3 files:
+For each example there are 3 modes:
 
-- Original name: This points to prod. This file would not reflect your local changes.
-- `.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
+- `/examples/abc.html` points to prod. This file would not reflect your local changes.
+- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
+- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
 
 
 #### Document proxy
@@ -134,8 +134,6 @@ For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) 
                     This is what gets deployed to 3p.ampproject.net.
   docs/           - documentation
   examples/       - example AMP HTML files and corresponding assets
-  examples.build/ - (generated) Same as examples with files pointing to the
-                    local AMP.
   extensions/     - plugins which extend the AMP HTML runtime's core set of tags
   spec/           - The AMP HTML Specification files
   src/            - source code for the AMP runtime
