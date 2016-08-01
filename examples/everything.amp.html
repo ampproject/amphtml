@@ -6,6 +6,7 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <base href="/examples/">
   <style amp-custom>
     body {
       font-family: 'Questrial', Arial;
@@ -59,7 +60,7 @@
       font-family: 'Comic AMP';
       font-style: bold;
       font-weight: 700;
-      src: url(/examples/fonts/ComicAMP.ttf) format('truetype');
+      src: url(fonts/ComicAMP.ttf) format('truetype');
     }
     .comic-amp-font-loaded .comic-amp {
       font-family: 'Comic AMP', serif, sans-serif;
@@ -107,7 +108,7 @@
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async src="/examples/viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
+  <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
 </head>
 <body class="comic-amp-font-loading">
 <div class="logo"></div>
@@ -176,7 +177,7 @@
 
   <h2>Video</h2>
   <amp-video
-      src="/examples/video/The-Audience-Is-Programming.mp4"
+      src="video/The-Audience-Is-Programming.mp4"
       width="358"
       height="204"
       layout="responsive"
