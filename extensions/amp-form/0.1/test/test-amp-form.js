@@ -16,10 +16,10 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {
-    AmpForm,
-    installAmpForm,
-    setReportValiditySupported,
-    onInputInteraction_,
+  AmpForm,
+  installAmpForm,
+  setReportValiditySupported,
+  onInputInteraction_,
 } from '../amp-form';
 import * as sinon from 'sinon';
 import {timer} from '../../../../src/timer';
@@ -546,15 +546,17 @@ describe('amp-form', () => {
         emailInput.setAttribute('type', 'email');
         emailInput.setAttribute('required', '');
         fieldset.appendChild(emailInput);
+        const usernameInput = document.createElement('input');
+        usernameInput.setAttribute('name', 'nickname');
+        usernameInput.setAttribute('required', '');
+        fieldset.appendChild(usernameInput);
         form.appendChild(fieldset);
         sandbox.spy(form, 'checkValidity');
         sandbox.spy(emailInput, 'checkValidity');
         sandbox.spy(fieldset, 'checkValidity');
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
-        const event = {target: emailInput};
-        onInputInteraction_(event);
-
+        onInputInteraction_({target: emailInput});
         expect(form.checkValidity.called).to.be.true;
         expect(emailInput.checkValidity.called).to.be.true;
         expect(fieldset.checkValidity.called).to.be.true;
@@ -562,10 +564,47 @@ describe('amp-form', () => {
         expect(emailInput.className).to.contain('user-invalid');
         expect(fieldset.className).to.contain('user-invalid');
 
+        // No interaction happened with usernameInput, so no user-class should
+        // be added at this point.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+
         emailInput.value = 'cool@bea.ns';
-        onInputInteraction_(event);
-        expect(form.className).to.contain('user-valid');
+        onInputInteraction_({target: emailInput});
         expect(emailInput.className).to.contain('user-valid');
+        expect(form.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Still no interaction.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+        // Both inputs back to invalid.
+        emailInput.value = 'invalid-value';
+        onInputInteraction_({target: emailInput});
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(form.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Still no interaction.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+        // Only email input is invalid now.
+        usernameInput.value = 'coolbeans';
+        onInputInteraction_({target: usernameInput});
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(form.className).to.contain('user-invalid');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Both input are finally valid.
+        emailInput.value = 'cool@bea.ns';
+        onInputInteraction_({target: emailInput});
+        expect(emailInput.className).to.contain('user-valid');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(form.className).to.contain('user-valid');
         expect(fieldset.className).to.contain('user-valid');
       });
     });

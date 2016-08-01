@@ -24,9 +24,9 @@ import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
 import {
-    removeElement,
-    childElementByAttr,
-    ancestorElementsByTag,
+  removeElement,
+  childElementByAttr,
+  ancestorElementsByTag,
 } from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
@@ -74,11 +74,12 @@ export function setReportValiditySupported(isSupported) {
 
 /**
  * Returns whether reportValidity API is supported.
+ * @param {!Document} doc
  * @return {boolean}
  */
-function isReportValiditySupported() {
+function isReportValiditySupported(doc) {
   if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!document.createElement('form').reportValidity;
+    reportValiditySupported = !!doc.createElement('form').reportValidity;
   }
   return reportValiditySupported;
 }
@@ -317,7 +318,7 @@ function onInvalidInputBlur_(event) {
  * @param {!HTMLInputElement} input
  */
 function reportInputValidity(input) {
-  if (isReportValiditySupported()) {
+  if (isReportValiditySupported(input.ownerDocument)) {
     input.reportValidity();
   } else {
     input./*OK*/focus();
@@ -424,7 +425,7 @@ function checkUserValidity(element, propagate = false) {
  */
 export function onInputInteraction_(e) {
   const input = e.target;
-  checkUserValidity(input, /** propagate */ true);
+  checkUserValidity(input, /* propagate */ true);
 }
 
 
