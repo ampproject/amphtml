@@ -16,7 +16,7 @@
 
 import {base64ToByteArray} from '../../../ads/google/a4a/utils';
 import {AmpA4A, utf8FromArrayBuffer} from '../../amp-a4a/0.1/amp-a4a';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 export class AmpAdNetworkFakeImpl extends AmpA4A {
 
@@ -25,6 +25,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
+    user.assert(element.hasAttribute('src'),
+        'Attribute src required for <amp-ad type="fake">: %s', element);
+    user.assert(TextEncoder, '<amp-ad type="fake" requires browser support ' +
+        'for TextEncoder() function.');
   }
 
   /** @override */
