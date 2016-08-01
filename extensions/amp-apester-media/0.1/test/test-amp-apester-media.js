@@ -30,7 +30,6 @@ describe('amp-apester-media', () => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
       media.setAttribute('data-apester-media-id', mediaId);
-      media.setAttribute('width', '600');
       media.setAttribute('height', '390');
       media.setAttribute('alt', 'Testing');
       if (opt_responsive) {
@@ -52,7 +51,6 @@ describe('amp-apester-media', () => {
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
     expect(iframe.src).to.equal('http://stage3-renderer.qmerce.com/interaction/578b4d6d2d9fb72943ce465c');
-    expect(iframe.getAttribute('width')).to.equal('600');
     expect(iframe.getAttribute('height')).to.equal('390');
     //  expect(iframe.getAttribute('title')).to.equal('Apester: Testing');
   }
