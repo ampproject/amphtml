@@ -71,9 +71,9 @@ export class LiveListManager {
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev && (this.win.location.pathname == '/examples' +
-            '.build/live-list-update.amp.max.html' ||
-            this.win.location.pathname == '/examples.build/live-blog.amp' +
-            '.max.html' || this.win.location.pathname == '/examples.build/' +
+            '/live-list-update.amp.max.html' ||
+            this.win.location.pathname == '/examples/live-blog.amp' +
+            '.max.html' || this.win.location.pathname == '/examples/' +
             'live-blog-non-floating-button.amp.max.html')) {
         this.interval_ = 5000;
       }
