@@ -18,11 +18,9 @@ import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 import {Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
-<<<<<<< 5e2eb4aedb96cc6ac5b2ce0246fdfe55c40c1dec
 import {timerFor} from '../../../src/timer';
-=======
->>>>>>> sticky-ad wait for ad to build, use render-start promise
 import {toggle} from '../../../src/style';
+import {waitForRenderStart} from '../../../3p/integration';
 
 
 
@@ -142,22 +140,28 @@ class AmpStickyAd extends AMP.BaseElement {
       // Get Ad promise for ad render-start
       this.adRenderStartPromise_ = this.ad_.implementation_.renderStartPromise;
       if (this.adRenderStartPromise_) {
-        this.adRenderStartPromise_.then(() => {
-          this.boundDisplayAfterAdLoad_();
-        });
+        this.delayAdLoad_();
       } else {
         //add listener for element not attached and not built
-        this.ad_.addEventListener('amp:attached', () => {
-          this.ad_.addEventListener('amp:built', () => {
-            this.adRenderStartPromise_ =
-                this.ad_.implementation_.renderStartPromise;
-            this.adRenderStartPromise_.then(() => {
-              this.boundDisplayAfterAdLoad_();
-            });
-            this.scheduleLayout(this.ad_);
-          });
+        this.ad_.addEventListener('amp:built', () => {
+          this.adRenderStartPromise_ =
+              this.ad_.implementation_.renderStartPromise;
+          this.delayAdLoad_();
+          // schedule Layout again after amp-ad is built.
+          this.scheduleLayout(this.ad_);
         });
       }
+    }
+  }
+
+  delayAdLoad_() {
+    const type = this.ad_.getAttribute('type');
+    if (waitForRenderStart.indexOf(type) < 0) {
+      timer.delay(this.boundDisplayAfterAdLoad_(), 1000);
+    } else {
+      this.adRenderStartPromise_.then(() => {
+        this.boundDisplayAfterAdLoad_();
+      });
     }
   }
 

@@ -190,7 +190,7 @@ const defaultAllowedTypesInCustomFrame = [
 // List of ad networks that will manually call `window.context.renderStart` to
 // emit render-start event when ad actually starts rendering. Please add
 // yourself here if you'd like to do so (which we encourage).
-const waitForRenderStart = [
+export const waitForRenderStart = [
   'doubleclick',
 ];
 
