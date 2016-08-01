@@ -80,6 +80,13 @@ export class LiveListInterface {
    * @return {boolean}
    */
   isEnabled() {}
+
+  /**
+   * Retrieves the highest update time from the live list.
+   *
+   * @return {time}
+   */
+  getUpdateTime() {}
 }
 
 
@@ -767,6 +774,11 @@ export class AmpLiveList extends AMP.BaseElement {
   isElementBelowViewport_(element) {
     return this.viewport_.getLayoutRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
+  }
+
+  /** @override */
+  getUpdateTime() {
+    return this.updateTime_;
   }
 }
 
