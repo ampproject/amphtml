@@ -98,8 +98,9 @@ export class Performance {
         whenDocumentReady(this.win.document)
         .then(() => {
           // Two fold. First, resolve the promise to undefined.
-          // Second, causes a delay until the promise resolves so that
-          // Resources' onDocumentReady event is guaranteed to fire.
+          // Second, causes a delay by introducing another async request
+          // (this `#then` block) so that Resources' onDocumentReady event
+          // is guaranteed to fire.
         });
     // Tick window.onload event.
     loadPromise(win).then(() => {
