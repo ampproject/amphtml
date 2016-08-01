@@ -280,7 +280,7 @@ function reportInputValidity(input) {
  * @param {!Window} win
  */
 function installSubmissionHandlers(win) {
-  onDocumentReady(win.document, (doc) => {
+  onDocumentReady(win.document, doc => {
     toArray(doc.forms).forEach(form => {
       new AmpForm(form);
     });
