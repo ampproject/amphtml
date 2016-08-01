@@ -93,8 +93,8 @@ The content in the `examples` directory can be reached at: http://localhost:8000
 For each example there are 3 modes:
 
 - `/examples/abc.html` points to prod. This file would not reflect your local changes.
-- `/examples/abc.html/max` points to your local unminified AMP. You want to use this during normal dev.
-- `/examples/abc.html/min` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
+- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
+- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
 
 
 #### Document proxy

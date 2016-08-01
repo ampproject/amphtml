@@ -37,7 +37,7 @@ function serve() {
       }));
 
   util.log(util.colors.yellow('Run `gulp build` then go to '
-      + getHost() + '/examples/article.amp.html'
+      + getHost() + '/examples/article.amp.max.html'
   ));
   return server;
 }

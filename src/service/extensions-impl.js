@@ -468,10 +468,10 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
       }
       return `/base/dist/v0/${extensionId}-0.1.max.js`;
     }
-    if (path.indexOf('/max') >= 0) {
+    if (path.indexOf('.max') >= 0) {
       return `http://localhost:8000/dist/v0/${extensionId}-0.1.max.js`;
     }
-    if (path.indexOf('/min') >= 0) {
+    if (path.indexOf('.min') >= 0) {
       return `http://localhost:8000/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;

@@ -475,7 +475,7 @@ describe('Extensions', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl(
-          'examples/ads.amp.html/min', 'amp-ad');
+          'examples/ads.amp.min.html', 'amp-ad');
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
@@ -483,7 +483,7 @@ describe('Extensions', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl(
-          'examples/ads.amp.html/max', 'amp-ad');
+          'examples/ads.amp.max.html', 'amp-ad');
       expect(script).to.equal(
           'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });

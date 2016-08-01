@@ -303,14 +303,14 @@ app.use('/examples/analytics.config.json', function(req, res, next) {
 app.get('/examples/*', function(req, res, next) {
   var filePath = req.path;
   var mode = null;
-  if (filePath.substr(-4) == '/max') {
+  if (filePath.substr(-9) == '.max.html') {
     mode = 'max';
-  } else if (filePath.substr(-4) == '/min') {
+  } else if (filePath.substr(-9) == '.min.html') {
     mode = 'min';
+  } else {
+    return next();
   }
-  if (mode) {
-    filePath = filePath.substr(0, filePath.length - 4);
-  }
+  filePath = filePath.substr(0, filePath.length - 9) + '.html';
   fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
     if (mode) {
       file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
@@ -322,7 +322,7 @@ app.get('/examples/*', function(req, res, next) {
       file = file.replace('/dist/amp.js', '/dist/v0.js');
     }
     res.end(file);
-  }).catch(e => {
+  }).catch(() => {
     next();
   });
 });
