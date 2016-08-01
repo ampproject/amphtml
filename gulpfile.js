@@ -58,6 +58,7 @@ function buildExtensions(options) {
   buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
+  buildExtension('amp-apester-media', '0.1', true, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
