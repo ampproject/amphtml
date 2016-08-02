@@ -142,7 +142,7 @@ export class SignInProtocol {
           'getAccessTokenPassive', {
             origin: this.pubOrigin_,
           }).then(resp => {
-            return /** @type {?string} */ (resp.accessToken);
+            return /** @type {?string} */ (resp);
           }).catch(reason => {
             user.error(TAG, 'Failed to retrieve access token: ', reason);
             return null;
@@ -189,7 +189,7 @@ export class SignInProtocol {
       origin: this.pubOrigin_,
       accessGrant: grant,
     }).then(resp => {
-      const accessToken = resp.accessToken;
+      const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       return accessToken;
     }).catch(reason => {
@@ -222,7 +222,7 @@ export class SignInProtocol {
       origin: this.pubOrigin_,
       url,
     }).then(resp => {
-      const accessToken = resp.accessToken;
+      const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);
       // Return empty dialog result.
       return '';
