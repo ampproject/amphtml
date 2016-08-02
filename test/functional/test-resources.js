@@ -979,7 +979,7 @@ describe('Resources changeSize', () => {
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 
-  describe('attemptChangeSize rules when element is in viewport', () => {
+  describe('attemptChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
 
@@ -994,23 +994,11 @@ describe('Resources changeSize', () => {
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
     });
 
-    it('should NOT change size and calls overflowCallback', () => {
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
+    it('should NOT change size when height is unchanged', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50};
+      resources.scheduleChangeSize_(resource1, 50, 120, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
-    });
-
-    it('should change size when new height/width is lower', () => {
-      resources.scheduleChangeSize_(resource1, 10, 11, false);
-      resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
       expect(resource1.changeSize.callCount).to.equal(0);
       expect(overflowCallbackSpy.callCount).to.equal(0);
     });
@@ -1056,40 +1044,6 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize.callCount).to.equal(1);
       expect(overflowCallbackSpy.callCount).to.equal(1);
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-    });
-
-    it('should change size when slightly above the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 190,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
-      resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-    });
-
-    it('should NOT change size when in the middle of the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 100,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
-      resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
-    });
-
-    it('should NOT change size when below viewport, but decreases', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 50, 120, false);
-      resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
     });
 
     it('should defer when above the viewport and scrolling on', () => {
@@ -1158,6 +1112,27 @@ describe('Resources changeSize', () => {
       expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
       expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('in vp should NOT call overflowCallback if new height smaller', () => {
+      resources.scheduleChangeSize_(resource1, 10, 11, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_.length).to.equal(0);
+      expect(resource1.changeSize.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(0);
+    });
+
+    it('in viewport should NOT change size and calls overflowCallback', () => {
+      resources.scheduleChangeSize_(resource1, 111, 222, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_.length).to.equal(0);
+      expect(resource1.changeSize.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
+      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
+      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
+      expect(resource1.getPendingChangeSize().height).to.equal(111);
+      expect(resource1.getPendingChangeSize().width).to.equal(222);
     });
 
     it('should reset pending change size when rescheduling', () => {
