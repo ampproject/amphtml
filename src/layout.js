@@ -86,6 +86,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
+  'AMP-OOYALA': true,
   'AMP-VIDEO': true,
   'AMP-YOUTUBE': true,
 };
