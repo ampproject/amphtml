@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Animation} from '../../../src/animation';
-import {BaseSlide} from './base-slide';
+import {BaseSlides} from './base-slides';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -34,13 +34,13 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
-export class AmpSlideScroll extends BaseSlide {
+export class AmpSlideScroll extends BaseSlides {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
   /** @override */
-  buildSlide() {
+  buildSlides() {
     /** @private @const {!Window} */
     this.win_ = this.win;
 

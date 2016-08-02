@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {BaseCarousel} from './base-carousel';
 
-export class BaseSlide extends BaseCarousel {
+export class BaseSlides extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
@@ -33,7 +33,7 @@ export class BaseSlide extends BaseCarousel {
     /** @private {number} */
     this.autoplayDelay_ = 5000;
 
-    this.buildSlide();
+    this.buildSlides();
 
     /** @protected {boolean} */
     this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
@@ -70,6 +70,7 @@ export class BaseSlide extends BaseCarousel {
    * Proceeds to the next slide in the desired direction.
    * @param {number} unusedDir -1 or 1
    * @param {boolean} unusedAnimate
+   * @protected
    */
   moveSlide(unusedDir, unusedAnimate) {
     // Subclasses may override.
@@ -123,19 +124,19 @@ export class BaseSlide extends BaseCarousel {
      return;
    }
    this.clearAutoplay();
-   this.autoplayTimeoutId_ = timer.delay(
+   this.autoplayTimeoutId_ = timerFor(this.win).delay(
        this.go.bind(
            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
        this.autoplayDelay_);
  }
 
  /**
-  * Pause the autoplay.
-  * @private
+  * Clear the autoplay timer.
+  * @protected
   */
  clearAutoplay() {
    if (this.autoplayTimeoutId_ !== null) {
-     timer.cancel(this.autoplayTimeoutId_);
+     timerFor(this.win).cancel(this.autoplayTimeoutId_);
      this.autoplayTimeoutId_ = null;
    }
  }

@@ -17,7 +17,7 @@
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {BaseSlide} from './base-slide';
+import {BaseSlides} from './base-slides';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -25,7 +25,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
 
-export class AmpSlides extends BaseSlide {
+export class AmpSlides extends BaseSlides {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -33,7 +33,7 @@ export class AmpSlides extends BaseSlide {
   }
 
   /** @override */
-  buildSlide() {
+  buildSlides() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {

@@ -30,13 +30,13 @@
  * limitations under the License.
  */
 
-import {BaseSlide} from '../base-slide';
+import {BaseSlides} from '../base-slides';
 import * as sinon from 'sinon';
 
-describe('BaseSlide', () => {
+describe('BaseSlides', () => {
 
   let sandbox;
-  let buildSlideSpy;
+  let buildSlidesSpy;
   let onViewportCallbackSpy;
   let hasPrevSpy;
   let hasNextSpy;
@@ -53,21 +53,21 @@ describe('BaseSlide', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    buildSlideSpy = sandbox.spy();
+    buildSlidesSpy = sandbox.spy();
     onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
     hasNextSpy = sandbox.spy();
     goCallbackSpy = sandbox.spy();
-    setupAutoplaySpy = sandbox.spy(BaseSlide.prototype, 'setupAutoplay_');
-    buildButtonsSpy = sandbox.spy(BaseSlide.prototype, 'buildButtons');
-    setupGesturesSpy = sandbox.spy(BaseSlide.prototype, 'setupGestures');
+    setupAutoplaySpy = sandbox.spy(BaseSlides.prototype, 'setupAutoplay_');
+    buildButtonsSpy = sandbox.spy(BaseSlides.prototype, 'buildButtons');
+    setupGesturesSpy = sandbox.spy(BaseSlides.prototype, 'setupGestures');
     setControlsStateSpy =
-        sandbox.spy(BaseSlide.prototype, 'setControlsState');
-    hintControlsSpy = sandbox.spy(BaseSlide.prototype, 'hintControls');
-    autoplaySpy = sandbox.spy(BaseSlide.prototype, 'autoplay_');
-    clearAutoplaySpy = sandbox.spy(BaseSlide.prototype, 'clearAutoplay');
+        sandbox.spy(BaseSlides.prototype, 'setControlsState');
+    hintControlsSpy = sandbox.spy(BaseSlides.prototype, 'hintControls');
+    autoplaySpy = sandbox.spy(BaseSlides.prototype, 'autoplay_');
+    clearAutoplaySpy = sandbox.spy(BaseSlides.prototype, 'clearAutoplay');
     onViewportCallbackSpy =
-        sandbox.spy(BaseSlide.prototype, 'onViewportCallback');
+        sandbox.spy(BaseSlides.prototype, 'onViewportCallback');
   });
 
   afterEach(() => {
@@ -91,11 +91,11 @@ describe('BaseSlide', () => {
   }
 
 
-  class TestCarousel extends BaseSlide {
+  class TestCarousel extends BaseSlides {
 
     /** @override */
-    buildSlide() {
-      buildSlideSpy();
+    buildSlides() {
+      buildSlidesSpy();
     }
 
     /** @override */
