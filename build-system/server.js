@@ -33,6 +33,14 @@ var url = require('url');
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
+app.use('/', function(req, res, next) {
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      // TODO(tdrl): Is there an algorithmic way to get the request port?
+      // req.port didn't do it.
+      req.protocol + '://' + req.hostname + ':8000');
+  next();
+});
+
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
