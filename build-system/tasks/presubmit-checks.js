@@ -397,8 +397,9 @@ var forbiddenTerms = {
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/validator-full.js',  // TODO(powdercloud): remove
+      'validator/validator.js',  // TODO(powdercloud): remove
+      'validator/engine/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
