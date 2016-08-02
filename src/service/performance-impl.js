@@ -15,7 +15,7 @@
  */
 
 import {documentInfoFor} from '../document-info';
-import {onDocumentReady} from '../document-ready';
+import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
@@ -94,15 +94,14 @@ export class Performance {
     this.isMessagingReady_ = false;
 
     /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      onDocumentReady(this.win.document, () => {
-        // We need to add a delay, since this can execute earlier
-        // than the onReady callback registered inside of `Resources`.
-        // Should definitely think of making `getResourcesInViewport` async.
-        timer.delay(resolve);
-      });
-    });
-
+    this.whenReadyToRetrieveResourcesPromise_ =
+        whenDocumentReady(this.win.document)
+        .then(() => {
+          // Two fold. First, resolve the promise to undefined.
+          // Second, causes a delay by introducing another async request
+          // (this `#then` block) so that Resources' onDocumentReady event
+          // is guaranteed to fire.
+        });
     // Tick window.onload event.
     loadPromise(win).then(() => {
       this.tick('ol');
