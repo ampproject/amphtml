@@ -62,10 +62,6 @@ app.use('/pwa', function(req, res, next) {
   });
 });
 
-app.use('/examples', function(req, res) {
-  res.redirect('/examples.build');
-});
-
 app.use('/api/show', function(req, res) {
   res.json({
     showNotification: true
@@ -148,17 +144,7 @@ function proxyToAmpProxy(req, res, minify) {
   });
 }
 
-// Match max/min/none (using \*)
-app.use('/examples.build/live-list.amp.\*html', function(req, res) {
-  res.setHeader('Content-Type', 'text/html');
-  res.statusCode = 200;
-  fs.readFileAsync(process.cwd() +
-      '/examples.build/live-list.amp.max.html').then((file) => {
-        res.end(file);
-  });
-});
-
-var liveListUpdateFile = '/examples.build/live-list-update.amp.max.html';
+var liveListUpdateFile = '/examples/live-list-update.amp.html';
 var liveListCtr = 0;
 var itemCtr = 2;
 var liveListDoc = null;
@@ -285,8 +271,7 @@ function getLiveBlogItem() {
     </amp-live-list></body></html>`;
 }
 
-// Will match live-blog max/min/none
-app.use('/examples.build/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
+app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
   function(req, res, next) {
     if ('amp_latest_update_time' in req.query) {
       res.setHeader('Content-Type', 'text/html');
@@ -310,9 +295,36 @@ app.use('/min/', function(req, res) {
   proxyToAmpProxy(req, res, /* minify */ true);
 });
 
-app.use('/examples.build/analytics.config.json', function (req, res, next) {
+app.use('/examples/analytics.config.json', function(req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();
+});
+
+app.get('/examples/*', function(req, res, next) {
+  var filePath = req.path;
+  var mode = null;
+  if (filePath.substr(-9) == '.max.html') {
+    mode = 'max';
+  } else if (filePath.substr(-9) == '.min.html') {
+    mode = 'min';
+  } else {
+    return next();
+  }
+  filePath = filePath.substr(0, filePath.length - 9) + '.html';
+  fs.readFileAsync(process.cwd() + filePath, 'utf8').then(file => {
+    if (mode) {
+      file = file.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
+      file = file.replace('https://cdn.ampproject.org/v0.max.js', '/dist/amp.js');
+      file = file.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '/dist/v0/');
+    }
+    if (mode == 'min') {
+      file = file.replace(/\.max\.js/g, '.js');
+      file = file.replace('/dist/amp.js', '/dist/v0.js');
+    }
+    res.end(file);
+  }).catch(() => {
+    next();
+  });
 });
 
 exports.app = app;

@@ -23,7 +23,7 @@ import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
-import {onDocumentReady} from '../document-ready';
+import {onDocumentReady, whenDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
@@ -212,9 +212,8 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    onDocumentReady(this.win_.document, () => {
-      this.win_.document.body.style.borderBottom =
-          `${paddingBottom}px solid transparent`;
+    onDocumentReady(this.win_.document, doc => {
+      doc.body.style.borderBottom = `${paddingBottom}px solid transparent`;
     });
   }
 
@@ -906,13 +905,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    onDocumentReady(this.win.document, () => {
-      // Microtask is necessary here to let Safari to recalculate scrollWidth
-      // post DocumentReady signal.
-      timer.delay(() => {
-        this.setup_();
-      }, 0);
-    });
+    // Microtask is necessary here to let Safari to recalculate scrollWidth
+    // post DocumentReady signal.
+    whenDocumentReady(this.win.document).then(() => this.setup_());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
     dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
@@ -1013,12 +1008,11 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   updatePaddingTop(paddingTop) {
-    onDocumentReady(this.win.document, () => {
+    onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
       // Also tried `paddingTop` but it didn't work for `position:absolute`
       // on iOS.
-      this.win.document.body.style.borderTop =
-          `${paddingTop}px solid transparent`;
+      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
     });
   }
 
@@ -1026,9 +1020,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, () => {
-      this.win.document.body.style.borderStyle =
-          lightboxMode ? 'none' : 'solid';
+    onDocumentReady(this.win.document, doc => {
+      doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
     });
   }
 

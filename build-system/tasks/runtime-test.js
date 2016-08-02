@@ -20,6 +20,8 @@ var Karma = require('karma').Server;
 var config = require('../config');
 var karmaConfig = config.karma;
 var extend = require('util')._extend;
+var fs = require('fs');
+var path = require('path');
 
 /**
  * Read in and process the configuration settings for karma
@@ -49,6 +51,18 @@ function getConfig() {
   }
 
   return extend(obj, karmaConfig.default);
+}
+
+function getAdExtensions() {
+  const adNetworks = [];
+  const files = fs.readdirSync('./ads/');
+  for (var i = 0; i < files.length; i++) {
+    if (path.extname(files[i]) == '.js'
+        && files[i][0] != '_' && files[i] != 'ads.extern.js') {
+      adNetworks.push(path.basename(files[i], '.js'));
+    }
+  }
+  return adNetworks;
 }
 
 /**
@@ -90,6 +104,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
+    adExtensions: getAdExtensions(),
   };
 
   if (argv.grep) {

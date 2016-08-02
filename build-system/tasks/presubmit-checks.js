@@ -61,12 +61,14 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/server.js',
-      'validator/index.js',  // NodeJs only.
       'validator/nodejs/index.js',  // NodeJs only.
-      'validator/parse-css.js',
-      'validator/validator-full.js',
-      'validator/validator-in-browser.js',
-      'validator/validator.js',
+      'validator/parse-css.js',  // TODO(powdercloud): remove
+      'validator/validator-full.js',  // TODO(powdercloud): remove
+      'validator/validator-in-browser.js', // TODO(powdercloud): remove
+      'validator/validator.js',  // TODO(powdercloud): remove
+      'validator/engine/parse-css.js',
+      'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
     ]
   },
   // Match `getMode` that is not followed by a "()." and is assigned

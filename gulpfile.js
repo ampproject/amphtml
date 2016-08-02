@@ -186,7 +186,7 @@ function compileCss() {
 }
 
 /**
- * Enables watching for file changes in css, extensions, and examples.
+ * Enables watching for file changes in css, extensions.
  */
 function watch() {
   $$.watch('css/**/*.css', function() {
@@ -198,7 +198,6 @@ function watch() {
   buildExtensions({
     watch: true,
   });
-  buildExamples(true);
   compile(true);
 }
 
@@ -302,7 +301,6 @@ function build() {
   polyfillsForTests();
   buildAlp();
   buildExtensions({bundleOnlyIfListedInFiles: true});
-  buildExamples(false);
   compile();
 }
 
