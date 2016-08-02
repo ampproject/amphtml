@@ -22,13 +22,13 @@ import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
-const VARS = 'vars';
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -222,9 +222,12 @@ export class InstrumentationService {
         visibilityFor(this.win_).then(visibility => {
           visibility.listenOnce(spec, vars => {
             if (spec['selector']) {
-              const el = this.win_.document.getElementById(spec['selector']
-                .slice(1));
-              Object.assign(vars, this.extractAnalyticsVariables_(el));
+              const attr = getDataParamsFromAttributes(
+                this.win_.document.getElementById(spec['selector'].slice(1))
+              );
+              for (const key in attr) {
+                vars[key] = attr[key];
+              }
             }
             callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
           });
@@ -282,24 +285,6 @@ export class InstrumentationService {
   }
 
   /**
-   * @param {!Element} el
-   * @private
-   * @return {!Object<string, string>}
-   */
-  extractAnalyticsVariables_(el) {
-    const dataSet = el.dataset;
-    const analyticsVariables = {};
-    for (const dataKey in dataSet) {
-      if (dataKey.indexOf(VARS) === 0) {
-        let variableName = dataKey.replace(VARS, '');
-        variableName = variableName[0].toLowerCase() + variableName.slice(1);
-        analyticsVariables[variableName] = dataSet[dataKey];
-      }
-    }
-    return analyticsVariables;
-  }
-
-  /**
    * @param {!Function} listener
    * @param {string} selector
    * @private
@@ -312,7 +297,7 @@ export class InstrumentationService {
         listener(
           new AnalyticsEvent(
             AnalyticsEventType.CLICK,
-            this.extractAnalyticsVariables_(el)
+            getDataParamsFromAttributes(el)
           )
         );
       } else {
@@ -323,7 +308,7 @@ export class InstrumentationService {
             listener(
               new AnalyticsEvent(
                 AnalyticsEventType.CLICK,
-                this.extractAnalyticsVariables_(el)
+                getDataParamsFromAttributes(el)
               )
             );
             // Don't fire the event multiple times even if the more than one

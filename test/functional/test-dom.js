@@ -497,10 +497,12 @@ describe('DOM', () => {
       element.setAttribute('attr1', '1');
       element.setAttribute('data-param-hello', '2');
       element.setAttribute('data-param-from-the-other-side', '3');
+      element.setAttribute('data-vars-event-name', 'click');
       const params = dom.getDataParamsFromAttributes(element);
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
       expect(params.attr1).to.be.undefined;
+      expect(params.eventName).to.be.equal('click');
     });
   });
 

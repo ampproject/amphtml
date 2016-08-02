@@ -408,7 +408,9 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
   const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const matches = attr.name.match(/^data-param-(.+)/);
+    const attrName = attr.name;
+    const matches = attrName.match(/^data-param-(.+)/) ||
+      attrName.match(/^data-vars-(.+)/);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
       params[computeParamNameFunc(param)] = attr.value;
