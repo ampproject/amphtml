@@ -538,7 +538,8 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
         } else if (customElement || customTemplate) {
           // This is an extension.
           extensions.loadExtension(customElement || customTemplate);
-          dev().fine(TAG, '- load extension: ', customElement || customTemplate);
+          dev().fine(
+              TAG, '- load extension: ', customElement || customTemplate);
           if (customElement) {
             extensionIds.push(customElement);
           }

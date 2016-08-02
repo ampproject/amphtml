@@ -261,7 +261,8 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.src = this.iframeSrc;
 
     if (!isTracking) {
-      this.intersectionObserver_ = new IntersectionObserver(this.element, iframe);
+      this.intersectionObserver_ = new IntersectionObserver(this.element,
+          iframe);
     }
 
     iframe.onload = () => {

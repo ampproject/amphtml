@@ -19,7 +19,6 @@ import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
-import {timerFor} from '../timer';
 import {viewerFor} from '../viewer';
 
 

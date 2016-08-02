@@ -110,7 +110,8 @@ export function isVisibilitySpecValid(config) {
 
   if (!isPositiveNumber_(ctMin) || !isPositiveNumber_(ctMax) ||
       !isPositiveNumber_(ttMin) || !isPositiveNumber_(ttMax)) {
-    user().error('Timing conditions should be positive integers when specified.');
+    user().error(
+        'Timing conditions should be positive integers when specified.');
     return false;
   }
 

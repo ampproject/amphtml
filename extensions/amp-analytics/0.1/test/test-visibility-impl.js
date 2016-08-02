@@ -15,16 +15,11 @@
  */
 
 import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
 import {
   isPositiveNumber_,
   isValidPercentage_,
   isVisibilitySpecValid,
-  installVisibilityService,
 } from '../visibility-impl';
-import {installResourcesService} from '../../../../src/service/resources-impl';
-import {installViewerService} from '../../../../src/service/viewer-impl';
-import {installViewportService} from '../../../../src/service/viewport-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {visibilityFor} from '../../../../src/visibility';
 import {VisibilityState} from '../../../../src/visibility-state';

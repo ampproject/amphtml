@@ -523,7 +523,8 @@ function createBaseAmpElementProto(win) {
    * @return {number} @this {!Element}
    */
   ElementProto.getPriority = function() {
-    dev().assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
+    dev().assert(
+        this.isUpgraded(), 'Cannot get priority of unupgraded element');
     return this.implementation_.getPriority();
   };
 

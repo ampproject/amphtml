@@ -341,8 +341,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   generateRequests_() {
     const requests = {};
     if (!this.config_ || !this.config_['requests']) {
-      dev().error(this.getName_(), 'No request strings defined. Analytics data ' +
-          'will not be sent from this page.');
+      dev().error(this.getName_(), 'No request strings defined. Analytics ' +
+          'data will not be sent from this page.');
       return;
     }
     for (const k in this.config_['requests']) {

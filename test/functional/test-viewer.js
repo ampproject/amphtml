@@ -1081,11 +1081,9 @@ describe('Viewer', () => {
     });
 
     it('should return viewer origin if set via handshake', () => {
-      debugger;
       windowApi.parent = {};
       const viewer = new Viewer(windowApi);
       const result = viewer.getViewerOrigin().then(viewerOrigin => {
-        debugger;
         expect(viewerOrigin).to.equal('https://foobar.com');
       });
       viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
