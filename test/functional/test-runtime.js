@@ -23,7 +23,6 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
-import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
@@ -56,7 +55,6 @@ describe('runtime', () => {
       history: {},
       navigator: {},
       setTimeout: () => {},
-      location: parseUrl('https://acme.com/document1'),
       Object,
       HTMLElement,
       services: {
