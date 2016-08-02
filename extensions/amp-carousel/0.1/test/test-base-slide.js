@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-import {BaseCarousel} from '../base-carousel';
+/**
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {BaseSlide} from '../base-slide';
 import * as sinon from 'sinon';
 
-describe('BaseCarousel', () => {
+describe('BaseSlide', () => {
 
   let sandbox;
-  let buildCarouselSpy;
-  let updateViewportStateSpy;
+  let buildSlideSpy;
+  let onViewportCallbackSpy;
   let hasPrevSpy;
   let hasNextSpy;
   let goCallbackSpy;
@@ -37,19 +53,21 @@ describe('BaseCarousel', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    buildCarouselSpy = sandbox.spy();
-    updateViewportStateSpy = sandbox.spy();
+    buildSlideSpy = sandbox.spy();
+    onViewportCallbackSpy = sandbox.spy();
     hasPrevSpy = sandbox.spy();
     hasNextSpy = sandbox.spy();
     goCallbackSpy = sandbox.spy();
-    setupAutoplaySpy = sandbox.spy(BaseCarousel.prototype, 'setupAutoplay_');
-    buildButtonsSpy = sandbox.spy(BaseCarousel.prototype, 'buildButtons');
-    setupGesturesSpy = sandbox.spy(BaseCarousel.prototype, 'setupGestures');
+    setupAutoplaySpy = sandbox.spy(BaseSlide.prototype, 'setupAutoplay_');
+    buildButtonsSpy = sandbox.spy(BaseSlide.prototype, 'buildButtons');
+    setupGesturesSpy = sandbox.spy(BaseSlide.prototype, 'setupGestures');
     setControlsStateSpy =
-        sandbox.spy(BaseCarousel.prototype, 'setControlsState');
-    hintControlsSpy = sandbox.spy(BaseCarousel.prototype, 'hintControls');
-    autoplaySpy = sandbox.spy(BaseCarousel.prototype, 'autoplay_');
-    clearAutoplaySpy = sandbox.spy(BaseCarousel.prototype, 'clearAutoplay');
+        sandbox.spy(BaseSlide.prototype, 'setControlsState');
+    hintControlsSpy = sandbox.spy(BaseSlide.prototype, 'hintControls');
+    autoplaySpy = sandbox.spy(BaseSlide.prototype, 'autoplay_');
+    clearAutoplaySpy = sandbox.spy(BaseSlide.prototype, 'clearAutoplay');
+    onViewportCallbackSpy =
+        sandbox.spy(BaseSlide.prototype, 'onViewportCallback');
   });
 
   afterEach(() => {
@@ -73,21 +91,16 @@ describe('BaseCarousel', () => {
   }
 
 
-  class TestCarousel extends BaseCarousel {
+  class TestCarousel extends BaseSlide {
 
     /** @override */
-    buildCarousel() {
-      buildCarouselSpy();
+    buildSlide() {
+      buildSlideSpy();
     }
 
     /** @override */
     isLoopingEligible() {
       return true;
-    }
-
-    /** @override */
-    updateViewportState(inViewport) {
-      updateViewportStateSpy(inViewport);
     }
 
     /** @override */
@@ -155,7 +168,7 @@ describe('BaseCarousel', () => {
     }));
 
     carousel.viewportCallback(true);
-    expect(updateViewportStateSpy).to.have.been.calledWith(true);
+    expect(onViewportCallbackSpy).to.have.been.calledWith(true);
     expect(hintControlsSpy).to.have.been.called;
     expect(autoplaySpy).to.have.been.called;
     expect(clearAutoplaySpy).to.not.have.been.called;
@@ -168,7 +181,7 @@ describe('BaseCarousel', () => {
     }));
 
     carousel.viewportCallback(false);
-    expect(updateViewportStateSpy).to.have.been.calledWith(false);
+    expect(onViewportCallbackSpy).to.have.been.calledWith(false);
     expect(hintControlsSpy).to.not.have.been.called;
     expect(autoplaySpy).to.not.have.been.called;
     expect(clearAutoplaySpy).to.have.been.called;

@@ -25,36 +25,13 @@ export class BaseCarousel extends AMP.BaseElement {
     /** @private {!Element} */
     this.nextButton_;
 
-    /** @private {?number} */
-    this.autoplayTimeoutId_ = null;
-
     /** @const @private {boolean} */
     this.showControls_ = this.element.hasAttribute('controls');
-
-    /** @private {boolean} */
-    this.hasLoop_ = this.element.hasAttribute('loop');
-
-    /** @private {boolean} */
-    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
-
-    /** @private {number} */
-    this.autoplayDelay_ = 5000;
 
     if (this.showControls_) {
       this.element.classList.add('-amp-carousel-has-controls');
     }
-
     this.buildCarousel();
-
-    /** @protected {boolean} */
-    this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
-
-    /** @private {boolean} */
-    this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
-
-    if (this.shouldAutoplay_) {
-      this.setupAutoplay_();
-    }
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
@@ -62,30 +39,19 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   viewportCallback(inViewport) {
-    this.updateViewportState(inViewport);
+    this.onViewportCallback(inViewport);
     if (inViewport) {
       this.hintControls();
-      this.autoplay_();
-    } else {
-      this.clearAutoplay();
     }
   }
 
   /**
-   * Updates the viewport state when there is a viewport callback.
+   * Handles element specific viewport based events.
    * @param {boolean} unusedInViewport.
    * @protected
    */
-  updateViewportState(unusedInViewport) {}
+  onViewportCallback(unusedInViewport) {}
 
-  /**
-   * Checks if a carousel is eligible to loop, regardless of the loop attribute.
-   * @returns {boolean}
-   * @protected
-   */
-  isLoopingEligible() {
-    return false;
-  }
 
   buildButtons() {
     this.prevButton_ = this.element.ownerDocument.createElement('div');
@@ -143,20 +109,16 @@ export class BaseCarousel extends AMP.BaseElement {
    * @param {boolean} opt_autoplay
    */
   go(dir, animate, opt_autoplay = false) {
-    this.goCallback(dir, animate);
-    if (opt_autoplay) {
-      this.autoplay_();
-    } else {
-      this.clearAutoplay();
-    }
+    this.goCallback(dir, animate, opt_autoplay);
   }
 
   /**
    * Proceeds to the next slide in the desired direction.
    * @param {number} unusedDir -1 or 1
    * @param {boolean} unusedAnimate
+   * @param {boolean} opt_autoplay
    */
-  goCallback(unusedDir, unusedAnimate) {
+  goCallback(unusedDir, unusedAnimate, opt_autoplay) {
     // Subclasses may override.
   }
 
@@ -220,55 +182,6 @@ export class BaseCarousel extends AMP.BaseElement {
   interactionPrev() {
     if (!this.prevButton_.classList.contains('amp-disabled')) {
       this.go(/* dir */ -1, /* animate */ true, /* autoplay */ false);
-    }
-  }
-
-  /**
-   * Sets up the `autoplay` configuration.
-   * @private
-   */
-  setupAutoplay_() {
-    const delayValue = Number(this.element.getAttribute('delay'));
-    // If it isn't a number and is not greater than 0 then don't assign
-    // and use the default.
-    if (delayValue > 0) {
-      // Guard against autoplayValue that is lower than 1s to prevent
-      // people from crashing the runtime with providing very low delays.
-      this.autoplayDelay_ = Math.max(1000, delayValue);
-    }
-
-    // By default `autoplay` should also mean that the current carousel slide
-    // is looping. (to be able to advance past the last item)
-    if (!this.hasLoop_) {
-      this.element.setAttribute('loop', '');
-      this.hasLoop_ = true;
-      this.shouldLoop = true;
-    }
-  }
-
-  /**
-   * Starts the autoplay delay if allowed.
-   * @private
-   */
-  autoplay_() {
-    if (!this.shouldAutoplay_) {
-      return;
-    }
-    this.clearAutoplay();
-    this.autoplayTimeoutId_ = timer.delay(
-        this.go.bind(
-            this, /* dir */ 1, /* animate */ true, /* autoplay */ true),
-        this.autoplayDelay_);
-  }
-
-  /**
-   * Pause the autoplay.
-   * @private
-   */
-  clearAutoplay() {
-    if (this.autoplayTimeoutId_ !== null) {
-      timer.cancel(this.autoplayTimeoutId_);
-      this.autoplayTimeoutId_ = null;
     }
   }
 }

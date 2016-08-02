@@ -17,7 +17,7 @@
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
+import {BaseSlide} from './base-slide';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
@@ -25,7 +25,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 
 
-export class AmpSlides extends BaseCarousel {
+export class AmpSlides extends BaseSlide {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -33,7 +33,7 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
-  buildCarousel() {
+  buildSlide() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -74,7 +74,7 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
-  goCallback(dir, animate) {
+  moveSlide(dir, animate) {
     const newIndex = this.nextIndex_(dir);
     // Guard again NaN by checking if greater than or equal to zero
     // since we can't have negative indexes anyways.

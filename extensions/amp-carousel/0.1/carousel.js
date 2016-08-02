@@ -72,7 +72,7 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  updateViewportState(unusedInViewport) {
+  onViewportCallback(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
+import {BaseSlide} from './base-slide';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -34,13 +34,13 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
-export class AmpSlideScroll extends BaseCarousel {
+export class AmpSlideScroll extends BaseSlide {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
   /** @override */
-  buildCarousel() {
+  buildSlide() {
     /** @private @const {!Window} */
     this.win_ = this.win;
 
@@ -199,7 +199,7 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  goCallback(dir, animate) {
+  moveSlide(dir, animate) {
     if (this.slideIndex_ != null) {
       const hasNext = this.hasNext();
       const hasPrev = this.hasPrev();
@@ -224,17 +224,16 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /**
    * Handles scroll on the slides container.
-   * @param {!Event} event Event object.
+   * @param {!Event} unusedEvent Event object.
    * @private
    */
-  scrollHandler_(event) {
+  scrollHandler_(unusedEvent) {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
 
-    if (event.isTrusted) {
-      this.clearAutoplay();
-    }
+    // TODO (sriram): clear autoplay timer on user scroll.
+    //    event.isTarget is set on non-user scrolls as well.
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (!this.hasNativeSnapPoints_) {
