@@ -6,7 +6,6 @@ c
 dist
 dist.3p
 dist.tools
-examples.build
 examples.min
 node_modules
 npm-debug.log

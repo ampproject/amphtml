@@ -309,7 +309,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
     // If a fallback does not exist attempt to collapse the ad.
     if (!this.fallback_) {
-      this.attemptChangeHeight(0, () => this./*OK*/collapse());
+      this.attemptChangeHeight(0).then(() => {
+        this./*OK*/collapse();
+      }, () => {});
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
@@ -349,13 +351,5 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       this.apiHandler_ = null;
     }
     return true;
-  }
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (this.apiHandler_) {
-      this.apiHandler_.overflowCallback(
-        overflown, requestedHeight, requestedWidth);
-    }
   }
 }

@@ -31,6 +31,7 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
+
 describe('AccessService', () => {
 
   let sandbox;
@@ -209,9 +210,11 @@ describe('AccessService', () => {
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
+    service.signIn_.start = sandbox.spy();
 
     service.startInternal_();
     expect(service.buildLoginUrls_.callCount).to.equal(1);
+    expect(service.signIn_.start.callCount).to.equal(1);
     expect(service.runAuthorization_.callCount).to.equal(1);
     expect(service.scheduleView_.callCount).to.equal(1);
     expect(service.scheduleView_.firstCall.args[0]).to.equal(2000);
@@ -319,6 +322,35 @@ describe('AccessService adapter context', () => {
         /* useAuthData */ true).then(url => {
           expect(url).to.equal('?rid=reader1&type=');
         });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, but not enabled', () => {
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, but null', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive', () => null);
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, but null promise', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+        () => Promise.resolve(null));
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=');
+    });
+  });
+
+  it('should resolve URL with ACCESS_TOKEN, enabled, not null', () => {
+    sandbox.stub(service.signIn_, 'getAccessTokenPassive',
+        () => Promise.resolve('access_token'));
+    return context.buildUrl('?at=ACCESS_TOKEN').then(url => {
+      expect(url).to.equal('?at=access_token');
+    });
   });
 });
 
@@ -1170,6 +1202,12 @@ describe('AccessService login', () => {
     serviceMock = sandbox.mock(service);
 
     service.loginUrlMap_[''] = 'https://acme.com/l?rid=R';
+
+    service.viewer_ = {
+      broadcast: () => {},
+      isVisible: () => true,
+      onVisibilityChanged: () => {},
+    };
   });
 
   afterEach(() => {
@@ -1444,6 +1482,41 @@ describe('AccessService login', () => {
     return p1Promise.then(() => 'SUCCESS', () => 'ERROR').then(res => {
       expect(res).to.equal('ERROR');
       expect(service.loginPromise_).to.equal(p3);
+    });
+  });
+
+  it('should request sign-in when configured', () => {
+    service.signIn_.requestSignIn = sandbox.stub();
+    service.signIn_.requestSignIn.returns(Promise.resolve('#signin'));
+    service.openLoginDialog_ = sandbox.stub();
+    service.openLoginDialog_.returns(Promise.resolve('#login'));
+    service.login('');
+    expect(service.signIn_.requestSignIn.callCount).to.equal(1);
+    expect(service.signIn_.requestSignIn.firstCall.args[0])
+        .to.equal('https://acme.com/l?rid=R');
+    expect(service.openLoginDialog_.callCount).to.equal(0);
+  });
+
+  it('should wait for token exchange post-login with success=true', () => {
+    service.signIn_.postLoginResult = sandbox.stub();
+    service.signIn_.postLoginResult.returns(Promise.resolve());
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs('https://acme.com/l?rid=R')
+        .returns(Promise.resolve('#success=true'))
+        .once();
+    return service.login('').then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.signIn_.postLoginResult.callCount).to.equal(1);
+      expect(service.signIn_.postLoginResult.firstCall.args[0]).to.deep.equal({
+        'success': 'true',
+      });
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(viewStub.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
     });
   });
 });

@@ -154,12 +154,19 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width) {
-    this.baseInstance_.attemptChangeSize(height, width, () => {
-      const targetOrigin =
+    const targetOrigin =
           this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+    this.baseInstance_.attemptChangeSize(height, width).then(() => {
       postMessage(
           this.iframe_,
           'embed-size-changed',
+          {requestedHeight: height, requestedWidth: width},
+          targetOrigin,
+          this.is3p_);
+    }, () => {
+      postMessage(
+          this.iframe_,
+          'embed-size-denied',
           {requestedHeight: height, requestedWidth: width},
           targetOrigin,
           this.is3p_);
@@ -193,19 +200,6 @@ export class AmpAdApiHandler {
     // if we aren't currently in view.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
-    }
-  }
-
-  /** @override  */
-  overflowCallback(overflown, requestedHeight, requestedWidth) {
-    if (overflown && this.iframe_) {
-      const targetOrigin = parseUrl(this.iframe_.src).origin;
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight, requestedWidth},
-          targetOrigin,
-          this.is3p_);
     }
   }
 }

@@ -1561,25 +1561,19 @@ describe('CustomElement Overflow Element', () => {
   });
 
   it('should set overflow', () => {
-    const overflowCallbackSpy =
-        sandbox.spy(element.implementation_, 'overflowCallback');
-    element.overflowCallback(true, 117, 113);
+    element.overflowCallback(true);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.have.class('amp-visible');
     expect(overflowElement.onclick).to.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(true, 117, 113);
   });
 
   it('should unset overflow', () => {
-    const overflowCallbackSpy =
-        sandbox.spy(element.implementation_, 'overflowCallback');
     element.getOverflowElement();
     overflowElement.classList.toggle('amp-visible', true);
     element.overflowCallback(false, 117, 113);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.not.have.class('amp-visible');
     expect(overflowElement.onclick).to.not.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(false, 117, 113);
   });
 
   it('should force change size when clicked', () => {

@@ -45,6 +45,5 @@ tags: {  # amp-form
       error_message: "contents"
     }
   }
-  # TODO: update with ampproject.org url when available
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
