@@ -378,6 +378,9 @@ function getUserValidityStateFor(element) {
  * sense approach for when to apply these classes. As the specs gets clearer, we should
  * strive to match it as much as possible.
  *
+ * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
+ *              specs for the :user-valid/:user-inavlid.
+ *
  * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
  * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
  * @returns {boolean} Whether the element is valid or not.
