@@ -62,9 +62,10 @@ def CheckPrereqs():
 
   # Ensure source files are available.
   for f in ['validator-main.protoascii', 'validator.proto',
-            'validator_gen_js.py', 'package.json', 'validator.js',
-            'validator_test.js', 'validator-in-browser.js', 'tokenize-css.js',
-            'parse-css.js', 'parse-srcset.js']:
+            'validator_gen_js.py', 'package.json', 'engine/validator.js',
+            'engine/validator_test.js', 'engine/validator-in-browser.js',
+            'engine/tokenize-css.js', 'engine/parse-css.js',
+            'engine/parse-srcset.js']:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
@@ -267,10 +268,11 @@ def CompileValidatorMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-full.js',
-                'htmlparser-interface.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js',
+                'engine/tokenize-css.js', '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/dom-walker.js', 'engine/htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -341,10 +343,12 @@ def CompileValidatorTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-full.js',
-                'htmlparser-interface.js', 'validator_test.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js',
+                'engine/tokenize-css.js', '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
+                'engine/validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
@@ -359,11 +363,12 @@ def CompileValidatorLightTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
-                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
-                'validator-in-browser.js', 'validator.js', 'validator-light.js',
-                'htmlparser-interface.js', 'dom-walker.js',
-                'validator-light_test.js'],
+      js_files=['engine/htmlparser.js', 'engine/parse-css.js',
+                'engine/parse-srcset.js', 'engine/tokenize-css.js',
+                '%s/validator-generated.js' % out_dir,
+                'engine/validator-in-browser.js', 'engine/validator.js',
+                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
+                'engine/validator-light_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
@@ -377,8 +382,9 @@ def CompileHtmlparserTestMinified(out_dir):
       dots, etc.
   """
   logging.info('entering ...')
-  CompileWithClosure(js_files=['htmlparser.js', 'htmlparser-interface.js',
-                               'htmlparser_test.js'],
+  CompileWithClosure(js_files=['engine/htmlparser.js',
+                               'engine/htmlparser-interface.js',
+                               'engine/htmlparser_test.js'],
                      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
                      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
@@ -393,8 +399,9 @@ def CompileParseCssTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
-                'json-testutil.js', 'parse-css_test.js',
+      js_files=['engine/parse-css.js', 'engine/tokenize-css.js',
+                'engine/css-selectors.js', 'engine/json-testutil.js',
+                'engine/parse-css_test.js',
                 '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_css.ParseCssTest'],
       output_file='%s/parse-css_test_minified.js' % out_dir)
@@ -410,7 +417,8 @@ def CompileParseSrcsetTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['parse-srcset.js', 'json-testutil.js', 'parse-srcset_test.js',
+      js_files=['engine/parse-srcset.js', 'engine/json-testutil.js',
+                'engine/parse-srcset_test.js',
                 '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_srcset.ParseSrcsetTest'],
       output_file='%s/parse-srcset_test_minified.js' % out_dir)
