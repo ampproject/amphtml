@@ -27,7 +27,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
     super(element);
     user.assert(element.hasAttribute('src'),
         'Attribute src required for <amp-ad type="fake">: %s', element);
-    user.assert(TextEncoder, '<amp-ad type="fake" requires browser support ' +
+    user.assert(TextEncoder, '<amp-ad type="fake"> requires browser support ' +
         'for TextEncoder() function.');
   }
 
@@ -41,7 +41,7 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    return '../extensions/amp-ad-network-fake-impl/0.1/data/' +
+    return '/extensions/amp-ad-network-fake-impl/0.1/data/' +
         this.element.getAttribute('src');
   }
 
