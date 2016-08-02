@@ -71,4 +71,9 @@ export class AccessOtherAdapter {
     dev.fine(TAG, 'Ignore pingback');
     return Promise.resolve();
   }
+
+  /** @override */
+  encodeReaderId(readerId) {
+    return readerId;
+  }
 }

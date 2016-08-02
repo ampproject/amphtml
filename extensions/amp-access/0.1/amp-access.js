@@ -144,6 +144,9 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
+    /** @private {?Promise<string>} */
+    this.encodedReaderIdPromise_ = null;
+
     /** @private {?JSONType} */
     this.authResponse_ = null;
 
@@ -342,6 +345,20 @@ export class AccessService {
   }
 
   /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getEncodedReaderId_() {
+    if (!this.encodedReaderIdPromise_) {
+      this.encodedReaderIdPromise_ = this.getReaderId_().then(readerId => {
+        dev.error(TAG, "bernie: readerId=", readerId);
+        return this.adapter_.encodeReaderId(readerId);
+      });
+    }
+    return this.encodedReaderIdPromise_;
+  }
+
+  /**
    * @param {string} url
    * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
    * @return {!Promise<string>}
@@ -371,7 +388,10 @@ export class AccessService {
    * @private
    */
   prepareUrlVars_(useAuthData) {
-    return this.getReaderId_().then(readerId => {
+    dev.error(TAG, 'bernie: in prepareUrlVars_()');
+    return this.getEncodedReaderId_().then(readerId => {
+      dev.error(TAG, "bernie: readerId=", readerId);
+      dev.error(TAG, "bernie: typeof readerId=", typeof readerId);
       const vars = {
         'READER_ID': readerId,
         'ACCESS_READER_ID': readerId,  // A synonym.
@@ -879,6 +899,12 @@ class AccessTypeAdapterDef {
    * @return {!Promise}
    */
   pingback() {}
+
+  /**
+   * @param {string} unusedReaderId
+   * @return {!Promise<string>|string}
+   */
+  encodeReaderId(unusedReaderId) {}
 }
 
 
