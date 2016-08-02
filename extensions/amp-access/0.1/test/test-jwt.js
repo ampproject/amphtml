@@ -86,8 +86,8 @@ describe('JwtHelper', () => {
   });
 
   describe('pemToBinary', () => {
-    const PLAIN_TEXT = ''
-        + 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd'
+    const PLAIN_TEXT =
+        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd'
         + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs'
         + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D'
         + 'o2kQ+X5xK9cipRgEKwIDAQAB';
@@ -257,7 +257,7 @@ describe('JwtHelper', () => {
       xhrMock = sandbox.mock(xhr);
 
       windowApi = {
-        crypto: {subtle: subtle},
+        crypto: {subtle},
         services: {
           'xhr': {obj: xhr},
         },
@@ -304,31 +304,24 @@ describe('JwtHelper', () => {
           .once();
       const key = 'KEY';
       subtleMock.expects('importKey')
-          .withExactArgs(
-            /* format */ 'spki',
-            pemToBinary(PEM),
-            /* algo options */ {
-              name: 'RSASSA-PKCS1-v1_5',
-              hash: {name: 'SHA-256'},
-            },
-            /* extractable */ false,
-            /* uses */ ['verify']
-          )
-          .returns(Promise.resolve(key))
-          .once();
+        .withExactArgs(
+          /* format */ 'spki',
+          pemToBinary(PEM),
+          {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
+          /* extractable */ false,
+          /* uses */ ['verify']
+        )
+        .returns(Promise.resolve(key))
+        .once();
       subtleMock.expects('verify')
-          .withExactArgs(
-            /* options */ {name: 'RSASSA-PKCS1-v1_5'},
-            key,
-            /* sig */ sinon.match(arg => {
-              return true;
-            }),
-            /* verifiable */ sinon.match(arg => {
-              return true;
-            })
-          )
-          .returns(Promise.resolve(true))
-          .once();
+        .withExactArgs(
+          {name: 'RSASSA-PKCS1-v1_5'},
+          key,
+          /* sig */ sinon.match(() => true),
+          /* verifiable */ sinon.match(() => true)
+        )
+        .returns(Promise.resolve(true))
+        .once();
       return helper.decodeAndVerify(TOKEN, PEM_URL).then(tok => {
         expect(tok['name']).to.equal('John Do');
       });
