@@ -1,2 +1,2 @@
 PASS
-feature_tests/manufactured_body.html:32:0 Tag or Text which is only allowed inside the body section found outside of the body section. [DEPRECATION]
+feature_tests/manufactured_body.html:32:0 Tag or Text which is only allowed inside the body section found outside of the body section. This will soon be an error. [DEPRECATION]

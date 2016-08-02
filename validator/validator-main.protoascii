@@ -25,7 +25,7 @@ min_validator_revision_required: 153
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 250
+spec_file_revision: 252
 
 # Validator extensions.
 # =====================
@@ -2635,7 +2635,21 @@ error_formats {
 error_formats {
   code: DEPRECATED_MANUFACTURED_BODY
   format: "Tag or Text which is only allowed inside the body section found "
-          "outside of the body section."
+          "outside of the body section. This will soon be an error."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
+  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
+          "the acceptable reference points: %3."
+}
+error_formats {
+  code: MANDATORY_REFERENCE_POINT_MISSING
+  format: "The mandatory reference point '%1' for '%2' is missing."
+}
+error_formats {
+  code: DUPLICATE_REFERENCE_POINT
+  format: "The reference point '%1' for '%2' must be unique "
+          "but a duplicate was encountered."
 }
 
 
@@ -2717,18 +2731,4 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
   format: "CSS syntax error in tag '%1' - invalid attribute selector."
-}
-error_formats {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
-  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
-          "the acceptable reference points: %3."
-}
-error_formats {
-  code: MANDATORY_REFERENCE_POINT_MISSING
-  format: "The mandatory reference point '%1' for '%2' is missing."
-}
-error_formats {
-  code: DUPLICATE_REFERENCE_POINT
-  format: "The reference point '%1' for '%2' is must be unique "
-          "but a duplicate was encountered."
 }
