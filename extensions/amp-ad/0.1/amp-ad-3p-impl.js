@@ -27,6 +27,12 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
 
+/** @const These tags are valid ad containers */
+const AMP_AD_CONTAINERS = {
+  'AMP-STICKY-AD': true,
+  'AMP-FX-FLYING-CARPET': true,
+};
+
 /**
  * Store loading ads info within window to ensure it can be properly stored
  * across separately compiled binaries that share load throttling.
@@ -93,6 +99,21 @@ export function incrementLoadingAds(win) {
   }, 1000);
   loadingAds[timerId] = 1;
   return timerId;
+}
+
+/**
+ * @param {!Element} el
+ * @param {!Window} win
+ * @return {string|null} a string that contains all containers of the ad.
+ * This is called before creating iframe for this ad.
+ */
+export function getAdContainerList(el) {
+  do {
+    if (AMP_AD_CONTAINERS[el.tagName]) {
+      return el.tagName;
+    }
+    el = el.parentNode;
+  } while (el && el.tagName != 'BODY');
 }
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -235,6 +256,14 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       user().assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
+      /** detect ad containers, add the list to element as a new attribute */
+      if (!this.element.getAttribute('data-amp-container-element')) {
+        const containerList_ = getAdContainerList(this.element);
+        if (containerList_) {
+          this.element.setAttribute('data-amp-container-element',
+              containerList_);
+        }
+      }
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
         if (cid) {
