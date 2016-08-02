@@ -6,9 +6,6 @@
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
-    nav {
-      margin-top: 60px;
-    }
     .broken {
       color: red;
     }
@@ -18,8 +15,10 @@
     /* Included here to make sure it does not render. */
     .fixed {
       position: fixed;
-      top: 0;
+      bottom: 0;
       right: 0;
+      background-color: #eee;
+      opacity: .8;
     }
     .red {
       background-color: red;
@@ -45,8 +44,14 @@
 
 </head>
 <body>
+  <h2>Ad networks in <span class="broken">red color</span> have broken examples, please help to fix.</h2>
   <nav>
-    <!-- Please keep the list in alphabetic order -->
+    <!--
+        When adding new ad network to the list, please
+        1) verify that the ad slot loads ad. Check DEVELOPMENT.md for how to
+           run a local server.
+        2) keep the list in alphabetic order
+    -->
     <a href="#a9">A9</a> |
     <a href="#adblade">Adblade</a> |
     <a href="#adition">ADITION</a> |
@@ -100,12 +105,14 @@
   </nav>
 
   <div class="fixed">
-    <h4>Fixed positioned ad (will not render)</h4>
-    <amp-ad width=300 height=250
+    <amp-ad width=300 height=50
         type="a9"
         data-aax_size="300x250"
         data-aax_pubname="test123"
         data-aax_src="302">
+      <div placeholder>
+        Fixed positioned ad (will not render)
+      </div>
     </amp-ad>
   </div>
 
