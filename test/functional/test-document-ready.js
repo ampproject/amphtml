@@ -62,6 +62,7 @@ describe('documentReady', () => {
     const callback = sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(1);
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
   });
 
   it('should wait to call callback until ready', () => {
@@ -75,6 +76,7 @@ describe('documentReady', () => {
     testDoc.readyState = 'complete';
     eventListeners['readystatechange']();
     expect(callback.callCount).to.equal(1);
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
     expect(eventListeners['readystatechange']).to.equal(undefined);
   });
 
@@ -94,6 +96,7 @@ describe('documentReady', () => {
     testDoc.readyState = 'complete';
     eventListeners['readystatechange']();
     expect(callback.callCount).to.equal(1);
+    expect(callback.getCall(0).args).to.deep.equal([testDoc]);
     expect(eventListeners['readystatechange']).to.equal(undefined);
   });
 
@@ -115,6 +118,7 @@ describe('documentReady', () => {
 
       return timer.promise().then(() => {
         expect(spy.callCount).to.equal(1);
+        expect(spy.getCall(0).args).to.deep.equal([testDoc]);
         expect(spy2.callCount).to.equal(1);
         expect(spy3.callCount).to.equal(1);
       });
@@ -144,6 +148,7 @@ describe('documentReady', () => {
 
         return timer.promise().then(() => {
           expect(callback.callCount).to.equal(1);
+          expect(callback.getCall(0).args).to.deep.equal([testDoc]);
           expect(eventListeners['readystatechange']).to.equal(undefined);
         });
       });

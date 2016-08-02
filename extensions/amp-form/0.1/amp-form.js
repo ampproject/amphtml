@@ -437,8 +437,8 @@ export function onInputInteraction_(e) {
  * @param {!Window} win
  */
 function installSubmissionHandlers(win) {
-  onDocumentReady(win.document, () => {
-    toArray(win.document.forms).forEach(form => {
+  onDocumentReady(win.document, doc => {
+    toArray(doc.forms).forEach(form => {
       new AmpForm(form);
     });
   });
