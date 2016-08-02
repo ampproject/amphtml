@@ -87,30 +87,29 @@ export class JwtHelper {
     if (!this.subtle_) {
       throw new Error('Crypto is not supported on this platform');
     }
-    let decoded;
-    try {
-      decoded = this.decodeInternal_(encodedToken);
-    } catch (e) {
-      return Promise.reject(e);
-    }
-    const alg = decoded.header['alg'];
-    if (!alg || alg != 'RS256') {
-      // TODO(dvoytenko@): Support other RS* algos.
-      return Promise.reject(new Error('Only alg=RS256 is supported'));
-    }
-    return this.loadKey_(keyUrl).then(key => {
-      const sig = convertStringToArrayBuffer(decodeBase64WebSafe(decoded.sig));
-      return this.subtle_.verify(
-        /* options */ {name: 'RSASSA-PKCS1-v1_5'},
-        key,
-        sig,
-        convertStringToArrayBuffer(decoded.verifiable)
-      );
-    }).then(isValid => {
-      if (isValid) {
-        return decoded.payload;
+    const decodedPromise = new Promise(
+        resolve => resolve(this.decodeInternal_(encodedToken)));
+    return decodedPromise.then(decoded => {
+      const alg = decoded.header['alg'];
+      if (!alg || alg != 'RS256') {
+        // TODO(dvoytenko@): Support other RS* algos.
+        throw new Error('Only alg=RS256 is supported');
       }
-      throw new Error('Signature verification failed');
+      return this.loadKey_(keyUrl).then(key => {
+        const sig = convertStringToArrayBuffer(
+            decodeBase64WebSafe(decoded.sig));
+        return this.subtle_.verify(
+          /* options */ {name: 'RSASSA-PKCS1-v1_5'},
+          key,
+          sig,
+          convertStringToArrayBuffer(decoded.verifiable)
+        );
+      }).then(isValid => {
+        if (isValid) {
+          return decoded.payload;
+        }
+        throw new Error('Signature verification failed');
+      });
     });
   }
 
@@ -189,43 +188,15 @@ export function pemToBinary(pem) {
   // TODO(dvoytenko, #4281): Extract with other binary encoding utils (base 64)
   // into a separate module.
   pem = pem.trim();
-  let start = 0;
-  let end = pem.length;
 
   // Remove pem prefix, e.g. "----BEING PUBLIC KEY----".
-  if (pem.charAt(0) == '-') {
-    // Skip the first "---".
-    start = 1;
-    for (; start < pem.length; start++) {
-      if (pem.charAt(start) != '-') {
-        break;
-      }
-    }
-
-    // Skip the second "---".
-    start = pem.indexOf('-', start);
-    for (; start < pem.length; start++) {
-      if (pem.charAt(start) != '-') {
-        break;
-      }
-    }
-  }
+  pem = pem.replace(/\-+BEGIN[^-]*\-+/, '');
 
   // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  if (start != -1) {
-    // This is a classic base64, thus non-footer `-` are not expected.
-    end = pem.indexOf('-', start);
-    if (end == -1) {
-      end = pem.length;
-    }
-  }
-
-  if (start != 0 || end != pem.length) {
-    pem = pem.substring(start, end);
-  }
+  pem = pem.replace(/\-+END[^-]*\-+/, '');
 
   // Remove line breaks.
-  pem = pem.replace(/[\r\n]/g, emptyString).trim();
+  pem = pem.replace(/[\r\n]/g, '').trim();
 
   return convertStringToArrayBuffer(atob(pem));
 }
@@ -244,12 +215,4 @@ function convertStringToArrayBuffer(s) {
     bytes[i] = s.charCodeAt(i);
   }
   return bytes;
-}
-
-
-/**
- * @return {string}
- */
-function emptyString() {
-  return '';
 }
