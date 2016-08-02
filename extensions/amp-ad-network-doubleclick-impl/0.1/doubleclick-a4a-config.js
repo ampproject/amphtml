@@ -39,7 +39,9 @@ const DOUBLECLICK_A4A_EXPERIMENT_BRANCHES = {
  * @returns {boolean}
  */
 export function doubleclickIsA4AEnabled(win, element) {
-  return googleAdsIsA4AEnabled(
-      win, element, DOUBLECLICK_A4A_EXPERIMENT_ID,
-      DOUBLECLICK_A4A_EXPERIMENT_BRANCHES);
+  // Ensure not within remote.html iframe.
+  return !win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
+      googleAdsIsA4AEnabled(
+        win, element, DOUBLECLICK_A4A_EXPERIMENT_ID,
+        DOUBLECLICK_A4A_EXPERIMENT_BRANCHES);
 }

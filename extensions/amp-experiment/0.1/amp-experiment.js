@@ -17,6 +17,7 @@
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {Layout} from '../../../src/layout';
 import {waitForBodyPromise} from '../../../src/dom';
 import {allocateVariant} from './variant';
 import {getService} from '../../../src/service';
@@ -28,8 +29,8 @@ const ATTR_PREFIX = 'amp-x-';
 export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
   }
 
   /** @override */

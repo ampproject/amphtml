@@ -44,8 +44,7 @@ tags: {  # amp-brid-player
       error_message: "contents"
     }
   }
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
 }
 tags: {  # <amp-brid-player>
   tag_name: "AMP-BRID-PLAYER"
@@ -72,8 +71,7 @@ tags: {  # <amp-brid-player>
     value_regex: "[0-9]+"
   }
   attr_lists: "extended-amp-global"
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brid-player.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

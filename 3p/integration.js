@@ -23,67 +23,72 @@
  */
 
 import './polyfills';
-import {installEmbedStateListener} from './environment';
+import {installEmbedStateListener, manageWin} from './environment';
+import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
+import {endsWith} from '../src/string';
+import {parseUrl, getSourceUrl} from '../src/url';
+import {user} from '../src/log';
+
+// 3P - please keep in alphabetic order
+import {facebook} from './facebook';
+import {twitter} from './twitter';
+
+// 3P Ad Networks - please keep in alphabetic order
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
-import {adition} from '../ads/adition';
 import {adform} from '../ads/adform';
+import {adgeneration} from '../ads/adgeneration';
+import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adspirit} from '../ads/adspirit';
+import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
-import {plista} from '../ads/plista';
-import {criteo} from '../ads/criteo';
-import {doubleclick} from '../ads/google/doubleclick';
-import {dotandads} from '../ads/dotandads';
-import {endsWith} from '../src/string';
-import {facebook} from './facebook';
-import {flite} from '../ads/flite';
-import {nativo} from '../ads/nativo';
-import {mantisDisplay, mantisRecommend} from '../ads/mantis';
-import {improvedigital} from '../ads/improvedigital';
-import {manageWin} from './environment';
-import {mediaimpact} from '../ads/mediaimpact';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
-import {twitter} from './twitter';
-import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, nextTick, register, run} from './3p';
-import {parseUrl, getSourceUrl} from '../src/url';
 import {appnexus} from '../ads/appnexus';
-import {taboola} from '../ads/taboola';
-import {smartadserver} from '../ads/smartadserver';
-import {widespace} from '../ads/widespace';
-import {sovrn} from '../ads/sovrn';
-import {sortable} from '../ads/sortable';
-import {revcontent} from '../ads/revcontent';
+import {chargeads} from '../ads/chargeads';
+import {colombia} from '../ads/colombia';
+import {criteo} from '../ads/criteo';
+import {dotandads} from '../ads/dotandads';
+import {doubleclick} from '../ads/google/doubleclick';
+import {eplanning} from '../ads/eplanning';
+import {flite} from '../ads/flite';
+import {genieessp} from '../ads/genieessp';
+import {gmossp} from '../ads/gmossp';
+import {imobile} from '../ads/imobile';
+import {improvedigital} from '../ads/improvedigital';
+import {kargo} from '../ads/kargo';
+import {mads} from '../ads/mads';
+import {mantisDisplay, mantisRecommend} from '../ads/mantis';
+import {mediaimpact} from '../ads/mediaimpact';
+import {microad} from '../ads/microad';
+import {nativo} from '../ads/nativo';
+import {nend} from '../ads/nend';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
-import {triplelift} from '../ads/triplelift';
-import {teads} from '../ads/teads';
-import {rubicon} from '../ads/rubicon';
-import {imobile} from '../ads/imobile';
-import {webediads} from '../ads/webediads';
+import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
-import {yieldbot} from '../ads/yieldbot';
-import {user} from '../src/log';
-import {gmossp} from '../ads/gmossp';
-import {weboramaDisplay} from '../ads/weborama';
-import {adstir} from '../ads/adstir';
-import {colombia} from '../ads/colombia';
-import {sharethrough} from '../ads/sharethrough';
-import {eplanning} from '../ads/eplanning';
-import {microad} from '../ads/microad';
-import {yahoojp} from '../ads/yahoojp';
-import {chargeads} from '../ads/chargeads';
-import {nend} from '../ads/nend';
-import {adgeneration} from '../ads/adgeneration';
-import {genieessp} from '../ads/genieessp';
-import {kargo} from '../ads/kargo';
 import {pulsepoint} from '../ads/pulsepoint';
+import {revcontent} from '../ads/revcontent';
+import {rubicon} from '../ads/rubicon';
+import {sharethrough} from '../ads/sharethrough';
+import {smartadserver} from '../ads/smartadserver';
+import {sortable} from '../ads/sortable';
+import {sovrn} from '../ads/sovrn';
+import {taboola} from '../ads/taboola';
+import {teads} from '../ads/teads';
+import {triplelift} from '../ads/triplelift';
+import {webediads} from '../ads/webediads';
+import {weboramaDisplay} from '../ads/weborama';
+import {widespace} from '../ads/widespace';
+import {yahoojp} from '../ads/yahoojp';
+import {yieldbot} from '../ads/yieldbot';
+import {yieldmo} from '../ads/yieldmo';
+import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
 /**
@@ -126,6 +131,7 @@ register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('kargo', kargo);
+register('mads', mads);
 register('mantis-display', mantisDisplay);
 register('mantis-recommend', mantisRecommend);
 register('mediaimpact', mediaimpact);
@@ -154,6 +160,7 @@ register('yahoojp', yahoojp);
 register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
+register('yieldone', yieldone);
 
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
@@ -279,15 +286,12 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
+    window.context.renderStart = triggerRenderStart;
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
       // generic solution is available.
       window.context.updateDimensions = triggerDimensions;
-    }
-
-    if (waitForRenderStart.indexOf(data.type) != -1) {
-      window.context.renderStart = triggerRenderStart;
     }
 
     // This only actually works for ads.

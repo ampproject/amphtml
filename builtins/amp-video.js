@@ -52,7 +52,7 @@ export function installVideo(win) {
 
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
-      this.propagateAttributes(['poster'], this.video_);
+      this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
     }
@@ -68,7 +68,7 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'controls', 'autoplay', 'muted', 'loop'],
+          ['src', 'autoplay', 'muted', 'loop'],
           this.video_);
 
       if (this.element.hasAttribute('preload')) {

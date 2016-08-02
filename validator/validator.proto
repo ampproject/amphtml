@@ -235,14 +235,50 @@ message ChildTagSpec {
   repeated string child_tag_name_oneof = 3;
 }
 
+// TagSpecs and reference points.
+//
+// Any TagSpec may define a list of reference points via the
+// TagSpec::reference_points field. These reference points specify how
+// DOM elements that are children of this parent tag fulfill particular
+// functionality. For instance, a widget (implemented as an AMP tag) may
+// require a login reference point. Any valid AMP tag would be allowed,
+// whether it's a clickable DIV or an AMP-IMG or a BUTTON, so long as
+// it *also* conforms to the reference point specification. This
+// specification is a TagSpec which does not define a name (the
+// name is set to the special value '$REFERENCE_POINT'), but rather
+// identifies the reference point with AttrSpec requirements. For instance,
+// the login reference point may require that there be a login attribute,
+// or some end-point attribute with a URL, or similar.
+// Therefore, for any child tags of a tag that defines reference points,
+// they are first matched against these reference points, and only
+// then are they validated as regular tags against the TagSpecs that are
+// not reference points while their reference point attributes are skipped.
+// The complexity of this mechanism is unfortunate but reduces the markup
+// required and makes CSS styling more convenient. Please see
+// the amp-live-list specification for an example.
+message ReferencePoint {
+  // A tag spec identified by its TagSpec::spec_name which specifies how
+  // a specific functionality for the parent tag is assigned.
+  optional string tag_spec_name = 1;
+  // At least one of the child tags of the parent defining this
+  // reference point must match it.
+  optional bool mandatory = 2;
+  // At most one of the child tags of the parent defining this
+  // reference point must match it.
+  optional bool unique = 3;
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 20
+// NEXT AVAILABLE TAG: 21
 message TagSpec {
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
+  // Note: "$REFERENCE_POINT" is a special tag_name value.
+  //       Reference points are partial tag specs which don't have a defined
+  //       tag_name.
   optional string tag_name = 1;
 
   // If provided, the spec_name must be unique within the validator
@@ -301,6 +337,11 @@ message TagSpec {
   // of this tag in the document.
   optional ChildTagSpec child_tags = 19;
 
+  // The reference_points defined by this TagSpec instance determine how
+  // specific child tags are identified. Please see the comment for the
+  // ReferencePoint message.
+  repeated ReferencePoint reference_points = 20;
+
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string spec_url = 10;
@@ -311,7 +352,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 11
+// NEXT AVAILABLE TAG: 13
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -322,6 +363,13 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
+  // If we encounter a manufactured body tag, this flag determines if
+  // it is treated as an error or a warning.
+  // TODO(gregable): Eventually change this to true and remove the code
+  // for it, making the error permanent.
+  optional bool manufactured_body_tag_is_error = 11 [default = false];
+  // Spec URL for information about manufactured body tags.
+  optional string manufactured_body_spec_url = 12;
 
   repeated ErrorFormat error_formats = 9;
 
@@ -390,7 +438,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 64
+  // NEXT AVAILABLE TAG: 69
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -436,6 +484,11 @@ message ValidationError {
     INCORRECT_NUM_CHILD_TAGS = 56;
     DISALLOWED_CHILD_TAG_NAME = 57;
     DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
+    DISALLOWED_MANUFACTURED_BODY = 64;
+    DEPRECATED_MANUFACTURED_BODY = 65;
+    CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
+    MANDATORY_REFERENCE_POINT_MISSING = 67;
+    DUPLICATE_REFERENCE_POINT = 68;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;

@@ -52,7 +52,7 @@ export class LiveListManager {
     /** @private @const {string} */
     this.url_ = this.win.location.href;
 
-    /** @private {number} */
+    /** @private {time} */
     this.latestUpdateTime_ = 0;
 
     /** @private @const {function(): Promise} */
@@ -64,12 +64,16 @@ export class LiveListManager {
       // then make sure to stop polling if viewer is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
 
+      const initialUpdateTimes = Object.keys(this.liveLists_)
+          .map(key => this.liveLists_[key].getUpdateTime());
+      this.latestUpdateTime_ = Math.max.apply(Math, initialUpdateTimes);
+
       // For testing purposes only, we speed up the interval of the update.
       // This should NEVER be allowed in production.
       if (getMode().localDev && (this.win.location.pathname == '/examples' +
-            '.build/live-list-update.amp.max.html' ||
-            this.win.location.pathname == '/examples.build/live-blog.amp' +
-            '.max.html' || this.win.location.pathname == '/examples.build/' +
+            '/live-list-update.amp.max.html' ||
+            this.win.location.pathname == '/examples/live-blog.amp' +
+            '.max.html' || this.win.location.pathname == '/examples/' +
             'live-blog-non-floating-button.amp.max.html')) {
         this.interval_ = 5000;
       }

@@ -61,12 +61,14 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/server.js',
-      'validator/index.js',  // NodeJs only.
       'validator/nodejs/index.js',  // NodeJs only.
-      'validator/parse-css.js',
-      'validator/validator-full.js',
-      'validator/validator-in-browser.js',
-      'validator/validator.js',
+      'validator/parse-css.js',  // TODO(powdercloud): remove
+      'validator/validator-full.js',  // TODO(powdercloud): remove
+      'validator/validator-in-browser.js', // TODO(powdercloud): remove
+      'validator/validator.js',  // TODO(powdercloud): remove
+      'validator/engine/parse-css.js',
+      'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
     ]
   },
   // Match `getMode` that is not followed by a "()." and is assigned
@@ -232,6 +234,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
+      'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive
@@ -367,21 +370,6 @@ var forbiddenTerms = {
       'dist.3p/current/integration.js',
     ],
   },
-  // TODO: (erwinm) rewrite the destructure and spread warnings as
-  // eslint rules (takes more time than this quick regex fix).
-  // No Array destructuring allowed since the closure output is awful and
-  // there is no loose mode.
-  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]) *=': es6polyfill,
-  // No spread (eg. test(...args) allowed since we dont ship with Array
-  // polyfills except `arguments` spread as babel does not polyfill
-  // it since it can assume that it can `slice` w/o the use of helpers.
-  '\\.\\.\\.(?!arguments\\))[_$A-Za-z0-9]*(?:\\)|])': {
-    message: es6polyfill,
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-    ],
-  },
-
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
@@ -510,6 +498,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.scrollTo\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  '\\.scheduleUnlayout\\(': bannedTermsHelpString,
   'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
@@ -536,7 +525,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
 };
 
 // Terms that must appear in a source file.

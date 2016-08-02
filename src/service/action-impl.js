@@ -439,8 +439,8 @@ function assertActionForParser(s, context, condition, opt_message) {
 /**
  * @param {string} s
  * @param {!Element} context
- * @param {!{type: string, value: *}} tok
- * @param {string} type
+ * @param {!{type: TokenType, value: *}} tok
+ * @param {TokenType} type
  * @param {*=} opt_value
  * @return {!{type: string, value: *}}
  * @private

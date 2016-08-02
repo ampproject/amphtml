@@ -86,7 +86,7 @@ export class AmpList extends AMP.BaseElement {
       const scrollHeight = this.container_./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight);
+        this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
   }

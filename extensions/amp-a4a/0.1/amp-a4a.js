@@ -198,14 +198,14 @@ export class AmpA4A extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if this element is the child of an amp-ad element.  For use by
+   * Returns true if this element was loaded from an amp-ad element.  For use by
    * network-specific implementations that don't want to allow themselves to be
    * embedded directly into a page.
    * @return {boolean}
    */
-  isInAmpAdTag() {
-    return !!this.element.parentElement &&
-        this.element.parentElement.tagName == 'AMP-AD';
+  isAmpAdElement() {
+    return this.element.tagName == 'AMP-AD' ||
+        this.element.tagName == 'AMP-EMBED';
   }
 
   /**
@@ -483,8 +483,7 @@ export class AmpA4A extends AMP.BaseElement {
       mode: 'cors',
       method: 'GET',
       credentials: 'include',
-      // TODO(kjwright):  Add requireAmpResponseSourceOrigin once supported
-      // server-side
+      requireAmpResponseSourceOrigin: true,
     };
     return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
@@ -554,7 +553,7 @@ export class AmpA4A extends AMP.BaseElement {
         // will run efficiently.
         this.renderViaIframe_();
         this.rendered_ = true;
-        return Promise.resolve(true);
+        return true;
       } else {
         try {
           // Do extraction processing on CSS and body before creating the
@@ -603,12 +602,12 @@ export class AmpA4A extends AMP.BaseElement {
             this.rendered_ = true;
             this.onAmpCreativeShadowDomRender();
           });
-          return Promise.resolve(true);
+          return true;
         } catch (e) {
           // If we fail on any of the steps of Shadow DOM construction, just
           // render in iframe.
           // TODO: report!
-          return Promise.resolve(false);
+          return false;
         }
       }
     });

@@ -29,14 +29,8 @@ var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
   fix: false,
+  rulePaths: ['build-system/eslint-rules/'],
   plugins: ['eslint-plugin-google-camelcase'],
-  "ecmaFeatures": {
-    "modules": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false,
-    "destructuring": false
-  },
 };
 
 var watcher = lazypipe().pipe(watch, config.lintGlobs);

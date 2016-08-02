@@ -186,6 +186,8 @@ class TagNameStack {
           if (HeadElements.hasOwnProperty(tagName)) {
             this.startTag('HEAD', []);
           } else {
+            if (this.handler_.markManufacturedBody)
+              this.handler_.markManufacturedBody();
             this.startTag('BODY', []);
           }
         }
@@ -193,11 +195,17 @@ class TagNameStack {
       case TagRegion.IN_HEAD:
         if (!HeadElements.hasOwnProperty(tagName)) {
           this.endTag('HEAD');
-          if (tagName !== 'BODY') this.startTag('BODY', []);
+          if (tagName !== 'BODY') {
+            if (this.handler_.markManufacturedBody)
+              this.handler_.markManufacturedBody();
+            this.startTag('BODY', []);
+          }
         }
         break;
       case TagRegion.PRE_BODY:
         if (tagName !== 'BODY') {
+          if (this.handler_.markManufacturedBody)
+            this.handler_.markManufacturedBody();
           this.startTag('BODY', []);
         } else {
           this.region_ = TagRegion.IN_BODY;
@@ -235,10 +243,14 @@ class TagNameStack {
       switch (this.region_) {
         case TagRegion.PRE_HEAD:
         case TagRegion.PRE_BODY:
+          if (this.handler_.markManufacturedBody)
+            this.handler_.markManufacturedBody();
           this.startTag('BODY', []);
           break;
         case TagRegion.IN_HEAD:
           this.endTag('HEAD');
+          if (this.handler_.markManufacturedBody)
+            this.handler_.markManufacturedBody();
           this.startTag('BODY', []);
           break;
         default:
