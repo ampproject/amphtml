@@ -94,6 +94,7 @@ describe('amp-app-banner', () => {
       }
 
       const banner = iframe.doc.createElement('amp-app-banner');
+      banner.setAttribute('layout', 'nodisplay');
       if (!config.noOpenLink) {
         const openLink = iframe.doc.createElement('a');
         openLink.setAttribute('open-link', '');
@@ -123,6 +124,8 @@ describe('amp-app-banner', () => {
       expect(AbstractAppBanner.prototype.addDismissButton_.called).to.be.true;
       expect(AbstractAppBanner.prototype.updateViewportPadding_.called)
           .to.be.true;
+      expect(banner.style.display).to.be.equal('');
+      expect(banner.style.visibility).to.be.equal('');
     });
   }
 
@@ -132,6 +135,8 @@ describe('amp-app-banner', () => {
     });
     return getAppBanner().then(banner => {
       expect(banner.parentElement).to.be.null;
+      expect(banner.style.display).to.be.equal('');
+      expect(banner.style.visibility).to.be.equal('hidden');
     });
   }
 
@@ -234,15 +239,20 @@ describe('amp-app-banner', () => {
       sandbox.stub(platform, 'isChrome', () => isChrome);
     });
 
-    it('should preconnect to play store', () => {
-      return getAppBanner().then(banner => {
+    it('should preconnect to play store and preload manifest', () => {
+      return getAppBanner({manifest}).then(banner => {
         const impl = banner.implementation_;
         sandbox.stub(impl.preconnect, 'url');
+        sandbox.stub(impl.preconnect, 'preload');
         impl.preconnectCallback(true);
         expect(impl.preconnect.url.called).to.be.true;
         expect(impl.preconnect.url.callCount).to.equal(1);
         expect(impl.preconnect.url.calledWith('https://play.google.com'))
             .to.be.true;
+        expect(impl.preconnect.preload.called).to.be.true;
+        expect(impl.preconnect.preload.callCount).to.equal(1);
+        expect(impl.preconnect.preload.calledWith(
+            'https://example.com/manifest.json')).to.be.true;
       });
     });
 

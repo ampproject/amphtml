@@ -18,8 +18,6 @@ import {Layout} from '../../../src/layout';
 import {user, dev, rethrowAsync} from '../../../src/log';
 import {platform} from '../../../src/platform';
 import {viewerFor} from '../../../src/viewer';
-import {viewportFor} from '../../../src/viewport';
-import {vsyncFor} from '../../../src/vsync';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoFor} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
@@ -29,7 +27,7 @@ import {removeElement, openWindowDialog} from '../../../src/dom';
 import {storageFor} from '../../../src/storage';
 import {timer} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
-
+import {setStyles} from '../../../src/style';
 
 const TAG = 'amp-app-banner';
 
@@ -41,7 +39,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.NODISPLAY;
   }
 
   /** @protected */
@@ -55,6 +53,14 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @private */
   openLinkClicked_(openInAppUrl, installAppUrl) {
+    // This redirect-after-timeout workaround will trigger if the user has not
+    // been already navigated away to the app itself. This will only trigger
+    // if the user doesn't have the app installed and will redirect the user
+    // to the app store to install the app.
+    // The 1500ms delay is very important, any smaller timeouts and Safari
+    // iOS would execute the redirect without allowing the user to confirm
+    // navigation to the app. That would cause the redirect to always happen
+    // regardless if the user have the app installed or not.
     timer.delay(() => {
       this.redirectTopLocation_(installAppUrl);
     }, 1500);
@@ -87,12 +93,12 @@ export class AbstractAppBanner extends AMP.BaseElement {
    * @protected
    */
   onDismissButtonClick_() {
-    vsyncFor(this.win).run({
+    this.getVsync().run({
       measure: null,
       mutate: handleDismiss,
     }, {
       element: this.element,
-      viewport: viewportFor(this.win),
+      viewport: this.getViewport(),
       storagePromise: storageFor(this.win),
       storageKey: this.getStorageKey_(),
     });
@@ -121,30 +127,34 @@ export class AbstractAppBanner extends AMP.BaseElement {
       if (isDismissed) {
         this.hide_();
       } else {
+        setStyles(this.element, {
+          visibility: '',
+        });
         this.addDismissButton_();
         this.updateViewportPadding_();
       }
     });
   }
+
   /** @protected */
   hide_() {
-    return vsyncFor(this.win).runPromise({
+    return this.getVsync().runPromise({
       measure: null,
       mutate: hideBanner,
     }, {
       element: this.element,
-      viewport: viewportFor(this.win),
+      viewport: this.getViewport(),
     });
   }
 
   /** @protected */
   updateViewportPadding_() {
-    vsyncFor(this.win).run({
+    this.getVsync().run({
       measure: measureBanner,
       mutate: updateViewportPadding,
     }, {
       element: this.element,
-      viewport: viewportFor(this.win),
+      viewport: this.getViewport(),
     });
   }
 }
@@ -175,7 +185,7 @@ export class AmpAppBanner extends AbstractAppBanner {
     /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      this.element.classList.add('experiment-disabled');
+      this.element.classList.add('-amp-experiment-disabled');
       user.warn(TAG, `Experiment ${TAG} disabled`);
       return Promise.resolve();
     }
@@ -198,6 +208,12 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
   /** @override */
   buildCallback() {
+    // To allow layout to be scheduled.
+    setStyles(this.element, {
+      display: '',
+      visibility: 'hidden',
+    });
+
     // We want to fallback to browser builtin mechanism when possible.
     const viewer = viewerFor(this.win);
     /** @private @const {boolean} */
@@ -266,10 +282,19 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   /** @override */
   preconnectCallback(onLayout) {
     this.preconnect.url('https://play.google.com', onLayout);
+    if (this.manifestHref_) {
+      this.preconnect.preload(this.manifestHref_);
+    }
   }
 
   /** @override */
   buildCallback() {
+    // To allow layout to be scheduled.
+    setStyles(this.element, {
+      display: '',
+      visibility: 'hidden',
+    });
+
     const viewer = viewerFor(this.win);
     /** @private @const {?Element} */
     this.manifestLink_ = this.win.document.head.querySelector(
