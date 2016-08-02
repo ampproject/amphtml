@@ -29,7 +29,6 @@ import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
 import {visibilityFor} from '../../../../src/visibility';
 import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
-import * as lolex from 'lolex';
 
 
 adopt(window);
@@ -44,7 +43,6 @@ describe('Visibility (tag: amp-analytics)', () => {
   let callbackStub;
   let win;
   let clock;
-  let iframeClock;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -62,37 +60,19 @@ describe('Visibility (tag: amp-analytics)', () => {
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
-    return createIframePromise().then(iframe => {
-      iframeClock = lolex.install(iframe.win);
-      installViewerService(iframe.win);
-      installViewportService(iframe.win);
-      installResourcesService(iframe.win);
-      installVisibilityService(iframe.win);
-
-      return visibilityFor(iframe.win).then(v => {
-        visibility = v;
-        sandbox.stub(visibility.resourcesService_,
-            'getResourceForElement').returns({
-              element: {getIntersectionChangeEntry: getIntersectionStub},
-              getId: getIdStub,
-              isLayoutPending: () => false});
-      });
+    return visibilityFor(window).then(v => {
+      visibility = v;
+      sandbox.stub(visibility.resourcesService_,
+        'getResourceForElement').returns({
+          element: {getIntersectionChangeEntry: getIntersectionStub},
+          getId: getIdStub,
+          isLayoutPending: () => false});
     });
   });
 
   afterEach(() => {
-    visibility = null;
-    getIntersectionStub = null;
-    callbackStub = null;;
     sandbox.restore();
   });
-
-  // Necessary, since we've muddled our test runner's code into an iframe's
-  // separate context.
-  function tick(time) {
-    iframeClock.tick(time);
-    clock.tick(time);
-  }
 
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
     boundingClientRect = layoutRectLtwh.apply(win, boundingClientRect);
@@ -108,7 +88,7 @@ describe('Visibility (tag: amp-analytics)', () => {
     getIntersectionStub.returns(intersectionChange);
     config['selector'] = '#abc';
     visibility.listenOnce(config, callbackStub);
-    tick(20);
+    clock.tick(20);
     expect(callbackStub.callCount).to.equal(expectedCalls);
     if (opt_expectedVars && expectedCalls > 0) {
       for (let c = 0; c < opt_expectedVars.length; c++) {
@@ -163,10 +143,10 @@ describe('Visibility (tag: amp-analytics)', () => {
   it('fires with just totalTimeMin condition', () => {
     listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
 
-    tick(999);
+    clock.tick(999);
     verifyChange(INTERSECTION_0P, 0);
 
-    tick(1);
+    clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       totalVisibleTime: '1000',
@@ -176,10 +156,10 @@ describe('Visibility (tag: amp-analytics)', () => {
   it('fires with just continuousTimeMin condition', () => {
     listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
 
-    tick(999);
+    clock.tick(999);
     verifyChange(INTERSECTION_0P, 0);
 
-    tick(1);
+    clock.tick(1);
     expect(callbackStub.callCount).to.equal(1);
   });
 
@@ -187,10 +167,10 @@ describe('Visibility (tag: amp-analytics)', () => {
     listen(INTERSECTION_0P, {totalTimeMin: 1000, visiblePercentageMin: 1}, 0);
 
     verifyChange(INTERSECTION_1P, 0);
-    tick(1000);
+    clock.tick(1000);
     verifyChange(INTERSECTION_50P, 0);
 
-    tick(1000);
+    clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
     // There is a 20ms offset in some timedurations because of initial
     // timeout in the listenOnce logic.
@@ -208,10 +188,10 @@ describe('Visibility (tag: amp-analytics)', () => {
     // This test counts time from when the ad is loaded.
     listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
 
-    tick(1000);
+    clock.tick(1000);
     verifyChange(INTERSECTION_0P, 0);
 
-    tick(1000);
+    clock.tick(1000);
     expect(callbackStub.callCount).to.equal(1);
   });
 
@@ -220,15 +200,15 @@ describe('Visibility (tag: amp-analytics)', () => {
     listen(INTERSECTION_50P,
         {continuousTimeMin: 1000, visiblePercentageMin: 49}, 0);
 
-    tick(999);
+    clock.tick(999);
     verifyChange(INTERSECTION_0P, 0);
 
-    tick(1000);
+    clock.tick(1000);
     verifyChange(INTERSECTION_50P, 0);
 
-    tick(100);
+    clock.tick(100);
     expect(callbackStub.callCount).to.equal(0);
-    tick(900);
+    clock.tick(900);
     expect(callbackStub.callCount).to.equal(1);
     sinon.assert.calledWith(callbackStub.getCall(0), sinon.match({
       maxContinuousVisibleTime: '1000',
