@@ -95,6 +95,7 @@ export class JwtHelper {
     }
     const alg = decoded.header['alg'];
     if (!alg || alg != 'RS256') {
+      // TODO(dvoytenko@): Support other RS* algos.
       return Promise.reject(new Error('Only alg=RS256 is supported'));
     }
     return this.loadKey_(keyUrl).then(key => {
