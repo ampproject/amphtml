@@ -106,7 +106,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @param {boolean} opt_autoplay
+   * @param {boolean=} opt_autoplay
    */
   go(dir, animate, opt_autoplay = false) {
     this.goCallback(dir, animate, opt_autoplay);
@@ -116,7 +116,7 @@ export class BaseCarousel extends AMP.BaseElement {
    * Proceeds to the next slide in the desired direction.
    * @param {number} unusedDir -1 or 1
    * @param {boolean} unusedAnimate
-   * @param {boolean} opt_autoplay
+   * @param {boolean=} opt_autoplay
    */
   goCallback(unusedDir, unusedAnimate, opt_autoplay) {
     // Subclasses may override.

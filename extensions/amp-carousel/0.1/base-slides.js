@@ -78,7 +78,7 @@ export class BaseSlides extends BaseCarousel {
 
   /**
    * Updates the viewport state when there is a viewport callback.
-   * @param {boolean} unusedInViewport.
+   * @param {boolean} unusedInViewport
    * @protected
    */
   updateViewportState(unusedInViewport) {}
