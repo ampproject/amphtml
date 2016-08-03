@@ -36,7 +36,7 @@ Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/v
 ## Building a Custom Validator
 
 This is only useful for development - e.g. when making changes to
-`engine/validator.js` or when authoring an AMP extension, and it's rough aroung
+`engine/validator.js` or when authoring an AMP extension, and it's rough around
 the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
