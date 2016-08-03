@@ -48,12 +48,12 @@ export class Crypto {
                   // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
                   if (e.message && e.message.indexOf('secure origin') < 0) {
                     // Log unexpected fallback.
-                    dev.error(TAG, FALLBACK_MSG, e);
+                    dev().error(TAG, FALLBACK_MSG, e);
                   }
                   return lib.sha384(input);
                 });
       } catch (e) {
-        dev.error(TAG, FALLBACK_MSG, e);
+        dev().error(TAG, FALLBACK_MSG, e);
       }
     }
     return Promise.resolve(lib.sha384(input));

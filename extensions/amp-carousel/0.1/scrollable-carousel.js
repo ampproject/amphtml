@@ -37,7 +37,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    dev.fine(TAG, 'Building scrollable carousel');
+    dev().fine(TAG, 'Building scrollable carousel');
 
     /** @private {number} */
     this.pos_ = 0;

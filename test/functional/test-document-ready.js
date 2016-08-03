@@ -16,7 +16,7 @@
 
 import {isDocumentReady, onDocumentReady, whenDocumentReady,} from
     '../../src/document-ready';
-import {timer} from '../../src/timer';
+import {timerFor} from '../../src/timer';
 import * as sinon from 'sinon';
 
 
@@ -25,6 +25,7 @@ describe('documentReady', () => {
   let sandbox;
   let testDoc;
   let eventListeners;
+  const timer = timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

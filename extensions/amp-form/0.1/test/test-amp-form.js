@@ -22,7 +22,7 @@ import {
   onInputInteraction_,
 } from '../amp-form';
 import * as sinon from 'sinon';
-import {timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -34,6 +34,7 @@ import {installActionServiceForDoc,} from
 describe('amp-form', () => {
 
   let sandbox;
+  const timer = timerFor(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {

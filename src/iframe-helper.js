@@ -242,8 +242,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  */
 export function listenFor(
     iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
-  dev.assert(iframe.src, 'only iframes with src supported');
-  dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
+  dev().assert(iframe.src, 'only iframes with src supported');
+  dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   const parentWin = iframe.ownerDocument.defaultView;
 
@@ -374,7 +374,7 @@ function parseIfNeeded(data) {
     try {
       data = JSON.parse(data);
     } catch (e) {
-      dev.warn('Postmessage could not be parsed. ' +
+      dev().warn('Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
     }
   }
