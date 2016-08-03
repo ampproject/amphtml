@@ -44,6 +44,11 @@ const base64UrlSubs = {'-': '+', '_': '/', '.': '='};
 /**
  * Converts a string which is in base64url encoding into the decoded string.
  * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
+ * Note that atob seems to accept input either with or without padding, so this
+ * routine will also.
+ * Note that the way this is currently implemented, it will also accept regular
+ * base64 input. But that is not part of the contract, so do not count on it
+ * being true in the future.
  * @param {string} str
  * @return {string}
  */
