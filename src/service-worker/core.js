@@ -75,10 +75,9 @@ function isCdnJsFile(url) {
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @const
  * @type {!Object<string, string>}
  */
-const clientsMap = Object.create(null);
+let clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
@@ -112,7 +111,7 @@ const cachePromise = caches.open('cdn-js').then(result => {
  *
  * @type {!Promise}
  */
-const dbPromise = indexedDBP.open('cdn-js', 1, {
+const dbPromise = Promise.resolve(indexedDBP.open('cdn-js', 1, {
   upgrade(db, event) {
     const oldVersion = event.oldVersion;
     // Do we need to create our database?
@@ -124,7 +123,7 @@ const dbPromise = indexedDBP.open('cdn-js', 1, {
   },
 }).then(result => {
   db = result;
-});
+}));
 
 /**
  * Fetches the request, and stores it in the cache. Since we only store one
@@ -250,20 +249,23 @@ self.addEventListener('fetch', event => {
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
   if (!clientId || !isCdnJsFile(url)) {
-    event.respondWith(fetch(request));
     return;
   }
 
   const requestFile = basename(url);
   const requestVersion = ampVersion(url);
 
-  // What version do we have for this client?
-  // TODO(jridgewell): We have a bit of a race condition here, where multiple
-  // fetch events can be issued before we decide which version to use. Thus,
-  // those that are already issued will have skipped this check and fall back
-  // on whichever version they already have cached. That version may not be
-  // uniform, which is a horrible thing. Fix this.
-  const response = Promise.resolve(clientsMap[clientId]).then(version => {
+  // Wait for the cachePromise and dbPromise to resolve. This is necessary
+  // since the SW thread may be killed and restarted at any time.
+  const response = Promise.all([cachePromise, dbPromise]).then(() => {
+    // What version do we have for this client?
+    // TODO(jridgewell): We have a bit of a race condition here, where multiple
+    // fetch events can be issued before we decide which version to use. Thus,
+    // those that are already issued will have skipped this check and fall back
+    // on whichever version they already have cached. That version may not be
+    // uniform, which is a horrible thing. Fix this.
+    return clientsMap[clientId];
+  }).then(version => {
     // If we already registered this client, we must always use the same
     // version.
     if (version) {
@@ -304,6 +306,5 @@ self.addEventListener('fetch', event => {
     });
   });
 
-  // You must always respond with a Response.
   event.respondWith(response);
 });
