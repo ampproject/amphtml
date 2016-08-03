@@ -574,6 +574,14 @@ export class FixedLayer {
       visibility: 'visible',
     });
     this.doc.documentElement.appendChild(this.fixedLayer_);
+    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
+    // the fix for https://github.com/ampproject/amphtml/issues/4047
+    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
+    if (this.fixedLayer_.style['webkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['webkitAnimation'] = 'none';
+    } else if (this.fixedLayer_.style['WebkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['WebkitAnimation'] = 'none';
+    }
     return this.fixedLayer_;
   }
 
