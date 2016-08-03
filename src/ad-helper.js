@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/** @const These tags are allowed to have fixed positioning */
+const POSITION_FIXED_TAG_WHITELIST = {
+  'AMP-FX-FLYING-CARPET': true,
+  'AMP-LIGHTBOX': true,
+  'AMP-STICKY-AD': true,
+};
+
 /**
  * @param {!Element} el
  * @param {!Window} win

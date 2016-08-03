@@ -27,13 +27,6 @@ import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
 
-/** @const These tags are allowed to have fixed positioning */
-const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-FX-FLYING-CARPET': true,
-  'AMP-LIGHTBOX': true,
-  'AMP-STICKY-AD': true,
-};
-
 /**
  * Store loading ads info within window to ensure it can be properly stored
  * across separately compiled binaries that share load throttling.
