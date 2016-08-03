@@ -60,7 +60,7 @@ export function allowRenderOutsideViewport(element, win) {
   // Ad opts into lazier loading strategy where we only load ads that are
   // at closer than 1.25 viewports away.
   if (element.getAttribute('data-loading-strategy') ==
-      'prefer-viewability-over-views') {
+    'prefer-viewability-over-views') {
     return 1.25;
   }
   return true;
@@ -105,9 +105,10 @@ export function incrementLoadingAds(win) {
  * @param {!Element} el
  * @param {!Window} win
  * @return {string|null} a string that contains all containers of the ad.
- * This is called before creating iframe for this ad.
+ * This should only be called when a layout on the page was just forced
+ * anyway.
  */
-export function getAdContainerList(el) {
+export function getAdContainer(el) {
   do {
     if (AMP_AD_CONTAINERS[el.tagName]) {
       return el.tagName;
@@ -258,10 +259,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           'position:fixed: %s', this.element);
       /** detect ad containers, add the list to element as a new attribute */
       if (!this.element.getAttribute('data-amp-container-element')) {
-        const containerList_ = getAdContainerList(this.element);
-        if (containerList_) {
+        const container = getAdContainer(this.element);
+        if (container) {
           this.element.setAttribute('data-amp-container-element',
-              containerList_);
+            container);
         }
       }
       incrementLoadingAds(this.win);
@@ -270,7 +271,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this.element.setAttribute('ampcid', cid);
         }
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element);
+          this.element);
         this.apiHandler_ = new AmpAdApiHandler(
             this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
@@ -300,7 +301,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.fallback_) {
       this.attemptChangeHeight(0).then(() => {
         this./*OK*/collapse();
-      }, () => {});
+      }, () => { });
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
