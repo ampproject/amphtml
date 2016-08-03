@@ -142,7 +142,7 @@ describe('Slides functional', () => {
 
     it('should allow negative value swipe when looping and on ' +
        'first item', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       slides.currentIndex_ = 0;
       slides.onSwipeStart_({});
       expect(slides.swipeState_).to.not.equal(null);
@@ -162,7 +162,7 @@ describe('Slides functional', () => {
 
     it('should allow positive value swipe when looping and on ' +
        'last item', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       slides.currentIndex_ = 2;
       slides.onSwipeStart_({});
       expect(slides.swipeState_).to.not.equal(null);
@@ -316,7 +316,7 @@ describe('Slides functional', () => {
 
     it('should not go past first item with a negative value when not ' +
        ' looping', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       const prevTr = sandbox.spy();
       const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
@@ -344,7 +344,7 @@ describe('Slides functional', () => {
     });
 
     it('should go past first item with a negative value when looping', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       const prevTr = sandbox.spy();
       const nextTr = sandbox.spy();
       slides.currentIndex_ = 0;
@@ -370,7 +370,7 @@ describe('Slides functional', () => {
 
     it('should not go past last item with a positive value when ' +
        'not looping', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       const prevTr = sandbox.spy();
       const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
@@ -394,7 +394,7 @@ describe('Slides functional', () => {
     });
 
     it('should go past last item with a positive value when looping', () => {
-      slides.isLooping_ = true;
+      slides.shouldLoop = true;
       const prevTr = sandbox.spy();
       const nextTr = sandbox.spy();
       slides.currentIndex_ = 2;
@@ -511,11 +511,10 @@ describe('Slides functional', () => {
   });
 
   describe('Slides autoplay', () => {
-    let tryAutoplaySpy;
+    let autoplaySpy;
     let setupAutoplaySpy;
     let goSpy;
-    let isInViewportStub;
-    let tryCancelAutoplayTimeoutSpy;
+    let clearAutoplay;
 
     function autoplaySetup(delay = '', inViewport = true) {
       clock = sandbox.useFakeTimers();
@@ -526,19 +525,17 @@ describe('Slides functional', () => {
       }
       element.removeAttribute('loop');
       setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
-      tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');
+      autoplaySpy = sandbox.spy(AmpSlides.prototype, 'autoplay_');
       goSpy = sandbox.spy(AmpSlides.prototype, 'go');
-      tryCancelAutoplayTimeoutSpy = sandbox
-          .spy(AmpSlides.prototype, 'tryCancelAutoplayTimeout_');
+      clearAutoplay = sandbox
+          .spy(AmpSlides.prototype, 'clearAutoplay');
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
     }
 
-    function setupInViewport(inViewport) {
+    function setupInViewport(unusedInViewport) {
       sandbox.stub(slides, 'updateInViewport');
-      isInViewportStub = sandbox.stub(slides, 'isInViewport')
-          .returns(inViewport);
     }
 
     afterEach(() => {
@@ -553,122 +550,118 @@ describe('Slides functional', () => {
     it('should add `loop` attribute', () => {
       autoplaySetup();
       expect(element.hasAttribute('loop')).to.be.true;
-      expect(slides.isLooping_).to.be.true;
+      expect(slides.shouldLoop).to.be.true;
     });
 
     describe('in viewport', () => {
 
-      it('should call tryAutoplay_', () => {
+      it('should call autoplay_', () => {
         autoplaySetup();
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
 
         slides.viewportCallback(true);
-        expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(2);
+        expect(autoplaySpy.callCount).to.equal(1);
       });
 
       it('should call `go` after 5000ms(default)', () => {
         autoplaySetup();
 
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
         slides.viewportCallback(true);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
 
         clock.tick(5000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(autoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
 
         clock.tick(5000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(autoplaySpy.callCount).to.equal(3);
         expect(goSpy.callCount).to.equal(2);
       });
 
       it('should call `go` after 2000ms (set by user)', () => {
         autoplaySetup(2000);
 
-        expect(slides.isAutoplayRequested_).to.be.true;
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
         slides.viewportCallback(true);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
 
         clock.tick(2000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(autoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
-        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(slides.autoplayTimeoutId_).to.not.be.null;
       });
 
       it('should cancel autoplay on swipe start', () => {
         autoplaySetup(2000);
 
-        expect(slides.isAutoplayRequested_).to.be.true;
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
-        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(0);
+        expect(clearAutoplay.callCount).to.equal(0);
 
         slides.viewportCallback(true);
 
-        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(1);
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(clearAutoplay.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
 
         // user interaction
         slides.onSwipeStart_({});
 
-        expect(slides.isAutoplayRequested_).to.be.false;
-        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(2);
+        expect(slides.autoplayTimeoutId_).to.be.null;
+        expect(clearAutoplay.callCount).to.equal(2);
 
         clock.tick(2000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
       });
 
       it('should cancel autoplay on user interaction', () => {
         autoplaySetup(2000);
 
-        expect(slides.isAutoplayRequested_).to.be.true;
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
         slides.viewportCallback(true);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
 
         clock.tick(2000);
 
         // autoplay call
-        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(autoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
 
         clock.tick(2000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(autoplaySpy.callCount).to.equal(3);
         expect(goSpy.callCount).to.equal(2);
 
         // user interaction
         slides.interactionNext(1, false);
-        expect(slides.isAutoplayRequested_).to.be.false;
+        expect(slides.autoplayTimeoutId_).to.be.null;
 
         clock.tick(2000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(autoplaySpy.callCount).to.equal(3);
         expect(goSpy.callCount).to.equal(3);
 
         clock.tick(2000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(autoplaySpy.callCount).to.equal(3);
         expect(goSpy.callCount).to.equal(3);
       });
     });
@@ -678,19 +671,17 @@ describe('Slides functional', () => {
       it('should not call `go`', () => {
         autoplaySetup(5000, false);
 
-        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
         slides.viewportCallback(false);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
         clock.tick(5000);
 
-        expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(1);
+        expect(autoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
       });
     });

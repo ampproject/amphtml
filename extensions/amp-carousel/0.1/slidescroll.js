@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
+import {BaseSlides} from './base-slides';
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -34,13 +34,13 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 /** @const {number} */
 const CUSTOM_SNAP_TIMEOUT = 100;
 
-export class AmpSlideScroll extends BaseCarousel {
+export class AmpSlideScroll extends BaseSlides {
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
   /** @override */
-  buildCarousel() {
+  buildSlides() {
     /** @private @const {!Window} */
     this.win_ = this.win;
 
@@ -57,10 +57,6 @@ export class AmpSlideScroll extends BaseCarousel {
 
     /** @private {number} */
     this.noOfSlides_ = this.slides_.length;
-
-    /** @private @const {boolean} */
-    this.hasLooping_ =
-        this.element.hasAttribute('loop') && this.noOfSlides_ > 1;
 
     /** @private {!Element} */
     this.slidesContainer_ = this.win_.document.createElement('div');
@@ -128,13 +124,27 @@ export class AmpSlideScroll extends BaseCarousel {
     }
   }
 
+  /** @override */
+  isLoopingEligible() {
+    return this.noOfSlides_ > 2;
+  }
+
+  /**
+   * Handles touchmove event.
+   * @private
+   */
   touchMoveHandler_() {
+    this.clearAutoplay();
     this.hasTouchMoved_ = true;
     if (this.touchEndTimeout_) {
       timer.cancel(this.touchEndTimeout_);
     }
   }
 
+  /**
+   * Handles touchend event.
+   * @private
+   */
   touchEndHandler_() {
     if (this.hasTouchMoved_) {
       if (this.scrollTimeout_) {
@@ -172,10 +182,7 @@ export class AmpSlideScroll extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    if (inViewport) {
-      this.hintControls();
-    }
+  updateViewportState(inViewport) {
     if (this.slideIndex_ != null) {
       this.updateInViewport(this.slides_[this.slideIndex_], inViewport);
     }
@@ -183,16 +190,16 @@ export class AmpSlideScroll extends BaseCarousel {
 
   /** @override */
   hasPrev() {
-    return this.hasLooping_ || this.slideIndex_ > 0;
+    return this.shouldLoop || this.slideIndex_ > 0;
   }
 
   /** @override */
   hasNext() {
-    return this.hasLooping_ || this.slideIndex_ < this.slides_.length - 1;
+    return this.shouldLoop || this.slideIndex_ < this.slides_.length - 1;
   }
 
   /** @override */
-  goCallback(dir, animate) {
+  moveSlide(dir, animate) {
     if (this.slideIndex_ != null) {
       const hasNext = this.hasNext();
       const hasPrev = this.hasPrev();
@@ -224,6 +231,9 @@ export class AmpSlideScroll extends BaseCarousel {
     if (this.scrollTimeout_) {
       timer.cancel(this.scrollTimeout_);
     }
+
+    // TODO (sriram): clear autoplay timer on user scroll.
+    //    event.isTarget is set on non-user scrolls as well.
 
     const currentScrollLeft = this.slidesContainer_./*OK*/scrollLeft;
     if (!this.hasNativeSnapPoints_) {
@@ -341,7 +351,7 @@ export class AmpSlideScroll extends BaseCarousel {
 
     let newIndex = this.slideIndex_ + updateValue;
 
-    if (this.hasLooping_) {
+    if (this.shouldLoop) {
       newIndex = (newIndex < 0) ? this.noOfSlides_ - 1 :
           (newIndex >= this.noOfSlides_) ? 0 : newIndex;
     } else {
@@ -385,9 +395,9 @@ export class AmpSlideScroll extends BaseCarousel {
       return;
     }
     const prevIndex = (newIndex - 1 >= 0) ? newIndex - 1 :
-        (this.hasLooping_) ? noOfSlides_ - 1 : null;
+        (this.shouldLoop) ? noOfSlides_ - 1 : null;
     const nextIndex = (newIndex + 1 < noOfSlides_) ? newIndex + 1 :
-        (this.hasLooping_) ? 0 : null;
+        (this.shouldLoop) ? 0 : null;
 
     const showIndexArr = [];
     if (prevIndex != null) {
@@ -402,7 +412,7 @@ export class AmpSlideScroll extends BaseCarousel {
     }
     this.updateInViewport(this.slides_[newIndex], true);
     showIndexArr.forEach((showIndex, loopIndex) => {
-      if (this.hasLooping_) {
+      if (this.shouldLoop) {
         setStyle(this.slideWrappers_[showIndex], 'order', loopIndex + 1);
       }
       this.slideWrappers_[showIndex].classList.add(SHOWN_CSS_CLASS);
@@ -418,7 +428,7 @@ export class AmpSlideScroll extends BaseCarousel {
     // instances we show the second slide (middle slide at
     // scrollLeft = slide's width).
     let newScrollLeft = this.slideWidth_;
-    if (!this.hasLooping_ && newIndex == 0) {
+    if (!this.shouldLoop && newIndex == 0) {
       newScrollLeft = 0;
     }
 
@@ -439,7 +449,7 @@ export class AmpSlideScroll extends BaseCarousel {
     for (let i = 0; i < noOfSlides_; i++) {
       if (indexArr.indexOf(i) == -1 &&
           this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
-        if (this.hasLooping_) {
+        if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
