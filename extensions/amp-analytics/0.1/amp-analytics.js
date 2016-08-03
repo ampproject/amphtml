@@ -131,14 +131,14 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
-      dev.fine(this.getName_(), 'User has opted out. No hits will be sent.');
+      dev().fine(this.getName_(), 'User has opted out. No hits will be sent.');
       return Promise.resolve();
     }
 
     this.generateRequests_();
 
     if (!this.config_['triggers']) {
-      user.error(this.getName_(), 'No triggers were found in the ' +
+      user().error(this.getName_(), 'No triggers were found in the ' +
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
@@ -152,11 +152,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       if (this.config_['triggers'].hasOwnProperty(k)) {
         const trigger = this.config_['triggers'][k];
         if (!trigger) {
-          user.error(this.getName_(), 'Trigger should be an object: ', k);
+          user().error(this.getName_(), 'Trigger should be an object: ', k);
           continue;
         }
         if (!trigger['on'] || !trigger['request']) {
-          user.error(this.getName_(), '"on" and "request" ' +
+          user().error(this.getName_(), '"on" and "request" ' +
               'attributes are required for data to be collected.');
           continue;
         }
@@ -201,7 +201,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       let count = 0;
       for (const replaceMapKey in replaceMap) {
         if (++count > MAX_REPLACES) {
-          user.error(this.getName_(),
+          user().error(this.getName_(),
               'More than ' + MAX_REPLACES + ' extraUrlParamsReplaceMap rules ' +
               'aren\'t allowed; Skipping the rest');
           break;
@@ -234,7 +234,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
     assertHttpsUrl(remoteConfigUrl);
-    dev.fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
+    dev().fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
     const fetchConfig = {
       requireAmpResponseSourceOrigin: true,
     };
@@ -249,9 +249,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
-          dev.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
+          dev().fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
         }, err => {
-          user.error(this.getName_(), 'Error loading remote config: ',
+          user().error(this.getName_(), 'Error loading remote config: ',
               remoteConfigUrl, err);
         });
   }
@@ -297,16 +297,16 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (isJsonScriptTag(child)) {
           inlineConfig = JSON.parse(children[0].textContent);
         } else {
-          user.error(this.getName_(), 'The analytics config should ' +
+          user().error(this.getName_(), 'The analytics config should ' +
               'be put in a <script> tag with type="application/json"');
         }
       } else if (children.length > 1) {
-        user.error(this.getName_(), 'The tag should contain only one' +
+        user().error(this.getName_(), 'The tag should contain only one' +
             ' <script> child.');
       }
     }
     catch (er) {
-      user.error(this.getName_(), 'Analytics config could not be ' +
+      user().error(this.getName_(), 'Analytics config could not be ' +
           'parsed. Is it in a valid JSON format?', er);
     }
     return inlineConfig;
@@ -341,8 +341,8 @@ export class AmpAnalytics extends AMP.BaseElement {
   generateRequests_() {
     const requests = {};
     if (!this.config_ || !this.config_['requests']) {
-      dev.error(this.getName_(), 'No request strings defined. Analytics data ' +
-          'will not be sent from this page.');
+      dev().error(this.getName_(), 'No request strings defined. Analytics ' +
+          'data will not be sent from this page.');
       return;
     }
     for (const k in this.config_['requests']) {
@@ -373,7 +373,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   handleEvent_(trigger, event) {
     let request = this.requests_[trigger['request']];
     if (!request) {
-      user.error(this.getName_(), 'Ignoring event. Request string ' +
+      user().error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
       return Promise.resolve();
     }
@@ -445,7 +445,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     opt_iterations = opt_iterations === undefined ? 2 : opt_iterations;
     opt_encode = opt_encode === undefined ? true : opt_encode;
     if (opt_iterations < 0) {
-      user.error('Maximum depth reached while expanding variables. Please ' +
+      user().error('Maximum depth reached while expanding variables. Please ' +
           'ensure that the variables are not recursive.');
       return template;
     }
@@ -488,11 +488,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   sendRequest_(request, trigger) {
     if (!request) {
-      user.error(this.getName_(), 'Request not sent. Contents empty.');
+      user().error(this.getName_(), 'Request not sent. Contents empty.');
       return;
     }
     if (trigger['iframePing']) {
-      user.assert(trigger['on'] == 'visible',
+      user().assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.win, request);
     } else {
@@ -525,7 +525,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     for (const property in from) {
-      user.assert(opt_predefinedConfig || property != 'iframePing',
+      user().assert(opt_predefinedConfig || property != 'iframePing',
           'iframePing config is only available to vendor config.');
       // Only deal with own properties.
       if (from.hasOwnProperty(property)) {

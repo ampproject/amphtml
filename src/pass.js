@@ -82,7 +82,7 @@ export class Pass {
       delay = 10;
     }
 
-    const nextTime = this.timer_.now() + delay;
+    const nextTime = Date.now() + delay;
     // Schedule anew if nothing is scheduled currently or if the new time is
     // sooner then previously requested.
     if (!this.isPending() || nextTime - this.nextTime_ < -10) {

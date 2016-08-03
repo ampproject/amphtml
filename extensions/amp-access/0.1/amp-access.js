@@ -38,7 +38,7 @@ import {parseQueryString} from '../../../src/url';
 import {performanceFor} from '../../../src/performance';
 import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
@@ -92,7 +92,7 @@ export class AccessService {
     this.accessElement_ = accessElement;
 
     const configJson = tryParseJson(this.accessElement_.textContent, e => {
-      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
+      throw user().createError('Failed to parse "amp-access" JSON: ' + e);
     });
 
     /** @const @private {!AccessType} */
@@ -112,7 +112,7 @@ export class AccessService {
     this.pubOrigin_ = getSourceOrigin(win.location);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);
@@ -201,7 +201,7 @@ export class AccessService {
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
     }
-    throw dev.createError('Unsupported access type: ', this.type_);
+    throw dev().createError('Unsupported access type: ', this.type_);
   }
 
   /**
@@ -210,14 +210,14 @@ export class AccessService {
    */
   buildConfigType_(configJson) {
     let type = configJson['type'] ?
-        user.assertEnumValue(AccessType, configJson['type'], 'access type') :
+        user().assertEnumValue(AccessType, configJson['type'], 'access type') :
         AccessType.CLIENT;
     if (type == AccessType.SERVER && !this.isServerEnabled_) {
-      user.warn(TAG, 'Experiment "amp-access-server" is not enabled.');
+      user().warn(TAG, 'Experiment "amp-access-server" is not enabled.');
       type = AccessType.CLIENT;
     }
     if (type == AccessType.CLIENT && this.isServerEnabled_) {
-      user.info(TAG, 'Forcing access type: SERVER');
+      user().info(TAG, 'Forcing access type: SERVER');
       type = AccessType.SERVER;
     }
     return type;
@@ -240,7 +240,7 @@ export class AccessService {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      user.assert(false,
+      user().assert(false,
           '"login" must be either a single URL or a map of URLs');
     }
 
@@ -274,7 +274,7 @@ export class AccessService {
    */
   start_() {
     if (!this.enabled_) {
-      user.info(TAG, 'Access is disabled - no "id=amp-access" element');
+      user().info(TAG, 'Access is disabled - no "id=amp-access" element');
       return this;
     }
     this.startInternal_();
@@ -283,7 +283,7 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    dev.fine(TAG, 'config:', this.type_, this.loginConfig_,
+    dev().fine(TAG, 'config:', this.type_, this.loginConfig_,
         this.adapter_.getConfig());
 
     // TODO(dvoytenko, #3742): This will refer to the ampdoc once AccessService
@@ -399,7 +399,7 @@ export class AccessService {
    */
   runAuthorization_(opt_disableFallback) {
     if (!this.adapter_.isAuthorizationEnabled()) {
-      dev.fine(TAG, 'Ignore authorization for type=', this.type_);
+      dev().fine(TAG, 'Ignore authorization for type=', this.type_);
       this.firstAuthorizationResolver_();
       return Promise.resolve();
     }
@@ -414,7 +414,7 @@ export class AccessService {
       this.analyticsEvent_('access-authorization-failed');
       if (this.authorizationFallbackResponse_ && !opt_disableFallback) {
         // Use fallback.
-        user.error(TAG, 'Authorization failed: ', error);
+        user().error(TAG, 'Authorization failed: ', error);
         return this.authorizationFallbackResponse_;
       } else {
         // Rethrow the error, it will be processed in the bottom `catch`.
@@ -422,7 +422,7 @@ export class AccessService {
       }
     });
     const promise = responsePromise.then(response => {
-      dev.fine(TAG, 'Authorization response: ', response);
+      dev().fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', false);
@@ -433,7 +433,7 @@ export class AccessService {
         });
       });
     }).catch(error => {
-      user.error(TAG, 'Authorization failed: ', error);
+      user().error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });
@@ -565,7 +565,7 @@ export class AccessService {
         const p = this.renderTemplate_(element, templateElements[i], response)
             .catch(error => {
               // Ignore the error.
-              dev.error(TAG, 'Template failed: ', error,
+              dev().error(TAG, 'Template failed: ', error,
                   templateElements[i], element);
             });
         promises.push(p);
@@ -633,7 +633,7 @@ export class AccessService {
     if (this.reportViewPromise_) {
       return this.reportViewPromise_;
     }
-    dev.fine(TAG, 'start view monitoring');
+    dev().fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_(timeToView)
         .then(() => {
           // Wait for the most recent authorization flow to complete.
@@ -646,7 +646,7 @@ export class AccessService {
         })
         .catch(reason => {
           // Ignore - view has been canceled.
-          dev.fine(TAG, 'view cancelled:', reason);
+          dev().fine(TAG, 'view cancelled:', reason);
           this.reportViewPromise_ = null;
           throw reason;
         });
@@ -703,11 +703,11 @@ export class AccessService {
    */
   reportViewToServer_() {
     return this.adapter_.pingback().then(() => {
-      dev.fine(TAG, 'Pingback complete');
+      dev().fine(TAG, 'Pingback complete');
       this.analyticsEvent_('access-pingback-sent');
     }).catch(error => {
       this.analyticsEvent_('access-pingback-failed');
-      throw user.createError('Pingback failed: ', error);
+      throw user().createError('Pingback failed: ', error);
     });
   }
 
@@ -752,7 +752,7 @@ export class AccessService {
    * @return {!Promise}
    */
   login(type) {
-    const now = this.timer_.now();
+    const now = Date.now();
 
     // If login is pending, block a new one from starting for 1 second. After
     // 1 second, however, the new login request will be allowed to proceed,
@@ -762,18 +762,18 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    dev.fine(TAG, 'Start login: ', type);
-    user.assert(this.loginConfig_[type],
+    dev().fine(TAG, 'Start login: ', type);
+    user().assert(this.loginConfig_[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = user.assert(this.loginUrlMap_[type],
+    const loginUrl = user().assert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
 
     this.loginAnalyticsEvent_(type, 'started');
     const dialogPromise = this.signIn_.requestSignIn(loginUrl) ||
         this.openLoginDialog_(loginUrl);
     const loginPromise = dialogPromise.then(result => {
-      dev.fine(TAG, 'Login dialog completed: ', type, result);
+      dev().fine(TAG, 'Login dialog completed: ', type, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
@@ -799,7 +799,7 @@ export class AccessService {
         });
       }
     }).catch(reason => {
-      dev.fine(TAG, 'Login dialog failed: ', type, reason);
+      dev().fine(TAG, 'Login dialog failed: ', type, reason);
       this.loginAnalyticsEvent_(type, 'failed');
       if (this.loginPromise_ == loginPromise) {
         this.loginPromise_ = null;

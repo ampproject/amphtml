@@ -91,7 +91,7 @@ export function verifySignature(data, signature, publicKeyInfos) {
     .then(results => results.some(x => x))
     .catch(error => {
       // Note if anything goes wrong.
-      dev.error(TAG_, 'Error while verifying:', error);
+      dev().error(TAG_, 'Error while verifying:', error);
       throw error;
     });
 }

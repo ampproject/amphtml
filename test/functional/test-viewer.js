@@ -16,7 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
-import {platform} from '../../src/platform';
+import {platformFor} from '../../src/platform';
 import * as sinon from 'sinon';
 
 
@@ -26,10 +26,10 @@ describe('Viewer', () => {
   let windowMock;
   let viewer;
   let windowApi;
-  let timeouts;
   let clock;
   let events;
   let errorStub;
+  let platform;
 
   function changeVisibility(vis) {
     windowApi.document.hidden = vis !== 'visible';
@@ -47,12 +47,10 @@ describe('Viewer', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    timeouts = [];
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(handler) {
-      timeouts.push(handler);
-    };
     windowApi = new WindowApi();
+    windowApi.setTimeout = window.setTimeout;
+    windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
       hash: '',
       href: '/test/viewer',
@@ -69,12 +67,14 @@ describe('Viewer', () => {
       documentElement: {style: {}},
       title: 'Awesome doc',
     };
+    windowApi.navigator = window.navigator;
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
     events = {};
-    errorStub = sandbox.stub(dev, 'error');
+    errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
+    platform = platformFor(windowApi);
     viewer = new Viewer(windowApi);
   });
 

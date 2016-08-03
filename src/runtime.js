@@ -230,7 +230,7 @@ function adoptShared(global, opts, callback) {
       } catch (e) {
         // Throw errors outside of loop in its own micro task to
         // avoid on error stopping other extensions from loading.
-        dev.error(TAG, 'Extension failed: ', e, fnOrStruct.n);
+        dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
     }
     // Make sure we empty the array of preregistered extensions.
@@ -406,7 +406,7 @@ function prepareAndRegisterServiceForDocShadowMode(global, extensions,
  * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
  */
 function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
-  dev.assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
+  dev().assert((opt_ctor || opt_factory) && (!opt_ctor || !opt_factory),
       'Only one: a class or a factory must be specified');
   if (opt_ctor) {
     fromClassForDoc(ampdoc, name, opt_ctor);
@@ -425,7 +425,7 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
  * @param {string} url
  */
 function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
-  dev.fine(TAG, 'Attach shadow doc:', doc);
+  dev().fine(TAG, 'Attach shadow doc:', doc);
   const ampdocService = ampdocFor(global);
 
   hostElement.style.visibility = 'hidden';
@@ -434,7 +434,7 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   shadowRoot.AMP.url = url;
 
   const ampdoc = installShadowDoc(ampdocService, shadowRoot);
-  dev.fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
+  dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
   // Install runtime CSS.
   installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
@@ -463,7 +463,7 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
     hostElement.style.visibility = 'visible';
   }, 50);
 
-  dev.fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
+  dev().fine(TAG, 'Shadow root initialization is done:', shadowRoot, ampdoc);
   return shadowRoot.AMP;
 }
 
@@ -493,22 +493,22 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
       const rel = n.getAttribute('rel');
       if (n.tagName == 'TITLE') {
         shadowRoot.AMP.title = n.textContent;
-        dev.fine(TAG, '- set title: ', shadowRoot.AMP.title);
+        dev().fine(TAG, '- set title: ', shadowRoot.AMP.title);
       } else if (tagName == 'META' && n.hasAttribute('charset')) {
         // Ignore.
       } else if (tagName == 'META' && name == 'viewport') {
         // Ignore.
       } else if (tagName == 'META') {
         // TODO(dvoytenko): copy other meta tags.
-        dev.warn(TAG, 'meta ignored: ', n);
+        dev().warn(TAG, 'meta ignored: ', n);
       } else if (tagName == 'LINK' && rel == 'canonical') {
         shadowRoot.AMP.canonicalUrl = n.getAttribute('href');
-        dev.fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
+        dev().fine(TAG, '- set canonical: ', shadowRoot.AMP.canonicalUrl);
       } else if (tagName == 'LINK' && rel == 'stylesheet') {
         // This must be a font definition: no other stylesheets are allowed.
         const href = n.getAttribute('href');
         if (parentLinks[href]) {
-          dev.fine(TAG, '- stylesheet already included: ', href);
+          dev().fine(TAG, '- stylesheet already included: ', href);
         } else {
           parentLinks[href] = true;
           const el = global.document.createElement('link');
@@ -516,48 +516,49 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           el.setAttribute('type', 'text/css');
           el.setAttribute('href', href);
           global.document.head.appendChild(el);
-          dev.fine(TAG, '- import font to parent: ', href, el);
+          dev().fine(TAG, '- import font to parent: ', href, el);
         }
       } else if (n.tagName == 'STYLE') {
         if (n.hasAttribute('amp-boilerplate')) {
           // Ignore.
-          dev.fine(TAG, '- ignore boilerplate style: ', n);
+          dev().fine(TAG, '- ignore boilerplate style: ', n);
         } else {
           shadowRoot.appendChild(global.document.importNode(n, true));
-          dev.fine(TAG, '- import style: ', n);
+          dev().fine(TAG, '- import style: ', n);
         }
       } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
-        dev.fine(TAG, '- src script: ', n);
+        dev().fine(TAG, '- src script: ', n);
         const src = n.getAttribute('src');
         const isRuntime = src.indexOf('/amp.js') != -1 ||
             src.indexOf('/v0.js') != -1;
         const customElement = n.getAttribute('custom-element');
         const customTemplate = n.getAttribute('custom-template');
         if (isRuntime) {
-          dev.fine(TAG, '- ignore runtime script: ', src);
+          dev().fine(TAG, '- ignore runtime script: ', src);
         } else if (customElement || customTemplate) {
           // This is an extension.
           extensions.loadExtension(customElement || customTemplate);
-          dev.fine(TAG, '- load extension: ', customElement || customTemplate);
+          dev().fine(
+              TAG, '- load extension: ', customElement || customTemplate);
           if (customElement) {
             extensionIds.push(customElement);
           }
         } else {
-          user.error(TAG, '- unknown script: ', n, src);
+          user().error(TAG, '- unknown script: ', n, src);
         }
       } else if (n.tagName == 'SCRIPT') {
         // Non-src version of script.
         const type = n.getAttribute('type') || 'application/javascript';
         if (type.indexOf('javascript') == -1) {
           shadowRoot.appendChild(global.document.importNode(n, true));
-          dev.fine(TAG, '- non-src script: ', n);
+          dev().fine(TAG, '- non-src script: ', n);
         } else {
-          user.error(TAG, '- unallowed inline javascript: ', n);
+          user().error(TAG, '- unallowed inline javascript: ', n);
         }
       } else if (n.tagName == 'NOSCRIPT') {
         // Ignore.
       } else {
-        user.error(TAG, '- UNKNOWN head element:', n);
+        user().error(TAG, '- UNKNOWN head element:', n);
       }
     }
   }

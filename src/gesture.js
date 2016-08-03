@@ -17,7 +17,6 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
-import {timer} from './timer';
 
 const PROP_ = '__AMP_Gestures';
 
@@ -185,7 +184,7 @@ export class Gestures {
    * @private
    */
   onTouchStart_(event) {
-    const now = timer.now();
+    const now = Date.now();
     this.wasEventing_ = false;
 
     this.pointerDownObservable_.fire(event);
@@ -220,7 +219,7 @@ export class Gestures {
    * @private
    */
   onTouchMove_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -248,7 +247,7 @@ export class Gestures {
    * @private
    */
   onTouchEnd_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -299,7 +298,7 @@ export class Gestures {
 
     // Set the recognizer as ready and wait for the pass to
     // make the decision.
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.ready_[i] = now + offset;
@@ -325,7 +324,7 @@ export class Gestures {
       return;
     }
 
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.pending_[i] = now + timeLeft;
@@ -355,11 +354,11 @@ export class Gestures {
    * @private
    */
   signalEmit_(recognizer, data, event) {
-    dev.assert(this.eventing_ == recognizer,
+    dev().assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, timer.now(),
+      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
           event));
     }
   }
@@ -372,7 +371,7 @@ export class Gestures {
     let cancelEvent = !!this.eventing_ || this.wasEventing_;
     this.wasEventing_ = false;
     if (!cancelEvent) {
-      const now = timer.now();
+      const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
                 this.pending_[i] && this.pending_[i] >= now) {
@@ -400,7 +399,7 @@ export class Gestures {
    * @private
    */
   doPass_() {
-    const now = timer.now();
+    const now = Date.now();
 
     // The "most ready" recognizer is the youngest in the "ready" set.
     // Otherwise we wouldn't wait for it at all.

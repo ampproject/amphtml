@@ -16,7 +16,7 @@
 
 import {setStyles} from './style';
 import {waitForBody} from './dom';
-import {platform} from './platform';
+import {platformFor} from './platform';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
 
@@ -41,7 +41,7 @@ import {dev} from './log';
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       doc,
-      dev.assert(doc.head),
+      dev().assert(doc.head),
       cssText,
       opt_isRuntimeCss || false,
       opt_ext || null);
@@ -123,7 +123,7 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  * @param {!ShadowRoot} shadowRoot
  */
 export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev.assert(
+  const style = dev().assert(
       ampdoc.getRootNode().querySelector('style[amp-runtime]'),
       'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
   const cssText = style.textContent;
@@ -141,7 +141,7 @@ export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
  */
 export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    setStyles(dev.assert(doc.body), {
+    setStyles(dev().assert(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
@@ -150,7 +150,7 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
     // TODO(erwinm, #4097): Remove this when safari technology preview has merged
     // the fix for https://github.com/ampproject/amphtml/issues/4047
     // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
-    if (platform.isSafari()) {
+    if (platformFor(doc.defaultView).isSafari()) {
       if (doc.body.style['webkitAnimation'] !== undefined) {
         doc.body.style['webkitAnimation'] = 'none';
       } else if (doc.body.style['WebkitAnimation'] !== undefined) {

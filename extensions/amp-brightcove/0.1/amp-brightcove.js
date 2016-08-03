@@ -42,7 +42,7 @@ class AmpBrightcove extends AMP.BaseElement {
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const account = user.assert(
+    const account = user().assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);

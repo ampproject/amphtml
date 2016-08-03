@@ -139,5 +139,3 @@ export class Platform {
 export function platformFor(window) {
   return fromClass(window, 'platform', Platform);
 };
-
-export const platform = platformFor(window);

@@ -111,7 +111,7 @@ export class AmpUserNotification extends AMP.BaseElement {
       this.dialogResolve_ = resolve;
     });
 
-    this.elementId_ = user.assert(this.element.id,
+    this.elementId_ = user().assert(this.element.id,
         'amp-user-notification should have an id.');
 
     /** @private @const {string} */
@@ -149,7 +149,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   buildGetHref_(ampUserId) {
-    const showIfHref = dev.assert(this.showIfHref_);
+    const showIfHref = dev().assert(this.showIfHref_);
     return this.urlReplacements_.expand(showIfHref).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
@@ -181,7 +181,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win).fetchJson(dev.assert(this.dismissHref_), {
+    return xhrFor(this.win).fetchJson(dev().assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
       body: {
@@ -198,7 +198,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   onGetShowEndpointSuccess_(data) {
-    user.assert(typeof data['showNotification'] == 'boolean',
+    user().assert(typeof data['showNotification'] == 'boolean',
         '`showNotification` ' +
         'should be a boolean. Got "%s" which is of type %s.',
         data['showNotification'], typeof data['showNotification']);
@@ -275,7 +275,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.storagePromise_
         .then(storage => storage.get(this.storageKey_))
         .then(persistedValue => !!persistedValue, reason => {
-          dev.error(TAG, 'Failed to read storage', reason);
+          dev().error(TAG, 'Failed to read storage', reason);
           return false;
         });
   }
@@ -348,7 +348,7 @@ export class UserNotificationManager {
   get(id) {
     this.managerReadyPromise_.then(() => {
       if (this.win.document.getElementById(id) == null) {
-        user.warn(TAG, `Did not find amp-user-notification element ${id}.`);
+        user().warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });
     return this.getOrCreateDeferById_(id).promise;

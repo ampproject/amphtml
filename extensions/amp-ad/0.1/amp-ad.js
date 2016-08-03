@@ -56,7 +56,7 @@ export class AmpAd extends AMP.BaseElement {
       .then(ctor => new ctor(this.element))
       .catch(error => {
         // Report error and fallback to 3p
-        user.error(
+        user().error(
           this.element.tagName,
           'Unable to load ad implementation for type ', type,
           ', falling back to 3p, error: ', error);
@@ -73,7 +73,7 @@ export class AmpAd extends AMP.BaseElement {
   buildCallback() {
     // This is only called when no type was set on the element and thus
     // upgrade element fell through.
-    dev.assert(this.element.getAttribute('type'), 'Required attribute type');
+    dev().assert(this.element.getAttribute('type'), 'Required attribute type');
   }
 }
 

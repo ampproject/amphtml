@@ -109,7 +109,7 @@ export class AmpDocService {
       n = shadowRoot.host;
     }
 
-    throw dev.createError('No ampdoc found for', node);
+    throw dev().createError('No ampdoc found for', node);
   }
 
   /**
@@ -119,7 +119,7 @@ export class AmpDocService {
    * @private
    */
   installShadowDoc_(shadowRoot) {
-    dev.assert(!shadowRoot[AMPDOC_PROP],
+    dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
     const ampdoc = new AmpDocShadow(this.win, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
@@ -143,7 +143,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isSingleDoc() {
-    return dev.assert(null, 'not implemented');
+    return dev().assert(null, 'not implemented');
   }
 
   /**
@@ -154,7 +154,7 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    */
   getRootNode() {
-    return dev.assert(null, 'not implemented');
+    return dev().assert(null, 'not implemented');
   }
 
   /**
@@ -162,7 +162,7 @@ export class AmpDoc {
    * @return {!Window}
    */
   getWin() {
-    return dev.assert(null, 'not implemented');
+    return dev().assert(null, 'not implemented');
   }
 
   /**

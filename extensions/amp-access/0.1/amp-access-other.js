@@ -60,15 +60,15 @@ export class AccessOtherAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Use the authorization fallback for type=other');
+    dev().fine(TAG, 'Use the authorization fallback for type=other');
     // Only allowed for proxy origin (`cdn.ampproject.org`).
-    dev.assert(!this.isProxyOrigin_);
-    return Promise.resolve(dev.assert(this.authorizationResponse_));
+    dev().assert(!this.isProxyOrigin_);
+    return Promise.resolve(dev().assert(this.authorizationResponse_));
   }
 
   /** @override */
   pingback() {
-    dev.fine(TAG, 'Ignore pingback');
+    dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
   }
 }

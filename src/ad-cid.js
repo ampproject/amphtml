@@ -48,7 +48,7 @@ export function getAdCid(adElement) {
     }
     return cidService.get(scope, consent).catch(error => {
       // Not getting a CID is not fatal.
-      dev.error('ad-cid', error);
+      dev().error('ad-cid', error);
       return undefined;
     });
   });

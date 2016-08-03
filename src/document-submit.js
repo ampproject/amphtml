@@ -53,14 +53,14 @@ export function onDocumentFormSubmit_(e) {
   }
 
   const action = form.getAttribute('action');
-  user.assert(action, 'form action attribute is required: %s', form);
+  user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
-  user.assert(!startsWith(action, urls.cdn),
+  user().assert(!startsWith(action, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
 
   const target = form.getAttribute('target');
-  user.assert(target, 'form target attribute is required: %s', form);
-  user.assert(target == '_blank' || target == '_top',
+  user().assert(target, 'form target attribute is required: %s', form);
+  user().assert(target == '_blank' || target == '_top',
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
 
   // amp-form extension will add novalidate to all forms to manually trigger

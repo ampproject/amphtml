@@ -15,7 +15,6 @@
  */
 
 import {onDocumentElementClick_} from '../../src/document-click';
-import {platform} from '../../src/platform';
 import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
@@ -289,9 +288,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should open link in _top on Safari iOS when embedded', () => {
-      sandbox.stub(platform, 'isIos').returns(true);
-      sandbox.stub(platform, 'isSafari').returns(true);
-      onDocumentElementClick_(evt, viewport, history);
+      onDocumentElementClick_(evt, viewport, history, true);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
@@ -300,25 +297,19 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should not do anything for mailto: protocol', () => {
       tgt.href = 'mailto:hello@example.com';
-      sandbox.stub(platform, 'isIos').returns(true);
-      sandbox.stub(platform, 'isSafari').returns(true);
-      onDocumentElementClick_(evt, viewport, history);
+      onDocumentElementClick_(evt, viewport, history, true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other non-safari iOS', () => {
-      sandbox.stub(platform, 'isIos').returns(true);
-      sandbox.stub(platform, 'isSafari').returns(false);
-      onDocumentElementClick_(evt, viewport, history);
+      onDocumentElementClick_(evt, viewport, history, false);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other platforms', () => {
-      sandbox.stub(platform, 'isIos').returns(false);
-      sandbox.stub(platform, 'isSafari').returns(false);
-      onDocumentElementClick_(evt, viewport, history);
+      onDocumentElementClick_(evt, viewport, history, false);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
     });

@@ -21,7 +21,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {isObject} from '../../../src/types';
 
 /** @type {number} Value of YouTube player state when playing. */
@@ -64,7 +64,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
-    this.videoid_ = user.assert(
+    this.videoid_ = user().assert(
         (this.element.getAttribute('data-videoid') ||
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
@@ -86,7 +86,7 @@ class AmpYoutube extends AMP.BaseElement {
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
       delete params['autoplay'];
-      user.warn('Autoplay is currently not support with amp-youtube.');
+      user().warn('Autoplay is currently not support with amp-youtube.');
     }
     src = addParamsToUrl(src, params);
 
@@ -116,7 +116,7 @@ class AmpYoutube extends AMP.BaseElement {
           // would send couple of messages but then stop. Waiting for a bit before
           // sending the 'listening' event seems to fix that and allow YT
           // Player to send messages continuously.
-          return timer.promise(300);
+          return timerFor(this.win).promise(300);
         })
         .then(() => this.listenToFrame_())
         .then(() => this.playerReadyPromise_);

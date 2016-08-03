@@ -17,7 +17,7 @@
 import {dev, user} from '../log';
 import {fromClassForDoc} from '../service';
 import {getMode} from '../mode';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
 
@@ -163,12 +163,12 @@ export class ActionService {
    */
   installActionHandler(target, handler) {
     const debugid = target.tagName + '#' + target.id;
-    user.assert(target.id && target.id.substring(0, 4) == 'amp-',
+    user().assert(target.id && target.id.substring(0, 4) == 'amp-',
         'AMP element is expected: %s', debugid);
 
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
-      dev.assert(
+      dev().assert(
         isArray(currentQueue),
         'Expected queue to be an array: %s',
         debugid
@@ -180,13 +180,13 @@ export class ActionService {
 
     // Dequeue the current queue.
     if (currentQueue) {
-      timer.delay(() => {
+      timerFor(target.ownerDocument.defaultView).delay(() => {
         // TODO(dvoytenko, #1260): dedupe actions.
         currentQueue.forEach(invocation => {
           try {
             handler(invocation);
           } catch (e) {
-            dev.error(TAG_, 'Action execution failed:', invocation, e);
+            dev().error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
       }, 1);
@@ -225,7 +225,7 @@ export class ActionService {
    */
   actionInfoError_(s, actionInfo, target) {
     // Method not found "activate" on ' + target
-    user.assert(false, 'Action Error: ' + s +
+    user().assert(false, 'Action Error: ' + s +
         (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
         (target ? ' on [' + target + ']' : ''));
   }
@@ -432,7 +432,7 @@ export function parseActionMap(s, context) {
  * @private
  */
 function assertActionForParser(s, context, condition, opt_message) {
-  return user.assert(condition, 'Invalid action definition in %s: [%s] %s',
+  return user().assert(condition, 'Invalid action definition in %s: [%s] %s',
       context, s, opt_message || '');
 }
 

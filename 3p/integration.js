@@ -200,14 +200,14 @@ const waitForRenderStart = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user.assert(win.context.location.originValidated != null,
+  user().assert(win.context.location.originValidated != null,
       'Origin should have been validated');
 
-  user.assert(isTagNameAllowed(data.type, win.context.tagName),
+  user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user.assert(data,
+      user().assert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -413,7 +413,7 @@ function onResizeDenied(observerCallback) {
  * @param {string} entityId See comment above for content.
  */
 function reportRenderedEntityIdentifier(entityId) {
-  user.assert(typeof entityId == 'string',
+  user().assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
     id: entityId,
@@ -438,7 +438,7 @@ export function validateParentOrigin(window, parentLocation) {
     parentLocation.originValidated = false;
     return;
   }
-  user.assert(ancestors[0] == parentLocation.origin,
+  user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
@@ -467,7 +467,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user.assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
 }
 

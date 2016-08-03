@@ -16,7 +16,6 @@
 
 import {GestureRecognizer} from './gesture';
 import {calcVelocity} from './motion';
-import {timer} from './timer';
 
 
 /**
@@ -262,7 +261,7 @@ class SwipeRecognizer extends GestureRecognizer {
     if (!touches || touches.length != 1) {
       return false;
     }
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.startX_ = touches[0].clientX;
     this.startY_ = touches[0].clientY;
     return true;
@@ -338,7 +337,7 @@ class SwipeRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
@@ -570,7 +569,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     if (first) {
       this.startTime_ = this.lastTime_;
       this.velocityX_ = this.velocityY_ = 0;
@@ -693,7 +692,7 @@ export class PinchRecognizer extends GestureRecognizer {
     if (!touches || touches.length != 2) {
       return false;
     }
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
     this.startX1_ = touches[0].clientX;
     this.startY1_ = touches[0].clientY;
     this.startX2_ = touches[1].clientX;
@@ -759,7 +758,7 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   emit_(first, last, event) {
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     const deltaTime = this.lastTime_ - this.prevTime_;
     const deltaX = this.deltaX_();
     const deltaY = this.deltaY_();

@@ -20,7 +20,7 @@ import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -72,7 +72,7 @@ export function allowRenderOutsideViewport(element, win) {
  * @param {!Window} win
  */
 export function decrementLoadingAds(timerId, win) {
-  timer.cancel(timerId);
+  timerFor(win).cancel(timerId);
   const loadingAds = win[LOADING_ADS_WIN_ID_];
   if (loadingAds) {
     delete loadingAds[timerId];
@@ -91,7 +91,7 @@ export function incrementLoadingAds(win) {
     win[LOADING_ADS_WIN_ID_] = loadingAds;
   }
 
-  const timerId = timer.delay(() => {
+  const timerId = timerFor(win).delay(() => {
     // Unfortunately we don't really have a good way to measure how long it
     // takes to load an ad, so we'll just pretend it takes 1 second for
     // now.
@@ -272,7 +272,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.iframe_) {
-      user.assert(!this.isInFixedContainer_,
+      user().assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
       incrementLoadingAds(this.win);

@@ -32,7 +32,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
     return 1;
   }
 
-  public void testDevFineRemoval() throws Exception {
+  public void testDevFineRemovalDeprecated() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -59,6 +59,34 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
+  public void testDevFineRemoval() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine('hello world');",
+             "  console.log('this is preserved');",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  'hello world';",
+             "  console.log('this is preserved');",
+            "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  module$src$log.dev().fine();",
+             "  console.log('this is preserved');",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { fine: function() {}} } };",
+             "  console.log('this is preserved');",
+            "})()"));
+  }
+
   public void testDevErrorPreserve() throws Exception {
     test(
         LINE_JOINER.join(
@@ -75,7 +103,7 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertExpressionRemoval() throws Exception {
+  public void testDevAssertExpressionRemovalDeprecated() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -104,7 +132,36 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testDevAssertPreserveFirstArg() throws Exception {
+  public void testDevAssertExpressionRemoval() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  module$src$log.dev().assert('hello world');",
+             "  console.log('this is preserved');",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  \"hello world\";",
+             "  console.log('this is preserved');",
+            "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert();",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
+  }
+
+  public void testDevAssertPreserveFirstArgDeprecated() throws Exception {
     test(
         LINE_JOINER.join(
              "(function() {",
@@ -120,7 +177,23 @@ public class AmpPassTest extends Es6CompilerTestCase {
             "})()"));
   }
 
-  public void testShouldPreserveNoneCalls() throws Exception {
+  public void testDevAssertPreserveFirstArg() throws Exception {
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert(true, 'This is an error');",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = true;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
+  }
+
+  public void testShouldPreserveNoneCallsDeprecated() throws Exception {
     test(
         // Does reliasing
         LINE_JOINER.join(
@@ -133,6 +206,23 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "(function() {",
              "  var log = { dev: { assert: function() {} } };",
              "  var someValue = log.dev.assert;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
+  }
+
+  public void testShouldPreserveNoneCalls() throws Exception {
+    test(
+        // Does reliasing
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var module$src$log = { dev: function() { return { assert: function() {}} } };",
+             "  var someValue = module$src$log.dev().assert;",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }

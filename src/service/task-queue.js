@@ -15,7 +15,6 @@
  */
 
 import {dev} from '../log';
-import {timer} from '../timer';
 
 
 /**
@@ -93,10 +92,11 @@ export class TaskQueue {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    dev.assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    dev().assert(
+        !this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
-    this.lastEnqueueTime_ = timer.now();
+    this.lastEnqueueTime_ = Date.now();
   }
 
   /**
@@ -111,7 +111,7 @@ export class TaskQueue {
     if (!dequeued) {
       return false;
     }
-    this.lastDequeueTime_ = timer.now();
+    this.lastDequeueTime_ = Date.now();
     return true;
   }
 

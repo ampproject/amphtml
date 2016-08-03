@@ -22,7 +22,6 @@
  */
 
 import {getCookie, setCookie} from './cookies';
-import {timer} from './timer';
 
 
 /** @const {string} */
@@ -159,7 +158,7 @@ function getExperimentIds(win) {
 function saveExperimentIds(win, experimentIds) {
   win._experimentCookie = null;
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
-      timer.now() + COOKIE_EXPIRATION_INTERVAL);
+      Date.now() + COOKIE_EXPIRATION_INTERVAL);
 }
 
 /**

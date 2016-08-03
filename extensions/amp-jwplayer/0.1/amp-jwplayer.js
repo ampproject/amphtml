@@ -46,7 +46,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.height_ = getLengthNumeral(height);
 
     /** @private @const {string} */
-    this.contentid_ = user.assert(
+    this.contentid_ = user().assert(
       (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
       'Either the data-media-id or the data-playlist-id ' +
@@ -54,7 +54,7 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.element);
 
     /** @private @const {string} */
-    this.playerid_ = user.assert(
+    this.playerid_ = user().assert(
       this.element.getAttribute('data-player-id'),
       'The data-player-id attribute is required for <amp-jwplayer> %s',
       this.element);

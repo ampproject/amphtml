@@ -51,7 +51,7 @@ export function allocateVariant(win, experimentName, config) {
     hasConsentPromise = userNotificationManagerFor(win)
         .then(manager => manager.getNotification(config.consentNotificationId))
         .then(userNotification => {
-          user.assert(userNotification,
+          user().assert(userNotification,
               `Notification not found: ${config.consentNotificationId}`);
           return userNotification.isDismissed();
         });
@@ -87,7 +87,7 @@ export function allocateVariant(win, experimentName, config) {
  */
 function validateConfig(config) {
   const variants = config.variants;
-  user.assert(isObject(variants) && Object.keys(variants).length > 0,
+  user().assert(isObject(variants) && Object.keys(variants).length > 0,
     'Missing experiment variants config.');
   if (config.group) {
     assertName(config.group);
@@ -97,14 +97,14 @@ function validateConfig(config) {
     if (variants.hasOwnProperty(variantName)) {
       assertName(variantName);
       const percentage = variants[variantName];
-      user.assert(
+      user().assert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
           'Invalid percentage %s:%s. Has to be in range of (0,100)',
           variantName, percentage);
       totalPercentage += percentage;
     }
   }
-  user.assert(totalPercentage./*avoid float precision error*/toFixed(6) <= 100,
+  user().assert(totalPercentage./*avoid float precision*/toFixed(6) <= 100,
       'Total percentage is bigger than 100: ' + totalPercentage);
 }
 
@@ -132,6 +132,6 @@ function getBucketTicket(win, group, opt_cidScope) {
 }
 
 function assertName(name) {
-  user.assert(nameValidator.test(name),
+  user().assert(nameValidator.test(name),
       `Invalid name ${name}: %s. Allowed chars are [a-zA-Z0-9-_].`);
 }

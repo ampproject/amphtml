@@ -149,6 +149,8 @@ describe('amp-install-serviceworker', () => {
             },
           },
         },
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
       };
       implementation.win = win;
       documentInfo = {

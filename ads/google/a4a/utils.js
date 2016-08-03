@@ -20,7 +20,6 @@ import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoFor} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
@@ -171,7 +170,7 @@ function buildAdUrl(
       {name: 'ref', value: referrer},
     ]
   );
-  dtdParam.value = elapsedTimeWithCeiling(timer.now(), startTime);
+  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
   return buildUrl(
       baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
@@ -214,7 +213,7 @@ function iframeNestingDepth(global) {
     win = win.parent;
     depth++;
   }
-  dev.assert(win == global.top);
+  dev().assert(win == global.top);
   return depth;
 }
 
@@ -299,7 +298,7 @@ function secondWindowFromTop(global) {
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
-  dev.assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == global.top);
   return secondFromTop;
 }
 

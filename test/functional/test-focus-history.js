@@ -48,6 +48,8 @@ describe('FocusHistory', () => {
       addEventListener: (eventType, handler) => {
         windowEventListeners[eventType] = handler;
       },
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
     };
     focusHistory = new FocusHistory(testWindow, 10000);
   });

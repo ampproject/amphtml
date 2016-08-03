@@ -443,7 +443,7 @@ describe('LocalStorageBinding', () => {
   });
 
   it('should throw if localStorage is not supported', () => {
-    const errorSpy = sandbox.spy(dev, 'error');
+    const errorSpy = sandbox.spy(dev(), 'error');
 
     expect(errorSpy.callCount).to.equal(0);
     new LocalStorageBinding(windowApi);

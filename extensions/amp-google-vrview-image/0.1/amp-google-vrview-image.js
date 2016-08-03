@@ -35,7 +35,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @const @private {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
+      dev().warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
 
@@ -89,7 +89,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
   layoutCallback() {
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
+      dev().warn(TAG, `TAG ${TAG} disabled`);
       return Promise.resolve();
     }
 

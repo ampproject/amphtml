@@ -331,10 +331,10 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();

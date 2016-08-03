@@ -38,7 +38,7 @@ const TOLERANCE_ = 2;
 
 
 import {removeElement} from '../../../src/dom';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {vsyncFor} from '../../../src/vsync';
 import * as style from '../../../src/style';
 
@@ -79,14 +79,16 @@ export class FontLoader {
    */
   load(fontConfig, timeout) {
     this.fontConfig_ = fontConfig;
-    return timer.timeoutPromise(timeout, this.load_()).then(() => {
-      this.fontLoadResolved_ = true;
-      this.dispose_();
-    }).catch(reason => {
-      this.fontLoadRejected_ = true;
-      this.dispose_();
-      throw reason;
-    });
+    return timerFor(this.win_)
+        .timeoutPromise(timeout, this.load_())
+        .then(() => {
+          this.fontLoadResolved_ = true;
+          this.dispose_();
+        }, reason => {
+          this.fontLoadRejected_ = true;
+          this.dispose_();
+          throw reason;
+        });
   }
 
 

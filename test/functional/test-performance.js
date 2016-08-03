@@ -16,7 +16,6 @@
 
 import * as sinon from 'sinon';
 import {
-  ENSURE_NON_ZERO,
   Performance,
   installPerformanceService,
 } from '../../src/service/performance-impl';
@@ -60,12 +59,12 @@ describe('performance', () => {
           .to.be.jsonEqual({
             label: '_test',
             from: null,
-            value: ENSURE_NON_ZERO,
+            value: perf.initTime_,
           });
       expect(perf.events_[1]).to.be.jsonEqual({
         label: 'test',
         from: '_test',
-        value: ENSURE_NON_ZERO + 99,
+        value: perf.initTime_ + 99,
       });
     });
 
@@ -468,9 +467,9 @@ describe('performance', () => {
             expect(tickSpy.firstCall.args[0]).to.equal('_pc');
             expect(tickSpy.secondCall.args[0]).to.equal('pc');
             expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(perf.initTime_);
             expect(Number(tickSpy.secondCall.args[2]))
-                .to.equal(ENSURE_NON_ZERO + 400);
+                .to.equal(perf.initTime_ + 400);
           });
         });
       });
@@ -485,9 +484,9 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('_pc');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(perf.initTime_);
           expect(Number(tickSpy.secondCall.args[2])).to.equal(
-              ENSURE_NON_ZERO + 1);
+              perf.initTime_ + 1);
         });
       });
     });
