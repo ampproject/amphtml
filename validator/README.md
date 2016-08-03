@@ -23,15 +23,15 @@ If you just want to validate a page, please see
 [our documentation over at ampproject.org](https://www.ampproject.org/docs/guides/validate.html).
 
 ## Chrome Extension
-Please see (https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
+Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
 ## Command Line Tool and Node.js API
 
-Please see (https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
+Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
 
 ## Web UI
 
-Please see (https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
+Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
 
 ## Building a Custom Validator
 
