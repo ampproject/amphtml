@@ -22,10 +22,6 @@ limitations under the License.
     <td>A stickyAd provides a way to fix ad at bottom of a page. The stickyAs serves as a container and the ad as its child will display as sticky-ad</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</div><div>Work in progress.</div></td>
-  </tr>
-  <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-sticky-ad" src="https://cdn.ampproject.org/v0/amp-sticky-ad-0.1.js">&lt;/script></code></td>
   </tr>
