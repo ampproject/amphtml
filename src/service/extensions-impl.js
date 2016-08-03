@@ -473,10 +473,10 @@ export function calculateExtensionScriptUrl(protocol, path, port, extensionId,
       return `/base/dist/v0/${extensionId}-0.1.max.js`;
     }
     if (path.indexOf('.max') >= 0 || path.startsWith('/max/')) {
-      return `${protocol}://localhost:${port}/dist/v0/${extensionId}-0.1.max.js`;
+      return `${protocol}//localhost:${port}/dist/v0/${extensionId}-0.1.max.js`;
     }
     if (path.indexOf('.min') >= 0 || path.startsWith('/min/')) {
-      return `${protocol}://localhost:${port}/dist/v0/${extensionId}-0.1.js`;
+      return `${protocol}//localhost:${port}/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
