@@ -258,18 +258,10 @@ self.addEventListener('fetch', event => {
   // Wait for the cachePromise and dbPromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
   const response = Promise.all([cachePromise, dbPromise]).then(() => {
-    // What version do we have for this client?
-    // TODO(jridgewell): We have a bit of a race condition here, where multiple
-    // fetch events can be issued before we decide which version to use. Thus,
-    // those that are already issued will have skipped this check and fall back
-    // on whichever version they already have cached. That version may not be
-    // uniform, which is a horrible thing. Fix this.
-    return clientsMap[clientId];
-  }).then(version => {
     // If we already registered this client, we must always use the same
     // version.
-    if (version) {
-      return version;
+    if (clientsMap[clientId]) {
+      return clientsMap[clientId];
     }
 
     // If not, do we have this version cached?
@@ -281,12 +273,21 @@ self.addEventListener('fetch', event => {
 
       // Tears! We have nothing cached, so we'll have to make a request.
       return requestVersion;
+    }).then((version) => {
+      // Determining the version to serve is racey, since there are parallel
+      // requests coming in for all the CDN JS files. If one of them "won"
+      // the race, respect the winner.
+      if (clientsMap[clientId]) {
+        return clientsMap[clientId];
+      }
+
+      clientsMap[clientId] = version;
+      return version;
     });
   }).then(version => {
     const versionedRequest = version === requestVersion ?
         request :
         new Request(versionedUrl(url, version), request);
-    clientsMap[clientId] = version;
 
     return cache.match(versionedRequest).then(response => {
       // Cache hit!
