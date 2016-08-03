@@ -24,15 +24,15 @@ data.s;
 data.sid;
 data.zid;
 data.pid;
-data.custom3
-window.uAd = {}
+data.custom3;
+window.uAd = {};
 window.uAd.embed;
 data.pageOpts;
 data.adUnits;
 data.clmb_slot;
 data.clmb_position;
 data.clmb_divid;
-data.clmb_section
+data.clmb_section;
 var Criteo;
 Criteo.DisplayAd;
 data.epl_si;
@@ -142,3 +142,10 @@ data.zergid;
 window.zergnetWidgetId;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
+
+data.ankv;
+data.ancat;
+data.anapiid;
+data.annid;
+data.anwid;
+data.antkey;
