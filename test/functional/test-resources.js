@@ -830,6 +830,22 @@ describe('Resources discoverWork', () => {
     expect(resources.pendingBuildResources_.length).to.equal(0);
   });
 
+  it('should update inViewport before scheduling layouts', () => {
+    resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+    const setInViewport = sandbox.spy(resource1, 'setInViewport');
+    const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload_');
+
+    resources.discoverWork_();
+
+    expect(resource1.isInViewport()).to.be.true;
+    expect(setInViewport).to.have.been.calledBefore(schedule);
+  });
+
 });
 
 
