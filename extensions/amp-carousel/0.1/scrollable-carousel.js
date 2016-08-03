@@ -17,7 +17,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Layout} from '../../../src/layout';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 import * as st from '../../../src/style';
@@ -34,8 +34,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    dev().fine(TAG, 'Building scrollable carousel');
-
     /** @private {number} */
     this.pos_ = 0;
 
@@ -47,8 +45,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
-      'whiteSpace': 'nowrap',
+      'white-space': 'nowrap',
       'overflow-x': 'auto',
+      'overflow-y': 'hidden',
+      '-webkit-overflow-scrolling': 'touch',
     });
     this.element.appendChild(this.container_);
 
@@ -101,10 +101,9 @@ export class AmpScrollableCarousel extends BaseCarousel {
       Animation.animate(this.element, pos => {
         this.container_./*OK*/scrollLeft = interpolate(pos);
       }, duration, curve).thenAlways(() => {
-        this.commitSwitch_(oldPos, newPos);
+        this.commitSwitch_(newPos);
       });
     }
-    this.pos_ = newPos;
   }
 
   /**
@@ -114,8 +113,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
   scrollHandler_() {
     const currentScrollLeft = this.container_./*OK*/scrollLeft;
     this.pos_ = currentScrollLeft;
-
-    dev.fine(TAG, 'currentScrollLeft:' + currentScrollLeft);
 
     if (this.scrollTimerId_ == null) {
       this.waitForScroll_(currentScrollLeft);
@@ -127,16 +124,15 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   waitForScroll_(startingScrollLeft) {
-    dev.fine(TAG, 'waitForScroll_');
-    this.scrollTimerId_ = timer.delay(() => {
-      //TODO(yuxichen): test out the threshold for identifying fast scrolling
+    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+      // TODO(yuxichen): test out the threshold for identifying fast scrolling
       if (Math.abs(startingScrollLeft - this.pos_) < 30) {
-        dev.fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
+        dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
             + this.pos_);
         this.scrollTimerId_ = null;
         this.commitSwitch_(this.pos_);
       } else {
-        dev.fine(TAG, 'fast scrolling: ' + startingScrollLeft + ' - '
+        dev().fine(TAG, 'fast scrolling: ' + startingScrollLeft + ' - '
             + this.pos_);
         this.waitForScroll_(this.pos_);
       }
@@ -148,12 +144,13 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    dev.fine(TAG, 'commitSwitch_');
+    dev().fine(TAG, 'commitSwitch_');
     this.updateInViewport_(pos, this.oldPos_);
     this.doLayout_(pos);
     this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.setControlsState();
     this.oldPos_ = pos;
+    this.pos_ = pos;
   }
 
   /**
