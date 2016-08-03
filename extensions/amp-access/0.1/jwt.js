@@ -190,10 +190,10 @@ export function pemToBinary(pem) {
   pem = pem.trim();
 
   // Remove pem prefix, e.g. "----BEING PUBLIC KEY----".
-  pem = pem.replace(/\-+BEGIN[^-]*\-+/, '');
+  pem = pem.replace(/^\-+BEGIN[^-]*\-+/, '');
 
   // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  pem = pem.replace(/\-+END[^-]*\-+/, '');
+  pem = pem.replace(/\-+END[^-]*\-+$/, '');
 
   // Remove line breaks.
   pem = pem.replace(/[\r\n]/g, '').trim();
