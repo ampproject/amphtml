@@ -23,6 +23,21 @@ import {toggle} from '../../../src/style';
 import {waitForRenderStart} from '../../../3p/integration';
 
 
+/**
+ * Allows listening for message from the element, unlisten afterward.
+ *
+ * @param {!Element}.
+ * @param {string} typeOfMessage.
+ * @param {function(!Object, !Window, string)} callback Called when a message of
+ *     this type arrives for this iframe.
+ */
+function listenOnce(element, typeOfMessage, callback) {
+  element.addEventListener(typeOfMessage, () => {
+    callback();
+    callback = null;
+  });
+};
+
 
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
@@ -72,7 +87,7 @@ class AmpStickyAd extends AMP.BaseElement {
       const borderBottom = this.element./*OK*/offsetHeight;
       this.viewport_.updatePaddingBottom(borderBottom);
       this.updateInViewport(this.ad_, true);
-      this.scheduleLayout(this.ad_);
+      this.scheduleLayoutForAd_();
     }
     return Promise.resolve();
   }
@@ -80,6 +95,7 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.viewport_.updatePaddingBottom(0);
+    this.element.classList.remove('amp-sticky-ad-loaded');
     return true;
   }
 
@@ -136,33 +152,43 @@ class AmpStickyAd extends AMP.BaseElement {
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
+        this.scheduleLayoutForAd_();
       });
-      // Get Ad promise for ad render-start
-      this.adRenderStartPromise_ = this.ad_.implementation_.renderStartPromise;
-      if (this.adRenderStartPromise_) {
-        this.delayAdLoad_();
-      } else {
-        //add listener for element not attached and not built
-        this.ad_.addEventListener('amp:built', () => {
-          this.adRenderStartPromise_ =
-              this.ad_.implementation_.renderStartPromise;
-          this.delayAdLoad_();
-          // schedule Layout again after amp-ad is built.
-          this.scheduleLayout(this.ad_);
-        });
-      }
+    }
+  }
+
+  scheduleLayoutForAd_() {
+    if (this.ad_.isBuilt()) {
+      this.layoutAd_();
+    } else {
+      listenOnce(this.ad_, 'amp:built', () => {
+        console.log('after build');
+        this.layoutAd_();
+      });
+    }
+  }
+
+  layoutAd_() {
+    if (!this.ad_.isFirstLayoutCompleted()) {
+      this.scheduleLayout(this.ad_);
+      this.displayAfterAdLoad_();
+    } else {
+      this.scheduleLayout(this.ad_);
+      this.delayAdLoad_();
     }
   }
 
   delayAdLoad_() {
-    const type = this.ad_.getAttribute('type');
-    if (waitForRenderStart.indexOf(type) < 0) {
-      timer.delay(this.boundDisplayAfterAdLoad_(), 1000);
-    } else {
-      this.adRenderStartPromise_.then(() => {
-        this.boundDisplayAfterAdLoad_();
-      });
-    }
+    listenOnce(this.ad_, 'amp:load:end', () => {
+      const type = this.ad_.getAttribute('type');
+      if (waitForRenderStart.indexOf(type) < 0) {
+        timer.delay(() => {
+          this.displayAfterAdLoad_();
+        }, 1000);
+      } else {
+        this.displayAfterAdLoad_();
+      }
+    });
   }
 
   displayAfterAdLoad_() {

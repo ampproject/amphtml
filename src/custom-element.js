@@ -528,6 +528,10 @@ function createBaseAmpElementProto(win) {
     return this.built_;
   };
 
+  ElementProto.isFirstLayoutCompleted = function() {
+    return this.isFirstLayoutCompleted_;
+  };
+
   /**
    * Get the priority to load the element.
    * @return {number} @this {!Element}
@@ -923,6 +927,7 @@ function createBaseAmpElementProto(win) {
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
     this.dispatchCustomEventForTesting('amp:load:start');
+    this.implementation_.isFirstLayoutCompleted_ = this.isFirstLayoutCompleted_;
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
@@ -935,6 +940,8 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
+        console.log('dispatch Event');
+        this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not
