@@ -39,7 +39,7 @@ export class Crypto {
   sha384(input) {
     if (this.subtle_) {
       try {
-        return this.subtle_.digest('SHA-384',
+        return this.subtle_.digest({name: 'SHA-384'},
                 input instanceof Uint8Array ? input : str2ab(input))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
