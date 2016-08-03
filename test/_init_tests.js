@@ -139,6 +139,7 @@ beforeEach(beforeTest);
 function beforeTest() {
   window.AMP_MODE = null;
   window.AMP_TEST = true;
+  window.ampExtendedElements = {};
   installDocService(window, true);
 }
 
