@@ -440,11 +440,9 @@ export class Extensions {
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     const pathStr = this.win.location.pathname;
-    const protocol = this.win.location.protocol;
-    const port = this.win.location.port;
     const useCompiledJs = shouldUseCompiledJs();
-    const scriptSrc = calculateExtensionScriptUrl(protocol, pathStr, port,
-        extensionId, getMode().test, useCompiledJs);
+    const scriptSrc = calculateExtensionScriptUrl(pathStr, extensionId,
+        getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -454,17 +452,15 @@ export class Extensions {
 /**
  * Calculate script url for amp-ad.
  * @visibleForTesting
- * @param {string} protocol Serving protocol
  * @param {string} path Location path of the window
- * @param {string} port Serving port
  * @param {string} extensionId
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
  * @visibleForTesting
  */
-export function calculateExtensionScriptUrl(protocol, path, port, extensionId,
-    isTest, isUsingCompiledJs) {
+export function calculateExtensionScriptUrl(path, extensionId, isTest,
+    isUsingCompiledJs) {
   if (getMode().localDev) {
     if (isTest) {
       if (isUsingCompiledJs) {
@@ -473,10 +469,10 @@ export function calculateExtensionScriptUrl(protocol, path, port, extensionId,
       return `/base/dist/v0/${extensionId}-0.1.max.js`;
     }
     if (path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
-      return `${protocol}//localhost:${port}/dist/v0/${extensionId}-0.1.max.js`;
+      return `/dist/v0/${extensionId}-0.1.max.js`;
     }
     if (path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
-      return `${protocol}//localhost:${port}/dist/v0/${extensionId}-0.1.js`;
+      return `/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
