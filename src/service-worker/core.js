@@ -295,7 +295,7 @@ self.addEventListener('fetch', event => {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (versionedRequest !== request) {
+        if (version !== requestVersion && requestVersion.endsWith(VERSION)) {
           fetchAndCache(request);
         }
 
