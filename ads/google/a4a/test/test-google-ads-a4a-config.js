@@ -128,28 +128,33 @@ describe('a4a_config', () => {
            'googleAdsIsA4AEnabled').to.be.true;
   });
 
-  ['?PARAM', '?p=blarg&PARAM', '?p=blarg&PARAM&s=987'].forEach(urlBase => {
+  const urlBaseConditions = ['?exp=PARAM',
+    '?p=blarg&exp=PARAM',
+    '?p=blarg&exp=PARAM&s=987',
+    '?p=blarg&exp=zort:123,PARAM,spaz:987&s=987'];
+  urlBaseConditions.forEach(urlBase => {
 
-    it(`should force experiment param from URL when pattern=${urlBase}`, () => {
-      win.location.search = urlBase.replace('PARAM', 'a4a=2');
-      rand.onFirstCall().returns(2);  // Force experiment off.
-      const element = document.createElement('div');
-      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
-             'googleAdsIsA4AEnabled').to.be.true;
-      expect(win.document.cookie).to.be.null;
-      expect(rand.called, 'rand called at least once').to.be.false;
-      expect(element.getAttribute('data-experiment-id')).to.equal(
-          BRANCHES.experiment);
-    });
+    it(`should force experiment param from URL when pattern=${urlBase}`,
+        () => {
+          win.location.search = urlBase.replace('PARAM', 'a4a:2');
+          rand.onFirstCall().returns(2);  // Force experiment off.
+          const element = document.createElement('div');
+          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
+              'googleAdsIsA4AEnabled').to.be.true;
+          expect(win.document.cookie).to.be.null;
+          expect(rand.called, 'rand called at least once').to.be.false;
+          expect(element.getAttribute('data-experiment-id')).to.equal(
+              BRANCHES.experiment);
+        });
 
     it(`should force control param from URL when pattern=${urlBase}`, () => {
-      win.location.search = urlBase.replace('PARAM', 'a4a=1');
+      win.location.search = urlBase.replace('PARAM', 'a4a:1');
       rand.onFirstCall().returns(2);  // Force experiment off.
       const element = document.createElement('div');
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
-             'googleAdsIsA4AEnabled').to.be.false;
+          'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(rand.called, 'rand called at least once').to.be.false;
       expect(element.getAttribute('data-experiment-id')).to.equal(
@@ -157,18 +162,17 @@ describe('a4a_config', () => {
     });
 
     it(`should exclude all experiment IDs when pattern=${urlBase}`, () => {
-      win.location.search = urlBase.replace('PARAM', 'a4a=0');
+      win.location.search = urlBase.replace('PARAM', 'a4a:0');
       rand.onFirstCall().returns(2);  // Force experiment off.
       const element = document.createElement('div');
       // Should not register as 'A4A enabled', but should still attach the
       // control experiment ID.
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, BRANCHES),
-             'googleAdsIsA4AEnabled').to.be.false;
+          'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
       expect(rand.called, 'rand called at least once').to.be.false;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
-
   });
 
 });

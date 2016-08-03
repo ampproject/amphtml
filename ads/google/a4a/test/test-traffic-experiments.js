@@ -23,12 +23,12 @@ import {
   mergeExperimentIds,
   setupPageExperiments,
   validateExperimentIds,
-} from '../../ads/google/a4a/traffic-experiments';
+} from '../traffic-experiments';
 import {
   isExperimentOn,
   resetExperimentToggles_,
-} from '../../src/experiments';
-import {dev} from '../../src/log';
+} from '../../../../src/experiments';
+import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 /** @private @const Tag used in dev log messages */

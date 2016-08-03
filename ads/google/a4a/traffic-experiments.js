@@ -26,6 +26,7 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{string: {branches: !Branches}}} */
 export let Branches;
@@ -89,10 +90,22 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
  * @visibleForTesting
  */
 function handleUrlParameters(win, experimentId, branches) {
-  const a4aParam = /(?:\?|&)a4a=([0-9]+)/.exec(win.location.search);
+  // The URL for a Google-search-served experiment looks like:
+  //   https://cdn.ampproject.org/path/to/file.html?param0=a&exp=a4a:X&param1=b
+  // where the 'exp' parameter has the form:
+  //   exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN
+  // and the X is one of our control values: {0, 1, 2}.
+  const parsedQuery = parseQueryString(win.location.search);
+  let a4aParam = null;
+  if (parsedQuery['exp']) {
+    const parts = parsedQuery['exp'].split(',');
+    a4aParam = parts.find(x => { return x.substr(0, 4) == 'a4a:'; });
+  }
   if (a4aParam) {
-    // If a4aParam is non-null, it necessarily has at least 2 elements.
-    switch (a4aParam[1]) {
+    // In the future, we may want to specify multiple experiments in the a4a
+    // arg.  For the moment, however, assume that it's just a single flag.
+    const arg = a4aParam.split(':', 2)[1];
+    switch (arg) {
       case '0':
         // Not selected into experiment.  Disable the experiment altogether, so
         // that setupPageExperiments doesn't accidentally enable it.
@@ -107,8 +120,7 @@ function handleUrlParameters(win, experimentId, branches) {
         forceExperimentBranch(win, experimentId, branches.experiment);
         break;
       default:
-        dev().warn('a4a-config', 'Unknown a4a URL parameter: ',
-                 a4aParam[1]);
+        dev.warn('a4a-config', 'Unknown a4a URL parameter: ', arg);
     }
   }
 }
