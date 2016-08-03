@@ -419,6 +419,31 @@ describe('XHR', function() {
       });
     });
 
+    describe('#fetchText', () => {
+      const TEST_TEXT = 'test text';
+      let fetchStub;
+
+      beforeEach(() => {
+        const mockXhr = {
+          status: 200,
+          responseText: TEST_TEXT,
+        };
+        fetchStub = sandbox.stub(xhr, 'fetchAmpCors_',
+            () => Promise.resolve(new FetchResponse(mockXhr)));
+      });
+
+      it('should be able to fetch a document', () => {
+        const promise = xhr.fetchText('/text.html');
+        expect(fetchStub.calledWith('/text.html', {
+          method: 'GET',
+          headers: {'Accept': 'text/plain'},
+        })).to.be.true;
+        return promise.then(text => {
+          expect(text).to.equal(TEST_TEXT);
+        });
+      });
+    });
+
     describe('#fetch ' + test.desc, () => {
       const creative = '<html><body>This is a creative</body></html>';
 
