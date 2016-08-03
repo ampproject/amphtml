@@ -1,41 +1,14 @@
-# amphtml-validator Node.js package (Beta!)
+# amphtml-validator Node.js Package
 
-## Using the command-line tool (Beta!)
+This package is published and available at
+https://www.npmjs.com/package/amphtml-validator.
 
-To install this as a command line tool, type `npm install -g amphtml-validator`.
+## Command Line Tool
 
-Now let's validate a real AMP HTML page.
-```
-$ amphtml-validator https://www.ampproject.org/
-https://www.ampproject.org/: PASS
-```
+The `amphtml-validator` command line tool is documented here:
+https://www.ampproject.org/docs/guides/validate.html#command-line-tool
 
-How about an empty file? Turns out an empty file is not valid AMP.
-```
-$ echo > empty.html
-$ amphtml-validator empty.html
-empty.html:1:0 The mandatory tag 'html doctype' is missing or incorrect.
-empty.html:1:0 The mandatory tag 'html ⚡ for top-level html' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-empty.html:1:0 The mandatory tag 'head' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-...
-```
-
-OK, let's try a better starting point. Let's verify that this document is
-valid AMP.
-```
-$ amphtml-validator https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html
-https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html: PASS
-```
-
-Great, we download it and edit it. You may use `vim` if you don't like Emacs.
-```
-$ wget --output-document=hello-amp.html https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html
-$ amphtml-validator hello-amp.html
-hello-amp.html: PASS
-$ emacs hello-amp.html
-```
-
-## Using the Node.js API (Beta!)
+## Node.js API (Beta!)
 
 This API is new and still experimental, feedback is especially welcome.
 
