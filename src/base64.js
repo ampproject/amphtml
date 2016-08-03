@@ -15,20 +15,20 @@
  */
 
 
+import {dev} from './log';
+
+
 /**
  * Converts a string which holds 8-bit code points, such as the result of atob,
  * into an ArrayBuffer with the corresponding bytes.
  * @param {string} str
  * @return {!Uint8Array}
- * @throws {!Error} when input string contains chars out of range [0,255]
  */
 export function stringToBytes(str) {
   const bytes = new Uint8Array(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str.charCodeAt(i);
-    if (charCode > 255) {
-      throw Error('Characters must be in range [0,255]');
-    }
+    dev.assert(charCode <= 255, 'Characters must be in range [0,255]');
     bytes[i] = charCode;
   }
   return bytes;
