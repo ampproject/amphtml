@@ -164,6 +164,27 @@ export class Xhr {
   }
 
   /**
+   * Fetches text based on the fetch polyfill.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<string>}
+   */
+  fetchText(input, opt_init) {
+    const init = opt_init || {};
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    init.headers['Accept'] = 'text/plain';
+    return this.fetchAmpCors_(input, init).then(response => {
+      return assertSuccess(response);
+    }).then(response => response.text());
+  }
+
+  /**
    * Creates an XHR request with responseType=document
    * and returns the `FetchResponse` object.
    *
