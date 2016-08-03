@@ -450,40 +450,40 @@ describe('Extensions', () => {
     it('with local mode for testing with compiled js', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
-          'amp-ad', true, true);
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.html', '8000', 'amp-ad', true, true);
       expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode for testing without compiled js', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
-        'amp-ad', true, false);
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.html', '8000', 'amp-ad', true, false);
       expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with local mode normal pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
-          'amp-ad');
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.html', '8000', 'amp-ad');
       expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
     });
 
     it('with local mode min pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples/ads.amp.min.html', 'amp-ad');
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.min.html', '8000', 'amp-ad');
       expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode max pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples/ads.amp.max.html', 'amp-ad');
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.max.html', '8000', 'amp-ad');
       expect(script).to.equal(
           'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });
@@ -492,9 +492,45 @@ describe('Extensions', () => {
       window.AMP_MODE = {localDev: false, version: 123};
       expect(getMode().localDev).to.be.false;
       expect(getMode().version).to.equal(123);
-      const script = calculateExtensionScriptUrl('', 'amp-ad');
+      const script = calculateExtensionScriptUrl('', '', '', 'amp-ad');
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
+    });
+
+    it('with document proxy mode: max', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl(
+          'http', '/max/output.jsbin.com/pegizoq/quiet', '8000', 'amp-ad');
+      expect(script).to.equal(
+          'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
+    });
+
+    it('with document proxy mode: min', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl(
+          'http', '/min/output.jsbin.com/pegizoq/quiet', '8000', 'amp-ad');
+      expect(script).to.equal(
+          'http://localhost:8000/dist/v0/amp-ad-0.1.js');
+    });
+
+    it('with custom port', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl('http',
+          'examples/ads.amp.max.html', '9876', 'amp-ad');
+      expect(script).to.equal(
+          'http://localhost:9876/dist/v0/amp-ad-0.1.max.js');
+    });
+
+    it('via https', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl('https',
+          'examples/ads.amp.max.html', '8000', 'amp-ad');
+      expect(script).to.equal(
+          'https://localhost:8000/dist/v0/amp-ad-0.1.max.js');
     });
   });
 });
