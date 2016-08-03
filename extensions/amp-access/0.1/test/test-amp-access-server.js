@@ -97,6 +97,7 @@ describe('AccessServerAdapter', () => {
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
+        getAuthorizationTimeout: () => 3000,
         isAuthorizationEnabled: () => true,
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
