@@ -272,6 +272,19 @@ export function parseExperimentIds(idString) {
 }
 
 /**
+ * Checks whether a (possibly empty) experiment ID string (comma-separated)
+ * contains a specific, single ID.
+ *
+ * @param idString  {?string} Comma-separated list of ID strings, per
+ *   #parseExperimentIds.
+ * @param id {?string} Id to look up in the `idString`.
+ * @return {boolean}
+ */
+export function containsExperimentId(idString, id) {
+  return parseExperimentIds(idString).some(x => { return x === id; });
+}
+
+/**
  * Checks that all string experiment IDs in a list are syntactically valid
  * (integer base 10).
  *

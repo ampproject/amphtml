@@ -21,6 +21,7 @@ import {
   addExperimentIdToElement,
   getPageExperimentBranch,
   mergeExperimentIds,
+  containsExperimentId,
   setupPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
@@ -319,6 +320,34 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('should return empty string for invalid input', () => {
       expect(mergeExperimentIds('frob')).to.equal('');
+    });
+  });
+
+  describe('#containsExperimentIds', () => {
+    it('should return false for empty input string and any query', () => {
+      expect(containsExperimentId('', '')).to.be.false;
+      expect(containsExperimentId('', null)).to.be.false;
+      expect(containsExperimentId('', 'frob')).to.be.false;
+    });
+    it('should return false for null input string and any query', () => {
+      expect(containsExperimentId(null, '')).to.be.false;
+      expect(containsExperimentId(null, null)).to.be.false;
+      expect(containsExperimentId(null, 'frob')).to.be.false;
+    });
+    it('should return false for real data string but mismatching query', () => {
+      expect(containsExperimentId('frob,gunk,zort', 'blub')).to.be.false;
+      expect(containsExperimentId('frob,gunk,zort', 'ort')).to.be.false;
+      expect(containsExperimentId('frob,gunk,zort', 'fro')).to.be.false;
+      expect(containsExperimentId('frob,gunk,zort', 'gunk,zort')).to.be.false;
+    });
+    it('should return true for singleton data and matching query', () => {
+      expect(containsExperimentId('frob', 'frob')).to.be.true;
+    });
+    it('should return true for matching query', () => {
+      assert.fail('gnort');
+      expect(containsExperimentId('frob,gunk,zort', 'frob')).to.be.true;
+      expect(containsExperimentId('frob,gunk,zort', 'gunk')).to.be.true;
+      expect(containsExperimentId('frob,gunk,zort', 'zort')).to.be.true;
     });
   });
 });
