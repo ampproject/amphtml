@@ -78,7 +78,7 @@ export class AmpAdApiHandler {
     this.iframe_.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ = new IntersectionObserver(
-        this.baseInstance_.element, this.iframe_, is3p);
+        this.baseInstance_, this.iframe_, is3p);
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
