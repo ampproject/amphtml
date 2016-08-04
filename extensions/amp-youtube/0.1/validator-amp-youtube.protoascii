@@ -54,20 +54,11 @@ tags: {  # <amp-youtube>
   also_requires_tag: "amp-youtube extension .js script"
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "['src', 'data-videoid']"
-  }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['src', 'data-videoid']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
+    mandatory_oneof: "['data-videoid', 'video-id' (deprecated)]"
   }
   attrs: {
     name: "video-id"
-    mandatory_oneof: "['src', 'data-videoid']"
+    mandatory_oneof: "['data-videoid', 'video-id' (deprecated)]"
     deprecation: "data-videoid"
     deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
   }
