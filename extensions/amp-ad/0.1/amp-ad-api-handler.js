@@ -145,10 +145,8 @@ export class AmpAdApiHandler {
     }
     // IntersectionObserver's listeners were cleaned up by
     // setInViewport(false) before #unlayoutCallback
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.destroy();
-      this.intersectionObserver_ = null;
-    }
+    this.intersectionObserver_.destroy();
+    this.intersectionObserver_ = null;
   }
 
   /**
