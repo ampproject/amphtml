@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {base64UrlDecode} from '../../../src/base64';
+import {
+  base64UrlDecode,
+  base64UrlDecodeToBytes,
+  pemToBytes,
+  stringToBytes,
+} from '../../../src/base64';
 import {tryParseJson} from '../../../src/json';
 import {xhrFor} from '../../../src/xhr';
 
@@ -90,13 +95,12 @@ export class JwtHelper {
         throw new Error('Only alg=RS256 is supported');
       }
       return this.loadKey_(keyUrl).then(key => {
-        const sig = convertStringToArrayBuffer(
-            decodeBase64WebSafe(decoded.sig));
+        const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
           /* options */ {name: 'RSASSA-PKCS1-v1_5'},
           key,
           sig,
-          convertStringToArrayBuffer(decoded.verifiable)
+          stringToBytes(decoded.verifiable)
         );
       }).then(isValid => {
         if (isValid) {
@@ -141,7 +145,7 @@ export class JwtHelper {
     return this.xhr_.fetchText(keyUrl).then(pem => {
       return this.subtle_.importKey(
         /* format */ 'spki',
-        pemToBinary(pem),
+        pemToBytes(pem),
         /* algo options */ {
           name: 'RSASSA-PKCS1-v1_5',
           hash: {name: 'SHA-256'},
@@ -150,28 +154,4 @@ export class JwtHelper {
         /* uses */ ['verify']);
     });
   }
-}
-
-
-/**
- * Converts a text in PEM format into a binary array buffer.
- * @param {string} pem
- * @return {!ArrayBuffer}
- * @visibleForTesting
- */
-export function pemToBinary(pem) {
-  // TODO(dvoytenko, #4281): Extract with other binary encoding utils (base 64)
-  // into a separate module.
-  pem = pem.trim();
-
-  // Remove pem prefix, e.g. "----BEING PUBLIC KEY----".
-  pem = pem.replace(/^\-+BEGIN[^-]*\-+/, '');
-
-  // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  pem = pem.replace(/\-+END[^-]*\-+$/, '');
-
-  // Remove line breaks.
-  pem = pem.replace(/[\r\n]/g, '').trim();
-
-  return convertStringToArrayBuffer(atob(pem));
 }

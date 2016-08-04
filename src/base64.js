@@ -65,3 +65,47 @@ export function base64UrlDecode(str) {
 export function base64UrlDecodeToBytes(str) {
   return stringToBytes(base64UrlDecode(str));
 }
+
+/**
+ * Converts a string which is in base64 encoding into the decoded string.
+ * base64 is defined in RFC 4648.
+ * Note that atob seems to accept input either with or without padding, so this
+ * routine will also.
+ * @param {string} str
+ * @return {string}
+ */
+export function base64Decode(str) {
+  return atob(str);
+}
+
+/**
+ * Converts a string which is in base64url encoding into an ArrayBuffer
+ * containing the decoded value.
+ * @param {string} str
+ * @return {!Uint8Array}
+ */
+export function base64DecodeToBytes(str) {
+  return stringToBytes(base64Decode(str));
+}
+
+
+/**
+ * Converts a text in PEM format into a binary array buffer.
+ * @param {string} pem
+ * @return {!Uint8Array}
+ * @visibleForTesting
+ */
+export function pemToBytes(pem) {
+  pem = pem.trim();
+
+  // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
+  pem = pem.replace(/^\-+BEGIN[^-]*\-+/, '');
+
+  // Remove pem suffix, e.g. "----END PUBLIC KEY----".
+  pem = pem.replace(/\-+END[^-]*\-+$/, '');
+
+  // Remove line breaks.
+  pem = pem.replace(/[\r\n]/g, '').trim();
+
+  return base64DecodeToBytes(pem);
+}
