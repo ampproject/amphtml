@@ -17,7 +17,7 @@
 import {
   base64UrlDecodeToBytes,
   stringToBytes,
-} from '../../../src/base64';
+} from '../../../src/utils/base64';
 import {dev} from '../../../src/log';
 
 const TAG_ = 'CryptoVerifier';

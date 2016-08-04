@@ -19,7 +19,7 @@ import {
   base64UrlDecodeToBytes,
   pemToBytes,
   stringToBytes,
-} from '../../../src/base64';
+} from '../../../src/utils/base64';
 import {tryParseJson} from '../../../src/json';
 import {xhrFor} from '../../../src/xhr';
 

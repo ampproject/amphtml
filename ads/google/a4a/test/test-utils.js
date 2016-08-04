@@ -17,7 +17,7 @@
 import {
   extractGoogleAdCreativeAndSignature,
 } from '../utils';
-import {base64UrlDecodeToBytes} from '../../../../src/base64';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
 describe('Google A4A utils', () => {
   describe('#extractGoogleAdCreativeAndSignature', () => {

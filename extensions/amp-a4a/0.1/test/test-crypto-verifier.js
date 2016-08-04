@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {
   stringToBytes,
-} from '../../../../src/base64';
+} from '../../../../src/utils/base64';
 import {
   importPublicKey,
   verifySignature,

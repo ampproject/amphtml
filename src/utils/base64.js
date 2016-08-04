@@ -15,7 +15,7 @@
  */
 
 
-import {dev} from './log';
+import {dev} from '../log';
 
 
 /**

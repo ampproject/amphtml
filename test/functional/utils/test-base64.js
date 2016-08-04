@@ -17,7 +17,7 @@
 import {
   base64UrlDecodeToBytes,
   pemToBytes,
-} from '../../src/base64';
+} from '../../../src/utils/base64';
 
 describe('base64UrlDecodeToBytes', function() {
   it('should map a sample string appropriately', () => {

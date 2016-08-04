@@ -23,7 +23,7 @@ import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
-import {base64UrlDecodeToBytes} from '../../../src/base64';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';

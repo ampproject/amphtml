@@ -18,7 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
-import {base64UrlDecodeToBytes} from '../../../../src/base64';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
