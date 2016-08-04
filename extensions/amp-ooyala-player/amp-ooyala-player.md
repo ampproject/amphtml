@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-ooyala"></a> `amp-ooyala`
+# <a name="amp-ooyala-player"></a> `amp-ooyala-player`
 
 <table>
   <tr>
@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ooyala" src="https://cdn.ampproject.org/v0/amp-ooyala-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
@@ -42,11 +42,11 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ooyala
+<amp-ooyala-player
     data-embedcode="Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ"
     data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
     data-playerid="6440813504804d76ba35c8c787a4b33c"
-    width="640" height="360"></amp-ooyala>
+    width="640" height="360"></amp-ooyala-player>
 ```
 
 ## Attributes
@@ -77,4 +77,4 @@ An optional attribute to specify a skin.json config file URL for player V4.
 
 ## Validation
 
-See [amp-ooyala rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala/0.1/validator-amp-ooyala.protoascii) in the AMP validator specification.
+See [amp-ooyala-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ooyala-player/0.1/validator-amp-ooyala-player.protoascii) in the AMP validator specification.

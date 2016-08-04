@@ -3,7 +3,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
-class AmpOoyala extends AMP.BaseElement {
+class AmpOoyalaPlayer extends AMP.BaseElement {
 
   /** @override */
   preconnectCallback(onLayout) {
@@ -36,15 +36,15 @@ class AmpOoyala extends AMP.BaseElement {
 
     const embedCode = user.assert(
         this.element.getAttribute('data-embedcode'),
-        'The data-embedcode attribute is required for <amp-ooyala> %s',
+        'The data-embedcode attribute is required for <amp-ooyala-player> %s',
         this.element);
     const pCode = user.assert(
         this.element.getAttribute('data-pcode'),
-        'The data-pcode attribute is required for <amp-ooyala> %s',
+        'The data-pcode attribute is required for <amp-ooyala-player> %s',
         this.element);
     const playerId = user.assert(
         this.element.getAttribute('data-playerid'),
-        'The data-playerid attribute is required for <amp-ooyala> %s',
+        'The data-playerid attribute is required for <amp-ooyala-player> %s',
         this.element);
 
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
@@ -72,4 +72,4 @@ class AmpOoyala extends AMP.BaseElement {
 
 };
 
-AMP.registerElement('amp-ooyala', AmpOoyala);
+AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);

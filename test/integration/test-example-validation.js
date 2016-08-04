@@ -75,7 +75,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
   const errorWhitelist = [
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
-    /DISALLOWED_TAG amp-ooyala/,
+    /DISALLOWED_TAG amp-ooyala-player/,
   ];
 
   const usedWhitelist = [];
