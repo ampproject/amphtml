@@ -44,7 +44,7 @@ class AmpKaltura extends AMP.BaseElement {
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);
@@ -79,7 +79,7 @@ class AmpKaltura extends AMP.BaseElement {
     });
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
       this.element.getAttribute('data-partner'),
       'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element);

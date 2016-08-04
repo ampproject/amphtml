@@ -11,20 +11,32 @@
     <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
     <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
     <style amp-custom>
-        input:invalid {
+        input.user-invalid {
             background-color: #dc4e41;
+        }
+
+        input.user-valid {
+            background-color: #4CAF50;
+        }
+
+        fieldset.user-invalid {
+            border: 3px solid #dc4e41;
+        }
+
+        fieldset.user-valid {
+            border: 3px solid #4CAF50;
         }
 
         form .form-message {
             display: none;
         }
 
-        form:invalid .invalid-message {
+        form.user-invalid .invalid-message {
             display: block;
             color: #dc4e41;
         }
 
-        form:valid .valid-message {
+        form.user-valid .valid-message {
             display: block;
             color: #4CAF50;
         }
@@ -73,10 +85,10 @@
         <input type="submit" value="Subscribe">
     </fieldset>
 
-    <div class="invalid-message">
+    <div class="form-message invalid-message">
         There are some input that needs fixing. Please fix them.
     </div>
-    <div class="valid-message">
+    <div class="form-message valid-message">
         Everything looks good, you can submit now!
     </div>
 </form>

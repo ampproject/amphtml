@@ -34,7 +34,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
     if (!this.isExperimentOn_) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
       return;
     }
@@ -96,7 +96,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const viewportHeight = viewport.getHeight();
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
-    user.assert(
+    user().assert(
       layoutBox.top >= viewportHeight,
       '<amp-fx-flying-carpet> elements must be positioned after the first ' +
       'viewport: %s Current position: %s. Min: %s',
@@ -104,7 +104,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       layoutBox.top,
       viewportHeight
     );
-    user.assert(
+    user().assert(
       layoutBox.bottom <= docHeight - viewportHeight,
       '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',

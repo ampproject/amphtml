@@ -39,7 +39,7 @@ describe('SignInProtocol', () => {
     sandbox = sinon.sandbox.create();
     toggleExperiment(window, 'amp-access-signin', true);
 
-    errorStub = sandbox.stub(user, 'error');
+    errorStub = sandbox.stub(user(), 'error');
 
     viewer = {
       isEmbedded: () => true,
@@ -146,7 +146,7 @@ describe('SignInProtocol', () => {
           .withExactArgs('getAccessTokenPassive', {
             origin: ORIGIN,
           })
-          .returns(Promise.resolve({accessToken: 'access token'}))
+          .returns(Promise.resolve('access token'))
           .once();
       return signin.getAccessTokenPassive().then(token => {
         expect(token).to.equal('access token');
@@ -181,7 +181,7 @@ describe('SignInProtocol', () => {
             origin: ORIGIN,
             accessGrant: 'X',
           })
-          .returns(Promise.resolve({accessToken: 'access token X'}))
+          .returns(Promise.resolve('access token X'))
           .once();
       return signin.postLoginResult({'access_grant': 'X'}).then(token => {
         expect(token).to.equal('access token X');
@@ -219,7 +219,7 @@ describe('SignInProtocol', () => {
             origin: ORIGIN,
             url: loginUrl,
           })
-          .returns(Promise.resolve({accessToken: 'access token X'}))
+          .returns(Promise.resolve('access token X'))
           .once();
       return signin.requestSignIn(loginUrl).then(result => {
         expect(result).to.equal('');

@@ -20,7 +20,7 @@ import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platform} from '../src/platform';
+import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 // Needs to be called before the custom elements are first made.
@@ -139,6 +139,7 @@ beforeEach(beforeTest);
 function beforeTest() {
   window.AMP_MODE = null;
   window.AMP_TEST = true;
+  window.ampExtendedElements = {};
   installDocService(window, true);
 }
 
@@ -146,7 +147,7 @@ function beforeTest() {
 // to selector.
 afterEach(() => {
   const cleanupTagNames = ['link', 'meta'];
-  if (!platform.isSafari()) {
+  if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }

@@ -36,7 +36,7 @@ class AmpVine extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const vineid = user.assert(this.element.getAttribute('data-vineid'),
+    const vineid = user().assert(this.element.getAttribute('data-vineid'),
       'The data-vineid attribute is required for <amp-vine> %s',
       this.element);
     const width = this.element.getAttribute('width');
