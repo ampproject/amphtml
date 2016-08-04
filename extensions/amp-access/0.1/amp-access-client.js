@@ -53,7 +53,8 @@ export class AccessClientAdapter {
     assertHttpsUrl(this.pingbackUrl_, '"pingback"');
 
     /** @const @private {number} */
-    this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(configJson);
+    this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
+        configJson);
 
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(win);
@@ -72,7 +73,8 @@ export class AccessClientAdapter {
     }
 
     let timeout = configJson['authorizationTimeout'];
-    user.assert(typeof timeout == 'number', '"authorizationTimeout" must be a number');
+    user.assert(typeof timeout == 'number',
+        '"authorizationTimeout" must be a number');
     if (!(getMode().localDev || getMode().development)) {
       timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
     }
