@@ -789,15 +789,26 @@ export class Viewer {
   }
 
   /**
-   * Retrieves the Base CID from the viewer
+   * Get/set the Base CID from/to the viewer.
+   * @param {string=} opt_data Stringified JSON object {cid, time}.
    * @return {!Promise<string|undefined>}
    */
-  getBaseCid() {
+  baseCid(opt_data) {
     return this.isTrustedViewer().then(trusted => {
       if (!trusted) {
         return undefined;
       }
-      return this.sendMessage('cid', undefined, true);
+      return this.sendMessage('cid', opt_data, true)
+          .then(data => {
+            // For backward compatibility: #4029
+            if (data && !isValidJson(data)) {
+              return JSON.stringify({
+                cid: data,
+                time: timer.now(), // CID returned from old API is always fresh
+              });
+            }
+            return data;
+          });
     });
   }
 
@@ -1063,6 +1074,14 @@ function getChannelError(opt_reason) {
   return new Error('No messaging channel: ' + opt_reason);
 }
 
+function isValidJson(json) {
+  try {
+    JSON.parse(json);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 /**
  * @typedef {{

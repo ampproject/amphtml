@@ -507,7 +507,7 @@ describe('Viewer', () => {
     sandbox.stub(viewer, 'sendMessage', () => {
       return Promise.reject('should not be requested');
     });
-    return viewer.getBaseCid().then(cid => {
+    return viewer.baseCid().then(cid => {
       expect(cid).to.be.undefined;
     });
   });
@@ -520,7 +520,7 @@ describe('Viewer', () => {
       expect(name).to.equal('cid');
       return Promise.resolve('from-viewer');
     });
-    return viewer.getBaseCid().then(cid => {
+    return viewer.baseCid().then(cid => {
       expect(cid).to.be.equal('from-viewer');
     });
   });

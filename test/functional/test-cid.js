@@ -26,6 +26,8 @@ import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
+const DAY = 24 * 3600 * 1000;
+
 describe('cid', () => {
 
   let isIframed;
@@ -33,6 +35,7 @@ describe('cid', () => {
   let clock;
   let fakeWin;
   let storage;
+  let viewerStorage;
   let cid;
   let crypto;
   let viewerBaseCidStub;
@@ -47,6 +50,7 @@ describe('cid', () => {
     clock = sandbox.useFakeTimers();
     whenFirstVisible = Promise.resolve();
     storage = {};
+    viewerStorage = null;
     fakeWin = {
       localStorage: {
         setItem: (key, value) => {
@@ -82,8 +86,11 @@ describe('cid', () => {
     sandbox.stub(viewer, 'whenFirstVisible', function() {
       return whenFirstVisible;
     });
-    viewerBaseCidStub = sandbox.stub(viewer, 'getBaseCid', function() {
-      return Promise.resolve('from-viewer');
+    viewerBaseCidStub = sandbox.stub(viewer, 'baseCid', function(opt_data) {
+      if (opt_data) {
+        viewerStorage = opt_data;
+      }
+      return Promise.resolve(viewerStorage || undefined);
     });
 
     return Promise
@@ -186,18 +193,45 @@ describe('cid', () => {
         'sha384(YYYhttp://www.origin.come2)');
   });
 
-  it('should retrieve cid from viewer if embedded', () => {
+  it('should read from viewer storage if embedded', () => {
     isIframed = true;
-    return compare('e2', 'sha384(from-viewerhttp://www.origin.come2)')
+    const expectedBaseCid = 'from-viewer';
+    viewerStorage = JSON.stringify({
+      time: 0,
+      cid: expectedBaseCid,
+    });
+    return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
-          expect(viewerBaseCidStub.callCount).to.equal(1);
+          sinon.assert.calledOnce(viewerBaseCidStub);
+          sinon.assert.notCalled(viewerBaseCidStub.withArgs(sinon.match.string));
 
-          // Ensure it's called only once.
-          return compare('e3', 'sha384(from-viewerhttp://www.origin.come3)');
+          // Ensure it's called only once since we cache it in memory.
+          return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
         })
         .then(() => {
-          expect(viewerBaseCidStub.callCount).to.equal(1);
-          return expect(cid.baseCid_).to.eventually.equal('from-viewer');
+          sinon.assert.calledOnce(viewerBaseCidStub);
+          sinon.assert.notCalled(viewerBaseCidStub.withArgs(sinon.match.string));
+          return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
+        });
+  });
+
+  it('should store to viewer storage if embedded', () => {
+    isIframed = true;
+    const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
+    return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
+        .then(() => {
+          sinon.assert.calledOnce(viewerBaseCidStub.withArgs(JSON.stringify({
+            time: 0,
+            cid: expectedBaseCid,
+          })));
+
+          // Ensure it's called only once since we cache it in memory.
+          return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
+        })
+        .then(() => {
+          sinon.assert.calledOnce(
+              viewerBaseCidStub.withArgs(sinon.match.string));
+          return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
   });
 
@@ -242,7 +276,6 @@ describe('cid', () => {
   });
 
   it('should expire on read after 365 days', () => {
-    const DAY = 24 * 3600 * 1000;
     const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
     return compare('e2', expected).then(() => {
       clock.tick(364 * DAY);
@@ -260,11 +293,52 @@ describe('cid', () => {
     });
   });
 
+  it('should expire on read after 365 days when embedded', () => {
+    isIframed = true;
+    const expectedBaseCid = 'from-viewer';
+    viewerStorage = JSON.stringify({
+      time: 0,
+      cid: expectedBaseCid,
+    });
+
+    const expectedIdFromViewer = 'sha384(from-viewerhttp://www.origin.come2)';
+    const expectedNewId = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
+    return compare('e2', expectedIdFromViewer).then(() => {
+      clock.tick(364 * DAY);
+      return compare('e2', expectedIdFromViewer).then(() => {
+        clock.tick(365 * DAY + 1);
+        removeMemoryCacheOfCid();
+        return compare('e2', expectedNewId);
+      });
+    });
+  });
+
   it('should set last access time once a day', () => {
-    const DAY = 24 * 3600 * 1000;
     const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
     function getStoredTime() {
       return JSON.parse(storage['amp-cid']).time;
+    }
+    clock.tick(100);
+    return compare('e2', expected).then(() => {
+      expect(getStoredTime()).to.equal(100);
+      removeMemoryCacheOfCid();
+      clock.tick(3600);
+      return compare('e2', expected).then(() => {
+        expect(getStoredTime()).to.equal(100);
+        removeMemoryCacheOfCid();
+        clock.tick(DAY);
+        return compare('e2', expected).then(() => {
+          expect(getStoredTime()).to.equal(100 + 3600 + DAY);
+        });
+      });
+    });
+  });
+
+  it('should set last access time once a day when embedded', () => {
+    isIframed = true;
+    const expected = 'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.origin.come2)';
+    function getStoredTime() {
+      return JSON.parse(viewerStorage).time;
     }
     clock.tick(100);
     return compare('e2', expected).then(() => {
@@ -442,9 +516,9 @@ describe('cid', () => {
     fakeWin.location.hostname = 'cdn.ampproject.org';
     const cid1 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
         hasConsent);
-    const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
-        hasConsent);
     return cid1.then(c1 => {
+      const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+          hasConsent);
       return cid2.then(c2 => {
         expect(c1).to.equal(c2);
       });

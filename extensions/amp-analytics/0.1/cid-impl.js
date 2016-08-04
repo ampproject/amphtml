@@ -238,45 +238,35 @@ function getBaseCid(cid, persistenceConsent) {
     return cid.baseCid_;
   }
   const win = cid.win;
-  const stored = read(win);
-  // See if we have a stored base cid and whether it is still valid
-  // in terms of expiration.
-  if (stored && !isExpired(stored)) {
-    if (shouldUpdateStoredTime(stored)) {
-      // Once per interval we mark the cid as used.
-      store(win, stored.cid);
-    }
-    return cid.baseCid_ = Promise.resolve(stored.cid);
-  }
-  // If we are being embedded, try to get the base cid from the viewer.
-  // Note, that we never try to persist to localStorage in this case.
-  const viewer = viewerFor(win);
-  if (viewer.isIframed()) {
-    return cid.baseCid_ = viewer.getBaseCid().then(cidValue => {
-      if (!cidValue) {
-        throw new Error('No CID');
+
+  return read(win).then(stored => {
+    let needsToStore = false;
+
+    // See if we have a stored base cid and whether it is still valid
+    // in terms of expiration.
+    if (stored && !isExpired(stored)) {
+      cid.baseCid_ = Promise.resolve(stored.cid);
+      if (shouldUpdateStoredTime(stored)) {
+        needsToStore = true;
       }
-      return cidValue;
-    });
-  }
+    } else {
+      // We need to make a new one.
+      cid.baseCid_ = cryptoFor(win)
+          .then(crypto => crypto.sha384Base64(getEntropy(win)));
+      needsToStore = true;
+    }
 
-  // We need to make a new one.
-  cid.baseCid_ = cryptoFor(win)
-      .then(crypto => crypto.sha384Base64(getEntropy(win)));
+    if (needsToStore) {
+      // Storing the value may require consent. We wait for the respective
+      // promise.
+      Promise.all([cid.baseCid_, persistenceConsent])
+          .then(results => {
+            store(win, results[0]);
+          });
+    }
 
-  // Storing the value may require consent. We wait for the respective
-  // promise.
-  Promise.all([cid.baseCid_, persistenceConsent])
-      .then(results => {
-        // The initial CID generation is inherently racy. First one that gets
-        // consent wins.
-        const newVal = results[0];
-        const relookup = read(win);
-        if (!relookup) {
-          store(win, newVal);
-        }
-      });
-  return cid.baseCid_;
+    return cid.baseCid_;
+  });
 }
 
 /**
@@ -286,26 +276,33 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(win, cidString) {
-  try {
-    const item = {
-      time: timer.now(),
-      cid: cidString,
-    };
-    const data = JSON.stringify(item);
-    win.localStorage.setItem('amp-cid', data);
-  } catch (ignore) {
-    // Setting localStorage may fail. In practice we don't expect that to
-    // happen a lot (since we don't go anywhere near the quota, but
-    // in particular in Safari private browsing mode it always fails.
-    // In that case we just don't store anything, which is just fine.
+  const item = {
+    time: timer.now(),
+    cid: cidString,
+  };
+  const data = JSON.stringify(item);
+  const viewer = viewerFor(win);
+  if (viewer.isIframed()) {
+    // If we are being embedded, try to save the base cid to the viewer.
+    viewer.baseCid(data);
+  } else {
+    try {
+      win.localStorage.setItem('amp-cid', data);
+    } catch (ignore) {
+      // Setting localStorage may fail. In practice we don't expect that to
+      // happen a lot (since we don't go anywhere near the quota, but
+      // in particular in Safari private browsing mode it always fails.
+      // In that case we just don't store anything, which is just fine.
+    }
   }
 }
 
 /**
- * Retrieves a stored cid item from localStorage. Returns undefined if
- * none was found
+ * Gets the persisted CID data as a promise. It tries to read from
+ * localStorage first then from viewer if it is in embedded mode.
+ * Returns null if none was found.
  * @param {!Window} win
- * @return {!BaseCidInfoDef|undefined}
+ * @return {!Promise<?BaseCidInfoDef>}
  */
 function read(win) {
   let data;
@@ -314,14 +311,22 @@ function read(win) {
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  if (!data) {
-    return undefined;
+  const viewer = viewerFor(win);
+  let dataPromise = Promise.resolve(data);
+  if (!data && viewer.isIframed()) {
+    // If we are being embedded, try to get the base cid from the viewer.
+    dataPromise = viewer.baseCid();
   }
-  const item = JSON.parse(data);
-  return {
-    time: item['time'],
-    cid: item['cid'],
-  };
+  return dataPromise.then(data => {
+    if (!data) {
+      return null;
+    }
+    const item = JSON.parse(data);
+    return {
+      time: item['time'],
+      cid: item['cid'],
+    };
+  });
 }
 
 /**
