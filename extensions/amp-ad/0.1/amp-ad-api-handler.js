@@ -25,6 +25,7 @@ import {
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
+import {getMode} from '../../..//src/mode';
 
 export class AmpAdApiHandler {
 
@@ -135,6 +136,11 @@ export class AmpAdApiHandler {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
+    if (getMode().test) {
+      if (this.baseInstance_.renderStartResolve_) {
+        this.baseInstance_.renderStartResolve_();
+      }
+    }
     return loadPromise(this.iframe_);
   }
 

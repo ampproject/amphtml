@@ -940,7 +940,6 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
-        console.log('dispatch Event');
         this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {

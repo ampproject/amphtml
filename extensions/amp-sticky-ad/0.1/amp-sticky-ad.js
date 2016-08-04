@@ -162,7 +162,6 @@ class AmpStickyAd extends AMP.BaseElement {
       this.layoutAd_();
     } else {
       listenOnce(this.ad_, 'amp:built', () => {
-        console.log('after build');
         this.layoutAd_();
       });
     }
