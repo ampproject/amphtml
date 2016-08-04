@@ -344,7 +344,6 @@ describe('all-traffic-experiments-tests', () => {
       expect(containsExperimentId('frob', 'frob')).to.be.true;
     });
     it('should return true for matching query', () => {
-      assert.fail('gnort');
       expect(containsExperimentId('frob,gunk,zort', 'frob')).to.be.true;
       expect(containsExperimentId('frob,gunk,zort', 'gunk')).to.be.true;
       expect(containsExperimentId('frob,gunk,zort', 'zort')).to.be.true;
