@@ -96,7 +96,7 @@ export class IntersectionObserver extends Observable {
     /** @private @const */
     this.baseElement_ = baseElement;
     /** @private @const {!Timer} */
-    this.timer_ = timerFor(baseElement.ownerDocument.defaultView);
+    this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
     /** @private {boolean} */
