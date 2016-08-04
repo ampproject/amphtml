@@ -47,7 +47,7 @@ class TestConfig {
      * List of predicate functions that are called before running each test
      * suite to check whether the suite should be skipped or not.
      * If any of the functions return 'true', the suite will be skipped.
-     * @type {!Array<function>}
+     * @type {!Array<function():boolean>}
      */
     this.skipMatchers = [];
     /**
