@@ -71,9 +71,6 @@ export class Viewport {
     /** @const {!./viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
-    /** @const {!../platform.Platform} */
-    this.platform_ = platformFor(win);
-
     /**
      * Used to cache the rect of the viewport.
      * @private {?../layout-rect.LayoutRectDef}
@@ -734,6 +731,9 @@ export class ViewportBindingNatural_ {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!../platform.Platform} */
+    this.platform_ = platformFor(win);
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
