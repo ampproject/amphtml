@@ -73,7 +73,6 @@ var forbiddenTerms = {
     message: realiasGetMode,
     whitelist: [
       'src/mode.js',
-      'dist.3p/current/integration.js',
     ]
   },
   'import[^}]*\\bgetMode as': {
