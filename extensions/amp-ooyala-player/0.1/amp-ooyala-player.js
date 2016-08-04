@@ -14,14 +14,10 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   createPlaceholderCallback() {
     const placeholderUrl = this.element.getAttribute("data-placeholder");
     if (placeholderUrl) {
-      const placeholder = this.getWin().document.createElement('div');
+      const placeholder = this.getWin().document.createElement('amp-img');
       placeholder.setAttribute('placeholder', '');
-      const image = this.getWin().document.createElement('amp-img');
-
-      image.setAttribute('src', placeholderUrl);
-      image.setAttribute('layout', 'fill');
-
-      placeholder.appendChild(image);
+      placeholder.setAttribute('src', placeholderUrl);
+      placeholder.setAttribute('layout', 'fill');
       return placeholder;
     } else {
       return null;
