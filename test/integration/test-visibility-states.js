@@ -319,13 +319,13 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         }).then(setupSpys);
       });
 
-      it('calls layout when going to VISIBLE', () => {
+      it('calls layout and resume when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 
@@ -336,7 +336,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 
