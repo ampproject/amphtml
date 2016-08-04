@@ -184,6 +184,7 @@ describe('IntersectionObserver', () => {
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
+    element.win = window;
     element.getVsync = function() {
       return {
         measure: function(fn) {
