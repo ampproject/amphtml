@@ -64,10 +64,15 @@ describe('AccessClientAdapter', () => {
     });
 
     it('should set authorization timeout if provided', () => {
+      let adapter;
+
       validConfig['authorizationTimeout'] = 5000;
-      const adapter = new AccessClientAdapter(window, validConfig, context);
-      expect(adapter.authorizationTimeout_).to
-          .equal(5000);
+      adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(5000);
+
+      validConfig['authorizationTimeout'] = 1000;
+      adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(1000);
     });
 
     it('should fail when authorization timeout is malformed', () => {

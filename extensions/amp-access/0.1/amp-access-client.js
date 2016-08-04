@@ -18,6 +18,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {timer} from '../../../src/timer';
 import {xhrFor} from '../../../src/xhr';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-access-client';
@@ -66,13 +67,14 @@ export class AccessClientAdapter {
    * @return {number}
    */
   buildConfigAuthorizationTimeout_(configJson) {
-    let timeout = DEFAULT_AUTHORIZATION_TIMEOUT;
-    if (configJson['authorizationTimeout']) {
-      timeout = configJson['authorizationTimeout'];
-      user.warn(TAG, 'Modifying authorizationTimeout is not recommended for non-dev environments');
+    if (!configJson['authorizationTimeout']) {
+      return DEFAULT_AUTHORIZATION_TIMEOUT;
     }
-    if (typeof timeout != 'number') {
-      user.assert(false, '"authorizationTimeout" must be a number');
+
+    let timeout = configJson['authorizationTimeout'];
+    user.assert(typeof timeout == 'number', '"authorizationTimeout" must be a number');
+    if (!(getMode().localDev || getMode().development)) {
+      timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
     }
     return timeout;
   }
