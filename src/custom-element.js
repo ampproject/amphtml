@@ -90,7 +90,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     registerElement(win, name, toClass);
     return;
   }
-  user.assert(knownElements[name] == ElementStub,
+  user().assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
   knownElements[name] = toClass;
@@ -186,12 +186,12 @@ export function applyLayout_(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  user.assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  user().assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
       parseLength(widthAttr) : widthAttr;
-  user.assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  user().assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   const inputHeight = heightAttr ? parseLength(heightAttr) : null;
-  user.assert(inputHeight !== undefined, 'Invalid height value: %s',
+  user().assert(inputHeight !== undefined, 'Invalid height value: %s',
       heightAttr);
 
   // Effective layout attributes. These are effectively constants.
@@ -230,24 +230,24 @@ export function applyLayout_(element) {
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE) {
-    user.assert(height, 'Expected height to be available: %s', heightAttr);
+    user().assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
-    user.assert(!width || width == 'auto',
+    user().assert(!width || width == 'auto',
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
   if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
-    user.assert(width && width != 'auto',
+    user().assert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
   if (layout == Layout.RESPONSIVE) {
-    user.assert(getLengthUnits(width) == getLengthUnits(height),
+    user().assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
   } else {
-    user.assert(heightsAttr === null,
+    user().assert(heightsAttr === null,
         'Unexpected "heights" attribute for none-responsive layout');
   }
 
@@ -523,7 +523,8 @@ function createBaseAmpElementProto(win) {
    * @return {number} @this {!Element}
    */
   ElementProto.getPriority = function() {
-    dev.assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
+    dev().assert(
+        this.isUpgraded(), 'Cannot get priority of unupgraded element');
     return this.implementation_.getPriority();
   };
 
@@ -540,7 +541,7 @@ function createBaseAmpElementProto(win) {
     if (this.isBuilt()) {
       return;
     }
-    dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
+    dev().assert(this.isUpgraded(), 'Cannot build unupgraded element');
     try {
       this.implementation_.buildCallback();
       this.preconnect(/* onLayout */ false);
@@ -758,7 +759,7 @@ function createBaseAmpElementProto(win) {
    */
   ElementProto.tryUpgrade_ = function(opt_impl) {
     const impl = opt_impl || this.implementation_;
-    dev.assert(!isStub(impl), 'Implementation must not be a stub');
+    dev().assert(!isStub(impl), 'Implementation must not be a stub');
     if (this.upgradeState_ != UpgradeState.NOT_UPGRADED) {
       // Already upgraded or in progress or failed.
       return;
@@ -865,7 +866,7 @@ function createBaseAmpElementProto(win) {
     const box = this.implementation_.getIntersectionElementLayoutBox();
     const rootBounds = this.implementation_.getViewport().getRect();
     return getIntersectionChangeEntry(
-        timerFor(this.ownerDocument.defaultView).now(),
+        Date.now(),
         rootBounds,
         box);
   };
@@ -896,7 +897,7 @@ function createBaseAmpElementProto(win) {
    */
   ElementProto.layoutCallback = function() {
     assertNotTemplate(this);
-    dev.assert(this.isBuilt(),
+    dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
@@ -1050,7 +1051,7 @@ function createBaseAmpElementProto(win) {
   ElementProto.enqueAction = function(invocation) {
     assertNotTemplate(this);
     if (!this.isBuilt()) {
-      dev.assert(this.actionQueue_).push(invocation);
+      dev().assert(this.actionQueue_).push(invocation);
     } else {
       this.executionAction_(invocation, false);
     }
@@ -1066,7 +1067,7 @@ function createBaseAmpElementProto(win) {
       return;
     }
 
-    const actionQueue = dev.assert(this.actionQueue_);
+    const actionQueue = dev().assert(this.actionQueue_);
     this.actionQueue_ = null;
 
     // TODO(dvoytenko, #1260): dedupe actions.
@@ -1301,7 +1302,7 @@ function createBaseAmpElementProto(win) {
     this.getOverflowElement();
     if (!this.overflowElement_) {
       if (overflown) {
-        user.warn(TAG_,
+        user().warn(TAG_,
             'Cannot resize element and overflow is not available', this);
       }
     } else {
@@ -1402,7 +1403,7 @@ export function getElementClassForTesting(elementName) {
 
 /** @param {!Element} element */
 function assertNotTemplate(element) {
-  dev.assert(!element.isInTemplate_, 'Must never be called in template');
+  dev().assert(!element.isInTemplate_, 'Must never be called in template');
 };
 
 /**

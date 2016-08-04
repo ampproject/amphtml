@@ -42,18 +42,18 @@ export class AmpShareTracking extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user.assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
+    user().assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
 
     /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
-    dev.fine(TAG, 'vendorHref_: ', this.vendorHref_);
+    dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
     /** @private {!Promise<!Object>} */
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_()]).then(results => {
-        dev.fine(TAG, 'incomingFragment: ', results[0]);
-        dev.fine(TAG, 'outgoingFragment: ', results[1]);
+        dev().fine(TAG, 'incomingFragment: ', results[0]);
+        dev().fine(TAG, 'outgoingFragment: ', results[1]);
         return {
           incomingFragment: results[0],
           outgoingFragment: results[1],
@@ -103,11 +103,11 @@ export class AmpShareTracking extends AMP.BaseElement {
       if (response.fragment) {
         return response.fragment;
       }
-      user.error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+      user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
           'have a fragment value.');
       return '';
-    }, error => {
-      user.error(TAG, 'The request to share-tracking endpoint failed:' + error);
+    }, err => {
+      user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
       return '';
     });
   }

@@ -34,7 +34,7 @@ describe('ie-media-bug', () => {
       isIe: () => false,
     };
     platformMock = sandbox.mock(platform);
-    devErrorStub = sandbox.stub(dev, 'error');
+    devErrorStub = sandbox.stub(dev(), 'error');
 
     windowApi = {
       innerWidth: 320,

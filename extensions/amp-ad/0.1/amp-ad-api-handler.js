@@ -71,14 +71,14 @@ export class AmpAdApiHandler {
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
-    user.assert(
+    user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe_);
-    this.intersectionObserver_ =
-        new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
+    this.intersectionObserver_ = new IntersectionObserver(
+        this.baseInstance_.element, this.iframe_, is3p);
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
@@ -87,7 +87,7 @@ export class AmpAdApiHandler {
       if (this.noContentCallback_) {
         this.noContentCallback_();
       } else {
-        user.info('no content callback was specified');
+        user().info('no content callback was specified');
       }
     }, this.is3p_);
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad

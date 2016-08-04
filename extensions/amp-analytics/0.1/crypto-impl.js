@@ -39,7 +39,7 @@ export class Crypto {
   sha384(input) {
     if (this.subtle_) {
       try {
-        return this.subtle_.digest('SHA-384',
+        return this.subtle_.digest({name: 'SHA-384'},
                 input instanceof Uint8Array ? input : str2ab(input))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
@@ -48,12 +48,12 @@ export class Crypto {
                   // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
                   if (e.message && e.message.indexOf('secure origin') < 0) {
                     // Log unexpected fallback.
-                    dev.error(TAG, FALLBACK_MSG, e);
+                    dev().error(TAG, FALLBACK_MSG, e);
                   }
                   return lib.sha384(input);
                 });
       } catch (e) {
-        dev.error(TAG, FALLBACK_MSG, e);
+        dev().error(TAG, FALLBACK_MSG, e);
       }
     }
     return Promise.resolve(lib.sha384(input));

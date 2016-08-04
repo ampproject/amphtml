@@ -71,6 +71,9 @@ describe('Activity getTotalEngagedTime', () => {
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
+      navigator: window.navigator,
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       // required to instantiate Viewport service
       addEventListener: () => {},
     };

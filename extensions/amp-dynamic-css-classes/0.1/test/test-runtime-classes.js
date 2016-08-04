@@ -46,6 +46,8 @@ describe('dynamic classes are inserted at runtime', () => {
       navigator: {
         userAgent: '',
       },
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
