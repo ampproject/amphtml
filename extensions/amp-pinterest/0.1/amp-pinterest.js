@@ -64,7 +64,7 @@ class AmpPinterest extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const selector = user.assert(this.element.getAttribute('data-do'),
+    const selector = user().assert(this.element.getAttribute('data-do'),
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element);
 

@@ -34,7 +34,7 @@ import * as dom from './dom';
 export function getElementService(win, id, providedByElement) {
   return getElementServiceIfAvailable(win, id, providedByElement).then(
       service => {
-        return user.assert(service,
+        return user().assert(service,
             'Service %s was requested to be provided through %s, ' +
             'but %s is not loaded in the current page. To fix this ' +
             'problem load the JavaScript file for %s in this page.',
@@ -79,7 +79,7 @@ export function getElementServiceIfAvailable(win, id, providedByElement) {
  */
 function isElementScheduled(win, elementName) {
   // Set in custom-element.js
-  dev.assert(win.ampExtendedElements,
+  dev().assert(win.ampExtendedElements,
       'win.ampExtendedElements not created yet');
   return !!win.ampExtendedElements[elementName];
 }

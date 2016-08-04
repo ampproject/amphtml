@@ -232,7 +232,7 @@ function getServiceInternal(holder, context, id, opt_factory,
   }
 
   if (!s.obj) {
-    dev.assert(opt_factory || opt_constructor,
+    dev().assert(opt_factory || opt_constructor,
         'Factory or class not given and service missing %s', id);
     s.obj = opt_constructor
         ? new opt_constructor(context)
@@ -289,7 +289,7 @@ function getServicePromiseOrNullInternal(holder, id) {
     if (s.obj) {
       return s.promise = Promise.resolve(s.obj);
     }
-    dev.assert(false, 'Expected object or promise to be present');
+    dev().assert(false, 'Expected object or promise to be present');
   }
   return null;
 }

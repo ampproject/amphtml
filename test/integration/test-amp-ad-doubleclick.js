@@ -48,7 +48,8 @@ describe.configure().retryOnSaucelabs().run('Rendering of one ad', () => {
   });
 
   // TODO(#3561): unmute the test.
-  it.configure().skipEdge().run('should create an iframe loaded', function() {
+  // it.configure().skipEdge().run('should create an iframe loaded', function() {
+  it.skip('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;

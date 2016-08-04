@@ -73,7 +73,7 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return dev.assert(Resource.forElementOptional(element),
+    return dev().assert(Resource.forElementOptional(element),
         'Missing resource prop on %s', element);
   }
 
@@ -92,7 +92,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev.assert(owner.contains(element), 'Owner must contain the element');
+    dev().assert(owner.contains(element), 'Owner must contain the element');
     element[OWNER_PROP_] = owner;
   }
 
@@ -232,7 +232,7 @@ export class Resource {
     try {
       this.element.build();
     } catch (e) {
-      dev.error(TAG, 'failed to build:', this.debugid, e);
+      dev().error(TAG, 'failed to build:', this.debugid, e);
       this.blacklisted_ = true;
       return;
     }
@@ -488,18 +488,18 @@ export class Resource {
       return Promise.reject('already failed');
     }
 
-    dev.assert(this.state_ != ResourceState.NOT_BUILT,
+    dev().assert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
-      dev.fine(TAG, 'layout canceled due to non pre-renderable element:',
+      dev().fine(TAG, 'layout canceled due to non pre-renderable element:',
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
     }
 
     if (!this.isInViewport() && !this.renderOutsideViewport()) {
-      dev.fine(TAG, 'layout canceled due to element not being in viewport:',
+      dev().fine(TAG, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
@@ -508,20 +508,20 @@ export class Resource {
     // Double check that the element has not disappeared since scheduling
     this.measure();
     if (!this.isDisplayed()) {
-      dev.fine(TAG, 'layout canceled due to element loosing display:',
+      dev().fine(TAG, 'layout canceled due to element loosing display:',
           this.debugid, this.state_);
       return Promise.resolve();
     }
 
     // Not-wanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      dev.fine(TAG, 'layout canceled since it wasn\'t requested:',
+      dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
-    dev.fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+    dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
 
@@ -548,9 +548,9 @@ export class Resource {
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {
-      dev.fine(TAG, 'layout complete:', this.debugid);
+      dev().fine(TAG, 'layout complete:', this.debugid);
     } else {
-      dev.fine(TAG, 'loading failed:', this.debugid, opt_reason);
+      dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
   }
@@ -589,7 +589,7 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
-    dev.fine(TAG, 'inViewport:', this.debugid, inViewport);
+    dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }
@@ -627,7 +627,7 @@ export class Resource {
   pause() {
     if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
       if (this.paused_) {
-        dev.error(TAG, 'pause() called on an already paused resource:',
+        dev().error(TAG, 'pause() called on an already paused resource:',
           this.debugid);
       }
       return;
@@ -681,7 +681,7 @@ export class Resource {
    * @export
    */
   forceAll() {
-    dev.assert(!this.resources_.isRuntimeOn());
+    dev().assert(!this.resources_.isRuntimeOn());
     let p = Promise.resolve();
     if (this.state_ == ResourceState.NOT_BUILT) {
       if (!this.element.isUpgraded()) {

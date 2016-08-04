@@ -490,7 +490,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev.error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('dom', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.

@@ -39,7 +39,7 @@ export class ElementStub extends BaseElement {
 
   /** @override */
   getPriority() {
-    return dev.assert(0, 'Cannot get priority of stubbed element');
+    return dev().assert(0, 'Cannot get priority of stubbed element');
   }
 
   /** @override */
