@@ -750,6 +750,10 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
+        setStyles(this.win.document.body, {
+          overflowX: 'hidden',
+          overflowY: 'visible',
+        });
       });
     }
 
