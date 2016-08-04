@@ -29,7 +29,6 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
-import {timer} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
@@ -112,7 +111,7 @@ class Cid {
     } else {
       getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
     }
-    user.assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
+    user().assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
@@ -154,7 +153,7 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
  * @param {string} cookie
  */
 function setCidCookie(win, scope, cookie) {
-  const expiration = timer.now() + BASE_CID_MAX_AGE_MILLIS;
+  const expiration = Date.now() + BASE_CID_MAX_AGE_MILLIS;
   setCookie(win, scope, cookie, expiration, {
     highestAvailableDomain: true,
   });
@@ -219,12 +218,12 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  user.assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  user().assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 
 /**
- * Returns the base cid for the current user. This string must not
+ * Returns the base cid for the current user(). This string must not
  * be exposed to users without hashing with the current source origin
  * and the externalCidScope.
  * On a proxy this value is the same for a user across all source
@@ -288,7 +287,7 @@ function getBaseCid(cid, persistenceConsent) {
 function store(win, cidString) {
   try {
     const item = {
-      time: timer.now(),
+      time: Date.now(),
       cid: cidString,
     };
     const data = JSON.stringify(item);
@@ -331,7 +330,7 @@ function read(win) {
  */
 function isExpired(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + BASE_CID_MAX_AGE_MILLIS < now;
 }
 
@@ -344,7 +343,7 @@ function isExpired(storedCidInfo) {
  */
 function shouldUpdateStoredTime(storedCidInfo) {
   const createdTime = storedCidInfo.time;
-  const now = timer.now();
+  const now = Date.now();
   return createdTime + ONE_DAY_MILLIS < now;
 }
 
@@ -365,7 +364,7 @@ function getEntropy(win) {
     return uint8array;
   }
   // Support for legacy browsers.
-  return String(win.location.href + timer.now() +
+  return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);
 }
 

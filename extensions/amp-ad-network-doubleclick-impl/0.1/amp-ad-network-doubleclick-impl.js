@@ -27,7 +27,6 @@ import {
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
-import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -52,7 +51,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const startTime = timer.now();
+    const startTime = Date.now();
     const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const slotRect = this.getIntersectionElementLayoutBox();

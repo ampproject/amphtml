@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 
 export class BaseCarousel extends AMP.BaseElement {
 
@@ -142,7 +142,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.getVsync().mutate(() => {
       const className = '-amp-carousel-button-start-hint';
       this.element.classList.add(className);
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         this.deferMutate(() => this.element.classList.remove(className));
       }, 1000);
     });

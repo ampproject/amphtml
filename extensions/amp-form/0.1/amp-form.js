@@ -120,7 +120,7 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user.assert(!startsWith(this.xhrAction_, urls.cdn),
+      user().assert(!startsWith(this.xhrAction_, urls.cdn),
           'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
@@ -137,7 +137,7 @@ export class AmpForm {
     this.form_.classList.add('-amp-form');
 
     const submitButtons = this.form_.querySelectorAll('input[type=submit]');
-    user.assert(submitButtons && submitButtons.length > 0,
+    user().assert(submitButtons && submitButtons.length > 0,
         'form requires at least one <input type=submit>: %s', this.form_);
 
     /** @const @private {!Array<!Element>} */

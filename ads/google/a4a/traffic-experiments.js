@@ -107,7 +107,7 @@ function handleUrlParameters(win, experimentId, branches) {
         forceExperimentBranch(win, experimentId, branches.experiment);
         break;
       default:
-        dev.warn('a4a-config', 'Unknown a4a URL parameter: ',
+        dev().warn('a4a-config', 'Unknown a4a URL parameter: ',
                  a4aParam[1]);
     }
   }

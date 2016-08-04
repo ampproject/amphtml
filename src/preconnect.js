@@ -22,7 +22,7 @@
 
 import {fromClass} from './service';
 import {parseUrl} from './url';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {platformFor} from './platform';
 import {viewerFor} from './viewer';
 
@@ -66,6 +66,9 @@ export class Preconnect {
 
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
+
+    /** @private @const {!./timer.Timer} */
+    this.timer_ = timerFor(win);
   }
 
   /**
@@ -85,7 +88,7 @@ export class Preconnect {
       return;
     }
     const origin = parseUrl(url).origin;
-    const now = timer.now();
+    const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
@@ -115,7 +118,7 @@ export class Preconnect {
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
-    timer.delay(() => {
+    this.timer_.delay(() => {
       if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
@@ -230,7 +233,7 @@ export class Preconnect {
       // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
       // we effectively create an active connection.
       // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-      this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+      this.origins_[origin] = Date.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
       const url = origin +
           '/amp_preconnect_polyfill_404_or_other_error_expected.' +
           '_Do_not_worry_about_it?' + Math.random();
