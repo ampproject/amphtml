@@ -34,6 +34,9 @@ export let Branches;
 /** @typedef {{control: string, experiment: string}} */
 export let ExperimentInfo;
 
+/** @type {!string} @visibleForTesting */
+export const MANUAL_EXPERIMENT_ID = '117152632';
+
 /**
  * Check whether Google Ads supports the A4A rendering pathway for a given ad
  * Element on a given Window.  The tests we use are:
@@ -50,30 +53,37 @@ export let ExperimentInfo;
  * @param {!Window} win  Host window for the ad.
  * @param {!Element} element Ad tag Element.
  * @param {string} experimentId ID for the experiment to use.
- * @param {!Branches} experiment and control branch IDs to use.
+ * @param {!Branches} externalBranches experiment and control branch IDs to use
+ *   when experiment is triggered externally (e.g., via Google Search
+ *   results page).
+ * @param {!Branches} internalBranches experiment and control branch IDs to
+ *   use when experiment is triggered internally (i.e., via client-side
+ *   selection).
  * @return {boolean}  Whether Google Ads should attempt to render via the A4A
  *   pathway.
  */
-export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
+export function googleAdsIsA4AEnabled(win, element, experimentId,
+    externalBranches, internalBranches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
-    handleUrlParameters(win, experimentId, branches);
+    handleUrlParameters(win, experimentId, externalBranches,
+        MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
-    experimentInfo[experimentId] = branches;
+    experimentInfo[experimentId] = internalBranches;
+    // Note: Because the same experimentId is being used everywhere here,
+    // setupPageExperiments won't add new IDs if handleUrlParameters has
+    // already set something for this experimentId.
     setupPageExperiments(win, experimentInfo);
     if (isExperimentOn(win, experimentId)) {
       // Page is selected into the overall traffic experiment.
-      if (getPageExperimentBranch(win, experimentId) === branches.experiment) {
-        // Page is on the "experiment" (i.e., use A4A rendering pathway)
-        // branch of the overall traffic experiment.
-        addExperimentIdToElement(branches.experiment, element);
-        return true;
-      } else {
-        // Page is on the "control" (i.e., use traditional, 3p iframe
-        // rendering pathway) branch of the overall traffic experiment.
-        addExperimentIdToElement(branches.control, element);
-        return false;
-      }
+      const selectedBranch = getPageExperimentBranch(win, experimentId);
+      addExperimentIdToElement(selectedBranch, element);
+      // Detect whether page is on the "experiment" (i.e., use A4A rendering
+      // pathway) branch of the overall traffic experiment or it's on the
+      // "control" (i.e., use traditional, 3p iframe rendering pathway).
+      return selectedBranch == internalBranches.experiment ||
+          selectedBranch == externalBranches.experiment ||
+          selectedBranch == MANUAL_EXPERIMENT_ID;
     }
   }
   // Serving location doesn't qualify for A4A treatment or page is not in the
@@ -87,9 +97,10 @@ export function googleAdsIsA4AEnabled(win, element, experimentId, branches) {
  * @param {!Window} win
  * @param {string} experimentId
  * @param {!Branches} branches
+ * @param {!string} manualId
  * @visibleForTesting
  */
-function handleUrlParameters(win, experimentId, branches) {
+function handleUrlParameters(win, experimentId, branches, manualId) {
   // The URL for a Google-search-served experiment looks like:
   //   https://cdn.ampproject.org/path/to/file.html?param0=a&exp=a4a:X&param1=b
   // where the 'exp' parameter has the form:
@@ -106,10 +117,14 @@ function handleUrlParameters(win, experimentId, branches) {
     // arg.  For the moment, however, assume that it's just a single flag.
     const arg = a4aParam.split(':', 2)[1];
     switch (arg) {
+      case '-1':
+        // Manually triggered by the user.
+        forceExperimentBranch(win, experimentId, manualId);
+        break;
       case '0':
         // Not selected into experiment.  Disable the experiment altogether, so
         // that setupPageExperiments doesn't accidentally enable it.
-        forceExperimentBranch(win, experimentId, false);
+        forceExperimentBranch(win, experimentId, null);
         break;
       case '1':
         // Selected in; on control branch.
@@ -227,7 +242,7 @@ export function getPageExperimentBranch(win, experimentId) {
  *
  * @param {!Window} win Window context to check for experiment state.
  * @param {!string} experimentId ID of the experiment to check.
- * @param {string} branchId ID of branch to force or null/false to disable
+ * @param {?string} branchId ID of branch to force or null/false to disable
  *   altogether.
  * @visibleForTesting
  */

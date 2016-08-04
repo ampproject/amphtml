@@ -24,13 +24,19 @@ import {
   googleAdsIsA4AEnabled,
 } from '../../../ads/google/a4a/traffic-experiments';
 
-/** @const {string} */
+/** @const {!string}  @private */
 const ADSENSE_A4A_EXPERIMENT_ID = 'expAdsenseA4A';
 
-/** @const {!Branches} */
-const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
+/** const {!Branches} @private */
+const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
+  control: '117152650',
+  experiment: '117152651',
+};
+
+/** @const {!Branches} @private */
+const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152630',
-  experiment: '117152632',
+  experiment: '117152633',
 };
 
 /**
@@ -40,5 +46,7 @@ const ADSENSE_A4A_EXPERIMENT_BRANCHES = {
  */
 export function adsenseIsA4AEnabled(win, element) {
   return googleAdsIsA4AEnabled(
-      win, element, ADSENSE_A4A_EXPERIMENT_ID, ADSENSE_A4A_EXPERIMENT_BRANCHES);
+      win, element, ADSENSE_A4A_EXPERIMENT_ID,
+      ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+      ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES);
 }

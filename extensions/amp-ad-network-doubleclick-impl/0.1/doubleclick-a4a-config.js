@@ -27,8 +27,14 @@ import {
 /** @const {string} */
 const DOUBLECLICK_A4A_EXPERIMENT_ID = 'expDoubleclickA4A';
 
-/** @const {!Branches} */
-const DOUBLECLICK_A4A_EXPERIMENT_BRANCHES = {
+/** @const {!Branches} @private */
+const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
+  control: '117152660',
+  experiment: '117152661',
+};
+
+/** @const {!Branches} @private */
+const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
   control: '117152640',
   experiment: '117152641',
 };
@@ -43,5 +49,6 @@ export function doubleclickIsA4AEnabled(win, element) {
   return !win.document.querySelector('meta[name=amp-3p-iframe-src]') &&
       googleAdsIsA4AEnabled(
         win, element, DOUBLECLICK_A4A_EXPERIMENT_ID,
-        DOUBLECLICK_A4A_EXPERIMENT_BRANCHES);
+        DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES,
+        DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES);
 }
