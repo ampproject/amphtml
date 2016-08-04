@@ -43,7 +43,13 @@ class TestConfig {
 
   constructor(runner) {
     this.runner = runner;
-    this.skippedUserAgents = [];
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'true', the suite will be skipped.
+     * @type {!Array<function>}
+     */
+    this.skipMatchers = [];
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
@@ -51,28 +57,23 @@ class TestConfig {
     this.configTasks = [];
   }
 
-  skipOnTravis() {
-    this.skippedUserAgents.push('Chromium');
-    return this;
-  }
-
   skipChrome() {
-    this.skippedUserAgents.push('Chrome');
+    this.skipMatchers.push(platform.isChrome.bind(platform));
     return this;
   }
 
   skipEdge() {
-    this.skippedUserAgents.push('Edge');
+    this.skipMatchers.push(platform.isEdge.bind(platform));
     return this;
   }
 
   skipFirefox() {
-    this.skippedUserAgents.push('Firefox');
+    this.skipMatchers.push(platform.isFirefox.bind(platform));
     return this;
   }
 
   skipSafari() {
-    this.skippedUserAgents.push('Safari');
+    this.skipMatchers.push(platform.isSafari.bind(platform));
     return this;
   }
 
@@ -91,8 +92,8 @@ class TestConfig {
    * @param {function()} fn
    */
   run(desc, fn) {
-    for (let i = 0; i < this.skippedUserAgents.length; i++) {
-      if (this.isAgentMatched_(this.skippedUserAgents[i])) {
+    for (let i = 0; i < this.skipMatchers.length; i++) {
+      if (this.skipMatchers[i]()) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -105,18 +106,6 @@ class TestConfig {
       });
       return fn.apply(this, arguments);
     });
-  }
-
-  /** @private */
-  isAgentMatched_(agent) {
-    const ua = navigator.userAgent;
-    // Chrome's UA also has the word Safari in it, so we have to make sure
-    // Chrome does not appear in the UA before matching for Safari.
-    if (agent == 'Safari') {
-      return ua.indexOf('Safari') >= 0 && ua.indexOf('Chrome') < 0;
-    } else {
-      return ua.indexOf(agent) >= 0;
-    }
   }
 }
 
