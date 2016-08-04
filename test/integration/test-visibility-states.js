@@ -329,7 +329,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         });
       });
 
-      it('does not call callbacks when going to HIDDEN', () => {
+      it('calls resumeCallback when going to HIDDEN', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
