@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests for the amp-ooyala tag. See the inline comments.
+  Tests for the amp-ooyala-player tag. See the inline comments.
 -->
 <!doctype html>
 <html amp lang="en">
@@ -24,12 +24,12 @@
     <link rel="canonical" href="./regular-html-version.html" />
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-    <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-ooyala-latest.js"></script>
+    <script async custom-element="amp-ooyala-player" src="https://cdn.ampproject.org/v0/amp-ooyala-player-latest.js"></script>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
     <!-- valid -->
-    <amp-ooyala
+    <amp-ooyala-player
       style=""
       height=400
       width=400
@@ -38,40 +38,40 @@
       data-playerid="26e2e3c1049c4e70ae08a242638b5c40"
       data-playerversion="v4"
       data-placeholder="https://placehold.it/400x400">
-    </amp-ooyala>
+    </amp-ooyala-player>
 
     <!-- valid, uses V3 player by default -->
-    <amp-ooyala
+    <amp-ooyala-player
       height=400
       width=400
       data-embedcode="xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg"
       data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
       data-playerid="26e2e3c1049c4e70ae08a242638b5c40">
-    </amp-ooyala>
+    </amp-ooyala-player>
 
     <!-- invalid, needs data-pcode -->
-    <amp-ooyala
+    <amp-ooyala-player
       height=400
       width=400
       data-embedcode="xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg"
       data-playerid="26e2e3c1049c4e70ae08a242638b5c40">
-    </amp-ooyala>
+    </amp-ooyala-player>
 
     <!-- invalid, needs data-embedcode -->
-    <amp-ooyala
+    <amp-ooyala-player
       height=400
       width=400
       data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X"
       data-playerid="26e2e3c1049c4e70ae08a242638b5c40">
-    </amp-ooyala>
+    </amp-ooyala-player>
 
     <!-- invalid, needs data-playerid -->
-    <amp-ooyala
+    <amp-ooyala-player
       height=400
       width=400
       data-embedcode="xkeHRiMjE6ls2aXoPoiqmPO6IU8HtXsg"
       data-pcode="5zb2wxOlZcNCe_HVT3a6cawW298X">
-    </amp-ooyala>
+    </amp-ooyala-player>
     </div>
   </body>
 </html>

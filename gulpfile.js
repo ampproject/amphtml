@@ -81,7 +81,7 @@ function buildExtensions(options) {
   buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-o2-player', '0.1', false, options);
-  buildExtension('amp-ooyala', '0.1', false, options);
+  buildExtension('amp-ooyala-player', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
   buildExtension('amp-share-tracking', '0.1', false, options);

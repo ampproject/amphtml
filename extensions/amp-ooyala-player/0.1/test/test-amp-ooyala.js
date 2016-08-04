@@ -18,19 +18,19 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
-import '../amp-ooyala';
+import '../amp-ooyala-player';
 import {adopt} from '../../../../src/runtime';
 import {timer} from '../../../../src/timer';
 import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('amp-ooyala', function() {
+describe('amp-ooyala-player', function() {
 
   function getOoyalaElement(embedCode, playerId, pCode, opt_version, opt_config, opt_placeholder) {
     return createIframePromise(true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
-      const player = iframe.doc.createElement('amp-ooyala');
+      const player = iframe.doc.createElement('amp-ooyala-player');
       player.setAttribute('width', '300');
       player.setAttribute('height', '301');
       if (embedCode) {
