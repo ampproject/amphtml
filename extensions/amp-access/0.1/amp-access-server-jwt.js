@@ -38,7 +38,7 @@ const AUTHORIZATION_TIMEOUT = 3000;
  * approach only immediately visible sections are downloaded. For authorization,
  * the client calls the authorization endpoint, which returns a signed JWT
  * token with `amp_authdata` field. The client calls CDN with this JWT token,
- * and CDN retjrns back the authorized content fragments.
+ * and CDN returns back the authorized content fragments.
  *
  * The approximate diagram looks like this:
  *

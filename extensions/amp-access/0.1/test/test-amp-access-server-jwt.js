@@ -177,8 +177,7 @@ describe('AccessServerJwtAdapter', () => {
       it('should fetch JWT directly via client', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
-        const stub = sandbox.stub(adapter, 'fetchJwt_',
-            () => Promise.resolve({jwt: jwt}));
+        sandbox.stub(adapter, 'fetchJwt_', () => Promise.resolve({jwt}));
         xhrMock.expects('fetchDocument').never();
         return adapter.authorizeOnClient_().then(result => {
           expect(result).to.equal(authdata);
@@ -190,8 +189,8 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        const stub = sandbox.stub(adapter, 'fetchJwt_',
-            () => Promise.resolve({jwt: jwt, encoded: encoded}));
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
@@ -222,8 +221,8 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        const stub = sandbox.stub(adapter, 'fetchJwt_',
-            () => Promise.resolve({jwt: jwt, encoded: encoded}));
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
@@ -256,8 +255,8 @@ describe('AccessServerJwtAdapter', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        const stub = sandbox.stub(adapter, 'fetchJwt_',
-            () => Promise.resolve({jwt: jwt, encoded: encoded}));
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
@@ -336,7 +335,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
-            .withExactArgs( 'https://acme.com/a?rid=r1', {
+            .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
               requireAmpResponseSourceOrigin: true,
             })
@@ -361,7 +360,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
-            .withExactArgs( 'https://acme.com/a?rid=r1', {
+            .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
               requireAmpResponseSourceOrigin: true,
             })
@@ -384,7 +383,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
-            .withExactArgs( 'https://acme.com/a?rid=r1', {
+            .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
               requireAmpResponseSourceOrigin: true,
             })
@@ -413,7 +412,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
-            .withExactArgs( 'https://acme.com/a?rid=r1', {
+            .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
               requireAmpResponseSourceOrigin: true,
             })
@@ -450,7 +449,7 @@ describe('AccessServerJwtAdapter', () => {
             .returns(Promise.resolve('https://acme.com/a?rid=r1'))
             .once();
         xhrMock.expects('fetchText')
-            .withExactArgs( 'https://acme.com/a?rid=r1', {
+            .withExactArgs('https://acme.com/a?rid=r1', {
               credentials: 'include',
               requireAmpResponseSourceOrigin: true,
             })
