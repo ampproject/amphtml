@@ -92,7 +92,7 @@ class TestConfig {
    */
   run(desc, fn) {
     for (let i = 0; i < this.skippedUserAgents.length; i++) {
-      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+      if (this.isAgentMatched_(this.skippedUserAgents[i])) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -105,6 +105,18 @@ class TestConfig {
       });
       return fn.apply(this, arguments);
     });
+  }
+
+  /** @private */
+  isAgentMatched_(agent) {
+    const ua = navigator.userAgent;
+    // Chrome's UA also has the word Safari in it, so we have to make sure
+    // Chrome does not appear in the UA before matching for Safari.
+    if (agent == 'Safari') {
+      return ua.indexOf('Safari') >= 0 && ua.indexOf('Chrome') < 0;
+    } else {
+      return ua.indexOf(agent) >= 0;
+    }
   }
 }
 
