@@ -55,25 +55,26 @@ class TestConfig {
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
+    this.platform_ = platformFor(window);
   }
 
   skipChrome() {
-    this.skipMatchers.push(platform.isChrome.bind(platform));
+    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
     return this;
   }
 
   skipEdge() {
-    this.skipMatchers.push(platform.isEdge.bind(platform));
+    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
     return this;
   }
 
   skipFirefox() {
-    this.skipMatchers.push(platform.isFirefox.bind(platform));
+    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
     return this;
   }
 
   skipSafari() {
-    this.skipMatchers.push(platform.isSafari.bind(platform));
+    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
     return this;
   }
 
