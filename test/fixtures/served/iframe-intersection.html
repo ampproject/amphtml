@@ -5,7 +5,7 @@ Iframe with Inersection
 <textarea id=log-el style="width:100%; height: 50vh;"></textarea>
 
 <script>
-var startTime = new Date().getTime();
+var startTime = Date.now();
 // Default values for non-3P iframe.
 var sentinel = 'amp';
 var ampWindow = parent;
@@ -27,7 +27,7 @@ if (hashMatch) {
 function log(m) {
   var el = document.getElementById('log-el');
   el.value =
-      el.value + '\n[' + (new Date().getTime() - startTime) + '] ' + (m || '');
+      el.value + '\n[' + (Date.now() - startTime) + '] ' + (m || '');
 }
 
 window.addEventListener('message', function(event) {

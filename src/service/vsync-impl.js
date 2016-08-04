@@ -369,7 +369,7 @@ export class Vsync {
     }
     let lastTime = 0;
     return fn => {
-      const now = new Date().getTime();
+      const now = Date.now();
       // By default we take 16ms between frames, but if the last frame is say
       // 10ms ago, we only want to wait 6ms.
       const timeToCall = Math.max(0, FRAME_TIME - (now - lastTime));
