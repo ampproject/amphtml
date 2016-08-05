@@ -62,7 +62,9 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  attributes.container = container;
+  if (container) {
+    attributes.container = container;
+  }
   const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children

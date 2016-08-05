@@ -534,9 +534,9 @@ function tests(name) {
     it('should add container info when ad has a container', () => {
       return getAdInAdContainer().then(obj => {
         const ampAd = obj.ampAd;
-        expect(ampAd.getAttribute('data-amp-container-element')).to.be.null;
+        expect(ampAd.getAttribute('amp-container-element')).to.be.null;
         ampAd.implementation_.layoutCallback();
-        expect(ampAd.getAttribute('data-amp-container-element'))
+        expect(ampAd.getAttribute('amp-container-element'))
             .to.equal('AMP-STICKY-AD');
         console.log(obj.ampAd);
       });
