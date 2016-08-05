@@ -20,9 +20,8 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
-  postMessage,
+  postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {parseUrl} from '../../../src/url';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -95,24 +94,28 @@ export class AmpAdApiHandler {
     listenForOnce(this.iframe_, 'entity-id', info => {
       this.element_.creativeId = info.id;
     }, this.is3p_);
-    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size', data => {
-      let newHeight, newWidth;
-      if (data.width !== undefined) {
-        newWidth = Math.max(this.element_./*OK*/offsetWidth +
-            data.width - this.iframe_./*OK*/offsetWidth, data.width);
-        this.iframe_.width = newWidth;
-        this.element_.setAttribute('width', newWidth);
-      }
-      if (data.height !== undefined) {
-        newHeight = Math.max(this.element_./*OK*/offsetHeight +
-            data.height - this.iframe_./*OK*/offsetHeight, data.height);
-        this.iframe_.height = newHeight;
-        this.element_.setAttribute('height', newHeight);
-      }
-      if (newHeight !== undefined || newWidth !== undefined) {
-        this.updateSize_(newHeight, newWidth);
-      }
-    }, this.is3p_));
+
+    // Install iframe resize API.
+    this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
+        (data, source, origin) => {
+          let newHeight, newWidth;
+          if (data.width !== undefined) {
+            newWidth = Math.max(this.element_./*OK*/offsetWidth +
+                data.width - this.iframe_./*OK*/offsetWidth, data.width);
+            this.iframe_.width = newWidth;
+            this.element_.setAttribute('width', newWidth);
+          }
+          if (data.height !== undefined) {
+            newHeight = Math.max(this.element_./*OK*/offsetHeight +
+                data.height - this.iframe_./*OK*/offsetHeight, data.height);
+            this.iframe_.height = newHeight;
+            this.element_.setAttribute('height', newHeight);
+          }
+          if (newHeight !== undefined || newWidth !== undefined) {
+            this.updateSize_(newHeight, newWidth, source, origin);
+          }
+        }, this.is3p_, this.is3p_));
+
     if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
@@ -151,29 +154,39 @@ export class AmpAdApiHandler {
 
   /**
    * Updates the element's dimensions to accommodate the iframe's
-   *    requested dimensions.
+   * requested dimensions. Notifies the window that request the resize
+   * of success or failure.
    * @param {number|undefined} height
    * @param {number|undefined} width
+   * @param {!Window} source
+   * @param {string} origin
    * @private
    */
-  updateSize_(height, width) {
-    const targetOrigin =
-          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-    this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      postMessage(
-          this.iframe_,
-          'embed-size-changed',
-          {requestedHeight: height, requestedWidth: width},
-          targetOrigin,
-          this.is3p_);
-    }, () => {
-      postMessage(
-          this.iframe_,
-          'embed-size-denied',
-          {requestedHeight: height, requestedWidth: width},
-          targetOrigin,
-          this.is3p_);
-    });
+  updateSize_(height, width, source, origin) {
+    this.baseInstance_.attemptChangeSize(height, width).then(
+        () => this.sendEmbedSizeResponse_(
+            true /* success */, width, height, source, origin),
+        () => this.sendEmbedSizeResponse_(
+            false /* success */, width, height, source, origin));
+  }
+
+  /**
+   * Sends a response to the window which requested a resize.
+   * @param {boolean} success
+   * @param {number} requestedWidth
+   * @param {number} requestedHeight
+   * @param {!Window} source
+   * @param {string} origin
+   * @private
+   */
+  sendEmbedSizeResponse_(
+      success, requestedWidth, requestedHeight, source, origin) {
+    postMessageToWindows(
+        this.iframe_,
+        [{win: source, origin}],
+        success ? 'embed-size-changed' : 'embed-size-denied',
+        {requestedWidth, requestedHeight},
+        this.is3p_);
   }
 
   /**
