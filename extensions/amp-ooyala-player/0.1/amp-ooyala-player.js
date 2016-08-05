@@ -31,7 +31,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
 
     const embedCode = user.assert(
-        this.element.getAttribute('data-embedcode'),
+        encodeURIComponent(this.element.getAttribute('data-embedcode')),
         'The data-embedcode attribute is required for <amp-ooyala-player> %s',
         this.element);
     const pCode = user.assert(
@@ -46,14 +46,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     let src = 'https://player.ooyala.com/iframe.html?platform=html5-priority';
     let playerVersion = this.element.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
-      src = 'https://player.ooyala.com/static/v4/stable/latest/skin-plugin/amp_iframe.html?pcode=' + pCode;
+      src = 'https://player.ooyala.com/static/v4/stable/latest/skin-plugin/amp_iframe.html?pcode='
+        + encodeURIComponent(pCode);
       let configUrl = this.element.getAttribute('data-config');
       if (configUrl) {
-        src += "&options[skin.config]=" + configUrl;
+        src += "&options[skin.config]=" + encodeURIComponent(configUrl);
       }
     }
 
-    src += '&ec=' + embedCode + '&pbid=' + playerId;
+    src += '&ec=' + encodeURIComponent(embedCode) + '&pbid=' + encodeURIComponent(playerId);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.setAttribute('sandbox', "allow-scripts allow-popups allow-same-origin");
