@@ -272,8 +272,20 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 21
+// NEXT AVAILABLE TAG: 22
 message TagSpec {
+  // The HtmlFormat field tells the validator which html formats
+  // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
+  // If the repeated field is empty, this indicates that the TagSpec is allowed
+  // for all formats, rather than none.
+  enum HtmlFormat {
+    AMP = 1;
+    A4A = 2;
+  }
+  // Specifies which amp html document formats we allow this TagSpec to
+  // validate.
+  repeated HtmlFormat html_format = 21;
+
   // Use UPPER-CASE tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
   // Note: "$REFERENCE_POINT" is a special tag_name value.

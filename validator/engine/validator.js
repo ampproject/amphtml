@@ -31,7 +31,6 @@ goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrList');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
-goog.require('amp.validator.RULES');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
@@ -40,6 +39,7 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
+goog.require('amp.validator.createRules');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
@@ -2303,7 +2303,7 @@ class ParsedTagSpec {
 
   /**
    * Return the original tag spec. This is the json object representation from
-   * amp.validator.rules.
+   * amp.validator.rules_.
    * @return {!amp.validator.TagSpec}
    */
   getSpec() { return this.spec_; }
@@ -3393,17 +3393,20 @@ class ParsedValidatorRules {
      */
     this.mandatoryTagSpecs_ = [];
 
-    /** @type {!amp.validator.ValidatorRules} */
-    const rules = amp.validator.RULES;
+    /**
+     * @type {!amp.validator.ValidatorRules}
+     * @private
+     */
+    this.rules_ = this.filterRules(amp.validator.createRules());
 
-    const parsedAttrSpecs = new ParsedAttrSpecs(rules.attrLists);
+    const parsedAttrSpecs = new ParsedAttrSpecs(this.rules_.attrLists);
 
     /** @type {!Object<string, number>} */
     const tagSpecIdsByTagSpecName = {};
     /** @type {!Object<string, boolean>} */
     const tagSpecNamesToTrack = {};
-    for (let i = 0; i < rules.tags.length; ++i) {
-      const tag = rules.tags[i];
+    for (let i = 0; i < this.rules_.tags.length; ++i) {
+      const tag = this.rules_.tags[i];
       goog.asserts.assert(
           !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
       tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
@@ -3414,13 +3417,13 @@ class ParsedValidatorRules {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
       }
     }
-    for (let i = 0; i < rules.tags.length; ++i) {
-      const tag = rules.tags[i];
+    for (let i = 0; i < this.rules_.tags.length; ++i) {
+      const tag = this.rules_.tags[i];
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        goog.asserts.assert(rules.templateSpecUrl !== null);
+        goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          rules.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
+          this.rules_.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
       if (!parsedTagSpec.isReferencePoint()) {
@@ -3442,13 +3445,61 @@ class ParsedValidatorRules {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** type {!Object<!amp.validator.ValidationError.Code, string>} */
       this.formatByCode_ = {};
-      for (let i = 0; i < rules.errorFormats.length; ++i) {
-        const errorFormat = rules.errorFormats[i];
+      for (let i = 0; i < this.rules_.errorFormats.length; ++i) {
+        const errorFormat = this.rules_.errorFormats[i];
         goog.asserts.assert(errorFormat !== null);
         this.formatByCode_[errorFormat.code] = errorFormat.format;
       }
     }
   }
+
+  /**
+   * Filters the input rules so that only TagSpecs this validator needs are
+   * returned.
+   * @param {!amp.validator.ValidatorRules} allRules
+   * @return {!amp.validator.ValidatorRules}
+   */
+  filterRules(allRules) {
+    let newRules = allRules;
+    let filteredTags = [];
+    for (let i = 0; i < allRules.tags.length; ++i) {
+      if (this.isTagSpecCorrectHtmlFormat(allRules.tags[i]))
+        filteredTags.push(allRules.tags[i]);
+    }
+    newRules.tags = filteredTags;
+    return newRules;
+  }
+
+  /**
+   * True iff tagspec's html_format matches the AMP html_format.
+   * @param {amp.validator.TagSpec} tagSpec
+   * @return {boolean}
+   */
+  isTagSpecCorrectHtmlFormat(tagSpec) {
+    // Empty html_format field implies tagspec applies to all docs.
+    if (tagSpec.htmlFormat.length === 0) return true;
+
+    for (let i = 0; i < tagSpec.htmlFormat.length; ++i) {
+      // TODO(gregable): Make the validator's format configurable so we can
+      // validate different document types.
+      if (tagSpec.htmlFormat[i] === amp.validator.TagSpec.HtmlFormat.AMP)
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isManufacturedBodyTagError() {
+    return this.rules_.manufacturedBodyTagIsError;
+  }
+
+  /**
+   * @return {null|string}
+   */
+  manufacturedBodySpecUrl() { return this.rules_.manufacturedBodySpecUrl; }
 
   /**
    * @return {!Object<!amp.validator.ValidationError.Code, string>}
@@ -3767,13 +3818,14 @@ amp.validator.ValidationHandler =
    * @override
    */
   markManufacturedBody() {
-    if (amp.validator.RULES.manufacturedBodyTagIsError) {
+    if (parsedValidatorRulesSingleton.isManufacturedBodyTagError()) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         this.context_.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
             this.context_.getDocLocator(),
-            /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+            /* params */[],
+            parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
             this.validationResult_);
       } else {
         this.validationResult_.status =
@@ -3784,7 +3836,8 @@ amp.validator.ValidationHandler =
           amp.validator.ValidationError.Severity.WARNING,
           amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
           this.context_.getDocLocator(),
-          /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+          /* params */[],
+          parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
           this.validationResult_);
     }
   }
