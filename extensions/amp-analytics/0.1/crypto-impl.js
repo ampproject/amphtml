@@ -17,7 +17,7 @@
 import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {fromClass} from '../../../src/service';
 import {dev} from '../../../src/log';
-import {stringToBytes} from '../../../src/utils/base64';
+import {stringToBytes} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';

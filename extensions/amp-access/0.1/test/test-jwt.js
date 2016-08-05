@@ -15,7 +15,7 @@
  */
 
 import {JwtHelper} from '../jwt';
-import {pemToBytes} from '../../../../src/utils/base64';
+import {pemToBytes} from '../../../../src/utils/pem';
 import * as sinon from 'sinon';
 
 

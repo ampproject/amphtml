@@ -16,85 +16,63 @@
 
 import {
   base64UrlDecodeToBytes,
-  pemToBytes,
+  base64DecodeToBytes,
 } from '../../../src/utils/base64';
+import {stringToBytes} from '../../../src/utils/bytes';
 
-describe('base64UrlDecodeToBytes', function() {
+
+describe('base64UrlDecodeToBytes', () => {
   it('should map a sample string appropriately', () => {
-    const ab = base64UrlDecodeToBytes('AQAB');
-    expect(ab.length).to.equal(3);
-    expect(ab[0]).to.equal(1);
-    expect(ab[1]).to.equal(0);
-    expect(ab[2]).to.equal(1);
+    expect(base64UrlDecodeToBytes('AQAB'))
+      .to.deep.equal(new Uint8Array([1, 0, 1]));
+    expect(base64UrlDecodeToBytes('_-'))
+      .to.deep.equal(new Uint8Array([255]));
+  });
+
+  it('should handle unpadded input', () => {
+    expect(base64UrlDecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
+    expect(base64UrlDecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
+    expect(base64UrlDecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
+  });
+
+  it('should handle padded input', () => {
+    expect(base64UrlDecodeToBytes('cw..')).to.deep.equal(stringToBytes('s'));
+    expect(base64UrlDecodeToBytes('c3U.')).to.deep.equal(stringToBytes('su'));
+  });
+
+  it('should signal an error with bad input characters', () => {
+    expect(() => base64UrlDecodeToBytes('@#*#')).to.throw();
+  });
+
+  it('should signal an error with bad padding', () => {
+    expect(() => base64UrlDecodeToBytes('c3Vy.')).to.throw();
   });
 });
 
-describe('pemToBytes', () => {
-  const PLAIN_TEXT =
-        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB';
-  const PEM = '-----BEGIN PUBLIC KEY-----\n'
-        + 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB\n'
-        + '-----END PUBLIC KEY-----';
-
-  it('should convert a valid key', () => {
-    const binary = pemToBytes(PEM);
-    const plain = atob(PLAIN_TEXT);
-    const len = plain.length;
-    expect(binary.byteLength).to.equal(len);
-    expect(binary[0]).to.equal(plain.charCodeAt(0));
-    expect(binary[1]).to.equal(plain.charCodeAt(1));
-    expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-    expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+describe('base64DecodeToBytes', () => {
+  it('should map a sample string appropriately', () => {
+    expect(base64UrlDecodeToBytes('AQAB'))
+      .to.deep.equal(new Uint8Array([1, 0, 1]));
+    expect(base64UrlDecodeToBytes('/+'))
+      .to.deep.equal(new Uint8Array([255]));
   });
 
-  it('should convert without headers, footers, line breaks', () => {
-    const binary = pemToBytes(PLAIN_TEXT);
-    const plain = atob(PLAIN_TEXT);
-    const len = plain.length;
-    expect(binary.byteLength).to.equal(len);
-    expect(binary[0]).to.equal(plain.charCodeAt(0));
-    expect(binary[1]).to.equal(plain.charCodeAt(1));
-    expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-    expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+  it('should handle unpadded input', () => {
+    expect(base64UrlDecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
+    expect(base64UrlDecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
+    expect(base64UrlDecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
   });
 
-  it('should convert without line breaks', () => {
-    const binary = pemToBytes('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT
-                              + '-----END PUBLIC KEY-----');
-    const plain = atob(PLAIN_TEXT);
-    const len = plain.length;
-    expect(binary.byteLength).to.equal(len);
-    expect(binary[0]).to.equal(plain.charCodeAt(0));
-    expect(binary[1]).to.equal(plain.charCodeAt(1));
-    expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-    expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+  it('should handle padded input', () => {
+    expect(base64UrlDecodeToBytes('cw==')).to.deep.equal(stringToBytes('s'));
+    expect(base64UrlDecodeToBytes('c3U=')).to.deep.equal(stringToBytes('su'));
   });
 
-  it('should convert without header', () => {
-    const binary = pemToBytes(PLAIN_TEXT + '-----END PUBLIC KEY-----');
-    const plain = atob(PLAIN_TEXT);
-    const len = plain.length;
-    expect(binary.byteLength).to.equal(len);
-    expect(binary[0]).to.equal(plain.charCodeAt(0));
-    expect(binary[1]).to.equal(plain.charCodeAt(1));
-    expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-    expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+  it('should signal an error with bad input characters', () => {
+    expect(() => base64UrlDecodeToBytes('@#*#')).to.throw();
   });
 
-  it('should convert without footer', () => {
-    const binary = pemToBytes('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT);
-    const plain = atob(PLAIN_TEXT);
-    const len = plain.length;
-    expect(binary.byteLength).to.equal(len);
-    expect(binary[0]).to.equal(plain.charCodeAt(0));
-    expect(binary[1]).to.equal(plain.charCodeAt(1));
-    expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-    expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
+  it('should signal an error with bad padding', () => {
+    expect(() => base64UrlDecodeToBytes('c3Vy=')).to.throw();
   });
 });

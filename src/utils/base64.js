@@ -14,25 +14,7 @@
  * limitations under the License.
  */
 
-
-import {dev} from '../log';
-
-
-/**
- * Converts a string which holds 8-bit code points, such as the result of atob,
- * into an ArrayBuffer with the corresponding bytes.
- * @param {string} str
- * @return {!Uint8Array}
- */
-export function stringToBytes(str) {
-  const bytes = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    const charCode = str.charCodeAt(i);
-    dev().assert(charCode <= 255, 'Characters must be in range [0,255]');
-    bytes[i] = charCode;
-  }
-  return bytes;
-};
+import {stringToBytes} from './bytes';
 
 
 /**
@@ -57,7 +39,7 @@ export function base64UrlDecode(str) {
 }
 
 /**
- * Converts a string which is in base64url encoding into an ArrayBuffer
+ * Converts a string which is in base64url encoding into a Uint8Array
  * containing the decoded value.
  * @param {string} str
  * @return {!Uint8Array}
@@ -79,33 +61,11 @@ export function base64Decode(str) {
 }
 
 /**
- * Converts a string which is in base64url encoding into an ArrayBuffer
+ * Converts a string which is in base64url encoding into a Uint8Array
  * containing the decoded value.
  * @param {string} str
  * @return {!Uint8Array}
  */
 export function base64DecodeToBytes(str) {
   return stringToBytes(base64Decode(str));
-}
-
-
-/**
- * Converts a text in PEM format into a binary array buffer.
- * @param {string} pem
- * @return {!Uint8Array}
- * @visibleForTesting
- */
-export function pemToBytes(pem) {
-  pem = pem.trim();
-
-  // Remove pem prefix, e.g. "----BEGIN PUBLIC KEY----".
-  pem = pem.replace(/^\-+BEGIN[^-]*\-+/, '');
-
-  // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  pem = pem.replace(/\-+END[^-]*\-+$/, '');
-
-  // Remove line breaks.
-  pem = pem.replace(/[\r\n]/g, '').trim();
-
-  return base64DecodeToBytes(pem);
 }
