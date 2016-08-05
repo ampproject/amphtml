@@ -220,8 +220,7 @@ export class UrlReplacements {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
             'amp-share-tracking should be configured');
-        const incomingFragment = fragments.incomingFragment;
-        return incomingFragment === null ? 'none' : incomingFragment;
+        return fragments.incomingFragment;
       });
     });
 
@@ -230,8 +229,7 @@ export class UrlReplacements {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
             'amp-share-tracking should be configured');
-        const outgoingFragment = fragments.outgoingFragment;
-        return outgoingFragment === null ? 'none' : outgoingFragment;
+        return fragments.outgoingFragment;
       });
     });
 
