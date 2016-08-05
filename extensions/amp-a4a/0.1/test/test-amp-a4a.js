@@ -18,7 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
-import {base64UrlDecode} from '../crypto-verifier';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -41,7 +41,7 @@ class MockA4AImpl extends AmpA4A {
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
-      signature: base64UrlDecode(responseHeaders.get('X-Google-header')),
+      signature: base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')),
     });
   }
 

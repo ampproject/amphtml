@@ -15,7 +15,7 @@
  */
 
 import {AmpAdNetworkAdsenseImpl} from '../amp-ad-network-adsense-impl';
-import {base64ToByteArray} from '../../../../ads/google/a4a/utils';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import * as sinon from 'sinon';
 
 describe('amp-ad-network-adsense-impl', () => {
@@ -83,7 +83,7 @@ describe('amp-ad-network-adsense-impl', () => {
             return name === 'X-AmpAdSignature';
           },
         })).to.eventually.deep.equal(
-            {creative, signature: base64ToByteArray('AQAB')});
+            {creative, signature: base64UrlDecodeToBytes('AQAB')});
     });
   });
 });

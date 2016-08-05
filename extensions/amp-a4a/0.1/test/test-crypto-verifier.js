@@ -16,9 +16,10 @@
 
 import * as sinon from 'sinon';
 import {
-  base64UrlDecode,
+  stringToBytes,
+} from '../../../../src/utils/bytes';
+import {
   importPublicKey,
-  stringToByteArray,
   verifySignature,
   verifySignatureIsAvailable,
 } from '../crypto-verifier';
@@ -61,7 +62,7 @@ const pubKeyInfo1 = importPublicKey({
 });
 
 
-function hexToByteArray(hexString) {
+function hexToBytes(hexString) {
   // Assume length is even.
   const byteLength = hexString.length / 2;
   const bytes = new Uint8Array(byteLength);
@@ -71,7 +72,7 @@ function hexToByteArray(hexString) {
   return bytes;
 };
 
-const signature = hexToByteArray(
+const signature = hexToBytes(
     '0087de9f85b71386df784845d23103975591d73cd446212e184f1cb92ac6964f' +
     'a2338d3832bb1c79e1b30eeaca6f24530c12286f26d73b969f6a8bc82ef24f6f' +
     '70201fd2ff24d044b67dcfa067763fd9ef0437e707728f6e47160bf3b626cbbf' +
@@ -85,8 +86,8 @@ const signature = hexToByteArray(
     '4de94fdb376b3e689e4d6239dac65bc4e9ae3265b10bfe87bb838aa15515b01e' +
     '1cf21c14f99d474e12f5fcbeba8697074176d9bf8e3463d6195805c883710299' +
     'e50f0eef74');
-const data = stringToByteArray('Hello');
-const wrongData = stringToByteArray('Hello0');
+const data = stringToBytes('Hello');
+const wrongData = stringToBytes('Hello0');
 
 describe('verifySignature', function() {
 
@@ -137,14 +138,4 @@ describe('verifySignature', function() {
   it('should not validate with 2 wrong keys', () =>
     verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1])
       .then(isvalid => expect(isvalid).to.be.false));
-});
-
-describe('base64UrlDecode', function() {
-  it('should map a sample string appropriately', () => {
-    const ab = base64UrlDecode('AQAB');
-    expect(ab.length).to.equal(3);
-    expect(ab[0]).to.equal(1);
-    expect(ab[1]).to.equal(0);
-    expect(ab[2]).to.equal(1);
-  });
 });

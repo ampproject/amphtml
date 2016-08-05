@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+import {
+  base64UrlDecode,
+  base64UrlDecodeToBytes,
+} from '../../../src/utils/base64';
+import {stringToBytes} from '../../../src/utils/bytes';
+import {pemToBytes} from '../../../src/utils/pem';
 import {tryParseJson} from '../../../src/json';
 import {xhrFor} from '../../../src/xhr';
 
@@ -27,13 +33,6 @@ import {xhrFor} from '../../../src/xhr';
  * }}
  */
 let JwtTokenInternalDef;
-
-
-/**
- * Maps web-safe base64 characters to the actual base64 chars for decoding.
- * @const {!Object<string, string>}
- */
-const WEB_SAFE_CHAR_MAP = {'-': '+', '_': '/', '.': '='};
 
 
 /**
@@ -96,13 +95,12 @@ export class JwtHelper {
         throw new Error('Only alg=RS256 is supported');
       }
       return this.loadKey_(keyUrl).then(key => {
-        const sig = convertStringToArrayBuffer(
-            decodeBase64WebSafe(decoded.sig));
+        const sig = base64UrlDecodeToBytes(decoded.sig);
         return this.subtle_.verify(
           /* options */ {name: 'RSASSA-PKCS1-v1_5'},
           key,
           sig,
-          convertStringToArrayBuffer(decoded.verifiable)
+          stringToBytes(decoded.verifiable)
         );
       }).then(isValid => {
         if (isValid) {
@@ -132,8 +130,8 @@ export class JwtHelper {
       invalidToken();
     }
     return {
-      header: tryParseJson(decodeBase64WebSafe(parts[0]), invalidToken),
-      payload: tryParseJson(decodeBase64WebSafe(parts[1]), invalidToken),
+      header: tryParseJson(base64UrlDecode(parts[0]), invalidToken),
+      payload: tryParseJson(base64UrlDecode(parts[1]), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
       sig: parts[2],
     };
@@ -147,7 +145,7 @@ export class JwtHelper {
     return this.xhr_.fetchText(keyUrl).then(pem => {
       return this.subtle_.importKey(
         /* format */ 'spki',
-        pemToBinary(pem),
+        pemToBytes(pem),
         /* algo options */ {
           name: 'RSASSA-PKCS1-v1_5',
           hash: {name: 'SHA-256'},
@@ -156,63 +154,4 @@ export class JwtHelper {
         /* uses */ ['verify']);
     });
   }
-}
-
-
-/**
- * @param {string} s
- * @return {string}
- */
-function decodeBase64WebSafe(s) {
-  // TODO(dvoytenko, #4281): refactor to a common place across AMP.
-  return atob(s.replace(/[-_.]/g, unmapWebSafeChar));
-}
-
-
-/**
- * @param {string} c
- * @return {string}
- */
-function unmapWebSafeChar(c) {
-  return WEB_SAFE_CHAR_MAP[c];
-}
-
-
-/**
- * Convers a text in PEM format into a binary array buffer.
- * @param {string} pem
- * @return {!ArrayBuffer}
- * @visibleForTesting
- */
-export function pemToBinary(pem) {
-  // TODO(dvoytenko, #4281): Extract with other binary encoding utils (base 64)
-  // into a separate module.
-  pem = pem.trim();
-
-  // Remove pem prefix, e.g. "----BEING PUBLIC KEY----".
-  pem = pem.replace(/^\-+BEGIN[^-]*\-+/, '');
-
-  // Remove pem suffix, e.g. "----END PUBLIC KEY----".
-  pem = pem.replace(/\-+END[^-]*\-+$/, '');
-
-  // Remove line breaks.
-  pem = pem.replace(/[\r\n]/g, '').trim();
-
-  return convertStringToArrayBuffer(atob(pem));
-}
-
-
-/**
- * Convers a string to an array buffer.
- * @param {string} s
- * @return {!ArrayBuffer}
- */
-function convertStringToArrayBuffer(s) {
-  // TODO(dvoytenko, #4281): Extract with other binary encoding utils (base 64)
-  // into a separate module.
-  const bytes = new Uint8Array(s.length);
-  for (let i = 0; i < s.length; i++) {
-    bytes[i] = s.charCodeAt(i);
-  }
-  return bytes;
 }
