@@ -25,3 +25,20 @@ export function stubService(sandbox, win, serviceId, method) {
   });
   return stub;
 }
+
+/**
+ * @param {!Element} iframe
+ * @param {string} tagName
+ * @param {!Object} attributes
+ * @return {!Element} created element
+ */
+export function createElementWithAttributes(iframe, tagName, attributes) {
+  if (!iframe || !iframe.doc) {
+    return;
+  }
+  const element = iframe.doc.createElement(tagName);
+  for (const attr in attributes) {
+    element.setAttribute(attr, attributes[attr]);
+  }
+  return element;
+}

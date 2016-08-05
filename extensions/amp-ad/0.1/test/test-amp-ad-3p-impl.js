@@ -17,6 +17,7 @@
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import {createIframePromise} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '../../../../testing/test-helper';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
@@ -33,17 +34,17 @@ function tests(name) {
   function getAdInAdContainer() {
     return createIframePromise().then(iframe => {
       const adContainer = iframe.doc.createElement('amp-sticky-ad');
-      const ampAd = iframe.doc.createElement('amp-ad');
-      ampAd.setAttribute('width', '300');
-      ampAd.setAttribute('height', '50');
-      ampAd.setAttribute('type', 'a9');
-      ampAd.setAttribute('data-aax_size', '300*50');
-      ampAd.setAttribute('data-aax_pubname', 'abc123');
-      ampAd.setAttribute('data-aax_src', '302');
+      const ampAd = createElementWithAttributes(iframe, 'amp-ad', {
+        width: 300,
+        height: 50,
+        type: '_ping_',
+        src: 'testsrc',
+      });
       adContainer.appendChild(ampAd);
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'blah');
+      const link = createElementWithAttributes(iframe, 'link', {
+        rel: 'canonical',
+        href: 'blan',
+      });
       iframe.doc.head.appendChild(link);
       return iframe.addElement(adContainer).then(() => {
         return Promise.resolve({

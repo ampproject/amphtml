@@ -261,8 +261,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       /** detect ad containers, add the list to element as a new attribute */
       const container = getAdContainer(this.element);
       if (container) {
-        this.element.setAttribute('amp-container-element',
-          container);
+        this.element.setAttribute('amp-container-element', container);
       }
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
@@ -300,7 +299,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (!this.fallback_) {
       this.attemptChangeHeight(0).then(() => {
         this./*OK*/collapse();
-      }, () => { });
+      }, () => {});
     }
     this.deferMutate(() => {
       if (!this.iframe_) {
