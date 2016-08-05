@@ -21,9 +21,7 @@ import {dev} from '../src/log';
  * @param {!Object} data
  */
 export function fakead3p(global, data) {
-  if (data.ampContainerElement) {
-    dev.assert(data.ampContainerElement == 'AMP-STICKY-AD'
-        || data.ampContainerElement == 'AMP-FX-FLYING-CARPET');
-    console/*OK*/.log(data.ampContainerElement);
+  if (data.ad_container) {
+    dev().assert(data.container == data.ad_container, 'wrong container');
   }
 }

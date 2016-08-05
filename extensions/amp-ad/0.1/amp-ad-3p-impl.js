@@ -60,7 +60,7 @@ export function allowRenderOutsideViewport(element, win) {
   // Ad opts into lazier loading strategy where we only load ads that are
   // at closer than 1.25 viewports away.
   if (element.getAttribute('data-loading-strategy') ==
-    'prefer-viewability-over-views') {
+      'prefer-viewability-over-views') {
     return 1.25;
   }
   return true;
@@ -108,9 +108,10 @@ export function incrementLoadingAds(win) {
  * This should only be called when a layout on the page was just forced
  * anyway.
  */
+
 export function getAdContainer(el) {
   do {
-    if (AMP_AD_CONTAINERS[el.tagName]) {
+    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
       return el.tagName;
     }
     el = el.parentNode;
@@ -258,12 +259,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
       /** detect ad containers, add the list to element as a new attribute */
-      if (!this.element.getAttribute('data-amp-container-element')) {
-        const container = getAdContainer(this.element);
-        if (container) {
-          this.element.setAttribute('data-amp-container-element',
-            container);
-        }
+      const container = getAdContainer(this.element);
+      if (container) {
+        this.element.setAttribute('amp-container-element',
+          container);
       }
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
@@ -271,7 +270,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this.element.setAttribute('ampcid', cid);
         }
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-          this.element);
+            this.element);
         this.apiHandler_ = new AmpAdApiHandler(
             this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
