@@ -217,7 +217,7 @@ export class FontLoader {
     const customFontElement = this.customFontElement_ =
         this.document_.createElement('div');
     style.setStyles(customFontElement, {
-      fontFamily: this.fontConfig_.family,
+      fontFamily: this.fontConfig_.family + ' ,san-serif, serif',
       margin: 0,
       padding: 0,
       whiteSpace: 'nowrap',
