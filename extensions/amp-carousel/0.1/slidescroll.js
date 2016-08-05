@@ -16,7 +16,7 @@
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {Gestures} from '../../../src/gesture';
-import {Layout} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
@@ -37,7 +37,7 @@ const CUSTOM_SNAP_TIMEOUT = 100;
 export class AmpSlideScroll extends BaseSlides {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeDefined(layout);
   }
   /** @override */
   buildSlides() {
