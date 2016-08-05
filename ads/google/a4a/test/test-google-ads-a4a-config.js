@@ -146,6 +146,60 @@ describe('a4a_config', () => {
     '?p=blarg&exp=zort:123,PARAM,spaz:987&s=987'];
   urlBaseConditions.forEach(urlBase => {
 
+    it('should skip url-triggered eid when param is bad', () => {
+      win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
+      // Force random client-side selection off.
+      rand.onFirstCall().returns(2);
+      const element = document.createElement('div');
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.true;
+      expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
+    });
+
+    it('should skip url-triggered eid when param is empty', () => {
+      win.location.search = urlBase.replace('PARAM', 'a4a:');
+      // Force random client-side selection off.
+      rand.onFirstCall().returns(2);
+      const element = document.createElement('div');
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.true;
+      expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
+    });
+
+    it('should fall back to client-side eid when param is bad', () => {
+      win.location.search = urlBase.replace('PARAM', 'a4a:spaz');
+      // Force random client-side selection on.
+      rand.onFirstCall().returns(-1);
+      // Force experiment branch.
+      rand.onSecondCall().returns(0.75);
+      const element = document.createElement('div');
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.true;
+      expect(element.getAttribute('data-experiment-id')).to.equal(
+          INTERNAL_BRANCHES.experiment);
+    });
+
+    it('should fall back to client-side eid when param is empty', () => {
+      win.location.search = urlBase.replace('PARAM', 'a4a:');
+      // Force random client-side selection on.
+      rand.onFirstCall().returns(-1);
+      // Force experiment branch.
+      rand.onSecondCall().returns(0.75);
+      const element = document.createElement('div');
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.true;
+      expect(element.getAttribute('data-experiment-id')).to.equal(
+          INTERNAL_BRANCHES.experiment);
+    });
+
     it(`should force experiment param from URL when pattern=${urlBase}`,
         () => {
           win.location.search = urlBase.replace('PARAM', 'a4a:2');

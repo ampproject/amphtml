@@ -21,7 +21,7 @@ import {
   addExperimentIdToElement,
   getPageExperimentBranch,
   mergeExperimentIds,
-  containsExperimentId,
+  isInExperiment,
   setupPageExperiments,
   validateExperimentIds,
 } from '../traffic-experiments';
@@ -323,30 +323,39 @@ describe('all-traffic-experiments-tests', () => {
     });
   });
 
-  describe('#containsExperimentIds', () => {
-    it('should return false for empty input string and any query', () => {
-      expect(containsExperimentId('', '')).to.be.false;
-      expect(containsExperimentId('', null)).to.be.false;
-      expect(containsExperimentId('', 'frob')).to.be.false;
+  describe('#isInExperiment', () => {
+    it('should return false for empty element and any query', () => {
+      const element = document.createElement('div');
+      expect(isInExperiment(element, '')).to.be.false;
+      expect(isInExperiment(element, null)).to.be.false;
+      expect(isInExperiment(element, 'frob')).to.be.false;
     });
-    it('should return false for null input string and any query', () => {
-      expect(containsExperimentId(null, '')).to.be.false;
-      expect(containsExperimentId(null, null)).to.be.false;
-      expect(containsExperimentId(null, 'frob')).to.be.false;
+    it('should return false for empty attribute and any query', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, '');
+      expect(isInExperiment(element, '')).to.be.false;
+      expect(isInExperiment(element, null)).to.be.false;
+      expect(isInExperiment(element, 'frob')).to.be.false;
     });
     it('should return false for real data string but mismatching query', () => {
-      expect(containsExperimentId('frob,gunk,zort', 'blub')).to.be.false;
-      expect(containsExperimentId('frob,gunk,zort', 'ort')).to.be.false;
-      expect(containsExperimentId('frob,gunk,zort', 'fro')).to.be.false;
-      expect(containsExperimentId('frob,gunk,zort', 'gunk,zort')).to.be.false;
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob,gunk,zort');
+      expect(isInExperiment(element, 'blub')).to.be.false;
+      expect(isInExperiment(element, 'ort')).to.be.false;
+      expect(isInExperiment(element, 'fro')).to.be.false;
+      expect(isInExperiment(element, 'gunk,zort')).to.be.false;
     });
     it('should return true for singleton data and matching query', () => {
-      expect(containsExperimentId('frob', 'frob')).to.be.true;
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob');
+      expect(isInExperiment(element, 'frob')).to.be.true;
     });
     it('should return true for matching query', () => {
-      expect(containsExperimentId('frob,gunk,zort', 'frob')).to.be.true;
-      expect(containsExperimentId('frob,gunk,zort', 'gunk')).to.be.true;
-      expect(containsExperimentId('frob,gunk,zort', 'zort')).to.be.true;
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob,gunk,zort');
+      expect(isInExperiment(element, 'frob')).to.be.true;
+      expect(isInExperiment(element, 'gunk')).to.be.true;
+      expect(isInExperiment(element, 'zort')).to.be.true;
     });
   });
 });

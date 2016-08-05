@@ -66,8 +66,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentId,
     externalBranches, internalBranches) {
   if (isGoogleAdsA4AValidEnvironment(win)) {
     // Page is served from a supported domain.
-    handleUrlParameters(win, experimentId, externalBranches,
-        MANUAL_EXPERIMENT_ID);
+    handleUrlParameters(win, experimentId, externalBranches.control,
+        externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
     experimentInfo[experimentId] = internalBranches;
     // Note: Because the same experimentId is being used everywhere here,
@@ -92,51 +92,59 @@ export function googleAdsIsA4AEnabled(win, element, experimentId,
 }
 
 /**
- * Set experiment state from URL parameter, if present.
+ * Set experiment state from URL parameter, if present.  This looks for the
+ * presence of a URL parameter of the form
+ *   `exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN`
+ * and interprets the X as one of the following:
+ *   - `-1`: Manually-triggered experiment.  For testing only.  Sets
+ *     `adtest=on` on the ad request, so that it will not bill or record
+ *     user clicks as ad CTR.  Ad request will be accounted in a special
+ *     'testing only' experiment statistic pool so that we can track usage
+ *     of this feature.
+ *   - `0`: Ad is explicitly opted out of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will serve into a 3p iframe, as traditional, but ad
+ *     request and clicks will not be accounted in experiment statistics.
+ *   - `1`: Ad is on the control branch of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will serve into a 3p iframe, and ad requests and
+ *     clicks _will_ be accounted in experiment statistics.
+ *   - `2`: Ad is on the experimental branch of the overall A4A-vs-3p iframe
+ *     experiment.  Ad will render via the A4A path, including early ad
+ *     request and (possibly) early rendering in shadow DOM or iframe.
  *
- * @param {!Window} win
- * @param {string} experimentId
- * @param {!Branches} branches
- * @param {!string} manualId
- * @visibleForTesting
+ * @param {!Window} win  Window.
+ * @param {!string} experimentName  Name of the overall experiment.
+ * @param {!string} controlBranchId  Experiment ID string for control branch of
+ *   the overall experiment.
+ * @param {!string} treatmentBranchId  Experiment ID string for the 'treatment'
+ *   (i.e., a4a) branch of the overall experiment.
+ * @param {!string} manualId  ID of the manual experiment.
  */
-function handleUrlParameters(win, experimentId, branches, manualId) {
-  // The URL for a Google-search-served experiment looks like:
-  //   https://cdn.ampproject.org/path/to/file.html?param0=a&exp=a4a:X&param1=b
-  // where the 'exp' parameter has the form:
-  //   exp=expt0:val0,expt1:val1,...,a4a:X,...,exptN:valN
-  // and the X is one of our control values: {0, 1, 2}.
-  const parsedQuery = parseQueryString(win.location.search);
-  let a4aParam = null;
-  if (parsedQuery['exp']) {
-    const parts = parsedQuery['exp'].split(',');
-    a4aParam = parts.find(x => { return x.substr(0, 4) == 'a4a:'; });
+function handleUrlParameters(win, experimentName,
+    controlBranchId, treatmentBranchId, manualId) {
+  const expParam = parseQueryString(win.location.search)['exp'];
+  if (!expParam) {
+    return;
   }
-  if (a4aParam) {
-    // In the future, we may want to specify multiple experiments in the a4a
-    // arg.  For the moment, however, assume that it's just a single flag.
-    const arg = a4aParam.split(':', 2)[1];
-    switch (arg) {
-      case '-1':
-        // Manually triggered by the user.
-        forceExperimentBranch(win, experimentId, manualId);
-        break;
-      case '0':
-        // Not selected into experiment.  Disable the experiment altogether, so
-        // that setupPageExperiments doesn't accidentally enable it.
-        forceExperimentBranch(win, experimentId, null);
-        break;
-      case '1':
-        // Selected in; on control branch.
-        forceExperimentBranch(win, experimentId, branches.control);
-        break;
-      case '2':
-        // Selected in; on experiment branch.
-        forceExperimentBranch(win, experimentId, branches.experiment);
-        break;
-      default:
-        dev.warn('a4a-config', 'Unknown a4a URL parameter: ', arg);
-    }
+  const a4aParam = expParam.split(',').find(
+      x => { return x.substr(0, 4) == 'a4a:'; });
+  if (!a4aParam) {
+    return;
+  }
+  // In the future, we may want to specify multiple experiments in the a4a
+  // arg.  For the moment, however, assume that it's just a single flag.
+  const arg = a4aParam.split(':', 2)[1];
+  const argMapping = {
+    '-1': manualId,
+    '0': null,
+    '1': controlBranchId,
+    '2': treatmentBranchId,
+  };
+  if (argMapping.hasOwnProperty(arg)) {
+    forceExperimentBranch(win, experimentName, argMapping[arg]);
+  } else {
+    dev().warn('a4a-config', 'Unknown a4a URL parameter: ', a4aParam,
+        ' expected one of -1 (manual), 0 (not in experiment), 1 (control ' +
+        'branch), or 2 (a4a experiment branch)');
   }
 }
 
@@ -275,13 +283,14 @@ export function parseExperimentIds(idString) {
  * Checks whether a (possibly empty) experiment ID string (comma-separated)
  * contains a specific, single ID.
  *
- * @param idString  {?string} Comma-separated list of ID strings, per
- *   #parseExperimentIds.
- * @param id {?string} Id to look up in the `idString`.
+ * @param element  {!Element}  Element to check for membership in a specific
+ *   experiment.
+ * @param id {?string} Experiment ID to check for on `element`.
  * @return {boolean}
  */
-export function containsExperimentId(idString, id) {
-  return parseExperimentIds(idString).some(x => { return x === id; });
+export function isInExperiment(element, id) {
+  return parseExperimentIds(element.getAttribute(EXPERIMENT_ATTRIBUTE)).some(
+      x => { return x === id; });
 }
 
 /**
@@ -325,6 +334,7 @@ export function mergeExperimentIds(newId, currentIdString) {
  * added by a publisher page.
  *
  * @const {!string}
+ * @visibleForTesting
  */
 export const EXPERIMENT_ATTRIBUTE = 'data-experiment-id';
 
