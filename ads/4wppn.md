@@ -17,10 +17,7 @@ limitations under the License.
 # 4w Premium Publisher Network
 
 Please refer to [4w Marketplace](mailto:4winfo@4wmarketplace.com) for more
-<<<<<<< HEAD
-=======
 information on how to get required ad tag or placement IDs.
->>>>>>> Neodata Changes
 
 ## Examples
 
@@ -28,13 +25,8 @@ information on how to get required ad tag or placement IDs.
 
 ```html
 <amp-ad width=320 height=50
-<<<<<<< HEAD
     type="4wppn"
     data-loc="ppnm_ans_ans_ros_top">
-=======
-           type="4wppn"
-           data-loc="ppnm_ans_ans_ros_top">
->>>>>>> Neodata Changes
 </amp-ad>
 ```
 
