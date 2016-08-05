@@ -24,13 +24,13 @@ information on how to get required parameters.
 ### Simple ad tag 
 
 ```html
- <amp-ad width=320 height=250
-          type="adagio"
-          data-sid="39"
-          data-loc="amp_ampw_amps_ampp_300x250"
-          data-keywords=""
-          data-uservars="">
-  </amp-ad>
+<amp-ad width=320 height=250
+    type="adagio"
+    data-sid="39"
+    data-loc="amp_ampw_amps_ampp_300x250"
+    data-keywords=""
+    data-uservars="">
+</amp-ad>
 ```
 
 

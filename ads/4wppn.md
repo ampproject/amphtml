@@ -25,8 +25,8 @@ information on how to get required ad tag or placement IDs.
 
 ```html
 <amp-ad width=320 height=50
-           type="4wppn"
-           data-loc="ppnm_ans_ans_ros_top">
+    type="4wppn"
+    data-loc="ppnm_ans_ans_ros_top">
 </amp-ad>
 ```
 
