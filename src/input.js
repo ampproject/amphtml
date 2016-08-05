@@ -58,7 +58,7 @@ export class Input {
         (win.navigator['maxTouchPoints'] !== undefined &&
             win.navigator['maxTouchPoints'] > 0) ||
         win['DocumentTouch'] !== undefined);
-    dev.fine(TAG_, 'touch detected:', this.hasTouch_);
+    dev().fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
     this.keyboardActive_ = false;
@@ -182,7 +182,7 @@ export class Input {
 
     this.keyboardActive_ = true;
     this.keyboardStateObservable_.fire(true);
-    dev.fine(TAG_, 'keyboard activated');
+    dev().fine(TAG_, 'keyboard activated');
   }
 
   /** @private */
@@ -192,7 +192,7 @@ export class Input {
     }
     this.keyboardActive_ = false;
     this.keyboardStateObservable_.fire(false);
-    dev.fine(TAG_, 'keyboard deactivated');
+    dev().fine(TAG_, 'keyboard deactivated');
   }
 
   /**
@@ -217,7 +217,7 @@ export class Input {
   mouseConfirmed_() {
     this.hasMouse_ = true;
     this.mouseDetectedObservable_.fire(true);
-    dev.fine(TAG_, 'mouse detected');
+    dev().fine(TAG_, 'mouse detected');
   }
 
   /** @private */
@@ -227,7 +227,7 @@ export class Input {
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
       listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
-      dev.fine(TAG_, 'mouse detection failed');
+      dev().fine(TAG_, 'mouse detection failed');
     }
   }
 }

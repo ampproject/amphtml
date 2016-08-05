@@ -62,10 +62,6 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/server.js',
       'validator/nodejs/index.js',  // NodeJs only.
-      'validator/parse-css.js',  // TODO(powdercloud): remove
-      'validator/validator-full.js',  // TODO(powdercloud): remove
-      'validator/validator-in-browser.js', // TODO(powdercloud): remove
-      'validator/validator.js',  // TODO(powdercloud): remove
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
@@ -354,9 +350,6 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
-      'validator/tokenize-css.js',  // TODO(powdercloud): remove
-      'validator/validator-full.js',  // TODO(powdercloud): remove
-      'validator/validator.js',  // TODO(powdercloud): remove
       'validator/engine/tokenize-css.js',
       'validator/engine/validator.js',
       // exports.startsWith occurs in babel generated code.
@@ -398,8 +391,6 @@ var forbiddenTerms = {
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'validator/validator-full.js',  // TODO(powdercloud): remove
-      'validator/validator.js',  // TODO(powdercloud): remove
       'validator/engine/validator.js',
     ],
   },

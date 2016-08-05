@@ -44,7 +44,7 @@ describe('UrlReplacements', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    userErrorStub = sandbox.stub(user, 'error');
+    userErrorStub = sandbox.stub(user(), 'error');
   });
 
   afterEach(() => {

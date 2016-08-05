@@ -16,14 +16,11 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
-import {bezierCurve} from '../../../src/curve';
-import {continueMotion} from '../../../src/motion';
+import {timerFor} from '../../../src/timer';
+import {numeric} from '../../../src/transition';
 import {dev} from '../../../src/log';
 import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
 
 /** @const {string} */
 const TAG = 'amp-scrollable-carousel';
@@ -37,10 +34,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    dev.fine(TAG, 'Building scrollable carousel');
-
     /** @private {number} */
     this.pos_ = 0;
+
+    this.oldPos_ = 0;
 
     /** @private {!Array<!Element>} */
     this.cells_ = this.getRealChildren();
@@ -48,12 +45,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
-      whiteSpace: 'nowrap',
-      position: 'absolute',
-      zIndex: 1,
-      top: 0,
-      left: 0,
-      bottom: 0,
+      'white-space': 'nowrap',
+      'overflow-x': 'auto',
+      'overflow-y': 'hidden',
+      '-webkit-overflow-scrolling': 'touch',
     });
     this.element.appendChild(this.container_);
 
@@ -66,6 +61,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
       }
       this.container_.appendChild(cell);
     });
+
+    /** @private {?number} */
+    this.scrollTimerId_ = null;
+
+    this.container_.addEventListener(
+        'scroll', this.scrollHandler_.bind(this));
   }
 
   /** @override */
@@ -77,45 +78,79 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  onViewportCallback(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
-    if (inViewport) {
-      this.hintControls();
-    }
   }
 
   /** @override */
   goCallback(dir, animate) {
     const newPos = this.nextPos_(this.pos_, dir);
-    if (newPos != this.pos_) {
-      const oldPos = this.pos_;
-      this.pos_ = newPos;
+    const oldPos = this.pos_;
 
-      if (!animate) {
-        this.commitSwitch_(oldPos, newPos);
-      } else {
-        Animation.animate(this.element, tr.setStyles(this.container_, {
-          transform: tr.translateX(tr.numeric(-oldPos, -newPos)),
-        }), 200, 'ease-out').thenAlways(() => {
-          this.commitSwitch_(oldPos, newPos);
-        });
-      }
+    if (newPos == oldPos) {
+      return;
+    }
+
+    if (!animate) {
+      this.commitSwitch_(newPos);
+      this.container_./*OK*/scrollLeft = newPos;
+    } else {
+      const interpolate = numeric(oldPos, newPos);
+      const duration = 200;
+      const curve = 'ease-in-out';
+      Animation.animate(this.element, pos => {
+        this.container_./*OK*/scrollLeft = interpolate(pos);
+      }, duration, curve).thenAlways(() => {
+        this.commitSwitch_(newPos);
+      });
     }
   }
 
   /**
-   * @param {number} oldPos
-   * @param {number} newPos
+   * Handles scroll on the carousel container.
    * @private
    */
-  commitSwitch_(oldPos, newPos) {
-    st.setStyles(this.container_, {
-      transform: st.translateX(-newPos),
-    });
-    this.updateInViewport_(newPos, oldPos);
-    this.doLayout_(newPos);
-    this.preloadNext_(newPos, Math.sign(newPos - oldPos));
+  scrollHandler_() {
+    const currentScrollLeft = this.container_./*OK*/scrollLeft;
+    this.pos_ = currentScrollLeft;
+
+    if (this.scrollTimerId_ == null) {
+      this.waitForScroll_(currentScrollLeft);
+    }
+  }
+
+  /**
+   * @param {!number} startingScrollLeft
+   * @private
+   */
+  waitForScroll_(startingScrollLeft) {
+    this.scrollTimerId_ = timerFor(this.win).delay(() => {
+      // TODO(yuxichen): test out the threshold for identifying fast scrolling
+      if (Math.abs(startingScrollLeft - this.pos_) < 30) {
+        dev().fine(TAG, 'slow scrolling: ' + startingScrollLeft + ' - '
+            + this.pos_);
+        this.scrollTimerId_ = null;
+        this.commitSwitch_(this.pos_);
+      } else {
+        dev().fine(TAG, 'fast scrolling: ' + startingScrollLeft + ' - '
+            + this.pos_);
+        this.waitForScroll_(this.pos_);
+      }
+    }, 100);
+  }
+
+  /**
+   * @param {number} pos
+   * @private
+   */
+  commitSwitch_(pos) {
+    dev().fine(TAG, 'commitSwitch_');
+    this.updateInViewport_(pos, this.oldPos_);
+    this.doLayout_(pos);
+    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
     this.setControlsState();
+    this.oldPos_ = pos;
+    this.pos_ = pos;
   }
 
   /**
@@ -196,128 +231,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
         }
       });
     }
-  }
-
-  /** @override */
-  setupGestures() {
-    /** @private {number} */
-    this.startPos_ = 0;
-    /** @private {number} */
-    this.minPos_ = 0;
-    /** @private {number} */
-    this.maxPos_ = 0;
-    /** @private {number} */
-    this.extent_ = 0;
-    /** @private {?Motion} */
-    this.motion_ = null;
-
-    const gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXRecognizer, e => {
-      if (e.data.first) {
-        this.onSwipeStart_(e.data);
-      }
-      this.onSwipe_(e.data);
-      if (e.data.last) {
-        this.onSwipeEnd_(e.data);
-      }
-    });
-    gestures.onPointerDown(() => {
-      if (this.motion_) {
-        this.motion_.halt();
-        this.motion_ = null;
-      }
-    });
-  }
-
-  /**
-   * @param {!Swipe} unusedSwipe
-   * @private
-   */
-  onSwipeStart_(unusedSwipe) {
-    this.updateBounds_();
-    this.startPos_ = this.pos_;
-    this.motion_ = null;
-  }
-
-  /**
-   * @param {!Swipe} swipe
-   * @private
-   */
-  onSwipe_(swipe) {
-    this.pos_ = this.boundPos_(this.startPos_ - swipe.deltaX, true);
-    st.setStyles(this.container_, {
-      transform: st.translateX(-this.pos_),
-    });
-    if (Math.abs(swipe.velocityX) < 0.05) {
-      this.commitSwitch_(this.startPos_, this.pos_);
-    }
-  }
-
-  /**
-   * @param {!Swipe} swipe
-   * @return {!Promise}
-   * @private
-   */
-  onSwipeEnd_(swipe) {
-    let promise;
-    if (Math.abs(swipe.velocityX) > 0.1) {
-      this.motion_ = continueMotion(this.element,
-          this.pos_, 0, -swipe.velocityX, 0,
-          (x, unusedY) => {
-            const newPos = (this.boundPos_(x, true) +
-                this.boundPos_(x, false)) * 0.5;
-            if (Math.abs(newPos - this.pos_) <= 1) {
-              // Hit the wall: stop motion.
-              return false;
-            }
-            this.pos_ = newPos;
-            st.setStyles(this.container_, {
-              transform: st.translateX(-this.pos_),
-            });
-            return true;
-          });
-      promise = this.motion_.thenAlways();
-    } else {
-      promise = Promise.resolve();
-    }
-    return promise.then(() => {
-      const newPos = this.boundPos_(this.pos_, false);
-      if (Math.abs(newPos - this.pos_) < 1) {
-        return undefined;
-      }
-      const posFunc = tr.numeric(this.pos_, newPos);
-      return Animation.animate(this.element, time => {
-        this.pos_ = posFunc(time);
-        st.setStyles(this.container_, {
-          transform: st.translateX(-this.pos_),
-        });
-      }, 250, bezierCurve(0.4, 0, 0.2, 1.4)).thenAlways();
-    }).then(() => {
-      this.commitSwitch_(this.startPos_, this.pos_);
-      this.startPos_ = this.pos_;
-      this.motion_ = null;
-    });
-  }
-
-  /** @private */
-  updateBounds_() {
-    const containerWidth = this.element./*OK*/offsetWidth;
-    const scrollWidth = this.container_./*OK*/scrollWidth;
-    this.minPos_ = 0;
-    this.maxPos_ = Math.max(scrollWidth - containerWidth, 0);
-    this.extent_ = Math.min(containerWidth * 0.4, 200);
-  }
-
-  /**
-   * @param {number} pos
-   * @param {boolean} allowExtent
-   * @return {number}
-   * @private
-   */
-  boundPos_(pos, allowExtent) {
-    const extent = allowExtent ? this.extent_ : 0;
-    return Math.min(this.maxPos_ + extent,
-        Math.max(this.minPos_ - extent, pos));
   }
 
   /** @override */

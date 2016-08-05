@@ -17,16 +17,15 @@
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
-import {BaseCarousel} from './base-carousel';
+import {BaseSlides} from './base-slides';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 
-export class AmpSlides extends BaseCarousel {
+export class AmpSlides extends BaseSlides {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -34,16 +33,7 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
-  buildCarousel() {
-    /** @private @const {boolean} */
-    this.isLooping_ = this.element.hasAttribute('loop');
-
-    /** @private {boolean} */
-    this.isAutoplayRequested_ = this.element.hasAttribute('autoplay');
-
-    /** @private @const {number} */
-    this.autoplayDelay_ = 5000;
-
+  buildSlides() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -56,13 +46,13 @@ export class AmpSlides extends BaseCarousel {
     /** @private {number} */
     this.currentIndex_ = 0;
 
-    /** @private {?number} */
-    this.autoplayTimeoutId_ = null;
-
-    user.assert(this.slides_.length >= 1,
+    user().assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
+  }
 
-    this.setupAutoplay_();
+  /** @override */
+  isLoopingEligible() {
+    return this.slides_.length > 2;
   }
 
   /** @override */
@@ -76,19 +66,15 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  updateViewportState(inViewport) {
     const curSlide = this.curSlide_();
     if (curSlide) {
       this.updateInViewport(curSlide, inViewport);
-      this.tryAutoplay_(1, true);
-      if (inViewport) {
-        this.hintControls();
-      }
     }
   }
 
   /** @override */
-  goCallback(dir, animate) {
+  moveSlide(dir, animate) {
     const newIndex = this.nextIndex_(dir);
     // Guard again NaN by checking if greater than or equal to zero
     // since we can't have negative indexes anyways.
@@ -108,63 +94,6 @@ export class AmpSlides extends BaseCarousel {
               this.preloadNext_(dir);
             });
       }
-    }
-    this.tryAutoplay_(1, true);
-  }
-
-  /**
-   * Sets up the `autoplay` configuration.
-   * @private
-   */
-  setupAutoplay_() {
-    if (!this.isAutoplayRequested_) {
-      return;
-    }
-
-    const delayValue = Number(this.element.getAttribute('delay'));
-    // If it isn't a number and is not greater than 0 then don't assign
-    // and use the default.
-    if (delayValue > 0) {
-      // Guard against autoplayValue that is lower than 1s to prevent
-      // people from crashing the runtime with providing very low delays.
-      this.autoplayDelay_ = Math.max(1000, delayValue);
-    }
-
-    // By default `autoplay` should also mean that the current carousel slide
-    // is looping. (to be able to advance past the last item)
-    if (!this.element.hasAttribute('loop')) {
-      this.element.setAttribute('loop', '');
-      this.isLooping_ = true;
-    }
-  }
-
-  /**
-   * Sets up the autoplay delay if necessary.
-   * @private
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
-   */
-  tryAutoplay_(dir, animate) {
-    this.tryCancelAutoplayTimeout_();
-
-    // If amp-carousel is not in viewport then no need to queue up new
-    // call to `go`.
-    if (!(this.isAutoplayRequested_ && this.isInViewport())) {
-      return;
-    }
-
-    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
-        this.autoplayDelay_);
-  }
-
-  /**
-   * Cancel `autoplay` timeout if one is in queue.
-   * @private
-   */
-  tryCancelAutoplayTimeout_() {
-    if (this.autoplayTimeoutId_ !== null) {
-      timer.cancel(this.autoplayTimeoutId_);
-      this.autoplayTimeoutId_ = null;
     }
   }
 
@@ -319,9 +248,7 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipeStart_(unusedSwipe) {
-    // cancel any current and future autoplay request
-    this.tryCancelAutoplayTimeout_();
-    this.isAutoplayRequested_ = false;
+    this.clearAutoplay();
 
     const currentSlide = this.curSlide_();
     const containerWidth = this.element./*OK*/offsetWidth;
@@ -334,13 +261,13 @@ export class AmpSlides extends BaseCarousel {
     const nextIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
         1, this.slides_.length);
 
-    if (this.isLooping_ || this.currentIndex_ - 1 >= 0) {
+    if (this.shouldLoop || this.currentIndex_ - 1 >= 0) {
       const prevSlide = this.slides_[prevIndex];
       this.prepareSlide_(prevSlide, -1);
       prevTr = this.createTransition_(currentSlide, prevSlide, -1);
       minDelta = -1;
     }
-    if (this.isLooping_ || this.currentIndex_ + 1 < this.slides_.length) {
+    if (this.shouldLoop || this.currentIndex_ + 1 < this.slides_.length) {
       const nextSlide = this.slides_[nextIndex];
       this.prepareSlide_(nextSlide, 1);
       nextTr = this.createTransition_(currentSlide, nextSlide, 1);
@@ -446,7 +373,7 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   hasPrev() {
-    if (this.isLooping_) {
+    if (this.shouldLoop) {
       return true;
     }
     return this.currentIndex_ != 0;
@@ -454,26 +381,10 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    if (this.isLooping_) {
+    if (this.shouldLoop) {
       return true;
     }
     return this.currentIndex_ < this.slides_.length - 1;
-  }
-
-  /** @override */
-  interactionNext() {
-    if (!this.nextButton_.classList.contains('amp-disabled')) {
-      this.isAutoplayRequested_ = false;
-      this.go(1, true);
-    }
-  }
-
-  /** @override */
-  interactionPrev() {
-    if (!this.prevButton_.classList.contains('amp-disabled')) {
-      this.isAutoplayRequested_ = false;
-      this.go(-1, true);
-    }
   }
 
   /**

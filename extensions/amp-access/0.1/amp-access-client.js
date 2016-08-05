@@ -16,7 +16,7 @@
 
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {xhrFor} from '../../../src/xhr';
 import {getMode} from '../../../src/mode';
 
@@ -43,12 +43,12 @@ export class AccessClientAdapter {
     this.context_ = context;
 
     /** @const @private {string} */
-    this.authorizationUrl_ = user.assert(configJson['authorization'],
+    this.authorizationUrl_ = user().assert(configJson['authorization'],
         '"authorization" URL must be specified');
     assertHttpsUrl(this.authorizationUrl_, '"authorization"');
 
     /** @const @private {string} */
-    this.pingbackUrl_ = user.assert(configJson['pingback'],
+    this.pingbackUrl_ = user().assert(configJson['pingback'],
         '"pingback" URL must be specified');
     assertHttpsUrl(this.pingbackUrl_, '"pingback"');
 
@@ -60,7 +60,7 @@ export class AccessClientAdapter {
     this.xhr_ = xhrFor(win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
   }
 
   /**
@@ -111,11 +111,11 @@ export class AccessClientAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Start authorization via ', this.authorizationUrl_);
+    dev().fine(TAG, 'Start authorization via ', this.authorizationUrl_);
     const urlPromise = this.context_.buildUrl(this.authorizationUrl_,
         /* useAuthData */ false);
     return urlPromise.then(url => {
-      dev.fine(TAG, 'Authorization URL: ', url);
+      dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
@@ -130,7 +130,7 @@ export class AccessClientAdapter {
     const promise = this.context_.buildUrl(this.pingbackUrl_,
         /* useAuthData */ true);
     return promise.then(url => {
-      dev.fine(TAG, 'Pingback URL: ', url);
+      dev().fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',

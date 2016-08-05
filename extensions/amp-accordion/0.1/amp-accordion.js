@@ -46,13 +46,13 @@ class AmpAccordion extends AMP.BaseElement {
     }
     const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
     this.sections_.forEach((section, index) => {
-      user.assert(
+      user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const sectionComponents_ = section.children;
-      user.assert(
+      user().assert(
           sectionComponents_.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -101,7 +101,7 @@ class AmpAccordion extends AMP.BaseElement {
       const sessionStr = this.win./*OK*/sessionStorage.getItem(this.id_);
       return JSON.parse(sessionStr);
     } catch (e) {
-      dev.error(e.message, e.stack);
+      dev().error(e.message, e.stack);
       return;
     }
   }
@@ -115,7 +115,7 @@ class AmpAccordion extends AMP.BaseElement {
     try {
       this.win./*OK*/sessionStorage.setItem(this.id_, sessionStr);
     } catch (e) {
-      dev.error(e.message, e.stack);
+      dev().error(e.message, e.stack);
     }
   }
 

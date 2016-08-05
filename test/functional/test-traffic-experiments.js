@@ -155,7 +155,7 @@ describe('all-traffic-experiments-tests', () => {
       expect(getPageExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
     });
     it('handles multi-way branches', () => {
-      dev.info(TAG_, 'Testing multi-way branches');
+      dev().info(TAG_, 'Testing multi-way branches');
       sandbox.win.AMP_CONFIG = {};
       const config = sandbox.win.AMP_CONFIG;
       config['expt_0'] = 1.0;

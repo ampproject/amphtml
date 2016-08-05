@@ -82,7 +82,7 @@ describe('crypto-impl', () => {
 
   function isModernChrome() {
     const platform = new Platform(window);
-    return platform.isChrome() && platform.getMajorVersion() >= 45;
+    return platform.isChrome() && platform.getMajorVersion() >= 37;
   }
 
   beforeEach(() => {

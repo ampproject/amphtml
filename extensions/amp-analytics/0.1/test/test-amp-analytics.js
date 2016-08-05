@@ -124,9 +124,9 @@ describe('amp-analytics', function() {
         return;
       }
       return new Promise(resolve => {
-        const start = new Date().getTime();
+        const start = Date.now();
         const interval = setInterval(() => {
-          const time = new Date().getTime();
+          const time = Date.now();
           if (sendRequestSpy.callCount > 0 ||
                   opt_max && (time - start) > opt_max) {
             clearInterval(interval);

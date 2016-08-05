@@ -39,7 +39,7 @@ describe('SignInProtocol', () => {
     sandbox = sinon.sandbox.create();
     toggleExperiment(window, 'amp-access-signin', true);
 
-    errorStub = sandbox.stub(user, 'error');
+    errorStub = sandbox.stub(user(), 'error');
 
     viewer = {
       isEmbedded: () => true,

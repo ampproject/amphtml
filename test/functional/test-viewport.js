@@ -60,7 +60,9 @@ describe('Viewport', () => {
         documentElement: {style: {}},
       },
       location: {},
+      navigator: window.navigator,
       setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
     installViewerService(windowApi);
@@ -601,6 +603,9 @@ describe('Viewport META', () => {
             return undefined;
           },
         },
+        navigator: window.navigator,
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
         location: {},
       };
       installViewerService(windowApi);
@@ -845,7 +850,6 @@ describe('ViewportBindingNatural', () => {
 
 describe('ViewportBindingNaturalIosEmbed', () => {
   let sandbox;
-  let clock;
   let windowMock;
   let binding;
   let windowApi;
@@ -855,7 +859,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowEventHandlers = {};
     bodyEventListeners = {};
@@ -890,7 +893,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNaturalIosEmbed_(windowApi);
-    clock.tick(1);
     return Promise.resolve();
   });
 

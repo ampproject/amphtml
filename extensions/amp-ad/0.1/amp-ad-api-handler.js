@@ -63,19 +63,22 @@ export class AmpAdApiHandler {
   }
 
   /**
+   * Sets up listeners and iframe state for iframe containing ad creative.
    * @param {!Element} iframe
-   * @param {boolean} is3p
+   * @param {boolean} is3p whether iframe was loaded via 3p.
+   * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
+   *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
    */
-  startUp(iframe, is3p) {
-    user.assert(
+  startUp(iframe, is3p, opt_defaultVisible) {
+    user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
     this.is3p_ = is3p;
     this.iframe_.setAttribute('scrolling', 'no');
     this.baseInstance_.applyFillContent(this.iframe_);
-    this.intersectionObserver_ =
-        new IntersectionObserver(this.baseInstance_, this.iframe_, is3p);
+    this.intersectionObserver_ = new IntersectionObserver(
+        this.baseInstance_, this.iframe_, is3p);
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
@@ -84,7 +87,7 @@ export class AmpAdApiHandler {
       if (this.noContentCallback_) {
         this.noContentCallback_();
       } else {
-        user.info('no content callback was specified');
+        user().info('no content callback was specified');
       }
     }, this.is3p_);
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
@@ -110,7 +113,7 @@ export class AmpAdApiHandler {
         this.updateSize_(newHeight, newWidth);
       }
     }, this.is3p_));
-    if (this.is3p_) {
+    if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
