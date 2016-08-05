@@ -1,0 +1,855 @@
+
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="https://ampbyexample.com/components/amp-img/">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+  <!--<script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"></script>-->
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-sidebar-0.1.js"></script>
+  <script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+  <title>amp-experiment - AMP by Example</title>
+  <meta name="description" content="The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data." />
+
+  <!-- Schema.org markup for Google+ -->
+  <meta itemprop="name" content="amp-experiment - AMP by Example">
+  <meta itemprop="description" content="The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data.">
+  <meta itemprop="image" content="https://ampbyexample.com/img/abe_preview.png">
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@amphtml">
+  <meta name="twitter:creator" content="@sebabenz">
+  <meta name="twitter:title" content="amp-experiment - AMP by Example">
+  <meta name="twitter:description" content="The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data.">
+  <meta name="twitter:image" content="https://ampbyexample.com/img/abe_preview.png">
+
+  <!-- Open Graph data -->
+  <meta property="fb:app_id" content="254325784911610" />
+  <meta property="og:title" content="amp-experiment - AMP by Example" />
+  <meta property="og:type" content="article" />
+  <meta property="og:image" content="https://ampbyexample.com/img/abe_preview.png" />
+  <meta property="og:url" content="https://ampbyexample.com/components/amp-experiment/" />
+  <meta property="og:description" content="The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data." />
+  <meta property="og:site_name" content="AMP by Example" />
+  <meta property="article:published_time" content="2016-08-04T10:01:21.904Z" />
+  <meta property="article:modified_time" content="2016-08-04T10:01:21.904Z" />
+  <!-- Metadata required by Google for AMP files -->
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": "https://ampbyexample.com/components/amp-experiment/",
+      "headline": "amp-experiment - AMP by Example",
+      "datePublished": "2016-08-04T10:01:21.904Z",
+      "dateModified": "2016-08-04T10:01:21.904Z",
+      "description": "The  amp-experiment component allows to perform user experience experiments on an AMP document and collect resulting data.",
+      "author": {
+        "@type": "Person",
+        "name": "Sebastian Benz"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Google",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://ampbyexample.com/img/logo.png",
+          "width": "362",
+          "height": "60"
+        }
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://ampbyexample.com/img/abe_preview.png",
+        "height": "1336",
+        "width": "2000"
+      }
+    }
+    </script>
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicons/android-chrome-192x192.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#607d8b">
+  <meta name="application-name" content="AMP by Example">
+  <link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/favicons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/favicons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/favicons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/favicons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/favicons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/favicons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/favicons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon-180x180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="AMP by Example">
+  <link rel="icon" type="image/png" sizes="228x228" href="/favicons/coast-228x228.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicons/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="230x230" href="/favicons/favicon-230x230.png">
+  <link rel="shortcut icon" href="/favicons/favicon.ico">
+  <link rel="yandex-tableau-widget" href="/favicons/yandex-browser-manifest.json">
+  <meta name="msapplication-TileColor" content="#607D8B">
+  <meta name="msapplication-TileImage" content="/favicons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/favicons/browserconfig.xml">
+  <meta property="twitter:image" content="https://ampbyexample.com/favicons/twitter.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 1)" href="/favicons/apple-touch-startup-image-320x460.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)" href="/favicons/apple-touch-startup-image-640x920.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/favicons/apple-touch-startup-image-640x1096.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/favicons/apple-touch-startup-image-750x1294.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 3)" href="/favicons/apple-touch-startup-image-1182x2208.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 3)" href="/favicons/apple-touch-startup-image-1242x2148.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 1)" href="/favicons/apple-touch-startup-image-748x1024.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 1)" href="/favicons/apple-touch-startup-image-768x1004.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)" href="/favicons/apple-touch-startup-image-1496x2048.png">
+  <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)" href="/favicons/apple-touch-startup-image-1536x2008.png">
+  <meta property="og:image" content="https://ampbyexample.com/favicons/open-graph.png">
+  <style amp-custom>
+    .hljs{display:block;padding:0;color:#333;height:100%}.hljs-comment,.hljs-quote{color:#998;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-subst{color:#333}.hljs-literal,.hljs-number,.hljs-tag .hljs-attr,.hljs-template-variable,.hljs-variable{color:teal}.hljs-doctag,.hljs-string{color:#d14}.hljs-section,.hljs-selector-id,.hljs-title{color:#900;font-weight:700}.hljs-subst{font-weight:400}.hljs-class .hljs-title,.hljs-type{color:#458;font-weight:700}.hljs-attribute,.hljs-name,.hljs-tag{color:navy;font-weight:400}.hljs-meta,.hljs-strong{font-weight:700}.hljs-link,.hljs-regexp{color:#009926}.hljs-bullet,.hljs-symbol{color:#990073}.hljs-built_in,.hljs-builtin-name{color:#0086b3}.hljs-meta{color:#999}.hljs-deletion{background:#fdd}.hljs-addition{background:#dfd}.hljs-emphasis{font-style:italic}      blockquote,h1{line-height:1.35}address,h5{line-height:1}html{color:rgba(0,0,0,.87)}::-moz-selection{background:#b3d4fc;text-shadow:none}::selection{background:#b3d4fc;text-shadow:none}hr{display:block;height:1px;border:0;border-top:1px solid #ccc;margin:1em 0;padding:0}audio,canvas,iframe,img,svg,video{vertical-align:middle}fieldset{border:0;margin:0;padding:0}textarea{resize:vertical}.browserupgrade{margin:.2em 0;background:#ccc;color:#000;padding:.2em 0}.hidden{display:none}.visuallyhidden{border:0;clip:rect(0 0 0 0);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px}.visuallyhidden.focusable:active,.visuallyhidden.focusable:focus{clip:auto;height:auto;margin:0;overflow:visible;position:static;width:auto}body,html{width:100%}.invisible{visibility:hidden}.clearfix:after,.clearfix:before{content:" ";display:table}.clearfix:after{clear:both}@media print{blockquote,img,pre,tr{page-break-inside:avoid}*,:after,:before,:first-letter,:first-line{background:0 0;color:#000;box-shadow:none;text-shadow:none}a,a:visited{text-decoration:underline}a[href]:after{content:" (" attr(href) ")"}abbr[title]:after{content:" (" attr(title) ")"}a[href^="#"]:after,a[href^="javascript:"]:after{content:""}blockquote,pre{border:1px solid #999}thead{display:table-header-group}img{max-width:100%}h2,h3,p{orphans:3;widows:3}h2,h3{page-break-after:avoid}}.mdl-accordion,.mdl-button,.mdl-card,.mdl-checkbox,.mdl-dropdown-menu,.mdl-icon-toggle,.mdl-item,.mdl-radio,.mdl-slider,.mdl-switch,.mdl-tabs__tab,a{-webkit-tap-highlight-color:transparent;-webkit-tap-highlight-color:rgba(255,255,255,0)}html{height:100%;-ms-touch-action:manipulation;touch-action:manipulation}body{min-height:100%;margin:0}main{display:block}[hidden]{display:none}body,html{font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:400;line-height:20px}h1,h2,h3,h4,h5,h6,p{margin:0;padding:0}h1,h2,h3{margin-bottom:24px;font-weight:400}h4,h5,h6{margin-top:24px;margin-bottom:16px;font-family:Roboto,Helvetica,Arial,sans-serif}h1 small,h2 small,h3 small,h4 small,h5 small,h6 small{font-family:Roboto,Helvetica,Arial,sans-serif;font-weight:400;line-height:1.35;letter-spacing:-.02em;opacity:.54;font-size:.6em}h1{font-family:Roboto,Helvetica,Arial,sans-serif;font-size:56px;letter-spacing:-.02em;margin-top:24px}h2{font-family:Roboto,Helvetica,Arial,sans-serif;font-size:45px;line-height:48px;margin-top:24px}h3{font-family:Roboto,Helvetica,Arial,sans-serif;font-size:34px;line-height:40px;margin-top:24px}h4{font-size:24px;font-weight:400;line-height:32px;-moz-osx-font-smoothing:grayscale}h5{font-size:20px;font-weight:500;letter-spacing:.02em}h6,p{font-weight:400;line-height:24px}h6{font-size:16px;letter-spacing:.04em}p{font-size:14px;letter-spacing:0;margin-bottom:8px}a{color:#ff4081;font-weight:500}blockquote{font-family:Roboto,Helvetica,Arial,sans-serif;position:relative;font-size:24px;font-weight:300;font-style:italic;letter-spacing:.08em}blockquote:before{position:absolute;left:-.5em;content:'“'}blockquote:after{content:'”';margin-left:-.05em}mark{background-color:#f4ff81}dt{font-weight:700}address,ol,ul{font-weight:400;letter-spacing:0}address{font-size:12px;font-style:normal}ol,ul{font-size:14px;line-height:24px}      .button,body a,button{cursor:pointer}.box,body{display:flex}.doc a,body a{text-decoration:none}everflow-wrap: break-word; figure,ol,ul{margin:0;padding:0}body{background:#fafafa;font-family:Roboto,Helvetica,Arial,sans-serif;min-height:100vh;flex-direction:column}article,main{flex:1;width:100%}figcaption,h1,h2,h3,h4,h5,h6,p{padding:0 16px}ol,ul{margin:0 16px;padding:16px}article{padding:0;max-width:2400px;margin:auto}article #title{text-align:center;margin:0;padding-top:24px;padding-bottom:24px}code,pre{background:#ECEFF1}.doc,.doc pre,.doc pre>code{background-color:#fff}.box{clear:both;min-height:-webkit-min-content;min-height:-moz-min-content;min-height:min-content}.anchor-trigger:hover+.anchor,.doc amp-img{display:block}.column{flex:1;max-width:800px;margin:0 auto;width:0}.doc code{padding:1px 5px}.code,code{background-color:#ECEFF1}.doc pre{padding:16px;margin:0}.doc amp-img{margin:0 auto}.anchor-trigger{float:left}.anchor-target{margin:0;padding:0}.anchor{position:relative;left:-16px;top:30px;display:none;vertical-align:middle}.action,.anchor:hover{display:block}.anchor-img{background-image:-webkit-image-set(url(/img/ic_link_black_1x_web_18dp.png) 1x,url(/img/ic_link_black_2x_web_18dp.png) 2x);width:18px;height:18px}.code{padding-left:8px;padding-right:8px;padding-bottom:8px}pre{white-space:pre-wrap;margin:0;width:auto;line-height:20px;overflow-wrap:break-word}code{font-size:12px;font-family:Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif}.action,.button,button{position:relative;height:36px;min-width:64px;font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:0;line-height:36px;text-decoration:none}.preview{background-color:#CFD8DC}.action{text-align:end;margin:8px;color:#000;border-radius:2px;padding:2px 36px 2px 8px}.action:hover{background-color:#ccc}.button,button{background:0 0;border:none;border-radius:2px;margin:0;padding:0 16px;display:inline-block;font-family:Roboto,Helvetica,Arial,sans-serif;will-change:box-shadow;transition:box-shadow .2s cubic-bezier(.4,0,1,1),background-color .2s cubic-bezier(.4,0,.2,1),color .2s cubic-bezier(.4,0,.2,1);outline:0;text-align:center;vertical-align:middle}.amp-experiment,.amp-experiment-large,.amp-experiment-medium{background-position:100% center}.button-primary{color:#fff;background-color:#eb407a;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12)}.button-inactive{color:#666;background-color:#aaa;cursor:default}header #logo,header .button>span{font-weight:300;color:#fff;text-transform:uppercase}#experiment-container{display:flex;justify-content:space-between;flex-wrap:wrap}#canary-toggle,#experiment-toggle{padding:0;margin:0 auto;display:inline-block;width:160px}.amp-experiment{padding-right:24px;background-repeat:no-repeat;background-image:-webkit-image-set(url(/img/ic_experiment_black_1x_web_18dp.png) 1x,url(/img/ic_experiment_black_2x_web_18dp.png) 2x)}.amp-experiment-medium{padding-right:36px;background-repeat:no-repeat;background-image:-webkit-image-set(url(/img/ic_experiment_black_1x_web_24dp.png) 1x,url(/img/ic_experiment_black_2x_web_24dp.png) 2x)}.amp-experiment-large{padding-right:44px;background-repeat:no-repeat;background-image:-webkit-image-set(url(/img/ic_experiment_black_1x_web_36dp.png) 1x,url(/img/ic_experiment_black_2x_web_36dp.png) 2x)}.gist,.show-preview{background-position:right 8px center;background-repeat:no-repeat}.gist{background-image:url(/img/gist.png)}.show-preview{background-image:-webkit-image-set(url(/img/ic_play_circle_filled_black_1x_web_24dp.png) 1x,url(/img/ic_play_circle_filled_black_2x_web_24dp.png) 2x)}.exit{background-position:right center;background-repeat:no-repeat;background-image:-webkit-image-set(url(/img/ic_close_black_1x_web_24dp.png) 1x,url(/img/ic_close_black_2x_web_24dp.png) 2x)}header{background-color:#607D8B;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);display:flex;flex-direction:column;align-items:center;justify-content:space-between}header #logo{align-self:flex-start;margin:0 auto;text-align:left;font-size:38px;line-height:36px;padding-left:46px;background-position:left center;background-repeat:no-repeat;background-image:-webkit-image-set(url(/favicons/android-chrome-36x36.png) 1x,url(/favicons/android-chrome-72x72.png) 2x)}header .button{margin-left:16px;padding:0;height:40px;min-width:40px;display:block;float:left}header .button>amp-img{margin:8px;float:left}header .button>span{display:inline-block;line-height:40px}header #hamburger{align-self:flex-start;padding:8px;margin-left:8px;margin-top:4px}header #actions{max-width:50%;padding:0 16px;align-self:flex-start;margin-left:auto;margin-right:12px}#drawermenu{width:320px;background-color:#fff}#drawermenu amp-accordion{padding-bottom:24px}#drawermenu .close{float:right;top:16px;margin-right:16px;cursor:pointer}#drawermenu .close:hover{background-color:#ccc}#drawermenu .expanded,#drawermenu .item a:active{background-color:#eee}#drawermenu .item a{color:#333;display:block;font-weight:400;letter-spacing:.1px;padding:10px 24px 10px 32px;white-space:nowrap;font-size:13px;-webkit-tap-highlight-color:#eee}.amp-mode-touch #drawermenu .item a{padding-top:18px;padding-bottom:17px}#drawermenu .item amp-img{margin-left:4px;vertical-align:text-bottom}#drawermenu .item .selected{font-weight:700;color:#eb407a}#drawermenu .category{padding-left:16px}#drawermenu h4{font-weight:700;font-size:13px;padding:0;border:0;background-color:#fff;width:100%;line-height:40px}#drawermenu .topheader{margin-top:16px;margin-left:16px}#drawermenu .home{text-align:left;font-weight:500;font-size:16px;text-transform:uppercase;line-height:36px;color:rgba(0,0,0,.87);padding-left:0}footer ul,footer ul li a{margin:0;line-height:12px}#drawermenu section:not([expanded]) .show-less,#drawermenu section[expanded] .show-more{display:none}footer{background:#607D8B;padding-top:36px;padding-bottom:36px}footer ul{display:flex;flex-flow:row;justify-content:center;padding:0}footer li{display:block;padding:0 1em;border-left:1px solid #fff}.fab,footer ul li a{color:#fff;padding:0;cursor:pointer}footer ul li:first-child{border-left:none}footer ul li a{flex-flow:row wrap;justify-content:center;text-align:center;text-decoration:none;font-weight:400}.fab{position:fixed;bottom:5%;right:5%;z-index:1000;background:#eb407a;line-height:24px;border-radius:50%;height:56px;margin:auto;min-width:56px;width:56px;box-shadow:0 1px 1.5px 0 rgba(0,0,0,.12),0 1px 1px 0 rgba(0,0,0,.24);outline:0}.fab amp-img{vertical-align:middle;position:absolute;top:50%;left:50%;transform:translate(-12px,-12px);line-height:24px;width:24px}.card{box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.2),0 1px 5px 0 rgba(0,0,0,.12);float:none;overflow:hidden;padding:8px;margin:16px;border-radius:2px}.card h4{margin-top:0;padding:0}.card p{margin-top:8px;padding:0}.info{background:#ccc}.important{background:#FFF9C4}.show-on-mobile{display:none}.hide-on-mobile{display:block}.hide{display:none}@media (max-width:700px){.hljs{padding:0 16px}article{padding:0}}@media (max-width:1024px){header .button>span,header .hide-on-mobile{display:none}.anchor-trigger,.doc{float:none}body{background:#fff}article{margin-top:56px}header{height:56px;flex-direction:row;position:fixed;top:0;width:100%;z-index:1000}header #actions{padding:8px 16px;margin-right:0}header #hamburger{padding:8px;margin:0}header #logo{width:auto;margin:0;padding:0;font-weight:400;font-size:16px;background-image:none;align-self:center}.card{margin:16px}.column{flex:none;width:auto;max-width:1280px}.box{display:block;margin:0}.doc{padding:0;margin:0}.code{padding:8px;margin:16px}.preview{padding:0;margin:16px}.anchor-trigger:hover+.anchor,.hide-on-mobile{display:none}.show-on-mobile{display:block}}form{display:-webkit-flex;display:-ms-flexbox;display:flex;flex-flow:row wrap;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;padding:16px;-webkit-flex-grow:1;-ms-flex-positive:1;flex-grow:1;margin:0;color:#616161}input[type=email],input[type=text]{display:block;font-family:Helvetica,Arial,sans-serif;margin:0 0 16px;width:100%;text-align:left;color:inherit;outline:0}.data-input{border:none;border-bottom:1px solid rgba(0,0,0,.12);font-size:16px;margin-bottom:16px;padding:4px 0;color:inherit;outline:0;background:0 0}.search-input{float:left;border:1px solid #ddd;height:43px;padding:0;font-size:20px}.search-input-submit{top:-61px;float:right;font-size:16px;margin-top:1px;background-color:#4285f4;height:43px}          body[amp-x-button-color-experiment="yellow"] .button-experiment{
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 background-color: yellow;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 color: black;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               }
+    body[amp-x-button-color-experiment="red"] .button-experiment{
+      background-color: red;
+    }
+    body[amp-x-button-color-experiment="blue"] .button-experiment{
+      background-color: blue;
+    }
+    button {
+      background-color: grey;
+    }
+
+  </style>
+  <base href="https://ampbyexample.com/components/">
+</head>
+<body>
+<amp-sidebar id='drawermenu' layout="nodisplay">
+  <amp-img class='close' src="/img/ic_chevron_left_black_24dp_2x.png" width="32" height="32" alt="Close" on="tap:drawermenu.close" role="button" tabindex="0"></amp-img>
+  <div class="topheader">
+    <a href="/" class="home">AMP by Example</a>
+  </div>
+  <hr/>
+  <amp-accordion>
+    <section  >
+      <h4>
+        <div class="show-more category">Introduction</div>
+        <div class="show-less category expanded">Introduction</div>
+      </h4>
+      <div>
+        <div class="item">
+          <a  href="/introduction/hello_world/">Hello World
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/introduction/how_to_publish_amps/">How to publish AMPs
+          </a>
+        </div>
+      </div>
+    </section>
+    <section expanded >
+      <h4>
+        <div class="show-more category">Components</div>
+        <div class="show-less category expanded">Components</div>
+      </h4>
+      <div>
+        <div class="item">
+          <a  href="/components/amp-access/">amp-access
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-accordion/">amp-accordion
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-ad/">amp-ad
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-anim/">amp-anim
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-audio/">amp-audio
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-brightcove/">amp-brightcove
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-carousel/">amp-carousel
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-dailymotion/">amp-dailymotion
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-facebook/">amp-facebook
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-font/">amp-font
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-form/">amp-form
+            <amp-img src="/img/ic_experiment_black_2x_web_18dp.png" width="18" height="18" alt="experimental">
+            </amp-img>
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-fx-flying-carpet/">amp-fx-flying-carpet
+            <amp-img src="/img/ic_experiment_black_2x_web_18dp.png" width="18" height="18" alt="experimental">
+            </amp-img>
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-iframe/">amp-iframe
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-image-lightbox/">amp-image-lightbox
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-img/">amp-img
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-instagram/">amp-instagram
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-install-serviceworker/">amp-install-serviceworker
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-lightbox/">amp-lightbox
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-list/">amp-list
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-live-list/">amp-live-list
+            <amp-img src="/img/ic_experiment_black_2x_web_18dp.png" width="18" height="18" alt="experimental">
+            </amp-img>
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-pinterest/">amp-pinterest
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-sidebar/">amp-sidebar
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-social-share/">amp-social-share
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-soundcloud/">amp-soundcloud
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-sticky-ad/">amp-sticky-ad
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-twitter/">amp-twitter
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-user-notification/">amp-user-notification
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-video/">amp-video
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-vimeo/">amp-vimeo
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-vine/">amp-vine
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/components/amp-youtube/">amp-youtube
+          </a>
+        </div>
+      </div>
+    </section>
+    <section  >
+      <h4>
+        <div class="show-more category">Advanced</div>
+        <div class="show-less category expanded">Advanced</div>
+      </h4>
+      <div>
+        <div class="item">
+          <a  href="/advanced/amp-user-notification_with_server_endpoint/">amp-user-notification with Server Endpoint
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/how_to_create_interactive_amp_pages/">How to create interactive AMP pages?
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/image_galleries_with_amp-carousel/">Image Galleries with amp-carousel
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/integrating_videos_in_amp_an_overview/">Integrating Videos in AMP: an Overview
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/long_list_of_amp-instagram_embeds/">Long List of amp-instagram Embeds
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/using_the_google_amp_cache/">Using the Google AMP Cache
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/advanced/video_carousels_with_amp-carousel/">Video Carousels with amp-carousel
+          </a>
+        </div>
+      </div>
+    </section>
+    <section  >
+      <h4>
+        <div class="show-more category">Samples &amp; Templates</div>
+        <div class="show-less category expanded">Samples &amp; Templates</div>
+      </h4>
+      <div>
+        <div class="item">
+          <a  href="/samples_templates/news_article/">News Article
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/samples_templates/product/">Product
+          </a>
+        </div>
+        <div class="item">
+          <a  href="/samples_templates/recipe/">Recipe
+          </a>
+        </div>
+      </div>
+    </section>
+  </amp-accordion>
+</amp-sidebar>
+<header>
+  <a id="hamburger" class="button" on='tap:drawermenu.toggle'>
+    <amp-img srcset="/img/ic_menu_white_1x_web_24dp.png 1x, /img/ic_menu_white_2x_web_24dp.png 2x" width="24" height="24" alt="navigation"></amp-img>
+  </a>
+  <a id="logo" href="/">AMP by Example</a>
+  <div id="actions">
+    <a href="https://github.com/ampproject/amp-by-example/blob/master/src/20_Components/amp-experiment.html" class="button" target="_blank">
+      <amp-img srcset="/img/GitHub-Mark-Light-32px.png 1x, /img/GitHub-Mark-Light-64px.png 2x" width="24" height="24" alt="Github" attribution="github" ></amp-img>
+      <span class="hide-on-mobile">View on Github</span>
+    </a>
+  </div>
+</header>
+<article>
+  <h3 id="title">
+    amp-experiment <i class="amp-experiment-large"></i>
+  </h3>
+  <div class="box">
+    <div class="column doc">
+      <div id="experimental-mode" class="card info">
+        <h4>Experimental Mode</h4>
+        <p>The <code>amp-experiment</code> component is currently in experimental mode and needs to be manually enabled (<a href="https://www.ampproject.org/docs/reference/experimental.html">more info</a>).</p>
+
+        <div id="experiment-container">
+          <button id="experiment-toggle" class="button-inactive">Enable Experiment</button>
+          <a id="canary-toggle" class="button button-inactive" href="https://cdn.ampproject.org/experiments.html" target="_blank">Enable Dev Channel</a>
+        </div>
+      </div>
+      <!-- BEGIN INVALID AMP - don't try at home -->
+      <script>
+        document.addEventListener("DOMContentLoaded", function(event) {
+          (window.AMP = window.AMP || []).push(function(AMP) {
+
+            function enableButton(button) {
+              const element = document.getElementById(button);
+              element.className = element.className.replace("inactive", "primary");
+            }
+
+            function isExperimentEnabled() {
+              return AMP.isExperimentOn('amp-experiment');
+            }
+
+            function enableExperiment() {
+              if (!isExperimentEnabled()) {
+                AMP.toggleExperiment('amp-experiment');
+              }
+              location.reload();
+            }
+
+            // enable active experiment button
+            if (!isExperimentEnabled()) {
+              var experimentToggle = document.getElementById("experiment-toggle");
+              experimentToggle.addEventListener("click", enableExperiment);
+              enableButton('experiment-toggle');
+            }
+
+            // enable active dev channel button
+            if (!window.AMP_CONFIG.canary) {
+              enableButton('canary-toggle');
+            }
+
+            // show invalid AMP message in dev mode
+            if (window.location.hash.includes('development=1')) {
+              console.log('This sample is intentionally not valid AMP.');
+            }
+          });
+        });
+
+      </script>
+      <!-- END INVALID AMP -->
+    </div>
+    <div class="column code hide-on-mobile "></div>
+    <div class="column preview hide-on-mobile "></div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example0" class="anchor-target"></a>
+      <div class="anchor-trigger"><h4 id="introduction">Introduction</h4>
+        <p>The  <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md">amp-experiment</a> component allows to perform user experience experiments on an AMP document and collect resulting data. This is, for example, good for A/B testing new features in your AMPs, but you can test as many variants as you want.</p>
+      </div>
+      <a href="#example0" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example1" class="anchor-target"></a>
+
+      <a href="#example1" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+          <pre class="hljs"><code class="html"><span class="hljs-meta">&lt;!doctype html&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">html</span> ⚡&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">"utf-8"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"canonical"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"https://ampbyexample.com/components/amp-img/"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"viewport"</span> <span class="hljs-attr">content</span>=<span class="hljs-string">"width=device-width,minimum-scale=1,initial-scale=1"</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">amp-boilerplate</span>&gt;</span><span class="css"><span class="hljs-selector-tag">body</span>{<span class="hljs-attribute">-webkit-animation</span>:-amp-start <span class="hljs-number">8s</span> <span class="hljs-built_in">steps</span>(1,end) <span class="hljs-number">0s</span> <span class="hljs-number">1</span> normal both;<span class="hljs-attribute">-moz-animation</span>:-amp-start <span class="hljs-number">8s</span> <span class="hljs-built_in">steps</span>(1,end) <span class="hljs-number">0s</span> <span class="hljs-number">1</span> normal both;<span class="hljs-attribute">-ms-animation</span>:-amp-start <span class="hljs-number">8s</span> <span class="hljs-built_in">steps</span>(1,end) <span class="hljs-number">0s</span> <span class="hljs-number">1</span> normal both;<span class="hljs-attribute">animation</span>:-amp-start <span class="hljs-number">8s</span> <span class="hljs-built_in">steps</span>(1,end) <span class="hljs-number">0s</span> <span class="hljs-number">1</span> normal both}@-<span class="hljs-keyword">webkit</span>-<span class="hljs-keyword">keyframes</span> -amp-start{<span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">visibility</span>:hidden}<span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">visibility</span>:visible}}@-<span class="hljs-keyword">moz</span>-<span class="hljs-keyword">keyframes</span> -amp-start{<span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">visibility</span>:hidden}<span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">visibility</span>:visible}}@-<span class="hljs-keyword">ms</span>-<span class="hljs-keyword">keyframes</span> -amp-start{<span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">visibility</span>:hidden}<span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">visibility</span>:visible}}@-<span class="hljs-keyword">o</span>-<span class="hljs-keyword">keyframes</span> -amp-start{<span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">visibility</span>:hidden}<span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">visibility</span>:visible}}@<span class="hljs-keyword">keyframes</span> -amp-start{<span class="hljs-selector-tag">from</span>{<span class="hljs-attribute">visibility</span>:hidden}<span class="hljs-selector-tag">to</span>{<span class="hljs-attribute">visibility</span>:visible}}</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">noscript</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">amp-boilerplate</span>&gt;</span><span class="css"><span class="hljs-selector-tag">body</span>{<span class="hljs-attribute">-webkit-animation</span>:none;<span class="hljs-attribute">-moz-animation</span>:none;<span class="hljs-attribute">-ms-animation</span>:none;<span class="hljs-attribute">animation</span>:none}</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">noscript</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">async</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.ampproject.org/v0.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example2" class="anchor-target"></a>
+      <div class="anchor-trigger"><h4 id="setup">Setup</h4>
+      </div>
+      <a href="#example2" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example3" class="anchor-target"></a>
+      <p>  Import the <code>amp-experiment</code> component.</p>
+
+      <a href="#example3" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+      <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">async</span> <span class="hljs-attr">custom-element</span>=<span class="hljs-string">"amp-experiment"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.ampproject.org/v0/amp-experiment-0.1.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example4" class="anchor-target"></a>
+
+      <a href="#example4" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">async</span> <span class="hljs-attr">custom-element</span>=<span class="hljs-string">"amp-analytics"</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdn.ampproject.org/v0/amp-analytics-0.1.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example5" class="anchor-target"></a>
+      <p>  Style different variants of the experiment by using <code>body[amp-x-name-of-experiment=&quot;nameOfVariant&quot;</code>].</p>
+
+      <a href="#example5" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+          <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">amp-custom</span>&gt;</span><span class="css">
+    <span class="hljs-selector-tag">body</span><span class="hljs-selector-attr">[amp-x-button-color-experiment="yellow"]</span> <span class="hljs-selector-class">.button-experiment</span>{
+      <span class="hljs-attribute">background-color</span>: yellow;
+      <span class="hljs-attribute">color</span>: black;
+    }
+    <span class="hljs-selector-tag">body</span><span class="hljs-selector-attr">[amp-x-button-color-experiment="red"]</span> <span class="hljs-selector-class">.button-experiment</span>{
+      <span class="hljs-attribute">background-color</span>: red;
+    }
+    <span class="hljs-selector-tag">body</span><span class="hljs-selector-attr">[amp-x-button-color-experiment="blue"]</span> <span class="hljs-selector-class">.button-experiment</span>{
+      <span class="hljs-attribute">background-color</span>: blue;
+    }
+    <span class="hljs-selector-tag">button</span> {
+      <span class="hljs-attribute">background-color</span>: grey;
+    }
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example6" class="anchor-target"></a>
+
+      <a href="#example6" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+          <pre class="hljs"><code class="html"><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example7" class="anchor-target"></a>
+      <div class="anchor-trigger"><h4 id="basic-usage">Basic Usage</h4>
+      </div>
+      <a href="#example7" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example8" class="anchor-target"></a>
+      <p>  Configure experiments inside the <code>amp-experiment</code> inside a JSON object. Use <code>variants</code> within each experiment to declare how many users in percent will be part of an experiment variant. The total sum of the variants must be a number &lt;= 100, if the number is &lt; 100, then the default behaviour is used. A user belongs to one of the variants based on a random number generated between 0 and 100.</p>
+      <p> For more details about variants read the official <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-experiment/amp-experiment.md">documentation</a>. Multiple experiments can be run on the same AMP document in parallel with their own sets of variants. One AMP document can have at most one <code>amp-experiment</code> element.</p>
+
+      <a href="#example8" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+          <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">amp-experiment</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span>&gt;</span><span class="actionscript">
+      {
+        <span class="hljs-string">"button-color-experiment"</span>: {
+          <span class="hljs-string">"variants"</span>: {
+            <span class="hljs-string">"yellow"</span>: <span class="hljs-number">30</span>,
+            <span class="hljs-string">"red"</span>: <span class="hljs-number">30</span>,
+            <span class="hljs-string">"blue"</span>: <span class="hljs-number">30</span>
+          }
+        }
+      }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">amp-experiment</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview  ">
+      <amp-experiment>
+        <script type="application/json">
+          {
+            "button-color-experiment": {
+              "variants": {
+                "yellow": 30,
+                "red": 30,
+                "blue": 30
+              }
+            }
+          }
+        </script>
+      </amp-experiment>
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example9" class="anchor-target"></a>
+      <p>An experimental button. The background of the button is going to be yellow for the 30% of users, red for 30% of users, blue for 30% of users and, for the remaining 10% of users, the button background is going to be the default color which is grey in this sample.</p>
+
+      <a href="#example9" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+      <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"button button-experiment"</span>&gt;</span>Click here<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview  ">
+      <button class="button button-experiment">Click here</button>
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example10" class="anchor-target"></a>
+
+      <a href="#example10" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example11" class="anchor-target"></a>
+      <div class="anchor-trigger"><h4 id="reporting">Reporting</h4>
+      </div>
+      <a href="#example11" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example12" class="anchor-target"></a>
+      <p>Measure results of the experiment using <a href="https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md">amp-pixel</a>...</p>
+
+      <a href="#example12" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+      <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">amp-pixel</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://example.com/track/?xname=button-color-experiment&amp;xvar=VARIANT(button-color-experiment)"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">amp-pixel</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview  ">
+      <amp-pixel src="https://example.com/track/?xname=button-color-experiment&xvar=VARIANT(button-color-experiment)"></amp-pixel>
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example13" class="anchor-target"></a>
+      <p>... or <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md">amp-analytics</a>. Allocated variants are available as a URL substitution variable: <code>VARIANT(name-of-the-experiment)</code>. You can check the analytics requests in the network tab of the developer tools.</p>
+
+      <a href="#example13" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code  ">
+          <pre class="hljs"><code class="html">  <span class="hljs-tag">&lt;<span class="hljs-name">amp-analytics</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"googleanalytics"</span>
+      <span class="hljs-attr">id</span>=<span class="hljs-string">"analytics"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"application/json"</span>&gt;</span><span class="actionscript">
+      {
+        <span class="hljs-string">"vars"</span>: {
+          <span class="hljs-string">"account"</span>: <span class="hljs-string">"UA-73836974-1"</span>
+        },
+        <span class="hljs-string">"requests"</span>: {
+          <span class="hljs-string">"exp"</span>: <span class="hljs-string">"${host}/r/collect?t=exp&amp;xid=${experiment}&amp;xvar=${variant}"</span>
+        },
+        <span class="hljs-string">"triggers"</span>: {
+          <span class="hljs-string">"default pageview"</span>: {
+            <span class="hljs-string">"on"</span>: <span class="hljs-string">"visible"</span>,
+            <span class="hljs-string">"request"</span>: <span class="hljs-string">"pageview"</span>,
+            <span class="hljs-string">"request"</span>: <span class="hljs-string">"exp"</span>,
+            <span class="hljs-string">"vars"</span>: {
+              <span class="hljs-string">"title"</span>: <span class="hljs-string">"amp-experiment"</span>,
+              <span class="hljs-string">"experiment"</span>: <span class="hljs-string">"button-color-experiment"</span>,
+              <span class="hljs-string">"variant"</span>: <span class="hljs-string">"VARIANT(button-color-experiment)"</span>
+            }
+          }
+        }
+      }
+    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">amp-analytics</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview  ">
+      <amp-analytics type="googleanalytics"
+          id="analytics">
+        <script type="application/json">
+          {
+            "vars": {
+              "account": "UA-73836974-1"
+            },
+            "requests": {
+              "exp": "${host}/r/collect?t=exp&xid=${experiment}&xvar=${variant}"
+            },
+            "triggers": {
+              "default pageview": {
+                "on": "visible",
+                "request": "pageview",
+                "request": "exp",
+                "vars": {
+                  "title": "amp-experiment",
+                  "experiment": "button-color-experiment",
+                  "variant": "VARIANT(button-color-experiment)"
+                }
+              }
+            }
+          }
+        </script>
+      </amp-analytics>
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example14" class="anchor-target"></a>
+
+      <a href="#example14" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example15" class="anchor-target"></a>
+      <div class="anchor-trigger"><h4 id="development-tip">Development Tip</h4>
+      </div>
+      <a href="#example15" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc  ">
+      <a id="example16" class="anchor-target"></a>
+      <p>You can force an experiment to be in a specific variant by adding <code>amp-x-experiment-name</code> to the AMP page URL.</p>
+      <ul>
+        <li><a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=red">#amp-x-button-color-experiment=red</a></li>
+        <li><a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=blue">#amp-x-button-color-experiment=blue</a></li>
+        <li><a href="https://ampbyexample.com/components/amp-experiment#amp-x-button-color-experiment=yellow">#amp-x-button-color-experiment=yellow</a></li>
+      </ul>
+
+      <a href="#example16" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+    </div>
+    <div class="column code hide-on-mobile ">
+      <pre class="hljs"><code class="html"></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+
+    </div>
+  </div>
+  <div class="box ">
+    <div class="column doc hide-on-mobile ">
+      <a id="example17" class="anchor-target"></a>
+
+      <a href="#example17" class="anchor">
+        <div class="anchor-img"></div>
+      </a>
+      <p>
+        Next up:
+        <a id="nextArticle" href="/components/amp-facebook/">amp-facebook</a>
+      </p>
+    </div>
+    <div class="column code hide-on-mobile ">
+          <pre class="hljs"><code class="html"><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span></code></pre>
+    </div>
+    <div class="column preview hide-on-mobile ">
+
+    </div>
+  </div>
+</article>
+<footer>
+  <ul>
+    <li><a href="https://github.com/ampproject/amp-by-example/issues/new">feedback</a></li>
+    <li><a href="https://github.com/ampproject/amp-by-example">github</a></li>
+    <li><a href="/LICENSE.txt">license</a></li>
+    <li><a href="https://www.google.com/intl/en/policies/privacy/">privacy</a></li>
+  </ul>
+</footer>
+<amp-analytics type="googleanalytics" id="analytics">
+  <script type="application/json">
+    {
+      "vars": {
+        "account": "UA-73836974-1"
+      },
+      "triggers": {
+        "default pageview": {
+          "on": "visible",
+          "request": "pageview",
+          "vars": {
+            "title": "amp-experiment - AMP by Example"
+          }
+        }
+      }
+    }
+  </script>
+</amp-analytics>
+<amp-install-serviceworker
+    src="/sw.js"
+    data-iframe-src="https://ampbyexample.com/sw.html"
+    layout="nodisplay">
+</amp-install-serviceworker>
+</body>
+</html>

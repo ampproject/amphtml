@@ -15,6 +15,8 @@
  */
 
 import {dev, user} from '../../../src/log';
+import {hasNextNodeInDocumentOrder} from '../../../src/dom';
+
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 import {Layout} from '../../../src/layout';
@@ -62,6 +64,8 @@ export class AmpExperiment extends AMP.BaseElement {
 
   getConfig_() {
     const children = this.element.children;
+    const hasNext = hasNextNodeInDocumentOrder(this.element);
+    user().error('x', this.win.document.body.innerHTML + 'dingding');
     user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
