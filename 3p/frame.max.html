@@ -2,7 +2,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<script src="./integration.js"></script>
+<script>
+(function() {
+  // skipping try catch on JSON.parse
+  var j = location.hash.substr(1);
+  window.AMP_CONFIG = JSON.parse(j)._context.AMP_CONFIG;
+  var u = window.AMP_CONFIG.thirdPartyFrameHost+'/integration.js';
+  document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>');
+})();
+</script>
 </head>
 <body style="margin:0">
 <div id="c" style="position:absolute;top:0;left:0;bottom:0;right:0;">

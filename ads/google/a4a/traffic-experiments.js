@@ -211,7 +211,7 @@ export function randomlySelectUnsetPageExperiments(win, experiments) {
   if (getMode(win).localDev) {
     // In local dev mode, it can be difficult to configure AMP_CONFIG
     // externally.  Default it here if necessary.
-    win.AMP_CONFIG = win.AMP_CONFIG || {};
+    win.AMP_CONFIG = win.AMP_CONFIG || AMP.config.urls;
   }
   for (const experimentName in experiments) {
     // Skip experimentName if it is not a key of experiments object or if it

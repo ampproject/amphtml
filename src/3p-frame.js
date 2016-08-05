@@ -70,6 +70,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     locationHref = parentWindow.parent.location.href;
   }
   attributes._context = {
+    AMP_CONFIG: window.AMP_CONFIG || AMP.config.urls,
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
