@@ -209,7 +209,7 @@ describe('IntersectionObserver', () => {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(new Date().getTime(),
+        return getIntersectionChangeEntry(Date.now(),
             rootBounds, layoutBox);
       },
     };

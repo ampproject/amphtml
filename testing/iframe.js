@@ -274,14 +274,14 @@ export function createServedIframe(src) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = new Date().getTime();
+    let start = Date.now();
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (new Date().getTime() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > (opt_timeout || 1600)) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());

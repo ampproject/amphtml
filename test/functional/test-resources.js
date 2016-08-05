@@ -1112,7 +1112,7 @@ describe('Resources changeSize', () => {
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
           height: 50};
       resources.lastVelocity_ = 10;
-      resources.lastScrollTime_ = new Date().getTime();
+      resources.lastScrollTime_ = Date.now();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_.length).to.equal(1);

@@ -213,7 +213,7 @@ export class UrlReplacements {
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return new Date().getTime();
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.

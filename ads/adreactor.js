@@ -28,6 +28,6 @@ export function adreactor(global, data) {
       '&pid=' + encodeURIComponent(data.pid) +
       '&custom3=' + encodeURIComponent(data.custom3) +
       '&random=' + Math.floor(89999999 * Math.random() + 10000000) +
-      '&millis=' + new Date().getTime();
+      '&millis=' + Date.now();
   writeScript(global, url);
 }

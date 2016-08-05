@@ -181,7 +181,7 @@ export class Activity {
   /** @private */
   start_() {
     /** @private @const {number} */
-    this.startTime_ = (new Date()).getTime();
+    this.startTime_ = Date.now();
     // record an activity since this is when the page became visible
     this.handleActivity_();
     this.setUpActivityListeners_();
@@ -189,7 +189,7 @@ export class Activity {
 
   /** @private */
   getTimeSinceStart_() {
-    const timeSinceStart = (new Date()).getTime() - this.startTime_;
+    const timeSinceStart = Date.now() - this.startTime_;
     // Ensure that a negative time is never returned. This may cause loss of
     // data if there is a time change during the session but it will decrease
     // the likelyhood of errors in that situation.

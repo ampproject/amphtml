@@ -53,7 +53,7 @@ function tests(name) {
       afterEach(() => {
         sandbox.restore();
         delete clientIdScope['with_cid'];
-        setCookie(window, cidScope, '', new Date().getTime() - 5000);
+        setCookie(window, cidScope, '', Date.now() - 5000);
       });
 
       it('provides cid to ad', () => {
@@ -66,7 +66,7 @@ function tests(name) {
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
           setCookie(window, cidScope, 'sentinel123',
-              new Date().getTime() + 5000);
+              Date.now() + 5000);
           installCidService(win);
           return ad;
         }).then(ad => {
@@ -181,7 +181,7 @@ function tests(name) {
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           setCookie(window, cidScope, 'XXX',
-              new Date().getTime() + 5000);
+              Date.now() + 5000);
           return ad;
         }).then(ad => {
           expect(ad.getAttribute('ampcid')).to.be.null;

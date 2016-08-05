@@ -275,7 +275,7 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = new Date().getTime() +
+      const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
       setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
     } else {
