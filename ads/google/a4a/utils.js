@@ -23,6 +23,7 @@ import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -78,21 +79,6 @@ export function googleAdUrl(
 
 
 /**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
- */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-/**
  * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
  * @return {!Promise<!AdResponseDef>}
@@ -102,7 +88,8 @@ export function extractGoogleAdCreativeAndSignature(
   let signature = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature = base64ToByteArray(responseHeaders.get(AMP_SIGNATURE_HEADER));
+      signature =
+        base64UrlDecodeToBytes(responseHeaders.get(AMP_SIGNATURE_HEADER));
     }
   } finally {
     return Promise.resolve({creative, signature});

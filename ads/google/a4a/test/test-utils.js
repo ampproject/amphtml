@@ -15,9 +15,9 @@
  */
 
 import {
-  base64ToByteArray,
   extractGoogleAdCreativeAndSignature,
 } from '../utils';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 
 describe('Google A4A utils', () => {
   describe('#extractGoogleAdCreativeAndSignature', () => {
@@ -33,7 +33,7 @@ describe('Google A4A utils', () => {
       return expect(extractGoogleAdCreativeAndSignature(creative, headers))
           .to.eventually.deep.equal({
             creative,
-            signature: base64ToByteArray('AQAB'),
+            signature: base64UrlDecodeToBytes('AQAB'),
           });
     });
 

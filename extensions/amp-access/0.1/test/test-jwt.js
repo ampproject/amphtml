@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {JwtHelper, pemToBinary} from '../jwt';
+import {JwtHelper} from '../jwt';
+import {pemToBytes} from '../../../../src/utils/pem';
 import * as sinon from 'sinon';
 
 
@@ -82,76 +83,6 @@ describe('JwtHelper', () => {
       const token = helper.decodeInternal_(`${body}.eyJhbGci+/`);
       const tokenWebSafe = helper.decodeInternal_(`${body}.eyJhbGci-_`);
       expect(token.sig).to.not.equal(tokenWebSafe);
-    });
-  });
-
-  describe('pemToBinary', () => {
-    const PLAIN_TEXT =
-        'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB';
-    const PEM = '-----BEGIN PUBLIC KEY-----\n'
-        + 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDdlatRjRjogo3WojgGHFHYLugd\n'
-        + 'UWAY9iR3fy4arWNA1KoS8kVw33cJibXr8bvwUAUparCwlvdbH6dvEOfou0/gCFQs\n'
-        + 'HUfQrSDv+MuSUMAe8jzKE4qW+jK+xQU9a03GUnKHkkle+Q0pX/g6jXZ7r1/xAK5D\n'
-        + 'o2kQ+X5xK9cipRgEKwIDAQAB\n'
-        + '-----END PUBLIC KEY-----';
-
-    it('should convert a valid key', () => {
-      const binary = pemToBinary(PEM);
-      const plain = atob(PLAIN_TEXT);
-      const len = plain.length;
-      expect(binary.byteLength).to.equal(len);
-      expect(binary[0]).to.equal(plain.charCodeAt(0));
-      expect(binary[1]).to.equal(plain.charCodeAt(1));
-      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
-    });
-
-    it('should convert without headers, footers, line breaks', () => {
-      const binary = pemToBinary(PLAIN_TEXT);
-      const plain = atob(PLAIN_TEXT);
-      const len = plain.length;
-      expect(binary.byteLength).to.equal(len);
-      expect(binary[0]).to.equal(plain.charCodeAt(0));
-      expect(binary[1]).to.equal(plain.charCodeAt(1));
-      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
-    });
-
-    it('should convert without line breaks', () => {
-      const binary = pemToBinary('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT
-          + '-----END PUBLIC KEY-----');
-      const plain = atob(PLAIN_TEXT);
-      const len = plain.length;
-      expect(binary.byteLength).to.equal(len);
-      expect(binary[0]).to.equal(plain.charCodeAt(0));
-      expect(binary[1]).to.equal(plain.charCodeAt(1));
-      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
-    });
-
-    it('should convert without header', () => {
-      const binary = pemToBinary(PLAIN_TEXT + '-----END PUBLIC KEY-----');
-      const plain = atob(PLAIN_TEXT);
-      const len = plain.length;
-      expect(binary.byteLength).to.equal(len);
-      expect(binary[0]).to.equal(plain.charCodeAt(0));
-      expect(binary[1]).to.equal(plain.charCodeAt(1));
-      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
-    });
-
-    it('should convert without footer', () => {
-      const binary = pemToBinary('-----BEGIN PUBLIC KEY-----' + PLAIN_TEXT);
-      const plain = atob(PLAIN_TEXT);
-      const len = plain.length;
-      expect(binary.byteLength).to.equal(len);
-      expect(binary[0]).to.equal(plain.charCodeAt(0));
-      expect(binary[1]).to.equal(plain.charCodeAt(1));
-      expect(binary[len - 1]).to.equal(plain.charCodeAt(len - 1));
-      expect(binary[len - 2]).to.equal(plain.charCodeAt(len - 2));
     });
   });
 
@@ -306,7 +237,7 @@ describe('JwtHelper', () => {
       subtleMock.expects('importKey')
         .withExactArgs(
           /* format */ 'spki',
-          pemToBinary(PEM),
+          pemToBytes(PEM),
           {name: 'RSASSA-PKCS1-v1_5', hash: {name: 'SHA-256'}},
           /* extractable */ false,
           /* uses */ ['verify']
