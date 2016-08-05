@@ -1522,8 +1522,8 @@ export class Resources {
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
-    vsm.addTransition(inactive, visible, doPass);
-    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, visible, resume);
+    vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doPass);
 
