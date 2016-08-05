@@ -51,28 +51,28 @@ describe('base64UrlDecodeToBytes', () => {
 
 describe('base64DecodeToBytes', () => {
   it('should map a sample string appropriately', () => {
-    expect(base64UrlDecodeToBytes('AQAB'))
+    expect(base64DecodeToBytes('AQAB'))
       .to.deep.equal(new Uint8Array([1, 0, 1]));
-    expect(base64UrlDecodeToBytes('/+'))
+    expect(base64DecodeToBytes('/+'))
       .to.deep.equal(new Uint8Array([255]));
   });
 
   it('should handle unpadded input', () => {
-    expect(base64UrlDecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
-    expect(base64UrlDecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
-    expect(base64UrlDecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
+    expect(base64DecodeToBytes('cw')).to.deep.equal(stringToBytes('s'));
+    expect(base64DecodeToBytes('c3U')).to.deep.equal(stringToBytes('su'));
+    expect(base64DecodeToBytes('c3Vy')).to.deep.equal(stringToBytes('sur'));
   });
 
   it('should handle padded input', () => {
-    expect(base64UrlDecodeToBytes('cw==')).to.deep.equal(stringToBytes('s'));
-    expect(base64UrlDecodeToBytes('c3U=')).to.deep.equal(stringToBytes('su'));
+    expect(base64DecodeToBytes('cw==')).to.deep.equal(stringToBytes('s'));
+    expect(base64DecodeToBytes('c3U=')).to.deep.equal(stringToBytes('su'));
   });
 
   it('should signal an error with bad input characters', () => {
-    expect(() => base64UrlDecodeToBytes('@#*#')).to.throw();
+    expect(() => base64DecodeToBytes('@#*#')).to.throw();
   });
 
   it('should signal an error with bad padding', () => {
-    expect(() => base64UrlDecodeToBytes('c3Vy=')).to.throw();
+    expect(() => base64DecodeToBytes('c3Vy=')).to.throw();
   });
 });
