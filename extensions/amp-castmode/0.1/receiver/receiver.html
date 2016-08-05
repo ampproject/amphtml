@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+
+  <style type="text/css">
+    body {
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    #root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+
+      background-color: #222;
+      color: #fefefe;
+    }
+
+    #log {
+      position: absolute;
+      background: #fff;
+      width: 500px;
+      height: 120px;
+      left: 40px;
+      bottom: 40px;
+      color: #222;
+      font-size: smaller;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    #container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+
+    .flex-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+    }
+  </style>
+
+  <title>AMP Cast Debug</title>
+
+</head>
+<body>
+  <DIV id="root">
+
+    <div id="container"></div>
+
+    <!-- Log -->
+    <pre id="log"></pre>
+  </DIV>
+
+<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+<script type="text/javascript" src="../../../../build/receiver/receiver.max.js"></script>
+
+</body>
+</html>
+

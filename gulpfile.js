@@ -199,6 +199,9 @@ function watch() {
   buildExtensions({
     watch: true,
   });
+  buildCastReceiver({
+    watch: true,
+  });
   compile(true);
 }
 
@@ -314,6 +317,7 @@ function dist() {
   compile(false, true, true);
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
+  buildCastReceiver({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
 }
@@ -536,6 +540,69 @@ function buildExperiments(options) {
 
 
 /**
+ * Build all the AMP Cast receiver.
+ *
+ * @param {!Object} options
+ */
+function buildCastReceiver(options) {
+  options = options || {};
+  $$.util.log('Bundling receiver.html/js');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return $$.util.log($$.util.colors.red('copy error: ', err));
+    }
+    $$.util.log($$.util.colors.green('copied ' + name));
+  }
+
+  var path = 'extensions/amp-castmode/0.1/receiver';
+  var htmlPath = path + '/receiver.html';
+  var jsPath = path + '/receiver.js';
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    $$.watch(path + '/*', function() {
+      buildCastReceiver(copy);
+    });
+  }
+
+  // Build HTML.
+  /* TODO(dvoytenko): inline the script.
+  $$.util.log('Processing ' + htmlPath);
+  var html = fs.readFileSync(htmlPath, 'utf8');
+  var minHtml = html;
+  .replace('../../dist.tools/receiver/receiver.max.js',
+      'https://cdn.ampproject.org/v0/experiments.js');
+  gulp.src(htmlPath)
+      .pipe($$.file('experiments.cdn.html', minHtml))
+      .pipe(gulp.dest('dist.tools/experiments/'));
+  */
+
+  // Build JS.
+  var builtName = 'receiver.max.js';
+  var minifiedName = 'receiver.js';
+  return compileJs(path + '/', 'receiver.js', './build/receiver/', {
+    watch: false,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    toName: builtName,
+    minifiedName: minifiedName,
+    checkTypes: options.checkTypes,
+  });
+}
+
+
+/**
  * Build "Login Done" page.
  *
  * @param {!Object} options
@@ -675,3 +742,4 @@ gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-receiver', 'Builds cast receiver', buildCastReceiver);

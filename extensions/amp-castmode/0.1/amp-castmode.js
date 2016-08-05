@@ -15,8 +15,10 @@
  */
 
 import {CSS} from '../../../build/amp-castmode-0.1.css';
+import {CastSenderDebug, CastSenderProd} from './cast-sender';
 import {Layout} from '../../../src/layout';
 import {historyFor} from '../../../src/history';
+import {viewerFor} from '../../../src/viewer';
 import * as st from '../../../src/style';
 
 
@@ -49,23 +51,6 @@ class AmpCastmode extends AMP.BaseElement {
     startButton.addEventListener('click', () => {
       this.activate();
     });
-
-    // TODO(dvoytenko): WAT!? Remove this craziness!!!
-    /** @private @const {!Promise} */
-    this.castPromise_ = new Promise((resolve, reject) => {
-      this.win['__onGCastApiAvailable'] = function(loaded, errorInfo) {
-        console.log('cast loaded: ', loaded, errorInfo);
-        if (loaded) {
-          resolve();
-        } else {
-          reject(errorInfo);
-        }
-      };
-      const script = this.win.document.createElement('script');
-      script.onerror = reject;
-      script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js';
-      this.win.document.head.appendChild(script);
-    });
   }
 
   /** @override */
@@ -78,24 +63,20 @@ class AmpCastmode extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
-    /**  @private {function(this:AmpCastmode, Event)}*/
-    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-    this.win.document.documentElement.addEventListener(
-        'keydown', this.boundCloseOnEscape_);
-    this.getViewport().enterLightboxMode();
 
-    this.mutateElement(() => {
-      this.element.style.display = '';
-    });
+    const castDebugParam = viewerFor(this.win).getParam('castdebug');
+    const castDebug = castDebugParam == '1';
+    console.log('debug: ', castDebug);
 
-    this.getHistory_().push(this.close.bind(this)).then(historyId => {
-      this.historyId_ = historyId;
-    });
+    /** @private @const {!CastSender} */
+    this.sender_ = castDebug ?
+        new CastSenderDebug(this.win) :
+        new CastSenderProd(this.win);
 
-    this.active_ = true;
-
-    this.castPromise_.then(() => {
-      this.construct_();
+    const connectPromise = this.sender_.connect();
+    connectPromise.then(() => {
+      console.log('Connected!');
+      this.start_();
     });
   }
 
@@ -129,11 +110,35 @@ class AmpCastmode extends AMP.BaseElement {
     return historyFor(this.element.ownerDocument.defaultView);
   }
 
-  /**
-   * @private
-   */
+  /** @private */
+  start_() {
+    /**  @private {function(this:AmpCastmode, Event)}*/
+    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+    this.win.document.documentElement.addEventListener(
+        'keydown', this.boundCloseOnEscape_);
+    this.getViewport().enterLightboxMode();
+
+    this.mutateElement(() => {
+      this.element.style.display = '';
+    });
+
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
+      this.historyId_ = historyId;
+    });
+
+    this.active_ = true;
+
+    this.construct_();
+  }
+
+  /** @private */
   construct_() {
-    // TODO
+
+    // TODO(dvoytenko): create a preview pane, a cursor and a remote control.
+
+    this.sender_.sendAction('show-image', {
+      src: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
+    });
   }
 }
 
