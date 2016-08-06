@@ -51,36 +51,37 @@ describe('UrlReplacements', () => {
     sandbox.restore();
   });
 
-  function getReplacements(withCid, withActivity, withVariant,
-      withShareTracking) {
+  function getReplacements(options) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
-      if (withCid) {
-        markElementScheduledForTesting(iframe.win, 'amp-analytics');
-        installCidService(iframe.win);
-        installCryptoService(iframe.win);
-      }
-      if (withActivity) {
-        markElementScheduledForTesting(iframe.win, 'amp-analytics');
-        installActivityService(iframe.win);
-      }
-      if (withVariant) {
-        markElementScheduledForTesting(iframe.win, 'amp-experiment');
-        getService(iframe.win, 'variant', () => Promise.resolve({
-          'x1': 'v1',
-          'x2': null,
-        }));
-      }
-      if (withShareTracking) {
-        markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
-        getService(iframe.win, 'share-tracking', () => Promise.resolve({
-          incomingFragment: '12345',
-          outgoingFragment: '54321',
-        }));
+      if (options) {
+        if (options.withCid) {
+          markElementScheduledForTesting(iframe.win, 'amp-analytics');
+          installCidService(iframe.win);
+          installCryptoService(iframe.win);
+        }
+        if (options.withActivity) {
+          markElementScheduledForTesting(iframe.win, 'amp-analytics');
+          installActivityService(iframe.win);
+        }
+        if (options.withVariant) {
+          markElementScheduledForTesting(iframe.win, 'amp-experiment');
+          getService(iframe.win, 'variant', () => Promise.resolve({
+            'x1': 'v1',
+            'x2': null,
+          }));
+        }
+        if (options.withShareTracking) {
+          markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
+          getService(iframe.win, 'share-tracking', () => Promise.resolve({
+            incomingFragment: '12345',
+            outgoingFragment: '54321',
+          }));
+        }
       }
       viewerService = installViewerService(iframe.win);
       installUrlReplacementsService(iframe.win);
@@ -89,10 +90,8 @@ describe('UrlReplacements', () => {
     });
   }
 
-  function expand(url, opt_bindings, withCid, withActivity, withVariant,
-        withShareTracking) {
-    return getReplacements(withCid, withActivity, withVariant,
-        withShareTracking).then(
+  function expand(url, opt_bindings, options) {
+    return getReplacements(options).then(
           replacements => replacements.expand(url, opt_bindings)
         );
   }
@@ -209,15 +208,14 @@ describe('UrlReplacements', () => {
     // Make sure cookie does not exist
     setCookie(window, 'url-xyz', '');
     return expand('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)',
-        /*opt_bindings*/undefined, /*withCid*/true).then(res => {
+        /*opt_bindings*/undefined, {withCid: true}).then(res => {
           expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
   });
 
   it('should replace VARIANT', () => {
     return expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
-        /*opt_bindings*/undefined, /*withCid*/undefined,
-        /*withActivity*/undefined, /*withVariant*/true).then(res => {
+        /*opt_bindings*/undefined, {withVariant: true}).then(res => {
           expect(res).to.equal('?x1=v1&x2=none&x3=');
         });
   });
@@ -230,8 +228,8 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace VARIANTS', () => {
-    return expand('?VARIANTS', /*opt_bindings*/undefined, /*withCid*/undefined,
-        /*withActivity*/undefined, /*withVariant*/true).then(res => {
+    return expand('?VARIANTS', /*opt_bindings*/undefined, {withVariant: true})
+        .then(res => {
           expect(res).to.equal('?x1.v1!x2.none');
         });
   });
@@ -243,12 +241,10 @@ describe('UrlReplacements', () => {
     });
   });
 
-  it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING',
-      () => {
+  it('should replace SHARE_TRACKING_INCOMING and' +
+      'SHARE_TRACKING_OUTGOING', () => {
     return expand('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
-        /*opt_bindings*/undefined, /*withCid*/undefined,
-        /*withActivity*/undefined, /*withVariant*/undefined,
-        /*withShareTracking*/true).then(res => {
+        /*opt_bindings*/undefined, {withShareTracking: true}).then(res => {
           expect(res).to.equal('?in=12345&out=54321');
         });
   });
@@ -458,7 +454,7 @@ describe('UrlReplacements', () => {
 
   it('should replace TOTAL_ENGAGED_TIME', () => {
     return expand('?sh=TOTAL_ENGAGED_TIME', /*opt_bindings*/undefined,
-        /*withCid*/undefined, /*withActivity*/true).then(res => {
+        {withActivity: true}).then(res => {
           expect(res).to.match(/sh=\d+/);
         });
   });
