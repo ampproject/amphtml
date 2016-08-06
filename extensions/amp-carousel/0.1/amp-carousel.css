@@ -89,13 +89,22 @@ amp-carousel .amp-carousel-button.amp-disabled {
   white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slides-container::-webkit-scrollbar {
+  /**
+   * Height not set to 0 because of safari bug.
+   * https://bugs.webkit.org/show_bug.cgi?id=160622
+   */
+   height: 0.1px;
+   background-color: transparent;
 }
 
 .-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
-
 
 .-amp-slide-item {
   align-items: center !important;
