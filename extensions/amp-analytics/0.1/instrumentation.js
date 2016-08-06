@@ -29,6 +29,7 @@ const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -223,7 +224,9 @@ export class InstrumentationService {
           visibility.listenOnce(spec, vars => {
             if (spec['selector']) {
               const attr = getDataParamsFromAttributes(
-                this.win_.document.getElementById(spec['selector'].slice(1))
+                this.win_.document.getElementById(spec['selector'].slice(1)),
+                null,
+                VARIABLE_DATA_ATTRIBUTE_KEY
               );
               for (const key in attr) {
                 vars[key] = attr[key];
@@ -297,7 +300,11 @@ export class InstrumentationService {
         listener(
           new AnalyticsEvent(
             AnalyticsEventType.CLICK,
-            getDataParamsFromAttributes(el)
+            getDataParamsFromAttributes(
+              el,
+              null,
+              VARIABLE_DATA_ATTRIBUTE_KEY
+            )
           )
         );
       } else {
@@ -308,7 +315,11 @@ export class InstrumentationService {
             listener(
               new AnalyticsEvent(
                 AnalyticsEventType.CLICK,
-                getDataParamsFromAttributes(el)
+                getDataParamsFromAttributes(
+                  el,
+                  null,
+                  VARIABLE_DATA_ATTRIBUTE_KEY
+                )
               )
             );
             // Don't fire the event multiple times even if the more than one
