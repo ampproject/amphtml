@@ -18,7 +18,7 @@ import {createIframePromise} from '../../../../testing/iframe';
 import {AmpShareTracking} from '../amp-share-tracking';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {Xhr} from '../../../../src/service/xhr-impl';
-import {getServicePromiseOrNull} from '../../../../src/service';
+import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -52,13 +52,8 @@ describe('amp-share-tracking', () => {
 
   it('should get incoming fragment starting with dot', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
-    const mockJsonResponse = {fragment: '54321'};
-    xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
@@ -67,13 +62,8 @@ describe('amp-share-tracking', () => {
   it('should get incoming fragment starting with dot and ignore ' +
       'other parameters', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve('.12345&key=value'));
-    const mockJsonResponse = {fragment: '54321'};
-    xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.incomingFragment).to.equal('12345');
       });
     });
@@ -81,13 +71,8 @@ describe('amp-share-tracking', () => {
 
   it('should ignore incoming fragment if it is empty', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve(''));
-    const mockJsonResponse = {fragment: '54321'};
-    xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.incomingFragment).to.equal('');
       });
     });
@@ -95,13 +80,8 @@ describe('amp-share-tracking', () => {
 
   it('should ignore incoming fragment if it does not start with dot', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve('12345'));
-    const mockJsonResponse = {fragment: '54321'};
-    xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
-    return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.incomingFragment).to.equal('');
       });
     });
@@ -109,10 +89,9 @@ describe('amp-share-tracking', () => {
 
   it('should get outgoing fragment randomly if no vendor url ' +
       'is provided', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.outgoingFragment).to.equal('rAmDoM');
       });
     });
@@ -120,14 +99,11 @@ describe('amp-share-tracking', () => {
 
   it('should get outgoing fragment from vendor if vendor url is provided ' +
       'and the response format is correct', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.outgoingFragment).to.equal('54321');
       });
     });
@@ -135,14 +111,11 @@ describe('amp-share-tracking', () => {
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the response format is NOT correct', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {foo: 'bar'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.outgoingFragment).to.equal('');
       });
     });
@@ -150,20 +123,21 @@ describe('amp-share-tracking', () => {
 
   it('should call fetchJson with correct request when getting outgoing' +
       'fragment', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     const mockJsonResponse = {fragment: '54321'};
     xhrMock.onFirstCall().returns(Promise.resolve(mockJsonResponse));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
       const xhrCall = xhrMock.getCall(0);
       expect(xhrCall.args[0]).to.equal('http://foo.bar');
-      const config = xhrCall.args[1];
-      expect(config.method).to.equal('POST');
-      expect(config.credentials).to.equal('include');
-      expect(config.requireAmpResponseSourceOrigin).to.be.true;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+      const postReq = xhrCall.args[1];
+      const postReqExpected = {
+        method: 'POST',
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
+        body: {},
+      };
+      expect(postReq).to.deep.equal(postReqExpected);
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.outgoingFragment).to.equal('54321');
       });
     });
@@ -171,13 +145,10 @@ describe('amp-share-tracking', () => {
 
   it('should get empty outgoing fragment if vendor url is provided ' +
       'but the xhr fails', () => {
-    viewerForMock.onFirstCall().returns(Promise.resolve('.12345'));
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
     xhrMock.onFirstCall().returns(Promise.reject('404'));
     return getAmpShareTracking('http://foo.bar').then(ampShareTracking => {
-      expect(ampShareTracking.vendorHref_).to.equal('http://foo.bar');
-      expect(getServicePromiseOrNull(ampShareTracking.win, 'share-tracking'))
-          .to.not.be.null;
-      return ampShareTracking.shareTrackingFragments_.then(fragments => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
         expect(fragments.outgoingFragment).to.equal('');
       });
     });
