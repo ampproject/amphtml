@@ -71,7 +71,8 @@ export class CastSenderProd extends CastSender {
           this.sessionListener_.bind(this),
           function(e) {
             if (e === chrome.cast.ReceiverAvailability.AVAILABLE) {
-              console.log('receiver available');
+              console.log('receiver available', e,
+                  e === chrome.cast.ReceiverAvailability.AVAILABLE);
               receiverReadyResolver();
             }
           });
@@ -187,6 +188,7 @@ export class CastSenderDebug extends CastSender {
    */
   startSession() {
     // Nothing. Session is always on.
+    return Promise.resolve();
   }
 
   /**

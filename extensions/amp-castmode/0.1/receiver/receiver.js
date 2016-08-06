@@ -21,14 +21,12 @@ import {CastChannelDebug, CastChannelProd} from './cast-channel';
 import {onDocumentReady} from '../../../../src/document-ready';
 import {initLog, log} from './cast-log';
 
-const VERSION = '0.1';
-
-
 onDocumentReady(window.document, () => {
-  const debug = true;
+  const version = window.VERSION;
+  const debug = window.DEBUG;
   const win = window;
   initLog(true);
-  log('Started ' + VERSION);
+  log('Started ' + version + '; debug=' + debug);
   const channel = debug ?
       new CastChannelDebug(win) :
       new CastChannelProd(win);

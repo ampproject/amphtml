@@ -47,9 +47,24 @@ class AmpCastmode extends AMP.BaseElement {
     const startButton = this.win.document.createElement('button');
     startButton.classList.add('amp-castmode-button');
     startButton.textContent = 'CAST';
+    startButton.disabled = true;
     this.win.document.body.appendChild(startButton);
     startButton.addEventListener('click', () => {
       this.activate();
+    });
+
+    const castDebugParam = viewerFor(this.win).getParam('castdebug');
+    const castDebug = castDebugParam == '1';
+    console.log('debug: ', castDebug);
+
+    /** @private @const {!CastSender} */
+    this.sender_ = castDebug ?
+        new CastSenderDebug(this.win) :
+        new CastSenderProd(this.win);
+    const connectPromise = this.sender_.connect();
+    connectPromise.then(() => {
+      console.log('Connected!');
+      startButton.disabled = false;
     });
   }
 
@@ -63,20 +78,24 @@ class AmpCastmode extends AMP.BaseElement {
     if (this.active_) {
       return;
     }
+    this.active_ = true;
 
-    const castDebugParam = viewerFor(this.win).getParam('castdebug');
-    const castDebug = castDebugParam == '1';
-    console.log('debug: ', castDebug);
+    /**  @private {function(this:AmpCastmode, Event)}*/
+    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+    this.win.document.documentElement.addEventListener(
+        'keydown', this.boundCloseOnEscape_);
+    this.getViewport().enterLightboxMode();
 
-    /** @private @const {!CastSender} */
-    this.sender_ = castDebug ?
-        new CastSenderDebug(this.win) :
-        new CastSenderProd(this.win);
+    this.mutateElement(() => {
+      this.element.style.display = '';
+    });
 
-    const connectPromise = this.sender_.connect();
-    connectPromise.then(() => {
-      console.log('Connected!');
-      this.start_();
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
+      this.historyId_ = historyId;
+    });
+
+    this.sender_.startSession().then(() => {
+      this.startCasting_();
     });
   }
 
@@ -111,29 +130,7 @@ class AmpCastmode extends AMP.BaseElement {
   }
 
   /** @private */
-  start_() {
-    /**  @private {function(this:AmpCastmode, Event)}*/
-    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
-    this.win.document.documentElement.addEventListener(
-        'keydown', this.boundCloseOnEscape_);
-    this.getViewport().enterLightboxMode();
-
-    this.mutateElement(() => {
-      this.element.style.display = '';
-    });
-
-    this.getHistory_().push(this.close.bind(this)).then(historyId => {
-      this.historyId_ = historyId;
-    });
-
-    this.active_ = true;
-
-    this.construct_();
-  }
-
-  /** @private */
-  construct_() {
-
+  startCasting_() {
     // TODO(dvoytenko): create a preview pane, a cursor and a remote control.
 
     this.sender_.sendAction('show-image', {
