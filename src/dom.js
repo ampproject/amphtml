@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {dashToCamelCase} from './string';
 import {dev} from './log';
 import {toArray} from './types';
 
@@ -403,12 +402,13 @@ export function childElementsByTag(parent, tagName) {
  * @param {string} Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc, opt_paramPattern) {
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
+  opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
   const params = Object.create(null);
   opt_paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
-  for (let key in dataset) {
+  for (const key in dataset) {
     const matches = key.match(opt_paramPattern);
     if (matches) {
       const param = matches[1][0].toLowerCase() + matches[1].substr(1);
