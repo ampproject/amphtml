@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
+import {
+  base64UrlDecode,
+  base64UrlDecodeToBytes,
+} from '../../../src/utils/base64';
+import {stringToBytes} from '../../../src/utils/bytes';
+import {pemToBytes} from '../../../src/utils/pem';
 import {tryParseJson} from '../../../src/json';
+import {xhrFor} from '../../../src/xhr';
 
 
 /**
@@ -29,13 +36,6 @@ let JwtTokenInternalDef;
 
 
 /**
- * Maps web-safe base64 characters to the actual base64 chars for decoding.
- * @const {!Object<string, string>}
- */
-const WEB_SAFE_CHAR_MAP = {'-': '+', '_': '/', '.': '='};
-
-
-/**
  * Provides helper methods to decode and verify JWT tokens.
  */
 export class JwtHelper {
@@ -47,6 +47,16 @@ export class JwtHelper {
 
     /** @const {!Window} */
     this.win = win;
+
+    /**
+     * Might be `null` if the platform does not support Crypto Subtle.
+     * @const @private {?SubtleCrypto}
+     */
+    this.subtle_ = win.crypto &&
+        (win.crypto.subtle || win.crypto.webkitSubtle) || null;
+
+    /** @const @private {!Xhr} */
+    this.xhr_ = xhrFor(win);
   }
 
   /**
@@ -56,6 +66,49 @@ export class JwtHelper {
    */
   decode(encodedToken) {
     return this.decodeInternal_(encodedToken).payload;
+  }
+
+  /**
+   * Whether the signature-verification supported on this platform.
+   * @return {boolean}
+   */
+  isVerificationSupported() {
+    return !!this.subtle_;
+  }
+
+  /**
+   * Decodes HWT token and verifies its signature.
+   * @param {string} encodedToken
+   * @param {string} keyUrl
+   * @return {!Promise<!JSONObject>}
+   */
+  decodeAndVerify(encodedToken, keyUrl) {
+    if (!this.subtle_) {
+      throw new Error('Crypto is not supported on this platform');
+    }
+    const decodedPromise = new Promise(
+        resolve => resolve(this.decodeInternal_(encodedToken)));
+    return decodedPromise.then(decoded => {
+      const alg = decoded.header['alg'];
+      if (!alg || alg != 'RS256') {
+        // TODO(dvoytenko@): Support other RS* algos.
+        throw new Error('Only alg=RS256 is supported');
+      }
+      return this.loadKey_(keyUrl).then(key => {
+        const sig = base64UrlDecodeToBytes(decoded.sig);
+        return this.subtle_.verify(
+          /* options */ {name: 'RSASSA-PKCS1-v1_5'},
+          key,
+          sig,
+          stringToBytes(decoded.verifiable)
+        );
+      }).then(isValid => {
+        if (isValid) {
+          return decoded.payload;
+        }
+        throw new Error('Signature verification failed');
+      });
+    });
   }
 
   /**
@@ -77,29 +130,28 @@ export class JwtHelper {
       invalidToken();
     }
     return {
-      header: tryParseJson(decodeBase64WebSafe(parts[0]), invalidToken),
-      payload: tryParseJson(decodeBase64WebSafe(parts[1]), invalidToken),
+      header: tryParseJson(base64UrlDecode(parts[0]), invalidToken),
+      payload: tryParseJson(base64UrlDecode(parts[1]), invalidToken),
       verifiable: `${parts[0]}.${parts[1]}`,
-      sig: decodeBase64WebSafe(parts[2]),
+      sig: parts[2],
     };
   }
-}
 
-
-/**
- * @param {string} s
- * @return {string}
- */
-function decodeBase64WebSafe(s) {
-  // TODO(dvoytenko): refactor to a common place across AMP.
-  return atob(s.replace(/[-_.]/g, unmapWebSafeChar));
-}
-
-
-/**
- * @param {string} c
- * @return {string}
- */
-function unmapWebSafeChar(c) {
-  return WEB_SAFE_CHAR_MAP[c];
+  /**
+   * @param {string} keyUrl
+   * @return {!Promise<!CryptoKey>}
+   */
+  loadKey_(keyUrl) {
+    return this.xhr_.fetchText(keyUrl).then(pem => {
+      return this.subtle_.importKey(
+        /* format */ 'spki',
+        pemToBytes(pem),
+        /* algo options */ {
+          name: 'RSASSA-PKCS1-v1_5',
+          hash: {name: 'SHA-256'},
+        },
+        /* extractable */ false,
+        /* uses */ ['verify']);
+    });
+  }
 }

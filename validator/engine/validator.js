@@ -15,15 +15,22 @@
  * limitations under the license.
  */
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
+goog.provide('amp.validator.Terminal');
 goog.provide('amp.validator.ValidationHandler');
+goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.isSeverityWarning');
+goog.provide('amp.validator.renderErrorMessage');
+goog.provide('amp.validator.renderValidationResult');
+goog.provide('amp.validator.validateNode');
+goog.provide('amp.validator.validateString');
+goog.require('amp.domwalker.DomWalker');
+goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrList');
 goog.require('amp.validator.CssSpec');
 goog.require('amp.validator.GENERATE_DETAILED_ERRORS');
-goog.require('amp.validator.RULES');
 goog.require('amp.validator.ReferencePoint');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
@@ -32,6 +39,7 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
+goog.require('amp.validator.createRules');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
@@ -2295,7 +2303,7 @@ class ParsedTagSpec {
 
   /**
    * Return the original tag spec. This is the json object representation from
-   * amp.validator.rules.
+   * amp.validator.rules_.
    * @return {!amp.validator.TagSpec}
    */
   getSpec() { return this.spec_; }
@@ -3385,17 +3393,20 @@ class ParsedValidatorRules {
      */
     this.mandatoryTagSpecs_ = [];
 
-    /** @type {!amp.validator.ValidatorRules} */
-    const rules = amp.validator.RULES;
+    /**
+     * @type {!amp.validator.ValidatorRules}
+     * @private
+     */
+    this.rules_ = this.filterRules(amp.validator.createRules());
 
-    const parsedAttrSpecs = new ParsedAttrSpecs(rules.attrLists);
+    const parsedAttrSpecs = new ParsedAttrSpecs(this.rules_.attrLists);
 
     /** @type {!Object<string, number>} */
     const tagSpecIdsByTagSpecName = {};
     /** @type {!Object<string, boolean>} */
     const tagSpecNamesToTrack = {};
-    for (let i = 0; i < rules.tags.length; ++i) {
-      const tag = rules.tags[i];
+    for (let i = 0; i < this.rules_.tags.length; ++i) {
+      const tag = this.rules_.tags[i];
       goog.asserts.assert(
           !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
       tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
@@ -3406,13 +3417,13 @@ class ParsedValidatorRules {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
       }
     }
-    for (let i = 0; i < rules.tags.length; ++i) {
-      const tag = rules.tags[i];
+    for (let i = 0; i < this.rules_.tags.length; ++i) {
+      const tag = this.rules_.tags[i];
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        goog.asserts.assert(rules.templateSpecUrl !== null);
+        goog.asserts.assert(this.rules_.templateSpecUrl !== null);
       }
       const parsedTagSpec = new ParsedTagSpec(
-          rules.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
+          this.rules_.templateSpecUrl, parsedAttrSpecs, tagSpecIdsByTagSpecName,
           shouldRecordTagspecValidated(tag, tagSpecNamesToTrack), tag, i);
       this.tagSpecById_.push(parsedTagSpec);
       if (!parsedTagSpec.isReferencePoint()) {
@@ -3434,13 +3445,61 @@ class ParsedValidatorRules {
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
       /** type {!Object<!amp.validator.ValidationError.Code, string>} */
       this.formatByCode_ = {};
-      for (let i = 0; i < rules.errorFormats.length; ++i) {
-        const errorFormat = rules.errorFormats[i];
+      for (let i = 0; i < this.rules_.errorFormats.length; ++i) {
+        const errorFormat = this.rules_.errorFormats[i];
         goog.asserts.assert(errorFormat !== null);
         this.formatByCode_[errorFormat.code] = errorFormat.format;
       }
     }
   }
+
+  /**
+   * Filters the input rules so that only TagSpecs this validator needs are
+   * returned.
+   * @param {!amp.validator.ValidatorRules} allRules
+   * @return {!amp.validator.ValidatorRules}
+   */
+  filterRules(allRules) {
+    let newRules = allRules;
+    let filteredTags = [];
+    for (let i = 0; i < allRules.tags.length; ++i) {
+      if (this.isTagSpecCorrectHtmlFormat(allRules.tags[i]))
+        filteredTags.push(allRules.tags[i]);
+    }
+    newRules.tags = filteredTags;
+    return newRules;
+  }
+
+  /**
+   * True iff tagspec's html_format matches the AMP html_format.
+   * @param {amp.validator.TagSpec} tagSpec
+   * @return {boolean}
+   */
+  isTagSpecCorrectHtmlFormat(tagSpec) {
+    // Empty html_format field implies tagspec applies to all docs.
+    if (tagSpec.htmlFormat.length === 0) return true;
+
+    for (let i = 0; i < tagSpec.htmlFormat.length; ++i) {
+      // TODO(gregable): Make the validator's format configurable so we can
+      // validate different document types.
+      if (tagSpec.htmlFormat[i] === amp.validator.TagSpec.HtmlFormat.AMP)
+        return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isManufacturedBodyTagError() {
+    return this.rules_.manufacturedBodyTagIsError;
+  }
+
+  /**
+   * @return {null|string}
+   */
+  manufacturedBodySpecUrl() { return this.rules_.manufacturedBodySpecUrl; }
 
   /**
    * @return {!Object<!amp.validator.ValidationError.Code, string>}
@@ -3759,13 +3818,14 @@ amp.validator.ValidationHandler =
    * @override
    */
   markManufacturedBody() {
-    if (amp.validator.RULES.manufacturedBodyTagIsError) {
+    if (parsedValidatorRulesSingleton.isManufacturedBodyTagError()) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         this.context_.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
             this.context_.getDocLocator(),
-            /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+            /* params */[],
+            parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
             this.validationResult_);
       } else {
         this.validationResult_.status =
@@ -3776,7 +3836,8 @@ amp.validator.ValidationHandler =
           amp.validator.ValidationError.Severity.WARNING,
           amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
           this.context_.getDocLocator(),
-          /* params */[], amp.validator.RULES.manufacturedBodySpecUrl,
+          /* params */[],
+          parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
           this.validationResult_);
     }
   }
@@ -3857,4 +3918,602 @@ amp.validator.ValidationHandler =
  */
 amp.validator.isSeverityWarning = function(error) {
   return error.severity === amp.validator.ValidationError.Severity.WARNING;
+};
+
+/**
+ * Validates a document input as a string.
+ * @param {string} inputDocContents
+ * @return {!amp.validator.ValidationResult} Validation Result (status and
+ *     errors)
+ * @export
+ */
+amp.validator.validateString = function(inputDocContents) {
+  if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  goog.asserts.assertString(inputDocContents, 'Input document is not a string');
+
+  const handler = new amp.validator.ValidationHandler();
+  const parser = new amp.htmlparser.HtmlParser();
+  parser.parse(handler, inputDocContents);
+
+  return handler.Result();
+};
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /**
+   * The terminal is an abstraction for the window.console object which
+   * accomodates differences between console implementations and provides
+   * a convenient way to capture what's being emitted to the terminal
+   * in a unittest. Pass the optional parameter to the constructor
+   * to observe the calls that would have gone to window.console otherwise.
+   * @constructor
+   */
+  amp.validator.Terminal = class {
+    /**
+     * @param {!Array<string>=} opt_out an array into which the terminal will
+     *     emit one string per info / warn / error calls.
+     */
+    constructor(opt_out) { this.out_ = opt_out || null; }
+
+    /** @param {string} msg */
+    info(msg) {
+      if (this.out_) {
+        this.out_.push('I: ' + msg);
+      } else {
+        (console.info || console.log).call(console, msg);
+      }
+    }
+
+    /** @param {string} msg */
+    warn(msg) {
+      if (this.out_) {
+        this.out_.push('W: ' + msg);
+      } else if (console.warn) {
+        console.warn(msg);
+      } else {
+        console.log('WARNING: ' + msg);
+      }
+    }
+
+    /** @param {string} msg */
+    error(msg) {
+      if (this.out_) {
+        this.out_.push('E: ' + msg);
+      } else if (console.error) {
+        console.error(msg);
+      } else {
+        console.log('ERROR: ' + msg);
+      }
+    }
+  };
+}
+
+if (amp.validator.GENERATE_DETAILED_ERRORS) {
+  /**
+   * Emits this validation result to the terminal, distinguishing warnings and
+   *   errors.
+   * @param {string} url
+   * @param {!amp.validator.Terminal=} opt_terminal
+   * @param {string=} opt_errorCategoryFilter
+   */
+  amp.validator.ValidationResult.prototype.outputToTerminal = function(
+      url, opt_terminal, opt_errorCategoryFilter) {
+
+    const terminal = opt_terminal || new amp.validator.Terminal();
+    const errorCategoryFilter = opt_errorCategoryFilter || null;
+
+    const status = this.status;
+    if (status === amp.validator.ValidationResult.Status.PASS) {
+      terminal.info('AMP validation successful.');
+      if (this.errors.length === 0) return;
+    } else if (status !== amp.validator.ValidationResult.Status.FAIL) {
+      terminal.error(
+          'AMP validation had unknown results. This indicates a validator ' +
+          'bug. Please report at ' +
+          'https://github.com/ampproject/amphtml/issues .');
+      return;
+    }
+    let errors;
+    if (errorCategoryFilter === null) {
+      if (status == amp.validator.ValidationResult.Status.FAIL) {
+        terminal.error('AMP validation had errors:');
+      } else {
+        terminal.warn('AMP validation had warnings:');
+      }
+      errors = this.errors;
+    } else {
+      errors = [];
+      for (const error of this.errors) {
+        if (amp.validator.categorizeError(error) === errorCategoryFilter) {
+          errors.push(error);
+        }
+      }
+      const urlWithoutFilter =
+          goog.uri.utils.removeFragment(url) + '#development=1';
+      if (errors.length === 0) {
+        terminal.error(
+            'AMP validation - no errors matching ' +
+            'filter=' + errorCategoryFilter + ' found. ' +
+            'To see all errors, visit ' + urlWithoutFilter);
+      } else {
+        terminal.error(
+            'AMP validation - displaying errors matching ' +
+            'filter=' + errorCategoryFilter + '. ' +
+            'To see all errors, visit ' + urlWithoutFilter);
+      }
+    }
+    for (const error of errors) {
+      if (error.severity === amp.validator.ValidationError.Severity.ERROR) {
+        terminal.error(errorLine(url, error));
+      } else {
+        terminal.warn(errorLine(url, error));
+      }
+    }
+    if (errorCategoryFilter === null && errors.length !== 0) {
+      terminal.info(
+          'See also https://validator.ampproject.org/#url=' +
+          encodeURIComponent(goog.uri.utils.removeFragment(url)));
+    }
+  };
+}
+
+/**
+ * A regex for replacing any adjacent characters that are whitespace
+ * with a single space (' ').
+ * @private
+ * @type {RegExp}
+ */
+const matchWhitespaceRE = /\s+/g;
+
+/**
+ * Applies the format to render the params in the provided error.
+ * @param {string} format
+ * @param {!amp.validator.ValidationError} error
+ * @return {string}
+ */
+function applyFormat(format, error) {
+  let message = format;
+  for (let param = 1; param <= error.params.length; ++param) {
+    const value = error.params[param - 1].replace(matchWhitespaceRE, ' ');
+    message = message.replace(new RegExp('%' + param, 'g'), value);
+  }
+  return message.replace(new RegExp('%%', 'g'), '%');
+}
+
+/**
+ * Renders the error message for a single error.
+ * @param {!amp.validator.ValidationError} error
+ * @return {string}
+ * @export
+ */
+amp.validator.renderErrorMessage = function(error) {
+  if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  goog.asserts.assert(error.code !== null);
+  const format = parsedValidatorRulesSingleton.getFormatByCode()[error.code];
+  goog.asserts.assert(format !== undefined);
+  return applyFormat(format, error);
+};
+
+/**
+ * Renders one line of error output.
+ * @param {string} filenameOrUrl
+ * @param {!amp.validator.ValidationError} error
+ * @return {string}
+ */
+function errorLine(filenameOrUrl, error) {
+  const line = error.line || 1;
+  const col = error.col || 0;
+
+  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) + ':' + line +
+      ':' + col + ' ';
+  errorLine += amp.validator.renderErrorMessage(error);
+  if (error.specUrl) {
+    errorLine += ' (see ' + error.specUrl + ')';
+  }
+  if (error.category !== null) {
+    errorLine += ' [' + error.category + ']';
+  }
+  return errorLine;
+}
+
+/**
+ * Renders the validation results into an array of human readable strings.
+ * Careful when modifying this - it's called from
+ * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * @param {!Object} validationResult
+ * @param {string} filename to use in rendering error messages.
+ * @return {!Array<string>}
+ * @export
+ */
+amp.validator.renderValidationResult = function(validationResult, filename) {
+  if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  const rendered = [];
+  rendered.push(validationResult.status);
+  for (const error of validationResult.errors) {
+    rendered.push(errorLine(filename, error));
+  }
+  return rendered;
+};
+
+/**
+ * Computes the validation category for this |error|. This is a higher
+ * level classification that distinguishes layout problems, problems
+ * with specific tags, etc. The category is determined with heuristics,
+ * just based on the information in |error|. We consider
+ * ValidationError::Code, ValidationError::params (including suffix /
+ * prefix matches.
+ * @param {!amp.validator.ValidationError} error
+ * @return {!amp.validator.ErrorCategory.Code}
+ * @export
+ */
+amp.validator.categorizeError = function(error) {
+  if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  // This shouldn't happen in practice. UNKNOWN_CODE would indicate that the
+  // field wasn't populated.
+  if (error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
+      error.code === null) {
+    return amp.validator.ErrorCategory.Code.UNKNOWN;
+  }
+  // E.g. "The tag 'UL', a child tag of 'amp-live-list', does not
+  // satisfy one of the acceptable reference points: AMP-LIVE-LIST
+  // [update], AMP-LIVE-LIST [items], AMP-LIVE-LIST [pagination]."
+  if (error.code ===
+          amp.validator.ValidationError.Code
+              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT ||
+      error.code ==
+          amp.validator.ValidationError.Code
+              .MANDATORY_REFERENCE_POINT_MISSING ||
+      error.code ==
+          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The tag 'img' may only appear as a descendant of tag
+  // 'noscript'. Did you mean 'amp-img'?"
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
+    if (error.params[0] === 'img' || error.params[0] === 'video' ||
+        error.params[0] === 'audio' || error.params[0] === 'iframe' ||
+        error.params[0] === 'font') {
+      return amp.validator.ErrorCategory.Code
+          .DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+    }
+    // E.g. "The tag 'picture' is disallowed."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "tag 'img' may only appear as a descendant of tag
+  // 'noscript'. Did you mean 'amp-img'?"
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+  }
+  if (error.code ===
+      amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // At the moment it's not possible to get this particular error since
+  // all mandatory tag ancestors have hints except for noscript, but
+  // usually when noscript fails then it reports an error for mandatory_parent
+  // (since there is such a TagSpec as well, for the head).
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR) {
+    if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
+        goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "Tag 'amp-accordion > section' must have 2 child tags - saw
+  // 3 child tags."
+  if (error.code ==
+      amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS) {
+    if (goog.string./*OK*/ startsWith(error.params[0], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // e.g. "Tag 'div' is disallowed as first child of tag
+  // 'amp-accordion > section'. Allowed first child tag names are
+  // ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']."
+  if (error.code ==
+          amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME ||
+      error.code ==
+          amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME) {
+    if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
+        goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The text (CDATA) inside tag 'style amp-custom' matches
+  // 'CSS !important', which is disallowed."
+  if (error.code === amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG ||
+      (error.code ===
+           amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST &&
+       error.params[0] === 'style amp-custom')) {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
+  // TODO(powdercloud): Legacy generic css error code. Remove after
+  // 2016-06-01.
+  if (error.code === amp.validator.ValidationError.Code.CSS_SYNTAX &&
+      error.params[0] === 'style amp-custom') {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
+  if ((error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_STRAY_TRAILING_BACKSLASH ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING ||
+       error.code === amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_INCOMPLETE_DECLARATION ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL ||
+       error.code ===
+           amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_DISALLOWED_RELATIVE_URL) &&
+      error.params[0] === 'style amp-custom') {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "The mandatory tag 'boilerplate (noscript)' is missing or
+  // incorrect."
+  if (error.code === amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING ||
+      (error.code ===
+           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING &&
+       error.params[0] === '⚡') ||
+      (error.code ===
+           amp.validator.ValidationError.Code
+               .MANDATORY_CDATA_MISSING_OR_INCORRECT &&
+       (goog.string./*OK*/ startsWith(
+            error.params[0], 'head > style[amp-boilerplate]') ||
+        goog.string./*OK*/ startsWith(
+            error.params[0], 'noscript > style[amp-boilerplate]')))) {
+    return amp.validator.ErrorCategory.Code
+        .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "The mandatory tag 'meta name=viewport' is missing or
+  // incorrect."
+  if ((error.code ===
+           amp.validator.ValidationError.Code
+               .DISALLOWED_PROPERTY_IN_ATTR_VALUE ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE ||
+       error.code ===
+           amp.validator.ValidationError.Code
+               .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE) &&
+      error.params[2] === 'meta name=viewport') {
+    return amp.validator.ErrorCategory.Code
+        .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "The mandatory attribute 'height' is missing in tag 'amp-img'."
+  if (error.code ===
+          amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT ||
+      error.code ===
+          amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID ||
+      error.code ===
+          amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID ||
+      (error.code ===
+       amp.validator.ValidationError.Code
+           .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT) ||
+      ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
+        error.code ===
+            amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING) &&
+       (error.params[0] === 'width' || error.params[0] === 'height' ||
+        error.params[0] === 'layout'))) {
+    return amp.validator.ErrorCategory.Code.AMP_LAYOUT_PROBLEM;
+  }
+  if (error.code ===
+          amp.validator.ValidationError.Code
+              .ATTR_DISALLOWED_BY_IMPLIED_LAYOUT ||
+      error.code ===
+          amp.validator.ValidationError.Code
+              .ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT) {
+    return amp.validator.ErrorCategory.Code.AMP_LAYOUT_PROBLEM;
+  }
+  // E.g. "The attribute 'src' in tag 'amphtml engine v0.js script'
+  // is set to the invalid value
+  // '//static.breakingnews.com/ads/gptLoader.js'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE &&
+      error.params[0] === 'src' &&
+      goog.string./*OK*/ endsWith(error.params[1], 'script')) {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g. "The tag 'script' is disallowed except in specific forms."
+  if (error.code ===
+          amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG &&
+      error.params[0] === 'script') {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
+  // is set to the invalid value 'text/javascript'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE &&
+      goog.string./*OK*/ startsWith(error.params[1], 'script') &&
+      error.params[0] === 'type') {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
+  // source'."
+  if ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
+       error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR ||
+       error.code ===
+           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING)) {
+    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    if (goog.string./*OK*/ startsWith(error.params[1], 'on')) {
+      return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+    }
+    if (error.params[1] === 'style' ||
+        error.params[1] === 'link rel=stylesheet for fonts') {
+      return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+    }
+    // E.g. "The attribute 'async' may not appear in tag 'link
+    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // Like the previous example but the tag is params[0] here. This
+  // error should always be for AMP elements thus far, so we don't
+  // check for params[0].
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The attribute 'shortcode' in tag 'amp-instagram' is deprecated -
+  // use 'data-shortcode' instead."
+  if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
+      error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
+      error.code ===
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY) {
+    return amp.validator.ErrorCategory.Code.DEPRECATION;
+  }
+  // E.g. "The parent tag of tag 'source' is 'picture', but it can
+  // only be 'amp-audio'."
+  if (error.code === amp.validator.ValidationError.Code.WRONG_PARENT_TAG) {
+    if (goog.string./*OK*/ startsWith(error.params[0], 'amp-') ||
+        goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
+        goog.string./*OK*/ startsWith(error.params[2], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    // E.g. "The parent tag of tag 'script' is 'body', but it can only
+    // be 'head'".
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The 'amp-image-lightbox extension .js script' tag is
+  // missing or incorrect, but required by 'amp-image-lightbox'."
+  if (error.code ===
+          amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING &&
+      (goog.string./*OK*/ startsWith(error.params[1], 'amp-') ||
+       error.params[1] === 'template')) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The attribute 'role' in tag 'amp-img' is missing or incorrect,
+  // but required by attribute 'on'."
+  if (error.code ===
+      amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "Mutually exclusive attributes encountered in tag
+  // 'amp-youtube' - pick one of ['src', 'data-videoid']."
+  if (error.code ===
+          amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS &&
+      goog.string./*OK*/ startsWith(error.params[0], 'amp-')) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The tag 'boilerplate (noscript) - old variant' appears
+  // more than once in the document."
+  if (error.code === amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG) {
+    return amp.validator.ErrorCategory.Code
+        .MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "Mustache template syntax in attribute name
+  // 'data-{{&notallowed}}' in tag 'p'."
+  if (error.code ===
+          amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE ||
+      error.code ===
+          amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE ||
+      error.code === amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME) {
+    return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
+  }
+  // E.g. "The tag 'amp-ad' may not appear as a descendant of tag
+  // 'amp-sidebar'.
+  if (error.code ===
+          amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
+      (goog.string./*OK*/ startsWith(error.params[1], 'amp-'))) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  if (error.code ===
+          amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR &&
+      (error.params[1] === 'template')) {
+    return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
+  }
+  // E.g. "Missing URL for attribute 'href' in tag 'a'."
+  // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
+  // 'amp-iframe'." Note: Parameters in the format strings appear out
+  // of order so that error.params(1) is the tag for all four of these.
+  if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
+      error.code == amp.validator.ValidationError.Code.INVALID_URL ||
+      error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL ||
+      error.code == amp.validator.ValidationError.Code.DISALLOWED_DOMAIN ||
+      error.code ==
+          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL) {
+    if (goog.string./*OK*/ startsWith(error.params[1], 'amp-')) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The dimension '1x' in attribute 'srcset' appears more than once."
+  if (error.code == amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  return amp.validator.ErrorCategory.Code.GENERIC;
+};
+
+/**
+ * Convenience function which calls |CategorizeError| for each error
+ * in |result| and sets its category field accordingly.
+ * @param {!amp.validator.ValidationResult} result
+ * @export
+ */
+amp.validator.annotateWithErrorCategories = function(result) {
+  if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  for (const error of result.errors) {
+    error.category = amp.validator.categorizeError(error);
+  }
+};
+
+/**
+ * Validates a document stored below a DOM node.
+ * EXPERIMENTAL: Do not rely on this API for now, it is still a work in
+ * progress.
+ *
+ * @param {!Document} rootDoc
+ * @return {!amp.validator.ValidationResult} Validation Result (status and
+ *     errors)
+ * @export
+ */
+amp.validator.validateNode = function(rootDoc) {
+  if (amp.validator.GENERATE_DETAILED_ERRORS) {
+    throw 'not implemented';
+  }
+  const handler = new amp.validator.ValidationHandler();
+  const visitor = new amp.domwalker.DomWalker();
+  visitor.walktree(handler, rootDoc);
+
+  return handler.Result();
 };

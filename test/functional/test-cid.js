@@ -22,7 +22,7 @@ import {
 import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
 import {parseUrl} from '../../src/url';
-import {timer} from '../../src/timer';
+import {timerFor} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
@@ -39,6 +39,7 @@ describe('cid', () => {
   let whenFirstVisible;
 
   const hasConsent = Promise.resolve();
+  const timer = timerFor(window);
 
   beforeEach(() => {
     let call = 1;
@@ -71,6 +72,7 @@ describe('cid', () => {
         },
       },
       document: {},
+      navigator: window.navigator,
       ampExtendedElements: {
         'amp-analytics': true,
       },
@@ -179,7 +181,7 @@ describe('cid', () => {
   it('should pick up the cid value from storage', () => {
     storage['amp-cid'] = JSON.stringify({
       cid: 'YYY',
-      time: timer.now(),
+      time: Date.now(),
     });
     return compare(
         'e2',
@@ -205,7 +207,7 @@ describe('cid', () => {
     isIframed = true;
     storage['amp-cid'] = JSON.stringify({
       cid: 'in-storage',
-      time: timer.now(),
+      time: Date.now(),
     });
     return compare(
         'e2',

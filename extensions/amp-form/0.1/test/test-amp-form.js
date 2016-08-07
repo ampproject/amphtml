@@ -15,9 +15,14 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {AmpForm, installAmpForm} from '../amp-form';
+import {
+  AmpForm,
+  installAmpForm,
+  setReportValiditySupported,
+  onInputInteraction_,
+} from '../amp-form';
 import * as sinon from 'sinon';
-import {timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import '../../../amp-mustache/0.1/amp-mustache';
 import {installTemplatesService} from '../../../../src/service/template-impl';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -29,6 +34,7 @@ import {installActionServiceForDoc,} from
 describe('amp-form', () => {
 
   let sandbox;
+  const timer = timerFor(window);
 
   function getAmpForm(button1 = true, button2 = false) {
     return createIframePromise().then(iframe => {
@@ -100,13 +106,25 @@ describe('amp-form', () => {
     expect(() => new AmpForm(form)).to.not.throw;
   });
 
-  it('should listen to submit event', () => {
+  it('should listen to submit event and inputs blur and input events', () => {
     const form = getForm();
+    const nameInput = form.querySelector('input[name=name]');
+    nameInput.addEventListener = sandbox.spy();
+    const emailInput = document.createElement('input');
+    emailInput.addEventListener = sandbox.spy();
+    form.addEventListener = sandbox.spy();
+    emailInput.setAttribute('type', 'email');
+    form.appendChild(emailInput);
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
     expect(form.addEventListener.called).to.be.true;
     expect(form.addEventListener.calledWith('submit')).to.be.true;
+    expect(nameInput.addEventListener.calledWith('blur')).to.be.true;
+    expect(nameInput.addEventListener.calledWith('input')).to.be.true;
+    expect(emailInput.addEventListener.calledWith('blur')).to.be.true;
+    expect(emailInput.addEventListener.calledWith('input')).to.be.true;
+    expect(form.className).to.contain('-amp-form');
   });
 
   it('should do nothing if already submitted', () => {
@@ -127,22 +145,45 @@ describe('amp-form', () => {
   });
 
   it('should respect novalidate on a form', () => {
+    setReportValiditySupported(true);
     const form = getForm();
     form.setAttribute('novalidate', '');
+    const emailInput = document.createElement('input');
+    emailInput.setAttribute('name', 'email');
+    emailInput.setAttribute('type', 'email');
+    emailInput.setAttribute('required', '');
+    form.appendChild(emailInput);
     const ampForm = new AmpForm(form);
     const event = {
       stopImmediatePropagation: sandbox.spy(),
       target: form,
       preventDefault: sandbox.spy(),
     };
+    ampForm.vsync_ = {
+      run: (task, state) => {
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+      },
+    };
     sandbox.spy(form, 'checkValidity');
+    sandbox.spy(emailInput, 'reportValidity');
     ampForm.xhrAction_ = null;
     ampForm.handleSubmit_(event);
+    // Check validity should always be called regardless of novalidate.
+    expect(form.checkValidity.called).to.be.true;
+
+    // However reporting validity shouldn't happen when novalidate.
+    expect(emailInput.reportValidity.called).to.be.false;
     expect(event.preventDefault.called).to.be.false;
-    expect(form.checkValidity.called).to.be.false;
+    expect(form.hasAttribute('amp-novalidate')).to.be.true;
   });
 
   it('should check validity and report when invalid', () => {
+    setReportValiditySupported(false);
     return getAmpForm().then(ampForm => {
       const form = ampForm.form_;
       const emailInput = document.createElement('input');
@@ -313,7 +354,7 @@ describe('amp-form', () => {
       expect(form.className).to.not.contain('amp-form-submit-error');
       expect(form.className).to.not.contain('amp-form-submit-success');
       fetchJsonResolver();
-      return timer.promise(20).then(() => {
+      return timer.promise(0).then(() => {
         expect(ampForm.state_).to.equal('submit-success');
         expect(form.className).to.not.contain('amp-form-submitting');
         expect(form.className).to.not.contain('amp-form-submit-error');
@@ -456,4 +497,147 @@ describe('amp-form', () => {
       });
     });
   });
+
+  describe('User Validity', () => {
+    it('should manage valid/invalid on input/fieldset/form on submit', () => {
+      setReportValiditySupported(false);
+      return getAmpForm(true).then(ampForm => {
+        const form = ampForm.form_;
+        const fieldset = document.createElement('fieldset');
+        const emailInput = document.createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('required', '');
+        fieldset.appendChild(emailInput);
+        form.appendChild(fieldset);
+        sandbox.spy(form, 'checkValidity');
+        sandbox.spy(emailInput, 'checkValidity');
+        sandbox.spy(fieldset, 'checkValidity');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+
+        const event = {
+          target: ampForm.form_,
+          stopImmediatePropagation: sandbox.spy(),
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmit_(event);
+
+        expect(form.checkValidity.called).to.be.true;
+        expect(emailInput.checkValidity.called).to.be.true;
+        expect(fieldset.checkValidity.called).to.be.true;
+        expect(form.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        emailInput.value = 'cool@bea.ns';
+        ampForm.handleSubmit_(event);
+        expect(form.className).to.contain('user-valid');
+        expect(emailInput.className).to.contain('user-valid');
+        expect(fieldset.className).to.contain('user-valid');
+      });
+    });
+
+    it('should manage valid/invalid on input user interaction', () => {
+      setReportValiditySupported(false);
+      return getAmpForm(true).then(ampForm => {
+        const form = ampForm.form_;
+        const fieldset = document.createElement('fieldset');
+        const emailInput = document.createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('required', '');
+        fieldset.appendChild(emailInput);
+        const usernameInput = document.createElement('input');
+        usernameInput.setAttribute('name', 'nickname');
+        usernameInput.setAttribute('required', '');
+        fieldset.appendChild(usernameInput);
+        form.appendChild(fieldset);
+        sandbox.spy(form, 'checkValidity');
+        sandbox.spy(emailInput, 'checkValidity');
+        sandbox.spy(fieldset, 'checkValidity');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+
+        onInputInteraction_({target: emailInput});
+        expect(form.checkValidity.called).to.be.true;
+        expect(emailInput.checkValidity.called).to.be.true;
+        expect(fieldset.checkValidity.called).to.be.true;
+        expect(form.className).to.contain('user-invalid');
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // No interaction happened with usernameInput, so no user-class should
+        // be added at this point.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+
+        emailInput.value = 'cool@bea.ns';
+        onInputInteraction_({target: emailInput});
+        expect(emailInput.className).to.contain('user-valid');
+        expect(form.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Still no interaction.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+        // Both inputs back to invalid.
+        emailInput.value = 'invalid-value';
+        onInputInteraction_({target: emailInput});
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(form.className).to.contain('user-invalid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Still no interaction.
+        expect(usernameInput.className).to.not.contain('user-invalid');
+        expect(usernameInput.className).to.not.contain('user-valid');
+
+        // Only email input is invalid now.
+        usernameInput.value = 'coolbeans';
+        onInputInteraction_({target: usernameInput});
+        expect(emailInput.className).to.contain('user-invalid');
+        expect(form.className).to.contain('user-invalid');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(fieldset.className).to.contain('user-invalid');
+
+        // Both input are finally valid.
+        emailInput.value = 'cool@bea.ns';
+        onInputInteraction_({target: emailInput});
+        expect(emailInput.className).to.contain('user-valid');
+        expect(usernameInput.className).to.contain('user-valid');
+        expect(form.className).to.contain('user-valid');
+        expect(fieldset.className).to.contain('user-valid');
+      });
+    });
+
+    it('should propagates user-valid only when going from invalid', () => {
+      setReportValiditySupported(false);
+      return getAmpForm(true).then(ampForm => {
+        const form = ampForm.form_;
+        const fieldset = document.createElement('fieldset');
+        const emailInput = document.createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('required', '');
+        fieldset.appendChild(emailInput);
+        form.appendChild(fieldset);
+        sandbox.spy(form, 'checkValidity');
+        sandbox.spy(emailInput, 'checkValidity');
+        sandbox.spy(fieldset, 'checkValidity');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+
+        emailInput.value = 'cool@bea.ns';
+        const event = {target: emailInput};
+        onInputInteraction_(event);
+
+        expect(emailInput.checkValidity.called).to.be.true;
+        expect(form.checkValidity.called).to.be.false;
+        expect(fieldset.checkValidity.called).to.be.false;
+        expect(emailInput.className).to.contain('user-valid');
+        expect(form.className).to.not.contain('user-valid');
+        expect(fieldset.className).to.not.contain('user-valid');
+      });
+    });
+  });
+
 });

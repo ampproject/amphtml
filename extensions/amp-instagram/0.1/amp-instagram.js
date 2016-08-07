@@ -71,7 +71,7 @@ class AmpInstagram extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.shortcode_ = user.assert(
+    this.shortcode_ = user().assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',

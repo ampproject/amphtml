@@ -28,7 +28,8 @@ script:
   - npm run ava
   - gulp lint
   - gulp build --fortesting --css-only
-  - gulp check-types
+  # TODO(jridgewell, #4347) Enable once assertions prove truthiness again.
+  # - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit
   # dep-check needs to occur after build since we rely on build to generate

@@ -20,7 +20,7 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-youtube';
 import {adopt} from '../../../../src/runtime';
-import {timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -28,6 +28,7 @@ adopt(window);
 describe('amp-youtube', function() {
   this.timeout(5000);
   let sandbox;
+  const timer = timerFor(window);
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();

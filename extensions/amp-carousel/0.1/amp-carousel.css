@@ -81,19 +81,30 @@ amp-carousel .amp-carousel-button.amp-disabled {
   display: flex !important;
   flex-wrap: nowrap;
   height: 100% !important;
+  left: 0;
   overflow-x: auto !important;
   overflow-y: hidden !important;
-  position: relative !important;
+  position: absolute !important;
+  top: 0;
   white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch !important;
+}
+
+.-amp-slides-container::-webkit-scrollbar {
+  /**
+   * Height not set to 0 because of safari bug.
+   * https://bugs.webkit.org/show_bug.cgi?id=160622
+   */
+   height: 0.1px;
+   background-color: transparent;
 }
 
 .-amp-slides-container.-amp-no-scroll {
   overflow-x: hidden !important;
 }
-
 
 .-amp-slide-item {
   align-items: center !important;
@@ -108,26 +119,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
 
 .-amp-slide-item-show {
   display: flex !important;
-}
-
-.-amp-carousel-start-marker,
-.-amp-carousel-end-marker {
-  display: block !important;
-  height: 100% !important;
-  width: 1px !important;
-  background-color: transparent !important;
-  scroll-snap-coordinate: 0 0 !important;
-  flex: 0 0 1px !important;
-}
-
-.-amp-carousel-start-marker {
-  order: -1 !important;
-  margin-left: -1px !important;
-}
-
-.-amp-carousel-end-marker {
-  order: 100000000 !important;
-  margin-right: -1px !important;
 }
 
 .-amp-carousel-start-marker,

@@ -184,6 +184,7 @@ describe('IntersectionObserver', () => {
     onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
+    element.win = window;
     element.getVsync = function() {
       return {
         measure: function(fn) {
@@ -208,7 +209,7 @@ describe('IntersectionObserver', () => {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(new Date().getTime(),
+        return getIntersectionChangeEntry(Date.now(),
             rootBounds, layoutBox);
       },
     };
@@ -331,10 +332,10 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     insert(testIframe);
     ioInstance.onViewportCallback(true);
-    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+    testIframe.contentWindow.postMessage = message => {
       // Copy because arg is modified in place.
       messages.push(JSON.parse(JSON.stringify(message)));
-    });
+    };
     ioInstance.postMessageApi_.clientWindows_ =
         [{win: testIframe.contentWindow, origin: '*'}];
     ioInstance.startSendingIntersectionChanges_();

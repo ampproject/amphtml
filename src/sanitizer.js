@@ -307,7 +307,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     } catch (e) {
       // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      user.error(TAG, 'Failed to parse srcset: ', e);
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();
