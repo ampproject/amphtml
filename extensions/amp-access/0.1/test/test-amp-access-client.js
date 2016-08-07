@@ -71,7 +71,7 @@ describe('AccessClientAdapter', () => {
     });
 
     it('should allow only lower-than-default timeout in production', () => {
-      const getModeStub = sinon.stub(mode, 'getMode', () => {
+      sandbox.stub(mode, 'getMode', () => {
         return {development: false, localDev: false};
       });
 
@@ -84,8 +84,6 @@ describe('AccessClientAdapter', () => {
       validConfig['authorizationTimeout'] = 5000;
       adapter = new AccessClientAdapter(window, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(3000);
-
-      getModeStub.restore();
     });
 
     it('should fail when authorization timeout is malformed', () => {
