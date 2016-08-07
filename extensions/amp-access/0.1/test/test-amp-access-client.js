@@ -16,6 +16,7 @@
 
 import {AccessClientAdapter} from '../amp-access-client';
 import * as sinon from 'sinon';
+import * as mode from '../../../../src/mode';
 
 describe('AccessClientAdapter', () => {
 
@@ -64,15 +65,27 @@ describe('AccessClientAdapter', () => {
     });
 
     it('should set authorization timeout if provided', () => {
-      let adapter;
-
       validConfig['authorizationTimeout'] = 5000;
-      adapter = new AccessClientAdapter(window, validConfig, context);
+      const adapter = new AccessClientAdapter(window, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(5000);
+    });
+
+    it('should allow only lower-than-default timeout in production', () => {
+      const getModeStub = sinon.stub(mode, 'getMode', () => {
+        return {development: false, localDev: false};
+      });
+
+      let adapter;
 
       validConfig['authorizationTimeout'] = 1000;
       adapter = new AccessClientAdapter(window, validConfig, context);
       expect(adapter.authorizationTimeout_).to.equal(1000);
+
+      validConfig['authorizationTimeout'] = 5000;
+      adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(3000);
+
+      getModeStub.restore();
     });
 
     it('should fail when authorization timeout is malformed', () => {
