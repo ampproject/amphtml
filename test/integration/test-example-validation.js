@@ -53,6 +53,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics-notification.amp.html',
     'everything.amp.html',
     'facebook.amp.html',
+    'gfycat.amp.html',
     'instagram.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
@@ -74,6 +75,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
   const errorWhitelist = [
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
+    /DISALLOWED_TAG amp-gfycat/,
   ];
 
   const usedWhitelist = [];
