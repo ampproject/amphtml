@@ -117,4 +117,19 @@ AMP.reisterServiceForDoc('amp-share-tracking-service', undefined, ampdoc => {
   */
 
   return service;
+
+  /* COMPLETELY WRONG RIGHT NOW
+  onDocumentReady(ampdoc.getRootNode(), () => {
+    const existing = ampdoc.getRootNode().querySelector('amp-share-tracking');   /// CORRECT
+    if (!existing) {
+      const def = ampdoc.getWin().document.createElement('amp-share-tracking');         // INCOMPLETE
+      waitForBody(ampdoc.getWin().document, () => {         // INCORRECT PARTIALLY
+        const parent = ampdoc.getRootNode().nodeType == /document/ 9 ?
+            ampdoc.getRootNode().body :
+            ampdoc.getRootNode();
+        parent.insertChildBefore(def, parent.firstChildElement);
+      });
+    }
+  });
+  */
 });
