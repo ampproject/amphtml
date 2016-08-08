@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {dashToCamelCase} from './string';
 import {dev} from './log';
 import {toArray} from './types';
 
@@ -400,23 +399,24 @@ export function childElementsByTag(parent, tagName) {
  * @param {!Element} element
  * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
+ * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
+  opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
-  const attributes = element.attributes;
+  const dataset = element.dataset;
   const params = Object.create(null);
-  for (let i = 0; i < attributes.length; i++) {
-    const attr = attributes[i];
-    const matches = attr.name.match(/^data-param-(.+)/);
+  opt_paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  for (const key in dataset) {
+    const matches = key.match(opt_paramPattern);
     if (matches) {
-      const param = dashToCamelCase(matches[1]);
-      params[computeParamNameFunc(param)] = attr.value;
+      const param = matches[1][0].toLowerCase() + matches[1].substr(1);
+      params[computeParamNameFunc(param)] = dataset[key];
     }
   }
   return params;
 }
-
 
 /**
  * Whether the element have a next node in the document order.
