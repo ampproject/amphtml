@@ -813,8 +813,6 @@ function createBaseAmpElementProto(win) {
 
 
   /**
-   * TODO(zhouyx): active this function for production code. And make the
-   * dispatchCustomEventForTesting only active for tests.
    * Dispatches a custom event.
    *
    * @param {string} name
