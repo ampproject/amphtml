@@ -17,6 +17,7 @@
 import {isExperimentOn} from '../../../src/experiments';
 import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
+import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 
@@ -48,7 +49,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    /** @private {!Promise<!Object>} */
+    /** @private {!Promise<!Object<string, string>>} */
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_()]).then(results => {
@@ -59,6 +60,8 @@ export class AmpShareTracking extends AMP.BaseElement {
           outgoingFragment: results[1],
         };
       });
+
+    getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
   }
 
   /**
@@ -67,6 +70,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getIncomingFragment_() {
+    dev().fine(TAG, 'getting incoming fragment');
     return viewerFor(this.win).getFragment().then(fragment => {
       const match = fragment.match(/\.([^&]*)/);
       return match ? match[1] : '';
@@ -79,6 +83,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingFragment_() {
+    dev().fine(TAG, 'getting outgoing fragment');
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }

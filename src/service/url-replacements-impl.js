@@ -17,6 +17,7 @@
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
+import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
 import {fromClass} from '../service';
@@ -54,8 +55,11 @@ export class UrlReplacements {
     /** @private @const {function():!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /** @private @const {!Promise<?Object<string, ?string>>} */
     this.variants_ = variantForOrNull(win);
+
+    /** @private @const {!Promise<?Object<string, string>>} */
+    this.shareTrackingFragments_ = shareTrackingForOrNull(win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -208,6 +212,24 @@ export class UrlReplacements {
         }
 
         return experiments.join(EXPERIMENT_DELIMITER);
+      });
+    });
+
+    // Returns incoming share tracking fragment.
+    this.set_('SHARE_TRACKING_INCOMING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.incomingFragment;
+      });
+    });
+
+    // Returns outgoing share tracking fragment.
+    this.set_('SHARE_TRACKING_OUTGOING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.outgoingFragment;
       });
     });
 
