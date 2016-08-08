@@ -23,10 +23,20 @@ import {dev, user} from '../../../src/log';
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
 
+
 /**
  * @visibleForTesting
  */
-export class AmpShareTracking extends AMP.BaseElement {
+export class AmpShareTrackingService {
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   */
+  constructor(ampdoc) {
+    /** @const {!Window} */
+    this.win = ampdoc.getWin();
+  }
+
   /**
     * @return {boolean}
     * @private
@@ -35,18 +45,9 @@ export class AmpShareTracking extends AMP.BaseElement {
     return isExperimentOn(this.win, TAG);
   }
 
-  /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
-  }
-
-  /** @override */
-  buildCallback() {
+  /** */
+  start() {
     user().assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
-
-    /** @private {string} */
-    this.vendorHref_ = this.element.getAttribute('data-href');
-    dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
     /** @private {!Promise<!Object>} */
     this.shareTrackingFragments_ = Promise.all([
@@ -79,37 +80,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * @private
    */
   getOutgoingFragment_() {
-    if (this.vendorHref_) {
-      return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
-    }
     return this.getOutgoingRandomFragment_();
-  }
-
-  /**
-   * Get an outgoing share-tracking fragment from vendor
-   * by issueing a post request to the url the vendor provided
-   * @param {string} vendorUrl
-   * @return {!Promise<string>}
-   * @private
-   */
-  getOutgoingFragmentFromVendor_(vendorUrl) {
-    const postReq = {
-      method: 'POST',
-      credentials: 'include',
-      requireAmpResponseSourceOrigin: true,
-      body: {},
-    };
-    return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
-      if (response.fragment) {
-        return response.fragment;
-      }
-      user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
-          'have a fragment value.');
-      return '';
-    }, err => {
-      user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
-      return '';
-    });
   }
 
   /**
@@ -124,4 +95,26 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-share-tracking', AmpShareTracking);
+AMP.registerElement('amp-share-tracking', AMP.BaseElement);
+
+
+AMP.reisterServiceForDoc('amp-share-tracking-service', undefined, ampdoc => {
+  // Called when ampdoc is ready to accept services.
+
+  const service = new AmpShareTrackingService(ampdoc);
+  service.start();
+
+  /*
+  onDocumentReady(ampdoc.getRootNode(), () => {
+    const existing = ampdoc.getRootNode().querySelector('amp-share-tracking');
+    if (!existing) {
+      service.start();
+    } else {
+      const href = existing.getAttribute('data-href');
+      service.start(href);
+    }
+  });
+  */
+
+  return service;
+});
