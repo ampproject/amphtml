@@ -109,6 +109,13 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
+// used for extracting fakead3p from production code.
+const IS_DEV = true;
+
+if (IS_DEV && parseFragment(location.hash)._context.mode.localDev) {
+  register('fakead3p', fakead3p);
+}
+
 // Keep the list in alphabetic order
 register('a9', a9);
 register('adblade', adblade);
@@ -135,7 +142,6 @@ register('doubleclick', doubleclick);
 register('eplanning', eplanning);
 register('ezoic', ezoic);
 register('facebook', facebook);
-register('fakead3p', fakead3p);
 register('flite', flite);
 register('genieessp', genieessp);
 register('gmossp', gmossp);

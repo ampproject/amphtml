@@ -110,12 +110,13 @@ export function incrementLoadingAds(win) {
  */
 
 export function getAdContainer(el) {
-  do {
+  while (el && el.tagName != 'BODY') {
+    el = el.parentNode;
     if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
       return el.tagName;
     }
-    el = el.parentNode;
-  } while (el && el.tagName != 'BODY');
+  }
+  return null;
 }
 
 /** @const {!string} Tag name for 3P AD implementation. */
