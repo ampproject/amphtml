@@ -1006,7 +1006,7 @@ describe('Resources changeSize', () => {
     it('should change size when forced', () => {
       resources.scheduleChangeSize_(resource1, 111, 222, true);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
@@ -1019,7 +1019,7 @@ describe('Resources changeSize', () => {
       );
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
@@ -1029,7 +1029,7 @@ describe('Resources changeSize', () => {
       resource1.element.contains = () => true;
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
@@ -1040,7 +1040,7 @@ describe('Resources changeSize', () => {
           height: 50};
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
       expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
@@ -1067,7 +1067,7 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
 
       expect(vsyncSpy.callCount).to.be.greaterThan(1);
@@ -1094,7 +1094,7 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
 
       expect(vsyncSpy.callCount).to.be.greaterThan(1);
@@ -1115,7 +1115,7 @@ describe('Resources changeSize', () => {
     it('in vp should NOT call overflowCallback if new height smaller', () => {
       resources.scheduleChangeSize_(resource1, 10, 11, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.not.been.called;
     });
@@ -1146,14 +1146,14 @@ describe('Resources changeSize', () => {
       resources.mutateWork_();
       expect(resource1.getPendingChangeSize()).to.jsonEqual(
           {height: 111, width: 222});
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
 
       resources.checkPendingChangeSize_(resource1.element);
       expect(resource1.getPendingChangeSize()).to.be.undefined;
       expect(resources.requestsChangeSize_.length).to.equal(1);
 
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.be.empty;
+      expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
       expect(resource1.changeSize.firstCall.args).to.jsonEqual([111, 222]);
       expect(overflowCallbackSpy).to.be.calledTwice;
