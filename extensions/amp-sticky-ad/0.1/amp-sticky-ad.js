@@ -21,22 +21,7 @@ import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
 import {waitForRenderStart} from '../../../3p/integration';
-
-
-/**
- * Allows listening for message from the element, unlisten afterward.
- *
- * @param {!Element}.
- * @param {string} typeOfMessage.
- * @param {function(!Object, !Window, string)} callback Called when a message of
- *     this type arrives for this iframe.
- */
-function listenOnce(element, typeOfMessage, callback) {
-  element.addEventListener(typeOfMessage, () => {
-    callback();
-    callback = null;
-  });
-};
+import {listenOnce} from '../../../src/event-helper';
 
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -145,8 +130,6 @@ class AmpStickyAd extends AMP.BaseElement {
         this.visible_ = true;
         this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
-        this.updateInViewport(this.ad_, true);
-        this.scheduleLayout(this.ad_);
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
@@ -169,9 +152,11 @@ class AmpStickyAd extends AMP.BaseElement {
 
   layoutAd_() {
     if (!this.ad_.isFirstLayoutCompleted()) {
+      this.updateInViewport(this.ad_, true);
       this.scheduleLayout(this.ad_);
       this.displayAfterAdLoad_();
     } else {
+      this.updateInViewport(this.ad_, true);
       this.scheduleLayout(this.ad_);
       this.delayAdLoad_();
     }
