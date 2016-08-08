@@ -112,12 +112,6 @@ const AMP_EMBED_ALLOWED = {
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
 
-if (IS_DEV &&
-    parseFragment(location.hash)._context &&
-    parseFragment(location.hash)._context.mode.localDev) {
-  register('fakead3p', fakead3p);
-}
-
 // Keep the list in alphabetic order
 register('a9', a9);
 register('adblade', adblade);
@@ -308,6 +302,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
+
+    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
+      register('fakead3p', fakead3p);
+    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
