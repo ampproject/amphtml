@@ -220,7 +220,7 @@ export class InstrumentationService {
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    * @param {!JSONType} config Configuration for instrumentation.
-   * @param {AnalyticsEventType} visibilityState State for which the callback is triggered.
+   * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @private
    */
   createVisibilityListener_(callback, config, eventType) {
