@@ -429,4 +429,17 @@ describe('amp-analytics.instrumentation', function() {
         fn2);
     expect(fn2.callCount).to.equal(1);
   });
+
+
+  it('extract element level vars from data attribute with prefix vars.',
+    () => {
+      const el1 = document.createElement('div');
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      ins.addListener({'on': 'click', 'selector': '.x'},
+        function(arg) {
+          expect(arg.vars.test).to.equal('foo');
+        });
+      ins.onClick_({target: el1});
+    });
 });
