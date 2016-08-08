@@ -56,7 +56,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
   return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode().localDev);
+      (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
 /**
