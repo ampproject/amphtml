@@ -98,7 +98,7 @@ export class AmpShareTrackingService {
 AMP.registerElement('amp-share-tracking', AMP.BaseElement);
 
 
-AMP.reisterServiceForDoc('amp-share-tracking-service', undefined, ampdoc => {
+AMP.registerServiceForDoc('amp-share-tracking-service', undefined, ampdoc => {
   // Called when ampdoc is ready to accept services.
 
   const service = new AmpShareTrackingService(ampdoc);
