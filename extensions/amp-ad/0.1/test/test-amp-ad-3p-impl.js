@@ -200,7 +200,7 @@ function tests(name) {
         });
       });
 
-      it.only('should fallback for resize with overflow', () => {
+      it('should fallback for resize with overflow', () => {
         return getAd({
           width: 100,
           height: 100,
@@ -209,31 +209,51 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          console.log(element.ownerDocument);
-          console.log(document);
-          impl.iframe_.contentWindow.postMessage = function() {
-                return;
-          };
-          const postMessageSpy = sinon.spy(impl.iframe_.contentWindow, 'postMessage');
-          //const postMessageSpy = sandbox/*OK*/.spy(Window, 'postMessage');
-          //const postSpy = sandbox.spy();
-          //impl.iframe_.contentWindow.postMessage = function() {
-            //postSpy();
-          //}
-          //const postMessageSpy = sandbox.spy(impl.iframe_.contentWindow, 'postMessage', ()=>{});
-          //const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
-          const attemptChangeSize = sandbox.stub(impl, 'attemptChangeSize', () => {
-            return Promise.resolve();
-          });
-          impl.apiHandler_.updateSize_(217, 114);
+          const attemptChangeSize = sandbox.stub(impl, 'attemptChangeSize',
+              () => {
+                return Promise.resolve();
+              });
+          const sendEmbedSizeResponseSpy = sandbox.spy(impl.apiHandler_,
+              'sendEmbedSizeResponse_');
+          impl.apiHandler_.updateSize_(217, 114, null, 'test-origin');
           expect(attemptChangeSize.callCount).to.equal(1);
           expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
           expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
-          // After the PR is merged, add test here
-          expect(postMessageSpy.callCount).to.equal(1);
-          //expect(postSpy).to.have.been.called;
+          return attemptChangeSize().then(() => {
+            expect(sendEmbedSizeResponseSpy).to.be.calledOnce;
+            expect(sendEmbedSizeResponseSpy.firstCall.args).to.jsonEqual([true,
+                114, 217, null, 'test-origin']);
+          });
         });
       });
+
+      it('should fallback for resize w/ overflow (attemptChangeSize fail)',
+          () => {
+            return getAd({
+              width: 100,
+              height: 100,
+              type: '_ping_',
+              src: 'testsrc',
+              resizable: '',
+            }, 'https://schema.org').then(element => {
+              const impl = element.implementation_;
+              const attemptChangeSize = sandbox.stub(impl, 'attemptChangeSize',
+                  () => {
+                    return Promise.reject(new Error('Fake error for testing'));
+                  });
+              const sendEmbedSizeResponseSpy = sandbox.spy(impl.apiHandler_,
+                  'sendEmbedSizeResponse_');
+              impl.apiHandler_.updateSize_(217, 114, null, 'test-origin');
+              expect(attemptChangeSize.callCount).to.equal(1);
+              expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
+              expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
+              return attemptChangeSize().catch(() => {
+                expect(sendEmbedSizeResponseSpy).to.be.calledOnce;
+                expect(sendEmbedSizeResponseSpy.firstCall.args).to
+                    .jsonEqual([false, 114, 217, null, 'test-origin']);
+              });
+            });
+          });
 
       it('should fallback for resize (height only) with overflow', () => {
         return getAd({
