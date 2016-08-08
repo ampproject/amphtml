@@ -16,6 +16,7 @@
 
 import {AccessClientAdapter} from '../amp-access-client';
 import * as sinon from 'sinon';
+import * as mode from '../../../../src/mode';
 
 describe('AccessClientAdapter', () => {
 
@@ -53,11 +54,43 @@ describe('AccessClientAdapter', () => {
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.pingbackUrl_).to
           .equal('https://acme.com/p?rid=READER_ID');
+      expect(adapter.authorizationTimeout_).to
+          .equal(3000);
       expect(adapter.getConfig()).to.deep.equal({
         authorizationUrl: 'https://acme.com/a?rid=READER_ID',
         pingbackUrl: 'https://acme.com/p?rid=READER_ID',
+        authorizationTimeout: 3000,
       });
       expect(adapter.isAuthorizationEnabled()).to.be.true;
+    });
+
+    it('should set authorization timeout if provided', () => {
+      validConfig['authorizationTimeout'] = 5000;
+      const adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(5000);
+    });
+
+    it('should allow only lower-than-default timeout in production', () => {
+      sandbox.stub(mode, 'getMode', () => {
+        return {development: false, localDev: false};
+      });
+
+      let adapter;
+
+      validConfig['authorizationTimeout'] = 1000;
+      adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(1000);
+
+      validConfig['authorizationTimeout'] = 5000;
+      adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.authorizationTimeout_).to.equal(3000);
+    });
+
+    it('should fail when authorization timeout is malformed', () => {
+      validConfig['authorizationTimeout'] = 'someString';
+      expect(() => {
+        new AccessClientAdapter(window, validConfig, context);
+      }).to.throw(/"authorizationTimeout" must be a number/);
     });
 
     it('should fail if config authorization is missing or malformed', () => {

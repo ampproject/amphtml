@@ -26,9 +26,6 @@ import {xhrFor} from '../../../src/xhr';
 /** @const {string} */
 const TAG = 'amp-access-server';
 
-/** @const {number} */
-const AUTHORIZATION_TIMEOUT = 3000;
-
 
 /**
  * This class implements server-side authorization protocol. In this approach
@@ -153,7 +150,7 @@ export class AccessServerAdapter {
       // Note that `application/x-www-form-urlencoded` is used to avoid
       // CORS preflight request.
       return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
+          this.clientAdapter_.getAuthorizationTimeout(),
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),

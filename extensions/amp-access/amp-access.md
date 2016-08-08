@@ -128,6 +128,7 @@ The following properties are defined in this configuration:
 | pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
 | login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
 | authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
+| authorizationTimeout          | &lt;number&gt;          | Timeout (in milliseconds) after which authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. |
 | type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready. |
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
