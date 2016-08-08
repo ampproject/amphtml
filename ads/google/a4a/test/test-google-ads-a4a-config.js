@@ -15,8 +15,9 @@
  */
 
 import {
-  googleAdsIsA4AEnabled,
-  MANUAL_EXPERIMENT_ID,
+    googleAdsIsA4AEnabled,
+    isInExperiment,
+    isInManualExperiment,
 } from '../traffic-experiments';
 import {resetExperimentToggles_} from '../../../../src/experiments';
 import * as sinon from 'sinon';
@@ -258,8 +259,17 @@ describe('a4a_config', () => {
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
       expect(rand.called, 'rand called at least once').to.be.false;
-      expect(element.getAttribute('data-experiment-id')).to.equal(
-          MANUAL_EXPERIMENT_ID);
+      expect(isInManualExperiment(element), 'element in manual experiment')
+          .to.be.true;
+      // And it shouldn't be in any *other* experiments.
+      for (const branch in EXTERNAL_BRANCHES) {
+        expect(isInExperiment(element, EXTERNAL_BRANCHES[branch]),
+            'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
+      }
+      for (const branch in EXTERNAL_BRANCHES) {
+        expect(isInExperiment(element, INTERNAL_BRANCHES[branch]),
+            'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
+      }
     });
   });
 

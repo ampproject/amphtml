@@ -22,8 +22,7 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-    isInExperiment,
-    MANUAL_EXPERIMENT_ID,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
@@ -62,7 +61,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
-    const adTestOn = isInExperiment(this.element, MANUAL_EXPERIMENT_ID);
+    const adTestOn = isInManualExperiment(this.element);
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},

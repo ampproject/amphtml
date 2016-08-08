@@ -22,8 +22,7 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
-    isInExperiment,
-    MANUAL_EXPERIMENT_ID,
+  isInManualExperiment,
 } from '../../../ads/google/a4a/traffic-experiments';
 import {
   extractGoogleAdCreativeAndSignature,
@@ -68,7 +67,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
     const adTestOn = this.element.getAttribute('data-adtest') ||
-        isInExperiment(this.element, MANUAL_EXPERIMENT_ID);
+        isInManualExperiment(this.element);
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
       {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
