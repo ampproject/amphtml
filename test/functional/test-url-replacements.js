@@ -51,31 +51,31 @@ describe('UrlReplacements', () => {
     sandbox.restore();
   });
 
-  function getReplacements(options) {
+  function getReplacements(opt_options) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
-      if (options) {
-        if (options.withCid) {
+      if (opt_options) {
+        if (opt_options.withCid) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
           installCidService(iframe.win);
           installCryptoService(iframe.win);
         }
-        if (options.withActivity) {
+        if (opt_options.withActivity) {
           markElementScheduledForTesting(iframe.win, 'amp-analytics');
           installActivityService(iframe.win);
         }
-        if (options.withVariant) {
+        if (opt_options.withVariant) {
           markElementScheduledForTesting(iframe.win, 'amp-experiment');
           getService(iframe.win, 'variant', () => Promise.resolve({
             'x1': 'v1',
             'x2': null,
           }));
         }
-        if (options.withShareTracking) {
+        if (opt_options.withShareTracking) {
           markElementScheduledForTesting(iframe.win, 'amp-share-tracking');
           getService(iframe.win, 'share-tracking', () => Promise.resolve({
             incomingFragment: '12345',
@@ -90,8 +90,8 @@ describe('UrlReplacements', () => {
     });
   }
 
-  function expand(url, opt_bindings, options) {
-    return getReplacements(options).then(
+  function expand(url, opt_bindings, opt_options) {
+    return getReplacements(opt_options).then(
           replacements => replacements.expand(url, opt_bindings)
         );
   }
@@ -214,47 +214,40 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace VARIANT', () => {
-    return expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
-        /*opt_bindings*/undefined, {withVariant: true}).then(res => {
-          expect(res).to.equal('?x1=v1&x2=none&x3=');
-        });
+    return expect(expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)',
+        /*opt_bindings*/undefined, {withVariant: true}))
+        .to.eventually.equal('?x1=v1&x2=none&x3=');
   });
 
   it('should replace VARIANT with empty string if ' +
       'amp-experiment is not configured ', () => {
-    return expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)').then(res => {
-      expect(res).to.equal('?x1=&x2=&x3=');
-    });
+    return expect(expand('?x1=VARIANT(x1)&x2=VARIANT(x2)&x3=VARIANT(x3)'))
+        .to.eventually.equal('?x1=&x2=&x3=');
   });
 
   it('should replace VARIANTS', () => {
-    return expand('?VARIANTS', /*opt_bindings*/undefined, {withVariant: true})
-        .then(res => {
-          expect(res).to.equal('?x1.v1!x2.none');
-        });
+    return expect(expand('?VARIANTS', /*opt_bindings*/undefined,
+        {withVariant: true})).to.eventually.equal('?x1.v1!x2.none');
   });
 
   it('should replace VARIANTS with empty string if ' +
       'amp-experiment is not configured ', () => {
-    return expand('?VARIANTS').then(res => {
-      expect(res).to.equal('?');
-    });
+    return expect(expand('?VARIANTS')).to.eventually.equal('?');
   });
 
   it('should replace SHARE_TRACKING_INCOMING and' +
       'SHARE_TRACKING_OUTGOING', () => {
-    return expand('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
-        /*opt_bindings*/undefined, {withShareTracking: true}).then(res => {
-          expect(res).to.equal('?in=12345&out=54321');
-        });
+    return expect(
+        expand('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING',
+        /*opt_bindings*/undefined, {withShareTracking: true}))
+        .to.eventually.equal('?in=12345&out=54321');
   });
 
   it('should replace SHARE_TRACKING_INCOMING and SHARE_TRACKING_OUTGOING' +
       'with empty string if amp-share-tracking is not configured', () => {
-    return expand('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING')
-        .then(res => {
-          expect(res).to.equal('?in=&out=');
-        });
+    return expect(
+        expand('?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'))
+        .to.eventually.equal('?in=&out=');
   });
 
   it('should replace TIMESTAMP', () => {
