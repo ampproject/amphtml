@@ -119,6 +119,7 @@ register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
 register('criteo', criteo);
@@ -166,7 +167,6 @@ register('yieldone', yieldone);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
-register('caprofitx', caprofitx);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
