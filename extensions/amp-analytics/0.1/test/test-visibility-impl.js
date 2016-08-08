@@ -19,18 +19,17 @@ import {
   isPositiveNumber_,
   isValidPercentage_,
   isVisibilitySpecValid,
+  Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
-import {visibilityFor} from '../../../../src/visibility';
 import {VisibilityState} from '../../../../src/visibility-state';
+import {viewerFor} from '../../../../src/viewer';
 import * as sinon from 'sinon';
 
 
 adopt(window);
 
-// The tests have amp-analytics tag because they should be run whenever
-// amp-analytics is changed.
-describe('Visibility (tag: amp-analytics)', () => {
+describe('amp-analytics.visibility', () => {
 
   let sandbox;
   let visibility;
@@ -55,14 +54,13 @@ describe('Visibility (tag: amp-analytics)', () => {
     getIntersectionStub = sandbox.stub();
     callbackStub = sandbox.stub();
 
-    return visibilityFor(window).then(v => {
-      visibility = v;
-      sandbox.stub(visibility.resourcesService_,
-        'getResourceForElement').returns({
+    viewerFor(window).setVisibilityState_(VisibilityState.VISIBLE);
+    visibility = new Visibility(window);
+    sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
+        .returns({
           element: {getIntersectionChangeEntry: getIntersectionStub},
           getId: getIdStub,
           isLayoutPending: () => false});
-    });
   });
 
   afterEach(() => {
@@ -79,22 +77,23 @@ describe('Visibility (tag: amp-analytics)', () => {
     };
   }
 
-  function listen(intersectionChange, config, expectedCalls, opt_expectedVars) {
+  function listen(intersectionChange, config, expectedCalls, opt_expectedVars,
+      opt_visible) {
+    opt_visible = opt_visible === undefined ? true : opt_visible;
     getIntersectionStub.returns(intersectionChange);
     config['selector'] = '#abc';
-    visibility.listenOnce(config, callbackStub);
+    visibility.listenOnce(config, callbackStub, opt_visible);
     clock.tick(20);
-    expect(callbackStub.callCount).to.equal(expectedCalls);
-    if (opt_expectedVars && expectedCalls > 0) {
-      for (let c = 0; c < opt_expectedVars.length; c++) {
-        sinon.assert.calledWith(callbackStub.getCall(c), opt_expectedVars[c]);
-      }
-    }
+    verifyExpectedVars(expectedCalls, opt_expectedVars);
   }
 
   function verifyChange(intersectionChange, expectedCalls, opt_expectedVars) {
     getIntersectionStub.returns(intersectionChange);
     visibility.scrollListener_();
+    verifyExpectedVars(expectedCalls, opt_expectedVars);
+  }
+
+  function verifyExpectedVars(expectedCalls, opt_expectedVars) {
     expect(callbackStub.callCount).to.equal(expectedCalls);
     if (opt_expectedVars && expectedCalls > 0) {
       for (let c = 0; c < opt_expectedVars.length; c++) {
@@ -103,17 +102,46 @@ describe('Visibility (tag: amp-analytics)', () => {
     }
   }
 
-  it('fires for trivial config', () => {
+  it('fires for trivial on=visible config', () => {
     listen(INTERSECTION_50P, {
       visiblePercentageMin: 0, visiblePercentageMax: 100}, 1);
   });
 
-  it('fires for non-trivial config', () => {
+  it('fires for trivial on=hidden config', () => {
+    listen(INTERSECTION_50P, {
+      visiblePercentageMin: 0, visiblePercentageMax: 100}, 0, undefined, false);
+
+    visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  it('fires for non-trivial on=visible config', () => {
     listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
           {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
     verifyChange(INTERSECTION_50P, 1, [sinon.match({
       backgrounded: '0',
+      backgroundedAtStart: '0',
+      elementX: '50',
+      elementY: '0',
+      elementWidth: '100',
+      elementHeight: '100',
+      loadTimeVisibility: '50',
+      totalTime: sinon.match(value => {
+        return !isNaN(Number(value));
+      }),
+    })]);
+  });
+
+  it('fires for non-trivial on=hidden config', () => {
+    listen(makeIntersectionEntry([51, 0, 100, 100], [0, 0, 100, 100]),
+          {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0, undefined,
+          false);
+
+    verifyChange(INTERSECTION_50P, 0, undefined);
+    visibility.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
+    verifyExpectedVars(1, [sinon.match({
+      backgrounded: '1',
       backgroundedAtStart: '0',
       elementX: '50',
       elementY: '0',
@@ -223,6 +251,7 @@ describe('Visibility (tag: amp-analytics)', () => {
 
   it('populates backgroundedAtStart=0', () => {
     const viewerStub = sandbox.stub(visibility.viewer_, 'getVisibilityState');
+    viewerStub.returns(VisibilityState.VISIBLE);
     visibility.backgroundedAtStart_ = false;
     listen(INTERSECTION_50P, {
       visiblePercentageMin: 0, visiblePercentageMax: 100}, 1, [sinon.match({
@@ -232,6 +261,7 @@ describe('Visibility (tag: amp-analytics)', () => {
 
     viewerStub.returns(VisibilityState.HIDDEN);
     visibility.visibilityListener_();
+    viewerStub.returns(VisibilityState.VISIBLE);
     listen(INTERSECTION_50P, {
       visiblePercentageMin: 0, visiblePercentageMax: 100}, 2, [
         sinon.match({}),
@@ -251,6 +281,7 @@ describe('Visibility (tag: amp-analytics)', () => {
       it('for visibility state=' + state, () => {
         viewerStub.returns(state);
         visibility.visibilityListener_();
+        viewerStub.returns(VisibilityState.VISIBLE);
 
         listen(INTERSECTION_50P, {
           visiblePercentageMin: 0, visiblePercentageMax: 100}, 1, [sinon.match({
@@ -259,48 +290,35 @@ describe('Visibility (tag: amp-analytics)', () => {
       });
     }
 
-    // TODO(jridgewell, #4261): Reenable when I understand what the hell
-    // is going on.
-    // verifyState(VisibilityState.VISIBLE, '0');
+    verifyState(VisibilityState.VISIBLE, '0');
     verifyState(VisibilityState.HIDDEN, '1');
     verifyState(VisibilityState.PAUSED, '1');
     verifyState(VisibilityState.INACTIVE, '1');
   });
 
   describe('isVisibilitySpecValid', () => {
-    it('passes valid visibility spec', () => {
-      const specs = [
-        undefined,
-        {selector: '#abc'},
-        {
-          selector: '#a', continuousTimeMin: 10, totalTimeMin: 1000,
-          visiblePercentageMax: 99, visiblePercentageMin: 10,
-        },
-        {selector: '#a', continuousTimeMax: 1000, unload: true},
-      ];
-      for (const s in specs) {
-        expect(isVisibilitySpecValid({visibilitySpec: specs[s]}, true),
-            JSON.stringify(specs[s])).to.be.true;
-      }
-    });
+    function isSpecValid(spec, result) {
+      it('check for visibility spec: ' + JSON.stringify(spec), () => {
+        expect(isVisibilitySpecValid({visibilitySpec: spec}),
+            JSON.stringify(spec)).to.equal(result);
+      });
+    }
 
-    it('rejects invalid visibility spec', () => {
-      const specs = [
-        {},
-        {selector: 'abc'},
-        {selector: '#a', continuousTimeMin: -10},
-        {
-          selector: '#a', continuousTimeMax: 10, continuousTimeMin: 100,
-          unload: true,
-        },
-        {selector: '#a', continuousTimeMax: 100, continuousTimeMin: 10},
-        {selector: '#a', visiblePercentageMax: 101},
-      ];
-      for (const s in specs) {
-        expect(isVisibilitySpecValid({visibilitySpec: specs[s]}, true),
-            JSON.stringify(specs[s])).to.be.false;
-      }
-    });
+    isSpecValid(undefined, true);
+    isSpecValid({selector: '#abc'}, true);
+    isSpecValid({
+      selector: '#a', continuousTimeMin: 10, totalTimeMin: 1000,
+      visiblePercentageMax: 99, visiblePercentageMin: 10,
+    }, true);
+    isSpecValid({selector: '#a', continuousTimeMax: 1000}, true);
+
+    isSpecValid({}, false);
+    isSpecValid({selector: 'abc'}, false);
+    isSpecValid({selector: '#a', continuousTimeMax: 10, continuousTimeMin: 100},
+      false);
+    isSpecValid({selector: '#a', continuousTimeMax: 100, continuousTimeMin: 10},
+      true);
+    isSpecValid({selector: '#a', visiblePercentageMax: 101}, false);
   });
 
   describe('utils', () => {
