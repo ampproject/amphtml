@@ -166,7 +166,7 @@ class AmpStickyAd extends AMP.BaseElement {
     listenOnce(this.ad_, 'amp:load:end', () => {
       const type = this.ad_.getAttribute('type');
       if (waitForRenderStart.indexOf(type) < 0) {
-        timer.delay(() => {
+        timerFor(this.win).delay(() => {
           this.displayAfterAdLoad_();
         }, 1000);
       } else {
