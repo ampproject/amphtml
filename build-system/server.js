@@ -33,14 +33,6 @@ var url = require('url');
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
-app.use('/', function(req, res, next) {
-  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-      // TODO(tdrl): Is there an algorithmic way to get the request port?
-      // req.port didn't do it.
-      req.protocol + '://' + req.hostname + ':8000');
-  next();
-});
-
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
@@ -307,6 +299,17 @@ app.use('/examples/analytics.config.json', function(req, res, next) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin', getUrlPrefix(req));
   next();
 });
+
+function handleAmpCorsRequest(req, res, next) {
+  var sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  next();
+}
+
+app.use('/examples/*', handleAmpCorsRequest);
+app.use('/extensions/*', handleAmpCorsRequest);
 
 app.get('/examples/*', function(req, res, next) {
   var filePath = req.path;

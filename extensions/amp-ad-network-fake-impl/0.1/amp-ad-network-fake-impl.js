@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {base64ToByteArray} from '../../../ads/google/a4a/utils';
+import {base64DecodeToBytes} from '../../../src/utils/base64';
 import {AmpA4A, utf8FromArrayBuffer} from '../../amp-a4a/0.1/amp-a4a';
 import {dev, user} from '../../../src/log';
 
@@ -25,10 +25,10 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
    */
   constructor(element) {
     super(element);
-    user.assert(element.hasAttribute('src'),
+    user().assert(element.hasAttribute('src'),
         'Attribute src required for <amp-ad type="fake">: %s', element);
-    user.assert(TextEncoder, '<amp-ad type="fake"> requires browser support ' +
-        'for TextEncoder() function.');
+    user().assert(TextEncoder, '<amp-ad type="fake"> requires browser'
+        + ' support for TextEncoder() function.');
   }
 
   /** @override */
@@ -49,12 +49,12 @@ export class AmpAdNetworkFakeImpl extends AmpA4A {
   extractCreativeAndSignature(responseText, unusedResponseHeaders) {
     return utf8FromArrayBuffer(responseText).then(deserialized => {
       const decoded = JSON.parse(deserialized);
-      dev.info('Fake', 'Decoded response text =', decoded['creative']);
-      dev.info('Fake', 'Decoded signature =', decoded['signature']);
+      dev().info('Fake', 'Decoded response text =', decoded['creative']);
+      dev().info('Fake', 'Decoded signature =', decoded['signature']);
       const encoder = new TextEncoder('utf-8');
       return {
         creative: encoder.encode(decoded['creative']).buffer,
-        signature: base64ToByteArray(decoded['signature']),
+        signature: base64DecodeToBytes(decoded['signature']),
       };
     });
   }
