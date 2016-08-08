@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
@@ -57,6 +58,7 @@ export const AnalyticsEventType = {
   CLICK: 'click',
   TIMER: 'timer',
   SCROLL: 'scroll',
+  HIDDEN: 'hidden',
 };
 
 /**
@@ -133,7 +135,8 @@ export class InstrumentationService {
   addListener(config, listener) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
-      this.createVisibilityListener_(listener, config);
+      this.createVisibilityListener_(listener, config,
+          AnalyticsEventType.VISIBLE);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
         user().error(this.TAG_, 'Missing required selector on click trigger');
@@ -162,6 +165,9 @@ export class InstrumentationService {
       if (this.isTimerSpecValid_(config['timerSpec'])) {
         this.createTimerListener_(listener, config['timerSpec']);
       }
+    } else if (eventType === AnalyticsEventType.HIDDEN) {
+      this.createVisibilityListener_(listener, config,
+          AnalyticsEventType.HIDDEN);
     } else {
       let observers = this.customEventObservers_[eventType];
       if (!observers) {
@@ -214,51 +220,49 @@ export class InstrumentationService {
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    * @param {!JSONType} config Configuration for instrumentation.
+   * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @private
    */
-  createVisibilityListener_(callback, config) {
+  createVisibilityListener_(callback, config, eventType) {
+    dev().assert(eventType == AnalyticsEventType.VISIBLE ||
+        eventType == AnalyticsEventType.HIDDEN,
+        'createVisibilityListener should be called with visible or hidden ' +
+        'eventType');
+    const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
     const spec = config['visibilitySpec'];
     if (spec) {
       if (!isVisibilitySpecValid(config)) {
         return;
       }
-      this.runOrSchedule_(() => {
-        visibilityFor(this.win_).then(visibility => {
-          visibility.listenOnce(spec, vars => {
-            if (spec['selector']) {
-              const attr = getDataParamsFromAttributes(
-                this.win_.document.getElementById(spec['selector'].slice(1)),
-                null,
-                VARIABLE_DATA_ATTRIBUTE_KEY
-              );
-              for (const key in attr) {
-                vars[key] = attr[key];
-              }
-            }
-            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
-          });
-        });
-      });
-    } else {
-      this.runOrSchedule_(() => {
-        callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      });
-    }
-  }
 
-  /**
-   * @param {function()} fn function to run or schedule.
-   * @private
-   */
-  runOrSchedule_(fn) {
-    if (this.viewer_.isVisible()) {
-      fn();
-    } else {
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
-          fn();
-        }
+      visibilityFor(this.win_).then(visibility => {
+        visibility.listenOnce(spec, vars => {
+          if (spec['selector']) {
+            const attr = getDataParamsFromAttributes(
+              this.win_.document.getElementById(spec['selector'].slice(1)),
+              null,
+              VARIABLE_DATA_ATTRIBUTE_KEY
+            );
+            for (const key in attr) {
+              vars[key] = attr[key];
+            }
+          }
+          callback(new AnalyticsEvent(eventType, vars));
+        }, shouldBeVisible);
       });
+    } else {
+      if (this.viewer_.isVisible() == shouldBeVisible) {
+        callback(new AnalyticsEvent(eventType));
+        config['called'] = true;
+      } else {
+        this.viewer_.onVisibilityChanged(() => {
+          if (!config['called'] &&
+              this.viewer_.isVisible() == shouldBeVisible) {
+            callback(new AnalyticsEvent(eventType));
+            config['called'] = true;
+          }
+        });
+      }
     }
   }
 
