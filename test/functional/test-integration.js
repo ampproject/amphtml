@@ -46,6 +46,9 @@ describe('3p integration.js', () => {
     };
 
     for (let i = 0; i < extensions.length; i++) {
+      if (extensions[i] == 'fakead3p') {
+        continue;
+      }
       const expanded = namingExceptions[extensions[i]];
       if (expanded) {
         for (let j = 0; j < expanded.length; j++) {

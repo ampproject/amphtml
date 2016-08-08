@@ -112,7 +112,9 @@ const AMP_EMBED_ALLOWED = {
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
 
-if (IS_DEV && parseFragment(location.hash)._context.mode.localDev) {
+if (IS_DEV &&
+    parseFragment(location.hash)._context &&
+    parseFragment(location.hash)._context.mode.localDev) {
   register('fakead3p', fakead3p);
 }
 
@@ -182,6 +184,7 @@ register('yieldone', yieldone);
 
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
+
 });
 
 // For backward compat, we always allow these types without the iframe
