@@ -15,7 +15,9 @@
  */
 
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
+import {getMode} from '../../../../src/mode';
 import {removeFragment} from '../../../../src/url';
+import {isUserErrorMessage} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 describe('AccessServerJwtAdapter', () => {
@@ -34,6 +36,7 @@ describe('AccessServerJwtAdapter', () => {
     validConfig = {
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
+      'publicKeyUrl': 'https://acme.com/pk',
     };
 
     meta = document.createElement('meta');
@@ -64,6 +67,8 @@ describe('AccessServerJwtAdapter', () => {
           .equal('https://acme.com/a?rid=READER_ID');
       expect(adapter.clientAdapter_.pingbackUrl_).to
           .equal('https://acme.com/p?rid=READER_ID');
+      expect(adapter.keyUrl_).to
+          .equal('https://acme.com/pk');
       expect(adapter.serverState_).to.equal('STATE1');
       expect(adapter.isProxyOrigin_).to.be.false;
     });
@@ -73,6 +78,13 @@ describe('AccessServerJwtAdapter', () => {
       expect(() => {
         new AccessServerJwtAdapter(window, validConfig, context);
       }).to.throw(/"authorization" URL must be specified/);
+    });
+
+    it('should fail if config is invalid', () => {
+      delete validConfig['publicKeyUrl'];
+      expect(() => {
+        new AccessServerJwtAdapter(window, validConfig, context);
+      }).to.throw(/"publicKeyUrl" URL must be specified/);
     });
 
     it('should tolerate when i-amp-access-state is missing', () => {
@@ -88,12 +100,14 @@ describe('AccessServerJwtAdapter', () => {
     let clientAdapter;
     let clientAdapterMock;
     let xhrMock;
+    let jwtMock;
     let responseDoc;
     let targetElement1, targetElement2;
 
     beforeEach(() => {
       adapter = new AccessServerJwtAdapter(window, validConfig, context);
       xhrMock = sandbox.mock(adapter.xhr_);
+      jwtMock = sandbox.mock(adapter.jwtHelper_);
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
@@ -126,6 +140,7 @@ describe('AccessServerJwtAdapter', () => {
     afterEach(() => {
       clientAdapterMock.verify();
       xhrMock.verify();
+      jwtMock.verify();
     });
 
     describe('authorize', () => {
@@ -133,39 +148,53 @@ describe('AccessServerJwtAdapter', () => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        clientAdapterMock.expects('authorize').returns(p).once();
+        const stub = sandbox.stub(adapter, 'authorizeOnClient_', () => p);
         xhrMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
+        expect(stub.callCount).to.equal(1);
       });
 
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        clientAdapterMock.expects('authorize').returns(p).once();
+        const stub = sandbox.stub(adapter, 'authorizeOnClient_', () => p);
         xhrMock.expects('fetchDocument').never();
         const result = adapter.authorize();
         expect(result).to.equal(p);
+        expect(stub.callCount).to.equal(1);
       });
 
-      it('should execute authorize-and-fill', () => {
+      it('should execute via server on proxy and w/server state', () => {
+        const p = Promise.resolve();
+        const stub = sandbox.stub(adapter, 'authorizeOnServer_', () => p);
+        xhrMock.expects('fetchDocument').never();
+        const result = adapter.authorize();
+        expect(result).to.equal(p);
+        expect(stub.callCount).to.equal(1);
+      });
+
+      it('should fetch JWT directly via client', () => {
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        sandbox.stub(adapter, 'fetchJwt_', () => Promise.resolve({jwt}));
+        xhrMock.expects('fetchDocument').never();
+        return adapter.authorizeOnClient_().then(result => {
+          expect(result).to.equal(authdata);
+        });
+      });
+
+      it('should fetch JWT directly and authorize-and-fill via server', () => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
-        contextMock.expects('collectUrlVars')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            }))
-            .once();
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
-          'vars': {
-            'READER_ID': 'reader1',
-            'OTHER': '123',
-          },
+          'jwt': encoded,
         };
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
@@ -181,31 +210,23 @@ describe('AccessServerJwtAdapter', () => {
             () => {
               return Promise.resolve();
             });
-        return adapter.authorize().then(response => {
-          expect(response).to.exist;
-          expect(response.access).to.equal('A');
+        return adapter.authorizeOnServer_().then(response => {
+          expect(response).to.equal(authdata);
           expect(replaceSectionsStub.callCount).to.equal(1);
         });
       });
 
-      it('should fail when XHR fails', () => {
+      it('should fail when authorize-and-fill fails', () => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
-        contextMock.expects('collectUrlVars')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            }))
-            .once();
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
-          'vars': {
-            'READER_ID': 'reader1',
-            'OTHER': '123',
-          },
+          'jwt': encoded,
         };
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
@@ -217,31 +238,29 @@ describe('AccessServerJwtAdapter', () => {
             })
             .returns(Promise.reject('intentional'))
             .once();
-        return adapter.authorize().then(() => {
+        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
+            () => {
+              return Promise.resolve();
+            });
+        return adapter.authorizeOnServer_().then(() => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/intentional/);
+          expect(replaceSectionsStub.callCount).to.equal(0);
         });
       });
 
-      it('should time out XHR fetch', () => {
+      it('should fail when authorize-and-fill times out', () => {
         adapter.serviceUrl_ = 'http://localhost:8000/af';
-        contextMock.expects('collectUrlVars')
-            .withExactArgs(
-                'https://acme.com/a?rid=READER_ID',
-                /* useAuthData */ false)
-            .returns(Promise.resolve({
-              'READER_ID': 'reader1',
-              'OTHER': 123,
-            }))
-            .once();
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        sandbox.stub(adapter, 'fetchJwt_',
+            () => Promise.resolve({jwt, encoded}));
         const request = {
           'url': removeFragment(window.location.href),
           'state': 'STATE1',
-          'vars': {
-            'READER_ID': 'reader1',
-            'OTHER': '123',
-          },
+          'jwt': encoded,
         };
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
@@ -253,7 +272,11 @@ describe('AccessServerJwtAdapter', () => {
             })
             .returns(new Promise(() => {}))  // Never resolved.
             .once();
-        const promise = adapter.authorize();
+        const replaceSectionsStub = sandbox.stub(adapter, 'replaceSections_',
+            () => {
+              return Promise.resolve();
+            });
+        const promise = adapter.authorizeOnServer_();
         return Promise.resolve().then(() => {
           clock.tick(3001);
           return promise;
@@ -261,6 +284,7 @@ describe('AccessServerJwtAdapter', () => {
           throw new Error('must never happen');
         }, error => {
           expect(error).to.match(/timeout/);
+          expect(replaceSectionsStub.callCount).to.equal(0);
         });
       });
 
@@ -287,6 +311,234 @@ describe('AccessServerJwtAdapter', () => {
               .to.equal('a2');
           expect(document.querySelector('[i-amp-access-id=a3]')).to.be.null;
         });
+      });
+
+      it('should disable validation by default', () => {
+        const savedDevFlag = getMode().development;
+        getMode().development = false;
+        const shouldBeValidatedInProdMode = adapter.shouldBeValidated_();
+        getMode().development = true;
+        const shouldBeValidatedInDevMode = adapter.shouldBeValidated_();
+        getMode().development = savedDevFlag;
+        expect(shouldBeValidatedInProdMode).to.be.false;
+        expect(shouldBeValidatedInDevMode).to.be.true;
+      });
+
+      it('should fetch JWT', () => {
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(Promise.resolve(encoded))
+            .once();
+        jwtMock.expects('decode')
+            .withExactArgs(encoded)
+            .returns(jwt)
+            .once();
+        sandbox.stub(adapter, 'shouldBeValidated_', () => false);
+        return adapter.fetchJwt_().then(resp => {
+          expect(resp.encoded).to.equal(encoded);
+          expect(resp.jwt).to.equal(jwt);
+        });
+      });
+
+      it('should fail when JWT fetch fails', () => {
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(Promise.reject('intentional'))
+            .once();
+        jwtMock.expects('decode').never();
+        return adapter.fetchJwt_().then(() => {
+          throw new Error('must never happen');
+        }, error => {
+          expect(error).to.match(/intentional/);
+          expect(isUserErrorMessage(error.message)).to.be.true;
+        });
+      });
+
+      it('should fail when JWT fetch times out', () => {
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(new Promise(() => {}))  // Never resolved.
+            .once();
+        jwtMock.expects('decode').never();
+        const promise = adapter.fetchJwt_();
+        return Promise.resolve().then(() => {
+          clock.tick(3001);
+          return promise;
+        }).then(() => {
+          throw new Error('must never happen');
+        }, error => {
+          expect(error).to.match(/timeout/);
+        });
+      });
+
+      it('should verified JWT after fetch when supported', () => {
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(Promise.resolve(encoded))
+            .once();
+        jwtMock.expects('decode')
+            .withExactArgs(encoded)
+            .returns(jwt)
+            .once();
+        jwtMock.expects('isVerificationSupported')
+            .returns(true)
+            .once();
+        jwtMock.expects('decodeAndVerify')
+            .withExactArgs(encoded, 'https://acme.com/pk')
+            .returns(Promise.resolve(jwt))
+            .once();
+        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        return adapter.fetchJwt_().then(resp => {
+          expect(resp.encoded).to.equal(encoded);
+          expect(resp.jwt).to.equal(jwt);
+          expect(validateStub.callCount).to.equal(1);
+        });
+      });
+
+      it('should NOT verified JWT after fetch when not supported', () => {
+        const authdata = {};
+        const jwt = {'amp_authdata': authdata};
+        const encoded = 'rAnDoM';
+        contextMock.expects('buildUrl')
+            .withExactArgs(
+                'https://acme.com/a?rid=READER_ID',
+                /* useAuthData */ false)
+            .returns(Promise.resolve('https://acme.com/a?rid=r1'))
+            .once();
+        xhrMock.expects('fetchText')
+            .withExactArgs('https://acme.com/a?rid=r1', {
+              credentials: 'include',
+              requireAmpResponseSourceOrigin: true,
+            })
+            .returns(Promise.resolve(encoded))
+            .once();
+        jwtMock.expects('decode')
+            .withExactArgs(encoded)
+            .returns(jwt)
+            .once();
+        jwtMock.expects('isVerificationSupported')
+            .returns(false)
+            .once();
+        jwtMock.expects('decodeAndVerify').never();
+        sandbox.stub(adapter, 'shouldBeValidated_', () => true);
+        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        return adapter.fetchJwt_().then(resp => {
+          expect(resp.encoded).to.equal(encoded);
+          expect(resp.jwt).to.equal(jwt);
+          expect(validateStub.callCount).to.equal(1);
+        });
+      });
+    });
+
+    describe('validation', () => {
+
+      let jwt;
+
+      beforeEach(() => {
+        jwt = {
+          'exp': Math.floor((Date.now() + 10000) / 1000),
+          'aud': 'ampproject.org',
+        };
+      });
+
+      it('should validate', () => {
+        adapter.validateJwt_(jwt);
+      });
+
+      it('should fail w/o exp', () => {
+        delete jwt['exp'];
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/"exp" field must be specified/);
+      });
+
+      it('should fail w/invalid exp', () => {
+        jwt['exp'] = 'invalid';
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw();
+      });
+
+      it('should fail when expired', () => {
+        jwt['exp'] = Math.floor((Date.now() - 10000) / 1000);
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/token has expired/);
+      });
+
+      it('should succeed with array aud', () => {
+        jwt['aud'] = ['ampproject.org'];
+        adapter.validateJwt_(jwt);
+
+        jwt['aud'] = ['other.org', 'ampproject.org'];
+        adapter.validateJwt_(jwt);
+
+        jwt['aud'] = ['ampproject.org', 'other.org'];
+        adapter.validateJwt_(jwt);
+      });
+
+      it('should fail w/o aud', () => {
+        delete jwt['aud'];
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/"aud" field must be specified/);
+      });
+
+      it('should fail w/non-AMP aud', () => {
+        jwt['aud'] = 'other.org';
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/"aud" must be "ampproject.org"/);
+      });
+
+      it('should fail w/non-AMP aud array', () => {
+        jwt['aud'] = ['another.org', 'other.org'];
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/"aud" must be "ampproject.org"/);
       });
     });
 
