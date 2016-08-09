@@ -90,6 +90,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
     id: 'amp-access-signin',
     name: 'AMP Access sign-in',
     spec: 'https://github.com/ampproject/amphtml/issues/4227',
