@@ -30,6 +30,7 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {user} from '../src/log';
+import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -112,6 +113,20 @@ const AMP_EMBED_ALLOWED = {
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
 
+if (IS_DEV) {
+  let toRegister = getMode().test || getMode().localDev;
+  const parseData = parseFragment(location.hash);
+  if (parseData && parseData._context && parseData._context.mode) {
+    const mode = parseData._context.mode;
+    toRegister = toRegister || mode.test || mode.localDev;
+  }
+  if (toRegister) {
+    register('_ping_', function(win, data) {
+      win.document.getElementById('c').textContent = data.ping;
+    });
+  }
+}
+
 // Keep the list in alphabetic order
 register('a9', a9);
 register('adblade', adblade);
@@ -176,10 +191,7 @@ register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
 
-register('_ping_', function(win, data) {
-  win.document.getElementById('c').textContent = data.ping;
 
-});
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
