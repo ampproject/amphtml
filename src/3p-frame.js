@@ -172,10 +172,14 @@ export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
+
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(
-      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
+  const port = window.location.port || window.parent.location.port;
+  const scriptUrl = getMode().localDev
+      ? `http://ads.localhost:${port}/dist.3p/current/integration.js`
+      : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+  preconnect.preload(scriptUrl, 'script');
 }
 
 /**
