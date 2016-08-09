@@ -136,8 +136,12 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    return new Promise((resolve, unused) => {
+    return new Promise((resolve, reject) => {
       vega.parse.spec(this.data_, (error, chart) => {
+        if (error) {
+          reject(error);
+          return;
+        }
         vsyncFor(this.win).mutate(() => {
           chart({el: this.container_}).update();
           resolve();
