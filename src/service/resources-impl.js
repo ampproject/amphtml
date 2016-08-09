@@ -336,20 +336,30 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
+    this.buildOrScheduleBuildForElement_(element);
+    dev().fine(TAG_, 'element added:', resource.debugid);
+  }
 
+  /**
+   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * @private
+   */
+  buildOrScheduleBuildForElement_(element) {
+    const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
+      if (element.isBuilt()) {
+        return;
+      }
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!element.isBuilt()) {
+      } else {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
       }
     }
-
-    dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -416,8 +426,7 @@ export class Resources {
   upgraded(element) {
     const resource = Resource.forElement(element);
     if (this.isRuntimeOn_) {
-      resource.build();
-      this.schedulePass();
+      this.buildOrScheduleBuildForElement_(element);
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
     }
@@ -932,7 +941,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        r.build();
+        continue;
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1001,7 +1010,7 @@ export class Resources {
     // Phase 3: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.hasOwner()) {
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its
