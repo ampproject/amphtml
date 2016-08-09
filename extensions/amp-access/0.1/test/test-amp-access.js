@@ -17,6 +17,7 @@
 import {AccessClientAdapter} from '../amp-access-client';
 import {AccessOtherAdapter} from '../amp-access-other';
 import {AccessServerAdapter} from '../amp-access-server';
+import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installActionServiceForDoc,} from
@@ -172,6 +173,61 @@ describe('AccessService', () => {
     expect(new AccessService(window).type_).to.equal('other');
     expect(new AccessService(window).adapter_).to.be
         .instanceOf(AccessOtherAdapter);
+  });
+
+  it('should parse type for JWT w/o experiment', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+      'jwt': true,
+    };
+    toggleExperiment(window, 'amp-access-jwt', false);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'client';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessClientAdapter);
+
+    config['type'] = 'server';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerAdapter);
+  });
+
+  it('should parse type for JWT with experiment', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+      'jwt': true,
+      'publicKeyUrl': 'https://acme.com/pk',
+    };
+    toggleExperiment(window, 'amp-access-jwt', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerJwtAdapter);
+
+    config['type'] = 'client';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('client');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerJwtAdapter);
+
+    config['type'] = 'server';
+    toggleExperiment(window, 'amp-access-server', true);
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).type_).to.equal('server');
+    expect(new AccessService(window).adapter_).to.be
+        .instanceOf(AccessServerJwtAdapter);
   });
 
   it('should fail if type is unknown', () => {
