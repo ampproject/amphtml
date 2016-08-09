@@ -22,7 +22,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
@@ -158,14 +158,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.win);
-
-    /** @private @const {function()|null} */
-    this.renderStartResolve_ = null;
-
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
-      this.renderStartResolve_ = resolve;
-    });
   }
 
   /**
@@ -251,18 +243,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
-        if (this.element.isFirstLayoutCompleted()) {
-          return this.apiHandler_.startUp(this.iframe_, true).then(() => {
-            return timerFor(this.win).timeoutPromise(5000,
-                this.renderStartPromise_,
-                'fail to receive render-start event from ad server, timeout');
-          });
-        } else {
-          return this.apiHandler_.startUp(this.iframe_, true);
-        }
+            this, this.element, this.boundNoContentHandler_);
+        return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
+    dev().error('AMP_AD',
+        'Failed to create iframe in layoutCallback(iframe already exists');
     return loadPromise(this.iframe_);
   }
 

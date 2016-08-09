@@ -26,6 +26,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {getMode} from '../../..//src/mode';
+import {timerFor} from '../../../src/timer';
 
 export class AmpAdApiHandler {
 
@@ -60,6 +61,14 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
+
+    /** @private @const {function()|null} */
+    this.renderStartResolve_ = null;
+
+    /** @private @const {!Promise} */
+    this.renderStartPromise_ = new Promise(resolve => {
+      this.renderStartResolve_ = resolve;
+    });
   }
 
   /**
@@ -126,9 +135,9 @@ export class AmpAdApiHandler {
       if (!this.iframe_) {
         return;
       }
-      if (this.baseInstance_.renderStartResolve_) {
-        this.baseInstance_.renderStartResolve_();
-        this.baseInstance_.renderStartResolve_ = null;
+      if (this.renderStartResolve_) {
+        this.renderStartResolve_();
+        this.renderStartResolve_ = null;
       }
       this.iframe_.style.visibility = '';
     }, this.is3p_);
@@ -137,11 +146,15 @@ export class AmpAdApiHandler {
     });
     this.element_.appendChild(this.iframe_);
     if (getMode().test) {
-      if (this.baseInstance_.renderStartResolve_) {
-        this.baseInstance_.renderStartResolve_();
+      if (this.renderStartResolve_) {
+        this.renderStartResolve_();
       }
     }
-    return loadPromise(this.iframe_);
+    return loadPromise(this.iframe_).then(() => {
+      return timerFor(this.baseInstance_.win).timeoutPromise(5000,
+          this.renderStartPromise_,
+          'fail to receive render-start event from ad server, timeout');
+    });
   }
 
   /** @override  */
