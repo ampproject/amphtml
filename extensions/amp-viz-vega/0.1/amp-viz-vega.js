@@ -20,6 +20,7 @@ import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
+import {xhrFor} from '../../../src/xhr';
 
 /*
  * We are using `require()` instead of `import` here for two reasons:
@@ -31,6 +32,7 @@ import {vsyncFor} from '../../../src/vsync';
  */
 /* global require: false */
 window.d3 = require('../../../third_party/d3/d3');
+require('../../../third_party/d3-geo-projection/d3-geo-projection');
 const vega = require('../../../third_party/vega/vega');
 
 /** @const */
@@ -102,10 +104,15 @@ export class AmpVizVega extends AMP.BaseElement {
             'parsed. Is it in a valid JSON format?: %s', err);
       });
     } else {
-      // TODO(aghassemi): Fetch and validate the data file.
-      this.data_ = {
-        'url': this.src_,
-      };
+      // TODO(aghassemi): We may need to expose credentials and set
+      // requireAmpResponseSourceOrigin to true as well. But for now Vega
+      // runtime also does XHR to load subresources (e.g. Vega spec can
+      // point to other Vega specs) an they don't include credentials on those
+      // calls. We may want to intercept all "urls" in spec and do the loading
+      // and parsing ourselves.
+      return xhrFor(this.win).fetchJson(this.src_).then( data => {
+        this.data_ = data;
+      });
     }
 
     return Promise.resolve();

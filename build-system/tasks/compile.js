@@ -211,6 +211,7 @@ function compile(entryModuleFilename, outputDir,
         define: [],
         hide_warnings_for: [
           'third_party/d3/',
+
           'third_party/vega/',
           'node_modules/',
           'build/patched-module/',
