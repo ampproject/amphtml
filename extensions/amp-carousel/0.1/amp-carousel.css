@@ -86,7 +86,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   overflow-y: hidden !important;
   position: absolute !important;
   top: 0;
-  white-space: nowrap !important;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
   -ms-overflow-style: none;
