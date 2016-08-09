@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {user} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
-import {listenFor} from '../../../src/iframe-helper';
+import {CSS} from "../../../build/amp-apester-media-0.1.css";
+import {user} from "../../../src/log";
+import {loadPromise} from "../../../src/event-helper";
+import {setStyles} from "../../../src/style";
+import {listenFor} from "../../../src/iframe-helper";
+import {Layout} from "../../../src/layout";
 
 /**
  * AMP Apester-media
  */
 class AmpApesterMedia extends AMP.BaseElement {
 
-  // /** @override */
-  // isLayoutSupported() {
-  //   return true;// (layout == Layout.CONTAINER);
-  // }
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.FIXED_HEIGHT;
+  }
 
   /** @override */
   viewportCallback() {
@@ -41,12 +42,12 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {?String}
      */
     this.displayBaseUrl_ = window.location.protocol +
-      '//stage3-renderer.qmerce.com'; //renderer.qmerce.local.com
+      '//renderer.qmerce.local.com';
 
     /**
      * @private {?Element}
      */
-    this.mediaAttribute_ = user.assert(
+    this.mediaAttribute_ = user().assert(
       (this.element.getAttribute('data-apester-media-id') ||
       this.element.getAttribute('data-apester-channel-token')),
       'Either the data-apester-media-id or the data-apester-channel-token ' +
