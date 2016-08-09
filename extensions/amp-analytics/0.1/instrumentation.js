@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {isVisibilitySpecValid} from './visibility-impl';
+import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
@@ -244,15 +244,10 @@ export class InstrumentationService {
 
       visibilityFor(this.win_).then(visibility => {
         visibility.listenOnce(spec, vars => {
-          if (spec['selector']) {
-            const attr = getDataParamsFromAttributes(
-              this.win_.document.getElementById(spec['selector'].slice(1)),
-              null,
-              VARIABLE_DATA_ATTRIBUTE_KEY
-            );
-            for (const key in attr) {
-              vars[key] = attr[key];
-            }
+          const attr = getDataParamsFromAttributes(getElement(spec['selector']),
+              null, VARIABLE_DATA_ATTRIBUTE_KEY);
+          for (const key in attr) {
+            vars[key] = attr[key];
           }
           callback(new AnalyticsEvent(eventType, vars));
         }, shouldBeVisible, analyticsElement);

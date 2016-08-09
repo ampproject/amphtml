@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestByTag} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
@@ -137,6 +138,27 @@ export function isVisibilitySpecValid(config) {
   return true;
 }
 
+/**
+ * Returns the element that matches the selector. If the selector is an
+ * id, the element with that id is returned. If the selector is a tag name, an
+ * ancestor of the analytics element with that tag name is returned.
+ *
+ * @param {string} selector The selector for the element to track.
+ * @param {!HTMLElement} el Element whose ancestors to search.
+ * @return {?HTMLElement} Element corresponding to the selector if found.
+ */
+export function getElement(selector, el) {
+  if (!el) {
+    return null;
+  }
+  if (selector[0] == '#') {
+    return el.parentDocument.getElementById(selector.slice(1));
+  } else if (selector.substr(0, 4) == 'amp-') {
+    return closestByTag(el, selector);
+  }
+  return null;
+}
+
 
 /**
  * This type signifies a callback that gets called when visibility conditions
@@ -234,30 +256,6 @@ export class Visibility {
   }
 
   /**
-   * Returns the element that matches the selector. If the selector is an
-   * id, the element with that id is returned. If the selector is a tag name, an
-   * ancestor of the analytics element with that tag name is returned.
-   *
-   * @param {string} selector The selector for the element to track.
-   * @param {!HTMLElement} analyticsElement Element whose ancestors to search.
-   * @return {HTMLElement} Element corresponding to the selector or null.
-   * @private
-   */
-  getElement_(selector, analyticsElement) {
-    if (selector[0] == '#') {
-      return this.win_.document.getElementById(selector.slice(1));
-    } else if (selector.substr(0, 4) == 'amp-') {
-      selector = selector.toUpperCase();
-      let el = analyticsElement;
-      while (el != null && el.tagName != selector) {
-        el = el.parentElement;
-      }
-      return el;
-    }
-    return null;
-  }
-
-  /**
    * @param {!JSONType} config
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
@@ -267,7 +265,7 @@ export class Visibility {
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = this.getElement_(selector, analyticsElement);
+    const element = getElement(selector, analyticsElement);
     if (!element) {
       user().error('Element not found for visibilitySpec: ' + selector);
     }
