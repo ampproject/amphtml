@@ -35,7 +35,7 @@ a limited set of allowed tags, capabilities, and extensions.
 1. Unless otherwise specified below, the creative must obey all rules given by 
 the [AMP format rules](../../spec/amp-html-format.md), included here by 
 reference.  For example, the
-A4A [Boilerplate](http://localhost:8000/extensions/amp-a4a/amp-a4a-format.md#2) 
+A4A [Boilerplate](amp-a4a-format.md#2) 
 deviates from the AMP standard boilerplate.
 
   _*In addition*_:
@@ -66,11 +66,11 @@ particular, it may not target any selectors for elements within the ad creative.
 
 ### Boilerplate
 
-A4A creatives require a considerably simpler boilerplate style line than
+A4A creatives require a different, and considerably simpler, boilerplate style line than
 [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```
-<style amp-boilerplate>body{visibility:hidden}</style>
+<style amp-a4a-boilerplate>body{visibility:hidden}</style>
 ```
 
 _Rationale:_ The `amp-boilerplate` style hides body content until the AMP 
@@ -83,6 +83,10 @@ machinery that A4A and ad creatives rely on (e.g., analytics for visibility
 tracking or `amp-img` for content display) won't be available, so it's better to 
 display no ad than a malfunctioning one.
 
+Finally, the A4A boilerplate uses `amp-a4a-boilerplate` rather than
+`amp-boilerplate` so that validators can easily identify it and produce
+more accurate error messages to help developers.
+
 Note that the same rules about mutations to the boilerplate text apply as in 
 the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md).
 
@@ -92,6 +96,10 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 creative CSS.
 
   _Rationale_: position:fixed breaks out of shadow DOM, which A4A depends on.  Also, Ads in AMP are already not allowed to use fixed position.
+
+1. `touch-action` is prohibited.
+
+  _Rationale_: An ad that can manipulate `touch-action` can interfere with the user's ability to scroll the host document.
 
 1. Creative CSS is limited to 20kb.
 
