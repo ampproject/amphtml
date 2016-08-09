@@ -1423,6 +1423,8 @@ describe('Resources.add', () => {
   });
 
   it('should build elements immediately if the document is ready', () => {
+    child1.isBuilt = () => false;
+    child2.isBuilt = () => false;
     resources.documentReady_ = false;
     resources.add(child1);
     expect(child1.build.called).to.be.false;
