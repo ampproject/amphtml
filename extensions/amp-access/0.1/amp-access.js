@@ -17,6 +17,7 @@
 import {AccessClientAdapter} from './amp-access-client';
 import {AccessOtherAdapter} from './amp-access-other';
 import {AccessServerAdapter} from './amp-access-server';
+import {AccessServerJwtAdapter} from './amp-access-server-jwt';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {SignInProtocol} from './signin';
 import {actionServiceForDoc} from '../../../src/action';
@@ -87,6 +88,9 @@ export class AccessService {
 
     /** @const @private {boolean} */
     this.isServerEnabled_ = isExperimentOn(this.win, 'amp-access-server');
+
+    /** @const @private {boolean} */
+    this.isJwtEnabled_ = isExperimentOn(this.win, 'amp-access-jwt');
 
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
@@ -193,10 +197,17 @@ export class AccessService {
       buildUrl: this.buildUrl_.bind(this),
       collectUrlVars: this.collectUrlVars_.bind(this),
     });
+    const isJwt = (this.isJwtEnabled_ && configJson['jwt'] === true);
     switch (this.type_) {
       case AccessType.CLIENT:
+        if (isJwt) {
+          return new AccessServerJwtAdapter(this.win, configJson, context);
+        }
         return new AccessClientAdapter(this.win, configJson, context);
       case AccessType.SERVER:
+        if (isJwt) {
+          return new AccessServerJwtAdapter(this.win, configJson, context);
+        }
         return new AccessServerAdapter(this.win, configJson, context);
       case AccessType.OTHER:
         return new AccessOtherAdapter(this.win, configJson, context);
