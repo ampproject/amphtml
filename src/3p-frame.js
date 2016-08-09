@@ -175,9 +175,8 @@ export function preloadBootstrap(window) {
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  const port = window.location.port || window.parent.location.port;
   const scriptUrl = getMode().localDev
-      ? `http://ads.localhost:${port}/dist.3p/current/integration.js`
+      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
       : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
   preconnect.preload(scriptUrl, 'script');
 }
@@ -210,15 +209,19 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
-    const prefix = getMode().test ? '/base' : '';
-    return 'http://ads.localhost:' +
-        (parentWindow.location.port || parentWindow.parent.location.port) +
-        prefix + '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
-        '.html';
+    return getAdsLocalhost(parentWindow)
+        + (getMode().test ? '/base' : '')
+        + '/dist.3p/current'
+        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+}
+
+function getAdsLocalhost(win) {
+  return 'http://ads.localhost:'
+      + (win.location.port || win.parent.location.port);
 }
 
 /**
