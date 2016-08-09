@@ -18,7 +18,7 @@ import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionFixed} from '../../../src/ad-helper';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
@@ -205,7 +205,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isInFixedContainer_ = isAdPositionFixed(this.element, this.win);
+    this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();

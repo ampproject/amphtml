@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-/** @const These tags are allowed to have fixed positioning */
+/**
+ * Tags that are allowed to have fixed positioning
+ * @const {!Object<string, boolean>}
+ */
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
@@ -24,16 +27,17 @@ const POSITION_FIXED_TAG_WHITELIST = {
 /**
  * @param {!Element} el
  * @param {!Window} win
- * @return {boolean} whether element or its ancestors have position
- * fixed (unless they are POSITION_FIXED_TAG_WHITELIST).
+ * @return {boolean} whether the element position is allowed. If the element
+ * belongs to POSITION_FIXED_TAG_WHITELIST, it is allowed to be position fixed.
+ * If the element has a position fixed ancestor, it is not allowed.
  * This should only be called when a layout on the page was just forced
  * anyway.
  */
-export function isAdPositionFixed(el, win) {
+export function isAdPositionAllowed(el, win) {
   let hasFixedAncestor = false;
   do {
     if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return false;
+      return true;
     }
     if (win/*because only called from onLayoutMeasure */
         ./*OK*/getComputedStyle(el).position == 'fixed') {
@@ -44,5 +48,5 @@ export function isAdPositionFixed(el, win) {
     }
     el = el.parentNode;
   } while (el && el.tagName != 'BODY');
-  return hasFixedAncestor;
+  return !hasFixedAncestor;
 }
