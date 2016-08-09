@@ -73,7 +73,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts', () => {
     let e = '';
     try {
-      user.assert(false, 'XYZ');
+      user().assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
@@ -89,7 +89,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts without error object', () => {
     let e = '';
     try {
-      user.assert(false, 'XYZ');
+      user().assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }

@@ -15,11 +15,10 @@
  */
 
 import {documentInfoFor} from '../document-info';
-import {onDocumentReady} from '../document-ready';
+import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
 import {resourcesFor} from '../resources';
-import {timer} from '../timer';
 import {viewerFor} from '../viewer';
 
 
@@ -29,12 +28,6 @@ import {viewerFor} from '../viewer';
  * be forwarded to the actual `tick` function when it is set.
  */
 const QUEUE_LIMIT = 50;
-
-/**
- * Added to relative relative timings so that they are never 0 which the
- * underlying library considers a non-value.
- */
-export const ENSURE_NON_ZERO = new Date().getTime();
 
 /**
  * @typedef {{
@@ -79,7 +72,7 @@ export class Performance {
     this.win = win;
 
     /** @private @const {number} */
-    this.initTime_ = timer.now();
+    this.initTime_ = Date.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -94,14 +87,14 @@ export class Performance {
     this.isMessagingReady_ = false;
 
     /** @private @const {!Promise} */
-    this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      onDocumentReady(this.win.document, () => {
-        // We need to add a delay, since this can execute earlier
-        // than the onReady callback registered inside of `Resources`.
-        // Should definitely think of making `getResourcesInViewport` async.
-        timer.delay(resolve);
-      });
-    });
+    this.whenReadyToRetrieveResourcesPromise_ =
+        whenDocumentReady(this.win.document)
+        .then(() => {
+          // Two fold. First, resolve the promise to undefined.
+          // Second, causes a delay by introducing another async request
+          // (this `#then` block) so that Resources' onDocumentReady event
+          // is guaranteed to fire.
+        });
 
     // Tick window.onload event.
     loadPromise(win).then(() => {
@@ -163,14 +156,14 @@ export class Performance {
     // (hasn't been visible yet, ever at this point)
     if (didStartInPrerender) {
       this.viewer_.whenFirstVisible().then(() => {
-        docVisibleTime = timer.now();
+        docVisibleTime = Date.now();
       });
     }
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
-            ? (timer.now() - docVisibleTime)
+            ? (Date.now() - docVisibleTime)
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
@@ -182,7 +175,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(timer.now() - docVisibleTime);
+        this.prerenderComplete_(Date.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -234,7 +227,7 @@ export class Performance {
    */
   tick(label, opt_from, opt_value) {
     opt_from = opt_from == undefined ? null : opt_from;
-    opt_value = opt_value == undefined ? timer.now() : opt_value;
+    opt_value = opt_value == undefined ? Date.now() : opt_value;
 
     if (this.isMessagingReady_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
@@ -254,10 +247,10 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
+    // initTime_ Is added instead of non-zero, because the underlying
     // library doesn't like 0 values.
-    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
-    this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
+    this.tick('_' + label, undefined, this.initTime_);
+    this.tick(label, '_' + label, Math.round(value + this.initTime_));
   }
 
   /**
@@ -265,7 +258,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = timer.now();
+    const now = Date.now();
     const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);

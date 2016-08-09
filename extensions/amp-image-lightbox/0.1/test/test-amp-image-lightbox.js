@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 import '../amp-image-lightbox';
 import {
@@ -34,7 +34,7 @@ describe('amp-image-lightbox component', () => {
       const el = iframe.doc.createElement('amp-image-lightbox');
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
-      return new Timer(window).promise(16).then(() => {
+      return timerFor(window).promise(16).then(() => {
         el.implementation_.buildCallback();
         return el;
       });
@@ -196,7 +196,7 @@ describe('amp-image-lightbox image viewer', () => {
     };
     lightboxMock = sandbox.mock(lightbox);
 
-    imageViewer = new ImageViewer(lightbox);
+    imageViewer = new ImageViewer(lightbox, window);
     document.body.appendChild(imageViewer.getElement());
   });
 
@@ -373,7 +373,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
     };
     lightboxMock = sandbox.mock(lightbox);
 
-    imageViewer = new ImageViewer(lightbox);
+    imageViewer = new ImageViewer(lightbox, window);
     document.body.appendChild(imageViewer.getElement());
 
     imageViewer.getElement().style.width = '100px';

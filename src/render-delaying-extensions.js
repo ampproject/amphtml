@@ -16,7 +16,7 @@
 
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {timer} from './timer';
+import {timerFor} from './timer';
 
 /**
  * A map of extensions that, if they're included on the page, must be loaded
@@ -48,7 +48,7 @@ const LOAD_TIMEOUT = 3000;
 export function waitForExtensions(win) {
   const extensions = includedExtensions(win);
   const promises = extensions.map(extension => {
-    return timer.timeoutPromise(
+    return timerFor(win).timeoutPromise(
       LOAD_TIMEOUT,
       getServicePromise(win, EXTENSIONS[extension]),
       `Render timeout waiting for ${extension} to load.`
@@ -68,7 +68,7 @@ export function waitForExtensions(win) {
  */
 function includedExtensions(win) {
   const doc = win.document;
-  dev.assert(doc.body);
+  dev().assert(doc.body);
 
   return Object.keys(EXTENSIONS).filter(extension => {
     return doc.querySelector(`[custom-element="${extension}"]`);

@@ -18,7 +18,7 @@ import {
   AmpA4A,
   setPublicKeys,
 } from '../amp-a4a';
-import {base64UrlDecode} from '../crypto-verifier';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {cancellation} from '../../../../src/error';
@@ -41,7 +41,7 @@ class MockA4AImpl extends AmpA4A {
   extractCreativeAndSignature(responseArrayBuffer, responseHeaders) {
     return Promise.resolve({
       creative: responseArrayBuffer,
-      signature: base64UrlDecode(responseHeaders.get('X-Google-header')),
+      signature: base64UrlDecodeToBytes(responseHeaders.get('X-Google-header')),
     });
   }
 
@@ -399,6 +399,34 @@ describe('amp-a4a', () => {
           JSON.stringify(offsets) + '</script>' +
           baseTestDoc.slice(splicePoint));
     }
+    it('should not render AMP natively', () => {
+      return createAdTestingIframePromise().then(fixture => {
+        const doc = fixture.doc;
+        const a4aElement = doc.createElement('amp-a4a');
+        const a4a = new AmpA4A(a4aElement);
+        a4a.adUrl_ = 'http://foo.com';
+        a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
+        return a4a.maybeRenderAmpAd_().then(rendered => {
+          // Force vsync system to run all queued tasks, so that DOM mutations
+          // are actually completed before testing.
+          a4a.vsync_.runScheduledTasks_();
+          expect(rendered).to.be.false;
+          expect(a4aElement.shadowRoot).to.be.null;
+          expect(a4a.rendered_).to.be.false;
+          // Force layout callback which will cause iframe to be attached
+          a4a.adPromise_ = Promise.resolve(false);
+          return a4a.layoutCallback().then(() => {
+            a4a.vsync_.runScheduledTasks_();
+            // Verify iframe presence and lack of visibility hidden
+            expect(a4aElement.children.length).to.equal(1);
+            const iframe = a4aElement.children[0];
+            expect(iframe.tagName).to.equal('IFRAME');
+            expect(iframe.src.indexOf('http://foo.com')).to.equal(0);
+            expect(iframe.style.visibility).to.equal('');
+          });
+        });
+      });
+    });
     it('should render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;

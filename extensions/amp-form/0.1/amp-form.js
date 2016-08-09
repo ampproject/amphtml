@@ -23,7 +23,11 @@ import {xhrFor} from '../../../src/xhr';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
-import {removeElement, childElementByAttr} from '../../../src/dom';
+import {
+  removeElement,
+  childElementByAttr,
+  ancestorElementsByTag,
+} from '../../../src/dom';
 import {installStyles} from '../../../src/styles';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
@@ -34,6 +38,7 @@ import {urls} from '../../../src/config';
 /** @type {string} */
 const TAG = 'amp-form';
 
+
 /** @const @enum {string} */
 const FormState_ = {
   SUBMITTING: 'submitting',
@@ -41,8 +46,44 @@ const FormState_ = {
   SUBMIT_SUCCESS: 'submit-success',
 };
 
+
+/** @const @enum {string} */
+const UserValidityState = {
+  NONE: 'none',
+  USER_VALID: 'valid',
+  USER_INVALID: 'invalid',
+};
+
+
 /** @type {?./validation-bubble.ValidationBubble|undefined} */
 let validationBubble;
+
+
+/** @type {boolean|undefined} */
+let reportValiditySupported;
+
+
+/**
+ * @param {boolean} isSupported
+ * @private visible for testing.
+ */
+export function setReportValiditySupported(isSupported) {
+  reportValiditySupported = isSupported;
+}
+
+
+/**
+ * Returns whether reportValidity API is supported.
+ * @param {!Document} doc
+ * @return {boolean}
+ */
+function isReportValiditySupported(doc) {
+  if (reportValiditySupported === undefined) {
+    reportValiditySupported = !!doc.createElement('form').reportValidity;
+  }
+  return reportValiditySupported;
+}
+
 
 export class AmpForm {
 
@@ -79,13 +120,24 @@ export class AmpForm {
     this.xhrAction_ = this.form_.getAttribute('action-xhr');
     if (this.xhrAction_) {
       assertHttpsUrl(this.xhrAction_, this.form_, 'action-xhr');
-      user.assert(!startsWith(this.xhrAction_, urls.cdn),
+      user().assert(!startsWith(this.xhrAction_, urls.cdn),
           'form action-xhr should not be on cdn.ampproject.org: %s',
           this.form_);
     }
 
+    /** @const @private {boolean} */
+    this.shouldValidate_ = !this.form_.hasAttribute('novalidate');
+    // Need to disable browser validation in order to allow us to take full
+    // control of this. This allows us to trigger validation APIs and reporting
+    // when we need to.
+    this.form_.setAttribute('novalidate', '');
+    if (!this.shouldValidate_) {
+      this.form_.setAttribute('amp-novalidate', '');
+    }
+    this.form_.classList.add('-amp-form');
+
     const submitButtons = this.form_.querySelectorAll('input[type=submit]');
-    user.assert(submitButtons && submitButtons.length > 0,
+    user().assert(submitButtons && submitButtons.length > 0,
         'form requires at least one <input type=submit>: %s', this.form_);
 
     /** @const @private {!Array<!Element>} */
@@ -100,6 +152,11 @@ export class AmpForm {
   /** @private */
   installSubmitHandler_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
+    const inputs = this.form_.querySelectorAll('input,select,textarea');
+    for (let i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('blur', onInputInteraction_);
+      inputs[i].addEventListener('input', onInputInteraction_);
+    }
   }
 
   /**
@@ -120,10 +177,10 @@ export class AmpForm {
       return;
     }
 
-    const shouldValidate = !this.form_.hasAttribute('novalidate');
-    const isInvalid = shouldValidate &&
-        this.form_.checkValidity && !this.form_.checkValidity();
-    if (isInvalid) {
+    // Validity checking should always occur, novalidate only circumvent
+    // reporting and blocking submission on non-valid forms.
+    const isValid = checkUserValidityOnSubmission(this.form_);
+    if (this.shouldValidate_ && !isValid) {
       e.stopImmediatePropagation();
       // TODO(#3776): Use .mutate method when it supports passing state.
       this.vsync_.run({
@@ -261,17 +318,117 @@ function onInvalidInputBlur_(event) {
  * @param {!HTMLInputElement} input
  */
 function reportInputValidity(input) {
-  input./*OK*/focus();
+  if (isReportValiditySupported(input.ownerDocument)) {
+    input.reportValidity();
+  } else {
+    input./*OK*/focus();
 
-  // Remove any previous listeners on the same input. This avoids adding many
-  // listeners on the same element when the user submit pressing Enter or any
-  // other method to submit the form without the element losing focus.
-  input.removeEventListener('blur', onInvalidInputBlur_);
-  input.removeEventListener('keyup', onInvalidInputKeyUp_);
+    // Remove any previous listeners on the same input. This avoids adding many
+    // listeners on the same element when the user submit pressing Enter or any
+    // other method to submit the form without the element losing focus.
+    input.removeEventListener('blur', onInvalidInputBlur_);
+    input.removeEventListener('keyup', onInvalidInputKeyUp_);
 
-  input.addEventListener('keyup', onInvalidInputKeyUp_);
-  input.addEventListener('blur', onInvalidInputBlur_);
-  validationBubble.show(input, input.validationMessage);
+    input.addEventListener('keyup', onInvalidInputKeyUp_);
+    input.addEventListener('blur', onInvalidInputBlur_);
+    validationBubble.show(input, input.validationMessage);
+  }
+}
+
+
+/**
+ * Checks user validity for all inputs, fieldsets and the form.
+ * @param {!HTMLFormElement} form
+ * @return {boolean} Whether the form is currently valid or not.
+ */
+function checkUserValidityOnSubmission(form) {
+  const inputs = form.querySelectorAll('input,select,textarea,fieldset');
+  for (let i = 0; i < inputs.length; i++) {
+    checkUserValidity(inputs[i]);
+  }
+  return checkUserValidity(form);
+}
+
+
+/**
+ * Returns the user validity state of the element.
+ * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @return {string}
+ */
+function getUserValidityStateFor(element) {
+  if (element.classList.contains('user-valid')) {
+    return UserValidityState.USER_VALID;
+  } else if (element.classList.contains('user-invalid')) {
+    return UserValidityState.USER_INVALID;
+  }
+
+  return UserValidityState.NONE;
+}
+
+
+/**
+ * Checks user validity which applies .user-valid and .user-invalid AFTER the user
+ * interacts with the input by moving away from the input (blur) or by changing its
+ * value (input).
+ *
+ * See :user-invalid spec for more details:
+ *   https://drafts.csswg.org/selectors-4/#user-pseudos
+ *
+ * The specs are still not fully specified. The current solution tries to follow a common
+ * sense approach for when to apply these classes. As the specs gets clearer, we should
+ * strive to match it as much as possible.
+ *
+ * TODO(#4317): Follow up on ancestor propagation behavior and understand the future
+ *              specs for the :user-valid/:user-inavlid.
+ *
+ * @param {!HTMLInputElement|!HTMLFormElement|!HTMLFieldSetElement} element
+ * @param {boolean=} propagate Whether to propagate the user validity to ancestors.
+ * @returns {boolean} Whether the element is valid or not.
+ */
+function checkUserValidity(element, propagate = false) {
+  let shouldPropagate = false;
+  const previousValidityState = getUserValidityStateFor(element);
+  const isCurrentlyValid = element.checkValidity && element.checkValidity();
+  if (previousValidityState != UserValidityState.USER_VALID &&
+      isCurrentlyValid) {
+    element.classList.add('user-valid');
+    element.classList.remove('user-invalid');
+    // Don't propagate user-valid unless it was marked invalid before.
+    shouldPropagate = previousValidityState == UserValidityState.USER_INVALID;
+  } else if (previousValidityState != UserValidityState.USER_INVALID &&
+      !isCurrentlyValid) {
+    element.classList.add('user-invalid');
+    element.classList.remove('user-valid');
+    // Always propagate an invalid state change. One invalid input field is
+    // guaranteed to make the fieldset and form invalid as well.
+    shouldPropagate = true;
+  }
+
+  if (propagate && shouldPropagate) {
+    // Propagate user validity to ancestor fieldsets.
+    const ancestors = ancestorElementsByTag(element, 'fieldset');
+    for (let i = 0; i < ancestors.length; i++) {
+      checkUserValidity(ancestors[i]);
+    }
+    // Also update the form user validity.
+    if (element.form) {
+      checkUserValidity(element.form);
+    }
+  }
+
+  return isCurrentlyValid;
+}
+
+
+/**
+ * Responds to user interaction with an input by checking user validity of the input
+ * and possibly its input-related ancestors (e.g. feildset, form).
+ * @param {!Event} e
+ * @private visible for testing.
+ */
+export function onInputInteraction_(e) {
+  const input = e.target;
+  checkUserValidity(input, /* propagate */ true);
 }
 
 
@@ -280,8 +437,8 @@ function reportInputValidity(input) {
  * @param {!Window} win
  */
 function installSubmissionHandlers(win) {
-  onDocumentReady(win.document, () => {
-    toArray(win.document.forms).forEach(form => {
+  onDocumentReady(win.document, doc => {
+    toArray(doc.forms).forEach(form => {
       new AmpForm(form);
     });
   });

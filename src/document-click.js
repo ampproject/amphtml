@@ -22,7 +22,7 @@ import {openWindowDialog} from './dom';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
-import {platform} from './platform';
+import {platformFor} from './platform';
 
 
 /**
@@ -68,6 +68,10 @@ export class ClickHandler {
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
+    const platform = platformFor(this.win);
+    /** @private @const {boolean} */
+    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
       /** @private @const {!function(!Event)|undefined} */
@@ -93,7 +97,8 @@ export class ClickHandler {
    * @param {!Event} e
    */
   handle_(e) {
-    onDocumentElementClick_(e, this.viewport_, this.history_);
+    onDocumentElementClick_(e, this.viewport_, this.history_,
+        this.isIosSafari_);
   }
 }
 
@@ -108,8 +113,9 @@ export class ClickHandler {
  * @param {!Event} e
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
+ * @param {boolean} isIosSafari
  */
-export function onDocumentElementClick_(e, viewport, history) {
+export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {
     return;
   }
@@ -128,7 +134,6 @@ export function onDocumentElementClick_(e, viewport, history) {
   // On Safari iOS, custom protocol links will fail to open apps when the
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
-  const isSafariIOS = platform.isIos() && platform.isSafari();
   const isFTP = tgtLoc.protocol == 'ftp:';
 
   // In case of FTP Links in embedded documents always open then in _blank.
@@ -138,7 +143,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   }
 
   const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
-  if (isSafariIOS && !isNormalProtocol) {
+  if (isIosSafari && !isNormalProtocol) {
     openWindowDialog(win, target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
@@ -194,7 +199,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
   } else {
-    dev.warn('documentElement',
+    dev().warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 

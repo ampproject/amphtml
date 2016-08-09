@@ -23,7 +23,6 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
-import {parseUrl} from '../../src/url';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
@@ -56,14 +55,13 @@ describe('runtime', () => {
       history: {},
       navigator: {},
       setTimeout: () => {},
-      location: parseUrl('https://acme.com/document1'),
       Object,
       HTMLElement,
       services: {
         ampdoc: {obj: ampdocService},
       },
     };
-    errorStub = sandbox.stub(dev, 'error');
+    errorStub = sandbox.stub(dev(), 'error');
   });
 
   afterEach(() => {
@@ -71,14 +69,14 @@ describe('runtime', () => {
     sandbox.restore();
   });
 
-  it('should conver AMP from array to AMP object in single-doc', () => {
+  it('should convert AMP from array to AMP object in single-doc', () => {
     expect(win.AMP.push).to.equal([].push);
     adopt(win);
     expect(win.AMP.push).to.not.equal([].push);
     expect(win.AMP_TAG).to.be.true;
   });
 
-  it('should conver AMP from array to AMP object in shadow-doc', () => {
+  it('should convert AMP from array to AMP object in shadow-doc', () => {
     expect(win.AMP.push).to.equal([].push);
     adoptShadowMode(win);
     expect(win.AMP.push).to.not.equal([].push);

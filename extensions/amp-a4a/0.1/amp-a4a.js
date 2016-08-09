@@ -17,14 +17,14 @@
 import {
   allowRenderOutsideViewport,
   decrementLoadingAds,
-  incrementLoadingAds,
-  isPositionFixed} from '../../amp-ad/0.1/amp-ad-3p-impl';
+  incrementLoadingAds} from '../../amp-ad/0.1/amp-ad-3p-impl';
 import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
@@ -242,7 +242,7 @@ export class AmpA4A extends AMP.BaseElement {
       return;
     }
     this.layoutMeasureExecuted_ = true;
-    user.assert(!isPositionFixed(this.element, this.win),
+    user().assert(isAdPositionAllowed(this.element, this.win),
         '<%s> is not allowed to be placed in elements with ' +
         'position:fixed: %s', this.element.tagName, this.element);
     // OnLayoutMeasure can be called when page is in prerender so delay until
@@ -251,7 +251,7 @@ export class AmpA4A extends AMP.BaseElement {
     // its element ancestry.
     if (!this.isValidElement()) {
       // TODO(kjwright): collapse?
-      user.warn('Amp Ad', 'Amp ad element ignored as invalid', this.element);
+      user().warn('Amp Ad', 'Amp ad element ignored as invalid', this.element);
       return;
     }
 
@@ -624,7 +624,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @private
    */
   renderViaIframe_(opt_isNonAmpCreative) {
-    user.assert(this.adUrl_, 'creative missing in renderViaIframe_?');
+    user().assert(this.adUrl_, 'adUrl missing in renderViaIframe_?');
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('height', this.element.getAttribute('height'));
     iframe.setAttribute('width', this.element.getAttribute('width'));
@@ -638,7 +638,10 @@ export class AmpA4A extends AMP.BaseElement {
       // TODO(keithwrightbos): noContentCallback?
       this.apiHandler_ = new AmpAdApiHandler(this, this.element);
       // TODO(keithwrightbos): startup returns load event, do we need to wait?
-      this.apiHandler_.startUp(iframe, opt_isNonAmpCreative);
+      // Set opt_defaultVisible to true as 3p draw code never executed causing
+      // render-start event never to fire which will remove visiblity hidden.
+      this.apiHandler_.startUp(
+        iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
     });
   }
 
@@ -657,14 +660,14 @@ export class AmpA4A extends AMP.BaseElement {
     const metadataStart = creative.lastIndexOf(METADATA_STRING);
     if (metadataStart < 0) {
       // Couldn't find a metadata blob.
-      dev.warn('A4A',
+      dev().warn('A4A',
         'Could not locate start index for amp meta data in: %s', creative);
       return null;
     }
     const metadataEnd = creative.lastIndexOf('</script>');
     if (metadataEnd < 0) {
       // Couldn't find a metadata blob.
-      dev.warn('A4A',
+      dev().warn('A4A',
         'Could not locate closing script tag for amp meta data in: %s',
         creative);
       return null;
@@ -673,7 +676,7 @@ export class AmpA4A extends AMP.BaseElement {
       return this.buildCreativeMetaData_(JSON.parse(
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd)));
     } catch (err) {
-      dev.warn('A4A', 'Invalid amp metadata: %s',
+      dev().warn('A4A', 'Invalid amp metadata: %s',
         creative.slice(metadataStart + METADATA_STRING.length, metadataEnd));
       return null;
     }

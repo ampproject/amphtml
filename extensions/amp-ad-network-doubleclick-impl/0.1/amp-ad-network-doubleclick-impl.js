@@ -22,12 +22,14 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
   extractGoogleAdCreativeAndSignature,
   getGoogleAdSlotCounter,
   googleAdUrl,
   isGoogleAdsA4AValidEnvironment,
 } from '../../../ads/google/a4a/utils';
-import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const DOUBLECLICK_BASE_URL =
@@ -52,13 +54,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const startTime = timer.now();
+    const startTime = Date.now();
     const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const slotRect = this.getIntersectionElementLayoutBox();
     const rawJson = this.element.getAttribute('json');
     const jsonParameters = rawJson ? JSON.parse(rawJson) : {};
     const tfcd = jsonParameters['tfcd'];
+    const adTestOn = isInManualExperiment(this.element);
     return googleAdUrl(this, DOUBLECLICK_BASE_URL, startTime, slotNumber, [
       {name: 'iu', value: this.element.getAttribute('data-slot')},
       {name: 'co', value: jsonParameters['cookieOptOut'] ? '1' : null},
@@ -68,6 +71,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       {name: 'sz', value: `${slotRect.width}x${slotRect.height}`},
       {name: 'tfcd', value: tfcd == undefined ? null : tfcd},
       {name: 'u_sd', value: global.devicePixelRatio},
+      {name: 'adtest', value: adTestOn},
     ], [
       {
         name: 'scp',

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 153
+min_validator_revision_required: 157
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 250
+spec_file_revision: 254
 
 # Validator extensions.
 # =====================
@@ -57,7 +57,8 @@ tags: {
 
 # 4.1 The root element
 # 4.1.1 The html element
-tags: {
+tags: {  # AMP
+  html_format: AMP
   tag_name: "HTML"
   spec_name: "html ⚡ for top-level html"
   mandatory: true
@@ -71,6 +72,22 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+tags: {  # A4A
+  html_format: A4A
+  tag_name: "HTML"
+  spec_name: "html a4⚡ for top-level html"
+  mandatory: true
+  mandatory_parent: "!DOCTYPE"
+  unique: true
+  attrs: {
+    name: "a4⚡"
+    alternative_names: "a4amp"
+    mandatory: true
+    value: ""
+  }
+  # TODO(gregable): Add a spec_url pointing to a descriptive document.
+}
+
 
 # 4.2 Document metadata
 # 4.2.1 The head element
@@ -2635,7 +2652,21 @@ error_formats {
 error_formats {
   code: DEPRECATED_MANUFACTURED_BODY
   format: "Tag or Text which is only allowed inside the body section found "
-          "outside of the body section."
+          "outside of the body section. This will soon be an error."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
+  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
+          "the acceptable reference points: %3."
+}
+error_formats {
+  code: MANDATORY_REFERENCE_POINT_MISSING
+  format: "The mandatory reference point '%1' for '%2' is missing."
+}
+error_formats {
+  code: DUPLICATE_REFERENCE_POINT
+  format: "The reference point '%1' for '%2' must be unique "
+          "but a duplicate was encountered."
 }
 
 
@@ -2717,18 +2748,4 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
   format: "CSS syntax error in tag '%1' - invalid attribute selector."
-}
-error_formats {
-  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
-  format: "The tag '%1', a child tag of '%2', does not satisfy one of "
-          "the acceptable reference points: %3."
-}
-error_formats {
-  code: MANDATORY_REFERENCE_POINT_MISSING
-  format: "The mandatory reference point '%1' for '%2' is missing."
-}
-error_formats {
-  code: DUPLICATE_REFERENCE_POINT
-  format: "The reference point '%1' for '%2' is must be unique "
-          "but a duplicate was encountered."
 }

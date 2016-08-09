@@ -90,6 +90,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
     id: 'amp-access-signin',
     name: 'AMP Access sign-in',
     spec: 'https://github.com/ampproject/amphtml/issues/4227',
@@ -147,8 +153,8 @@ const EXPERIMENTS = [
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
-    dev.assert(experiment.cleanupIssue, `experiment ${experiment.name} must ` +
-        'have a `cleanupIssue` field.');
+    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+        ' have a `cleanupIssue` field.');
   });
 }
 
@@ -275,7 +281,7 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = new Date().getTime() +
+      const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
       setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
     } else {
@@ -292,10 +298,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev.assert(document.getElementById('popup-container'));
-  const messageElement = dev.assert(document.getElementById('popup-message'));
-  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
-  const cancelButton = dev.assert(
+  const container = dev().assert(document.getElementById('popup-container'));
+  const messageElement = dev().assert(document.getElementById('popup-message'));
+  const confirmButton = dev().assert(
+      document.getElementById('popup-button-ok'));
+  const cancelButton = dev().assert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {

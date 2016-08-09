@@ -80,6 +80,13 @@ export class LiveListInterface {
    * @return {boolean}
    */
   isEnabled() {}
+
+  /**
+   * Retrieves the highest update time from the live list.
+   *
+   * @return {time}
+   */
+  getUpdateTime() {}
 }
 
 
@@ -116,7 +123,7 @@ export class AmpLiveList extends AMP.BaseElement {
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
 
     if (!this.isExperimentOn_) {
-      user.warn(TAG, `Experiment ${TAG} disabled`);
+      user().warn(TAG, `Experiment ${TAG} disabled`);
       return;
     }
 
@@ -127,17 +134,17 @@ export class AmpLiveList extends AMP.BaseElement {
     this.manager_ = installLiveListManager(this.win);
 
     /** @private @const {!Element} */
-    this.updateSlot_ = user.assert(
+    this.updateSlot_ = user().assert(
        this.getUpdateSlot_(this.element),
        'amp-live-list must have an "update" slot.');
 
     /** @private @const {!Element} */
-    this.itemsSlot_ = user.assert(
+    this.itemsSlot_ = user().assert(
         this.getItemsSlot_(this.element),
         'amp-live-list must have an "items" slot.');
 
     /** @private @const {string} */
-    this.liveListId_ = user.assert(this.element.getAttribute('id'),
+    this.liveListId_ = user().assert(this.element.getAttribute('id'),
         'amp-live-list must have an id.');
 
     /** @private @const {number} */
@@ -146,7 +153,7 @@ export class AmpLiveList extends AMP.BaseElement {
         LiveListManager.getMinDataPollInterval());
 
     const maxItems = this.element.getAttribute('data-max-items-per-page');
-    user.assert(Number(maxItems) > 0,
+    user().assert(Number(maxItems) > 0,
         `amp-live-list#${this.liveListId_} must have ` +
         `data-max-items-per-page attribute with numeric value. ` +
         `Found ${maxItems}`);
@@ -221,7 +228,7 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
-    user.assert(container, 'amp-live-list must have an `items` slot');
+    user().assert(container, 'amp-live-list must have an `items` slot');
     this.validateLiveListItems_(container);
     const mutateItems = this.getUpdates_(container);
 
@@ -670,7 +677,7 @@ export class AmpLiveList extends AMP.BaseElement {
       }
       numItems++;
     });
-    user.assert(!foundInvalid,
+    user().assert(!foundInvalid,
         `All amp-live-list-items under amp-live-list#${this.liveListId_} ` +
         `children must have id and data-sort-time attributes. ` +
         `data-sort-time must be a Number greater than 0.`);
@@ -752,7 +759,7 @@ export class AmpLiveList extends AMP.BaseElement {
     // we can't for data-update-time since we always have to evaluate if it
     // changed or not if it exists.
     const time = Number(elem.getAttribute(attr));
-    user.assert(time > 0, `"${attr}" attribute must exist and value ` +
+    user().assert(time > 0, `"${attr}" attribute must exist and value ` +
         `must be a number greater than 0. Found ${time} on ` +
         `${elem.getAttribute('id')} instead.`);
     return time;
@@ -767,6 +774,11 @@ export class AmpLiveList extends AMP.BaseElement {
   isElementBelowViewport_(element) {
     return this.viewport_.getLayoutRect(element).top >
         this.viewport_.getScrollTop() + this.viewport_.getSize().height;
+  }
+
+  /** @override */
+  getUpdateTime() {
+    return this.updateTime_;
   }
 }
 

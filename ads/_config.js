@@ -72,16 +72,12 @@ export const adPrefetch = {
     'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
     'https://yads.c.yimg.jp/js/yads.js',
   ],
-  nend: 'https://js1.nend.net/js/amp.js',
-  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
-  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
-  genieessp: 'https://js.gsspcln.jp/l/amp.js',
-  yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   yieldbot: [
     'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
     'https://msg.yldbt.com/js/ybmsg.html',
   ],
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
 };
 
 /**
@@ -97,8 +93,8 @@ export const adPreconnect = {
     'https://staticd.cdn.adblade.com',
     'https://static.adblade.com',
   ],
-  adition: 'https://imagesrv.adition.com',
   adform: 'https://track.adform.net',
+  adition: 'https://imagesrv.adition.com',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
   adstir: 'https://ad.ad-stir.com',
@@ -106,7 +102,6 @@ export const adPreconnect = {
     'https://mads.at.atwola.com',
     'https://aka-cdn.adtechus.com',
   ],
-  aduptech: 'https://s.d.adup-tech.com',
   amoad: [
     'https://d.amoad.com',
     'https://i.amoad.com',
@@ -120,22 +115,11 @@ export const adPreconnect = {
   criteo: [
     'https://cas.criteo.com',
   ],
+  dotandads: 'https://bal.ad.dotandad.com',
   doubleclick: [
     'https://partner.googleadservices.com',
-    'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
-  'mantis-display': [
-    'https://mantodea.mantisadnetwork.com',
-    'https://res.cloudinary.com',
-    'https://resize.mantisadnetwork.com',
-  ],
-  'mantis-recommend': [
-    'https://mantodea.mantisadnetwork.com',
-    'https://resize.mantisadnetwork.com',
-  ],
-  dotandads: 'https://bal.ad.dotandad.com',
-  gmossp: 'https://cdn.gmossp-sp.jp',
   imobile: 'https://spad.i-mobile.co.jp',
   improvedigital: 'https://ad.360yield.com/',
   industrybrains: [
@@ -147,6 +131,15 @@ export const adPreconnect = {
     'https://pubads.g.doubleclick.net',
     'https://prg.kargo.com',
   ],
+  'mantis-display': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://res.cloudinary.com',
+    'https://resize.mantisadnetwork.com',
+  ],
+  'mantis-recommend': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://resize.mantisadnetwork.com',
+  ],
   microad: [
     'https://s-rtb.send.microad.jp',
     'https://s-rtb.send.microadinc.com',
@@ -155,7 +148,6 @@ export const adPreconnect = {
     'https://deb.send.microad.jp',
   ],
   nend: [
-    'https://js1.nend.net',
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
@@ -186,7 +178,6 @@ export const adPreconnect = {
     'https://images.taboola.com',
   ],
   teads: [
-    'https://cdn.teads.tv',
     'https://cdn2.teads.tv',
     'https://a.teads.tv',
     'https://t.teads.tv',
@@ -202,25 +193,18 @@ export const adPreconnect = {
   ],
   widespace: 'https://engine.widespace.com',
   yahoojp: [
-    'https://s.yimg.jp',
     'https://yads.yahoo.co.jp',
   ],
   yieldbot: 'https://i.yldbt.com',
   yieldmo: [
-    'https://static.yieldmo.com',
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
-  ],
-  adtech: [
-    'https://mads.at.atwola.com',
-    'https://aka-cdn.adtechus.com',
   ],
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
   ],
 };
-
 
 /**
  * The externalCidScope used to provide CIDs to ads of the given type.

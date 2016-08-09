@@ -61,12 +61,10 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     whitelist: [
       'build-system/server.js',
-      'validator/index.js',  // NodeJs only.
       'validator/nodejs/index.js',  // NodeJs only.
-      'validator/parse-css.js',
-      'validator/validator-full.js',
-      'validator/validator-in-browser.js',
-      'validator/validator.js',
+      'validator/engine/parse-css.js',
+      'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
     ]
   },
   // Match `getMode` that is not followed by a "()." and is assigned
@@ -352,10 +350,8 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
-      'validator/index.js',  // NodeJs only.
-      'validator/tokenize-css.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/engine/tokenize-css.js',
+      'validator/engine/validator.js',
       // exports.startsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ]
@@ -395,8 +391,7 @@ var forbiddenTerms = {
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/engine/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {

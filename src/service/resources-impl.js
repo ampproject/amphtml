@@ -32,7 +32,6 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
-import {timer} from '../timer';
 import {toggle} from '../style';
 
 
@@ -164,26 +163,26 @@ export class Resources {
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
     });
     this.viewport_.onScroll(() => {
-      this.lastScrollTime_ = timer.now();
+      this.lastScrollTime_ = Date.now();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
       if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
-        this.firstVisibleTime_ = timer.now();
+        this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
     });
 
     this.viewer_.onRuntimeState(state => {
-      dev.fine(TAG_, 'Runtime state:', state);
+      dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
     });
@@ -350,7 +349,7 @@ export class Resources {
       }
     }
 
-    dev.fine(TAG_, 'element added:', resource.debugid);
+    dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -405,7 +404,7 @@ export class Resources {
     }
     resource.pauseOnRemove();
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev.fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG_, 'element removed:', resource.debugid);
   }
 
   /**
@@ -422,7 +421,7 @@ export class Resources {
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
     }
-    dev.fine(TAG_, 'element upgraded:', resource.debugid);
+    dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
   /**
@@ -686,7 +685,7 @@ export class Resources {
    */
   doPass_() {
     if (!this.isRuntimeOn_) {
-      dev.fine(TAG_, 'runtime is off');
+      dev().fine(TAG_, 'runtime is off');
       return;
     }
 
@@ -699,8 +698,8 @@ export class Resources {
     }
 
     const viewportSize = this.viewport_.getSize();
-    const now = timer.now();
-    dev.fine(TAG_, 'PASS: at ' + now +
+    const now = Date.now();
+    dev().fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', relayoutAll=', this.relayoutAll_,
         ', relayoutTop=', this.relayoutTop_,
@@ -741,7 +740,7 @@ export class Resources {
     // scroll adjustment to avoid active viewport changing without user's
     // action. The elements in the active viewport are not resized and instead
     // the overflow callbacks are called.
-    const now = timer.now();
+    const now = Date.now();
     const viewportRect = this.viewport_.getRect();
     const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
@@ -752,7 +751,7 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
     if (this.deferredMutates_.length > 0) {
-      dev.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
+      dev().fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
       for (let i = 0; i < deferredMutates.length; i++) {
@@ -760,7 +759,7 @@ export class Resources {
       }
     }
     if (this.requestsChangeSize_.length > 0) {
-      dev.fine(TAG_, 'change size requests:',
+      dev().fine(TAG_, 'change size requests:',
           this.requestsChangeSize_.length);
       const requestsChangeSize = this.requestsChangeSize_;
       this.requestsChangeSize_ = [];
@@ -918,7 +917,7 @@ export class Resources {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    const now = timer.now();
+    const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
@@ -1043,7 +1042,7 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          dev.fine(TAG_, 'idle layout:', r.debugid);
+          dev().fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
           if (idleScheduledCount >= 4) {
@@ -1067,14 +1066,14 @@ export class Resources {
    * @private
    */
   work_() {
-    const now = timer.now();
+    const now = Date.now();
     const visibility = this.viewer_.getVisibilityState();
 
     let timeout = -1;
     let task = this.queue_.peek(this.boundTaskScorer_);
     while (task) {
       timeout = this.calcTaskTimeout_(task);
-      dev.fine(TAG_, 'peek from queue:', task.id,
+      dev().fine(TAG_, 'peek from queue:', task.id,
           'sched at', task.scheduleTime,
           'score', this.boundTaskScorer_(task),
           'timeout', timeout);
@@ -1094,7 +1093,7 @@ export class Resources {
       } else {
         task.promise = task.callback(visibility);
         task.startTime = now;
-        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
         this.exec_.enqueue(task);
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
@@ -1105,8 +1104,8 @@ export class Resources {
       timeout = -1;
     }
 
-    dev.fine(TAG_, 'queue size:', this.queue_.getSize());
-    dev.fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev().fine(TAG_, 'queue size:', this.queue_.getSize());
+    dev().fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
@@ -1175,7 +1174,7 @@ export class Resources {
    * @private
    */
   calcTaskTimeout_(task) {
-    const now = timer.now();
+    const now = Date.now();
 
     if (this.exec_.getSize() == 0) {
       // If we've never been visible, return 0. This follows the previous
@@ -1225,7 +1224,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      dev.error(TAG_, 'task failed:',
+      dev().error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1247,7 +1246,7 @@ export class Resources {
     if ((newHeight === undefined || newHeight == layoutBox.height) &&
         (newWidth === undefined || newWidth == layoutBox.width)) {
       if (newHeight === undefined && newWidth === undefined) {
-        dev.error(
+        dev().error(
             TAG_, 'attempting to change size with undefined dimensions',
             resource.debugid);
       }
@@ -1301,7 +1300,7 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
-    dev.assert(resource.getState() != ResourceState.NOT_BUILT &&
+    dev().assert(resource.getState() != ResourceState.NOT_BUILT &&
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
@@ -1377,11 +1376,11 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback,
-      scheduleTime: timer.now(),
+      scheduleTime: Date.now(),
       startTime: 0,
       promise: null,
     };
-    dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
+    dev().fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
@@ -1419,7 +1418,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      dev.assert(parentResource.element.contains(element));
+      dev().assert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }
@@ -1482,12 +1481,12 @@ export class Resources {
         }
         if (this.visible_) {
           if (this.schedulePass(delay)) {
-            dev.fine(TAG_, 'next pass:', delay);
+            dev().fine(TAG_, 'next pass:', delay);
           } else {
-            dev.fine(TAG_, 'pass already scheduled');
+            dev().fine(TAG_, 'pass already scheduled');
           }
         } else {
-          dev.fine(TAG_, 'document is not visible: no scheduling');
+          dev().fine(TAG_, 'document is not visible: no scheduling');
         }
       }
     };
@@ -1523,8 +1522,8 @@ export class Resources {
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
-    vsm.addTransition(inactive, visible, doPass);
-    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, visible, resume);
+    vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doPass);
 

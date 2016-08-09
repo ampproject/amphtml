@@ -34,7 +34,7 @@ export class PinWidget {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    user.assert(rootElement.getAttribute('data-url'),
+    user().assert(rootElement.getAttribute('data-url'),
       'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);

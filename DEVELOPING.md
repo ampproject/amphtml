@@ -34,40 +34,41 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 
 1. Install [NodeJS](https://nodejs.org).
 2. In the repo directory, run `npm i` command to install the required npm packages.
-3. run `sudo npm i -g gulp` command to install gulp in your local bin folder ('/usr/local/bin/' on Mac).
-4. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
+3. Run `npm i -g gulp` command to install gulp system-wide (on Mac or Linux you may need to prefix this with `sudo`, depending on how Node was installed).
+4. Edit your hosts file (`/etc/hosts` on Mac or Linux, `%SystemRoot%\System32\drivers\etc\hosts` on Windows) and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
 <pre>
   127.0.0.1               ads.localhost iframe.localhost
 </pre>
 
 ### Build & Test
 
-| Command                       | Description                                                           |
-| ----------------------------- | --------------------------------------------------------------------- |
-| **`gulp`**                    | Runs "watch" and "serve". Use this for standard local dev.            |
-| `gulp dist`                   | Builds production binaries.                                           |
-| `gulp dist --fortesting`      | Indicates the production binaries are used for local testing. Without this ads, tweets and similar use cases are expected to break locally when using minified sources.|
-| `gulp lint`                   | Validates against Google Closure Linter.                              |
-| `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
-| `gulp lint --fix`             | Fixes simple lint warnings/errors automatically.                      |
-| `gulp build`                  | Builds the AMP library.                                               |
-| `gulp build` --css-only       | Builds only the embedded css into js files for the AMP library.       |
-| `gulp clean`                  | Removes build output.                                                 |
-| `gulp css`                    | Recompile css to build directory.                                     |
-| `gulp extensions`             | Build AMP Extensions.                                                 |
-| `gulp watch`                  | Watches for changes in files, re-build.                               |
-| `gulp test`                   | Runs tests in Chrome.                                                 |
-| `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
-| `gulp test --nobuild`         | Runs tests without re-build.                                          |
-| `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
-| `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
-| `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
-| `gulp test --safari`          | Runs tests in Safari.                                                 |
-| `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
-| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
-| `npm run ava` | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
+| Command                                                                 | Description                                                           |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **`gulp`**<sup>[[1]](#footnote-1)</sup>                                 | Runs "watch" and "serve". Use this for standard local dev.            |
+| `gulp dist`<sup>[[1]](#footnote-1)</sup>                                | Builds production binaries.                                           |
+| `gulp dist --fortesting`<sup>[[1]](#footnote-1)</sup>                   | Indicates the production binaries are used for local testing. Without this ads, tweets and similar use cases are expected to break locally when using minified sources. |
+| `gulp lint`                                                             | Validates against Google Closure Linter.                              |
+| `gulp lint --watch`                                                     | Watches for changes in files, Validates against Google Closure Linter.|
+| `gulp lint --fix`                                                       | Fixes simple lint warnings/errors automatically.                      |
+| `gulp build`<sup>[[1]](#footnote-1)</sup>                               | Builds the AMP library.                                               |
+| `gulp build --css-only`<sup>[[1]](#footnote-1)</sup>                    | Builds only the embedded css into js files for the AMP library.       |
+| `gulp clean`                                                            | Removes build output.                                                 |
+| `gulp css`                                                              | Recompile css to build directory.                                     |
+| `gulp extensions`                                                       | Build AMP Extensions.                                                 |
+| `gulp watch`<sup>[[1]](#footnote-1)</sup>                               | Watches for changes in files, re-build.                               |
+| `gulp test`<sup>[[1]](#footnote-1)</sup>                                | Runs tests in Chrome.                                                 |
+| `gulp test --verbose`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Chrome with logging enabled.                            |
+| `gulp test --nobuild`                                                   | Runs tests without re-build.                                          |
+| `gulp test --watch`<sup>[[1]](#footnote-1)</sup>                        | Watches for changes in files, runs corresponding test(s) in Chrome.   |
+| `gulp test --watch --verbose`<sup>[[1]](#footnote-1)</sup>              | Same as "watch" with logging enabled.                                 |
+| `gulp test --saucelabs`<sup>[[1]](#footnote-1)</sup>                    | Runs test on saucelabs (requires [setup](#saucelabs)).                |
+| `gulp test --safari`<sup>[[1]](#footnote-1)</sup>                       | Runs tests in Safari.                                                 |
+| `gulp test --firefox`<sup>[[1]](#footnote-1)</sup>                      | Runs tests in Firefox.                                                |
+| `gulp test --files=<test-files-path-glob>`<sup>[[1]](#footnote-1)</sup> | Runs specific test files.                                             |
+| `gulp serve`                                                            | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples/ |
+| `npm run ava`<sup>[[1]](#footnote-1)</sup>                              | Run node tests for tasks and offline/node code using [ava](https://github.com/avajs/ava). |
 
+<a id="footnote-1">[1]</a> On Windows, this command must be run as administrator.
 
 #### Saucelabs
 
@@ -88,13 +89,13 @@ If a test flaked on a pull request you can ask a project owner to restart the te
 
 #### Examples
 
-The content in the `examples` directory can be reached at: http://localhost:8000/examples.build/
+The content in the `examples` directory can be reached at: http://localhost:8000/examples/
 
-For each example there are 3 files:
+For each example there are 3 modes:
 
-- Original name: This points to prod. This file would not reflect your local changes.
-- `.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
+- `/examples/abc.html` points to prod. This file would not reflect your local changes.
+- `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
+- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
 
 
 #### Document proxy
@@ -134,8 +135,6 @@ For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) 
                     This is what gets deployed to 3p.ampproject.net.
   docs/           - documentation
   examples/       - example AMP HTML files and corresponding assets
-  examples.build/ - (generated) Same as examples with files pointing to the
-                    local AMP.
   extensions/     - plugins which extend the AMP HTML runtime's core set of tags
   spec/           - The AMP HTML Specification files
   src/            - source code for the AMP runtime

@@ -17,6 +17,7 @@
 import * as lib from '../../../third_party/closure-library/sha384-generated';
 import {fromClass} from '../../../src/service';
 import {dev} from '../../../src/log';
+import {stringToBytes} from '../../../src/utils/bytes';
 
 /** @const {string} */
 const TAG = 'Crypto';
@@ -39,8 +40,8 @@ export class Crypto {
   sha384(input) {
     if (this.subtle_) {
       try {
-        return this.subtle_.digest('SHA-384',
-                input instanceof Uint8Array ? input : str2ab(input))
+        return this.subtle_.digest({name: 'SHA-384'},
+                input instanceof Uint8Array ? input : stringToBytes(input))
             // [].slice.call(Unit8Array) is a shim for Array.from(Unit8Array)
             .then(buffer => [].slice.call(new Uint8Array(buffer)),
                 e => {
@@ -48,12 +49,12 @@ export class Crypto {
                   // non-secure origin: https://www.chromium.org/Home/chromium-security/prefer-secure-origins-for-powerful-new-features
                   if (e.message && e.message.indexOf('secure origin') < 0) {
                     // Log unexpected fallback.
-                    dev.error(TAG, FALLBACK_MSG, e);
+                    dev().error(TAG, FALLBACK_MSG, e);
                   }
                   return lib.sha384(input);
                 });
       } catch (e) {
-        dev.error(TAG, FALLBACK_MSG, e);
+        dev().error(TAG, FALLBACK_MSG, e);
       }
     }
     return Promise.resolve(lib.sha384(input));
@@ -98,24 +99,6 @@ function getSubtle(win) {
     return null;
   }
   return win.crypto.subtle || win.crypto.webkitSubtle || null;
-}
-
-/**
- * Convert a string to Unit8Array. A shim for TextEncoder.
- * @param {string} str
- * @returns {!Uint8Array}
- */
-function str2ab(str) {
-  const buf = new Uint8Array(str.length);
-  for (let i = 0; i < str.length; i++) {
-    // Apply the same check as in closure lib:
-    // https://github.com/google/closure-library/blob/master/closure/goog/crypt/sha2_64bit.js#L169
-    if (str.charCodeAt(i) > 255) {
-      throw Error('Characters must be in range [0,255]');
-    }
-    buf[i] = str.charCodeAt(i);
-  }
-  return buf;
 }
 
 export function installCryptoService(win) {

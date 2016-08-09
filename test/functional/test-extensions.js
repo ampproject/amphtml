@@ -450,7 +450,7 @@ describe('Extensions', () => {
     it('with local mode for testing with compiled js', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
+      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
           'amp-ad', true, true);
       expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
     });
@@ -458,15 +458,15 @@ describe('Extensions', () => {
     it('with local mode for testing without compiled js', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
-        'amp-ad', true, false);
+      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
+          'amp-ad', true, false);
       expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with local mode normal pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl('examples.build/ads.amp.html',
+      const script = calculateExtensionScriptUrl('examples/ads.amp.html',
           'amp-ad');
       expect(script).to.equal('https://cdn.ampproject.org/v0/amp-ad-0.1.js');
     });
@@ -474,18 +474,17 @@ describe('Extensions', () => {
     it('with local mode min pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples.build/ads.amp.min.html', 'amp-ad');
-      expect(script).to.equal('http://localhost:8000/dist/v0/amp-ad-0.1.js');
+      const script = calculateExtensionScriptUrl('examples/ads.amp.min.html',
+          'amp-ad');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode max pathname', () => {
       window.AMP_MODE = {localDev: true};
       expect(getMode().localDev).to.be.true;
-      const script = calculateExtensionScriptUrl(
-          'examples.build/ads.amp.max.html', 'amp-ad');
-      expect(script).to.equal(
-          'http://localhost:8000/dist/v0/amp-ad-0.1.max.js');
+      const script = calculateExtensionScriptUrl('examples/ads.amp.max.html',
+          'amp-ad');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with remote mode', () => {
@@ -495,6 +494,22 @@ describe('Extensions', () => {
       const script = calculateExtensionScriptUrl('', 'amp-ad');
       expect(script).to.equal(
           'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js');
+    });
+
+    it('with document proxy mode: max', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl(
+          '/max/output.jsbin.com/pegizoq/quiet', 'amp-ad');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.max.js');
+    });
+
+    it('with document proxy mode: min', () => {
+      window.AMP_MODE = {localDev: true};
+      expect(getMode().localDev).to.be.true;
+      const script = calculateExtensionScriptUrl(
+          '/min/output.jsbin.com/pegizoq/quiet', 'amp-ad');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.js');
     });
   });
 });

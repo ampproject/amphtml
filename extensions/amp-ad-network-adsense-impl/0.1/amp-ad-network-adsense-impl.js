@@ -22,6 +22,9 @@
 
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {
+  isInManualExperiment,
+} from '../../../ads/google/a4a/traffic-experiments';
+import {
   extractGoogleAdCreativeAndSignature,
   getGoogleAdSlotCounter,
   googleAdUrl,
@@ -29,7 +32,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {documentStateFor} from '../../../src/document-state';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const ADSENSE_BASE_URL = 'https://googleads.g.doubleclick.net/pagead/ads';
@@ -58,19 +60,21 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getAdUrl() {
-    const startTime = timer.now();
+    const startTime = Date.now();
     const global = this.win;
     const slotNumber = getGoogleAdSlotCounter(global).nextSlotNumber();
     const screen = global.screen;
     const slotRect = this.getIntersectionElementLayoutBox();
     const visibilityState = documentStateFor(global).getVisibilityState();
+    const adTestOn = this.element.getAttribute('data-adtest') ||
+        isInManualExperiment(this.element);
     return googleAdUrl(this, ADSENSE_BASE_URL, startTime, slotNumber, [
       {name: 'client', value: this.element.getAttribute('data-ad-client')},
       {name: 'format', value: `${slotRect.width}x${slotRect.height}`},
       {name: 'w', value: slotRect.width},
       {name: 'h', value: slotRect.height},
       {name: 'iu', value: this.element.getAttribute('data-ad-slot')},
-      {name: 'adtest', value: this.element.getAttribute('data-adtest')},
+      {name: 'adtest', value: adTestOn},
       {
         name: 'bc',
         value: global.SVGElement && global.document.createElementNS ?

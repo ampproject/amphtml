@@ -33,7 +33,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user.assert(isExperimentOn(this.win, EXPERIMENT),
+    user().assert(isExperimentOn(this.win, EXPERIMENT),
         `Experiment ${EXPERIMENT} disabled`);
 
     /** @private {?JSONType} */
@@ -45,12 +45,12 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {?string} */
     this.src_ = this.element.getAttribute('src');
 
-    user.assert(this.inlineData_ || this.src_,
+    user().assert(this.inlineData_ || this.src_,
         '%s: neither `src` attribute nor a ' +
         'valid <script type="application/json"> child was found for Vega data.',
         this.getName_());
 
-    user.assert(!(this.inlineData_ && this.src_),
+    user().assert(!(this.inlineData_ && this.src_),
         '%s: both `src` attribute and a valid ' +
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
@@ -82,11 +82,11 @@ export class AmpVizVega extends AMP.BaseElement {
   loadData_() {
     // Validation in buildCallback should ensure one and only one of
     // src_/inlineData_ is ever set.
-    dev.assert(!this.src_ != !this.inlineData_);
+    dev().assert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
       this.data_ = tryParseJson(this.inlineData_, err => {
-        user.assert(!err, 'data could not be ' +
+        user().assert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
       });
     } else {
@@ -109,11 +109,11 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    user.assert(scripts.length == 1, '%s: more than one ' +
+    user().assert(scripts.length == 1, '%s: more than one ' +
         '<script> tags found. Only one allowed.', this.getName_());
 
     const child = scripts[0];
-    user.assert(isJsonScriptTag(child), '%s: data should ' +
+    user().assert(isJsonScriptTag(child), '%s: data should ' +
         'be put in a <script type="application/json"> tag.', this.getName_());
 
     return child.textContent;

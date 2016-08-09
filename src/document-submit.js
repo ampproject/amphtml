@@ -53,16 +53,25 @@ export function onDocumentFormSubmit_(e) {
   }
 
   const action = form.getAttribute('action');
-  user.assert(action, 'form action attribute is required: %s', form);
+  user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
-  user.assert(!startsWith(action, urls.cdn),
+  user().assert(!startsWith(action, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
 
   const target = form.getAttribute('target');
-  user.assert(target, 'form target attribute is required: %s', form);
-  user.assert(target == '_blank' || target == '_top',
+  user().assert(target, 'form target attribute is required: %s', form);
+  user().assert(target == '_blank' || target == '_top',
       'form target=%s is invalid can only be _blank or _top: %s', target, form);
-  const shouldValidate = !form.hasAttribute('novalidate');
+
+  // amp-form extension will add novalidate to all forms to manually trigger
+  // validation. In that case `novalidate` doesn't have the same meaning.
+  const isAmpFormMarked = form.classList.contains('-amp-form');
+  let shouldValidate;
+  if (isAmpFormMarked) {
+    shouldValidate = !form.hasAttribute('amp-novalidate');
+  } else {
+    shouldValidate = !form.hasAttribute('novalidate');
+  }
 
   // Safari does not trigger validation check on submission, hence we
   // trigger it manually. In other browsers this would never execute since

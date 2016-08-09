@@ -21,14 +21,15 @@ import {
   addExperimentIdToElement,
   getPageExperimentBranch,
   mergeExperimentIds,
-  setupPageExperiments,
+  isInExperiment,
+  randomlySelectUnsetPageExperiments,
   validateExperimentIds,
-} from '../../ads/google/a4a/traffic-experiments';
+} from '../traffic-experiments';
 import {
   isExperimentOn,
   resetExperimentToggles_,
-} from '../../src/experiments';
-import {dev} from '../../src/log';
+} from '../../../../src/experiments';
+import {dev} from '../../../../src/log';
 import * as sinon from 'sinon';
 
 /** @private @const Tag used in dev log messages */
@@ -36,7 +37,7 @@ const TAG_ = 'test-amp-ad';
 
 describe('all-traffic-experiments-tests', () => {
 
-  describe('#setupPageExperiments', () => {
+  describe('#randomlySelectUnsetPageExperiments', () => {
     let sandbox;
     let accurateRandomStub;
     let cachedAccuratePrng;
@@ -76,7 +77,7 @@ describe('all-traffic-experiments-tests', () => {
     it('handles empty experiments list', () => {
       // Opt out of experiment.
       sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
-      setupPageExperiments(sandbox.win, {});
+      randomlySelectUnsetPageExperiments(sandbox.win, {});
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
       expect(sandbox.win.pageExperimentBranches).to.be.empty;
@@ -84,7 +85,7 @@ describe('all-traffic-experiments-tests', () => {
     it('handles experiment not diverted path', () => {
       // Opt out of experiment.
       sandbox.win.AMP_CONFIG['testExperimentId'] = 0.0;
-      setupPageExperiments(sandbox.win, testExperimentSet);
+      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.false;
       expect(getPageExperimentBranch(sandbox.win,
@@ -96,7 +97,7 @@ describe('all-traffic-experiments-tests', () => {
       // return a value < 0.5.
       sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.3);
-      setupPageExperiments(sandbox.win, testExperimentSet);
+      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.true;
       expect(getPageExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
@@ -108,7 +109,7 @@ describe('all-traffic-experiments-tests', () => {
       // return a value > 0.5.
       sandbox.win.AMP_CONFIG['testExperimentId'] = 1.0;
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.6);
-      setupPageExperiments(sandbox.win, testExperimentSet);
+      randomlySelectUnsetPageExperiments(sandbox.win, testExperimentSet);
       expect(isExperimentOn(sandbox.win, 'testExperimentId'),
           'experiment is on').to.be.true;
       expect(getPageExperimentBranch(sandbox.win, 'testExperimentId')).to.equal(
@@ -137,7 +138,7 @@ describe('all-traffic-experiments-tests', () => {
         // expt_3 omitted.
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.6);
-      setupPageExperiments(sandbox.win, experimentInfo);
+      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(isExperimentOn(sandbox.win, 'expt_1'),
@@ -155,7 +156,7 @@ describe('all-traffic-experiments-tests', () => {
       expect(getPageExperimentBranch(sandbox.win, 'expt_3')).to.not.be.ok;
     });
     it('handles multi-way branches', () => {
-      dev.info(TAG_, 'Testing multi-way branches');
+      dev().info(TAG_, 'Testing multi-way branches');
       sandbox.win.AMP_CONFIG = {};
       const config = sandbox.win.AMP_CONFIG;
       config['expt_0'] = 1.0;
@@ -169,7 +170,7 @@ describe('all-traffic-experiments-tests', () => {
         },
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.returns(0.7);
-      setupPageExperiments(sandbox.win, experimentInfo);
+      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(getPageExperimentBranch(sandbox.win, 'expt_0')).to.equal(
@@ -207,7 +208,7 @@ describe('all-traffic-experiments-tests', () => {
       };
       RANDOM_NUMBER_GENERATORS.accuratePrng.onFirstCall().returns(0.7);
       RANDOM_NUMBER_GENERATORS.accuratePrng.onSecondCall().returns(0.3);
-      setupPageExperiments(sandbox.win, experimentInfo);
+      randomlySelectUnsetPageExperiments(sandbox.win, experimentInfo);
       expect(isExperimentOn(sandbox.win, 'expt_0'),
           'expt_0 is on').to.be.true;
       expect(isExperimentOn(sandbox.win, 'expt_1'),
@@ -241,9 +242,9 @@ describe('all-traffic-experiments-tests', () => {
       sandbox.win.AMP_CONFIG = {};
       const config = sandbox.win.AMP_CONFIG;
       config['fooExpt'] = 0.0;
-      setupPageExperiments(sandbox.win, exptAInfo);
+      randomlySelectUnsetPageExperiments(sandbox.win, exptAInfo);
       config['fooExpt'] = 1.0;
-      setupPageExperiments(sandbox.win, exptBInfo);
+      randomlySelectUnsetPageExperiments(sandbox.win, exptBInfo);
       // Even though we tried to set up a second time, using a config
       // parameter that should ensure that the experiment was activated, the
       // experiment framework should evaluate each experiment only once per
@@ -319,6 +320,42 @@ describe('all-traffic-experiments-tests', () => {
     });
     it('should return empty string for invalid input', () => {
       expect(mergeExperimentIds('frob')).to.equal('');
+    });
+  });
+
+  describe('#isInExperiment', () => {
+    it('should return false for empty element and any query', () => {
+      const element = document.createElement('div');
+      expect(isInExperiment(element, '')).to.be.false;
+      expect(isInExperiment(element, null)).to.be.false;
+      expect(isInExperiment(element, 'frob')).to.be.false;
+    });
+    it('should return false for empty attribute and any query', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, '');
+      expect(isInExperiment(element, '')).to.be.false;
+      expect(isInExperiment(element, null)).to.be.false;
+      expect(isInExperiment(element, 'frob')).to.be.false;
+    });
+    it('should return false for real data string but mismatching query', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob,gunk,zort');
+      expect(isInExperiment(element, 'blub')).to.be.false;
+      expect(isInExperiment(element, 'ort')).to.be.false;
+      expect(isInExperiment(element, 'fro')).to.be.false;
+      expect(isInExperiment(element, 'gunk,zort')).to.be.false;
+    });
+    it('should return true for singleton data and matching query', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob');
+      expect(isInExperiment(element, 'frob')).to.be.true;
+    });
+    it('should return true for matching query', () => {
+      const element = document.createElement('div');
+      element.setAttribute(EXPERIMENT_ATTRIBUTE, 'frob,gunk,zort');
+      expect(isInExperiment(element, 'frob')).to.be.true;
+      expect(isInExperiment(element, 'gunk')).to.be.true;
+      expect(isInExperiment(element, 'zort')).to.be.true;
     });
   });
 });

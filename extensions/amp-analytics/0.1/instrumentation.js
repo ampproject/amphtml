@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
+import {dev} from '../../../src/log';
 import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
+import {getDataParamsFromAttributes} from '../../../src/dom';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 const SCROLL_PRECISION_PERCENT = 5;
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * Type to define a callback that is called when an instrumented event fires.
@@ -55,6 +58,7 @@ export const AnalyticsEventType = {
   CLICK: 'click',
   TIMER: 'timer',
   SCROLL: 'scroll',
+  HIDDEN: 'hidden',
 };
 
 /**
@@ -84,6 +88,9 @@ export class InstrumentationService {
 
     /** @const {string} */
     this.TAG_ = 'Analytics.Instrumentation';
+
+    /** @const {!Timer} */
+    this.timer_ = timerFor(window);
 
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
@@ -115,7 +122,7 @@ export class InstrumentationService {
 
     // Stop buffering of custom events after 10 seconds. Assumption is that all
     // `amp-analytics` elements will have been instrumented by this time.
-    timer.delay(() => {
+    this.timer_.delay(() => {
       this.customEventBuffer_ = undefined;
     }, 10000);
   }
@@ -128,10 +135,11 @@ export class InstrumentationService {
   addListener(config, listener) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
-      this.createVisibilityListener_(listener, config);
+      this.createVisibilityListener_(listener, config,
+          AnalyticsEventType.VISIBLE);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
-        user.error(this.TAG_, 'Missing required selector on click trigger');
+        user().error(this.TAG_, 'Missing required selector on click trigger');
         return;
       }
 
@@ -140,7 +148,7 @@ export class InstrumentationService {
           this.createSelectiveListener_(listener, config['selector']));
     } else if (eventType === AnalyticsEventType.SCROLL) {
       if (!config['scrollSpec']) {
-        user.error(this.TAG_, 'Missing scrollSpec on scroll trigger.');
+        user().error(this.TAG_, 'Missing scrollSpec on scroll trigger.');
         return;
       }
       this.registerScrollTrigger_(config['scrollSpec'], listener);
@@ -157,6 +165,9 @@ export class InstrumentationService {
       if (this.isTimerSpecValid_(config['timerSpec'])) {
         this.createTimerListener_(listener, config['timerSpec']);
       }
+    } else if (eventType === AnalyticsEventType.HIDDEN) {
+      this.createVisibilityListener_(listener, config,
+          AnalyticsEventType.HIDDEN);
     } else {
       let observers = this.customEventObservers_[eventType];
       if (!observers) {
@@ -169,7 +180,7 @@ export class InstrumentationService {
       if (this.customEventBuffer_) {
         const buffer = this.customEventBuffer_[eventType];
         if (buffer) {
-          timer.delay(() => {
+          this.timer_.delay(() => {
             buffer.forEach(event => {
               listener(event);
             });
@@ -209,41 +220,49 @@ export class InstrumentationService {
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    * @param {!JSONType} config Configuration for instrumentation.
+   * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
    * @private
    */
-  createVisibilityListener_(callback, config) {
-    if (config['visibilitySpec']) {
+  createVisibilityListener_(callback, config, eventType) {
+    dev().assert(eventType == AnalyticsEventType.VISIBLE ||
+        eventType == AnalyticsEventType.HIDDEN,
+        'createVisibilityListener should be called with visible or hidden ' +
+        'eventType');
+    const shouldBeVisible = eventType == AnalyticsEventType.VISIBLE;
+    const spec = config['visibilitySpec'];
+    if (spec) {
       if (!isVisibilitySpecValid(config)) {
         return;
       }
 
-      this.runOrSchedule_(() => {
-        visibilityFor(this.win_).then(visibility => {
-          visibility.listenOnce(config['visibilitySpec'], vars => {
-            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
-          });
+      visibilityFor(this.win_).then(visibility => {
+        visibility.listenOnce(spec, vars => {
+          if (spec['selector']) {
+            const attr = getDataParamsFromAttributes(
+              this.win_.document.getElementById(spec['selector'].slice(1)),
+              null,
+              VARIABLE_DATA_ATTRIBUTE_KEY
+            );
+            for (const key in attr) {
+              vars[key] = attr[key];
+            }
+          }
+          callback(new AnalyticsEvent(eventType, vars));
+        }, shouldBeVisible);
+      });
+    } else {
+      if (this.viewer_.isVisible() == shouldBeVisible) {
+        callback(new AnalyticsEvent(eventType));
+        config['called'] = true;
+      } else {
+        this.viewer_.onVisibilityChanged(() => {
+          if (!config['called'] &&
+              this.viewer_.isVisible() == shouldBeVisible) {
+            callback(new AnalyticsEvent(eventType));
+            config['called'] = true;
+          }
         });
-      });
-    } else {
-      this.runOrSchedule_(() => {
-        callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      });
-    }
-  }
-
-  /**
-   * @param {function()} fn function to run or schedule.
-   * @private
-   */
-  runOrSchedule_(fn) {
-    if (this.viewer_.isVisible()) {
-      fn();
-    } else {
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
-          fn();
-        }
-      });
+      }
     }
   }
 
@@ -282,23 +301,40 @@ export class InstrumentationService {
    */
   createSelectiveListener_(listener, selector) {
     return e => {
+      let el = e.target;
       // First do the cheap lookups.
-      if (selector === '*' || this.matchesSelector_(e.target, selector)) {
-        listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+      if (selector === '*' || this.matchesSelector_(el, selector)) {
+        listener(
+          new AnalyticsEvent(
+            AnalyticsEventType.CLICK,
+            getDataParamsFromAttributes(
+              el,
+              null,
+              VARIABLE_DATA_ATTRIBUTE_KEY
+            )
+          )
+        );
       } else {
         // More expensive search.
-        let el = e.target;
         while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
           el = el.parentElement;
           if (this.matchesSelector_(el, selector)) {
-            listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+            listener(
+              new AnalyticsEvent(
+                AnalyticsEventType.CLICK,
+                getDataParamsFromAttributes(
+                  el,
+                  null,
+                  VARIABLE_DATA_ATTRIBUTE_KEY
+                )
+              )
+            );
             // Don't fire the event multiple times even if the more than one
             // ancestor matches the selector.
             return;
           }
         }
       }
-
     };
   }
 
@@ -312,7 +348,7 @@ export class InstrumentationService {
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      user.error(this.TAG_, 'Boundaries are required for the scroll ' +
+      user().error(this.TAG_, 'Boundaries are required for the scroll ' +
           'trigger to work.');
       return;
     }
@@ -380,7 +416,7 @@ export class InstrumentationService {
     for (let b = 0; b < bounds.length; b++) {
       let bound = bounds[b];
       if (typeof bound !== 'number' || !isFinite(bound)) {
-        user.error(this.TAG_, 'Scroll trigger boundaries must be finite.');
+        user().error(this.TAG_, 'Scroll trigger boundaries must be finite.');
         return result;
       }
 
@@ -412,7 +448,7 @@ export class InstrumentationService {
       while (i-- > 0 && matches.item(i) != el) {};
       return i > -1;
     } catch (selectorError) {
-      user.error(this.TAG_, 'Bad query selector.', selector, selectorError);
+      user().error(this.TAG_, 'Bad query selector.', selector, selectorError);
     }
     return false;
   }
@@ -423,19 +459,19 @@ export class InstrumentationService {
    */
   isTimerSpecValid_(timerSpec) {
     if (!timerSpec) {
-      user.error(this.TAG_, 'Bad timer specification');
+      user().error(this.TAG_, 'Bad timer specification');
       return false;
     } else if (!timerSpec.hasOwnProperty('interval')) {
-      user.error(this.TAG_, 'Timer interval specification required');
+      user().error(this.TAG_, 'Timer interval specification required');
       return false;
     } else if (typeof timerSpec['interval'] !== 'number' ||
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
-      user.error(this.TAG_, 'Bad timer interval specification');
+      user().error(this.TAG_, 'Bad timer interval specification');
       return false;
     } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
               (typeof timerSpec['maxTimerLength'] !== 'number' ||
                   timerSpec['maxTimerLength'] <= 0)) {
-      user.error(this.TAG_, 'Bad maxTimerLength specification');
+      user().error(this.TAG_, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;

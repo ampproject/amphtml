@@ -318,6 +318,35 @@ describe('DOM', () => {
     expect(dom.lastChildElementByAttr(parent, 'on-child')).to.be.null;
   });
 
+  it('ancestorElements should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElements(element2, () => true).length).to.equal(2);
+    expect(dom.ancestorElements(element2, e => e.tagName == 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(element1, e => e.tagName == 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElements(parent, e => e.tagName == 'ELEMENT3').length)
+        .to.be.equal(0);
+  });
+
+  it('ancestorElementsByTag should find all matches', () => {
+    const parent = document.createElement('parent');
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+    const element2 = document.createElement('element2');
+    element1.appendChild(element2);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT1').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element1, 'PARENT').length)
+        .to.equal(1);
+    expect(dom.ancestorElementsByTag(element2, 'ELEMENT3').length)
+        .to.be.equal(0);
+  });
+
   describe('contains', () => {
     let connectedElement;
     let connectedChild;
@@ -501,6 +530,14 @@ describe('DOM', () => {
       expect(params.hello).to.be.equal('2');
       expect(params.fromTheOtherSide).to.be.equal('3');
       expect(params.attr1).to.be.undefined;
+    });
+
+    it('should return key-value for custom data attributes', () => {
+      const element = document.createElement('element');
+      element.setAttribute('data-vars-event-name', 'click');
+      const params = dom.getDataParamsFromAttributes(element, null,
+        /^vars(.+)/);
+      expect(params.eventName).to.be.equal('click');
     });
   });
 

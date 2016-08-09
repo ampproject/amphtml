@@ -16,6 +16,7 @@
 
 import {InstrumentationService} from '../instrumentation.js';
 import {adopt} from '../../../../src/runtime';
+import {VisibilityState} from '../../../../src/visibility-state';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -45,6 +46,19 @@ describe('amp-analytics.instrumentation', function() {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  it('works for visible event', () => {
+    const fn = sandbox.stub();
+    ins.addListener({'on': 'visible'}, fn);
+    expect(fn.calledOnce).to.be.true;
+  });
+
+  it('works for hidden event', () => {
+    const fn = sandbox.stub();
+    ins.addListener({'on': 'hidden'}, fn);
+    ins.viewer_.setVisibilityState_(VisibilityState.HIDDEN);
+    expect(fn.calledOnce).to.be.true;
   });
 
   it('always fires click listeners when selector is set to *', () => {
@@ -429,4 +443,17 @@ describe('amp-analytics.instrumentation', function() {
         fn2);
     expect(fn2.callCount).to.equal(1);
   });
+
+
+  it('extract element level vars from data attribute with prefix vars.',
+    () => {
+      const el1 = document.createElement('div');
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      ins.addListener({'on': 'click', 'selector': '.x'},
+        function(arg) {
+          expect(arg.vars.test).to.equal('foo');
+        });
+      ins.onClick_({target: el1});
+    });
 });

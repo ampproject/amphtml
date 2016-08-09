@@ -20,7 +20,7 @@ import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 import {installDocService} from '../src/service/ampdoc-impl';
-import {platform} from '../src/platform';
+import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 
 // Needs to be called before the custom elements are first made.
@@ -43,36 +43,38 @@ class TestConfig {
 
   constructor(runner) {
     this.runner = runner;
-    this.skippedUserAgents = [];
+    /**
+     * List of predicate functions that are called before running each test
+     * suite to check whether the suite should be skipped or not.
+     * If any of the functions return 'true', the suite will be skipped.
+     * @type {!Array<function():boolean>}
+     */
+    this.skipMatchers = [];
     /**
      * Called for each test suite (things created by `describe`).
      * @type {!Array<function(!TestSuite)>}
      */
     this.configTasks = [];
-  }
-
-  skipOnTravis() {
-    this.skippedUserAgents.push('Chromium');
-    return this;
+    this.platform_ = platformFor(window);
   }
 
   skipChrome() {
-    this.skippedUserAgents.push('Chrome');
+    this.skipMatchers.push(this.platform_.isChrome.bind(this.platform_));
     return this;
   }
 
   skipEdge() {
-    this.skippedUserAgents.push('Edge');
+    this.skipMatchers.push(this.platform_.isEdge.bind(this.platform_));
     return this;
   }
 
   skipFirefox() {
-    this.skippedUserAgents.push('Firefox');
+    this.skipMatchers.push(this.platform_.isFirefox.bind(this.platform_));
     return this;
   }
 
   skipSafari() {
-    this.skippedUserAgents.push('Safari');
+    this.skipMatchers.push(this.platform_.isSafari.bind(this.platform_));
     return this;
   }
 
@@ -91,8 +93,8 @@ class TestConfig {
    * @param {function()} fn
    */
   run(desc, fn) {
-    for (let i = 0; i < this.skippedUserAgents.length; i++) {
-      if (navigator.userAgent.indexOf(this.skippedUserAgents[i]) >= 0) {
+    for (let i = 0; i < this.skipMatchers.length; i++) {
+      if (this.skipMatchers[i]()) {
         this.runner.skip(desc, fn);
         return;
       }
@@ -139,6 +141,7 @@ beforeEach(beforeTest);
 function beforeTest() {
   window.AMP_MODE = null;
   window.AMP_TEST = true;
+  window.ampExtendedElements = {};
   installDocService(window, true);
 }
 
@@ -146,7 +149,7 @@ function beforeTest() {
 // to selector.
 afterEach(() => {
   const cleanupTagNames = ['link', 'meta'];
-  if (!platform.isSafari()) {
+  if (!platformFor(window).isSafari()) {
     // TODO(#3315): Removing test iframes break tests on Safari.
     cleanupTagNames.push('iframe');
   }

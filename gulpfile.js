@@ -185,7 +185,7 @@ function compileCss() {
 }
 
 /**
- * Enables watching for file changes in css, extensions, and examples.
+ * Enables watching for file changes in css, extensions.
  */
 function watch() {
   $$.watch('css/**/*.css', function() {
@@ -197,7 +197,6 @@ function watch() {
   buildExtensions({
     watch: true,
   });
-  buildExamples(true);
   compile(true);
 }
 
@@ -301,7 +300,6 @@ function build() {
   polyfillsForTests();
   buildAlp();
   buildExtensions({bundleOnlyIfListedInFiles: true});
-  buildExamples(false);
   compile();
 }
 
@@ -337,114 +335,6 @@ function checkTypes() {
   compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
       /* check types */ true);
   // These are not turned on on Travis.
-}
-
-/**
- * Build the examples
- *
- * @param {boolean} watch
- */
-function buildExamples(watch) {
-  if (watch) {
-    $$.watch('examples/*.html', function() {
-      buildExamples(false);
-    });
-  }
-
-  fs.copy('examples/', 'examples.build/', {clobber: true},
-      function(err) {
-        if (err) {
-          return $$.util.log($$.util.colors.red('copy error: ', err));
-        }
-        $$.util.log($$.util.colors.green('copied examples to examples.build'));
-      });
-
-  // Also update test-example-validation.js
-  buildExample('a4a.amp.html');
-  buildExample('ads.amp.html');
-  buildExample('ads-legacy.amp.html');
-  buildExample('adsense.amp.html');
-  buildExample('alp.amp.html');
-  buildExample('analytics-notification.amp.html');
-  buildExample('analytics.amp.html');
-  buildExample('article.amp.html');
-  buildExample('brid-player.amp.html');
-  buildExample('brightcove.amp.html');
-  buildExample('kaltura.amp.html');
-  buildExample('responsive.amp.html');
-  buildExample('article-access.amp.html');
-  buildExample('dailymotion.amp.html');
-  buildExample('carousel.amp.html');
-  buildExample('csp.amp.html');
-  buildExample('layout-flex-item.amp.html');
-  buildExample('live-blog-non-floating-button.amp.html');
-  buildExample('live-blog.amp.html');
-  buildExample('live-list-update.amp.html');
-  buildExample('live-list.amp.html');
-  buildExample('metadata-examples/article-json-ld.amp.html');
-  buildExample('metadata-examples/article-microdata.amp.html');
-  buildExample('metadata-examples/recipe-json-ld.amp.html');
-  buildExample('metadata-examples/recipe-microdata.amp.html');
-  buildExample('metadata-examples/review-json-ld.amp.html');
-  buildExample('metadata-examples/review-microdata.amp.html');
-  buildExample('metadata-examples/video-json-ld.amp.html');
-  buildExample('metadata-examples/video-microdata.amp.html');
-  buildExample('everything.amp.html');
-  buildExample('font.amp.html');
-  buildExample('forms.amp.html');
-  buildExample('facebook.amp.html');
-  buildExample('instagram.amp.html');
-  buildExample('jwplayer.amp.html');
-  buildExample('o2player.amp.html');
-  buildExample('pinterest.amp.html');
-  buildExample('reach-player.amp.html');
-  buildExample('released.amp.html');
-  buildExample('social-share.amp.html');
-  buildExample('twitter.amp.html');
-  buildExample('share-tracking-with-url.amp.html');
-  buildExample('share-tracking-without-url.amp.html');
-  buildExample('soundcloud.amp.html');
-  buildExample('springboard-player.amp.html');
-  buildExample('sticky.ads.amp.html');
-  buildExample('user-notification.amp.html');
-  buildExample('vimeo.amp.html');
-  buildExample('vine.amp.html');
-  buildExample('viz-vega.amp.html');
-  buildExample('vrview.amp.html');
-  buildExample('multiple-docs.html');
-  buildExample('youtube.amp.html');
-  buildExample('openx.amp.html');
-
-  // TODO(dvoytenko, #1393): Enable for proxy-testing.
-  // // Examples are also copied into `c/` directory for AMP-proxy testing.
-  // fs.copy('examples.build/', 'c/', {clobber: true},
-  //     copyHandler.bind(null, 'examples.build to c folder'));
-}
-
-/**
- * Copies an examples file to examples.build folder and changes all
- * JS references to local / minified copies.
- *
- * @param {string} name HTML file in examples/
- */
-function buildExample(name) {
-  var input = 'examples/' + name;
-  $$.util.log('Processing ' + name);
-  var html = fs.readFileSync(input, 'utf8');
-  var max = html;
-  max = max.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
-  max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
-  max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
-  gulp.src(input)
-      .pipe($$.file(name.replace('.html', '.max.html'),max))
-      .pipe(gulp.dest('examples.build/'));
-
-  var min = max;
-  min = min.replace(/\.max\.js/g, '.js');
-  min = min.replace('../dist/amp.js', '../dist/v0.js');
-  gulp.src(input)
-      .pipe($$.file(name.replace('.html', '.min.html'), min))
-      .pipe(gulp.dest('examples.build/'));
 }
 
 /**

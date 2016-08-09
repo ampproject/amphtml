@@ -6,9 +6,6 @@
   <link rel="canonical" href="http://nonblocking.io/" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-custom>
-    nav {
-      margin-top: 60px;
-    }
     .broken {
       color: red;
     }
@@ -18,8 +15,10 @@
     /* Included here to make sure it does not render. */
     .fixed {
       position: fixed;
-      top: 0;
+      bottom: 0;
       right: 0;
+      background-color: #eee;
+      opacity: .8;
     }
     .red {
       background-color: red;
@@ -45,20 +44,26 @@
 
 </head>
 <body>
+  <h2>Ad networks in <span class="broken">red color</span> have broken examples, please help to fix.</h2>
   <nav>
-    <!-- Please keep the list in alphabetic order -->
+    <!--
+        When adding new ad network to the list, please
+        1) verify that the ad slot loads ad. Check DEVELOPMENT.md for how to
+           run a local server.
+        2) keep the list in alphabetic order
+    -->
     <a href="#a9">A9</a> |
     <a href="#adblade">Adblade</a> |
     <a href="#adition">ADITION</a> |
     <a href="#adgeneration">Ad Generation</a> |
     <a href="#adman">Adman</a> |
     <a href="#adreactor">AdReactor</a> |
-    <a href="#adsense" class="broken">AdSense</a> |
+    <a href="#adsense">AdSense</a> |
     <a href="#adspirit">AdSpirit</a> |
     <a href="#adstir">AdStir</a> |
     <a href="#adtech" class="broken">AdTech</a> |
     <a href="#aduptech">Ad Up Technology</a> |
-    <a href="#amoad" class="broken">AmoAd</a> |
+    <a href="#amoad" class="broken">AMoAd</a> |
     <a href="#appnexus">App Nexus</a> |
     <a href="#chargeads">Chargeads</a> |
     <a href="#colombia" class="broken">Colombia ad</a> |
@@ -101,12 +106,14 @@
   </nav>
 
   <div class="fixed">
-    <h4>Fixed positioned ad (will not render)</h4>
-    <amp-ad width=300 height=250
+    <amp-ad width=300 height=50
         type="a9"
         data-aax_size="300x250"
         data-aax_pubname="test123"
         data-aax_src="302">
+      <div placeholder>
+        Fixed positioned ad (will not render)
+      </div>
     </amp-ad>
   </div>
 
@@ -155,11 +162,11 @@
       data-custom3="No Type">
   </amp-ad>
 
-  <h2 id="adsense" class="broken">AdSense</h2>
-  <amp-ad width=300 height=200
+  <h2 id="adsense">AdSense</h2>
+  <amp-ad width=300 height=250
       type="adsense"
-      data-ad-client="ca-pub-8125901705757971"
-      data-ad-slot="7783467241">
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
   </amp-ad>
 
   <h2 id="adspirit">AdSpirit</h2>
