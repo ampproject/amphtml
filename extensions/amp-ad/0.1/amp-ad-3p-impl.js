@@ -254,7 +254,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           this, this.element, this.boundNoContentHandler_);
         if (this.element.isFirstLayoutCompleted()) {
           return this.apiHandler_.startUp(this.iframe_, true).then(() => {
-            return this.renderStartPromise_;
+            return timerFor(this.win).timeoutPromise(5000,
+                this.renderStartPromise_,
+                'fail to receive render-start event from ad server, timeout');
           });
         } else {
           return this.apiHandler_.startUp(this.iframe_, true);
