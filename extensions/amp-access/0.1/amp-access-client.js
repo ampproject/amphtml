@@ -18,12 +18,13 @@ import {assertHttpsUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {xhrFor} from '../../../src/xhr';
+import {getMode} from '../../../src/mode';
 
 /** @const {string} */
 const TAG = 'amp-access-client';
 
 /** @const {number} */
-const AUTHORIZATION_TIMEOUT = 3000;
+const DEFAULT_AUTHORIZATION_TIMEOUT = 3000;
 
 
 /** @implements {AccessTypeAdapterDef} */
@@ -51,6 +52,10 @@ export class AccessClientAdapter {
         '"pingback" URL must be specified');
     assertHttpsUrl(this.pingbackUrl_, '"pingback"');
 
+    /** @const @private {number} */
+    this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
+        configJson);
+
     /** @const @private {!Xhr} */
     this.xhr_ = xhrFor(win);
 
@@ -58,11 +63,30 @@ export class AccessClientAdapter {
     this.timer_ = timerFor(win);
   }
 
+  /**
+   * @param {!JSONType} configJson
+   * @return {number}
+   */
+  buildConfigAuthorizationTimeout_(configJson) {
+    if (!configJson['authorizationTimeout']) {
+      return DEFAULT_AUTHORIZATION_TIMEOUT;
+    }
+
+    let timeout = configJson['authorizationTimeout'];
+    user().assert(typeof timeout == 'number',
+        '"authorizationTimeout" must be a number');
+    if (!(getMode().localDev || getMode().development)) {
+      timeout = Math.min(timeout, DEFAULT_AUTHORIZATION_TIMEOUT);
+    }
+    return timeout;
+  }
+
   /** @override */
   getConfig() {
     return {
       'authorizationUrl': this.authorizationUrl_,
       'pingbackUrl': this.pingbackUrl_,
+      'authorizationTimeout': this.authorizationTimeout_,
     };
   }
 
@@ -78,6 +102,13 @@ export class AccessClientAdapter {
     return true;
   }
 
+  /**
+   * @return {number}
+   */
+  getAuthorizationTimeout() {
+    return this.authorizationTimeout_;
+  }
+
   /** @override */
   authorize() {
     dev().fine(TAG, 'Start authorization via ', this.authorizationUrl_);
@@ -86,7 +117,7 @@ export class AccessClientAdapter {
     return urlPromise.then(url => {
       dev().fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
+          this.authorizationTimeout_,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
             requireAmpResponseSourceOrigin: true,
