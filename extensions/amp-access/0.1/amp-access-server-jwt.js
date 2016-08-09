@@ -18,6 +18,7 @@ import {AccessClientAdapter} from './amp-access-client';
 import {JwtHelper} from './jwt';
 import {assertHttpsUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev, user} from '../../../src/log';
@@ -31,6 +32,9 @@ const TAG = 'amp-access-server-jwt';
 
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
+
+/** @const {string} */
+const AMP_AUD = 'ampproject.org';
 
 
 /**
@@ -221,8 +225,18 @@ export class AccessServerJwtAdapter {
     // aud: audience.
     const aud = jwt['aud'];
     user().assert(aud, '"aud" field must be specified');
-    user().assert(aud == 'ampproject.org',
-        '"aud" must be "ampproject.org": %s', aud);
+    let audForAmp = false;
+    if (isArray(aud)) {
+      for (let i = 0; i < aud.length; i++) {
+        if (aud[i] == AMP_AUD) {
+          audForAmp = true;
+          break;
+        }
+      }
+    } else {
+      audForAmp = (aud == AMP_AUD);
+    }
+    user().assert(audForAmp, '"aud" must be "ampproject.org": %s', aud);
   }
 
   /**

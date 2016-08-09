@@ -509,6 +509,17 @@ describe('AccessServerJwtAdapter', () => {
         }).to.throw(/token has expired/);
       });
 
+      it('should succeed with array aud', () => {
+        jwt['aud'] = ['ampproject.org'];
+        adapter.validateJwt_(jwt);
+
+        jwt['aud'] = ['other.org', 'ampproject.org'];
+        adapter.validateJwt_(jwt);
+
+        jwt['aud'] = ['ampproject.org', 'other.org'];
+        adapter.validateJwt_(jwt);
+      });
+
       it('should fail w/o aud', () => {
         delete jwt['aud'];
         expect(() => {
@@ -518,6 +529,13 @@ describe('AccessServerJwtAdapter', () => {
 
       it('should fail w/non-AMP aud', () => {
         jwt['aud'] = 'other.org';
+        expect(() => {
+          adapter.validateJwt_(jwt);
+        }).to.throw(/"aud" must be "ampproject.org"/);
+      });
+
+      it('should fail w/non-AMP aud array', () => {
+        jwt['aud'] = ['another.org', 'other.org'];
         expect(() => {
           adapter.validateJwt_(jwt);
         }).to.throw(/"aud" must be "ampproject.org"/);
