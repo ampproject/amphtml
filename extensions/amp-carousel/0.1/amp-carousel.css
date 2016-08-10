@@ -116,6 +116,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
   width: 100% !important;
 }
 
+.-amp-slide-item > * {
+  height: 100%;
+  width: 100%;
+}
+
 .-amp-slide-item-show {
   display: flex !important;
 }
