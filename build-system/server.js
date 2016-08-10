@@ -300,6 +300,14 @@ app.use('/examples/analytics.config.json', function(req, res, next) {
   next();
 });
 
+app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
+  var sourceOrigin = req.query['__amp_source_origin'];
+  if (sourceOrigin) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
+  }
+  next();
+});
+
 app.get('/examples/*', function(req, res, next) {
   var filePath = req.path;
   var mode = null;

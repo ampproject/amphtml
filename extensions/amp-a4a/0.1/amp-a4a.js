@@ -26,6 +26,7 @@ import {createShadowEmbedRoot} from '../../../src/shadow-embed';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
@@ -64,6 +65,28 @@ let publicKeyInfos = [importPublicKey({
   ext: true,
 })];
 
+// If we're in local dev mode then we may be talking to a dev validation
+// instance as well.  Dev validators use different keys than production ones
+// do, so we need to add the dev key to the known key list.
+//
+// Note: This is temporary.  It will not be necessary once A4A can fetch keys
+// directly from the server.
+if (getMode().localDev) {
+  const devModulus =
+      'oDK9vY5WkwS25IJWhFTmyy_xTeBHA5b72On2FqhjZPLSwadlC0gZG0lvzPjxE1ba' +
+      'kbAM3rR2mRJmtrKDAcZSZxIfxpVhG5e7yFAZURnKSKGHvLLwSeohnR6zHgZ0Rm6f' +
+      'nvBhYBpHGaFboPXgK1IjgVZ_aEq5CRj24JLvqovMtpJJXwJ1fndMprEfDAzw5rEz' +
+      'fZxvGP3QObEQENHAlyPe54Z0vfCYhiXLWhQuOyaKkVIf3xn7t6Pu7PbreCN9f-Ca' +
+      '8noVVKNUZCdlUqiQjXZZfu5pi8ZCto_HEN26hE3nqoEFyBWQwMvgJMhpkS2NjIX2' +
+      'sQuM5KangAkjJRe-Ej6aaQ';
+  publicKeyInfos.push(importPublicKey({
+    kty: 'RSA',
+    'n': devModulus,
+    'e': pubExp,
+    alg: 'RS256',
+    ext: true,
+  }));
+}
 
 /**
  * @param {!Object} publicKeys An array of parsed JSON web keys.
@@ -104,7 +127,7 @@ function isValidOffsetArray(ary) {
 const METADATA_STRING = '<script type="application/json" amp-ad-metadata>';
 const AMP_BODY_STRING = 'amp-ad-body';
 
-/** @typedef {{creative: ArrayBuffer, signature: ?ArrayBuffer}} */
+/** @typedef {{creative: ArrayBuffer, signature: ?Uint8Array}} */
 let AdResponseDef;
 
 /** @typedef {{cssUtf16CharOffsets: Array<number>,
@@ -446,6 +469,13 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Extracts creative and verification signature (if present) from
    * XHR response body and header.  To be implemented by network.
+   *
+   * In the returned value, the `creative` field should be an `ArrayBuffer`
+   * containing the utf-8 encoded bytes of the creative itself, while the
+   * `signature` field should be a `Uint8Array` containing the raw signature
+   * bytes.  The `signature` field may be null if no signature was available
+   * for this creative / the creative is not valid AMP.
+   *
    * @param {!ArrayBuffer} unusedResponseArrayBuffer content as array buffer
    * @param {!Headers} unusedResponseHeaders Fetch API Headers object (or polyfill
    *     for it) containing the response headers.
