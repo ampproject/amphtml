@@ -93,8 +93,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
   /**
    * Hide the scrollbar by tucking it under some padding
    * which gets cut off as it overflows the parent.
+   * This relies on content box-sizing, although that's the default
+   * we still ensure it does not get overwritten.
    */
   padding-bottom: 20px !important;
+  box-sizing: content-box !important;
 }
 
 .-amp-slides-container.-amp-no-scroll {
