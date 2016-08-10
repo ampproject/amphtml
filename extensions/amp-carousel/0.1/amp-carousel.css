@@ -90,15 +90,11 @@ amp-carousel .amp-carousel-button.amp-disabled {
   scroll-snap-type: mandatory !important;
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch !important;
-}
-
-.-amp-slides-container::-webkit-scrollbar {
   /**
-   * Height not set to 0 because of safari bug.
-   * https://bugs.webkit.org/show_bug.cgi?id=160622
+   * Hide the scrollbar by tucking it under some padding
+   * which gets cut off as it overflows the parent.
    */
-   height: 0.1px;
-   background-color: transparent;
+  padding-bottom: 20px !important;
 }
 
 .-amp-slides-container.-amp-no-scroll {
