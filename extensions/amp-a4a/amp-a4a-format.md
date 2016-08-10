@@ -415,6 +415,15 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 #### 4.11 Scripting
 - Like a general AMP document, the creative's `<head>` tag must contain a
   `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag.
-- Other than the AMP script tag itself, though, neither `<script>` nor 
-`<noscript>` are allowed.  Unlike general AMP, `<script 
-type="application/ld+json">` is not allowed.
+- Unlike general AMP, `<noscript>` is prohibited.
+  - _Rationale:_ Since A4A requires Javascript to be enabled to function
+    at all, `<noscript>` blocks serve no purpose in an A4A creative and
+    only cost network bandwidth.
+- Unlike general AMP, `<script type="application/ld+json">` is
+  prohibited.
+  - _Rationale:_ JSON LD is used for structured data markup on host
+    pages, but ad creatives are not standalone documents and don't
+    contain structured data.  JSON LD blocks in them would just cost
+    network bandwidth.
+- All other scripting rules and exclusions are carried over from general
+  AMP.
