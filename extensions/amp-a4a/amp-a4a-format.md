@@ -55,14 +55,34 @@ deviates from the AMP standard boilerplate.
   _Rationale_: Same as for video.
 
 1. Analytics: `<amp-analytics>` viewability tracking may only target the full-ad
-selector, as defined in
-[Issue #4018](https://github.com/ampproject/amphtml/issues/4018).  In
+selector, via  `"visibilitySpec": { "selector": "amp-ad" }`, as defined in
+[Issue #4018](https://github.com/ampproject/amphtml/issues/4018) and
+[PR #4368](https://github.com/ampproject/amphtml/pull/4368).  In
 particular, it may not target any selectors for elements within the ad creative.
 
   _Rationale_: In some cases, A4A may choose to render an ad creative in an 
   iframe.  In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.
 
-  _[Example to be added here, once the format is finalized in #4018]_.
+  _Example_:
+  
+  ```html
+<amp-analytics id="nestedAnalytics">
+  <script type="application/json">
+  {
+    "requests": {
+       "visibility": "https://example.com/nestedAmpAnalytics"
+    },
+    "triggers": {
+      "visibilitySpec": {
+        "selector": "amp-ad",
+        "visiblePercentageMin": 50,
+        "continuousTimeMin": 1000
+      }
+    }
+  }
+  </script>
+</amp-analytics>
+  ```
 
 ### Boilerplate
 
