@@ -62,6 +62,16 @@ export function isObject(value) {
 }
 
 /**
+ * Determines if value is actually a number.
+ * NaN is considered a non-number in this function.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isNumber(value) {
+  return (typeof value === 'number' && !isNaN(value));
+}
+
+/**
  * Determines if value is of FormData type.
  * @param {*} value
  * @return {boolean}

@@ -20,6 +20,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {setStyles} from '../../../src/style';
+import {isObject, isNumber} from '../../../src/types';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -46,6 +48,12 @@ export class AmpVizVega extends AMP.BaseElement {
 
     /** @private {?string} */
     this.src_ = this.element.getAttribute('src');
+
+    /** @private {boolean} */
+    this.useDataWidth_ = this.element.hasAttribute('use-data-width');
+
+    /** @private {boolean} */
+    this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
     /**
      * @private
@@ -81,12 +89,14 @@ export class AmpVizVega extends AMP.BaseElement {
   /** @override */
   onLayoutMeasure() {
     const box = this.element.getLayoutBox();
+    if (this.measuredWidth_ == box.width &&
+        this.measuredHeight_ == box.height) {
+      return;
+    }
     this.measuredWidth_ = box.width;
     this.measuredHeight_ = box.height;
     if (this.chart_) {
-      vsyncFor(this.win).mutate(() => {
-        this.updateGraph_();
-      });
+      this.renderGraph_();
     }
   }
 
@@ -161,15 +171,25 @@ export class AmpVizVega extends AMP.BaseElement {
    */
   renderGraph_() {
     return new Promise((resolve, reject) => {
-      this.vega_.parse.spec(this.data_, (error, chart) => {
+      this.vega_.parse.spec(this.data_, (error, chartFactory) => {
         if (error) {
           reject(error);
           return;
         }
         vsyncFor(this.win).mutate(() => {
           dom.removeChildren(this.container_);
-          this.chart_ = chart({el: this.container_});
-          this.updateGraph_();
+          this.chart_ = chartFactory({el: this.container_});
+          if (!this.useDataWidth_) {
+            const w = this.measuredWidth_ - this.getDataPadding_('width');
+            this.chart_.width(w);
+          }
+          if (!this.useDataHeight_) {
+            const h = this.measuredHeight_ - this.getDataPadding_('height');
+            this.chart_.height(h);
+          }
+
+          this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
+          this.chart_.update();
           resolve();
         });
       });
@@ -177,15 +197,25 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Number}
    * @private
    */
-  updateGraph_() {
-    if (!this.chart_) {
-      return;
+  getDataPadding_(widthOrHeight) {
+    const p = this.data_.padding;
+    if (!p) {
+      return 0;
     }
-    const measuredViewport = [this.measuredWidth_, this.measuredHeight_];
-    this.chart_.viewport(measuredViewport);
-    this.chart_.update();
+    if (isNumber(p)) {
+      return p;
+    }
+    if (isObject(p)) {
+      if (widthOrHeight == 'width') {
+        return (p.left || 0) + (p.right || 0);
+      } else if (widthOrHeight == 'height') {
+        return (p.top || 0) + (p.bottom || 0);
+      }
+    }
+    return 0;
   }
 
   /**
