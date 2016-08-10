@@ -142,3 +142,4 @@ data.zergid;
 window.zergnetWidgetId;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
+window.EzoicAmpAd;
