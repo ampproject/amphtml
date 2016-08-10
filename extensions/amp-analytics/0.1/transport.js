@@ -62,7 +62,7 @@ export class Transport {
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      dev().warn(TAG_, 'Response was unparseable or failed to send image ' +
+      user().warn(TAG_, 'Response unparseable or failed to send image ' +
           'request', request);
     });
   }
