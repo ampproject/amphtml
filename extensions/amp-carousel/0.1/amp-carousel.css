@@ -88,7 +88,6 @@ amp-carousel .amp-carousel-button.amp-disabled {
   top: 0;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
-  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch !important;
   /**
    * Hide the scrollbar by tucking it under some padding
