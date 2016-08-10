@@ -33,6 +33,10 @@ export const adPrefetch = {
   aduptech: 'https://s.d.adup-tech.com/jsapi',
   amoad: 'https://j.amoad.com/js/a.js',
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
+  caprofitx: [
+    'https://cdn.caprofitx.com/pfx.min.js',
+    'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
+  ],
   colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
@@ -109,6 +113,7 @@ export const adPreconnect = {
     'https://v.amoad.com',
   ],
   appnexus: 'https://ib.adnxs.com',
+  caprofitx: 'https://ad.caprofitx.adtdp.com',
   chargeads: [
     'https://www.chargeplatform.com',
   ],
