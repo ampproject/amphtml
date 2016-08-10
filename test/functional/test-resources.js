@@ -1081,7 +1081,7 @@ describe('Resources changeSize', () => {
       viewportMock.expects('setScrollTop').withExactArgs(2777).once();
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
-      expect(resource1.changeSize.firstCall.args).to.jsonEqual([111, 222]);
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
@@ -1108,7 +1108,7 @@ describe('Resources changeSize', () => {
       viewportMock.expects('setScrollTop').never();
       task.mutate(state);
       expect(resource1.changeSize).to.be.calledOnce;
-      expect(resource1.changeSize.firstCall.args).to.jsonEqual([111, 222]);
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
@@ -1126,7 +1126,7 @@ describe('Resources changeSize', () => {
       expect(resources.requestsChangeSize_.length).to.equal(0);
       expect(resource1.changeSize).to.not.been.called;
       expect(overflowCallbackSpy).to.be.calledOnce;
-      expect(overflowCallbackSpy.firstCall.args).to.jsonEqual([true, 111, 222]);
+      expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222);
       expect(resource1.getPendingChangeSize()).to.jsonEqual(
           {height: 111, width: 222});
     });
@@ -1155,7 +1155,7 @@ describe('Resources changeSize', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeSize_).to.be.empty;
       expect(resource1.changeSize).to.be.calledOnce;
-      expect(resource1.changeSize.firstCall.args).to.jsonEqual([111, 222]);
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(overflowCallbackSpy).to.be.calledTwice;
       expect(overflowCallbackSpy.lastCall.args[0]).to.equal(false);
     });
