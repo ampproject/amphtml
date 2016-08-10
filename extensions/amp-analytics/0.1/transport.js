@@ -42,7 +42,7 @@ export function sendRequest(win, request, transportOptions) {
     Transport.sendRequestUsingImage(win, request);
     return;
   }
-  dev().warn(TAG_, 'Failed to send request', request, transportOptions);
+  user().warn(TAG_, 'Failed to send request', request, transportOptions);
 }
 
 /**
@@ -76,8 +76,10 @@ export class Transport {
     if (!win.navigator.sendBeacon) {
       return false;
     }
-    result = win.navigator.sendBeacon(request, '');
-    dev().fine(TAG_, 'Sent beacon request', request);
+    let result = win.navigator.sendBeacon(request, '');
+    if (result) {
+      dev().fine(TAG_, 'Sent beacon request', request);
+    }
     return result;
   }
 
