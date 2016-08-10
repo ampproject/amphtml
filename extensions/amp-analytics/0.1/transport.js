@@ -42,7 +42,7 @@ export function sendRequest(win, request, transportOptions) {
     Transport.sendRequestUsingImage(win, request);
     return;
   }
-  user().warn(TAG_, 'Failed to send request', request, transportOptions);
+  dev().warn(TAG_, 'Failed to send request', request, transportOptions);
 }
 
 /**
@@ -62,7 +62,8 @@ export class Transport {
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Failed to send image request', request);
+      dev().warn(TAG_, 'Response was unparseable or failed to send image ' +
+          'request', request);
     });
   }
 
@@ -75,9 +76,9 @@ export class Transport {
     if (!win.navigator.sendBeacon) {
       return false;
     }
-    win.navigator.sendBeacon(request, '');
+    result = win.navigator.sendBeacon(request, '');
     dev().fine(TAG_, 'Sent beacon request', request);
-    return true;
+    return result;
   }
 
   /**
