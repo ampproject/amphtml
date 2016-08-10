@@ -39,7 +39,7 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
-  return win.services[id].obj;
+  return dev().assert(win.services[id].obj);
 }
 
 /**
@@ -50,7 +50,7 @@ export function getExistingServiceForWindow(win, id) {
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
-  return getAmpdocServiceHolder(nodeOrDoc).services[id].obj;
+  return dev().assert(getAmpdocServiceHolder(nodeOrDoc).services[id].obj);
 }
 
 /**
