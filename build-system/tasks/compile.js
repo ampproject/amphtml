@@ -126,6 +126,8 @@ function compile(entryModuleFilename, outputDir,
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/mustache/**/*.js',
+      'third_party/vega/**/*.js',
+      'third_party/d3/**/*.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
@@ -208,6 +210,8 @@ function compile(entryModuleFilename, outputDir,
         jscomp_off: 'unknownDefines',
         define: [],
         hide_warnings_for: [
+          'third_party/d3/',
+          'third_party/vega/',
           'node_modules/',
           'build/patched-module/',
           // TODO: The following three are whitelisted only because they're
@@ -215,7 +219,7 @@ function compile(entryModuleFilename, outputDir,
           // errors and should be fixed at some point.
           'src/service.js',
           '3p/environment.js',
-          'src/document-state.js'
+          'src/document-state.js',
         ],
       }
     };
