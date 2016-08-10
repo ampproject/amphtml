@@ -696,6 +696,9 @@ describe('ViewportBindingNatural', () => {
   let documentElement;
   let documentBody;
   let windowEventHandlers;
+  let viewerViewportHandler;
+  let viewer;
+  let viewerMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -717,11 +720,23 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNatural_(windowApi);
+    viewerViewportHandler = undefined;
+    viewer = {
+      getPaddingTop: () => 19,
+      onViewportEvent: handler => {
+        viewerViewportHandler = handler;
+      },
+      requestFullOverlay: () => {},
+      cancelFullOverlay: () => {},
+      postScroll: sandbox.spy(),
+    };
+    viewerMock = sandbox.mock(viewer);
+    binding = new ViewportBindingNatural_(windowApi, viewer);
   });
 
   afterEach(() => {
     windowMock.verify();
+    viewerMock.verify();
     sandbox.restore();
   });
 
