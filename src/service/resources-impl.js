@@ -345,11 +345,11 @@ export class Resources {
    * @private
    */
   buildOrScheduleBuildForElement_(element) {
+    if (element.isBuilt()) {
+      return;
+    }
     const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
-      if (element.isBuilt()) {
-        return;
-      }
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
@@ -427,6 +427,7 @@ export class Resources {
     const resource = Resource.forElement(element);
     if (this.isRuntimeOn_) {
       this.buildOrScheduleBuildForElement_(element);
+      this.schedulePass();
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
     }
@@ -1028,7 +1029,8 @@ export class Resources {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (r.getState() == ResourceState.NOT_BUILT ||
+            r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
