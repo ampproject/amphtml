@@ -27,6 +27,7 @@ import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {getMode} from '../../..//src/mode';
 import {timerFor} from '../../../src/timer';
+import {installPerformanceService} from '../../../src/service/performance-impl';
 
 export class AmpAdApiHandler {
 
@@ -80,6 +81,8 @@ export class AmpAdApiHandler {
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
+    const perf = installPerformanceService(window);
+    perf.tick('ar');
     user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -132,6 +135,8 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = 'hidden';
     }
     listenForOnce(this.iframe_, 'render-start', () => {
+      perf.tick('e_ar');
+      perf.flush();
       if (!this.iframe_) {
         return;
       }
