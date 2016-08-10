@@ -78,7 +78,7 @@ function tests(name) {
         expect(fetches[0]).to.have.property('href',
             'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
         expect(fetches[1]).to.have.property('href',
-            'http://ads.localhost:9876/dist.3p/current/integration.js');
+            'http://ads.localhost:9876/base/dist.3p/current/integration.js');
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(

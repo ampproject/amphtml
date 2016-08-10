@@ -210,7 +210,6 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
       return overrideBootstrapBaseUrl;
     }
     return getAdsLocalhost(parentWindow)
-        + (getMode().test ? '/base' : '')
         + '/dist.3p/current'
         + (getMode().minified ? '-min/frame' : '/frame.max')
         + '.html';
@@ -221,7 +220,8 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 
 function getAdsLocalhost(win) {
   return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port);
+      + (win.location.port || win.parent.location.port)
+      + (getMode().test ? '/base' : '');
 }
 
 /**
