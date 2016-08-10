@@ -50,6 +50,7 @@ import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {criteo} from '../ads/criteo';
@@ -90,7 +91,6 @@ import {yieldbot} from '../ads/yieldbot';
 import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
-import {caprofitx} from '../ads/caprofitx';
 
 
 /**
@@ -164,6 +164,7 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
+
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
