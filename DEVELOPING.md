@@ -95,7 +95,7 @@ For each example there are 3 modes:
 
 - `/examples/abc.html` points to prod. This file would not reflect your local changes.
 - `/examples/abc.max.html` points to your local unminified AMP. You want to use this during normal dev.
-- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
+- `/examples/abc.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist --fortesting`.
 
 
 #### Document proxy
@@ -108,6 +108,10 @@ You can access is with the local JS at
 
 - normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
 - minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+
+When accessing `min` urls make sure you run `gulp dist` with the `--fortesting`
+flag so that we do not strip out the localhost code paths. (We do some
+code elimination to trim down the file size for the file we deploy to production)
 
 If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
 
