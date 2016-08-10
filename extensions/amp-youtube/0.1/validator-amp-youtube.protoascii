@@ -62,7 +62,7 @@ tags: {  # <amp-youtube>
     mandatory_oneof: "['data-videoid', 'video-id' (deprecated)]"
     deprecation: "data-videoid"
     deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
-    value_regex: "[^=/\?:]+"
+    value_regex: "[^=/?:]+"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
