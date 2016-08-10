@@ -107,6 +107,10 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
+    whitelist: [
+      'extensions/amp-ad/0.1/amp-ad-api-handler.js->' +
+          'src/service/performance-impl.js',
+    ],
   },
   {
     filesMatching: 'extensions/**/*.js',
