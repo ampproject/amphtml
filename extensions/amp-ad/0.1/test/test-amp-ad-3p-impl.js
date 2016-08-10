@@ -536,7 +536,7 @@ function tests(name) {
       return getAdInAdContainer().then(obj => {
         const ampAd = obj.ampAd;
         expect(ampAd.getAttribute('amp-container-element')).to.be.null;
-        ampAd.implementation_.layoutCallback();
+        ampAd.implementation_.onLayoutMeasure();
         expect(ampAd.getAttribute('amp-container-element'))
             .to.equal('AMP-STICKY-AD');
         console.log(obj.ampAd);

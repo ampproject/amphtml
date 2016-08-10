@@ -30,7 +30,6 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {user} from '../src/log';
-import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -114,11 +113,11 @@ const AMP_EMBED_ALLOWED = {
 const IS_DEV = true;
 
 if (IS_DEV) {
-  let toRegister = getMode().test || getMode().localDev;
+  let toRegister = false;
   const parseData = parseFragment(location.hash);
   if (parseData && parseData._context && parseData._context.mode) {
     const mode = parseData._context.mode;
-    toRegister = toRegister || mode.test || mode.localDev;
+    toRegister = mode.test || mode.localDev;
   }
   if (toRegister) {
     register('_ping_', function(win, data) {

@@ -100,7 +100,7 @@ export function incrementLoadingAds(win) {
  * @param {!Element} el
  * @param {!Window} win
  * @return {string|null} a string that contains all containers of the ad.
- * This is called before creating iframe for this ad.
+ * This is called during layout measure.
  */
 
 export function getAdContainer(el) {
