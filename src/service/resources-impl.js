@@ -336,22 +336,22 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
-    this.buildOrScheduleBuildForElement_(element);
+    this.buildOrScheduleBuildForElement_(resource);
     dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
    * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * @param {!Resource} resource
    * @private
    */
-  buildOrScheduleBuildForElement_(element) {
-    const resource = this.getResourceForElement(element);
+  buildOrScheduleBuildForElement_(resource) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!element.isBuilt()) {
+      } else if (!resource.element.isBuilt()) {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
@@ -428,7 +428,7 @@ export class Resources {
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    this.buildOrScheduleBuildForElement_(element);
+    this.buildOrScheduleBuildForElement_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -1027,8 +1027,7 @@ export class Resources {
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
-        if (r.getState() == ResourceState.NOT_BUILT ||
-            r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
         // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
