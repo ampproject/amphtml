@@ -300,16 +300,13 @@ app.use('/examples/analytics.config.json', function(req, res, next) {
   next();
 });
 
-function handleAmpCorsRequest(req, res, next) {
+app.use(['/examples/*', '/extensions/*'], function (req, res, next) {
   var sourceOrigin = req.query['__amp_source_origin'];
   if (sourceOrigin) {
     res.setHeader('AMP-Access-Control-Allow-Source-Origin', sourceOrigin);
   }
   next();
-}
-
-app.use('/examples/*', handleAmpCorsRequest);
-app.use('/extensions/*', handleAmpCorsRequest);
+});
 
 app.get('/examples/*', function(req, res, next) {
   var filePath = req.path;

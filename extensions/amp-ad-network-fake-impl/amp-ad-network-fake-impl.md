@@ -57,7 +57,7 @@ special tags for fake or special behaviors of existing tags:
 
 **src** Must be a bare filename for a single `.json` file.  Fake will attempt
  to load the file from
- `localhost:8000/extensions/amp-ad-network-fake-impl/0.1/data/${src}`.
+ `/extensions/amp-ad-network-fake-impl/0.1/data/${src}`.
  
 **data-use-a4a**  If non-empty, fake will attempt to render via the A4A 
 pathway (i.e., fast rendering for AMP creatives).  Otherwise, it will attempt
