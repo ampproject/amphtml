@@ -50,9 +50,11 @@ import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
 import {criteo} from '../ads/criteo';
+import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
@@ -91,6 +93,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
+
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -117,12 +120,14 @@ register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
 register('criteo', criteo);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
+register('ezoic', ezoic);
 register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);
