@@ -18,7 +18,7 @@
  * Tags that are allowed to have fixed positioning
  * @const {!Object<string, boolean>}
  */
-const POSITION_FIXED_TAG_WHITELIST = {
+export const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,

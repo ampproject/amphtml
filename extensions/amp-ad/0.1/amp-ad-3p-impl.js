@@ -18,7 +18,8 @@ import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isAdPositionAllowed, POSITION_FIXED_TAG_WHITELIST,}
+    from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
@@ -26,12 +27,6 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
-
-/** @const These tags are valid ad containers */
-const AMP_AD_CONTAINERS = {
-  'AMP-STICKY-AD': true,
-  'AMP-FX-FLYING-CARPET': true,
-};
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -105,8 +100,7 @@ export function incrementLoadingAds(win) {
  * @param {!Element} el
  * @param {!Window} win
  * @return {string|null} a string that contains all containers of the ad.
- * This should only be called when a layout on the page was just forced
- * anyway.
+ * This is called before creating iframe for this ad.
  */
 
 export function getAdContainer(el) {
@@ -182,6 +176,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.win);
+
+    /** @private {string|null} */
+    this.container_ = null;
   }
 
   /**
@@ -222,6 +219,15 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
+    /** detect ad containers, add the list to element as a new attribute */
+    if (!this.container_) {
+      this.container_ = getAdContainer(this.element);
+      if (this.container_) {
+        this.element.setAttribute('amp-container-element', this.container_);
+      } else {
+        this.container_ = 'none';
+      }
+    }
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -259,11 +265,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       user().assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
-      /** detect ad containers, add the list to element as a new attribute */
-      const container = getAdContainer(this.element);
-      if (container) {
-        this.element.setAttribute('amp-container-element', container);
-      }
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
         if (cid) {
