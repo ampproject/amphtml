@@ -755,7 +755,8 @@ export class ViewportBindingNatural_ {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
         if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
-            this.viewer_.getParam('webview') === '1') {
+                platformFor(this.win).isIos() &&
+                this.viewer_.getParam('webview') === '1') {
           setStyles(this.win.document.body, {
             overflowX: 'hidden',
             overflowY: 'visible',
