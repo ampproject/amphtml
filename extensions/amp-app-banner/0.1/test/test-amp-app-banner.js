@@ -277,7 +277,7 @@ describe('amp-app-banner', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenLink_');
       return getAppBanner({manifest}).then(() => {
         expect(AbstractAppBanner.prototype.setupOpenLink_.calledWith(
-            'android-app://com.medium.reader/https//amps.html',
+            'android-app://com.medium.reader/https/example.com/amps.html',
             'https://play.google.com/store/apps/details?id=com.medium.reader'
         )).to.be.true;
       });

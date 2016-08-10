@@ -379,8 +379,9 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     const canonicalUrl = documentInfoFor(this.win).canonicalUrl;
     const parsedUrl = parseUrl(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
+    const host = parsedUrl.host;
     const pathname = parsedUrl.pathname;
-    return `android-app://${appId}/${cleanProtocol}/${pathname}`;
+    return `android-app://${appId}/${cleanProtocol}/${host}${pathname}`;
   }
 }
 
