@@ -91,6 +91,9 @@ amp-carousel .amp-carousel-button.amp-disabled {
   /**
    * Hide the scrollbar by tucking it under some padding
    * which gets cut off as it overflows the parent.
+   * The exact size of the padding does not matter as long as it is
+   * larger than the height of the scrollbar. 20px is large enough to cover
+   * both desktop and mobile scrolbar sizes in different browsers.
    * This relies on content box-sizing, although that's the default
    * we still ensure it does not get overwritten.
    */
