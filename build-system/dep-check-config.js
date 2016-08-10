@@ -50,6 +50,8 @@ exports.rules = [
           'third_party/mustache/mustache.js',
       '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
+      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
+      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
     ]
   },
   // Rules for 3p
