@@ -88,17 +88,18 @@ amp-carousel .amp-carousel-button.amp-disabled {
   top: 0;
   width: 100% !important;
   scroll-snap-type: mandatory !important;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch !important;
-}
-
-.-amp-slides-container::-webkit-scrollbar {
   /**
-   * Height not set to 0 because of safari bug.
-   * https://bugs.webkit.org/show_bug.cgi?id=160622
+   * Hide the scrollbar by tucking it under some padding
+   * which gets cut off as it overflows the parent.
+   * The exact size of the padding does not matter as long as it is
+   * larger than the height of the scrollbar. 20px is large enough to cover
+   * both desktop and mobile scrolbar sizes in different browsers.
+   * This relies on content box-sizing, although that's the default
+   * we still ensure it does not get overwritten.
    */
-   height: 0.1px;
-   background-color: transparent;
+  padding-bottom: 20px !important;
+  box-sizing: content-box !important;
+  -webkit-overflow-scrolling: touch !important;
 }
 
 .-amp-slides-container.-amp-no-scroll {
