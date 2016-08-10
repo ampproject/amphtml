@@ -117,7 +117,8 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slide-item > * {
-  flex: 0 0 100% !important;
+  height: 100%;
+  width: 100%;
 }
 
 .-amp-slide-item-show {
