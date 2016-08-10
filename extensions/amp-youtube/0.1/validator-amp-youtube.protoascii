@@ -55,12 +55,14 @@ tags: {  # <amp-youtube>
   attrs: {
     name: "data-videoid"
     mandatory_oneof: "['data-videoid', 'video-id' (deprecated)]"
+    value_regex: "[^=/\?:]+"
   }
   attrs: {
     name: "video-id"
     mandatory_oneof: "['data-videoid', 'video-id' (deprecated)]"
     deprecation: "data-videoid"
     deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
+    value_regex: "[^=/?:]+"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
