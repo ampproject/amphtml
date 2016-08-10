@@ -30,6 +30,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {waitForBody} from '../dom';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -750,10 +751,12 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
-        setStyles(this.win.document.body, {
-          overflowX: 'hidden',
-          overflowY: 'visible',
-        });
+        if (isExperimentOn(this.win, 'amp-ios-overflow-x')) {
+          setStyles(this.win.document.body, {
+            overflowX: 'hidden',
+            overflowY: 'visible',
+          });
+        }
       });
     }
 
