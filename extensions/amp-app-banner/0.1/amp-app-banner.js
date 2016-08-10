@@ -28,6 +28,7 @@ import {storageFor} from '../../../src/storage';
 import {timer} from '../../../src/timer';
 import {parseUrl} from '../../../src/url';
 import {setStyles} from '../../../src/style';
+import {isProxyOrigin} from '../../../src/url';
 
 const TAG = 'amp-app-banner';
 
@@ -69,7 +70,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
 
   /** @private */
   redirectTopLocation_(link) {
-    this.win.top.location.replace(link);
+    this.win.top.location.assign(link);
   }
 
   /**
@@ -302,7 +303,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     // We want to fallback to browser builtin mechanism when possible.
     const isChromeAndroid = platform.isAndroid() && platform.isChrome();
     /** @private @const {boolean} */
-    this.canShowBuiltinBanner_ = !viewer.isEmbedded() && isChromeAndroid;
+    this.canShowBuiltinBanner_ = !isProxyOrigin(this.win.location) &&
+        !viewer.isEmbedded() && isChromeAndroid;
 
     if (this.canShowBuiltinBanner_) {
       dev.info(TAG,

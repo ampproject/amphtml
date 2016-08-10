@@ -147,8 +147,12 @@
 
     amp-app-banner {
       background: #f4f4f4;
-      padding: 15px;
+      padding: 10px;
       box-shadow: 0 2px 5px 0 #000;
+    }
+
+    amp-app-banner .content {
+      display: flex;
     }
 
     amp-img {
@@ -161,7 +165,6 @@
     }
 
     amp-app-banner amp-img {
-      float: left;
       margin-right: 15px
     }
 
@@ -180,7 +183,6 @@
     }
     amp-app-banner .actions {
       text-align: right;
-      margin-top: 10px;
       font-size: 14px;
     }
 
@@ -227,10 +229,14 @@
     </nav>
   </amp-sidebar>
   <amp-app-banner layout="nodisplay" id="demo-app-banner-2134">
-    <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
-             width="60" height="51"></amp-img>
-    <h3>Medium App</h3>
-    <p>Experience a richer experience on our mobile app!</p>
+    <div class="content">
+      <amp-img src="https://cdn-images-1.medium.com/max/800/1*JLegdtjFMNgqHgnxdd04fg.png"
+               width="60" height="51"></amp-img>
+      <div class="description">
+        <h3>Medium App</h3>
+        <p>Experience a richer experience on our mobile app!</p>
+      </div>
+    </div>
     <div class="actions">
       <a open-link>Open in app</a>
     </div>

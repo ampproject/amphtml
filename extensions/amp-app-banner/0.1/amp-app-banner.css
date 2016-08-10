@@ -23,6 +23,7 @@ amp-app-banner {
   box-sizing: border-box;
   background: #fefefe;
   z-index: 11 !important;
+  height: 100px !important;
 }
 
 .amp-app-banner-dismiss-button {
