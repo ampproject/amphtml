@@ -345,16 +345,13 @@ export class Resources {
    * @private
    */
   buildOrScheduleBuildForElement_(element) {
-    if (element.isBuilt()) {
-      return;
-    }
     const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else {
+      } else if (!element.isBuilt()) {
         // Otherwise add to pending resources and try to build any ready ones.
         this.pendingBuildResources_.push(resource);
         this.buildReadyResources_();
@@ -382,6 +379,7 @@ export class Resources {
 
   /** @private */
   buildReadyResourcesUnsafe_() {
+    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -392,8 +390,13 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
+        builtElementsCount++;
         resource.build();
       }
+    }
+
+    if (builtElementsCount > 0) {
+      this.schedulePass();
     }
   }
 
@@ -425,12 +428,7 @@ export class Resources {
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    if (this.isRuntimeOn_) {
-      this.buildOrScheduleBuildForElement_(element);
-      this.schedulePass();
-    } else if (resource.onUpgraded_) {
-      resource.onUpgraded_();
-    }
+    this.buildOrScheduleBuildForElement_(element);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
