@@ -222,8 +222,9 @@ describe('amp-app-banner', () => {
 
     it('should parse meta content and setup hrefs', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenLink_');
-      return getAppBanner({meta}).then(() => {
+      return getAppBanner({meta}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenLink_.calledWith(
+            el.querySelector('a[open-link]'),
             'medium://p/cb7f223fad86',
             'https://itunes.apple.com/us/app/id828256236'
         )).to.be.true;
@@ -275,8 +276,9 @@ describe('amp-app-banner', () => {
 
     it('should parse manifest and set hrefs', () => {
       sandbox.spy(AbstractAppBanner.prototype, 'setupOpenLink_');
-      return getAppBanner({manifest}).then(() => {
+      return getAppBanner({manifest}).then(el => {
         expect(AbstractAppBanner.prototype.setupOpenLink_.calledWith(
+            el.querySelector('a[open-link]'),
             'android-app://com.medium.reader/https/example.com/amps.html',
             'https://play.google.com/store/apps/details?id=com.medium.reader'
         )).to.be.true;
@@ -300,7 +302,7 @@ describe('amp-app-banner', () => {
         openLink.setAttribute('open-link', '');
         openLink.addEventListener = sandbox.spy();
         const banner = new AbstractAppBanner(element);
-        banner.setupOpenLink_('open-link', 'install-link');
+        banner.setupOpenLink_(openLink, 'open-link', 'install-link');
         expect(openLink.addEventListener.calledWith('click')).to.be.true;
         win.open = sandbox.spy();
         sandbox.stub(banner, 'redirectTopLocation_', () => {});

@@ -43,8 +43,7 @@ export class AbstractAppBanner extends AMP.BaseElement {
   }
 
   /** @protected */
-  setupOpenLink_(openInAppUrl, installAppUrl) {
-    const openLink = this.element.querySelector('a[open-link]');
+  setupOpenLink_(openLink, openInAppUrl, installAppUrl) {
     openLink.addEventListener('click', () => {
       this.openLinkClicked_(openInAppUrl, installAppUrl);
     });
@@ -185,7 +184,6 @@ export class AmpAppBanner extends AbstractAppBanner {
     /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
     if (!this.isExperimentOn_) {
-      this.element.classList.add('-amp-experiment-disabled');
       user.warn(TAG, `Experiment ${TAG} disabled`);
       return Promise.resolve();
     }
@@ -233,7 +231,8 @@ export class AmpIosAppBanner extends AbstractAppBanner {
       return;
     }
 
-    user.assert(this.element.querySelector('a[open-link]'),
+    /** @private @const {!Element} */
+    this.openLink_ = user.assert(this.element.querySelector('a[open-link]'),
         '<a open-link> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
@@ -269,7 +268,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     const openUrl = config['app-argument'];
     const installAppUrl = `https://itunes.apple.com/us/app/id${appId}`;
     const openInAppUrl = openUrl || installAppUrl;
-    this.setupOpenLink_(openInAppUrl, installAppUrl);
+    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
   }
 }
 
@@ -324,7 +323,8 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     this.manifestHref_ = this.manifestLink_.getAttribute('href');
     assertHttpsUrl(this.manifestHref_, this.element, 'manifest href');
 
-    user.assert(this.element.querySelector('a[open-link]'),
+    /** @private @const {!Element} */
+    this.openLink_ = user.assert(this.element.querySelector('a[open-link]'),
         '<a open-link> is required inside %s: %s', TAG, this.element);
 
     this.checkIfDismissed_();
@@ -349,7 +349,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
   }
 
   /**
-   * @param {!Object} manifestJson
+   * @param {!JSONObject} manifestJson
    * @private
    */
   parseManifest_(manifestJson) {
@@ -371,7 +371,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     const installAppUrl = (
         `https://play.google.com/store/apps/details?id=${app['id']}`);
     const openInAppUrl = this.getAndroidIntentForUrl_(app['id']);
-    this.setupOpenLink_(openInAppUrl, installAppUrl);
+    this.setupOpenLink_(this.openLink_, openInAppUrl, installAppUrl);
   }
 
   /** @private */
