@@ -30,6 +30,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {waitForBody} from '../dom';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -728,12 +729,15 @@ export class ViewportBindingNatural_ {
   /**
    * @param {!Window} win
    */
-  constructor(win) {
+  constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
 
     /** @const {!../platform.Platform} */
     this.platform_ = platformFor(win);
+
+    /** @private @const {!./viewer-impl.Viewer} */
+    this.viewer_ = viewer;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -750,6 +754,14 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
+        if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
+                this.platform_.isIos() &&
+                this.viewer_.getParam('webview') === '1') {
+          setStyles(this.win.document.body, {
+            overflowX: 'hidden',
+            overflowY: 'visible',
+          });
+        }
       });
     }
 
@@ -1265,7 +1277,7 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
-    binding = new ViewportBindingNatural_(window);
+    binding = new ViewportBindingNatural_(window, viewer);
   }
   return new Viewport(window, binding, viewer);
 }
