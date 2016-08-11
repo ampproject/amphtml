@@ -25,9 +25,8 @@ import {
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
-import {getMode} from '../../..//src/mode';
 import {timerFor} from '../../../src/timer';
-import {installPerformanceService} from '../../../src/service/performance-impl';
+//import {performanceFor} from '../../../src/performance';
 
 export class AmpAdApiHandler {
 
@@ -63,26 +62,32 @@ export class AmpAdApiHandler {
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
 
-    /** @private @const {function()|null} */
-    this.renderStartResolve_ = null;
-
     /** @private @const {!Promise} */
     this.renderStartPromise_ = new Promise(resolve => {
       this.renderStartResolve_ = resolve;
     });
+
+    /** @private @const {!Performance|null} */
+    this.performance_ = null;
+
+    /** @private @const {number|null} */
+    this.initTime_ = null;
   }
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
-    const perf = installPerformanceService(window);
-    perf.tick('ar');
+    // TODO: get performance to pass tests
+    // if (!getMode().test) {
+    //   this.performance_ = performanceFor(this.baseInstance_.win);
+    //   this.initTime_ = Date.now();
+    // }
     user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -134,31 +139,41 @@ export class AmpAdApiHandler {
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
-    listenForOnce(this.iframe_, 'render-start', () => {
-      perf.tick('e_ar');
-      perf.flush();
+
+    const promise = new Promise(resolve => {
+      listenForOnce(this.iframe_, 'render-start', () => {
+        resolve();
+      }, this.is3p_);
+    });
+
+    this.renderStartPromise_ = timerFor(this.baseInstance_.win).timeoutPromise(
+        2000, promise,
+        'fail to receive render-start event from ad server, timeout');
+    this.renderStartPromise_.then(() => {
+      // TODO: get tick delta
+      //   if (!getMode().test) {
+      //     const now = Date.now();
+      //     this.tickDelta('rs', now - this.initTime_);
+      //     this.performance_.flush();
+      //   }
       if (!this.iframe_) {
         return;
       }
-      if (this.renderStartResolve_) {
-        this.renderStartResolve_();
-        this.renderStartResolve_ = null;
+      this.iframe_.style.visibility = '';
+    }).catch(() => {
+      //get tick delta
+      if (!this.iframe_) {
+        return;
       }
       this.iframe_.style.visibility = '';
-    }, this.is3p_);
+    });
+
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
-    if (getMode().test) {
-      if (this.renderStartResolve_) {
-        this.renderStartResolve_();
-      }
-    }
     return loadPromise(this.iframe_).then(() => {
-      return timerFor(this.baseInstance_.win).timeoutPromise(5000,
-          this.renderStartPromise_,
-          'fail to receive render-start event from ad server, timeout');
+      return this.renderStartPromise_;
     });
   }
 

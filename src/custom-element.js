@@ -925,7 +925,6 @@ function createBaseAmpElementProto(win) {
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
     this.dispatchCustomEventForTesting('amp:load:start');
-    this.implementation_.isFirstLayoutCompleted_ = this.isFirstLayoutCompleted_;
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');

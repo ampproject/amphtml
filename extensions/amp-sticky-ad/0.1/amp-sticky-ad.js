@@ -58,10 +58,6 @@ class AmpStickyAd extends AMP.BaseElement {
      */
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
-
-    this.boundDisplayAfterAdLoad_ = () => this.displayAfterAdLoad_();
-
-    this.adRenderStartPromise_ = null;
   }
 
   /** @override */
@@ -140,6 +136,12 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Function that check if ad has been built
+   * If not, wait for the amp:built event
+   * otherwise schedule layout for ad.
+   * @private
+   */
   scheduleLayoutForAd_() {
     if (this.ad_.isBuilt()) {
       this.layoutAd_();
@@ -150,18 +152,23 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 
+  /**
+   * Layout ad, and change sticky-ad container style
+   * @private
+   */
   layoutAd_() {
-    if (!this.ad_.isFirstLayoutCompleted()) {
-      this.updateInViewport(this.ad_, true);
-      this.scheduleLayout(this.ad_);
-      this.displayAfterAdLoad_();
-    } else {
-      this.updateInViewport(this.ad_, true);
-      this.scheduleLayout(this.ad_);
-      this.delayAdLoad_();
-    }
+    this.updateInViewport(this.ad_, true);
+    this.scheduleLayout(this.ad_);
+    this.delayAdLoad_();
   }
 
+  /**
+   * Change sticky-ad container style to ad-loaded-style after certain delay.
+   * For ad type that support return render-start wait until ad layoutCallback
+   * resolve and receive amp:load:end.
+   * For ad type that don't support render-start, wait for 1 sec.
+   * @private
+   */
   delayAdLoad_() {
     listenOnce(this.ad_, 'amp:load:end', () => {
       const type = this.ad_.getAttribute('type');
@@ -175,6 +182,10 @@ class AmpStickyAd extends AMP.BaseElement {
     });
   }
 
+  /**
+   * Change sticky-ad container style by adding class name
+   * @private
+   */
   displayAfterAdLoad_() {
     this.vsync_.mutate(() => {
       this.element.classList.add('amp-sticky-ad-loaded');

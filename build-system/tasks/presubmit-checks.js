@@ -156,7 +156,6 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
-      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
       'src/service/performance-impl.js',
     ],
   },

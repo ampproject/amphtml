@@ -40,6 +40,13 @@ window.addEventListener('message', function(event) {
             sentinel: sentinel,
             type: 'send-embed-state',
           }, '*');
+    } else if (event.data.type == 'renderStart') {
+      var sentinel = event.data.is3p ? event.data.amp3pSentinel : 'amp';
+      getAmpWindow(sentinel)./*OK*/postMessage(
+          {
+            sentinel: sentinel,
+            type: 'render-start',
+          }, '*');
     }
   }
 });

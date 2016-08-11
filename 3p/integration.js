@@ -104,6 +104,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   plista: true,
   zergnet: true,
+  _ping_: true,
 };
 
 // Keep the list in alphabetic order
@@ -209,7 +210,6 @@ export function draw3p(win, data, configCallback) {
   const type = data.type;
   user().assert(win.context.location.originValidated != null,
       'Origin should have been validated');
-
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
@@ -317,7 +317,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
     delete data._context;
-
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
