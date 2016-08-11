@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 259
+spec_file_revision: 260
 
 # Validator extensions.
 # =====================
@@ -611,6 +611,7 @@ tags: {  # Special custom 'author' spreadsheet.
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
 }
 tags: {
+  html_format: AMP
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate] - old variant"
   mandatory_alternatives: "head > style[amp-boilerplate]"
@@ -624,6 +625,7 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
+  html_format: AMP
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate] - old variant"
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
@@ -637,6 +639,7 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
+  html_format: AMP
   tag_name: "STYLE"
   spec_name: "head > style[amp-boilerplate]"
   mandatory_alternatives: "head > style[amp-boilerplate]"
@@ -657,6 +660,28 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md"
 }
 tags: {
+  html_format: A4A
+  tag_name: "STYLE"
+  spec_name: "head > style[amp-a4a-boilerplate]"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-a4a-boilerplate"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  cdata: {
+    # This regex allows arbitrary whitespace around the body statement, but
+    # not inside it. This is a compromise to keep things simple, but allow
+    # pretty printing tools some latitude.
+    cdata_regex: "\\s*body{visibility:hidden}\\s*"
+  }
+  # TODO(gregable): Replace with a better URL eventually.
+  spec_url: "https://github.com/google/amphtml/blob/5cae97e7442df863a5a7ceac78257af02792f71c/extensions/amp-a4a/amp-a4a-format.md"
+}
+tags: {
+  html_format: AMP
   tag_name: "STYLE"
   spec_name: "noscript > style[amp-boilerplate]"
   mandatory_alternatives: "noscript > style[amp-boilerplate]"
@@ -2184,6 +2209,7 @@ tags: {
 # Specific script tags for custom elements and runtime imports.
 # 4.11.2 The noscript element
 tags: {
+  html_format: AMP
   tag_name: "NOSCRIPT"
   spec_name: "noscript enclosure for boilerplate"
   mandatory: true
