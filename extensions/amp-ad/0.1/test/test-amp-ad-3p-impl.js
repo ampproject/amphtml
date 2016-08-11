@@ -75,11 +75,10 @@ function tests(name) {
               'link[rel=preload]');
         }
         expect(fetches).to.have.length(2);
-        expect(fetches[0].href).to.equal(
-            'http://ads.localhost:' + location.port +
-            '/base/dist.3p/current/frame.max.html');
-        expect(fetches[1].href).to.equal(
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+        expect(fetches[0]).to.have.property('href',
+            'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
+        expect(fetches[1]).to.have.property('href',
+            'http://ads.localhost:9876/base/dist.3p/current/integration.js');
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(
