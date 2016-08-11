@@ -109,8 +109,7 @@ describe('amp-analytics.transport', () => {
   });
 
   describe('sendRequestUsingIframe', () => {
-    const url = 'http://iframe.localhost:9876/base/test/' +
-        'fixtures/served/iframe.html';
+    const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
     it('should create and delete an iframe', () => {
       const clock = sandbox.useFakeTimers();
       const iframe = sendRequestUsingIframe(window, url);
@@ -134,7 +133,7 @@ describe('amp-analytics.transport', () => {
 
     it('forbids same origin', () => {
       expect(() => {
-        sendRequestUsingIframe(window, 'http://localhost:9876/base/');
+        sendRequestUsingIframe(window, 'http://localhost:9876/');
       }).to.throw(
           /Origin of iframe request must not be equal to the document origin./
       );

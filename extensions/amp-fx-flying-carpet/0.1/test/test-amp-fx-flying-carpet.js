@@ -76,7 +76,7 @@ describe('amp-fx-flying-carpet', () => {
     return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
       img = iframe.doc.createElement('amp-img');
-      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       return [img];
@@ -160,7 +160,7 @@ describe('amp-fx-flying-carpet', () => {
       // Usually, the children appear on a new line with indentation
       const pretext = iframe.doc.createTextNode('\n  ');
       img = iframe.doc.createElement('amp-img');
-      img.setAttribute('src', '/base/examples/img/sample.jpg');
+      img.setAttribute('src', '/examples/img/sample.jpg');
       img.setAttribute('width', 300);
       img.setAttribute('height', 200);
       // Usually, the closing node appears on a new line
