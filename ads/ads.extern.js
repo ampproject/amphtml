@@ -142,4 +142,10 @@ data.zergid;
 window.zergnetWidgetId;
 window.MADSAdrequest = {};
 window.MADSAdrequest.adrequest;
-window.EzoicAmpAd;
+/**
+ * @constructor
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd.prototype.createAd;
