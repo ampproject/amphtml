@@ -1423,8 +1423,6 @@ describe('Resources.add', () => {
   });
 
   it('should build elements immediately if the document is ready', () => {
-    child1.isBuilt = () => false;
-    child2.isBuilt = () => false;
     resources.documentReady_ = false;
     resources.add(child1);
     expect(child1.build.called).to.be.false;
@@ -1449,14 +1447,12 @@ describe('Resources.add', () => {
 
   describe('buildReadyResources_', () => {
     it('should build ready resources and remove them from pending', () => {
-      sandbox.stub(resources, 'schedulePass');
       resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
-      expect(resources.schedulePass.called).to.be.false;
 
       child1.nextSibling = child2;
       resources.buildReadyResources_();
@@ -1464,7 +1460,6 @@ describe('Resources.add', () => {
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
-      expect(resources.schedulePass.calledOnce).to.be.true;
 
       child2.parentNode = parent;
       parent.nextSibling = true;
@@ -1472,7 +1467,6 @@ describe('Resources.add', () => {
       expect(child1.build.calledTwice).to.be.false;
       expect(child2.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
-      expect(resources.schedulePass.calledTwice).to.be.true;
     });
 
     it('should not try to build resources already being built', () => {
