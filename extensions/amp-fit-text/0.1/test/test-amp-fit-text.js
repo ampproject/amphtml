@@ -72,8 +72,10 @@ describe('amp-fit-text calculateFontSize', () => {
     element = document.createElement('div');
     element.style.fontFamily = 'Arial';
     element.style.lineHeight = '1em';
-    element.style.position = 'relative';
-    element.style.width = '200px';
+    element.style.position = 'absolute';
+    element.style.left = 0;
+    element.style.top = 0;
+    element.style.visibility = 'hidden';
     document.body.appendChild(element);
   });
 
@@ -81,28 +83,49 @@ describe('amp-fit-text calculateFontSize', () => {
     document.body.removeChild(element);
   });
 
-  it('should always fit on one line', () => {
+  it('should always fit on one line w/ enough width', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 20, 6, 72)).to.equal(20);
-    expect(calculateFontSize_(element, 10, 6, 72)).to.equal(10);
-    expect(calculateFontSize_(element, 40, 6, 72)).to.equal(40);
+    console.log(element.offsetWidth);
+    expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(20);
+    expect(calculateFontSize_(element, 10, 200, 6, 72)).to.equal(10);
+    expect(calculateFontSize_(element, 40, 200, 6, 72)).to.equal(40);
   });
 
-  it('should hit min', () => {
+  it('should always fit the width w/ enough height', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 6, 6, 72)).to.equal(6);
-    expect(calculateFontSize_(element, 3, 6, 72)).to.equal(6);
+    console.log(element.offsetWidth);
+    expect(calculateFontSize_(element, 200, 10, 6, 72)).to.equal(15);
+    expect(calculateFontSize_(element, 200, 20, 6, 72)).to.equal(30);
+    expect(calculateFontSize_(element, 200, 40, 6, 72)).to.equal(60);
   });
 
-  it('should hit max', () => {
+  it('should hit min w/ small height and enough width', () => {
     element./*OK*/innerHTML = 'A';
-    expect(calculateFontSize_(element, 72, 6, 72)).to.equal(72);
-    expect(calculateFontSize_(element, 80, 6, 72)).to.equal(72);
+    expect(calculateFontSize_(element, 6, 200, 6, 72)).to.equal(6);
+    expect(calculateFontSize_(element, 3, 200, 6, 72)).to.equal(6);
   });
 
-  it('should always fit on two lines', () => {
+  it('should hit min w/ small width and enough height', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 200, 2, 6, 72)).to.equal(6);
+    expect(calculateFontSize_(element, 200, 4, 6, 72)).to.equal(6);
+  });
+
+  it('should hit max w/ enough width', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 72, 200, 6, 72)).to.equal(72);
+    expect(calculateFontSize_(element, 80, 200, 6, 72)).to.equal(72);
+  });
+
+  it('should hit max w/ enough height', () => {
+    element./*OK*/innerHTML = 'A';
+    expect(calculateFontSize_(element, 200, 48, 6,72)).to.equal(72);
+    expect(calculateFontSize_(element, 200, 60, 6, 72)).to.equal(72);
+  });
+
+  it('should always fit on two lines w/ enough width', () => {
     element./*OK*/innerHTML = 'A<br>B';
-    expect(calculateFontSize_(element, 20, 6, 72)).to.equal(10);
+    expect(calculateFontSize_(element, 20, 200, 6, 72)).to.equal(10);
   });
 });
 
