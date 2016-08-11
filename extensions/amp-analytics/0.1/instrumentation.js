@@ -43,7 +43,7 @@ let AnalyticsEventListenerDef;
  * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *  fires.
- * @param {!HTMLElement} analyticsElement The element associated with the
+ * @param {!Element} analyticsElement The element associated with the
  *  config.
  */
 export function addListener(window, config, listener, analyticsElement) {
@@ -134,7 +134,7 @@ export class InstrumentationService {
    * @param {!JSONType} config Configuration for instrumentation.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *  occurs.
-   * @param {!HTMLElement} analyticsElement The element associated with the
+   * @param {!Element} analyticsElement The element associated with the
    *  config.
    */
   addListener(config, listener, analyticsElement) {
@@ -226,7 +226,7 @@ export class InstrumentationService {
    *   occurs.
    * @param {!JSONType} config Configuration for instrumentation.
    * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
-   * @param {!HTMLElement} analyticsElement The element assoicated with the
+   * @param {!Element} analyticsElement The element assoicated with the
    *   config.
    * @private
    */

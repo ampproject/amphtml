@@ -144,21 +144,24 @@ export function isVisibilitySpecValid(config) {
  * ancestor of the analytics element with that tag name is returned.
  *
  * @param {string} selector The selector for the element to track.
- * @param {!HTMLElement} el Element whose ancestors to search.
- * @return {?HTMLElement} Element corresponding to the selector if found.
+ * @param {!Element} el Element whose ancestors to search.
+ * @param {!String} selectionMethod The method to use to find the element..
+ * @return {?Element} Element corresponding to the selector if found.
  */
-export function getElement(selector, el) {
+export function getElement(selector, el, selectionMethod) {
   if (!el) {
     return null;
   }
-  if (selector[0] == '#') {
-    return el.parentDocument.getElementById(selector.slice(1));
-  } else if (selector.substr(0, 4) == 'amp-') {
+  if (selectionMethod == 'closest') {
+    // Only tag names are supported currently.
     return closestByTag(el, selector);
+  } else if (selectionMethod == 'scope') {
+    return el.querySelector(selector);
+  } else if (selector[0] == '#') {
+    return el.parentDocument.getElementById(selector.slice(1));
   }
   return null;
 }
-
 
 /**
  * This type signifies a callback that gets called when visibility conditions
@@ -260,12 +263,13 @@ export class Visibility {
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
-   * @param {HTMLElement} analyticsElement The amp-analytics element that the
+   * @param {Element} analyticsElement The amp-analytics element that the
    *  config is associated with.
    */
   listenOnce(config, callback, shouldBeVisible, analyticsElement) {
     const selector = config['selector'];
-    const element = getElement(selector, analyticsElement);
+    const element = getElement(selector, analyticsElement,
+        config['selectionMethod']);
     if (!element) {
       user().error('Element not found for visibilitySpec: ' + selector);
     }
