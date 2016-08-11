@@ -343,18 +343,22 @@ export class Resources {
   /**
    * Builds the element if ready to be built, otherwise adds it to pending resources.
    * @param {!Resource} resource
+   * @param {boolean=} checkForDupes
    * @private
    */
-  buildOrScheduleBuildForResource_(resource) {
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
       } else if (!resource.element.isBuilt()) {
-        // Otherwise add to pending resources and try to build any ready ones.
-        this.pendingBuildResources_.push(resource);
-        this.buildReadyResources_();
+        if (!checkForDupes ||
+            this.pendingBuildResources_.indexOf(resource) == -1) {
+          // Otherwise add to pending resources and try to build any ready ones.
+          this.pendingBuildResources_.push(resource);
+          this.buildReadyResources_();
+        }
       }
     }
   }
@@ -940,7 +944,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        this.buildOrScheduleBuildForResource_(r);
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
