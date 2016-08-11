@@ -21,8 +21,6 @@ function checkElementUpgrade(element) {
   expect(element).to.have.class('-amp-element');
   expect(element).to.have.class('-amp-layout-responsive');
   expect(element).to.have.class('-amp-layout-size-defined');
-  expect(element).to.not.have.class('-amp-notbuilt');
-  expect(element).to.not.have.class('amp-notbuilt');
   expect(element).to.not.have.class('amp-unresolved');
   expect(element).to.not.have.class('-amp-unresolved');
 }
