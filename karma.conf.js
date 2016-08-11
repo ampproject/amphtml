@@ -51,6 +51,16 @@ module.exports = function(config) {
 
     colors: true,
 
+    proxies: {
+      '/ads/': '/base/ads/',
+      '/dist/': '/base/dist/',
+      '/dist.3p/': '/base/dist.3p/',
+      '/examples/': '/base/examples/',
+      '/extensions/': '/base/extensions/',
+      '/src/': '/base/src/',
+      '/test/': '/base/test/',
+    },
+
     logLevel: config.LOG_WARN,
 
     autoWatch: true,

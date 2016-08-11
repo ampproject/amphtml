@@ -462,16 +462,12 @@ export class Extensions {
 export function calculateExtensionScriptUrl(path, extensionId, isTest,
     isUsingCompiledJs) {
   if (getMode().localDev) {
-    if (isTest) {
-      if (isUsingCompiledJs) {
-        return `/base/dist/v0/${extensionId}-0.1.js`;
-      }
-      return `/base/dist/v0/${extensionId}-0.1.max.js`;
-    }
-    if (path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
+    if ((isTest && !isUsingCompiledJs)
+        || path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
       return `/dist/v0/${extensionId}-0.1.max.js`;
     }
-    if (path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
+    if ((isTest && isUsingCompiledJs)
+        || path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
       return `/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;

@@ -452,7 +452,7 @@ describe('Extensions', () => {
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples/ads.amp.html',
           'amp-ad', true, true);
-      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.js');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.js');
     });
 
     it('with local mode for testing without compiled js', () => {
@@ -460,7 +460,7 @@ describe('Extensions', () => {
       expect(getMode().localDev).to.be.true;
       const script = calculateExtensionScriptUrl('examples/ads.amp.html',
           'amp-ad', true, false);
-      expect(script).to.equal('/base/dist/v0/amp-ad-0.1.max.js');
+      expect(script).to.equal('/dist/v0/amp-ad-0.1.max.js');
     });
 
     it('with local mode normal pathname', () => {

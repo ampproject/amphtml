@@ -149,7 +149,7 @@ describe('3p-frame', () => {
     expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
-    iframe.src = '/base/dist.3p/current/frame.max.html#' + fragment;
+    iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
@@ -186,7 +186,7 @@ describe('3p-frame', () => {
   it('should pick the right bootstrap url for testing mode', () => {
     window.AMP_MODE = {test: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
-        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
