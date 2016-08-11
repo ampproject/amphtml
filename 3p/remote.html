@@ -4,10 +4,12 @@
 <meta name="robots" content="noindex">
 <script>
 (function() {
-var v = location.search.substr(1);
-if (!(/^\d+(-canary)?$/.test(v))) return;
-var u = 'https://3p.ampproject.net/'+encodeURIComponent(v)+'/f.js';
-document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>');
+  var v = location.search.substr(1);
+  if (!(/^\d+(-canary)?$/.test(v))) return;
+  var j = location.hash.substr(1);
+  window.AMP_CONFIG = JSON.parse(j)._context.AMP_CONFIG;
+  var u = window.AMP_CONFIG.thirdPartyFrameHost + encodeURIComponent(v) + '/f.js';
+  document.write('<script'+' src="'+encodeURI(u)+'"><'+'/script>');
 })();
 </script>
 </head>
