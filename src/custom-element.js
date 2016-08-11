@@ -60,12 +60,22 @@ const knownElements = {};
 
 
 /**
- * Whether this platform supports template tags.
- * @const {boolean}
+ * Caches whether the template tag is supported to avoid memory allocations.
+ * @type {boolean|undefined}
  */
-const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
-  'template'
-);
+let templateTagSupported;
+
+/**
+ * Whether this platform supports template tags.
+ * @return {boolean}
+ */
+function isTemplateTagSupported() {
+  if (templateTagSupported === undefined) {
+    const template = window.document.createElement('template');
+    templateTagSupported = 'content' in template;
+  }
+  return templateTagSupported;
+}
 
 
 /**
@@ -712,7 +722,7 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
-    if (!TEMPLATE_TAG_SUPPORTED && this.isInTemplate_ === undefined) {
+    if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
       this.isInTemplate_ = !!dom.closestByTag(this, 'template');
     }
     if (this.isInTemplate_) {

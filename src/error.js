@@ -21,10 +21,19 @@ import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
 import {urls} from './config';
 
-const globalExponentialBackoff = exponentialBackoff(1.5);
-
 const CANCELLED = 'CANCELLED';
 
+/**
+ * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
+ * un-DCE'able side-effect.
+ * @param {function()} work the function to execute after backoff
+ * @return {number} the setTimeout id
+ */
+let globalExponentialBackoff = function(work) {
+  // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
+  globalExponentialBackoff = exponentialBackoff(1.5);
+  return globalExponentialBackoff(work);
+};
 
 /**
  * Reports an error. If the error has an "associatedElement" property

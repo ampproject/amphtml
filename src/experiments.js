@@ -36,8 +36,16 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
-/** @const {!Object<string, boolean>} */
-const EXPERIMENT_TOGGLES = Object.create(null);
+/** @type {Object<string, boolean>} */
+let toggles_;
+
+/**
+ * A wrapper to avoid a static side-effect.
+ * @return {!Object<string, boolean>}
+ */
+function experimentToggles() {
+  return toggles_ || (toggles_ = Object.create(null));
+}
 
 
 /**
@@ -74,10 +82,11 @@ export function isDevChannelVersionDoNotUse_(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  if (experimentId in EXPERIMENT_TOGGLES) {
-    return EXPERIMENT_TOGGLES[experimentId];
+  const toggles = experimentToggles();
+  if (experimentId in toggles) {
+    return toggles[experimentId];
   }
-  return EXPERIMENT_TOGGLES[experimentId] = calcExperimentOn(win, experimentId);
+  return toggles[experimentId] = calcExperimentOn(win, experimentId);
 }
 
 /**
@@ -115,17 +124,18 @@ function calcExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
+  const toggles = experimentToggles();
   const experimentIds = getExperimentIds(win);
   const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
-      (experimentId in EXPERIMENT_TOGGLES && EXPERIMENT_TOGGLES[experimentId]);
+      (experimentId in toggles && toggles[experimentId]);
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
     if (on) {
       experimentIds.push(experimentId);
-      EXPERIMENT_TOGGLES[experimentId] = true;
+      toggles[experimentId] = true;
     } else {
       experimentIds.splice(experimentIds.indexOf(experimentId), 1);
-      EXPERIMENT_TOGGLES[experimentId] = false;
+      toggles[experimentId] = false;
     }
     if (!opt_transientExperiment) {
       saveExperimentIds(win, experimentIds);
@@ -166,7 +176,5 @@ function saveExperimentIds(win, experimentIds) {
  * @visibleForTesting
  */
 export function resetExperimentToggles_() {
-  Object.keys(EXPERIMENT_TOGGLES).forEach(key => {
-    delete EXPERIMENT_TOGGLES[key];
-  });
+  toggles_ = undefined;
 }
