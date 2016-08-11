@@ -189,7 +189,7 @@ function styleLoaded(doc, style) {
 /**
  * Insert the element in the root after the element named after or
  * if that is null at the beginning.
- * @param {!Element} root
+ * @param {!Element|!ShadowRoot} root
  * @param {!Element} element
  * @param {?Element} after
  */
