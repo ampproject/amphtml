@@ -76,9 +76,9 @@ function tests(name) {
         }
         expect(fetches).to.have.length(2);
         expect(fetches[0]).to.have.property('href',
-            'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
+            'http://ads.localhost:9876/dist.3p/current/frame.max.html');
         expect(fetches[1]).to.have.property('href',
-            'http://ads.localhost:9876/base/dist.3p/current/integration.js');
+            'http://ads.localhost:9876/dist.3p/current/integration.js');
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(
@@ -93,7 +93,7 @@ function tests(name) {
     describe('ad resize', () => {
       it('should listen for resize events', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
+            '/test/fixtures/served/iframe.html';
         return getAd({
           width: 100,
           height: 100,
@@ -130,7 +130,7 @@ function tests(name) {
 
       it('should listen for resize events from nested frames', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe-resize-outer.html';
+            '/test/fixtures/served/iframe-resize-outer.html';
         return getAd({
           width: 100,
           height: 100,
@@ -167,7 +167,7 @@ function tests(name) {
 
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
+            '/test/fixtures/served/iframe.html';
         return getAd({
           width: 100,
           height: 100,
@@ -508,7 +508,7 @@ function tests(name) {
     describe('embed-state API', () => {
       it('should support subscription via send-embed-state', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
+            '/test/fixtures/served/iframe.html';
         return getAd({
           width: 100,
           height: 100,
