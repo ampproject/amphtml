@@ -21,6 +21,7 @@ import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {isObject, isNumber} from '../../../src/types';
+import {assertHttpsUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -77,6 +78,10 @@ export class AmpVizVega extends AMP.BaseElement {
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
         this.getName_());
+
+    if (this.src_) {
+      assertHttpsUrl(this.src_, this.element, this.getName_());
+    }
   }
 
   /** @override */
