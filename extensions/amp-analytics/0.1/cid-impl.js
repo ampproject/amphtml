@@ -256,12 +256,9 @@ function getBaseCid(cid, persistenceConsent) {
     }
 
     if (needsToStore) {
-      // Storing the value may require consent. We wait for the respective
-      // promise.
-      Promise.all([cid.baseCid_, persistenceConsent])
-          .then(results => {
-            store(win, results[0]);
-          });
+      cid.baseCid_.then(baseCid => {
+        store(win, persistenceConsent, baseCid);
+      });
     }
 
     return cid.baseCid_;
@@ -272,28 +269,36 @@ function getBaseCid(cid, persistenceConsent) {
  * Stores a new cidString in localStorage. Adds the current time to the
  * stored value.
  * @param {!Window} win
+ * @param {!Promise} persistenceConsent
  * @param {string} cidString Actual cid string to store.
  */
-function store(win, cidString) {
-  const item = {
-    time: Date.now(),
-    cid: cidString,
-  };
-  const data = JSON.stringify(item);
+function store(win, persistenceConsent, cidString) {
   const viewer = viewerFor(win);
+  // TODO(lannka, #4457): ideally, we should check if viewer has the capability
+  // of CID storage, rather than if it is iframed.
   if (viewer.isIframed()) {
     // If we are being embedded, try to save the base cid to the viewer.
-    viewer.baseCid(data);
+    viewer.baseCid(createCidData(cidString));
   } else {
-    try {
-      win.localStorage.setItem('amp-cid', data);
-    } catch (ignore) {
-      // Setting localStorage may fail. In practice we don't expect that to
-      // happen a lot (since we don't go anywhere near the quota, but
-      // in particular in Safari private browsing mode it always fails.
-      // In that case we just don't store anything, which is just fine.
-    }
+    // To use local storage, we need user's consent.
+    persistenceConsent.then(() => {
+      try {
+        win.localStorage.setItem('amp-cid', createCidData(cidString));
+      } catch (ignore) {
+        // Setting localStorage may fail. In practice we don't expect that to
+        // happen a lot (since we don't go anywhere near the quota, but
+        // in particular in Safari private browsing mode it always fails.
+        // In that case we just don't store anything, which is just fine.
+      }
+    });
   }
+}
+
+function createCidData(cidString) {
+  return JSON.stringify({
+    time: Date.now(),
+    cid: cidString,
+  });
 }
 
 /**

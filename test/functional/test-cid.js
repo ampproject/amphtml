@@ -204,15 +204,15 @@ describe('cid', () => {
     });
     return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
-          sinon.assert.calledOnce(viewerBaseCidStub);
-          sinon.assert.notCalled(viewerBaseCidStub.withArgs(sinon.match.string));
+          expect(viewerBaseCidStub).to.be.calledOnce;
+          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
 
           // Ensure it's called only once since we cache it in memory.
           return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
         })
         .then(() => {
-          sinon.assert.calledOnce(viewerBaseCidStub);
-          sinon.assert.notCalled(viewerBaseCidStub.withArgs(sinon.match.string));
+          expect(viewerBaseCidStub).to.be.calledOnce;
+          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
           return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
   });
@@ -222,17 +222,16 @@ describe('cid', () => {
     const expectedBaseCid = 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])';
     return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
         .then(() => {
-          sinon.assert.calledOnce(viewerBaseCidStub.withArgs(JSON.stringify({
+          expect(viewerBaseCidStub).to.be.calledWith(JSON.stringify({
             time: 0,
             cid: expectedBaseCid,
-          })));
+          }));
 
           // Ensure it's called only once since we cache it in memory.
           return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
         })
         .then(() => {
-          sinon.assert.calledOnce(
-              viewerBaseCidStub.withArgs(sinon.match.string));
+          expect(viewerBaseCidStub).to.be.calledWith(sinon.match.string);
           return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
         });
   });
@@ -419,6 +418,17 @@ describe('cid', () => {
             'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
         expect(stored.time).to.equal(777);
       });
+    });
+  });
+
+  it('should not wait persistence consent for viewer storage', () => {
+    isIframed = true;
+    const persistencePromise = new Promise(() => {/* never resolves */});
+    return cid.get('e2', hasConsent, persistencePromise).then(() => {
+      expect(viewerStorage).to.equal(JSON.stringify({
+        time: 0,
+        cid: 'sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])',
+      }));
     });
   });
 

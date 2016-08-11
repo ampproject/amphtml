@@ -25,6 +25,7 @@ import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 import {urls} from '../config';
+import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -802,10 +803,10 @@ export class Viewer {
       return this.sendMessage('cid', opt_data, true)
           .then(data => {
             // For backward compatibility: #4029
-            if (data && !isValidJson(data)) {
+            if (data && !tryParseJson(data)) {
               return JSON.stringify({
+                time: Date.now(), // CID returned from old API is always fresh
                 cid: data,
-                time: timer.now(), // CID returned from old API is always fresh
               });
             }
             return data;
@@ -1073,15 +1074,6 @@ function getChannelError(opt_reason) {
     return opt_reason;
   }
   return new Error('No messaging channel: ' + opt_reason);
-}
-
-function isValidJson(json) {
-  try {
-    JSON.parse(json);
-    return true;
-  } catch (e) {
-    return false;
-  }
 }
 
 /**
