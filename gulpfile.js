@@ -355,7 +355,6 @@ function thirdPartyBootstrap(watch, shouldMinify) {
   }
   $$.util.log('Processing ' + input);
   var html = fs.readFileSync(input, 'utf8');
-  var min = html;
   // By default we use an absolute URL, that is independent of the
   // actual frame host for the JS inside the frame.
   var jsPrefix = 'https://3p.ampproject.net/' + internalRuntimeVersion;
@@ -364,10 +363,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
   if (argv.fortesting) {
     jsPrefix = '.';
   }
-  // Convert default relative URL to absolute min URL.
-  min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
   gulp.src(input)
-      .pipe($$.file('frame.html', min))
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current';
@@ -583,15 +579,12 @@ function buildLoginDoneVersion(version, options) {
   // Build HTML.
   $$.util.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace(
-      '../../../dist/v0/amp-login-done-' + version + '.max.js',
-      'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
 
   mkdirSync('dist');
   mkdirSync('dist/v0');
 
   fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html',
-      minHtml);
+      html);
 
   // Build JS.
   var js = fs.readFileSync(jsPath, 'utf8');
