@@ -220,8 +220,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 
 function getAdsLocalhost(win) {
   return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port)
-      + (getMode().test ? '/base' : '');
+      + (win.location.port || win.parent.location.port);
 }
 
 /**
