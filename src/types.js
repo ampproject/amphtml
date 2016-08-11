@@ -63,7 +63,8 @@ export function isObject(value) {
 
 /**
  * Determines if value is actually a number.
- * NaN is considered a non-number in this function.
+ * NaN is not considered a number in this function.
+ * String numbers are not considered numbers in this function.
  * @param {*} value
  * @return {boolean}
  */

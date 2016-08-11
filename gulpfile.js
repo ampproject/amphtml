@@ -386,9 +386,9 @@ function thirdPartyBootstrap(watch, shouldMinify) {
 var activeBundleOperationCount = 0;
 
 /**
- * Synchronously concatenates the given files.
+ * Synchronously concatenates the given files into the given destination
  *
- * @param {string} destFilePath File path write the concatenated files to
+ * @param {string} destFilePath File path to write the concatenated files to
  * @param {Array<string>} files List of file paths to concatenate
  */
 function concatFiles(destFilePath, files) {
@@ -407,7 +407,7 @@ function concatFiles(destFilePath, files) {
  */
 function appendToCompiledFile(srcFilename, destFilePath) {
   if (srcFilename == 'amp-viz-vega.js') {
-    // Append minified d3 and vega third_party resources to amp-viz-vega.js
+    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
     concatFiles(destFilePath, [
       'third_party/d3/d3.js',
       'third_party/d3-geo-projection/d3-geo-projection.js',

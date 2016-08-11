@@ -20,7 +20,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
-import {setStyles} from '../../../src/style';
 import {isObject, isNumber} from '../../../src/types';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
@@ -58,7 +57,7 @@ export class AmpVizVega extends AMP.BaseElement {
     /**
      * @private
      * Global vg (and implicitly d3) are required and they are created by
-     * appending vega and d3 minified files during build process.
+     * appending vega and d3 minified files during the build process.
      */
     this.vega_ = window.vg;
 
