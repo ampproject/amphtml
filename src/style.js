@@ -41,7 +41,7 @@ export function camelCaseToTitleCase(camelCase) {
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
-function getVendorJsPropertyName(style, titleCase) {
+function getVendorJsPropertyName_(style, titleCase) {
   for (let i = 0; i < vendorPrefixes.length; i++) {
     const propertyName = vendorPrefixes[i] + titleCase;
     if (style[propertyName] !== undefined) {
@@ -71,7 +71,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
     propertyName = camelCase;
     if (style[camelCase] === undefined) {
       const titleCase = camelCaseToTitleCase(camelCase);
-      const prefixedPropertyName = getVendorJsPropertyName(style, titleCase);
+      const prefixedPropertyName = getVendorJsPropertyName_(style, titleCase);
 
       if (style[prefixedPropertyName] !== undefined) {
         propertyName = prefixedPropertyName;

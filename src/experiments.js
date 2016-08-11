@@ -176,5 +176,5 @@ function saveExperimentIds(win, experimentIds) {
  * @visibleForTesting
  */
 export function resetExperimentToggles_() {
-  toggles = undefined;
+  toggles_ = undefined;
 }
