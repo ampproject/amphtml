@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 258
+spec_file_revision: 259
 
 # Validator extensions.
 # =====================
@@ -2527,6 +2527,10 @@ error_specificity {
 error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 61 }
 error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 62 }
 error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 63 }
+error_specificity {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
+  specificity: 64
+}
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
@@ -2742,6 +2746,11 @@ error_formats {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT
   format: "The tag '%1', a child tag of '%2', does not satisfy one of "
           "the acceptable reference points: %3."
+}
+error_formats {
+  code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
+  format: "The tag '%1', a child tag of '%2', does not satisfy "
+          "the reference point '%3'."
 }
 error_formats {
   code: MANDATORY_REFERENCE_POINT_MISSING

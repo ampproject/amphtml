@@ -332,6 +332,9 @@ class ParsedReferencePoints {
   /** @return {boolean} */
   empty() { return this.parsed_.length === 0; }
 
+  /** @return {number} */
+  size() { return this.parsed_.length; }
+
   /** @return {?string} */
   parentSpecUrl() { return this.parent_.specUrl; }
 
@@ -406,24 +409,45 @@ class ReferencePointMatcher {
     goog.asserts.assert(
         resultForBestAttempt.status ===
         amp.validator.ValidationResult.Status.FAIL);
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      const acceptable = [];
-      for (const p of this.parsedReferencePoints_.iterate()) {
-        acceptable.push(p.point.tagSpecName);
-      }
+    if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
+    // Special case: only one reference point defined - emit a singular
+    // error message *and* merge in the errors from the best attempt above.
+    if (this.parsedReferencePoints_.size() === 1) {
       context.addError(
           amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code
-              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
+              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR,
           context.getDocLocator(),
           /*params*/
           [
             context.getTagStack().getCurrent(),
             this.parsedReferencePoints_.parentTagSpecName(),
-            acceptable.join(', ')
+            this.parsedReferencePoints_.iterate()[0].point.tagSpecName
           ],
           this.parsedReferencePoints_.parentSpecUrl(), result);
+      result.mergeFrom(resultForBestAttempt);
+      return;
     }
+    // General case: more than one reference point defined. Emit a plural
+    // message with the acceptable reference points listed.
+    const acceptable = [];
+    for (const p of this.parsedReferencePoints_.iterate()) {
+      acceptable.push(p.point.tagSpecName);
+    }
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code
+            .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
+        context.getDocLocator(),
+        /*params*/
+        [
+          context.getTagStack().getCurrent(),
+          this.parsedReferencePoints_.parentTagSpecName(), acceptable.join(', ')
+        ],
+        this.parsedReferencePoints_.parentSpecUrl(), result);
   }
 
   /**
