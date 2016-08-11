@@ -62,7 +62,8 @@ export class Transport {
     loadPromise(image).then(() => {
       dev().fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      user().warn(TAG_, 'Failed to send image request', request);
+      user().warn(TAG_, 'Response unparseable or failed to send image ' +
+          'request', request);
     });
   }
 
@@ -75,9 +76,11 @@ export class Transport {
     if (!win.navigator.sendBeacon) {
       return false;
     }
-    win.navigator.sendBeacon(request, '');
-    dev().fine(TAG_, 'Sent beacon request', request);
-    return true;
+    const result = win.navigator.sendBeacon(request, '');
+    if (result) {
+      dev().fine(TAG_, 'Sent beacon request', request);
+    }
+    return result;
   }
 
   /**
