@@ -696,7 +696,6 @@ describe('ViewportBindingNatural', () => {
   let documentElement;
   let documentBody;
   let windowEventHandlers;
-  let viewerViewportHandler;
   let viewer;
   let viewerMock;
 
@@ -720,12 +719,9 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowMock = sandbox.mock(windowApi);
-    viewerViewportHandler = undefined;
     viewer = {
       getPaddingTop: () => 19,
-      onViewportEvent: handler => {
-        viewerViewportHandler = handler;
-      },
+      onViewportEvent: () => {},
       requestFullOverlay: () => {},
       cancelFullOverlay: () => {},
       postScroll: sandbox.spy(),
