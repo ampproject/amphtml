@@ -332,6 +332,9 @@ class ParsedReferencePoints {
   /** @return {boolean} */
   empty() { return this.parsed_.length === 0; }
 
+  /** @return {number} */
+  size() { return this.parsed_.length; }
+
   /** @return {?string} */
   parentSpecUrl() { return this.parent_.specUrl; }
 
@@ -344,9 +347,16 @@ class ParsedReferencePoints {
  */
 class ReferencePointMatcher {
   /**
+   * @param {!ParsedValidatorRules} parsedValidatorRules
    * @param {!ParsedReferencePoints} parsedReferencePoints
    */
-  constructor(parsedReferencePoints) {
+  constructor(parsedValidatorRules, parsedReferencePoints) {
+    /**
+     * @type {!ParsedValidatorRules}
+     * @private
+     */
+    this.parsedValidatorRules_ = parsedValidatorRules;
+
     /**
      * @type {!ParsedReferencePoints}
      * @private
@@ -378,17 +388,17 @@ class ReferencePointMatcher {
    * points and record them in this.referencePointsMatched_.
    * @param {!Array<string>} attrs
    * @param {!Context} context
-   * @param {!Array<!ParsedTagSpec>} tagSpecById
    * @param {!amp.validator.ValidationResult} result
    */
-  match(attrs, context, tagSpecById, result) {
+  match(attrs, context, result) {
     if (this.parsedReferencePoints_.empty()) return;
     const resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
     for (const p of this.parsedReferencePoints_.iterate()) {
-      const parsedSpec = tagSpecById[p.tagSpecId];
+      const parsedSpec = this.parsedValidatorRules_.getTagSpec(p.tagSpecId);
       validateTagAgainstSpec(
-          parsedSpec, context, attrs, tagSpecById, resultForBestAttempt);
+          this.parsedValidatorRules_, parsedSpec, context, attrs,
+          resultForBestAttempt);
       if (resultForBestAttempt.status !==
           amp.validator.ValidationResult.Status.FAIL) {
         this.referencePointsMatched_.push(parsedSpec.getId());
@@ -399,24 +409,45 @@ class ReferencePointMatcher {
     goog.asserts.assert(
         resultForBestAttempt.status ===
         amp.validator.ValidationResult.Status.FAIL);
-    if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      const acceptable = [];
-      for (const p of this.parsedReferencePoints_.iterate()) {
-        acceptable.push(p.point.tagSpecName);
-      }
+    if (!amp.validator.GENERATE_DETAILED_ERRORS) {
+      result.status = amp.validator.ValidationResult.Status.FAIL;
+      return;
+    }
+    // Special case: only one reference point defined - emit a singular
+    // error message *and* merge in the errors from the best attempt above.
+    if (this.parsedReferencePoints_.size() === 1) {
       context.addError(
           amp.validator.ValidationError.Severity.ERROR,
           amp.validator.ValidationError.Code
-              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
+              .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR,
           context.getDocLocator(),
           /*params*/
           [
             context.getTagStack().getCurrent(),
             this.parsedReferencePoints_.parentTagSpecName(),
-            acceptable.join(', ')
+            this.parsedReferencePoints_.iterate()[0].point.tagSpecName
           ],
           this.parsedReferencePoints_.parentSpecUrl(), result);
+      result.mergeFrom(resultForBestAttempt);
+      return;
     }
+    // General case: more than one reference point defined. Emit a plural
+    // message with the acceptable reference points listed.
+    const acceptable = [];
+    for (const p of this.parsedReferencePoints_.iterate()) {
+      acceptable.push(p.point.tagSpecName);
+    }
+    context.addError(
+        amp.validator.ValidationError.Severity.ERROR,
+        amp.validator.ValidationError.Code
+            .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT,
+        context.getDocLocator(),
+        /*params*/
+        [
+          context.getTagStack().getCurrent(),
+          this.parsedReferencePoints_.parentTagSpecName(), acceptable.join(', ')
+        ],
+        this.parsedReferencePoints_.parentSpecUrl(), result);
   }
 
   /**
@@ -482,6 +513,11 @@ class ReferencePointMatcher {
    * @return {!Array<number>}
    */
   getReferencePointsMatched() { return this.referencePointsMatched_; }
+
+  /**
+   * @return {!ParsedReferencePoints}
+   */
+  getParsedReferencePoints() { return this.parsedReferencePoints_; }
 }
 
 /**
@@ -3050,6 +3086,11 @@ class TagSpecDispatch {
   /**
    * @return {boolean}
    */
+  empty() { return !this.hasDispatchKeys() && !this.hasTagSpecs(); }
+
+  /**
+   * @return {boolean}
+   */
   hasDispatchKeys() { return this.tagSpecsByDispatch_ !== null; }
 
   /**
@@ -3095,193 +3136,23 @@ class TagSpecDispatch {
   allTagSpecs() { return this.allTagSpecs_; }
 }
 
-/**
- * A higher number means |code| is more specific, meaning more
- * helpful. Used by maxSpecificity below.
- * @param {!amp.validator.ValidationError.Code} code
- * @return {number}
- */
-function specificity(code) {
-  switch (code) {
-    case amp.validator.ValidationError.Code.UNKNOWN_CODE:
-      return 0;
-    case amp.validator.ValidationError.Code
-        .MANDATORY_CDATA_MISSING_OR_INCORRECT:
-      return 1;
-    case amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST:
-      return 2;
-    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
-      return 3;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
-      return 4;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR:
-      return 5;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT:
-      return 6;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
-      return 7;
-    case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
-      return 8;
-    case amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING:
-      return 9;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
-      return 10;
-    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
-      return 11;
-    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
-      return 12;
-    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
-      return 13;
-    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
-      return 14;
-    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
-      return 15;
-    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
-      return 16;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG_OLD_VARIANT:
-      return 17;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
-      return 18;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
-      return 19;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
-      return 20;
-    case amp.validator.ValidationError.Code
-        .MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
-      return 21;
-    case amp.validator.ValidationError.Code
-        .INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
-      return 22;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-      return 23;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
-      return 24;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
-      return 25;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
-      return 26;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
-      return 27;
-    case amp.validator.ValidationError.Code
-        .INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 28;
-    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
-      return 29;
-    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
-      return 30;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
-      return 31;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
-      return 32;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
-      return 33;
-    case amp.validator.ValidationError.Code.DUPLICATE_DIMENSION:
-      return 34;
-    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
-      return 35;
-    case amp.validator.ValidationError.Code.MISSING_URL:
-      return 36;
-    case amp.validator.ValidationError.Code.DISALLOWED_DOMAIN:
-      return 37;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
-      return 38;
-    case amp.validator.ValidationError.Code.INVALID_URL:
-      return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
-      return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
-      return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
-      return 42;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
-      return 43;
-    case amp.validator.ValidationError.Code
-        .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
-      return 45;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
-      return 46;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
-      return 47;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
-      return 48;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
-      return 49;
-    case amp.validator.ValidationError.Code
-        .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 50;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
-      return 51;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN:
-      return 52;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
-      return 53;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
-      return 54;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
-      return 55;
-    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
-      return 56;
-    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
-      return 57;
-    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
-      return 58;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
-      return 59;
-    case amp.validator.ValidationError.Code
-        .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT:
-      return 60;
-    case amp.validator.ValidationError.Code.MANDATORY_REFERENCE_POINT_MISSING:
-      return 61;
-    case amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT:
-      return 62;
-    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
-      return 100;
-    case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
-      return 101;
-    case amp.validator.ValidationError.Code.DEPRECATED_TAG:
-      return 102;
-    case amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY:
-      return 103;
-    case amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY:
-      return 104;
-    default:
-      goog.asserts.fail('Unrecognized Code: ' + code);
-  }
-}
-
-/**
- * A helper function which allows us to compare two candidate results
- * in validateTag to report the results which have the most specific errors.
- * @param {!amp.validator.ValidationResult} validationResult
- * @return {number} maximum value of specificity found in all errors.
- */
-amp.validator.maxSpecificity = function(validationResult) {
-  let max = 0;
-  for (const error of validationResult.errors) {
-    goog.asserts.assert(error.code !== null);
-    const thisSpecificity = specificity(error.code);
-    max = Math.max(thisSpecificity, max);
-  }
-  return max;
-};
 
 /**
  * Validates the provided |tagName| with respect to a single tag
  * specification.
+ * @param {!ParsedValidatorRules} parsedRules
  * @param {!ParsedTagSpec} parsedSpec
  * @param {!Context} context
  * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
- * @param {!Array<!ParsedTagSpec>} tagSpecById
  * @param {!amp.validator.ValidationResult} resultForBestAttempt
  */
 function validateTagAgainstSpec(
-    parsedSpec, context, encounteredAttrs, tagSpecById, resultForBestAttempt) {
+    parsedRules, parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(
-      context, encounteredAttrs, tagSpecById, resultForAttempt);
+      context, encounteredAttrs, parsedRules.getTagSpecById(),
+      resultForAttempt);
   parsedSpec.validateParentTag(context, resultForAttempt);
   parsedSpec.validateAncestorTags(context, resultForAttempt);
 
@@ -3306,8 +3177,8 @@ function validateTagAgainstSpec(
     }
 
     // If the same number of errors, prefer the most specific error.
-    if (amp.validator.maxSpecificity(resultForAttempt) >
-        amp.validator.maxSpecificity(resultForBestAttempt)) {
+    if (parsedRules.maxSpecificity(resultForAttempt.errors) >
+        parsedRules.maxSpecificity(resultForBestAttempt.errors)) {
       resultForBestAttempt.copyFrom(resultForAttempt);
     }
 
@@ -3360,10 +3231,32 @@ function validateTagAgainstSpec(
   if (spec.childTags !== null)
     context.setChildTagMatcher(new ChildTagMatcher(spec));
 
-  // Set the reference point matcher so it considers spec.referencePoints,
-  // if present.
+  // Set the reference point matcher so it considers spec.reference_points(),
+  // if present, considering that reference points could be defined by
+  // both reference points and regular tag specs.
+  if (parsedSpec.getReferencePoints().empty()) return;
+  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
+  if (currentMatcher !== null &&
+      !currentMatcher.getParsedReferencePoints().empty()) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+          context.getDocLocator(),
+          /* params */
+          [
+            getTagSpecName(spec),
+            currentMatcher.getParsedReferencePoints().parentTagSpecName()
+          ],
+          currentMatcher.getParsedReferencePoints().parentSpecUrl(),
+          resultForBestAttempt);
+    } else {
+      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
   context.setReferencePointMatcher(
-      new ReferencePointMatcher(parsedSpec.getReferencePoints()));
+      new ReferencePointMatcher(parsedRules, parsedSpec.getReferencePoints()));
 }
 
 /**
@@ -3443,12 +3336,28 @@ class ParsedValidatorRules {
       }
     }
     if (amp.validator.GENERATE_DETAILED_ERRORS) {
-      /** type {!Object<!amp.validator.ValidationError.Code, string>} */
-      this.formatByCode_ = {};
+      /**
+       * @typedef {{ format: string, specificity: number }}
+       */
+      let ErrorCodeMetadata;
+
+      /**
+       * type {!Object<!amp.validator.ValidationError.Code,
+       *               ErrorCodeMetadata>}
+       *  @private
+       */
+      this.errorCodes_ = {};
       for (let i = 0; i < this.rules_.errorFormats.length; ++i) {
         const errorFormat = this.rules_.errorFormats[i];
         goog.asserts.assert(errorFormat !== null);
-        this.formatByCode_[errorFormat.code] = errorFormat.format;
+        this.errorCodes_[errorFormat.code] = {};
+        this.errorCodes_[errorFormat.code].format = errorFormat.format;
+      }
+      for (let i = 0; i < this.rules_.errorSpecificity.length; ++i) {
+        const errorSpecificity = this.rules_.errorSpecificity[i];
+        goog.asserts.assert(errorSpecificity !== null);
+        this.errorCodes_[errorSpecificity.code].specificity =
+            errorSpecificity.specificity;
       }
     }
   }
@@ -3502,105 +3411,32 @@ class ParsedValidatorRules {
   manufacturedBodySpecUrl() { return this.rules_.manufacturedBodySpecUrl; }
 
   /**
-   * @return {!Object<!amp.validator.ValidationError.Code, string>}
+   * @param {amp.validator.ValidationError.Code} errorCode
+   * @return {!string}
    */
-  getFormatByCode() { return this.formatByCode_; }
+  getFormatByCode(errorCode) { return this.errorCodes_[errorCode].format; }
 
   /**
-   * Validates the provided |tagName| with respect to the tag
-   * specifications that are part of this instance. At least one
-   * specification must validate. The ids for mandatory tag specs are
-   * emitted via context.recordTagspecValidated().
-   * @param {!Context} context
-   * @param {string} tagName
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
-   * @param {!amp.validator.ValidationResult} validationResult
+   * @param {amp.validator.ValidationError.Code} error_code
+   * @return {number}
    */
-  validateTag(context, tagName, encounteredAttrs, validationResult) {
-    let tagSpecDispatch;
-    if (!this.tagSpecByTagName_.hasOwnProperty(tagName) ||
-        (tagSpecDispatch = this.tagSpecByTagName_[tagName]) === undefined) {
-      if (amp.validator.GENERATE_DETAILED_ERRORS) {
-        context.addError(
-            amp.validator.ValidationError.Severity.ERROR,
-            amp.validator.ValidationError.Code.DISALLOWED_TAG,
-            context.getDocLocator(),
-            /* params */[tagName.toLowerCase()],
-            /* specUrl */ '', validationResult);
-      } else {
-        validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-      }
-      return;
-    }
-    // At this point, we have dispatch keys, tagspecs, or both.
-    // The strategy is to look for a matching dispatch key first. A matching
-    // dispatch key does not guarantee that the dispatched tagspec will also
-    // match. If we find a matching dispatch key, we immediately return the
-    // result for that tagspec, success or fail.
-    // If we don't find a matching dispatch key, we must try all of the
-    // tagspecs to see if any of them match. If there are no tagspecs, we want
-    // to return a GENERAL_DISALLOWED_TAG error.
-    let resultForBestAttempt = new amp.validator.ValidationResult();
-    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-    // calling HasDispatchKeys here is only an optimization to skip the loop
-    // over encountered attributes in the case where we have no dispatches.
-    if (tagSpecDispatch.hasDispatchKeys()) {
-      for (let i = 0; i < encounteredAttrs.length; i += 2) {
-        let attrName = encounteredAttrs[i];
-        let attrValue = encounteredAttrs[i + 1];
-        // Our html parser repeats the key as the value if there is no value. We
-        // replace the value with an empty string instead in this case.
-        if (attrName === attrValue) {
-          attrValue = '';
-        }
-        attrName = attrName.toLowerCase();
+  specificity(error_code) { return this.errorCodes_[error_code].specificity; }
 
-        const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attrName, attrValue, context.getTagStack().getParent());
-        if (maybeTagSpecId !== -1) {
-          const parsedSpec = this.tagSpecById_[maybeTagSpecId];
-          goog.asserts.assert(parsedSpec !== undefined, '1');
-          validateTagAgainstSpec(
-              parsedSpec, context, encounteredAttrs, this.tagSpecById_,
-              resultForBestAttempt);
-          // Use the dispatched TagSpec validation results, success or fail.
-          validationResult.mergeFrom(resultForBestAttempt);
-          return;
-        }
-      }
-      // If none of the dispatch tagspecs matched and passed and there are no
-      // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
-      // which gives an error that reads "tag foo is disallowed except in
-      // specific forms".
-      if (!tagSpecDispatch.hasTagSpecs()) {
-        // TODO(gregable): Determine a good way to source a specUrl in these
-        // instances.
-        if (amp.validator.GENERATE_DETAILED_ERRORS) {
-          context.addError(
-              amp.validator.ValidationError.Severity.ERROR,
-              amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
-              context.getDocLocator(),
-              /* params */[tagName.toLowerCase()],
-              /* specUrl */ '', validationResult);
-        } else {
-          validationResult.status = amp.validator.ValidationResult.Status.FAIL;
-        }
-        return;
-      }
+  /**
+   * A helper function which allows us to compare two candidate results
+   * in validateTag to report the results which have the most specific errors.
+   * @param {!Array<amp.validator.ValidationError>} errors
+   * @return {number} maximum value of specificity found in all errors.
+   */
+  maxSpecificity(errors) {
+    let max = 0;
+    for (const error of errors) {
+      goog.asserts.assert(error.code !== null);
+      max = Math.max(this.specificity(error.code), max);
     }
-    // Validate against all tagspecs.
-    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
-      const parsedSpec = this.tagSpecById_[tagSpecId];
-      validateTagAgainstSpec(
-          parsedSpec, context, encounteredAttrs, this.tagSpecById_,
-          resultForBestAttempt);
-      if (resultForBestAttempt.status !==
-          amp.validator.ValidationResult.Status.FAIL) {
-        break;  // Exit early on success
-      }
-    }
-    validationResult.mergeFrom(resultForBestAttempt);
-  }
+    return max;
+  };
+
 
   /**
    * Emits errors for tags that are specified to be mandatory.
@@ -3719,6 +3555,21 @@ class ParsedValidatorRules {
 
   /** @return {!Array<!ParsedTagSpec>} */
   getTagSpecById() { return this.tagSpecById_; }
+
+  /**
+   * @param {number} id
+   * @return {!ParsedTagSpec}
+   */
+  getTagSpec(id) { return this.tagSpecById_[id]; }
+
+  /**
+   * @param {!string} tagName
+   * @return {TagSpecDispatch|undefined}
+   */
+  dispatchForTagName(tagName) {
+    if (!this.tagSpecByTagName_.hasOwnProperty(tagName)) return undefined;
+    return this.tagSpecByTagName_[tagName];
+  }
 }
 
 const parsedValidatorRulesSingleton = new ParsedValidatorRules();
@@ -3855,12 +3706,9 @@ amp.validator.ValidationHandler =
         tagName, this.context_, this.validationResult_, attrs);
     const matcher = this.context_.getTagStack().parentReferencePointMatcher();
     if (matcher !== null) {
-      matcher.match(
-          attrs, this.context_, this.rules_.getTagSpecById(),
-          this.validationResult_);
+      matcher.match(attrs, this.context_, this.validationResult_);
     }
-    this.rules_.validateTag(
-        this.context_, tagName, attrs, this.validationResult_);
+    this.validateTag(tagName, attrs);
     this.context_.getTagStack().matchChildTagName(
         this.context_, this.validationResult_);
   }
@@ -3907,6 +3755,101 @@ amp.validator.ValidationHandler =
     const matcher = this.context_.getCdataMatcher();
     if (matcher !== null)
       matcher.match(text, this.context_, this.validationResult_);
+  }
+
+  /**
+   * Validates the provided |tagName| with respect to the tag
+   * specifications that are part of this instance. At least one
+   * specification must validate. The ids for mandatory tag specs are
+   * emitted via context.recordTagspecValidated().
+   * @param {string} tagName
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
+   */
+  validateTag(tagName, encounteredAttrs) {
+    let tagSpecDispatch = this.rules_.dispatchForTagName(tagName);
+    if (tagSpecDispatch === undefined) {
+      if (amp.validator.GENERATE_DETAILED_ERRORS) {
+        this.context_.addError(
+            amp.validator.ValidationError.Severity.ERROR,
+            amp.validator.ValidationError.Code.DISALLOWED_TAG,
+            this.context_.getDocLocator(),
+            /* params */[tagName.toLowerCase()],
+            /* specUrl */ '', this.validationResult_);
+      } else {
+        this.validationResult_.status =
+            amp.validator.ValidationResult.Status.FAIL;
+      }
+      return;
+    }
+    // At this point, we have dispatch keys, tagspecs, or both.
+    // The strategy is to look for a matching dispatch key first. A matching
+    // dispatch key does not guarantee that the dispatched tagspec will also
+    // match. If we find a matching dispatch key, we immediately return the
+    // result for that tagspec, success or fail.
+    // If we don't find a matching dispatch key, we must try all of the
+    // tagspecs to see if any of them match. If there are no tagspecs, we want
+    // to return a GENERAL_DISALLOWED_TAG error.
+    let resultForBestAttempt = new amp.validator.ValidationResult();
+    resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+    // calling HasDispatchKeys here is only an optimization to skip the loop
+    // over encountered attributes in the case where we have no dispatches.
+    if (tagSpecDispatch.hasDispatchKeys()) {
+      for (let i = 0; i < encounteredAttrs.length; i += 2) {
+        let attrName = encounteredAttrs[i];
+        let attrValue = encounteredAttrs[i + 1];
+        // Our html parser repeats the key as the value if there is no value. We
+        // replace the value with an empty string instead in this case.
+        if (attrName === attrValue) {
+          attrValue = '';
+        }
+        attrName = attrName.toLowerCase();
+
+        const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
+            attrName, attrValue, this.context_.getTagStack().getParent());
+        if (maybeTagSpecId !== -1) {
+          const parsedSpec = this.rules_.getTagSpec(maybeTagSpecId);
+          goog.asserts.assert(parsedSpec !== undefined, '1');
+          validateTagAgainstSpec(
+              this.rules_, parsedSpec, this.context_, encounteredAttrs,
+              resultForBestAttempt);
+          // Use the dispatched TagSpec validation results, success or fail.
+          this.validationResult_.mergeFrom(resultForBestAttempt);
+          return;
+        }
+      }
+      // If none of the dispatch tagspecs matched and passed and there are no
+      // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
+      // which gives an error that reads "tag foo is disallowed except in
+      // specific forms".
+      if (!tagSpecDispatch.hasTagSpecs()) {
+        // TODO(gregable): Determine a good way to source a specUrl in these
+        // instances.
+        if (amp.validator.GENERATE_DETAILED_ERRORS) {
+          this.context_.addError(
+              amp.validator.ValidationError.Severity.ERROR,
+              amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+              this.context_.getDocLocator(),
+              /* params */[tagName.toLowerCase()],
+              /* specUrl */ '', this.validationResult_);
+        } else {
+          this.validationResult_.status =
+              amp.validator.ValidationResult.Status.FAIL;
+        }
+        return;
+      }
+    }
+    // Validate against all tagspecs.
+    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
+      const parsedSpec = this.rules_.getTagSpec(tagSpecId);
+      validateTagAgainstSpec(
+          this.rules_, parsedSpec, this.context_, encounteredAttrs,
+          resultForBestAttempt);
+      if (resultForBestAttempt.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        break;  // Exit early on success
+      }
+    }
+    this.validationResult_.mergeFrom(resultForBestAttempt);
   }
 };
 
@@ -4092,7 +4035,7 @@ amp.validator.renderErrorMessage = function(error) {
     throw 'not implemented';
   }
   goog.asserts.assert(error.code !== null);
-  const format = parsedValidatorRulesSingleton.getFormatByCode()[error.code];
+  const format = parsedValidatorRulesSingleton.getFormatByCode(error.code);
   goog.asserts.assert(format !== undefined);
   return applyFormat(format, error);
 };
@@ -4167,11 +4110,13 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
           amp.validator.ValidationError.Code
               .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT ||
-      error.code ==
+      error.code ===
           amp.validator.ValidationError.Code
               .MANDATORY_REFERENCE_POINT_MISSING ||
-      error.code ==
-          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT) {
+      error.code ===
+          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT ||
+      error.code ===
+          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'img' may only appear as a descendant of tag
