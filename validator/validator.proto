@@ -364,7 +364,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 13
+// NEXT AVAILABLE TAG: 14
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -384,6 +384,7 @@ message ValidatorRules {
   optional string manufactured_body_spec_url = 12;
 
   repeated ErrorFormat error_formats = 9;
+  repeated ErrorSpecificity error_specificity = 13;
 
   // Deprecated fields, do not reuse.
   extensions 5, 2;
@@ -539,6 +540,14 @@ message ValidationError {
   // in tests to match specific errors to specific tags in the test cases. It
   // is not a rendered value.
   optional string data_amp_report_test_value = 9;
+}
+
+// Used in the verbose validator to select between multiple generated error
+// types for a failing error. A higher number means that the error is more
+// specific, ie: more helpful, preferred.
+message ErrorSpecificity {
+  optional ValidationError.Code code = 1;
+  optional int32 specificity = 2;
 }
 
 message ErrorFormat {
