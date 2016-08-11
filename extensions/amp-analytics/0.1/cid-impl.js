@@ -294,6 +294,12 @@ function store(win, persistenceConsent, cidString) {
   }
 }
 
+/**
+ * Creates a JSON object that contains the given CID and the current time as
+ * a timestamp.
+ * @param {string} cidString
+ * @return {!{time: number, cid: string}}
+ */
 function createCidData(cidString) {
   return JSON.stringify({
     time: Date.now(),

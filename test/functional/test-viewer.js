@@ -500,15 +500,16 @@ describe('Viewer', () => {
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
   });
 
-  describe.only('baseCid', () => {
+  describe('baseCid', () => {
     const cidData = JSON.stringify({
-      time: 0,
+      time: 100,
       cid: 'cid-123',
     });
     let trustedViewer;
     let persistedCidData;
 
     beforeEach(() => {
+      clock.tick(100);
       trustedViewer = true;
       persistedCidData = cidData;
       sandbox.stub(viewer, 'isTrustedViewer',
@@ -539,7 +540,7 @@ describe('Viewer', () => {
     });
 
     it('should send message to store cid', () => {
-      const newCidData = JSON.stringify({time: 1, cid: 'cid-456'});
+      const newCidData = JSON.stringify({time: 101, cid: 'cid-456'});
       expect(viewer.baseCid(newCidData)).to.eventually.equal(newCidData);
     });
   });
