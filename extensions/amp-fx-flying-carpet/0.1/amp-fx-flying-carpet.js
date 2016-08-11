@@ -32,35 +32,50 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
     if (!this.isExperimentOn_) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
       return;
     }
 
+    const doc = this.element.ownerDocument;
+    const container = doc.createElement('div');
+    const childNodes = this.getRealChildNodes();
+
     /** @const @private {!Vsync} */
     this.vsync_ = this.getVsync();
 
-    const children = this.getRealChildNodes();
-    const doc = this.element.ownerDocument;
+    /**
+     * Preserved so that we may keep track of the "good" children. When an
+     * element collapses, we remove it from the list.
+     * @private @const
+     */
+    this.children_ = this.getRealChildren();
+
+    /**
+     * The number of non-empty child nodes left that are still "good". If no
+     * more are left, we attempt to collapse the flying carpet.
+     * Note that this may not be the number for child elements, since Text also
+     * appears inside the flying carpet.
+     * @private
+     */
+    this.totalChildren_ = this.visibileChildren_(childNodes).length;
 
     /**
      * A cached reference to the container, used to set its width to match
      * the flying carpet's.
      * @private @const
      */
-    this.container_ = doc.createElement('div');
+    this.container_ = container;
 
     const clip = doc.createElement('div');
     clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
-    this.container_.setAttribute('class', '-amp-fx-flying-carpet-container');
+    container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
-    for (let i = 0; i < children.length; i++) {
-      this.container_.appendChild(children[i]);
-    }
-    clip.appendChild(this.container_);
-
+    this.children_.forEach(child => this.setAsOwner(child));
+    childNodes.forEach(child => container.appendChild(child));
+    clip.appendChild(container);
     this.element.appendChild(clip);
   }
 
@@ -71,13 +86,17 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     });
   }
 
+  viewportCallback(inViewport) {
+    this.updateInViewport(this.children_, inViewport);
+  }
+
   assertPosition() {
     const layoutBox = this.element.getLayoutBox();
     const viewport = this.getViewport();
     const viewportHeight = viewport.getHeight();
     const docHeight = viewport.getScrollHeight();
     // Hmm, can the page height change and affect us?
-    user.assert(
+    user().assert(
       layoutBox.top >= viewportHeight,
       '<amp-fx-flying-carpet> elements must be positioned after the first ' +
       'viewport: %s Current position: %s. Min: %s',
@@ -85,7 +104,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       layoutBox.top,
       viewportHeight
     );
-    user.assert(
+    user().assert(
       layoutBox.bottom <= docHeight - viewportHeight,
       '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Max: %s',
@@ -100,10 +119,46 @@ class AmpFlyingCarpet extends AMP.BaseElement {
       this.assertPosition();
     } catch (e) {
       // Collapse the element if the effect is broken by the viewport location.
-      toggle(this.element, false);
+      this./*OK*/collapse();
       throw e;
     }
+    this.scheduleLayout(this.children_);
     return Promise.resolve();
+  }
+
+  collapsedCallback(child) {
+    const index = this.children_.indexOf(child);
+    if (index > -1) {
+      this.children_.splice(index, 1);
+      this.totalChildren_--;
+      if (this.totalChildren_ == 0) {
+        return this.attemptChangeHeight(0).then(() => {
+          this./*OK*/collapse();
+        }, () => {});
+      }
+    }
+  }
+
+  /**
+   * Determines the child nodes that are "visible". We purposefully ignore Text
+   * nodes that only contain whitespace since they do not contribute anything
+   * visually, only their surrounding Elements or non-whitespace Texts do.
+   * @param {!Array<!Node>} nodes
+   * @private
+   */
+  visibileChildren_(nodes) {
+    return nodes.filter(node => {
+      if (node.nodeType === /* Element */1) {
+        return true;
+      }
+
+      if (node.nodeType === /* Text */3) {
+        // Is there a non-whitespace character?
+        return /\S/.test(node.textContent);
+      }
+
+      return false;
+    });
   }
 }
 

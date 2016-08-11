@@ -15,6 +15,7 @@
  */
 package org.ampproject;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
@@ -43,12 +44,15 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
   private final Set<String> stripTypeSuffixes;
+  private final Map<String, Node> assignmentReplacements;
   final boolean isProd;
 
-  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes) {
+  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes,
+        Map<String, Node> assignmentReplacements) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
     this.isProd = isProd;
+    this.assignmentReplacements = assignmentReplacements;
   }
 
   @Override public void process(Node externs, Node root) {
@@ -60,10 +64,13 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
+    if (isCallRemovable(n)) {
+      Node call = n.getGrandparent();
+      maybeEliminateCallExceptFirstParam(call, call.getParent());
     // Remove `dev.assert` calls and preserve first argument if any.
-    if (isNameStripType(n, ImmutableSet.of( "dev.assert"))) {
+    } else if (isNameStripType(n, ImmutableSet.of( "dev.assert"))) {
       maybeEliminateCallExceptFirstParam(n, parent);
-    // Remove any `stripTypes` passed in outright like `dev.warn`.
+    // Remove any `stripTypes` passed in outright like `dev.fine`.
     } else if (isNameStripType(n, stripTypeSuffixes)) {
       removeExpression(n, parent);
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
@@ -74,6 +81,45 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("minified"))) {
       replaceWithBooleanExpression(true, n, parent);
+    } else if (isProd) {
+      maybeReplaceRValueInVar(n, assignmentReplacements);
+    }
+  }
+  
+  private boolean isCallRemovable(Node n) {
+    // Looks for a label named "assert" or "fine" then traverses up
+    // looking for a "Call". This more or less looks for
+    // module$src$log.dev().assert(); or module$src$log.dev().fine();
+    if (n != null && n.isString() &&
+        // Refactor to read this in from passed in from command line runner instead
+        (n.getString() == "assert" || n.getString() == "fine")) {
+      Node call = n.getGrandparent();
+      if (call == null || !call.isCall()) {
+        return false;
+      }
+      // Look for a module named src/log.js and a `dev` export that is called.
+      Node siblingcall = n.getParent().getFirstChild();
+      if (siblingcall.isCall()) {
+        Node getprop = siblingcall.getFirstChild();
+        return getprop != null && getprop.isGetProp() &&
+            getprop.matchesQualifiedName("module$src$log.dev");
+      }
+    }
+    return false;
+  }
+
+  private void maybeReplaceRValueInVar(Node n, Map<String, Node> map) {
+    if (n != null && (n.isVar() || n.isLet() || n.isConst())) {
+      Node varNode = n.getFirstChild();
+      if (varNode != null) {
+        for (Map.Entry<String, Node> mapping : map.entrySet()) {
+          if (varNode.getString() == mapping.getKey()) {
+            varNode.replaceChild(varNode.getFirstChild(), mapping.getValue());
+            compiler.reportCodeChange();
+            return;
+          }
+        }
+      }
     }
   }
 
@@ -85,7 +131,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   private boolean isFunctionInvokeAndPropAccess(Node n, String fnQualifiedName, Set<String> props) {
     // mode.getMode().localDev
     // mode [property] ->
-    //   getMode [call] 
+    //   getMode [call]
     //   ${property} [string]
     if (!n.isGetProp()) {
       return false;
@@ -133,7 +179,7 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       return false;
     }
     Node getprop = n.getFirstChild();
-    if (getprop == null) {
+    if (getprop == null || !getprop.isGetProp()) {
       return false;
     }
     return qualifiedNameEndsWithStripType(getprop, suffixes);
@@ -149,21 +195,20 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     compiler.reportCodeChange();
   }
 
-  private void maybeEliminateCallExceptFirstParam(Node n, Node p) {
-    Node call = n.getFirstChild();
-    if (call == null) {
+  private void maybeEliminateCallExceptFirstParam(Node call, Node p) {
+    Node getprop = call.getFirstChild();
+    if (getprop == null) {
       return;
     }
 
-    Node firstArg = call.getNext();
+    Node firstArg = getprop.getNext();
     if (firstArg == null) {
-      p.removeChild(n);
-      compiler.reportCodeChange();
+      removeExpression(call, p);
       return;
     }
 
     firstArg.detachFromParent();
-    p.replaceChild(n, firstArg);
+    p.replaceChild(call, firstArg);
     compiler.reportCodeChange();
   }
 

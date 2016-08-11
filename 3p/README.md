@@ -19,7 +19,6 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 - If you can make it not-iframe-based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
 - Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
 - All JS on container page must be open source and bundled with AMP.
-- Direct iframe embeds not using our 3p iframe mechanism (used e.g. for ads) are preferred.
 - JavaScript loaded into iframe should be reasonable with respect to functionality.
 - Use the `sandbox` attribute on iframe if possible.
 - Provide unit and integration tests.

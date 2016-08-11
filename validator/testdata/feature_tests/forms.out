@@ -1,0 +1,13 @@
+FAIL
+feature_tests/forms.html:46:2 The relative URL '/subscribe' for attribute 'action' in tag 'form' is disallowed. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:50:2 Invalid URL protocol 'http:' for attribute 'action' in tag 'form'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:54:2 The domain 'cdn.ampproject.org' for attribute 'action' in tag 'form' is disallowed. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:58:2 The attribute 'target' in tag 'form' is set to the invalid value '_new'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:62:2 The tag 'input' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:63:2 The tag 'select' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:64:4 The tag 'option' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:66:2 The tag 'textarea' may only appear as a descendant of tag 'form'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:69:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:70:4 The attribute 'type' in tag 'input' is set to the invalid value 'file'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:71:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]
+feature_tests/forms.html:72:4 The attribute 'type' in tag 'input' is set to the invalid value 'password'. (see https://www.ampproject.org/docs/reference/extended/amp-form.html) [DISALLOWED_HTML]

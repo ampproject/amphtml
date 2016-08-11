@@ -80,6 +80,7 @@ describe('amp-social-share', () => {
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'unknown-provider');
       expect(() => {
+        share.tryUpgrade_();
         share.build(true);
       }).to.throw('data-share-endpoint attribute is required');
     });
@@ -89,6 +90,7 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const share = iframe.doc.createElement('amp-social-share');
       expect(() => {
+        share.tryUpgrade_();
         share.build(true);
       }).to.throw('type attribute is required');
     });
@@ -156,8 +158,8 @@ describe('amp-social-share', () => {
   it('opens share window in _blank', () => {
     return getShare('twitter').then(el => {
       el.implementation_.handleClick_();
-      expect(el.implementation_.getWin().open.called).to.be.true;
-      expect(el.implementation_.getWin().open.calledWith(
+      expect(el.implementation_.win.open.called).to.be.true;
+      expect(el.implementation_.win.open.calledWith(
         'https://twitter.com/intent/tweet?text=doc%20title&' +
           'url=https%3A%2F%2Fcanonicalexample.com%2F',
           '_blank', 'resizable,scrollbars,width=640,height=480'

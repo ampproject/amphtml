@@ -19,9 +19,7 @@ var BBPromise = require('bluebird');
 var child_process = require('child_process');
 var exec = BBPromise.promisify(child_process.exec);
 var fs = BBPromise.promisifyAll(require('fs'));
-var git = require('gulp-git');
 var gulp = require('gulp-help')(require('gulp'));
-var table = require('text-table');
 var util = require('gulp-util');
 
 
@@ -46,10 +44,6 @@ var fileSizes = Object.create(null);
 var tableHeaders = [
   ['"datetime"']
 ];
-
-var tableOptions = {
-  hsep: ','
-};
 
 var dateTimes = [];
 
@@ -227,10 +221,7 @@ function csvify() {
         // Reverse it from oldest to newest
         return serializeCheckout(logs.reverse()).then(rows => {
           rows.unshift.apply(rows, tableHeaders);
-          var alignOptions = Array
-              .apply(null, Array(tableHeaders[0].length)).map(x => 'l');
-          var tbl = table(rows, tableOptions);
-
+          var tbl = rows.map(row => row.join(',')).join('\n');
           return fs.writeFileAsync('test/size.csv', `${tbl}\n`);
         });
       });

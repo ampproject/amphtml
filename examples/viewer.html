@@ -85,10 +85,12 @@
       bottom: 0;
       overflow-x: hidden;
       visibility: hidden;
+      transform: translateX(-100%);
     }
 
     viewer[data-show-container="1"] #container1 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="1"] #show-container1-anchor {
@@ -97,6 +99,7 @@
 
     viewer[data-show-container="2"] #container2 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="2"] #show-container2-anchor {
@@ -105,6 +108,7 @@
 
     viewer[data-show-container="3"] #container3 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="3"] #show-container3-anchor {
@@ -113,6 +117,7 @@
 
     viewer[data-show-container="4"] #container4 {
       visibility: visible;
+      transform: none;
     }
 
     viewer[data-show-container="4"] #show-container4-anchor {
@@ -500,7 +505,7 @@
       new Viewer(
           'container4',
           '4',
-          'http://localhost:8000/examples.build/alp.amp.max.html',
+          'http://localhost:8000/examples/alp.amp.max.html',
           false).start();
       addShowContainer('4');
 

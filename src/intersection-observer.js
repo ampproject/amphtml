@@ -17,8 +17,8 @@
 import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listenFor, postMessageToWindows} from './iframe-helper';
-import {timer} from './timer';
+import {SubscriptionApi} from './iframe-helper';
+import {timerFor} from './timer';
 
 /**
  * Produces a change entry for that should be compatible with
@@ -44,7 +44,7 @@ export function getIntersectionChangeEntry(
 
   const boundingClientRect =
       moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  dev.assert(boundingClientRect.width >= 0 &&
+  dev().assert(boundingClientRect.width >= 0 &&
       boundingClientRect.height >= 0, 'Negative dimensions in ad.');
   boundingClientRect.x = boundingClientRect.left;
   boundingClientRect.y = boundingClientRect.top;
@@ -95,12 +95,8 @@ export class IntersectionObserver extends Observable {
     super();
     /** @private @const */
     this.baseElement_ = baseElement;
-    /** @private {?Element} */
-    this.iframe_ = iframe;
-    /** @private {!Array<{win: !Window, origin: string}>} */
-    this.clientWindows_ = [];
-    /** @private {boolean} */
-    this.is3p_ = opt_is3p || false;
+    /** @private @const {!Timer} */
+    this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
     /** @private {boolean} */
@@ -115,31 +111,38 @@ export class IntersectionObserver extends Observable {
     /** @private @const {function()} */
     this.boundFlush_ = this.flush_.bind(this);
 
+    /**
+     * An object which handles tracking subscribers to the
+     * intersection updates for this element.
+     * Triggered by context.observeIntersection(…) inside the ad/iframe
+     * or by directly posting a send-intersections message.
+     * @private {!SubscriptionApi}
+     */
+    this.postMessageApi_ = new SubscriptionApi(
+        iframe, 'send-intersections', opt_is3p || false,
+        // Each time someone subscribes we make sure that they
+        // get an update.
+        () => this.startSendingIntersectionChanges_());
+
     this.init_();
   }
 
   init_() {
-    // Triggered by context.observeIntersection(…) inside the ad/iframe.
-    // We use listen instead of listenOnce, because a single ad/iframe might
-    // have multiple parties wanting to receive viewability data.
-    // The second time this is called, it doesn't do much but it
-    // guarantees that the receiver gets an initial intersection change
-    // record.
-    listenFor(this.iframe_, 'send-intersections', (data, source, origin) => {
-      // This message might be from any window within the iframe, we need
-      // to keep track of which windows want to be sent updates.
-      if (!this.clientWindows_.some(entry => entry.win == source)) {
-        this.clientWindows_.push({win: source, origin});
-      }
-      this.startSendingIntersectionChanges_();
-    }, this.is3p_,
-    // For 3P frames we also allow nested frames within them to listen to
-    // the intersection changes.
-    this.is3p_ /* opt_includingNestedWindows */);
-
     this.add(() => {
       this.sendElementIntersection_();
     });
+  }
+
+  /**
+   * Check if we need to unlisten when moving out of viewport,
+   * unlisten and reset unlistenViewportChanges_.
+   * @private
+   */
+  unlistenOnOutViewport_() {
+    if (this.unlistenViewportChanges_) {
+      this.unlistenViewportChanges_();
+      this.unlistenViewportChanges_ = null;
+    }
   }
   /**
    * Called via postMessage from the child iframe when the ad/iframe starts
@@ -184,9 +187,8 @@ export class IntersectionObserver extends Observable {
         unlistenScroll();
         unlistenChanged();
       };
-    } else if (this.unlistenViewportChanges_) {
-      this.unlistenViewportChanges_();
-      this.unlistenViewportChanges_ = null;
+    } else {
+      this.unlistenOnOutViewport_();
     }
   }
 
@@ -211,7 +213,7 @@ export class IntersectionObserver extends Observable {
       // Send one immediately, …
       this.flush_();
       // but only send a maximum of 10 postMessages per second.
-      this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
+      this.flushTimeout_ = this.timer_.delay(this.boundFlush_, 100);
     }
   }
 
@@ -219,17 +221,22 @@ export class IntersectionObserver extends Observable {
    * @private
    */
   flush_() {
+    // TODO(zhouyx): One potential place to check if element is still in doc.
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
       return;
     }
-    // Note that we multicast the update to all interested windows.
-    postMessageToWindows(
-        this.iframe_,
-        this.clientWindows_,
-        'intersection',
-        {changes: this.pendingChanges_},
-        this.is3p_);
+    // Note that SubscribeApi multicasts the update to all interested windows.
+    this.postMessageApi_.send('intersection', {changes: this.pendingChanges_});
     this.pendingChanges_.length = 0;
+  }
+
+  /**
+   * Provide a function to clear timeout before set this intersection to null.
+   */
+  destroy() {
+    this.timer_.cancel(this.flushTimeout_);
+    this.flushTimeout_ = 0;
+    this.unlistenOnOutViewport_();
   }
 }

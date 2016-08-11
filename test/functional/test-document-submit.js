@@ -53,7 +53,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
 
     tgt.setAttribute('action', 'https://cdn.ampproject.org');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
-        /form action should not be on cdn\.ampproject\.org/);
+        /form action should not be on AMP CDN/);
 
     tgt.setAttribute('action', 'https://valid.example.com');
     tgt.removeAttribute('target');

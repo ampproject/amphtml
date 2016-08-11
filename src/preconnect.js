@@ -20,10 +20,11 @@
  */
 
 
-import {getService} from './service';
+import {fromClass} from './service';
 import {parseUrl} from './url';
-import {timer} from './timer';
+import {timerFor} from './timer';
 import {platformFor} from './platform';
+import {viewerFor} from './viewer';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -55,8 +56,19 @@ export class Preconnect {
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
 
-    /** @private {boolean} */
-    this.preloadSupported_ = this.isPreloadSupported_();
+    /**
+     * Detect support for the given resource hints.
+     * Unfortunately not all browsers support this, so this can only
+     * be used as an affirmative signal.
+     * @private @const {{preload: boolean, preconnect: boolean}}
+     */
+    this.features_ = this.detectFeatures_();
+
+    /** @private @const {!./service/viewer-impl.Viewer} */
+    this.viewer_ = viewerFor(win);
+
+    /** @private @const {!./timer.Timer} */
+    this.timer_ = timerFor(win);
   }
 
   /**
@@ -76,7 +88,7 @@ export class Preconnect {
       return;
     }
     const origin = parseUrl(url).origin;
-    const now = timer.now();
+    const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
@@ -90,18 +102,24 @@ export class Preconnect {
         ? ACTIVE_CONNECTION_TIMEOUT_MS
         : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
-    const dns = this.document_.createElement('link');
-    dns.setAttribute('rel', 'dns-prefetch');
-    dns.setAttribute('href', origin);
+    // If we know that preconnect is supported, there is no need to do
+    // dedicated dns-prefetch.
+    let dns;
+    if (!this.features_.preconnect) {
+      dns = this.document_.createElement('link');
+      dns.setAttribute('rel', 'dns-prefetch');
+      dns.setAttribute('href', origin);
+      this.head_.appendChild(dns);
+    }
     const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
-    this.head_.appendChild(dns);
+    preconnect.setAttribute('referrerpolicy', 'origin');
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
-    timer.delay(() => {
-      if (dns.parentNode) {
+    this.timer_.delay(() => {
+      if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
       if (preconnect.parentNode) {
@@ -113,36 +131,56 @@ export class Preconnect {
   }
 
   /**
-   * Asks the browser to prefetch a URL. Always also does a preconnect
+   * Temporary to not break prod when versions are misaligned across binaries.
+   * DO NOT USE!
+   * This should be safe to remove 1 version after 1468017284333 hits prod.
+   * @param {string} url
+   * @param {string=} opt_preloadAs
+   * @deprecated
+   */
+  prefetch(url, opt_preloadAs) {
+    this.preload(url, opt_preloadAs);
+  }
+
+  /**
+   * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  prefetch(url, opt_preloadAs) {
+  preload(url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
     if (this.urls_[url]) {
       return;
     }
-    const command = this.preloadSupported_ ? 'preload' : 'prefetch';
+    const command = this.features_.preload ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = this.document_.createElement('link');
-    prefetch.setAttribute('rel', command);
-    prefetch.setAttribute('href', url);
-    // Do not set 'as' attribute for now, for 2 reasons
-    // - document value is not yet supported and dropped
-    // - script is blocked due to CSP.
-    // if (opt_preloadAs) {
-    //  prefetch.setAttribute('as', opt_preloadAs);
-    // }
-    this.head_.appendChild(prefetch);
-    // As opposed to preconnect we do not clean this tag up, because there is
-    // no expectation as to it having an immediate effect.
+    this.viewer_.whenFirstVisible().then(() => {
+      const preload = this.document_.createElement('link');
+      preload.setAttribute('rel', command);
+      preload.setAttribute('href', url);
+      preload.setAttribute('referrerpolicy', 'origin');
+      // Do not set 'as' attribute for now, for 2 reasons
+      // - document value is not yet supported and dropped
+      // - script is blocked due to CSP.
+      // if (opt_preloadAs) {
+      //  preload.setAttribute('as', opt_preloadAs);
+      // }
+      this.head_.appendChild(preload);
+      // As opposed to preconnect we do not clean this tag up, because there is
+      // no expectation as to it having an immediate effect.
+    });
   }
 
+  /**
+   * Skips over non HTTP/HTTPS URL.
+   * @param {string} url
+   * @return {boolean}
+   */
   isInterestingUrl_(url) {
     if (url.indexOf('https:') == 0 || url.indexOf('http:') == 0) {
       return true;
@@ -150,15 +188,21 @@ export class Preconnect {
     return false;
   }
 
-  /** @private */
-  isPreloadSupported_() {
+  /**
+   * Detect related features if feature detection is supported by the
+   * browser. Even if this fails, the browser may support the feature.
+   * @return {{preload: boolean, preconnect: boolean}}
+   * @private
+   */
+  detectFeatures_() {
     const tokenList = this.document_.createElement('link').relList;
     if (!tokenList || !tokenList.supports) {
-      this.preloadSupported_ = false;
-      return this.preloadSupported_;
+      return {};
     }
-    this.preloadSupported_ = tokenList.supports('preload');
-    return this.preloadSupported_;
+    return {
+      preconnect: tokenList.supports('preconnect'),
+      preload: tokenList.supports('preload'),
+    };
   }
 
   /**
@@ -178,25 +222,28 @@ export class Preconnect {
    * response, but please make it small :)
    */
   preconnectPolyfill_(origin) {
-    // Unfortunately there is no way to feature detect whether preconnect is
-    // supported, so we do this only in Safari, which is the most important
-    // browser without support for it. This needs to be removed should it
-    // ever add support.
-    if (!this.platform_.isSafari()) {
+    // Unfortunately there is no reliable way to feature detect whether
+    // preconnect is supported, so we do this only in Safari, which is
+    // the most important browser without support for it.
+    if (this.features_.preconnect || !this.platform_.isSafari()) {
       return;
     }
-    // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
-    // we effectively create an active connection.
-    // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-    this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
-    const url = origin +
-        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-        '_Do_not_worry_about_it?' + Math.random();
-    // We use an XHR without withCredentials(true), so we do not send cookies
-    // to the host and the host cannot set cookies.
-    const xhr = new XMLHttpRequest();
-    xhr.open('HEAD', url, true);
-    xhr.send();
+
+    this.viewer_.whenFirstVisible().then(() => {
+      // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
+      // we effectively create an active connection.
+      // TODO(@cramforce): Confirm actual http2 timeout in Safari.
+      this.origins_[origin] = Date.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+      const url = origin +
+          '/amp_preconnect_polyfill_404_or_other_error_expected.' +
+          '_Do_not_worry_about_it?' + Math.random();
+      // We use an XHR without withCredentials(true), so we do not send cookies
+      // to the host and the host cannot set cookies.
+      const xhr = new XMLHttpRequest();
+      xhr.open('HEAD', url, true);
+
+      xhr.send();
+    });
   }
 }
 
@@ -205,7 +252,5 @@ export class Preconnect {
  * @return {!Preconnect}
  */
 export function preconnectFor(window) {
-  return getService(window, 'preconnect', () => {
-    return new Preconnect(window);
-  });
+  return fromClass(window, 'preconnect', Preconnect);
 };

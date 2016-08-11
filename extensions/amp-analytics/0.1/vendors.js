@@ -75,10 +75,10 @@ export const ANALYTICS_CONFIG = {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
       'base': 'https://${log}${domain}/hit.xiti?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
-      'suffix': '&ref=${documentReferrer}',
+      'suffix': '&medium=amp&${extraUrlParams}&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
-        's2=${level2}${extraUrlParams}${suffix}',
+        's2=${level2}${suffix}',
       'click': '${base}&' +
         'pclick=${title}&' +
         's2click=${level2}&' +
@@ -249,6 +249,7 @@ export const ANALYTICS_CONFIG = {
       'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
+        '&val_101=${id}' +
         '&val_101=${canonicalPath}' +
         '&ch=${canonicalHost}' +
         '&uuid=${uid}' +
@@ -262,7 +263,8 @@ export const ANALYTICS_CONFIG = {
         '&tet=${totalEngagedTime}' +
         '&dr=${documentReferrer}' +
         '&plt=${pageLoadTime}' +
-        '&val_108=${title}',
+        '&val_108=${title}' +
+        '&val_120=3',
     },
     'triggers': {
       'defaultPageview': {
@@ -446,6 +448,47 @@ export const ANALYTICS_CONFIG = {
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'mparticle': {
+    'vars': {
+      'eventType': 'Unknown',
+      'debug': false,
+      'amp_clientId': 'CLIENT_ID(mparticle_amp_id)',
+    },
+    'requests': {
+      'host': 'https://pixels.mparticle.com',
+      'endpointPath': '/v1/${apiKey}/Pixel',
+      'baseParams': 'et=${eventType}&' +
+          'amp_id=${amp_clientId}&' +
+          'attrs_k=${eventAttributes_Keys}&' +
+          'attrs_v=${eventAttributes_Values}&' +
+          'ua_k=${userAttributes_Keys}&' +
+          'ua_v=${userAttributes_Values}&' +
+          'ui_t=${userIdentities_Types}&' +
+          'ui_v=${userIdentities_Values}&' +
+          'flags_k=${customFlags_Keys}&' +
+          'flags_v=${customFlags_Values}&' +
+          'ct=${timestamp}&' +
+          'dbg=${debug}&' +
+          'lc=${location}&' +
+          'av=${appVersion}',
+      'pageview': '${host}${endpointPath}?' +
+          'dt=ScreenView&' +
+          'n=${canonicalPath}&' +
+          'hn=${ampdocUrl}&' +
+          'ttl=${title}&' +
+          '${baseParams}',
+      'event': '${host}${endpointPath}?' +
+          'dt=AppEvent&' +
+          'n=${eventName}&' +
+          '${baseParams}',
     },
     'transport': {
       'beacon': false,
@@ -709,9 +752,10 @@ export const ANALYTICS_CONFIG = {
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
-      'parameterPrefix': '?p=431,${contentId},1,' +
-        '${screenWidth}x${screenHeight},${screenColorDepth},' +
-        '${documentReferrer},${timestamp},0,,0&tz=${timezone}' +
+      'parameterPrefix': '?p=432,${contentId},1,' +
+        '${screenWidth}x${screenHeight},${screenColorDepth},1,' +
+        '${timestamp},${documentReferrer},${viewportWidth}x' +
+        '${viewportHeight},0&tz=${timezone}' +
         '&eid=${clientId(amp-wt3-eid)}&la=${browserLanguage}',
       'parameterSuffix': '&pu=${canonicalUrl}',
       'pageParameter': '&cp1=${pageParameter1}' +

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {dashToCamelCase} from './string';
 import {dev} from './log';
 import {toArray} from './types';
 
@@ -228,7 +227,7 @@ export function childElement(parent, callback) {
  * Finds all child elements that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElements(parent, callback) {
   const children = [];
@@ -339,7 +338,7 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {!Array.<!Element>}
+ * @return {!Array<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
@@ -375,28 +374,49 @@ export function childElementByTag(parent, tagName) {
 
 
 /**
+ * Finds all child elements with the specified tag name.
+ * @param {!Element} parent
+ * @param {string} tagName
+ * @return {!Array<!Element>}
+ */
+export function childElementsByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return toArray(parent.querySelectorAll(':scope > ' + tagName));
+  }
+  tagName = tagName.toUpperCase();
+  return childElements(parent, el => {
+    return el.tagName == tagName;
+  });
+}
+
+
+/**
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
  * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
+ * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
+  opt_paramPattern) {
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
-  const attributes = element.attributes;
+  const dataset = element.dataset;
   const params = Object.create(null);
-  for (let i = 0; i < attributes.length; i++) {
-    const attr = attributes[i];
-    const matches = attr.name.match(/^data-param-(.+)/);
+  opt_paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  for (const key in dataset) {
+    const matches = key.match(opt_paramPattern);
     if (matches) {
-      const param = dashToCamelCase(matches[1]);
-      params[computeParamNameFunc(param)] = attr.value;
+      const param = matches[1][0].toLowerCase() + matches[1].substr(1);
+      params[computeParamNameFunc(param)] = dataset[key];
     }
   }
   return params;
 }
-
 
 /**
  * Whether the element have a next node in the document order.
@@ -414,6 +434,38 @@ export function hasNextNodeInDocumentOrder(element) {
     }
   } while (currentElement = currentElement.parentNode);
   return false;
+}
+
+
+/**
+ * Finds all ancestor elements that satisfies predicate.
+ * @param {!Element} child
+ * @param {function(!Element):boolean} predicate
+ * @return {!Array<!Element>}
+ */
+export function ancestorElements(child, predicate) {
+  const ancestors = [];
+  for (let ancestor = child.parentElement; ancestor;
+       ancestor = ancestor.parentElement) {
+    if (predicate(ancestor)) {
+      ancestors.push(ancestor);
+    }
+  }
+  return ancestors;
+}
+
+
+/**
+ * Finds all ancestor elements that has the specified tag name.
+ * @param {!Element} child
+ * @param {string} attr
+ * @return {!Array<!Element>}
+ */
+export function ancestorElementsByTag(child, tagName) {
+  tagName = tagName.toUpperCase();
+  return ancestorElements(child, el => {
+    return el.tagName == tagName;
+  });
 }
 
 
@@ -438,7 +490,7 @@ export function openWindowDialog(win, url, target, opt_features) {
   try {
     res = win.open(url, target, opt_features);
   } catch (e) {
-    dev.error('dom', 'Failed to open url on target: ', target, e);
+    dev().error('dom', 'Failed to open url on target: ', target, e);
   }
 
   // Then try with `_top` target.
@@ -446,4 +498,14 @@ export function openWindowDialog(win, url, target, opt_features) {
     res = win.open(url, '_top');
   }
   return res;
+}
+
+/**
+ * Whether the element is a script tag with application/json type.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isJsonScriptTag(element) {
+  return element.tagName == 'SCRIPT' &&
+            element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }

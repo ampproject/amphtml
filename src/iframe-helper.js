@@ -242,8 +242,8 @@ function registerGlobalListenerIfNeeded(parentWin) {
  */
 export function listenFor(
     iframe, typeOfMessage, callback, opt_is3P, opt_includingNestedWindows) {
-  dev.assert(iframe.src, 'only iframes with src supported');
-  dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
+  dev().assert(iframe.src, 'only iframes with src supported');
+  dev().assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
   const parentWin = iframe.ownerDocument.defaultView;
 
@@ -374,9 +374,71 @@ function parseIfNeeded(data) {
     try {
       data = JSON.parse(data);
     } catch (e) {
-      dev.warn('Postmessage could not be parsed. ' +
+      dev().warn('Postmessage could not be parsed. ' +
           'Is it in a valid JSON format?', e);
     }
   }
   return data;
+}
+
+
+
+/**
+ * Manages a postMessage API for an iframe with a subscription message and
+ * a way to broadcast messages to all subscribed windows, which
+ * in turn must all be descendants of the contentWindow of the iframe.
+ */
+export class SubscriptionApi {
+  /**
+   * @param {!Element} iframe The iframe.
+   * @param {string} type Type of the subscription message.
+   * @param {boolean} is3p set to true if the iframe is 3p.
+   * @param {function(!Object, !Window, string)} requestCallback Callback
+   *     invoked whenever a new window subscribes.
+   */
+  constructor(iframe, type, is3p, requestCallback) {
+    /** @private {!Element} */
+    this.iframe_ = iframe;
+    /** @private {boolean} */
+    this.is3p_ = is3p;
+    /** @private {!Array<{win: !Window, origin: string}>} */
+    this.clientWindows_ = [];
+
+    this.init_(type, requestCallback);
+  }
+
+  /**
+   * Start listening for messages.
+   * @param {string} type Type of the subscription message.
+   * @param {function(!Object, !Window, string)} requestCallback Callback
+   *     invoked whenever a new window subscribes.
+   * @private
+   */
+  init_(type, requestCallback) {
+    listenFor(
+        this.iframe_, type, (data, source, origin) => {
+          // This message might be from any window within the iframe, we need
+          // to keep track of which windows want to be sent updates.
+          if (!this.clientWindows_.some(entry => entry.win == source)) {
+            this.clientWindows_.push({win: source, origin});
+          }
+          requestCallback(data, source, origin);
+        }, this.is3p_,
+        // For 3P frames we also allow nested frames within them to subscribe..
+        this.is3p_ /* opt_includingNestedWindows */);
+  }
+
+  /**
+   * Sends a message to all subscribed windows.
+   * @param {string} type Type of the message.
+   * @param {!Object} data Message payload.
+   */
+  send(type, data) {
+    postMessageToWindows(
+        this.iframe_,
+        this.clientWindows_,
+        type,
+        data,
+        this.is3p_);
+  }
 }

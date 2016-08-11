@@ -25,10 +25,11 @@ before_script:
   - npm install -g gulp
   - pip install --user protobuf
 script:
-  - npm run node-test
+  - npm run ava
   - gulp lint
-  - gulp build --fortesting
-  - gulp check-types
+  - gulp build --fortesting --css-only
+  # TODO(jridgewell, #4347) Enable once assertions prove truthiness again.
+  # - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit
   # dep-check needs to occur after build since we rely on build to generate
@@ -52,3 +53,7 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
+
+cache:
+  directories:
+  - node_modules

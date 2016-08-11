@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../../3p/3p';
-import {getCorrelator} from './utils';
+import {makeCorrelator} from './correlator';
+import {checkData, loadScript} from '../../3p/3p';
 
 /**
  * @enum {number}
@@ -96,8 +96,8 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       if (data.categoryExclusions) {
         if (Array.isArray(data.categoryExclusions)) {
-          for (const categoryExclusion of data.categoryExclusions) {
-            slot.setCategoryExclusion(categoryExclusion);
+          for (let i = 0; i < data.categoryExclusions.length; i++) {
+            slot.setCategoryExclusion(data.categoryExclusions[i]);
           }
         } else {
           slot.setCategoryExclusion(data.categoryExclusions);
@@ -121,6 +121,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
+        global.context.renderStart();
         if (event.isEmpty) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
@@ -178,6 +179,7 @@ function doubleClickWithGlade(global, data) {
   slot.setAttribute('data-request-width', requestWidth);
 
   slot.addEventListener('gladeAdFetched', event => {
+    global.context.renderStart();
     if (event.detail.empty) {
       global.context.noContentAvailable();
     }
@@ -185,4 +187,12 @@ function doubleClickWithGlade(global, data) {
 
   window.glade = {correlator: getCorrelator(global)};
   loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
+}
+
+/**
+ * @param {!Window} global
+ * @return {number}
+ */
+function getCorrelator(global) {
+  return makeCorrelator(global.context.clientId, global.context.pageViewId);
 }

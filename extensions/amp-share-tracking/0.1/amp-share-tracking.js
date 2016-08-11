@@ -15,43 +15,118 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
+import {xhrFor} from '../../../src/xhr';
+import {viewerFor} from '../../../src/viewer';
 import {getService} from '../../../src/service';
-import {dev} from '../../../src/log';
+import {Layout} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
 
-class AmpShareTracking extends AMP.BaseElement {
+/**
+ * @visibleForTesting
+ */
+export class AmpShareTracking extends AMP.BaseElement {
+  /**
+    * @return {boolean}
+    * @private
+    */
+  isExperimentOn_() {
+    return isExperimentOn(this.win, TAG);
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
+  }
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
-    if (!this.isExperimentOn_) {
-      dev.warn(TAG, `TAG ${TAG} disabled`);
-      return;
+    user().assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
+
+    /** @private {string} */
+    this.vendorHref_ = this.element.getAttribute('data-href');
+    dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
+
+    /** @private {!Promise<!Object<string, string>>} */
+    this.shareTrackingFragments_ = Promise.all([
+      this.getIncomingFragment_(),
+      this.getOutgoingFragment_()]).then(results => {
+        dev().fine(TAG, 'incomingFragment: ', results[0]);
+        dev().fine(TAG, 'outgoingFragment: ', results[1]);
+        return {
+          incomingFragment: results[0],
+          outgoingFragment: results[1],
+        };
+      });
+
+    getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);
+  }
+
+  /**
+   * Get the incoming share-tracking fragment from the viewer
+   * @return {!Promise<string>}
+   * @private
+   */
+  getIncomingFragment_() {
+    dev().fine(TAG, 'getting incoming fragment');
+    return viewerFor(this.win).getFragment().then(fragment => {
+      const match = fragment.match(/\.([^&]*)/);
+      return match ? match[1] : '';
+    });
+  }
+
+  /**
+   * Get an outgoing share-tracking fragment
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOutgoingFragment_() {
+    dev().fine(TAG, 'getting outgoing fragment');
+    if (this.vendorHref_) {
+      return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
+    return this.getOutgoingRandomFragment_();
+  }
+
+  /**
+   * Get an outgoing share-tracking fragment from vendor
+   * by issueing a post request to the url the vendor provided
+   * @param {string} vendorUrl
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOutgoingFragmentFromVendor_(vendorUrl) {
+    const postReq = {
+      method: 'POST',
+      credentials: 'include',
+      requireAmpResponseSourceOrigin: true,
+      body: {},
+    };
+    return xhrFor(this.win).fetchJson(vendorUrl, postReq).then(response => {
+      if (response.fragment) {
+        return response.fragment;
+      }
+      user().error(TAG, 'The response from [' + vendorUrl + '] does not ' +
+          'have a fragment value.');
+      return '';
+    }, err => {
+      user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
+      return '';
+    });
+  }
+
+  /**
+   * Get a random outgoing share-tracking fragment
+   * @return {!Promise<string>}
+   * @private
+   */
+  getOutgoingRandomFragment_() {
+    // TODO(yuxichen): Generate random outgoing fragment
+    const randomFragment = 'rAmDoM';
+    return Promise.resolve(randomFragment);
   }
 }
-
-/**
- * ShareTrackingService processes the incoming and outcoming url fragment
- */
-export class ShareTrackingService {
-  constructor(window) {
-    this.win = window;
-  }
-}
-
-/**
- * @param {!Window} window
- * @return {!ShareTrackingService}
- */
-export function installShareTrackingService(window) {
-  return getService(window, 'shareTrackingService', () => {
-    return new ShareTrackingService(window);
-  });
-}
-
-installShareTrackingService(AMP.win);
 
 AMP.registerElement('amp-share-tracking', AmpShareTracking);

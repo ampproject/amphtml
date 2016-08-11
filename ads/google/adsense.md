@@ -19,16 +19,16 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=200
-    type="adsense"
-    data-ad-client="ca-pub-8125901705757971"
-    data-ad-slot="7783467241">
-</amp-ad>
+<amp-ad width=300 height=250
+      type="adsense"
+      data-ad-client="ca-pub-2005682797531342"
+      data-ad-slot="7046626912">
+ </amp-ad>
 ```
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see [ad network documentation](https://support.google.com/adsense/answer/181947?hl=en).
 
 Supported parameters:
 

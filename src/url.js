@@ -17,6 +17,7 @@
 import {endsWith} from './string';
 import {user} from './log';
 import {getMode} from './mode';
+import {urls} from './config';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
 const a = window.document.createElement('a');
@@ -24,7 +25,7 @@ const a = window.document.createElement('a');
 // We cached all parsed URLs. As of now there are no use cases
 // of AMP docs that would ever parse an actual large number of URLs,
 // but we often parse the same one over and over again.
-const cache = Object.create(null);
+const cache = window.UrlCache || (window.UrlCache = Object.create(null));
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -75,6 +76,7 @@ export function parseUrl(url) {
     pathname: a.pathname,
     search: a.search,
     hash: a.hash,
+    origin: null,  // Set below.
   };
 
   // Some IE11 specific polyfills.
@@ -172,10 +174,10 @@ export function addParamsToUrl(url, params) {
  */
 export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
-  user.assert(urlString != null, '%s %s must be available',
+  user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
   const url = parseUrl(urlString);
-  user.assert(
+  user().assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
       '%s %s must start with ' +
@@ -191,7 +193,7 @@ export function assertHttpsUrl(
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  user.assert(/^https?\:/i.test(urlString),
+  user().assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;
@@ -260,7 +262,7 @@ export function isProxyOrigin(url) {
   const path = url.pathname.split('/');
   const prefix = path[1];
   // List of well known proxy hosts. New proxies must be added here.
-  return (url.origin == 'https://cdn.ampproject.org' ||
+  return (url.origin == urls.cdn ||
       (url.origin.indexOf('http://localhost:') == 0 &&
        (prefix == 'c' || prefix == 'v')));
 }
@@ -303,14 +305,14 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user.assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + decodeURIComponent(path[3])
       : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
-  user.assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
+  user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
   return origin + path.join('/') + removeAmpJsParams(url.search) +
       (url.hash || '');

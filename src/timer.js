@@ -18,6 +18,7 @@
 import './polyfills';
 
 import {user} from './log';
+import {fromClass} from './service';
 
 /**
  * Helper with all things Timer.
@@ -39,15 +40,7 @@ export class Timer {
     this.canceled_ = {};
 
     /** @const {number} */
-    this.startTime_ = this.now();
-  }
-
-  /**
-   * Returns the current EPOC time in milliseconds.
-   * @return {number}
-   */
-  now() {
-    return Date.now();
+    this.startTime_ = Date.now();
   }
 
  /**
@@ -55,7 +48,7 @@ export class Timer {
   * @return {number}
   */
   timeSinceStart() {
-    return this.now() - this.startTime_;
+    return Date.now() - this.startTime_;
   }
 
   /**
@@ -140,7 +133,7 @@ export class Timer {
     const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
-        reject(user.createError(opt_message || 'timeout'));
+        reject(user().createError(opt_message || 'timeout'));
       }, delay);
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
@@ -159,5 +152,10 @@ export class Timer {
   }
 }
 
-
-export const timer = new Timer(window);
+/**
+ * @param {!Window} window
+ * @return {!Timer}
+ */
+export function timerFor(window) {
+  return fromClass(window, 'timer', Timer);
+};

@@ -48,7 +48,6 @@ tags: {  # amp-social-share
 }
 tags: {  # <amp-social-share>
   tag_name: "AMP-SOCIAL-SHARE"
-  disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-social-share extension .js script"
   attrs: {
     name: "type"
@@ -64,6 +63,7 @@ tags: {  # <amp-social-share>
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "fb-messenger"
+      allowed_protocol: "skype"
       allowed_protocol: "snapchat"
       allowed_protocol: "sms"
       allowed_protocol: "tel"

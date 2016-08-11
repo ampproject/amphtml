@@ -35,12 +35,12 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const typeAttr = user.assert(this.element.getAttribute('type'),
+    const typeAttr = user().assert(this.element.getAttribute('type'),
         'The type attribute is required. %s', this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
 
     /** @private @const {string} */
-    this.shareEndpoint_ = user.assert(
+    this.shareEndpoint_ = user().assert(
         this.element.getAttribute('data-share-endpoint') ||
         typeConfig.shareEndpoint,
         'The data-share-endpoint attribute is required. %s', this.element);
@@ -52,7 +52,7 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {string} */
     this.href_ = null;
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
-    const urlReplacements = urlReplacementsFor(this.getWin());
+    const urlReplacements = urlReplacementsFor(this.win);
     urlReplacements.expand(hrefWithVars).then(href => {
       this.href_ = href;
     });
@@ -64,11 +64,11 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @private */
   handleClick_() {
     if (!this.href_) {
-      dev.error(TAG, 'Clicked before href is set.');
+      dev().error(TAG, 'Clicked before href is set.');
       return;
     }
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    openWindowDialog(this.getWin(), this.href_, '_blank', windowFeatures);
+    openWindowDialog(this.win, this.href_, '_blank', windowFeatures);
   }
 
 };

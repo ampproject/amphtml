@@ -18,16 +18,13 @@ import {AccessClientAdapter} from './amp-access-client';
 import {isExperimentOn} from '../../../src/experiments';
 import {isProxyOrigin, removeFragment} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
 /** @const {string} */
 const TAG = 'amp-access-server';
-
-/** @const {number} */
-const AUTHORIZATION_TIMEOUT = 3000;
 
 
 /**
@@ -83,7 +80,7 @@ export class AccessServerAdapter {
     this.xhr_ = xhrFor(win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);
@@ -123,16 +120,16 @@ export class AccessServerAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Start authorization with ',
+    dev().fine(TAG, 'Start authorization with ',
         this.isProxyOrigin_ ? 'proxy' : 'non-proxy',
         this.serverState_,
         this.clientAdapter_.getAuthorizationUrl());
     if (!this.isProxyOrigin_ || !this.serverState_) {
-      dev.fine(TAG, 'Proceed via client protocol');
+      dev().fine(TAG, 'Proceed via client protocol');
       return this.clientAdapter_.authorize();
     }
 
-    dev.fine(TAG, 'Proceed via server protocol');
+    dev().fine(TAG, 'Proceed via server protocol');
 
     const varsPromise = this.context_.collectUrlVars(
         this.clientAdapter_.getAuthorizationUrl(),
@@ -149,11 +146,11 @@ export class AccessServerAdapter {
         'state': this.serverState_,
         'vars': requestVars,
       };
-      dev.fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
+      dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       // Note that `application/x-www-form-urlencoded` is used to avoid
       // CORS preflight request.
       return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
+          this.clientAdapter_.getAuthorizationTimeout(),
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
@@ -162,12 +159,12 @@ export class AccessServerAdapter {
             },
           }));
     }).then(response => {
-      dev.fine(TAG, 'Authorization response: ', response);
-      const accessDataString = dev.assert(
+      dev().fine(TAG, 'Authorization response: ', response);
+      const accessDataString = dev().assert(
           response.querySelector('script[id="amp-access-data"]'),
           'No authorization data available').textContent;
       const accessData = JSON.parse(accessDataString);
-      dev.fine(TAG, '- access data: ', accessData);
+      dev().fine(TAG, '- access data: ', accessData);
 
       return this.replaceSections_(response).then(() => {
         return accessData;
@@ -186,7 +183,7 @@ export class AccessServerAdapter {
    */
   replaceSections_(doc) {
     const sections = doc.querySelectorAll('[i-amp-access-id]');
-    dev.fine(TAG, '- access sections: ', sections);
+    dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
@@ -194,7 +191,7 @@ export class AccessServerAdapter {
         const target = this.win.document.querySelector(
             '[i-amp-access-id="' + sectionId + '"]');
         if (!target) {
-          dev.warn(TAG, 'Section not found: ', sectionId);
+          dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
         }
         target.parentElement.replaceChild(

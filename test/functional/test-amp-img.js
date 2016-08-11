@@ -49,6 +49,23 @@ describe('amp-img', () => {
     });
   }
 
+  it('should load an img with more attributes', () => {
+    return getImg({
+      src: '/base/examples/img/sample.jpg',
+      width: 300,
+      height: 200,
+      alt: 'An image',
+      referrerpolicy: 'origin',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal('/base/examples/img/sample.jpg');
+      expect(ampImg.implementation_.getPriority()).to.equal(0);
+      expect(img.getAttribute('alt')).to.equal('An image');
+      expect(img.getAttribute('referrerpolicy')).to.equal('origin');
+    });
+  });
+
   it('should load an img', () => {
     return getImg({
       src: '/base/examples/img/sample.jpg',
@@ -71,6 +88,7 @@ describe('amp-img', () => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('/base/examples/img/sample.jpg');
+      expect(img.hasAttribute('referrerpolicy')).to.be.false;
     });
   });
 
@@ -172,7 +190,6 @@ describe('amp-img', () => {
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
 
-      expect(impl.img_).to.not.have.class('-amp-ghost');
       expect(toggleElSpy.callCount).to.equal(0);
 
       return impl.layoutCallback().catch(() => {

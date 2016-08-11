@@ -71,7 +71,7 @@ class AmpInstagram extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.shortcode_ = user.assert(
+    this.shortcode_ = user().assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
@@ -80,14 +80,15 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('div');
+    const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    const image = this.getWin().document.createElement('amp-img');
+    const image = this.win.document.createElement('amp-img');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
+    image.setAttribute('referrerpolicy', 'origin');
 
     this.propagateAttributes(['alt'], image);
 

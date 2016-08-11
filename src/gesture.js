@@ -17,7 +17,6 @@
 import {Observable} from './observable';
 import {Pass} from './pass';
 import {dev} from './log';
-import {timer} from './timer';
 
 const PROP_ = '__AMP_Gestures';
 
@@ -64,12 +63,13 @@ export class Gestures {
    * Creates if not yet created and returns the shared Gestures instance for
    * the specified element.
    * @param {!Element} element
+   * @param {boolean=} shouldPreventDefault
    * @return {!Gestures}
    */
-  static get(element) {
+  static get(element, shouldNotPreventDefault = false) {
     let res = element[PROP_];
     if (!res) {
-      res = new Gestures(element);
+      res = new Gestures(element, shouldNotPreventDefault);
       element[PROP_] = res;
     }
     return res;
@@ -78,7 +78,7 @@ export class Gestures {
   /**
    * @param {!Element} element
    */
-  constructor(element) {
+  constructor(element, shouldNotPreventDefault) {
     /** @private {!Element} */
     this.element_ = element;
 
@@ -97,6 +97,9 @@ export class Gestures {
     /** @private {?GestureRecognizer} */
     this.eventing_ = null;
 
+    /** @private {boolean} */
+    this.shouldNotPreventDefault_ = shouldNotPreventDefault;
+
     /**
      * This variable indicates that the eventing has stopped on this
      * event cycle.
@@ -105,7 +108,8 @@ export class Gestures {
     this.wasEventing_ = false;
 
     /** @private {!Pass} */
-    this.pass_ = new Pass(this.doPass_.bind(this));
+    this.pass_ = new Pass(element.ownerDocument.defaultView,
+        this.doPass_.bind(this));
 
     /** @private {!Observable} */
     this.pointerDownObservable_ = new Observable();
@@ -180,7 +184,7 @@ export class Gestures {
    * @private
    */
   onTouchStart_(event) {
-    const now = timer.now();
+    const now = Date.now();
     this.wasEventing_ = false;
 
     this.pointerDownObservable_.fire(event);
@@ -215,7 +219,7 @@ export class Gestures {
    * @private
    */
   onTouchMove_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -243,7 +247,7 @@ export class Gestures {
    * @private
    */
   onTouchEnd_(event) {
-    const now = timer.now();
+    const now = Date.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -294,7 +298,7 @@ export class Gestures {
 
     // Set the recognizer as ready and wait for the pass to
     // make the decision.
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.ready_[i] = now + offset;
@@ -320,7 +324,7 @@ export class Gestures {
       return;
     }
 
-    const now = timer.now();
+    const now = Date.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.pending_[i] = now + timeLeft;
@@ -350,11 +354,11 @@ export class Gestures {
    * @private
    */
   signalEmit_(recognizer, data, event) {
-    dev.assert(this.eventing_ == recognizer,
+    dev().assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
     const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, timer.now(),
+      overserver.fire(new Gesture(recognizer.getType(), data, Date.now(),
           event));
     }
   }
@@ -367,7 +371,7 @@ export class Gestures {
     let cancelEvent = !!this.eventing_ || this.wasEventing_;
     this.wasEventing_ = false;
     if (!cancelEvent) {
-      const now = timer.now();
+      const now = Date.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
                 this.pending_[i] && this.pending_[i] >= now) {
@@ -378,7 +382,9 @@ export class Gestures {
     }
     if (cancelEvent) {
       event.stopPropagation();
-      event.preventDefault();
+      if (!this.shouldNotPreventDefault_) {
+        event.preventDefault();
+      }
     }
     if (this.passAfterEvent_) {
       this.passAfterEvent_ = false;
@@ -393,7 +399,7 @@ export class Gestures {
    * @private
    */
   doPass_() {
-    const now = timer.now();
+    const now = Date.now();
 
     // The "most ready" recognizer is the youngest in the "ready" set.
     // Otherwise we wouldn't wait for it at all.

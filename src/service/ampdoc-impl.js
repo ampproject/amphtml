@@ -24,6 +24,18 @@ const AMPDOC_PROP = '__AMPDOC';
 
 
 /**
+ * Creates and installs the ampdoc for the shadow root.
+ * @param {!AmpDocService} ampdocService
+ * param {!ShadowRoot} shadowRoot
+ * @return {!AmpDoc}
+ * @restricted
+ */
+export function installShadowDoc(ampdocService, shadowRoot) {
+  return ampdocService.installShadowDoc_(shadowRoot);
+}
+
+
+/**
  * This service helps locate an ampdoc (`AmpDoc` instance) for any node,
  * either in the single-doc or shadow-doc environments.
  *
@@ -73,26 +85,45 @@ export class AmpDocService {
       return this.singleDoc_;
     }
 
-    // A custom element may already have the reference to the ampdoc.
-    if (typeof node.getAmpDoc == 'function') {
-      const ampDoc = node.getAmpDoc();
-      if (ampDoc) {
-        return ampDoc;
+    // Otherwise discover and possibly create the ampdoc.
+    let n = node;
+    while (n) {
+      // A custom element may already have the reference to the ampdoc.
+      if (typeof n.getAmpDoc == 'function') {
+        const ampdoc = n.getAmpDoc();
+        if (ampdoc) {
+          return ampdoc;
+        }
       }
+
+      // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
+      const shadowRoot = closestNode(n, n => isShadowRoot(n));
+      if (!shadowRoot) {
+        break;
+      }
+
+      const ampdoc = shadowRoot[AMPDOC_PROP];
+      if (ampdoc) {
+        return ampdoc;
+      }
+      n = shadowRoot.host;
     }
 
-    // Otherwise discover and possibly create the ampdoc.
-    // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
-    const shadowRoot = closestNode(node, node => isShadowRoot(node));
-    if (!shadowRoot) {
-      throw dev.createError('No root found for', node);
-    }
-    let ampDoc = shadowRoot[AMPDOC_PROP];
-    if (!ampDoc) {
-      ampDoc = new AmpDocShadow(this.win, shadowRoot);
-      shadowRoot[AMPDOC_PROP] = ampDoc;
-    }
-    return ampDoc;
+    throw dev().createError('No ampdoc found for', node);
+  }
+
+  /**
+   * Creates and installs the ampdoc for the shadow root.
+   * @param {!ShadowRoot} shadowRoot
+   * @return {!AmpDoc}
+   * @private
+   */
+  installShadowDoc_(shadowRoot) {
+    dev().assert(!shadowRoot[AMPDOC_PROP],
+        'The shadow root already contains ampdoc');
+    const ampdoc = new AmpDocShadow(this.win, shadowRoot);
+    shadowRoot[AMPDOC_PROP] = ampdoc;
+    return ampdoc;
   }
 }
 
@@ -112,14 +143,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isSingleDoc() {
-    return dev.assert(null, 'not implemented');
-  }
-
-  /**
-   * @return {!Window}
-   */
-  getWin() {
-    return dev.assert(null, 'not implemented');
+    return dev().assert(null, 'not implemented');
   }
 
   /**
@@ -130,7 +154,15 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    */
   getRootNode() {
-    return dev.assert(null, 'not implemented');
+    return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * DO NOT CALL. Retained for backward compat during rollout.
+   * @return {!Window}
+   */
+  getWin() {
+    return dev().assert(null, 'not implemented');
   }
 
   /**
@@ -158,18 +190,18 @@ export class AmpDocSingle extends AmpDoc {
    */
   constructor(win) {
     super();
-    /** @private @const {!Window} */
+    /** @public @const {!Window} */
     this.win = win;
-  }
-
-  /** @override */
-  isSingleDoc() {
-    return true;
   }
 
   /** @override */
   getWin() {
     return this.win;
+  }
+
+  /** @override */
+  isSingleDoc() {
+    return true;
   }
 
   /** @override */
@@ -198,13 +230,13 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  isSingleDoc() {
-    return false;
+  getWin() {
+    return this.win;
   }
 
   /** @override */
-  getWin() {
-    return this.win;
+  isSingleDoc() {
+    return false;
   }
 
   /** @override */

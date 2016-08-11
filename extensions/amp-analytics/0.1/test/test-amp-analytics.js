@@ -16,6 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
+import {Crypto} from '../crypto-impl';
 import {instrumentationServiceFor} from '../instrumentation';
 import {
   installUserNotificationManager,
@@ -45,6 +46,7 @@ describe('amp-analytics', function() {
   let sendRequestSpy;
   let configWithCredentials;
   let uidService;
+  let crypto;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
@@ -68,6 +70,7 @@ describe('amp-analytics', function() {
       installCidService(iframe.win);
       installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
+
       resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
@@ -80,6 +83,10 @@ describe('amp-analytics', function() {
           return Promise.resolve(JSON.parse(jsonMockResponses[url]));
         }};
       });
+
+      resetServiceForTesting(iframe.win, 'crypto');
+      crypto = new Crypto(iframe.win);
+      getService(iframe.win, 'crypto', () => crypto);
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', './test-canonical.html');
@@ -117,9 +124,9 @@ describe('amp-analytics', function() {
         return;
       }
       return new Promise(resolve => {
-        const start = new Date().getTime();
+        const start = Date.now();
         const interval = setInterval(() => {
-          const time = new Date().getTime();
+          const time = Date.now();
           if (sendRequestSpy.callCount > 0 ||
                   opt_max && (time - start) > opt_max) {
             clearInterval(interval);
@@ -161,7 +168,7 @@ describe('amp-analytics', function() {
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';
@@ -440,6 +447,20 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('expands element level vars with higher precedence than trigger vars',
+    () => {
+      const ins = instrumentationServiceFor(windowApi);
+      const el1 = windowApi.document.createElement('div');
+      el1.className = 'x';
+      el1.dataset.varsTest = 'foo';
+      ins.addListener(
+        {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
+        function(arg) {
+          expect(arg.vars.test).to.equal('foo');
+        });
+      ins.onClick_({target: el1});
+    });
+
   it('expands config vars with higher precedence than platform vars', () => {
     const analytics = getAnalyticsTag({
       'vars': {'random': 428},
@@ -543,6 +564,29 @@ describe('amp-analytics', function() {
       expect(addListenerSpy.args[0][0]['selector']).to.equal('bar');
     });
   });
+
+  function selectorExpansionTest(selector) {
+    it('expand selector value: ' + selector, () => {
+      const ins = instrumentationServiceFor(windowApi);
+      const addListenerSpy = sandbox.spy(ins, 'addListener');
+      const analytics = getAnalyticsTag({
+        requests: {foo: 'https://example.com/bar'},
+        triggers: [{on: 'click', selector: '${foo}, ${bar}', request: 'foo'}],
+        vars: {foo: selector, bar: '123'},
+      });
+      return waitForNoSendRequest(analytics).then(() => {
+        expect(addListenerSpy.callCount).to.equal(1);
+        expect(addListenerSpy.args[0][0]['selector']).to
+            .equal(selector + ', 123');
+      });
+    });
+  }
+
+  ['.clazz', 'a, div', 'a .foo', 'a #foo', 'a > div', 'div + p', 'div ~ ul',
+    '[target=_blank]', '[title~=flower]', '[lang|=en]', 'a[href^="https"]',
+    'a[href$=".pdf"]', 'a[href="w3schools"]', 'a:active', 'p::after',
+    'p:first-child', 'p:lang(it)', ':not(p)', 'p:nth-child(2)']
+        .map(selectorExpansionTest);
 
   it('does not expands selector with platform variable', () => {
     const ins = instrumentationServiceFor(windowApi);
@@ -719,7 +763,7 @@ describe('amp-analytics', function() {
     it('allows a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(analytics, 'sha384_').returns([0, 100, 0, 100]);
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -731,9 +775,10 @@ describe('amp-analytics', function() {
       const analytics = getAnalyticsTag(config);
 
       const urlReplacements = installUrlReplacementsService(
-                analytics.getWin());
+                analytics.win);
       sandbox.stub(urlReplacements, 'getReplacement_').returns(0);
-      sandbox.stub(analytics, 'sha384_').withArgs('0').returns([0]);
+      sandbox.stub(crypto, 'uniform')
+          .withArgs('0').returns(Promise.resolve(0.005));
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
       });
@@ -742,7 +787,7 @@ describe('amp-analytics', function() {
     it('does not allow a request through', () => {
       const analytics = getAnalyticsTag(getConfig(1));
 
-      sandbox.stub(analytics, 'sha384_').returns([1, 2, 3, 4]);
+      sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
       return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(0);
       });
@@ -778,6 +823,30 @@ describe('amp-analytics', function() {
         }],
       };
       const analytics = getAnalyticsTag(incompleteConfig);
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (Infinity)', () => {
+      const analytics = getAnalyticsTag(getConfig(Infinity));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (NaN)', () => {
+      const analytics = getAnalyticsTag(getConfig(NaN));
+
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('works for invalid threadhold (-1)', () => {
+      const analytics = getAnalyticsTag(getConfig(-1));
 
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);

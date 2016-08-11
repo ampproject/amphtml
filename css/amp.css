@@ -403,3 +403,10 @@ form [submit-error] {
 amp-live-list > [update] {
   display: none;
 }
+
+/**
+ * Display none elements
+ */
+amp-experiment, amp-share-tracking {
+  display: none;
+}

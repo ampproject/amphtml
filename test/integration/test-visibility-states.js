@@ -25,7 +25,7 @@ import {resourcesFor} from '../../src/resources';
 import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 
-describe('Viewer Visibility State', () => {
+describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
 
   // This test only works with uncompiled JS, because it stubs out
   // private properties.
@@ -43,7 +43,7 @@ describe('Viewer Visibility State', () => {
   function noop() {}
 
   // TODO(#3561): unmute the test.
-  describe.skipper().skipSafari().run('Element Transitions', () => {
+  describe.configure().skipSafari().run('Element Transitions', () => {
     let fixture;
     let resources;
     let viewer;
@@ -319,24 +319,24 @@ describe('Viewer Visibility State', () => {
         }).then(setupSpys);
       });
 
-      it('calls layout when going to VISIBLE', () => {
+      it('calls layout and resume when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 
-      it('does not call callbacks when going to HIDDEN', () => {
+      it('calls resume when going to HIDDEN', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
-          expect(resumeCallback).not.to.have.been.called;
+          expect(resumeCallback).to.have.been.called;
         });
       });
 

@@ -23,6 +23,7 @@ import {
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
+import {urls} from './config';
 
 
 /** @private @const {string} */
@@ -306,7 +307,7 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     } catch (e) {
       // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      user.error(TAG, 'Failed to parse srcset: ', e);
+      user().error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();
@@ -337,7 +338,7 @@ function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
   }
 
   // Rewrite as a proxy URL.
-  return 'https://cdn.ampproject.org/i/' +
+  return `${urls.cdn}/i/` +
       (src.protocol == 'https:' ? 's/' : '') +
       encodeURIComponent(src.host) +
       src.pathname + (src.search || '') + (src.hash || '');

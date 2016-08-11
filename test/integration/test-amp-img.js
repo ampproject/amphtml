@@ -19,7 +19,7 @@ import {
   expectBodyToBecomeVisible,
 } from '../../testing/iframe.js';
 
-describe('Rendering of amp-img', function() {
+describe.configure().retryOnSaucelabs().run('Rendering of amp-img', function() {
   this.timeout(5000);
 
   let fixture;

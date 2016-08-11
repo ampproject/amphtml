@@ -15,6 +15,7 @@
  */
 
 import {getMode} from './mode';
+import {getModeObject} from './mode-object';
 
 
 /** @const Time when this JS loaded.  */
@@ -70,7 +71,7 @@ export class Log {
      * the tests runs because only the former is relayed to the console.
      * @const {!Window}
      */
-    this.win = win.AMP_TEST_IFRAME ? win.parent : win;
+    this.win = (getMode().test && win.AMP_TEST_IFRAME) ? win.parent : win;
 
     /** @private @const {function(!./mode.ModeDef):!LogLevel} */
     this.levelFunc_ = levelFunc;
@@ -98,7 +99,7 @@ export class Log {
     }
 
     // Logging is enabled for tests directly.
-    if (this.win.ENABLE_LOG) {
+    if (getMode().test && this.win.ENABLE_LOG) {
       return LogLevel.FINE;
     }
 
@@ -108,7 +109,7 @@ export class Log {
     }
 
     // Delegate to the specific resolver.
-    return this.levelFunc_(getMode());
+    return this.levelFunc_(getModeObject());
   }
 
   /**
@@ -126,7 +127,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift(new Date().getTime() - start, '[' + tag + ']');
+      messages.unshift(Date.now() - start, '[' + tag + ']');
       fn.apply(this.win.console, messages);
     }
   }
@@ -350,6 +351,13 @@ export function rethrowAsync(var_args) {
 
 
 /**
+ * A cached user log. We do not use a Service since the service module depends
+ * on Log and closure literally can't even.
+ * @type {Log}
+ */
+let userLog;
+
+/**
  * Publisher level log.
  *
  * Enabled in the following conditions:
@@ -357,34 +365,51 @@ export function rethrowAsync(var_args) {
  *  2. Development mode is enabled via `#development=1` or logging is explicitly
  *     enabled via `#log=D` where D >= 1.
  *
- * @const {!Log}
+ * @return {!Log}
  */
-export const user = new Log(window, mode => {
-  const logNum = parseInt(mode.log, 10);
-  if (mode.development || logNum >= 1) {
-    return LogLevel.FINE;
+export function user() {
+  if (userLog) {
+    return userLog;
   }
-  return LogLevel.OFF;
-}, USER_ERROR_SENTINEL);
+  return userLog = new Log(window, mode => {
+    const logNum = parseInt(mode.log, 10);
+    if (mode.development || logNum >= 1) {
+      return LogLevel.FINE;
+    }
+    return LogLevel.OFF;
+  }, USER_ERROR_SENTINEL);
+}
 
 
 /**
- * AMP development log. Calls to `dev.assert` and `dev.fine` are stripped in
- * the PROD binary. However, `dev.assert` result is preserved in either case.
+ * A cached dev log. We do not use a Service since the service module depends
+ * on Log and closure literally can't even.
+ * @type {Log}
+ */
+let devLog;
+
+/**
+ * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
+ * the PROD binary. However, `devLog().assert` result is preserved in either case.
  *
  * Enabled in the following conditions:
  *  1. Not disabled using `#log=0`.
  *  2. Logging is explicitly enabled via `#log=D`, where D >= 2.
  *
- * @const {!Log}
+ * @return {!Log}
  */
-export const dev = new Log(window, mode => {
-  const logNum = parseInt(mode.log, 10);
-  if (logNum >= 3) {
-    return LogLevel.FINE;
+export function dev() {
+  if (devLog) {
+    return devLog;
   }
-  if (logNum >= 2) {
-    return LogLevel.INFO;
-  }
-  return LogLevel.OFF;
-});
+  return devLog = new Log(window, mode => {
+    const logNum = parseInt(mode.log, 10);
+    if (logNum >= 3) {
+      return LogLevel.FINE;
+    }
+    if (logNum >= 2) {
+      return LogLevel.INFO;
+    }
+    return LogLevel.OFF;
+  });
+}

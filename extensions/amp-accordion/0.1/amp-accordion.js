@@ -31,9 +31,6 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
-    /** @const @private {!Window} */
-    this.win_ = this.getWin();
-
     /** @const @private {string} */
     this.id_ = this.getSessionStorageKey_();
 
@@ -49,13 +46,13 @@ class AmpAccordion extends AMP.BaseElement {
     }
     const boundOnHeaderClick_ = this.onHeaderClick_.bind(this);
     this.sections_.forEach((section, index) => {
-      user.assert(
+      user().assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const sectionComponents_ = section.children;
-      user.assert(
+      user().assert(
           sectionComponents_.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
@@ -90,7 +87,7 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionStorageKey_() {
     const id_ = this.element.id;
-    const url = removeFragment(this.win_.location.href);
+    const url = removeFragment(this.win.location.href);
     return `amp-${id_}-${url}`;
   }
 
@@ -101,10 +98,10 @@ class AmpAccordion extends AMP.BaseElement {
    */
   getSessionState_() {
     try {
-      const sessionStr = this.win_./*OK*/sessionStorage.getItem(this.id_);
+      const sessionStr = this.win./*OK*/sessionStorage.getItem(this.id_);
       return JSON.parse(sessionStr);
     } catch (e) {
-      dev.error(e.message, e.stack);
+      dev().error(e.message, e.stack);
       return;
     }
   }
@@ -116,9 +113,9 @@ class AmpAccordion extends AMP.BaseElement {
   setSessionState_() {
     const sessionStr = JSON.stringify(this.currentState_);
     try {
-      this.win_./*OK*/sessionStorage.setItem(this.id_, sessionStr);
+      this.win./*OK*/sessionStorage.setItem(this.id_, sessionStr);
     } catch (e) {
-      dev.error(e.message, e.stack);
+      dev().error(e.message, e.stack);
     }
   }
 

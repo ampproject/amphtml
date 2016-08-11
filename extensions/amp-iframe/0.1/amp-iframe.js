@@ -21,8 +21,9 @@ import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
+import {urls} from '../../../src/config';
 
 /** @const {string} */
 const TAG_ = 'amp-iframe';
@@ -47,21 +48,21 @@ export class AmpIframe extends AMP.BaseElement {
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
-    user.assert(
+    user().assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
         url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
-    user.assert(
+    user().assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
-    user.assert(!(endsWith(url.hostname, '.ampproject.net') ||
+    user().assert(!(endsWith(url.hostname, `.${urls.thirdPartyFrameHost}`) ||
         endsWith(url.hostname, '.ampproject.org')),
         'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
@@ -71,7 +72,7 @@ export class AmpIframe extends AMP.BaseElement {
   assertPosition() {
     const pos = this.element.getLayoutBox();
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
-    user.assert(pos.top >= minTop,
+    user().assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
@@ -98,7 +99,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!srcdoc) {
       return;
     }
-    user.assert(
+    user().assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
@@ -215,7 +216,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isResizable_) {
-      user.assert(this.getOverflowElement(),
+      user().assert(this.getOverflowElement(),
           'Overflow element must be defined for resizable frames: %s',
           this.element);
     }
@@ -253,8 +254,9 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     this.propagateAttributes(
-        ['frameborder', 'allowfullscreen', 'allowtransparency', 'scrolling'],
-        iframe);
+        ['frameborder', 'allowfullscreen', 'allowtransparency',
+         'scrolling', 'referrerpolicy'],
+         iframe);
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 
@@ -272,7 +274,7 @@ export class AmpIframe extends AMP.BaseElement {
         // Prevent this iframe from ever being recreated.
         this.iframeSrc = null;
 
-        timer.promise(trackingIframeTimeout).then(() => {
+        timerFor(this.win).promise(trackingIframeTimeout).then(() => {
           removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
@@ -281,23 +283,7 @@ export class AmpIframe extends AMP.BaseElement {
     };
 
     listenFor(iframe, 'embed-size', data => {
-      let newHeight, newWidth;
-      if (data.width !== undefined) {
-        newWidth = Math.max(this.element./*OK*/offsetWidth +
-            data.width - iframe./*OK*/offsetWidth, data.width);
-        iframe.width = data.width;
-        this.element.setAttribute('width', newWidth);
-      }
-
-      if (data.height !== undefined) {
-        newHeight = Math.max(this.element./*OK*/offsetHeight +
-            data.height - iframe./*OK*/offsetHeight, data.height);
-        iframe.height = data.height;
-        this.element.setAttribute('height', newHeight);
-      }
-      if (newHeight !== undefined || newWidth !== undefined) {
-        this.updateSize_(newHeight, newWidth);
-      }
+      this.updateSize_(data.height, data.width);
     });
 
     if (this.isClickToPlay_) {
@@ -311,7 +297,7 @@ export class AmpIframe extends AMP.BaseElement {
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
       if (this.container_ != this.element) {
-        timer.delay(() => {
+        timerFor(this.win).delay(() => {
           this.deferMutate(() => {
             this.container_.classList.add('amp-active');
           });
@@ -341,7 +327,10 @@ export class AmpIframe extends AMP.BaseElement {
       this.iframe_ = null;
       // IntersectionObserver's listeners were cleaned up by
       // setInViewport(false) before #unlayoutCallback
-      this.intersectionObserver_ = null;
+      if (this.intersectionObserver_) {
+        this.intersectionObserver_.destroy();
+        this.intersectionObserver_ = null;
+      }
     }
     return true;
   }
@@ -351,6 +340,14 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
     }
+  }
+
+  /** @override  */
+  getPriority() {
+    if (isAdLike(this.element)) {
+      return 2; // See AmpAd3PImpl.
+    }
+    return super.getPriority();
   }
 
   /**
@@ -378,18 +375,55 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * Updates the element's dimensions to accommodate the iframe's
    *    requested dimensions.
-   * @param {number|undefined} newWidth
-   * @param {number|undefined} newHeight
+   * @param {number|undefined} height
+   * @param {number|undefined} width
    * @private
    */
-  updateSize_(newHeight, newWidth) {
+  updateSize_(height, width) {
     if (!this.isResizable_) {
-      user.warn(TAG_,
+      user().error(TAG_,
           'ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
-    this.attemptChangeSize(newHeight, newWidth);
+
+    if (height < 100) {
+      user().error(TAG_,
+          'ignoring embed-size request because the resize height is ' +
+          'less than 100px',
+          this.element);
+      return;
+    }
+
+    let newHeight, newWidth;
+    if (height !== undefined) {
+      newHeight = Math.max(
+        (this.element./*OK*/offsetHeight - this.iframe_./*OK*/offsetHeight)
+            + height,
+        height);
+    }
+    if (width !== undefined) {
+      newWidth = Math.max(
+        (this.element./*OK*/offsetWidth - this.iframe_./*OK*/offsetWidth)
+            + width,
+        width);
+    }
+
+    if (newHeight !== undefined || newWidth !== undefined) {
+      this.attemptChangeSize(newHeight, newWidth).then(() => {
+        if (newHeight !== undefined) {
+          this.element.setAttribute('height', newHeight);
+        }
+        if (newWidth !== undefined) {
+          this.element.setAttribute('width', newWidth);
+        }
+      }, () => {});
+    } else {
+      user().error(TAG_,
+          'ignoring embed-size request because'
+          + 'no width or height value is provided',
+          this.element);
+    }
   }
 
   /**
@@ -434,6 +468,36 @@ function makeIOsScrollable(element) {
     return wrapper;
   }
   return element;
+}
+
+// Most common ad sizes
+// Array of [width, height] pairs.
+const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+
+/**
+ * Guess whether this element might be an ad.
+ * @param {!Element} element An amp-iframe element.
+ * @return {boolean}
+ * @visibleForTesting
+ */
+export function isAdLike(element) {
+  const height = parseInt(element.getAttribute('height'), 10);
+  const width = parseInt(element.getAttribute('width'), 10);
+  for (let i = 0; i < adSizes.length; i++) {
+    const refWidth = adSizes[i][0];
+    const refHeight = adSizes[i][1];
+    if (refHeight > height) {
+      continue;
+    }
+    if (refWidth > width) {
+      continue;
+    }
+    // Fuzzy matching to account for padding.
+    if (height - refHeight <= 20 && width - refWidth <= 20) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

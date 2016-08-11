@@ -18,6 +18,7 @@ import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {dev} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
+import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
@@ -54,60 +55,113 @@ const EXPERIMENTS = [
     id: 'alp',
     name: 'Activates support for measuring incoming clicks.',
     spec: 'https://github.com/ampproject/amphtml/issues/2934',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4005',
   },
   {
     id: 'amp-experiment',
     name: 'AMP Experiment',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-experiment/amp-experiment.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
   },
   {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
     id: 'amp-sticky-ad',
     name: 'AMP Sticky Ad',
     spec: 'https://github.com/ampproject/amphtml/issues/2472',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
     id: 'amp-live-list',
     name: 'AMP Live List/Blog',
     spec: 'https://github.com/ampproject/amphtml/issues/2762',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
   },
   {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-access-signin',
+    name: 'AMP Access sign-in',
+    spec: 'https://github.com/ampproject/amphtml/issues/4227',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4226',
   },
   {
     id: 'amp-slidescroll',
     name: 'AMP carousel using horizontal scroll',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3997',
+  },
+  {
+    id: 'amp-scrollable-carousel',
+    name: 'AMP carousel using horizontal scroll',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
   },
   {
     id: 'form-submit',
     name: 'Global document form submit handler',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
   },
   {
     id: 'amp-form',
     name: 'AMP Form Extension',
     spec: 'https://github.com/ampproject/amphtml/issues/3343',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
+  },
+  {
+    id: 'amp-google-vrview-image',
+    name: 'AMP VR Viewer for images via Google VRView',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-google-vrview-image/amp-google-vrview-image.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
     id: 'no-auth-in-prerender',
     name: 'Delay amp-access auth request until doc becomes visible.',
     spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3824',
   },
   {
     id: 'amp-share-tracking',
     name: 'AMP Share Tracking',
     spec: 'https://github.com/ampproject/amphtml/issues/3135',
   },
+  {
+    id: 'amp-viz-vega',
+    name: 'AMP Visualization using Vega grammar',
+    spec: 'https://github.com/ampproject/amphtml/issues/3991',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
+  },
+  {
+    id: 'amp-ios-overflow-x',
+    name: 'Fixes a horizontal scroll issue on iOS browsers.',
+    spec: 'https://github.com/ampproject/amphtml/issues/3712',
+  },
 ];
+
+if (getMode().localDev) {
+  EXPERIMENTS.forEach(experiment => {
+    dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
+        ' have a `cleanupIssue` field.');
+  });
+}
 
 
 /**
@@ -232,7 +286,7 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
-      const validUntil = new Date().getTime() +
+      const validUntil = Date.now() +
           COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
       setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
     } else {
@@ -249,10 +303,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = dev.assert(document.getElementById('popup-container'));
-  const messageElement = dev.assert(document.getElementById('popup-message'));
-  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
-  const cancelButton = dev.assert(
+  const container = dev().assert(document.getElementById('popup-container'));
+  const messageElement = dev().assert(document.getElementById('popup-message'));
+  const confirmButton = dev().assert(
+      document.getElementById('popup-button-ok'));
+  const cancelButton = dev().assert(
       document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
