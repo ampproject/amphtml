@@ -60,7 +60,7 @@ export function doubleclick(global, data) {
       doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
-          GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
+        GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
       doubleClickWithGlade(global, data, exp);
     }
   }
