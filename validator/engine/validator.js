@@ -489,6 +489,11 @@ class ReferencePointMatcher {
    * @return {!Array<number>}
    */
   getReferencePointsMatched() { return this.referencePointsMatched_; }
+
+  /**
+   * @return {!ParsedReferencePoints}
+   */
+  getParsedReferencePoints() { return this.parsedReferencePoints_; }
 }
 
 /**
@@ -3202,8 +3207,30 @@ function validateTagAgainstSpec(
   if (spec.childTags !== null)
     context.setChildTagMatcher(new ChildTagMatcher(spec));
 
-  // Set the reference point matcher so it considers spec.referencePoints,
-  // if present.
+  // Set the reference point matcher so it considers spec.reference_points(),
+  // if present, considering that reference points could be defined by
+  // both reference points and regular tag specs.
+  if (parsedSpec.getReferencePoints().empty()) return;
+  const currentMatcher = context.getTagStack().currentReferencePointMatcher();
+  if (currentMatcher !== null &&
+      !currentMatcher.getParsedReferencePoints().empty()) {
+    if (amp.validator.GENERATE_DETAILED_ERRORS) {
+      context.addError(
+          amp.validator.ValidationError.Severity.ERROR,
+          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT,
+          context.getDocLocator(),
+          /* params */
+          [
+            getTagSpecName(spec),
+            currentMatcher.getParsedReferencePoints().parentTagSpecName()
+          ],
+          currentMatcher.getParsedReferencePoints().parentSpecUrl(),
+          resultForBestAttempt);
+    } else {
+      resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    return;
+  }
   context.setReferencePointMatcher(
       new ReferencePointMatcher(parsedRules, parsedSpec.getReferencePoints()));
 }
@@ -3369,9 +3396,7 @@ class ParsedValidatorRules {
    * @param {amp.validator.ValidationError.Code} error_code
    * @return {number}
    */
-  specificity(error_code) {
-    return this.errorCodes_[error_code].specificity;
-  }
+  specificity(error_code) { return this.errorCodes_[error_code].specificity; }
 
   /**
    * A helper function which allows us to compare two candidate results
@@ -3518,8 +3543,7 @@ class ParsedValidatorRules {
    * @return {TagSpecDispatch|undefined}
    */
   dispatchForTagName(tagName) {
-    if (!this.tagSpecByTagName_.hasOwnProperty(tagName))
-      return undefined;
+    if (!this.tagSpecByTagName_.hasOwnProperty(tagName)) return undefined;
     return this.tagSpecByTagName_[tagName];
   }
 }
@@ -3658,8 +3682,7 @@ amp.validator.ValidationHandler =
         tagName, this.context_, this.validationResult_, attrs);
     const matcher = this.context_.getTagStack().parentReferencePointMatcher();
     if (matcher !== null) {
-      matcher.match(
-          attrs, this.context_, this.validationResult_);
+      matcher.match(attrs, this.context_, this.validationResult_);
     }
     this.validateTag(tagName, attrs);
     this.context_.getTagStack().matchChildTagName(
@@ -4063,11 +4086,13 @@ amp.validator.categorizeError = function(error) {
   if (error.code ===
           amp.validator.ValidationError.Code
               .CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT ||
-      error.code ==
+      error.code ===
           amp.validator.ValidationError.Code
               .MANDATORY_REFERENCE_POINT_MISSING ||
-      error.code ==
-          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT) {
+      error.code ===
+          amp.validator.ValidationError.Code.DUPLICATE_REFERENCE_POINT ||
+      error.code ===
+          amp.validator.ValidationError.Code.TAG_REFERENCE_POINT_CONFLICT) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'img' may only appear as a descendant of tag

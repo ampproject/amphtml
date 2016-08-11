@@ -25,7 +25,7 @@ min_validator_revision_required: 157
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 255
+spec_file_revision: 256
 
 # Validator extensions.
 # =====================
@@ -2526,6 +2526,7 @@ error_specificity {
 }
 error_specificity { code: MANDATORY_REFERENCE_POINT_MISSING specificity: 61 }
 error_specificity { code: DUPLICATE_REFERENCE_POINT specificity: 62 }
+error_specificity { code: TAG_REFERENCE_POINT_CONFLICT specificity: 63 }
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
@@ -2751,7 +2752,11 @@ error_formats {
   format: "The reference point '%1' for '%2' must be unique "
           "but a duplicate was encountered."
 }
-
+error_formats {
+  code: TAG_REFERENCE_POINT_CONFLICT
+  format: "The tag '%1' conflicts with reference point '%2' because "
+          "both define reference points."
+}
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).

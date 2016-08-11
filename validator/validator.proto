@@ -364,7 +364,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 14
+// NEXT AVAILABLE TAG: 15
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -382,6 +382,12 @@ message ValidatorRules {
   optional bool manufactured_body_tag_is_error = 11 [default = false];
   // Spec URL for information about manufactured body tags.
   optional string manufactured_body_spec_url = 12;
+
+  // If enabled, reference points can define additinal reference points
+  // for child elements.
+  // TODO(powdercloud): Flip to true and remove this flag.
+  optional bool reference_points_can_define_reference_points = 14
+      [default = false];
 
   repeated ErrorFormat error_formats = 9;
   repeated ErrorSpecificity error_specificity = 13;
@@ -451,7 +457,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 69
+  // NEXT AVAILABLE TAG: 70
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -502,6 +508,7 @@ message ValidationError {
     CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT = 66;
     MANDATORY_REFERENCE_POINT_MISSING = 67;
     DUPLICATE_REFERENCE_POINT = 68;
+    TAG_REFERENCE_POINT_CONFLICT = 69;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
