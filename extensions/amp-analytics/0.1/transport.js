@@ -76,7 +76,7 @@ export class Transport {
     if (!win.navigator.sendBeacon) {
       return false;
     }
-    let result = win.navigator.sendBeacon(request, '');
+    const result = win.navigator.sendBeacon(request, '');
     if (result) {
       dev().fine(TAG_, 'Sent beacon request', request);
     }
