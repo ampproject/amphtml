@@ -149,6 +149,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
+  {
+    id: 'amp-ios-overflow-x',
+    name: 'Fixes a horizontal scroll issue on iOS browsers.',
+    spec: 'https://github.com/ampproject/amphtml/issues/3712',
+  },
 ];
 
 if (getMode().localDev) {
