@@ -336,7 +336,7 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
-    this.buildOrScheduleBuildForElement_(resource);
+    this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
@@ -345,7 +345,7 @@ export class Resources {
    * @param {!Resource} resource
    * @private
    */
-  buildOrScheduleBuildForElement_(resource) {
+  buildOrScheduleBuildForResource_(resource) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
@@ -428,7 +428,7 @@ export class Resources {
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    this.buildOrScheduleBuildForElement_(resource);
+    this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -940,7 +940,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        continue;
+        this.buildOrScheduleBuildForResource_(r);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
