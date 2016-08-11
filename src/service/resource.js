@@ -147,6 +147,13 @@ export class Resource {
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
+    /**
+     * Only used in the "runtime off" case when the monitoring code needs to
+     * known when the element is upgraded.
+     * @private {!Function|undefined}
+     */
+    this.onUpgraded_ = undefined;
+
    /**
     * Pending change size that was requested but could not be satisfied.
     * @private {!./resources-impl.SizeDef|undefined}
@@ -665,5 +672,46 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
+  }
+
+  /**
+   * Only allowed in dev mode when runtime is turned off. Performs all steps
+   * necessary to render an element.
+   * @return {!Promise}
+   * @export
+   */
+  forceAll() {
+    dev().assert(!this.resources_.isRuntimeOn());
+    let p = Promise.resolve();
+    if (this.state_ == ResourceState.NOT_BUILT) {
+      if (!this.element.isUpgraded()) {
+        p = p.then(() => {
+          return new Promise(resolve => {
+            this.onUpgraded_ = resolve;
+          });
+        });
+      }
+      p = p.then(() => {
+        this.onUpgraded_ = undefined;
+        this.build(true);
+      });
+    }
+    return p.then(() => {
+      this.applySizesAndMediaQuery();
+      this.measure();
+      if (this.layoutPromise_) {
+        return this.layoutPromise_;
+      }
+      if (this.state_ == ResourceState.LAYOUT_COMPLETE ||
+              this.state_ == ResourceState.LAYOUT_FAILED ||
+              this.layoutCount_ > 0) {
+        return;
+      }
+      if (!this.isDisplayed()) {
+        return;
+      }
+      this.layoutCount_++;
+      return this.element.layoutCallback();
+    });
   }
 }
