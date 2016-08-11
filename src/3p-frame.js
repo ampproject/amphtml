@@ -165,17 +165,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Preloads URLs related to the bootstrap iframe.
- * @param {!Window} parentWindow
+ * @param {!Window} window
  * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
+
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(
-      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
+  const scriptUrl = getMode().localDev
+      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
+      : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+  preconnect.preload(scriptUrl, 'script');
 }
 
 /**
@@ -206,15 +209,19 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
-    const prefix = getMode().test ? '/base' : '';
-    return 'http://ads.localhost:' +
-        (parentWindow.location.port || parentWindow.parent.location.port) +
-        prefix + '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
-        '.html';
+    return getAdsLocalhost(parentWindow)
+        + '/dist.3p/current'
+        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+}
+
+function getAdsLocalhost(win) {
+  return 'http://ads.localhost:'
+      + (win.location.port || win.parent.location.port)
+      + (getMode().test ? '/base' : '');
 }
 
 /**
