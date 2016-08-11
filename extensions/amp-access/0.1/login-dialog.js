@@ -284,7 +284,21 @@ class WebLoginDialog {
     } else {
       returnUrl = `${urls.cdn}/v0/amp-login-done-0.1.html`;
     }
-    return returnUrl + '?url=' + encodeURIComponent(currentUrl);
+    return returnUrl + '?url=' + encodeURIComponent(currentUrl)
+        + this.getReturnUrlHash_();
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getReturnUrlHash_() {
+    const context = {
+      AMP_CONFIG: this.win.AMP_CONFIG || {},
+      testOrLocalDev: getMode().localDev || getMode().test,
+    };
+
+    return `#${JSON.stringify({_context: context})}`;
   }
 }
 
