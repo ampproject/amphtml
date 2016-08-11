@@ -31,7 +31,7 @@ const CANCELLED = 'CANCELLED';
  */
 let globalExponentialBackoff = function(work) {
   // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
-  globalExponentialBackoff = exponentialBackoff(1.5)
+  globalExponentialBackoff = exponentialBackoff(1.5);
   return globalExponentialBackoff(work);
 };
 

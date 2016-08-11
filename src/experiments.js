@@ -37,14 +37,14 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
 /** @type {Object<string, boolean>} */
-let toggles;
+let toggles_;
 
 /**
  * A wrapper to avoid a static side-effect.
  * @return {!Object<string, boolean>}
  */
-function experimentsToggles() {
-  return toggles || (toggles = Object.create(null));
+function experimentToggles() {
+  return toggles_ || (toggles_ = Object.create(null));
 }
 
 
@@ -82,7 +82,7 @@ export function isDevChannelVersionDoNotUse_(win) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  const toggles = experimentsToggles();
+  const toggles = experimentToggles();
   if (experimentId in toggles) {
     return toggles[experimentId];
   }
@@ -124,7 +124,7 @@ function calcExperimentOn(win, experimentId) {
  */
 export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
-  const toggles = experimentsToggles();
+  const toggles = experimentToggles();
   const experimentIds = getExperimentIds(win);
   const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
       (experimentId in toggles && toggles[experimentId]);
