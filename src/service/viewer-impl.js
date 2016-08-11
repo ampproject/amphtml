@@ -25,6 +25,7 @@ import {timerFor} from '../timer';
 import {reportError} from '../error';
 import {VisibilityState} from '../visibility-state';
 import {urls} from '../config';
+import {tryParseJson} from '../json';
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
@@ -790,15 +791,26 @@ export class Viewer {
   }
 
   /**
-   * Retrieves the Base CID from the viewer
+   * Get/set the Base CID from/to the viewer.
+   * @param {string=} opt_data Stringified JSON object {cid, time}.
    * @return {!Promise<string|undefined>}
    */
-  getBaseCid() {
+  baseCid(opt_data) {
     return this.isTrustedViewer().then(trusted => {
       if (!trusted) {
         return undefined;
       }
-      return this.sendMessage('cid', undefined, true);
+      return this.sendMessage('cid', opt_data, true)
+          .then(data => {
+            // For backward compatibility: #4029
+            if (data && !tryParseJson(data)) {
+              return JSON.stringify({
+                time: Date.now(), // CID returned from old API is always fresh
+                cid: data,
+              });
+            }
+            return data;
+          });
     });
   }
 
@@ -1063,7 +1075,6 @@ function getChannelError(opt_reason) {
   }
   return new Error('No messaging channel: ' + opt_reason);
 }
-
 
 /**
  * @typedef {{
