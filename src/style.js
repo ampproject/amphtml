@@ -17,11 +17,11 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
-/** @private @const {!Object<string>} */
-const propertyNameCache_ = Object.create(null);
+/** @type {Object<string, string>} */
+let propertyNameCache;
 
-/** @private @const {!Array<string>} */
-const vendorPrefixes_ = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
+/** @const {!Array<string>} */
+const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 
 /**
@@ -34,17 +34,17 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the object if a prefixed version of a property exists and returns
+ * Checks the style if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!Object} object
+ * @param {!CSSStyleDeclaration} style
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
-function getVendorJsPropertyName_(object, titleCase) {
-  for (let i = 0; i < vendorPrefixes_.length; i++) {
-    const propertyName = vendorPrefixes_[i] + titleCase;
-    if (object[propertyName] !== undefined) {
+function getVendorJsPropertyName_(style, titleCase) {
+  for (let i = 0; i < vendorPrefixes.length; i++) {
+    const propertyName = vendorPrefixes[i] + titleCase;
+    if (style[propertyName] !== undefined) {
       return propertyName;
     }
   }
@@ -56,26 +56,29 @@ function getVendorJsPropertyName_(object, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @export
- * @param {!Object} object
+ * @param {!CSSStyleDeclaration} style
  * @param {string} camelCase the camel cased version of a css property name
  * @param {boolean=} opt_bypassCache bypass the memoized cache of property
  *   mapping
  * @return {string}
  */
-export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
-  let propertyName = propertyNameCache_[camelCase];
+export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
+  if (!propertyNameCache) {
+    propertyNameCache = Object.create(null);
+  }
+  let propertyName = propertyNameCache[camelCase];
   if (!propertyName || opt_bypassCache) {
     propertyName = camelCase;
-    if (object[camelCase] === undefined) {
+    if (style[camelCase] === undefined) {
       const titleCase = camelCaseToTitleCase(camelCase);
-      const prefixedPropertyName = getVendorJsPropertyName_(object, titleCase);
+      const prefixedPropertyName = getVendorJsPropertyName_(style, titleCase);
 
-      if (object[prefixedPropertyName] !== undefined) {
+      if (style[prefixedPropertyName] !== undefined) {
         propertyName = prefixedPropertyName;
       }
     }
     if (!opt_bypassCache) {
-      propertyNameCache_[camelCase] = propertyName;
+      propertyNameCache[camelCase] = propertyName;
     }
   }
   return propertyName;

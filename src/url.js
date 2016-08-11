@@ -19,13 +19,19 @@ import {user} from './log';
 import {getMode} from './mode';
 import {urls} from './config';
 
-// Cached a-tag to avoid memory allocation during URL parsing.
-const a = window.document.createElement('a');
+/**
+ * Cached a-tag to avoid memory allocation during URL parsing.
+ * @type {HTMLAnchorElement}
+ */
+let a;
 
-// We cached all parsed URLs. As of now there are no use cases
-// of AMP docs that would ever parse an actual large number of URLs,
-// but we often parse the same one over and over again.
-const cache = window.UrlCache || (window.UrlCache = Object.create(null));
+/**
+ * We cached all parsed URLs. As of now there are no use cases
+ * of AMP docs that would ever parse an actual large number of URLs,
+ * but we often parse the same one over and over again.
+ * @type {Object<string, !Location>}
+ */
+let cache;
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -54,6 +60,11 @@ export let Location;
  * @return {!Location}
  */
 export function parseUrl(url) {
+  if (!a) {
+    a = window.document.createElement('a');
+    cache = window.UrlCache || (window.UrlCache = Object.create(null));
+  }
+
   const fromCache = cache[url];
   if (fromCache) {
     return fromCache;
