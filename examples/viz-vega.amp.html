@@ -24,8 +24,8 @@
   </amp-viz-vega>
 
   <h2>Responsive size with inline data</h2>
-  <amp-viz-vega width="400" height="200" layout="responsive">
-    <!-- http://vega.github.io/vega-editor/index.html?mode=vega&spec=arc -->
+  <amp-viz-vega width="400" height="400" layout="responsive">
+    <!-- https://github.com/vega/vega/blob/master/examples/arc.json -->
     <script type="application/json">
       {
         "width": 400,
@@ -85,13 +85,13 @@
           }
         ]
       }
-      </script>
-    <amp-img placeholder width="400" height="200" layout="responsive" src="https://placehold.it/400x200?text=Custom Placeholder">
-    </amp-img>
+    </script>
   </amp-viz-vega>
 
-  <h2>fixed-height size with remote data pointing to remote data using topojson</h2>
+  <h2>fixed-height size world map with remote data pointing to remote data using topojson</h2>
   <amp-viz-vega use-data-width height="500" layout="fixed-height" src="vega-data/map.json">
+    <amp-img placeholder height="500" layout="fixed-height" src="https://placehold.it/400x200?text=Custom Placeholder">
+    </amp-img>
   </amp-viz-vega>
 
   <h2>Responsive size interactive graph with remote data</h2>
