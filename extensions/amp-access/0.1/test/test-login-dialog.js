@@ -279,7 +279,7 @@ describe('WebLoginDialog', () => {
   it('should have correct window.open params', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?return=' + RETURN_URL_ESC,
+            sinon.match('http://acme.com/login?return=' + RETURN_URL_ESC),
             '_blank',
             'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
@@ -306,7 +306,7 @@ describe('WebLoginDialog', () => {
   it('should have correct URL with other parameters', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
+            sinon.match('http://acme.com/login?a=1&return=' + RETURN_URL_ESC),
             '_blank',
             'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
@@ -326,7 +326,7 @@ describe('WebLoginDialog', () => {
   it('should substitute return URL', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
+            sinon.match('http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC),
             '_blank',
             'height=450,width=700,left=150,top=275' +
             ',resizable=yes,scrollbars=yes')
@@ -348,10 +348,10 @@ describe('WebLoginDialog', () => {
     viewer.getResolvedViewerUrl = () => 'http://acme.com/viewer1';
     windowMock.expects('open')
         .withArgs(
-            'http://acme.com/login?a=1&ret1=' +
+            sinon.match('http://acme.com/login?a=1&ret1=' +
             encodeURIComponent('http://localhost:8000/extensions' +
                 '/amp-access/0.1/amp-login-done.html?url=' +
-                encodeURIComponent('http://acme.com/viewer1')))
+                encodeURIComponent('http://acme.com/viewer1'))))
         .returns(dialog)
         .once();
     const promise = openLoginDialog(windowApi,
@@ -398,7 +398,7 @@ describe('WebLoginDialog', () => {
           return urlPromise;
         })
         .then(() => {
-          expect(dialogUrl).to.be.equal(
+          expect(dialogUrl).to.have.string(
             'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
           succeed();
           return promise;

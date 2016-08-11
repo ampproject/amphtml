@@ -5,7 +5,25 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <meta name="robots" content="noindex">
   <title>AMP Login Complete</title>
-  <script async src="../../../dist/v0/amp-login-done-0.1.max.js"></script>
+  <script>
+  (function() {
+    var c = window.AMP_CONFIG = window.AMP_CONFIG || {};
+    var context;
+    try {
+      context = JSON.parse(location.hash.substring(
+        location.hash.indexOf('{'),
+        location.hash.lastIndexOf('}') + 1
+      ))._context;
+    }
+    catch (e) { context = { AMP_CONFIG: {} }; }
+    for (var key in context.AMP_CONFIG)
+      if (c[key] === undefined) c[key] = context.AMP_CONFIG[key]
+    var u = context.testOrLocalDev
+      ? '../../../dist/v0/amp-login-done-0.1.max.js'
+      : c.cdnUrl+'/v0/amp-login-done-0.1.js';
+    document.write('<script async'+' src="'+encodeURI(u)+'"><'+'/script>');
+  })();
+  </script>
   <style>
     body {
       margin: 0;

@@ -33,7 +33,7 @@ describe('Configuration', function() {
     const config = fixture.win.AMP_CONFIG = {};
     config.cdnUrl = 'http://foo.bar.com';
     config.thirdPartyUrl = 'http://bar.baz.com';
-    config.thirdPartyFrameRegex = /a-website\.com/;
+    config.thirdPartyFrameRegex = '/a-website\.com/';
     config.errorReportingUrl = 'http://error.foo.com';
 
     return fixture.awaitEvent('amp:load:start', 1).then(() => {

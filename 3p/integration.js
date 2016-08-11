@@ -476,7 +476,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (window.location.hostname == thirdPartyHost) {
     return;
   }
-  if (urls.thirdPartyFrameRegex.test(window.location.hostname)) {
+  if (new RegExp(urls.thirdPartyFrameRegex).test(window.location.hostname)) {
     return;
   }
   if (window.location.hostname == 'ads.localhost') {
