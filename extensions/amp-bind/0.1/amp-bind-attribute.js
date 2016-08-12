@@ -27,8 +27,12 @@ export class AmpBindAttribute extends AMP.BaseElement {
   buildCallback() {
     console.log('Hi, I am amp-bind-attribute buildCallback');
     this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
-    this.bindService_.observeExpression('test', change => {
-      console.log('Expression reevaluated to', change);
+
+    const attrName = this.element.getAttribute('attr');
+    const expr = this.element.getAttribute('value');
+
+    this.bindService_.observeExpression(expr, newValue => {
+      this.element.parentNode.setAttribute(attrName, newValue);
     });
   }
 };

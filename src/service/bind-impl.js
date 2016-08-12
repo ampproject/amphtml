@@ -15,22 +15,44 @@
  */
 
 import {fromClassForDoc} from '../service';
+import * as ngExpressions from "angular-expressions";
 
 export class BindService {
   constructor(ampdoc) {
     this.ampdoc = ampdoc;
+    // Map<string, any>
+    this.scope_ = {};
+    this.expressions_ = {};
   }
 
   setVariable(name, value) {
+    const eval = ngExpressions.compile(name);
+    eval.assign(this.scope_, value);
+    this.reEvaluate_();
   }
 
-  observeExpression(exp, observer) {
-    setInterval(() => {
-      observer(Math.random());
-    }, 1000);
+  observeExpression(expStr, observer) {
+    if (this.expressions_[expStr]) {
+      return;
+    }
+    this.expressions_[expStr] = {
+      compiledExpr: ngExpressions.compile(expStr),
+      observer: observer,
+      prevVal: null
+    };
   }
 
-  evalExpression_(exp) {
+  reEvaluate_() {
+    const all = Object.keys(this.expressions_);
+    all.forEach((key) => {
+      const exp = this.expressions_[key];
+      const val = this.expressions_[key].compiledExpr(this.scope_);
+      if (val == exp.prevVal) {
+        return;
+      }
+      exp.observer(val);
+      exp.prevVal = val;
+    });
   }
 }
 
