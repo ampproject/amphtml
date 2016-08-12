@@ -771,6 +771,14 @@ export class BaseElement {
   onLayoutMeasure() {}
 
   /**
+   * @return {?{...}}
+   * @protected
+   */
+  getCastInfo() {
+    return null;
+  }
+
+  /**
    * @return {?Element}
    * @protected
    */

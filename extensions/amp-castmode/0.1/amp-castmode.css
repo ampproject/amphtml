@@ -177,6 +177,7 @@ amp-castmode {
   transform: scale(0.9);
   color: #fff;
   max-width: 220px;
+  min-width: 120px;
 }
 
 .-amp-cast-gallery-thumb > img {

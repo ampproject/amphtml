@@ -17,6 +17,7 @@
 import {CSS} from '../../../build/amp-castmode-0.1.css';
 import {CastSenderDebug, CastSenderProd} from './cast-sender';
 import {Layout} from '../../../src/layout';
+import {createThumb} from './cast-elements';
 import {historyFor} from '../../../src/history';
 import {toArray} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
@@ -205,25 +206,25 @@ class AmpCastmode extends AMP.BaseElement {
   startCasting_() {
     // TODO(dvoytenko): create a preview pane, a cursor and a remote control.
 
-    this.sender_.sendAction('show-image', {
-      src: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
-    });
-
     this.candidates_ = toArray(this.win.document.querySelectorAll(
         'amp-img,amp-video,amp-twitter,amp-youtube,blockquote'));
     console.log('candidates: ', this.candidates_.length, this.candidates_);
+    this.castInfo_ = [];
     this.thumbs_ = [];
     for (let i = 0; i < this.candidates_.length; i++) {
       const candidate = this.candidates_[i];
+      const castInfo = this.getCastInfo_(candidate);
+      this.castInfo_.push(castInfo);
       const thumb = this.win.document.createElement('div');
       thumb.classList.add('-amp-cast-gallery-thumb');
-      thumb.appendChild(this.createThumb_(candidate));
-      if (this.isPlayback_(candidate)) {
+      thumb.appendChild(createThumb(castInfo));
+      if (castInfo.playable) {
         thumb.appendChild(this.createPlayThumb_());
       }
       this.gallery_.appendChild(thumb);
       this.thumbs_.push(thumb);
     }
+    console.log('cast info: ', this.castInfo_);
 
     this.getVsync().mutate(() => {
       this.setMode_(Mode.GALLERY);
@@ -249,7 +250,8 @@ class AmpCastmode extends AMP.BaseElement {
   /** @private */
   updateActions_() {
     const element = this.candidates_[this.selectedIndex_];
-    const playback = this.isPlayback_(element);
+    const castInfo = this.castInfo_[this.selectedIndex_];
+    const playback = castInfo.playable;
     this.rcContainer_.classList.toggle('-amp-cast-playback', playback);
     if (!playback || this.mode_ != Mode.VIEW) {
       st.toggle(this.playButton_, false);
@@ -277,6 +279,8 @@ class AmpCastmode extends AMP.BaseElement {
     this.selectedIndex_ = index;
     const element = this.candidates_[index];
     const thumb = this.thumbs_[index];
+
+    // Update thumbs.
     const width = thumb.offsetWidth;
     const height = thumb.offsetHeight;
     thumb.classList.add('-amp-selected');
@@ -285,6 +289,7 @@ class AmpCastmode extends AMP.BaseElement {
     const tx = -offsetLeft + (totalWidth - width) / 2;
     this.gallery_.style.transform = `translateX(${tx}px)`;
 
+    // Update preview.
     this.preview_.textContent = '';
     const previewThumb = (thumb.firstElementChild || thumb).cloneNode(true);
     this.preview_.appendChild(previewThumb);
@@ -293,8 +298,31 @@ class AmpCastmode extends AMP.BaseElement {
     console.log('scale: ', scale);
     previewThumb.style.transform = `scale(${scale})`;
 
+    // Update actions.
     this.playing_ = false;
     this.updateActions_();
+
+    // Send to cast.
+    this.updateCastState_();
+  }
+
+  /** @private */
+  updateCastState_() {
+    const startIndex = Math.floor(this.selectedIndex_ / 3) * 3;
+    const endIndex = Math.min(startIndex + 2, this.candidates_.length - 1);
+    const items = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      const candidate = this.candidates_[i];
+      const castInfo = this.castInfo_[i];
+      items.push(castInfo);
+    }
+    this.sender_.sendAction('gallery', {
+      startIndex: startIndex,
+      selectedIndex: this.selectedIndex_,
+      items: items,
+      hasPrev: startIndex > 0,
+      hasNext: endIndex < this.candidates_.length - 1,
+    });
   }
 
   /** @private */
@@ -341,39 +369,36 @@ class AmpCastmode extends AMP.BaseElement {
 
   /**
    * @param {!Element} element
-   * @return {!Element}
+   * @return {!CastInfo}
    * @private
    */
-  createThumb_(element) {
-    let thumb = null;
-    if (element.toThumbnail) {
-      thumb = element.toThumbnail();
+  getCastInfo_(element) {
+    if (element.getCastInfo) {
+      const castInfo = element.getCastInfo();
+      if (castInfo) {
+        return castInfo;
+      }
     }
 
-    if (!thumb && element.tagName == 'BLOCKQUOTE') {
+    if (element.tagName == 'BLOCKQUOTE') {
       const text = element.textContent;
       const snippet = text.length > 50 ? text.substring(0, 50) + '...' : text;
-      thumb = document.createElement('div');
-      thumb.textContent = `\u00AB${snippet}\u00BB`;
-      thumb.style.width = '120px';
+      return {
+        type: 'BLOCKQUOTE',
+        playable: false,
+        thumbImage: null,
+        thumbText: `\u00AB${snippet}\u00BB`,
+        source: text,
+      };
     }
 
-    if (!thumb) {
-      thumb = document.createElement('div');
-      thumb.textContent = element.tagName;
-      thumb.style.width = '120px';
-    }
-    return thumb;
-  }
-
-  /**
-   * @param {!Element} element
-   * @return {boolean}
-   * @private
-   */
-  isPlayback_(element) {
-    return (element.tagName == 'AMP-VIDEO'
-        || element.tagName == 'AMP-YOUTUBE');
+    return {
+      type: 'UNKNOWN',
+      playable: false,
+      thumbImage: null,
+      thumbText: 'Unknown',
+      source: 'Unknown',
+    };
   }
 
   /**

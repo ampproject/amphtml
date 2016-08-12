@@ -54,6 +54,41 @@
       flex-direction: row;
       flex-wrap: nowrap;
     }
+
+    #gallery {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+
+    #gallery-container {
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      bottom: 100px;
+      right: 100px;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-item {
+      flex: 1 1 33%;
+      max-width: 32%;
+      margin: 16px;
+      height: 60%;
+      object-fit: cover;
+      box-sizing: border-box;
+      border: 10px solid transparent;
+    }
+
+    .gallery-item.selected {
+      border-color: #eee;
+    }
   </style>
 
   <title>AMP Cast Debug</title>
@@ -62,7 +97,12 @@
 <body>
   <DIV id="root">
 
-    <div id="container"></div>
+    <div id="container">
+      <div id="gallery">
+        <div id="gallery-container">
+        </div>
+      </div>
+    </div>
 
     <!-- Log -->
     <pre id="log"></pre>

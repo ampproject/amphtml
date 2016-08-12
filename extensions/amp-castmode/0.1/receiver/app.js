@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import {createThumb} from '../cast-elements';
 import {log} from './cast-log';
+import * as st from '../../../../src/style';
 
 
 /**
@@ -33,8 +35,49 @@ export class App {
       throw new Error('container not found');
     }
 
+    /** @private {number} */
+    this.galleryStartIndex_ = -1;
+
+    /** @private {?Element} */
+    this.selected_ = null;
+
     // Actions.
+    channel.onAction('gallery', this.handleGallery_.bind(this));
     channel.onAction('show-image', this.handleShowImage_.bind(this));
+  }
+
+  /**
+   * @param {!Object} payload
+   */
+  handleGallery_(payload) {
+    log('show gallery: ', payload);
+    const items = payload.items;
+
+    const gallery = this.win.document.getElementById('gallery');
+    const galleryContainer = this.win.document.getElementById('gallery-container');
+
+    if (this.galleryStartIndex_ != payload.startIndex) {
+      this.galleryStartIndex_ = payload.startIndex;
+      galleryContainer.textContent = '';
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const el = createThumb(item);
+        el.classList.add('gallery-item');
+        galleryContainer.appendChild(el);
+      }
+    }
+
+    const oldSelected = this.selected_;
+    this.selected_ = galleryContainer.children[
+        payload.selectedIndex - payload.startIndex];
+    if (oldSelected != this.selected_) {
+      if (oldSelected) {
+        oldSelected.classList.remove('selected');
+      }
+      this.selected_.classList.add('selected');
+    }
+
+    st.toggle(gallery, true);
   }
 
   /**
@@ -44,7 +87,10 @@ export class App {
     const src = payload.src;
     log('show image: ' + src);
 
-    this.container_.textContent = '';
+    const gallery = this.win.document.getElementById('gallery');
+    st.toggle(gallery, false);
+
+    // this.container_.textContent = '';
 
     const parent = this.win.document.createElement('div');
     parent.classList.add('flex-container');

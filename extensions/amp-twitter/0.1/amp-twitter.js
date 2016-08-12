@@ -66,6 +66,17 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /** @override */
+  getCastInfo() {
+    return {
+      type: 'TWITTER',
+      playable: false,
+      thumbImage: null,
+      thumbText: null,
+      source: this.element.getAttribute('data-tweetID'),
+    };
+  }
+
+  /** @override */
   toThumbnail() {
     const div = this.element.ownerDocument.createElement('div');
     div.style.width = '100px';

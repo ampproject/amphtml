@@ -105,6 +105,17 @@ export function installVideo(win) {
     }
 
     /** @override */
+    getCastInfo() {
+      return {
+        type: 'VIDEO',
+        playable: true,
+        thumbImage: this.element.getAttribute('poster'),
+        thumbText: null,
+        source: this.element.getAttribute('src'),
+      };
+    }
+
+    /** @override */
     toThumbnail() {
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr) {

@@ -1335,6 +1335,14 @@ function createBaseAmpElementProto(win) {
 
 
   /**
+   * @return {?{...}}
+   */
+  ElementProto.getCastInfo = function() {
+    return this.implementation_.getCastInfo();
+  };
+
+
+  /**
    * @return {?Element}
    */
   ElementProto.toThumbnail = function() {
