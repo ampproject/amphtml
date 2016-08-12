@@ -37,6 +37,8 @@ export class AmpBindAttribute extends AMP.BaseElement {
         if (!parent) {
           return;
         }
+        //TODO: need to convert attrName to function.
+        //e.g. slide-number to slideNumber.
         parent.setAttribute(attrName, newValue);
         const observer = parent.implementation_[attrName + 'Changed'];
         if (typeof observer == 'function') {

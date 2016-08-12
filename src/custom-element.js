@@ -299,6 +299,9 @@ function isInternalOrServiceNode(node) {
   if (isInternalElement(node)) {
     return true;
   }
+  if (node.tagName.indexOf('AMP-BIND') == 0) {
+    return true;
+  }
   if (node.tagName && (node.hasAttribute('placeholder') ||
       node.hasAttribute('fallback') ||
       node.hasAttribute('overflow'))) {

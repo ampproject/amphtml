@@ -381,6 +381,14 @@ export class AmpSlideScroll extends BaseSlides {
     });
   }
 
+  slideChanged(newIndex) {
+    if (!newIndex || newIndex == this.slideIndex_) {
+      return;
+    }
+    console.log('new slide is ', Number(newIndex));
+    this.showSlide_(Number(newIndex));
+  }
+
   /**
    * Makes the slide corresponding to the given index and the slides surrounding
    *    it available for display.
@@ -436,6 +444,10 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    // dispatch custom event of slidechange
+    const slideChangeEvent = new Event('slidechange');
+    slideChangeEvent.value = this.slideIndex_;
+    this.element.dispatchEvent(slideChangeEvent);
   }
 
   /**

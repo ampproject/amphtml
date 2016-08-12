@@ -40,8 +40,7 @@ export class AmpBindEvent extends AMP.BaseElement {
     this.parent_ = this.element.parentNode;
 
     // create event listener functions
-    this.eventListener_ = () => {
-      // set value to bindService_.
+    this.eventListener_ = event => {
       this.bindService_.setVariable(this.variable_, this.value_);
     };
 
