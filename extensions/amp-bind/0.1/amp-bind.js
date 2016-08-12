@@ -16,6 +16,8 @@
 
 import {AmpBindAttribute} from './amp-bind-attribute';
 import {AmpBindEvent} from './amp-bind-event';
+import {AmpBindDataSet} from './amp-bind-dataset';
 
 AMP.registerElement('amp-bind-attribute', AmpBindAttribute);
 AMP.registerElement('amp-bind-event', AmpBindEvent);
+AMP.registerElement('amp-bind-dataset', AmpBindDataSet);

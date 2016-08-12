@@ -25,6 +25,12 @@ export class BindService {
     this.expressions_ = {};
   }
 
+  addData(newData) {
+    for (var key in newData) {
+      this.scope_[key] = newData[key];
+    }
+  }
+
   setVariable(name, valExp) {
     const eval = ngExpressions.compile(name);
     const val = ngExpressions.compile(this.cleanExpression(valExp))(this.scope_);

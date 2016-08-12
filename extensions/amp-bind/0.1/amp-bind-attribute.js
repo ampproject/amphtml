@@ -29,10 +29,10 @@ export class AmpBindAttribute extends AMP.BaseElement {
     this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
 
     const attrName = this.element.getAttribute('attr');
-    const expr = this.element.getAttribute('value');
 
-    if (expr) {
-      this.bindService_.observeExpression(expr, newValue => {
+    const valueExpr = this.element.getAttribute('value');
+    if (valueExpr) {
+      this.bindService_.observeExpression(valueExpr, newValue => {
         const parent = this.element.parentNode;
         if (!parent) {
           return;
@@ -42,7 +42,21 @@ export class AmpBindAttribute extends AMP.BaseElement {
         if (typeof observer == 'function') {
           observer.call(parent.implementation_, newValue);
         }
+      });
+    }
 
+    const toggleExp = this.element.getAttribute('toggle');
+    if (toggleExp) {
+      this.bindService_.observeExpression(toggleExp, boolResult => {
+        const parent = this.element.parentNode;
+        if (!parent) {
+          return;
+        }
+        if (boolResult) {
+          parent.setAttribute(attrName, '');
+        } else {
+          parent.removeAttribute(attrName);
+        }
       });
     }
 

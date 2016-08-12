@@ -1,0 +1,94 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-bind</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <style amp-custom>
+    body {
+      margin: auto;
+    }
+    button {
+      background-color: green;
+    }
+    button[disabled] {
+      background-color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Product Photo Gallary Using amp-bind</h2>
+
+  <amp-bind-dataset layout="nodisplay">
+    <script type="application/json">
+      {
+        "products": [
+          {
+            "id": "p1",
+            "name": "Shampoo",
+            "isOutOfStock": false
+          },
+          {
+            "id": "p2",
+            "name": "Soap",
+            "isOutOfStock": false
+          },
+          {
+            "id": "p3",
+            "name": "Toothpaste",
+            "isOutOfStock": true
+          }
+        ]
+      }
+    </script>
+  </amp-bind-dataset>
+
+  <amp-img src="https://placehold.it/300x400?text=Pick a Number" width="300" height="400" layout="fixed">
+    <amp-bind-attribute layout="nodisplay"
+        attr="src"
+        value="{{'https://placehold.it/300x400?text=' + products.selected.id + ' - ' + products.selected.name}}">
+    </amp-bind-attribute>
+  </amp-img>
+
+  <div class="thumbnails">
+    <amp-img src="https://placehold.it/50x50?text=1" width="50" height="50" layout="fixed">
+      <amp-bind-event layout="nodisplay"
+          on="tap"
+          variable="products.selected"
+          value="{{products[0]}}">
+      </amp-bind-event>
+    </amp-img>
+
+    <amp-img src="https://placehold.it/50x50?text=2" width="50" height="50" layout="fixed">
+      <amp-bind-event layout="nodisplay"
+          on="tap"
+          variable="products.selected"
+          value="{{products[1]}}">
+      </amp-bind-event>
+    </amp-img>
+
+    <amp-img src="https://placehold.it/50x50?text=3" width="50" height="50" layout="fixed">
+      <amp-bind-event layout="nodisplay"
+          on="tap"
+          variable="products.selected"
+          value="{{products[2]}}">
+      </amp-bind-event>
+    </amp-img>
+  </div>
+  <button>
+    <amp-bind-attribute layout="nodisplay"
+      attr="disabled"
+      toggle="{{products.selected.isOutOfStock}}">
+    </amp-bind-attribute>
+    <span>Buy this</span>
+  </button>
+
+</body>
+</html>
