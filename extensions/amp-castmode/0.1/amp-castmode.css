@@ -140,10 +140,11 @@ amp-castmode {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  width: 1000px;  /* redo */
+  width: 3000px;  /* redo */
 }
 
 .-amp-cast-gallery-thumb {
+  position: relative;
   margin: 0 16px;
   height: 100%;
   box-sizing: border-box;
@@ -169,4 +170,15 @@ amp-castmode {
 
 .-amp-cast-gallery-thumb.-amp-selected {
   transform: scale(1.1);
+}
+
+.-amp-cast-play-thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background-image: url('/examples/video/media-playback-start-2400px.png');
+  background-size: 80px 80px;
 }

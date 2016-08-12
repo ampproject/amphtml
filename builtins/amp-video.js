@@ -103,6 +103,17 @@ export function installVideo(win) {
     isVideoSupported_() {
       return !!this.video_.play;
     }
+
+    /** @override */
+    toThumbnail() {
+      const posterAttr = this.element.getAttribute('poster');
+      if (!posterAttr) {
+        return null;
+      }
+      const img = this.element.ownerDocument.createElement('img');
+      img.src = posterAttr;
+      return img;
+    }
   }
 
   registerElement(win, 'amp-video', AmpVideo);

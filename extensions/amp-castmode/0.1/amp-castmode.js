@@ -208,6 +208,9 @@ class AmpCastmode extends AMP.BaseElement {
       const thumb = this.win.document.createElement('div');
       thumb.classList.add('-amp-cast-gallery-thumb');
       thumb.appendChild(this.createThumb_(candidate));
+      if (this.isPlayback_(candidate)) {
+        thumb.appendChild(this.createPlayThumb_());
+      }
       this.gallery_.appendChild(thumb);
       this.thumbs_.push(thumb);
     }
@@ -289,6 +292,7 @@ class AmpCastmode extends AMP.BaseElement {
 
   /**
    * @param {!Element} element
+   * @return {!Element}
    * @private
    */
   createThumb_(element) {
@@ -297,12 +301,40 @@ class AmpCastmode extends AMP.BaseElement {
       thumb = element.toThumbnail();
     }
 
+    if (!thumb && element.tagName == 'BLOCKQUOTE') {
+      const text = element.textContent;
+      const snippet = text.length > 50 ? text.substring(0, 50) + '...' : text;
+      thumb = document.createElement('div');
+      thumb.textContent = `\u00AB${snippet}\u00BB`;
+      thumb.style.width = '120px';
+    }
+
     if (!thumb) {
       thumb = document.createElement('div');
-      thumb.textContent = 'Unknown';
-      thumb.style.width = '80px';
+      thumb.textContent = element.tagName;
+      thumb.style.width = '120px';
     }
     return thumb;
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   * @private
+   */
+  isPlayback_(element) {
+    return (element.tagName == 'AMP-VIDEO'
+        || element.tagName == 'AMP-YOUTUBE');
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  createPlayThumb_() {
+    const div = document.createElement('div');
+    div.classList.add('-amp-cast-play-thumb');
+    return div;
   }
 }
 

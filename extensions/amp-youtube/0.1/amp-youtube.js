@@ -221,6 +221,14 @@ class AmpYoutube extends AMP.BaseElement {
       });
     });
   }
+
+  /** @override */
+  toThumbnail() {
+    const img = this.element.ownerDocument.createElement('img');
+    img.src = 'https://i.ytimg.com/vi/' +
+        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+    return img;
+  }
 };
 
 AMP.registerElement('amp-youtube', AmpYoutube);
