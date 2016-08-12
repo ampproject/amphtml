@@ -101,26 +101,22 @@ Allocated variants are available as a [URL substitution variable](https://github
 ```html
 <amp-pixel src="https://example.com?xname=aExperiment&xvar=VARIANT(aExperiment)">
 ``` 
+
 For experiments with no variants allocated, this variable resolves to string literal `none`.
 
 Variable `VARIANTS` returns all variants serialized in the format of
 
-```
-{experiment1}.{variant}!{experiment2}.{variant}...
-```
+`{experiment1}.{variant}!{experiment2}.{variant}...`
 
 For example, the URL `https://example.com?variants=VARIANTS` expands to:
 
-```
-https://example.com?variants=aExperiment.treatmentA!bExperiment.treatmentB
-```
+`https://example.com?variants=aExperiment.treatmentA!bExperiment.treatmentB`
 
 ## Override variant allocation
 An experiment can be forced to a variant via URL fragment. This is useful in development.
 
-```
-https://example.com/amparticle#amp-x-experiment=treatment
-```
+`https://example.com/amparticle#amp-x-experiment=treatment`
+
 Notice the same `amp-x-` prefix used as in body attributes.
 
 ## Validation
