@@ -509,3 +509,13 @@ export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
 }
+
+
+export function insertAfter(newNode, referenceNode) {
+  const nextSibling = referenceNode.nextSibling;
+  if (nextSibling) {
+    referenceNode.parentNode.insertBefore(newNode, nextSibling);
+  } else {
+    referenceNode.parentNode.appendChild(newNode);
+  }
+}

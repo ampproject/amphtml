@@ -76,24 +76,35 @@ class ScrollSyncService {
   }
 }
 
-
 function measureScrollTop(state) {
   state.scrollTop = state.viewport.getScrollTop();
+  // TODO: Loop over effects call measure on them in a performant way. We have to
+  // figure out when do we need measurement and only then do measurement.
+  for (const effect of state.effects) {
+    effect.measure();
+  }
 }
 
 
 function onScroll(state) {
   const scrollTop = state.scrollTop;
+  const scrollBuffer = 100;
   for (const effect of state.effects) {
     // TODO: This probably need a bit more thinking on when the directional animation
     // should be transitioned and what data does it need. Otherwise this will
     // call transition for directional animations ALL the time.
     if (effect.isDirectional()) {
       effect.transition(scrollTop);
-    } else if (scrollTop >= effect.getScrollMin() &&
-        scrollTop <= effect.getScrollMax()) {
-      effect.transition(scrollTop);
+    } else if (scrollTop >= effect.getScrollMin() - scrollBuffer &&
+        scrollTop <= effect.getScrollMax() + scrollBuffer ) {
+      const range = effect.getScrollMax() - effect.getScrollMin();
+      const normPosition = (scrollTop - effect.getScrollMin()) / range;
+      effect.transition(normPosition);
     }
+
+    // TODO: Figure out fast scroll problems and unsync transitions.
+    // If last scroll is a LOT different than current scroll.
+    // Do unsync transition.
   }
   lastScrollTop_ = scrollTop;
 }

@@ -37,19 +37,20 @@ class AmpScrollSync extends AMP.BaseElement {
     dev().fine(TAG, 'building');
 
     this.effectName_ = this.element.getAttribute('name');
-    dev().fine(TAG, 'effectName_: '+ this.effectName_);
+    dev().fine(TAG, 'effectName_: ' + this.effectName_);
 
     let config = {};
     let scrollSyncEffect = null;
-    if(this.effectName_ == 'dock-top') {
-      scrollSyncEffect = new ScrollSyncStickyTopEffect(this, config);
+    const element = this.element.parentElement;
+    if (this.effectName_ == 'dock-top') {
+      scrollSyncEffect = new ScrollSyncStickyTopEffect(element, config);
     } else if (this.effectName_ == 'scale') {
       config['end-scale'] = this.element.getAttribute('end-scale');
       config['starting-position'] = this.element.getAttribute('starting-position');
       config['ending-position'] = this.element.getAttribute('ending-position');
-      scrollSyncEffect = new ScrollSyncScaleEffect(this, config);
+      scrollSyncEffect = new ScrollSyncScaleEffect(element, config);
     } else if (this.effectName_ == 'scroll-away') {
-      scrollSyncEffect = new ScrollSyncScrollAwayEffect(this, config);
+      scrollSyncEffect = new ScrollSyncScrollAwayEffect(element, config);
     }
     /** @private */
     this.scrollSyncService_ = installScrollSyncService(this.win);

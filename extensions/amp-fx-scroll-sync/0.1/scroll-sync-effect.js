@@ -16,7 +16,7 @@
 
 export class ScrollSyncEffect {
   constructor(element) {
-    this.element_ = element;
+    this.element = element;
   }
 
   isDirectional() {
