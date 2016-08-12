@@ -78,4 +78,4 @@ Action must be provided, `https` and is non-cdn link (does **NOT** link to https
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
 ## Inputs
-Both `<input type=file>` and `<input type=password>` are not allowed. (This might be reconsidered in the future - please let us know if you require these and use cases).
+Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and `<input type=password>` are not allowed. (This might be reconsidered in the future - please let us know if you require these and use cases).
