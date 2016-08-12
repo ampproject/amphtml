@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 262
+spec_file_revision: 263
 
 reference_points_can_define_reference_points: true
 
@@ -87,7 +87,8 @@ tags: {  # A4A
     mandatory: true
     value: ""
   }
-  # TODO(gregable): Add a spec_url pointing to a descriptive document.
+  # TODO(gregable): Replace with a better URL eventually.
+  spec_url: "https://github.com/google/amphtml/blob/5cae97e7442df863a5a7ceac78257af02792f71c/extensions/amp-a4a/amp-a4a-format.md"
 }
 
 
@@ -176,6 +177,7 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 tags: {
+  html_format: AMP
   tag_name: "LINK"
   spec_name: "link rel=canonical"
   mandatory_parent: "HEAD"
