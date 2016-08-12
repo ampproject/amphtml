@@ -52,7 +52,6 @@ tags: {  # <amp-live-list>
   attrs: { name: "id" mandatory: true }
   attrs: {
     name: "data-poll-interval"
-    mandatory: true
     value_regex: "\\d{5,}"
   }
   attrs: {
