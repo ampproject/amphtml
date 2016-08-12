@@ -14,21 +14,26 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {bindServiceForDoc} from '../../../src/bind-service';
+import {fromClassForDoc} from '../service';
 
-export class AmpBindAttribute extends AMP.BaseElement {
-    /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
+export class BindService {
+  constructor(ampdoc) {
+    this.ampdoc = ampdoc;
   }
 
-  /** @override */
-  buildCallback() {
-    console.log('Hi, I am amp-bind-attribute buildCallback');
-    this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
-    this.bindService_.observeExpression('test', change => {
-      console.log('Expression reevaluated to', change);
-    });
+  setVariable(name, value) {
   }
+
+  observeExpression(exp, observer) {
+    setInterval(() => {
+      observer(Math.random());
+    }, 1000);
+  }
+
+  evalExpression_(exp) {
+  }
+}
+
+export function installBindServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'bindService', BindService);
 };

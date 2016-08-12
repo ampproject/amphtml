@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,21 +15,9 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
-import {bindServiceForDoc} from '../../../src/bind-service';
+import {getExistingServiceForDoc} from './service';
 
-export class AmpBindAttribute extends AMP.BaseElement {
-    /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.NODISPLAY;
-  }
-
-  /** @override */
-  buildCallback() {
-    console.log('Hi, I am amp-bind-attribute buildCallback');
-    this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
-    this.bindService_.observeExpression('test', change => {
-      console.log('Expression reevaluated to', change);
-    });
-  }
+export function bindServiceForDoc(nodeOrDoc) {
+  return /** @type {!./service/bind-impl.BindService} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'bindService'));
 };
