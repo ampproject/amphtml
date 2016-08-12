@@ -128,10 +128,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   <tr>
     <td width="30%">img</td>
     <td>Replaced with amp-img.<br>
-        Please note: `<img>` is a [Void Element according to
-        HTML5](https://www.w3.org/TR/html5/syntax.html#void-elements), so it
-        does not have an end tag. However, `<amp-img>` does
-        have an end tag `</amp-img>`.</td>
+        Please note: <code>&lt;img&gt;</code> is a <a href="https://www.w3.org/TR/html5/syntax.html#void-elements">Void Element according to HTML5</a>, so it does not have an end tag. However, <code>&lt;amp-img&gt;</code> does have an end tag <code>&lt;/amp-img&gt;</code>.</td>
   </tr>
   <tr>
     <td width="30%">video</td>
