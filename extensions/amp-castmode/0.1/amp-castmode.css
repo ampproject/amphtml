@@ -157,7 +157,7 @@ amp-castmode {
   justify-content: center;
   transform: scale(0.9);
   color: #fff;
-  max-width: 50%;
+  max-width: 220px;
 }
 
 .-amp-cast-gallery-thumb > img {
