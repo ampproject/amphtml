@@ -16,7 +16,7 @@
     }
 
     amp-img[selected] {
-      border: 3px solid red;
+      border: 1px solid red;
     }
   </style>
 </head>
@@ -28,7 +28,7 @@
 <amp-img src="https://placehold.it/300x400?text=1" width="300" height="400" layout="fixed">
   <amp-bind-attribute layout="nodisplay"
     attr="src"
-    value="{{'https://placehold.it/300x400?text=' + chosenImage}}">
+    value="{{'https://placehold.it/300x400?text=' + (gallary.chosenImage)}}">
   </amp-bind-attribute>
 </amp-img>
 
@@ -36,24 +36,24 @@
   <amp-img src="https://placehold.it/50x50?text=1" width="50" height="50" layout="fixed">
     <amp-bind-event layout="nodisplay"
       on="tap",
-      variable="chosenImage",
-      value="1">
+      variable="gallary.chosenImage",
+      value="{{1}}">
     </amp-bind-event>
   </amp-img>
 
   <amp-img src="https://placehold.it/50x50?text=2" width="50" height="50" layout="fixed">
     <amp-bind-event layout="nodisplay"
       on="tap",
-      variable="chosenImage",
-      value="2">
+      variable="gallary.chosenImage",
+      value="{{2}}">
     </amp-bind-event>
   </amp-img>
 
   <amp-img src="https://placehold.it/50x50?text=3" width="50" height="50" layout="fixed">
     <amp-bind-event layout="nodisplay"
       on="tap",
-      variable="chosenImage",
-      value="3">
+      variable="gallary.chosenImage",
+      value="{{3}}">
     </amp-bind-event>
   </amp-img>
 </div>

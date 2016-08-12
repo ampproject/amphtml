@@ -31,8 +31,20 @@ export class AmpBindAttribute extends AMP.BaseElement {
     const attrName = this.element.getAttribute('attr');
     const expr = this.element.getAttribute('value');
 
-    this.bindService_.observeExpression(expr, newValue => {
-      this.element.parentNode.setAttribute(attrName, newValue);
-    });
+    if (expr) {
+      this.bindService_.observeExpression(expr, newValue => {
+        const parent = this.element.parentNode;
+        if (!parent) {
+          return;
+        }
+        parent.setAttribute(attrName, newValue);
+        const observer = parent.implementation_[attrName + 'Changed'];
+        if (typeof observer == 'function') {
+          observer.call(parent.implementation_, newValue);
+        }
+
+      });
+    }
+
   }
 };

@@ -25,13 +25,23 @@ export class BindService {
     this.expressions_ = {};
   }
 
-  setVariable(name, value) {
+  setVariable(name, valExp) {
     const eval = ngExpressions.compile(name);
-    eval.assign(this.scope_, value);
+    const val = ngExpressions.compile(this.cleanExpression(valExp))(this.scope_);
+    eval.assign(this.scope_, val);
     this.reEvaluate_();
   }
 
+  cleanExpression(expStr) {
+    if (expStr.indexOf('{{') != 0) {
+      expStr = "'" + expStr + "'";
+    } else {
+      expStr = expStr.replace('{{', '').replace('}}','');
+    }
+    return expStr;
+  }
   observeExpression(expStr, observer) {
+    expStr = this.cleanExpression(expStr);
     if (this.expressions_[expStr]) {
       return;
     }
