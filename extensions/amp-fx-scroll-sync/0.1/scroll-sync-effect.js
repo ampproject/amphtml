@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-class ScrollSyncEffect {
-  constructor(element, config) {
+export class ScrollSyncEffect {
+  constructor(element) {
     this.element_ = element;
   }
 

@@ -16,38 +16,38 @@
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
 
-class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
-   constructor(element, config) {
-
-   }
-
-   /** @override */
-   isDirectional() {
-     return true;
-   }
+export class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
+  constructor(element, config) {
+    super(element);
+  }
 
   /** @override */
-   measure() {
-
-   }
-
-  /** @override */
-   requestMeasure() {
-
-   }
+  isDirectional() {
+    return true;
+  }
 
   /** @override */
-   getScrollMin() {
+  measure() {
 
-   }
-
-  /** @override */
-   getScrollMax() {
-
-   }
+  }
 
   /** @override */
-   transition(position) {
+  requestMeasure() {
 
-   }
+  }
+
+  /** @override */
+  getScrollMin() {
+
+  }
+
+  /** @override */
+  getScrollMax() {
+
+  }
+
+  /** @override */
+  transition(position) {
+
+  }
  }
