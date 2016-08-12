@@ -70,6 +70,7 @@ function buildExtensions(options) {
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-fx-flying-carpet', '0.1', true, options);
+  buildExtension('amp-fx-scroll-sync', '0.1', false, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-form', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
