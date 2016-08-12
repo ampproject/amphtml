@@ -619,10 +619,6 @@ export class Resource {
    */
   pause() {
     if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
-      if (this.paused_) {
-        dev().error(TAG, 'pause() called on an already paused resource:',
-          this.debugid);
-      }
       return;
     }
     this.paused_ = true;
