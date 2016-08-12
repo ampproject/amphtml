@@ -31,11 +31,15 @@ export class BindService {
     }
   }
 
-  setVariable(name, valExp) {
+  setVariable(name, valExp, event) {
     const eval = ngExpressions.compile(name);
+    if (event) {
+      this.scope_['ampEventData'] = event.detail;
+    }
     const val = ngExpressions.compile(this.cleanExpression(valExp))(this.scope_);
     eval.assign(this.scope_, val);
     this.reEvaluate_();
+    delete this.scope_['ampEventData'];
   }
 
   cleanExpression(expStr) {
@@ -49,11 +53,14 @@ export class BindService {
   observeExpression(expStr, observer) {
     expStr = this.cleanExpression(expStr);
     if (this.expressions_[expStr]) {
+      if (!this.expressions_[expStr].observers.contains(observer)) {
+        this.expressions_[expStr].observers.push(observer);
+      }
       return;
     }
     this.expressions_[expStr] = {
       compiledExpr: ngExpressions.compile(expStr),
-      observer: observer,
+      observers: [observer],
       prevVal: null
     };
   }
@@ -63,10 +70,14 @@ export class BindService {
     all.forEach((key) => {
       const exp = this.expressions_[key];
       const val = this.expressions_[key].compiledExpr(this.scope_);
-      if (val == exp.prevVal) {
+      if (val === exp.prevVal) {
         return;
       }
-      exp.observer(val);
+      exp.observers.forEach(observer => {
+        try {
+          observer(val);
+        } catch(e){}
+      });
       exp.prevVal = val;
     });
   }

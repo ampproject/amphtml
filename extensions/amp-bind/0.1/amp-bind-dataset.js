@@ -27,7 +27,6 @@ export class AmpBindDataSet extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
     this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
     const dataScript = childElementsByTag(this.element, 'SCRIPT')[0];
 

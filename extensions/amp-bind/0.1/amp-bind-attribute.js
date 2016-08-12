@@ -42,7 +42,9 @@ export class AmpBindAttribute extends AMP.BaseElement {
         parent.setAttribute(attrName, newValue);
         const observer = parent.implementation_[attrName + 'Changed'];
         if (typeof observer == 'function') {
-          observer.call(parent.implementation_, newValue);
+          try {
+            observer.call(parent.implementation_, newValue);
+          } catch(e) {}
         }
       });
     }

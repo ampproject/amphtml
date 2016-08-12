@@ -382,7 +382,7 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   slideChanged(newIndex) {
-    if (!newIndex || newIndex == this.slideIndex_) {
+    if (typeof newIndex !== 'number' || newIndex == this.slideIndex_) {
       return;
     }
     this.showSlide_(Number(newIndex));
@@ -444,8 +444,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
     // dispatch custom event of slidechange
-    const slideChangeEvent = new Event('slidechange');
-    slideChangeEvent.value = this.slideIndex_;
+    const slideChangeEvent = new CustomEvent('slidechange', {'detail': this.slideIndex_});
     this.element.dispatchEvent(slideChangeEvent);
   }
 
