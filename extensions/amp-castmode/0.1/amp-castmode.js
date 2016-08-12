@@ -136,6 +136,14 @@ class AmpCastmode extends AMP.BaseElement {
     this.sender_.sendAction('show-image', {
       src: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
     });
+
+    const candidates = this.win.document.querySelectorAll(
+        'amp-img,amp-video,amp-twitter,amp-youtube,blockquote');
+    for (let i = 0; i < candidates.length; i++) {
+      const div = this.win.document.createElement('div');
+      div.textContent = candidates[i].tagName;
+      this.container_.appendChild(div);
+    }
   }
 }
 
