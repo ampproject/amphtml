@@ -336,20 +336,31 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
+    this.buildOrScheduleBuildForResource_(resource);
+    dev().fine(TAG_, 'element added:', resource.debugid);
+  }
 
+  /**
+   * Builds the element if ready to be built, otherwise adds it to pending resources.
+   * @param {!Resource} resource
+   * @param {boolean=} checkForDupes
+   * @private
+   */
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
-      } else if (!element.isBuilt()) {
-        // Otherwise add to pending resources and try to build any ready ones.
-        this.pendingBuildResources_.push(resource);
-        this.buildReadyResources_();
+      } else if (!resource.element.isBuilt()) {
+        if (!checkForDupes ||
+            this.pendingBuildResources_.indexOf(resource) == -1) {
+          // Otherwise add to pending resources and try to build any ready ones.
+          this.pendingBuildResources_.push(resource);
+          this.buildReadyResources_();
+        }
       }
     }
-
-    dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -372,6 +383,7 @@ export class Resources {
 
   /** @private */
   buildReadyResourcesUnsafe_() {
+    let builtElementsCount = 0;
     // This will loop over all current pending resources and those that
     // get added by other resources build-cycle, this will make sure all
     // elements get a chance to be built.
@@ -382,8 +394,13 @@ export class Resources {
         // Remove resource before build to remove it from the pending list
         // in either case the build succeed or throws an error.
         this.pendingBuildResources_.splice(i--, 1);
+        builtElementsCount++;
         resource.build();
       }
+    }
+
+    if (builtElementsCount > 0) {
+      this.schedulePass();
     }
   }
 
@@ -415,12 +432,7 @@ export class Resources {
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    if (this.isRuntimeOn_) {
-      resource.build();
-      this.schedulePass();
-    } else if (resource.onUpgraded_) {
-      resource.onUpgraded_();
-    }
+    this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -932,7 +944,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        r.build();
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
@@ -1001,7 +1013,7 @@ export class Resources {
     // Phase 3: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
-      if (r.hasOwner()) {
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
         continue;
       }
       // Note that when the document is not visible, neither are any of its

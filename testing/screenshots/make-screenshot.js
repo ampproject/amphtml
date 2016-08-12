@@ -224,6 +224,7 @@ page.open(url, function() {
       resources.forEach(function(resource) {
         log('Resource started: ' + resource.debugid);
         prepareResource(resource);
+        // Note: forceAll is no longer available.
         resource.forceAll().then(function() {
           completeResource(resource);
         }, function(reason) {
