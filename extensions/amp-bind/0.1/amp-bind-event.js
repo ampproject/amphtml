@@ -49,7 +49,7 @@ export class AmpBindEvent extends AMP.BaseElement {
 
     /** @private @const {!Function} */
     this.eventListener_ = event => {
-      this.bindService_.setVariable(this.variable_, this.value_);
+      this.bindService_.setVariable(this.variable_, this.value_, event);
     };
 
     // Check for event aliasName.
