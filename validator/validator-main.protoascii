@@ -25,7 +25,9 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 261
+spec_file_revision: 266
+
+reference_points_can_define_reference_points: true
 
 # Validator extensions.
 # =====================
@@ -85,7 +87,8 @@ tags: {  # A4A
     mandatory: true
     value: ""
   }
-  # TODO(gregable): Add a spec_url pointing to a descriptive document.
+  # TODO(gregable): Replace with a better URL eventually.
+  spec_url: "https://github.com/google/amphtml/blob/5cae97e7442df863a5a7ceac78257af02792f71c/extensions/amp-a4a/amp-a4a-format.md"
 }
 
 
@@ -174,6 +177,7 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#html-tags"
 }
 tags: {
+  html_format: AMP
   tag_name: "LINK"
   spec_name: "link rel=canonical"
   mandatory_parent: "HEAD"
@@ -522,7 +526,8 @@ tags: {
 
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
-tags: {  # Special custom 'author' spreadsheet.
+tags: {  # Special custom 'author' spreadsheet for AMP
+  html_format: AMP
   tag_name: "STYLE"
   spec_name: "style amp-custom"
   unique: true
@@ -606,6 +611,123 @@ tags: {  # Special custom 'author' spreadsheet.
     blacklisted_cdata_regex: {
       regex: "!important"
       error_message: "CSS !important"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
+}
+tags: {  # Special custom 'author' spreadsheet for A4A
+  html_format: A4A
+  tag_name: "STYLE"
+  spec_name: "style amp-custom (A4A)"
+  unique: true
+  mandatory_parent: "HEAD"
+  attrs: {
+    name: "amp-custom"
+    mandatory: true
+    value: ""
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: true
+  }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value: "text/css"
+  }
+  cdata: {
+    max_bytes: 20000  # Smaller than AMP, which is 50,000.
+    # TODO(gregable): Replace with a better URL eventually.
+    max_bytes_spec_url: "https://github.com/google/amphtml/blob/5cae97e7442df863a5a7ceac78257af02792f71c/extensions/amp-a4a/amp-a4a-format.md"
+    css_spec: {
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allowed_protocol: "absolute"  # Temporary / will go away.
+        allow_relative: true
+        allow_empty: true
+      }
+      font_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allow_relative: true
+        allow_empty: true
+      }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+    # These regex blacklists are temporary hacks to validate essential CSS
+    # rules. They will be replaced later with more principled solutions.
+    blacklisted_cdata_regex: {
+      regex: "\\.i?-amp-"
+      error_message: "CSS -amp- class name prefix"
+    }
+    blacklisted_cdata_regex: {
+      regex: "!important"
+      error_message: "CSS !important"
+    }
+    blacklisted_cdata_regex: {
+      regex: "position: *(fixed|sticky)"
+      error_message: "CSS position fixed and sticky"
+    }
+    # Blacklisting transition, animation, transform, visibility, and opacity
+    # for the moment. This is *too* strict, so:
+    # TODO: Relax this constraint according to A4A spec.
+    blacklisted_cdata_regex: {
+      regex: "transition"
+      error_message: "CSS transition"
+    }
+    blacklisted_cdata_regex: {
+      regex: "animation"
+      error_message: "CSS animation"
+    }
+    blacklisted_cdata_regex: {
+      regex: "transform"
+      error_message: "CSS transform"
+    }
+    blacklisted_cdata_regex: {
+      regex: "visibility"
+      error_message: "CSS visibility"
+    }
+    blacklisted_cdata_regex: {
+      regex: "opacity"
+      error_message: "CSS opacity"
     }
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
@@ -1091,6 +1213,7 @@ tags: {
 # the exception of tags inside of a <noscript> ancestor.
 # 4.7.1 The img element
 tags: {
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
   tag_name: "IMG"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-IMG"
@@ -1125,6 +1248,7 @@ tags: {
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
 tags: {
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
   tag_name: "VIDEO"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-VIDEO"
@@ -1149,6 +1273,7 @@ tags: {
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
 tags: {
+  html_format: AMP  # Disallowed in A4A because <noscript> is disallowed.
   tag_name: "AUDIO"
   mandatory_ancestor: "NOSCRIPT"
   mandatory_ancestor_suggested_alternative: "AMP-AUDIO"
@@ -2109,6 +2234,22 @@ tags: {
   attrs: { name: "size" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
 }
+# 4.10.8 The datalist element
+tags: {
+  tag_name: "DATALIST"
+  mandatory_ancestor: "FORM"
+  also_requires_tag: "amp-form extension .js script"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
+# 4.10.9 The optgroup element
+tags: {
+  tag_name: "OPTGROUP"
+  mandatory_parent: "SELECT"
+  also_requires_tag: "amp-form extension .js script"
+  attrs: { name: "disabled" }
+  attrs: { name: "label" }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-form.html"
+}
 # 4.10.10 The option element
 tags: {
   tag_name: "OPTION"
@@ -2219,6 +2360,7 @@ tags: {
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
+  html_format: AMP
   tag_name: "NOSCRIPT"
   # Noscript inside of noscript has strange parsing semantics in browsers and
   # isn't really helping anyone anyway.
@@ -2231,42 +2373,55 @@ tags: {
 # 11 Obsolute features
 # 11.2 Non-conforming features
 tags: {
+  html_format: AMP
   tag_name: "ACRONYM"
 }
 tags: {
+  html_format: AMP
   tag_name: "BIG"
 }
 tags: {
+  html_format: AMP
   tag_name: "CENTER"
 }
 tags: {
+  html_format: AMP
   tag_name: "DIR"
 }
 tags: {
+  html_format: AMP
   tag_name: "HGROUP"
 }
 tags: {
+  html_format: AMP
   tag_name: "LISTING"
 }
 tags: {
+  html_format: AMP
   tag_name: "MULTICOL"
 }
 tags: {
+  html_format: AMP
   tag_name: "NEXTID"
 }
 tags: {
+  html_format: AMP
   tag_name: "NOBR"
 }
 tags: {
+  html_format: AMP
   tag_name: "SPACER"
 }
 tags: {
+  html_format: AMP
   tag_name: "STRIKE"
 }
 tags: {
+  html_format: AMP
   tag_name: "TT"
 }
 tags: {
+  html_format: AMP
   tag_name: "XMP"
 }
 
@@ -2275,6 +2430,7 @@ tags: {
 # This tag is a preserved indicator for documents created in microsoft word.
 # They do not render.
 tags: {
+  html_format: AMP
   tag_name: "O:P"
 }
 
@@ -2872,3 +3028,4 @@ error_formats {
   code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
   format: "CSS syntax error in tag '%1' - invalid attribute selector."
 }
+
