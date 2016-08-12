@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {ScrollSyncEffect} from './scroll-sync-effect'
+import {ScrollSyncEffect} from './scroll-sync-effect';
 
- class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
+class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
    constructor(element, config) {
 
    }

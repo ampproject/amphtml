@@ -14,29 +14,99 @@
  * limitations under the License.
  */
 
-import {ScrollSyncEffect} from './scroll-sync-effect'
+import {ScrollSyncEffect} from './scroll-sync-effect';
+import {getService} from '../../../src/service';
+import {viewportFor} from '../../../src/viewport';
+import {vsyncFor} from '../../../src/vsync';
+
+let lastScrollTop_ = 0;
 
 class ScrollSyncService {
-  constructor() {
+
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    this.win_ = win;
+
     /** @private @const {!Array<!ScrollSyncEffect>} */
     this.effects_ = [];
+
+    this.viewport_ = viewportFor(win);
+    this.vsync_ = vsyncFor(win);
+
+    this.viewport_.onScroll(() => {
+      this.vsync_.run({
+        measure: measureScrollTop,
+        mutate: onScroll,
+      }, {
+        effects: this.effects_,
+        win: this.win_,
+        viewport: this.viewport_,
+      });
+    });
   }
 
   /**
-   * @param {ScrollSyncEffect} effect
+   * @param {!ScrollSyncEffect} effect
    */
   addEffect(effect) {
-
+    if (this.effects_.indexOf(effect) == -1) {
+      this.effects_.push(effect);
+    }
   }
 
   /**
-   * @param {ScrollSyncEffect} effect
+   * @param {!ScrollSyncEffect} effect
    */
   removeEffect(effect) {
-
+    const index = this.effects_.indexOf(effect);
+    if (index != -1) {
+      this.effects_.splice(index, 1);
+    }
   }
 
+  /**
+   * @param {!HTMLElement} element
+   */
   removeAllEffect(element) {
-
+    this.effects_ = this.effects_.filter(effect => {
+      return effect.element != element;
+    });
   }
 }
+
+
+function measureScrollTop(state) {
+  state.scrollTop = state.viewport.getScrollTop();
+}
+
+
+function onScroll(state) {
+  const scrollTop = state.scrollTop;
+  for (const effect of state.effects) {
+    // TODO: This probably need a bit more thinking on when the directional animation
+    // should be transitioned and what data does it need. Otherwise this will
+    // call transition for directional animations ALL the time.
+    if (effect.isDirectional()) {
+      effect.transition(scrollTop);
+    } else if (scrollTop >= effect.getScrollMin() &&
+        scrollTop <= effect.getScrollMax()) {
+      effect.transition(scrollTop);
+    }
+  }
+  lastScrollTop_ = scrollTop;
+}
+
+
+/**
+ * @param {!Window} win
+ * @return {!ScrolLSyncService}
+ */
+export function installScrollSyncService(win) {
+  return getService(win, 'scroll-sync-service', () => {
+    return new ScrollSyncService(win);
+  });
+}
+
+installScrollSyncService(AMP.win);

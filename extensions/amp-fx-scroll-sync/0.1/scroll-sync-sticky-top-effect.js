@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ScrollSyncEffect} from './scroll-sync-effect'
+import {ScrollSyncEffect} from './scroll-sync-effect';
 
 class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
   constructor(element, config) {
