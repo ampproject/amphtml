@@ -111,11 +111,11 @@ amp-castmode {
 }
 
 .-amp-cast-rc-play {
-  background-image: url('/examples/video/media-playback-start-2400px.png');
+  --background-image: url('/examples/video/media-playback-start-2400px.png');
 }
 
 .-amp-cast-rc-pause {
-  background-image: url('/examples/video/media-playback-pause-2400px.png');
+  --background-image: url('/examples/video/media-playback-pause-2400px.png');
 }
 
 .-amp-cast-view {

@@ -22,6 +22,29 @@
       color: #fefefe;
     }
 
+    #logo {
+      position: absolute;
+      display: auto;
+      top: 20px;
+      left: 20px;
+      height: 100px;
+      width: auto;
+      z-index: 10;
+    }
+
+    #bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 0;
+      background-repeat: no-repeat;
+      background-size: cover;
+      -webkit-filter: blur(10px);
+      filter: blur(10px);
+    }
+
     #log {
       position: absolute;
       background: #fff;
@@ -63,6 +86,29 @@
       right: 0;
     }
 
+    #prev-indicator, #next-indicator {
+      width: 0;
+      height: 0;
+      position: absolute;
+      border: 0 solid transparent;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    #prev-indicator {
+      left: 20px;
+      border-top-width: 80px;
+      border-bottom-width: 80px;
+      border-right: 80px solid rgba(0, 0, 0, 0.25);
+    }
+
+    #next-indicator {
+      right: 10px;
+      border-top-width: 80px;
+      border-bottom-width: 80px;
+      border-left: 80px solid rgba(0, 0, 0, 0.25);
+    }
+
     #gallery-container {
       position: absolute;
       top: 100px;
@@ -84,11 +130,26 @@
       object-fit: cover;
       box-sizing: border-box;
       border: 10px solid transparent;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.15);
     }
 
     .gallery-item.selected {
       border-color: #eee;
     }
+
+    .gallery-item > img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
   </style>
 
   <title>AMP Cast Debug</title>
@@ -97,10 +158,16 @@
 <body>
   <DIV id="root">
 
+    <div id="bg"></div>
+
+    <img id="logo">
+
     <div id="container">
       <div id="gallery">
         <div id="gallery-container">
         </div>
+        <div id="prev-indicator"></div>
+        <div id="next-indicator"></div>
       </div>
     </div>
 

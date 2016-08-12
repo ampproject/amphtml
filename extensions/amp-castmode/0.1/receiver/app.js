@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createThumb} from '../cast-elements';
+import {createPauseOverlay, createPlayOverlay, createThumb} from '../cast-elements';
 import {log} from './cast-log';
 import * as st from '../../../../src/style';
 
@@ -30,10 +30,22 @@ export class App {
     this.channel = channel;
 
     /** @private @const {!Element} */
+    this.root_ = win.document.getElementById('root');
+
+    /** @private @const {!Element} */
     this.container_ = win.document.getElementById('container');
     if (!this.container_) {
       throw new Error('container not found');
     }
+
+    /** @private @const {!Element} */
+    this.prevIndicator_ = win.document.getElementById('prev-indicator');
+
+    /** @private @const {!Element} */
+    this.nextIndicator_ = win.document.getElementById('next-indicator');
+
+    st.toggle(this.prevIndicator_, false);
+    st.toggle(this.nextIndicator_, false);
 
     /** @private {number} */
     this.galleryStartIndex_ = -1;
@@ -42,8 +54,21 @@ export class App {
     this.selected_ = null;
 
     // Actions.
+    channel.onAction('article', this.handleArticle_.bind(this));
     channel.onAction('gallery', this.handleGallery_.bind(this));
     channel.onAction('show-image', this.handleShowImage_.bind(this));
+  }
+
+  /**
+   * @param {!Object} payload
+   */
+  handleArticle_(payload) {
+    this.root_.style.backgroundColor = payload.themeColor || '';
+    document.getElementById('logo').src = payload.logo || '';
+    document.getElementById('bg').style.backgroundImage =
+        payload.preview ?
+        `url(${payload.preview})` :
+        '';
   }
 
   /**
@@ -61,8 +86,7 @@ export class App {
       galleryContainer.textContent = '';
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        const el = createThumb(item);
-        el.classList.add('gallery-item');
+        const el = this.createThumb_(item);
         galleryContainer.appendChild(el);
       }
     }
@@ -78,6 +102,23 @@ export class App {
     }
 
     st.toggle(gallery, true);
+    st.toggle(this.prevIndicator_, payload.hasPrev);
+    st.toggle(this.nextIndicator_, payload.hasNext);
+  }
+
+  /**
+   * @param {!CastInfo} item
+   * @return {!Element}
+   */
+  createThumb_(item) {
+    const thumb = createThumb(item);
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('gallery-item');
+    wrapper.appendChild(thumb);
+    if (item.playable) {
+      wrapper.appendChild(createPlayOverlay(80));
+    }
+    return wrapper;
   }
 
   /**

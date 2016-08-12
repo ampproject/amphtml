@@ -17,7 +17,7 @@
 import {CSS} from '../../../build/amp-castmode-0.1.css';
 import {CastSenderDebug, CastSenderProd} from './cast-sender';
 import {Layout} from '../../../src/layout';
-import {createThumb} from './cast-elements';
+import {createPauseOverlay, createPlayOverlay, createThumb} from './cast-elements';
 import {historyFor} from '../../../src/history';
 import {toArray} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
@@ -77,6 +77,8 @@ class AmpCastmode extends AMP.BaseElement {
     /** @const @private {!Element} */
     this.pauseButton_ = createButton('pause', this.handlePause_);
 
+    this.playButton_.appendChild(createPlayOverlay(100));
+    this.pauseButton_.appendChild(createPauseOverlay(100));
     st.toggle(this.playButton_, false);
     st.toggle(this.pauseButton_, false);
 
@@ -219,7 +221,7 @@ class AmpCastmode extends AMP.BaseElement {
       thumb.classList.add('-amp-cast-gallery-thumb');
       thumb.appendChild(createThumb(castInfo));
       if (castInfo.playable) {
-        thumb.appendChild(this.createPlayThumb_());
+        thumb.appendChild(createPlayOverlay(80));
       }
       this.gallery_.appendChild(thumb);
       this.thumbs_.push(thumb);
@@ -229,6 +231,16 @@ class AmpCastmode extends AMP.BaseElement {
     this.getVsync().mutate(() => {
       this.setMode_(Mode.GALLERY);
       this.setSelectedThumb_(0);
+    });
+
+    // Meta.
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+    const logoMeta = document.querySelector('meta[name="logo"]');
+    const previewMeta = document.querySelector('meta[name="preview"]');
+    this.sender_.sendAction('article', {
+      themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
+      logo: logoMeta ? logoMeta.getAttribute('content') : null,
+      preview: previewMeta ? previewMeta.getAttribute('content') : null,
     });
   }
 
