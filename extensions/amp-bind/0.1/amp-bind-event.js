@@ -23,7 +23,7 @@ const eventAliasMap = {
 };
 
 export class AmpBindEvent extends AMP.BaseElement {
-    /** @override */
+  /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }

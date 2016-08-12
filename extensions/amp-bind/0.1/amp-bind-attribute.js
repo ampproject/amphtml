@@ -18,7 +18,7 @@ import {Layout} from '../../../src/layout';
 import {bindServiceForDoc} from '../../../src/bind-service';
 
 export class AmpBindAttribute extends AMP.BaseElement {
-    /** @override */
+  /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
@@ -26,19 +26,21 @@ export class AmpBindAttribute extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     console.log('Hi, I am amp-bind-attribute buildCallback');
+    /** @private @const {!BindService} */
     this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
 
+    /** @private @const {string} */
     const attrName = this.element.getAttribute('attr');
 
+    /** @private @const {string} */
     const valueExpr = this.element.getAttribute('value');
+    // set attribute and call parent's callback(if exists) when valueExpr change
     if (valueExpr) {
       this.bindService_.observeExpression(valueExpr, newValue => {
         const parent = this.element.parentNode;
         if (!parent) {
           return;
         }
-        //TODO: need to convert attrName to function.
-        //e.g. slide-number to slideNumber.
         parent.setAttribute(attrName, newValue);
         const observer = parent.implementation_[attrName + 'Changed'];
         if (typeof observer == 'function') {
@@ -50,6 +52,7 @@ export class AmpBindAttribute extends AMP.BaseElement {
     }
 
     const toggleExp = this.element.getAttribute('toggle');
+    // toggle attribute value when toggleExp change
     if (toggleExp) {
       this.bindService_.observeExpression(toggleExp, boolResult => {
         const parent = this.element.parentNode;
@@ -63,6 +66,5 @@ export class AmpBindAttribute extends AMP.BaseElement {
         }
       });
     }
-
   }
 };
