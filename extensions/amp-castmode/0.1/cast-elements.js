@@ -37,6 +37,7 @@ export function createThumb(castInfo) {
 
   if (castInfo.thumbText) {
     const div = document.createElement('div');
+    div.style.textAlign = 'center';
     div.textContent = castInfo.thumbText;
     return div;
   }
