@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
 import {assertHttpsUrl} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
@@ -34,9 +33,6 @@ import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
 import {urls} from '../../../src/config';
-
-/** @type {string} */
-const TAG = 'amp-form';
 
 
 /** @const @enum {string} */
@@ -451,12 +447,10 @@ function installSubmissionHandlers(win) {
  */
 export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
-    if (isExperimentOn(win, TAG)) {
-      installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(win);
-        installSubmissionHandlers(win);
-      });
-    }
+    installStyles(win.document, CSS, () => {
+      validationBubble = new ValidationBubble(win);
+      installSubmissionHandlers(win);
+    });
     return {};
   });
 }
