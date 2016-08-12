@@ -39,7 +39,8 @@ export class AmpExperiment extends AMP.BaseElement {
     if (!this.isExperimentOn_) {
       dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
-      getService(this.win, 'variant', () => Promise.reject());
+      getService(this.win, 'variant',
+          () => Promise.reject(EXPERIMENT + ' disabled'));
       return;
     }
 
