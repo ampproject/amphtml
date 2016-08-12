@@ -25,7 +25,9 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 261
+spec_file_revision: 262
+
+reference_points_can_define_reference_points: true
 
 # Validator extensions.
 # =====================
