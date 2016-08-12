@@ -84,5 +84,41 @@
       document.writeln('1, 2, 3');
     </script>
   </amp-live-list>
+
+  <!-- Example with individual items not matching the reference point
+       "AMP-LIVE-LIST [items] item" -->
+  <amp-live-list id="my-live-list-5" data-poll-interval="15000" data-max-items-per-page="20">
+    <button update>You have updates!</button>
+    <ul items>
+      <li id="1" data-update-time="42">1</li>  <!-- data-sort-time missing -->
+      <li id="2" data-sort-time="43" data-update-time="44">2</li>
+      <li data-update-time="44">3</li> <!-- id and data-sort-time missing -->
+      <p>junk</p> <!-- id, data-sort-time missing -->
+    </ul>
+    <div pagination></div>
+  </amp-live-list>
+
+  <!-- amp-live-list can't be used for a reference point that defines reference
+       points since it also defines reference points -->
+  <amp-live-list id="my-live-list-6" data-poll-interval="15000" data-max-items-per-page="20">
+    <button update on="tap:my-live-list-6.update">You have updates!</button>
+    <amp-live-list items id="my-live-list-7" data-poll-interval="15000" data-max-items-per-page="20">
+      <button update on="tap:my-live-list-7.update">You have updates!</button>
+      <div items></div>
+    </amp-live-list>
+  </amp-live-list>
+
+  <!-- While the previous example showed how amp-live-list can't be used as the
+       items reference point, it *can* be one of the items. -->
+  <amp-live-list id="my-live-list-8" data-poll-interval="15000" data-max-items-per-page="20">
+    <button update on="tap:my-live-list-8.update">You have updates!</button>
+    <div items>
+      <amp-live-list id="my-live-list-9" data-sort-time="43" data-update-time="44" data-poll-interval="15000" data-max-items-per-page="20">
+        <button update on="tap:my-live-list-9.update">You have updates!</button>
+        <div items></div>
+      </amp-live-list>
+    </div>
+  </amp-live-list>
+
 </body>
 </html>

@@ -84,7 +84,10 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      if (candidate.match(/^.*.html/g)) {
+      // TODO(gregable): Remove this hack once the js validator knows how
+      // to validate A4A documents.
+      if (candidate.match(/^.*.html/g) &&
+          !entry.subdir.match(/a4a_feature_tests/g)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
