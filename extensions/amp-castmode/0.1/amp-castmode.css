@@ -43,4 +43,130 @@ amp-castmode {
   z-index: 999 !important;
   bottom: 10px;
   right: 10px;
+  border: 1px solid black;
+  background: #fff;
+  padding: 16px;
+}
+
+.-amp-cast-rc {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+}
+
+.-amp-cast-rc-action {
+  width: 0;
+  height: 0;
+  position: absolute;
+  border: 0 solid transparent;
+}
+
+.-amp-cast-rc-prev {
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  border-top-width: 50px;
+  border-bottom-width: 50px;
+  border-right: 50px solid #fff;
+}
+
+.-amp-cast-rc-next {
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border-top-width: 50px;
+  border-bottom-width: 50px;
+  border-left: 50px solid #fff;
+}
+
+.-amp-cast-rc-up {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left-width: 50px;
+  border-right-width: 50px;
+  border-bottom: 50px solid #fff;
+}
+
+.-amp-cast-rc-down {
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left-width: 50px;
+  border-right-width: 50px;
+  border-top: 50px solid #fff;
+}
+
+.-amp-cast-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.-amp-cast-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.-amp-cast-gallery-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.-amp-cast-gallery {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 1000px;  /* redo */
+}
+
+.-amp-cast-gallery-thumb {
+  margin: 0 16px;
+  height: 100%;
+  box-sizing: border-box;
+  border: 2px solid #000;
+  background: #000;
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.9);
+  color: #fff;
+  max-width: 50%;
+}
+
+.-amp-cast-gallery-thumb > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.-amp-cast-gallery-thumb.-amp-selected {
+  transform: scale(1.1);
 }

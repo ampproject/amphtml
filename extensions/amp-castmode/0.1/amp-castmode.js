@@ -18,8 +18,16 @@ import {CSS} from '../../../build/amp-castmode-0.1.css';
 import {CastSenderDebug, CastSenderProd} from './cast-sender';
 import {Layout} from '../../../src/layout';
 import {historyFor} from '../../../src/history';
+import {toArray} from '../../../src/types';
 import {viewerFor} from '../../../src/viewer';
 import * as st from '../../../src/style';
+
+
+/** @enum {number} */
+const Mode = {
+  GALLERY: 1,
+  VIEW: 2,
+}
 
 
 class AmpCastmode extends AMP.BaseElement {
@@ -31,10 +39,64 @@ class AmpCastmode extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {!Element} */
+    /** @private {!Mode} */
+    this.mode_ = Mode.GALLERY;
+
+    /** @const @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
+
+    /** @const @private {!Element} */
+    this.rcContainer_ = this.element.ownerDocument.createElement('div');
+    this.rcContainer_.classList.add('-amp-cast-rc');
+    this.applyFillContent(this.rcContainer_);
+    this.container_.appendChild(this.rcContainer_);
+
+    const createButton = (dir, handler) => {
+      const button = this.element.ownerDocument.createElement('div');
+      button.classList.add('-amp-cast-rc-action');
+      button.classList.add('-amp-cast-rc-' + dir);
+      this.rcContainer_.appendChild(button);
+      const thisHandler = handler.bind(this);
+      button.onclick = event => {
+        event.stopPropagation();
+        thisHandler();
+      };
+      return button;
+    };
+    /** @const @private {!Element} */
+    this.prevButton_ = createButton('prev', this.handlePrev_);
+    /** @const @private {!Element} */
+    this.nextButton_ = createButton('next', this.handleNext_);
+    /** @const @private {!Element} */
+    this.upButton_ = createButton('up', this.handleUp_);
+
+    this.rcContainer_.onclick = this.handleClick_.bind(this);
+
+    /** @const @private {!Element} */
+    this.viewSpace_ = this.element.ownerDocument.createElement('div');
+    this.viewSpace_.classList.add('-amp-cast-view');
+    this.applyFillContent(this.viewSpace_);
+    this.container_.appendChild(this.viewSpace_);
+
+    /** @const @private {!Element} */
+    this.galleryContainer_ = this.element.ownerDocument.createElement('div');
+    this.galleryContainer_.classList.add('-amp-cast-gallery-container');
+    this.viewSpace_.appendChild(this.galleryContainer_);
+
+    /** @const @private {!Element} */
+    this.gallery_ = this.element.ownerDocument.createElement('div');
+    this.gallery_.classList.add('-amp-cast-gallery');
+    this.galleryContainer_.appendChild(this.gallery_);
+
+    /** @const @private {!Element} */
+    this.preview_ = this.element.ownerDocument.createElement('div');
+    this.preview_.classList.add('-amp-cast-preview');
+    this.viewSpace_.appendChild(this.preview_);
+
+    /** @private {number} */
+    this.selectedIndex_ = 0;
 
     this.registerAction('close', this.close.bind(this));
 
@@ -137,14 +199,112 @@ class AmpCastmode extends AMP.BaseElement {
       src: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
     });
 
-    const candidates = this.win.document.querySelectorAll(
-        'amp-img,amp-video,amp-twitter,amp-youtube,blockquote');
-    for (let i = 0; i < candidates.length; i++) {
-      const div = this.win.document.createElement('div');
-      div.textContent = candidates[i].tagName;
-      this.container_.appendChild(div);
+    this.candidates_ = toArray(this.win.document.querySelectorAll(
+        'amp-img,amp-video,amp-twitter,amp-youtube,blockquote'));
+    console.log('candidates: ', this.candidates_.length, this.candidates_);
+    this.thumbs_ = [];
+    for (let i = 0; i < this.candidates_.length; i++) {
+      const candidate = this.candidates_[i];
+      const thumb = this.win.document.createElement('div');
+      thumb.classList.add('-amp-cast-gallery-thumb');
+      thumb.appendChild(this.createThumb_(candidate));
+      this.gallery_.appendChild(thumb);
+      this.thumbs_.push(thumb);
+    }
+
+    this.getVsync().mutate(() => {
+      this.setMode_(Mode.GALLERY);
+      this.setSelectedThumb_(0);
+    });
+  }
+
+  /**
+   * @param {!Mode} mode
+   * @private
+   */
+  setMode_(mode) {
+    this.mode_ = mode;
+    st.toggleVisibility(this.galleryContainer_, mode == Mode.GALLERY);
+    st.toggleVisibility(this.preview_, mode == Mode.VIEW);
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  setSelectedThumb_(index) {
+    console.log('setSelectedThumb_: ', index);
+    this.thumbs_[this.selectedIndex_].classList.remove('-amp-selected');
+
+    this.selectedIndex_ = index;
+    const thumb = this.thumbs_[index];
+    const width = thumb.offsetWidth;
+    const height = thumb.offsetHeight;
+    thumb.classList.add('-amp-selected');
+    const offsetLeft = thumb.offsetLeft;
+    const totalWidth = this.viewSpace_.offsetWidth;
+    const tx = -offsetLeft + (totalWidth - width) / 2;
+    this.gallery_.style.transform = `translateX(${tx}px)`;
+
+    this.preview_.textContent = '';
+    const previewThumb = (thumb.firstElementChild || thumb).cloneNode(true);
+    this.preview_.appendChild(previewThumb);
+    const scale = Math.max(this.container_.offsetWidth / width,
+        this.container_.offsetHeight / height);
+    console.log('scale: ', scale);
+    previewThumb.style.transform = `scale(${scale})`;
+  }
+
+  /** @private */
+  handlePrev_() {
+    if (this.selectedIndex_ - 1 >= 0) {
+      this.setSelectedThumb_(this.selectedIndex_ - 1);
     }
   }
+
+  /** @private */
+  handleNext_() {
+    if (this.selectedIndex_ + 1 < this.candidates_.length) {
+      this.setSelectedThumb_(this.selectedIndex_ + 1);
+    }
+  }
+
+  /** @private */
+  handleUp_() {
+    switch (this.mode_) {
+      case Mode.VIEW:
+        this.setMode_(Mode.GALLERY);
+        break;
+    }
+  }
+
+  /** @private */
+  handleClick_() {
+    switch (this.mode_) {
+      case Mode.GALLERY:
+        this.setMode_(Mode.VIEW);
+        break;
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @private
+   */
+  createThumb_(element) {
+    let thumb = null;
+    if (element.toThumbnail) {
+      thumb = element.toThumbnail();
+    }
+
+    if (!thumb) {
+      thumb = document.createElement('div');
+      thumb.textContent = 'Unknown';
+      thumb.style.width = '80px';
+    }
+    return thumb;
+  }
 }
+
 
 AMP.registerElement('amp-castmode', AmpCastmode, CSS);

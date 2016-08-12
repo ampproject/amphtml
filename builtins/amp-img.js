@@ -135,6 +135,13 @@ export class AmpImg extends BaseElement {
       this.toggleFallback(true);
     });
   }
+
+  /** @override */
+  toThumbnail() {
+    const img = this.element.ownerDocument.createElement('img');
+    img.src = this.srcset_.select(320, 1).url;
+    return img;
+  }
 };
 
 /**

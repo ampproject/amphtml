@@ -146,6 +146,19 @@ export function toggle(element, opt_display) {
 
 
 /**
+ * Shows or hides the specified element.
+ * @param {!Element} element
+ * @param {boolean=} opt_visible
+ */
+export function toggleVisibility(element, opt_visible) {
+  if (opt_visible === undefined) {
+    opt_visible = !(element.style.visibility != 'hidden');
+  }
+  element.style.visibility = opt_visible ? '' : 'hidden';
+}
+
+
+/**
  * Returns a pixel value.
  * @param {number} value
  * @return {string}
