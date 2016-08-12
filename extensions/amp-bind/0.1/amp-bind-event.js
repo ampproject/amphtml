@@ -15,6 +15,12 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {bindServiceForDoc} from '../../../src/bind-service';
+
+// have this alias map for event name;
+const eventAliasMap = {
+  'tap': 'click',
+};
 
 export class AmpBindEvent extends AMP.BaseElement {
     /** @override */
@@ -25,5 +31,24 @@ export class AmpBindEvent extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     console.log('Hi, I am amp-bind-event buildCallback');
+    // get attributes
+    this.event_ = this.element.getAttribute('on');
+    this.variable_ = this.element.getAttribute('variable');
+    this.value_ = this.element.getAttribute('value');
+    this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
+    // Find parent
+    this.parent_ = this.element.parentNode;
+
+    // create event listener functions
+    this.eventListener_ = () => {
+      // set value to bindService_.
+      this.bindService_.setVariable(this.variable_, this.value_);
+    };
+
+    // add event listener
+    if (eventAliasMap[this.event_]) {
+      this.event_ = eventAliasMap[this.event_];
+    }
+    this.parent_.addEventListener(this.event_, this.eventListener_);
   }
 };

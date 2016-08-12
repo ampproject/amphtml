@@ -21,7 +21,12 @@ export class BindService {
     this.ampdoc = ampdoc;
   }
 
+  //let observerMap = {};
+
   setVariable(name, value) {
+    console.log('in setVariable name and value is ', name, value);
+    // find the observer with the name.
+    // for each observer tell them the new value();
   }
 
   observeExpression(exp, observer) {
@@ -31,6 +36,7 @@ export class BindService {
   }
 
   evalExpression_(exp) {
+    return exp;
   }
 }
 
