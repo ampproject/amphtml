@@ -58,6 +58,7 @@ describe('amp-analytics.visibility', () => {
     visibility = new Visibility(window);
     sandbox.stub(visibility.resourcesService_, 'getResourceForElement')
         .returns({
+          getLayoutBox: () => {},
           element: {getIntersectionChangeEntry: getIntersectionStub},
           getId: getIdStub,
           isLayoutPending: () => false});
