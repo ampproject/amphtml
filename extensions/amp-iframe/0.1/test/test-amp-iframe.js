@@ -35,9 +35,9 @@ adopt(window);
 describe('amp-iframe', () => {
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe.html';
+      '/test/fixtures/served/iframe.html';
   const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-clicktoplay.html';
+      '/test/fixtures/served/iframe-clicktoplay.html';
 
   const timer = new Timer(window);
   let ranJs = 0;
@@ -230,7 +230,7 @@ describe('amp-iframe', () => {
     return getAmpIframe({
       // ads. is not whitelisted for http iframes.
       src: 'http://ads.localhost:' + location.port +
-          '/base/test/fixtures/served/iframe.html',
+          '/test/fixtures/served/iframe.html',
       sandbox: 'allow-scripts',
       width: 100,
       height: 100,
