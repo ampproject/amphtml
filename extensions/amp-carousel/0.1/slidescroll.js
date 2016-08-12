@@ -385,7 +385,6 @@ export class AmpSlideScroll extends BaseSlides {
     if (!newIndex || newIndex == this.slideIndex_) {
       return;
     }
-    console.log('new slide is ', Number(newIndex));
     this.showSlide_(Number(newIndex));
   }
 

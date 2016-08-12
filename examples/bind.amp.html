@@ -25,7 +25,7 @@
   <button onclick="AMP.toggleExperiment('amp-slidescroll');location.reload();">Toggle Experiment</button>
   <div>
     <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
-      <amp-bind-attribute layout="nodisplay" attr="slide-number" value="{{chosenSlide}}">
+      <amp-bind-attribute layout="nodisplay" attr="slide" value="{{chosenSlide}}">
       </amp-bind-attribute>
       <amp-bind-event layout="nodisplay" on="slidechange" , variable="chosenSlide" , value="{{event.value}}">
       </amp-bind-event>
@@ -39,7 +39,7 @@
         layout="fixed">
         <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide == 1}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="1">
+        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="0">
         </amp-bind-event>
       </amp-img>
 
@@ -47,7 +47,7 @@
         layout="fixed">
         <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide == 2}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="2">
+        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="1">
         </amp-bind-event>
       </amp-img>
 
@@ -55,7 +55,7 @@
         layout="fixed">
         <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide == 3}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="3">
+        <amp-bind-event layout="nodisplay" on="tap" , variable="chosenSlide" , value="2">
         </amp-bind-event>
       </amp-img>
     </div>
