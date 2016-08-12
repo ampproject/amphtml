@@ -100,6 +100,24 @@ amp-castmode {
   border-top: 50px solid #fff;
 }
 
+.-amp-cast-rc-play, .-amp-cast-rc-pause {
+  width: 180px;
+  height: 180px;
+  background-size: 180px 180px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.-amp-cast-rc-play {
+  background-image: url('/examples/video/media-playback-start-2400px.png');
+}
+
+.-amp-cast-rc-pause {
+  background-image: url('/examples/video/media-playback-pause-2400px.png');
+}
+
 .-amp-cast-view {
   position: absolute;
   top: 0;

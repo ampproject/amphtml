@@ -71,6 +71,13 @@ class AmpCastmode extends AMP.BaseElement {
     this.nextButton_ = createButton('next', this.handleNext_);
     /** @const @private {!Element} */
     this.upButton_ = createButton('up', this.handleUp_);
+    /** @const @private {!Element} */
+    this.playButton_ = createButton('play', this.handlePlay_);
+    /** @const @private {!Element} */
+    this.pauseButton_ = createButton('pause', this.handlePause_);
+
+    st.toggle(this.playButton_, false);
+    st.toggle(this.pauseButton_, false);
 
     this.rcContainer_.onclick = this.handleClick_.bind(this);
 
@@ -97,6 +104,9 @@ class AmpCastmode extends AMP.BaseElement {
 
     /** @private {number} */
     this.selectedIndex_ = 0;
+
+    /** @private {boolean} */
+    this.playing_ = false;
 
     this.registerAction('close', this.close.bind(this));
 
@@ -229,6 +239,31 @@ class AmpCastmode extends AMP.BaseElement {
     this.mode_ = mode;
     st.toggleVisibility(this.galleryContainer_, mode == Mode.GALLERY);
     st.toggleVisibility(this.preview_, mode == Mode.VIEW);
+    this.container_.classList.toggle('-amp-cast-mode-gallery',
+        mode == Mode.GALLERY);
+    this.container_.classList.toggle('-amp-cast-mode-view',
+        mode == Mode.VIEW);
+    this.updateActions_();
+  }
+
+  /** @private */
+  updateActions_() {
+    const element = this.candidates_[this.selectedIndex_];
+    const playback = this.isPlayback_(element);
+    this.rcContainer_.classList.toggle('-amp-cast-playback', playback);
+    if (!playback || this.mode_ != Mode.VIEW) {
+      st.toggle(this.playButton_, false);
+      st.toggle(this.pauseButton_, false);
+    } else if (playback) {
+      st.toggle(this.playButton_, !this.playing_);
+      st.toggle(this.pauseButton_, this.playing_);
+    }
+  }
+
+  /** @private */
+  togglePlay_() {
+    this.playing_ = !this.playing_;
+    this.updateActions_();
   }
 
   /**
@@ -240,6 +275,7 @@ class AmpCastmode extends AMP.BaseElement {
     this.thumbs_[this.selectedIndex_].classList.remove('-amp-selected');
 
     this.selectedIndex_ = index;
+    const element = this.candidates_[index];
     const thumb = this.thumbs_[index];
     const width = thumb.offsetWidth;
     const height = thumb.offsetHeight;
@@ -256,6 +292,9 @@ class AmpCastmode extends AMP.BaseElement {
         this.container_.offsetHeight / height);
     console.log('scale: ', scale);
     previewThumb.style.transform = `scale(${scale})`;
+
+    this.playing_ = false;
+    this.updateActions_();
   }
 
   /** @private */
@@ -288,6 +327,16 @@ class AmpCastmode extends AMP.BaseElement {
         this.setMode_(Mode.VIEW);
         break;
     }
+  }
+
+  /** @private */
+  handlePlay_() {
+    this.togglePlay_();
+  }
+
+  /** @private */
+  handlePause_() {
+    this.togglePlay_();
   }
 
   /**
