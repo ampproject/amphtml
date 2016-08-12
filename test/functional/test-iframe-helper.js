@@ -20,9 +20,9 @@ import {generateSentinel} from '../../src/3p-frame.js';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection.html';
+      '/test/fixtures/served/iframe-intersection.html';
   const nestedIframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection-outer.html';
+      '/test/fixtures/served/iframe-intersection-outer.html';
 
   let testIframe;
   let sandbox;

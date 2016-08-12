@@ -86,7 +86,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   examples.forEach(filename => {
     it(filename + ' should validate', () => {
-      const url = '/base/examples/' + filename;
+      const url = '/examples/' + filename;
       return get(url).then(html => {
         /* global amp: false */
         const validationResult = amp.validator.validateString(html);

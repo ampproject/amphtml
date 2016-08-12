@@ -110,7 +110,7 @@ describe('amp-facebook', function() {
 
   it('resizes facebook posts', () => {
     const iframeSrc = 'http://ads.localhost:' + location.port +
-        '/base/test/fixtures/served/iframe.html';
+        '/test/fixtures/served/iframe.html';
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setDefaultBootstrapBaseUrlForTesting(iframeSrc);
     return getAmpFacebook(fbPostHref, undefined,

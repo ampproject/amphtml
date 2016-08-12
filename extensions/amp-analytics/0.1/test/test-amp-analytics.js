@@ -887,7 +887,7 @@ describe('amp-analytics', function() {
 
     it('succeeds for iframePing config in vendor config', function() {
       const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
-      const url = 'http://iframe.localhost:9876/base/test/' +
+      const url = 'http://iframe.localhost:9876/test/' +
               'fixtures/served/iframe.html?title=${title}';
       analytics.predefinedConfig_.testVendor = {
         'requests': {

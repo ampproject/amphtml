@@ -147,7 +147,7 @@ describe('IntersectionObserver', () => {
   });
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection.html';
+      '/test/fixtures/served/iframe-intersection.html';
 
   let sandbox;
   let testIframe;
