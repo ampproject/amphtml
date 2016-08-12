@@ -16,9 +16,9 @@
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
 
-class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
+export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
   constructor(element, config) {
-
+    super(element);
   }
 
   /** @override */

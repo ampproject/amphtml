@@ -15,6 +15,12 @@
  */
 
 import {dev} from '../../../src/log';
+import {ScrollSyncEffect} from './scroll-sync-effect';
+import {ScrollSyncStickyTopEffect} from './scroll-sync-sticky-top-effect';
+import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
+import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
+import {installScrollSyncService} from './scroll-sync-service';
+import {getService} from '../../../src/service';
 
 /** @private @const {string} */
 const TAG = 'amp-fx-scroll-sync';
@@ -29,7 +35,25 @@ class AmpScrollSync extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     dev().fine(TAG, 'building');
-    // register ScrollSyncEffect for parent element
+
+    this.effectName_ = this.element.getAttribute('name');
+    dev().fine(TAG, 'effectName_: '+ this.effectName_);
+
+    let config = {};
+    let scrollSyncEffect = null;
+    if(this.effectName_ == 'dock-top') {
+      scrollSyncEffect = new ScrollSyncStickyTopEffect(this, config);
+    } else if (this.effectName_ == 'scale') {
+      config['end-scale'] = this.element.getAttribute('end-scale');
+      config['starting-position'] = this.element.getAttribute('starting-position');
+      config['ending-position'] = this.element.getAttribute('ending-position');
+      scrollSyncEffect = new ScrollSyncScaleEffect(this, config);
+    } else if (this.effectName_ == 'scroll-away') {
+      scrollSyncEffect = new ScrollSyncScrollAwayEffect(this, config);
+    }
+    /** @private */
+    this.scrollSyncService_ = installScrollSyncService(this.win);
+    this.scrollSyncService_.addEffect(scrollSyncEffect);
   }
 }
 
