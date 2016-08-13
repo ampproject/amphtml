@@ -57,6 +57,7 @@ export class App {
     channel.onAction('article', this.handleArticle_.bind(this));
     channel.onAction('gallery', this.handleGallery_.bind(this));
     channel.onAction('show-image', this.handleShowImage_.bind(this));
+    channel.onAction('play-video', this.handlePlayVideo_.bind(this));
   }
 
   /**
@@ -146,4 +147,27 @@ export class App {
     this.container_.appendChild(parent);
   }
 
+  /**
+   * @param {!{src: string}} payload
+   */
+  handlePlayVideo_(payload) {
+    const src = payload.src;
+    log('handle play video', payload);
+
+    const gallery = this.win.document.getElementById('gallery');
+    st.toggle(gallery, false);
+
+    const parent = this.win.document.createElement('div');
+    parent.classList.add('flex-container');
+
+    const video = this.win.document.createElement('video');
+    video.autoplay = true;
+    video.style.objectFit = 'contain';
+    video.style.width = '100%';
+    video.style.height = '100%';
+    video.src = src;
+
+    parent.appendChild(video);
+    this.container_.appendChild(parent);
+  }
 }
