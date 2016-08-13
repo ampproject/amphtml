@@ -12,50 +12,115 @@
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <style amp-custom>
     body {
-      margin: auto;
+      font-family: Verdana;
+      background-color: black;
+    }
+    h2 {
+      display: block;
+      margin: 20px;
+      font-weight: normal;
     }
 
-    amp-img[selected] {
-      border: 2px solid red;
+    h2.title {
+      font-size: 16pt;
+      color: #ff1744;
+    }
+
+    h2.price {
+      font-size: 13pt;
+      color: #9C27B0;
+      font-style: italic;
+    }
+
+    .thumbnails amp-img {
+      opacity: 0.5;
+    }
+
+    .thumbnails amp-img[selected] {
+      opacity: 1;
+    }
+
+    .thumbnails {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .thumbnails amp-img {
+      flex: 1;
     }
   </style>
 </head>
 <body>
-  <h2>Two way binding with Carousel</h2>
-  <button onclick="AMP.toggleExperiment('amp-slidescroll');location.reload();">Toggle Experiment</button>
+  <h2 class="title">Guitar AMP</h2>
+  <h2 class="price">$500</h2>
   <div>
-    <amp-carousel id="carousel-1" width=400 height=300 type=slides controls>
-      <amp-bind-attribute layout="nodisplay" attr="slide" value="{{chosenSlide}}">
+    <amp-carousel slide=0 id="carousel-1" width=1 height=1 layout=responsive type=slides controls>
+      <amp-bind-attribute layout="nodisplay"
+          attr="slide"
+          value="{{selectedSlide}}">
       </amp-bind-attribute>
-      <amp-bind-event layout="nodisplay" on="slidechange" variable="chosenSlide" value="{{ampEventData}}">
+
+      <amp-bind-event layout="nodisplay"
+          on="slidechange"
+          variable="selectedSlide"
+          value="{{ampEventData}}">
       </amp-bind-event>
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" layout=fill></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=80 height=60></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h300-no" width=400 height=300></amp-img>
+
+      <amp-img src="http://i.ebayimg.com/images/g/h~kAAOSwyQtVytYY/s-l500.jpg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="http://i.ebayimg.com/images/g/TnEAAOSwPcVVytYc/s-l1600.jpg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="http://i.ebayimg.com/images/g/ZRsAAOSwgQ9VytYh/s-l1600.jpg" width=1 height=1 layout=responsive></amp-img>
+      <amp-img src="http://i.ebayimg.com/images/g/6WUAAOSwHnFVytYk/s-l1600.jpg" width=1 height=1 layout=responsive></amp-img>
     </amp-carousel>
 
     <div class="thumbnails">
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w50-h50-no" width="50" height="50"
-        layout="fixed">
-        <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide === 0}}">
+      <amp-img selected src="http://i.ebayimg.com/images/g/h~kAAOSwyQtVytYY/s-l500.jpg" width="1" height="1"
+        layout="responsive">
+        <amp-bind-attribute layout="nodisplay"
+            attr="selected"
+            toggle="{{selectedSlide === 0}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" variable="chosenSlide" value="{{0}}">
+        <amp-bind-event layout="nodisplay"
+            on="tap"
+            variable="selectedSlide"
+            value="{{0}}">
+        </amp-bind-event>
+      </amp-img>
+      <amp-img src="http://i.ebayimg.com/images/g/TnEAAOSwPcVVytYc/s-l1600.jpg" width="1" height="1"
+        layout="responsive">
+        <amp-bind-attribute layout="nodisplay"
+            attr="selected"
+            toggle="{{selectedSlide === 1}}">
+        </amp-bind-attribute>
+        <amp-bind-event layout="nodisplay"
+            on="tap"
+            variable="selectedSlide"
+            value="{{1}}">
         </amp-bind-event>
       </amp-img>
 
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w50-h50-no" width="50" height="50"
-        layout="fixed">
-        <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide === 1}}">
+      <amp-img src="http://i.ebayimg.com/images/g/ZRsAAOSwgQ9VytYh/s-l1600.jpg" width="1" height="1"
+        layout="responsive">
+        <amp-bind-attribute layout="nodisplay"
+            attr="selected"
+            toggle="{{selectedSlide === 2}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" variable="chosenSlide" value="{{1}}">
+        <amp-bind-event layout="nodisplay"
+            on="tap"
+            variable="selectedSlide"
+            value="{{2}}">
         </amp-bind-event>
       </amp-img>
 
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w50-h50-no" width="50" height="50"
-        layout="fixed">
-        <amp-bind-attribute layout="nodisplay" attr="selected" toggle="{{chosenSlide === 2}}">
+      <amp-img src="http://i.ebayimg.com/images/g/6WUAAOSwHnFVytYk/s-l1600.jpg" width="1" height="1"
+        layout="responsive">
+        <amp-bind-attribute layout="nodisplay"
+            attr="selected"
+            toggle="{{selectedSlide === 3}}">
         </amp-bind-attribute>
-        <amp-bind-event layout="nodisplay" on="tap" variable="chosenSlide" value="{{2}}">
+        <amp-bind-event layout="nodisplay"
+            on="tap"
+            variable="selectedSlide"
+            value="{{3}}">
         </amp-bind-event>
       </amp-img>
     </div>
