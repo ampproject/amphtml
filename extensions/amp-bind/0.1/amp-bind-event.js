@@ -23,7 +23,7 @@ const eventAliasMap = {
 };
 
 export class AmpBindEvent extends AMP.BaseElement {
-    /** @override */
+  /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
   }
@@ -31,23 +31,32 @@ export class AmpBindEvent extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     console.log('Hi, I am amp-bind-event buildCallback');
-    // get attributes
+
+    /** @private @const {!Event} */
     this.event_ = this.element.getAttribute('on');
+
+    /** @private @const {string} */
     this.variable_ = this.element.getAttribute('variable');
+
+    /** @private @const {string} */
     this.value_ = this.element.getAttribute('value');
+
+    /** @private @const {!BindService} */
     this.bindService_ = bindServiceForDoc(this.win.document.documentElement);
-    // Find parent
+
+    /** @private @const {!Element} */
     this.parent_ = this.element.parentNode;
 
-    // create event listener functions
+    /** @private @const {!Function} */
     this.eventListener_ = event => {
       this.bindService_.setVariable(this.variable_, this.value_, event);
     };
 
-    // add event listener
+    // Check for event aliasName.
     if (eventAliasMap[this.event_]) {
       this.event_ = eventAliasMap[this.event_];
     }
+    // register event listener function to parent.
     this.parent_.addEventListener(this.event_, this.eventListener_);
   }
 };

@@ -25,12 +25,22 @@ export class BindService {
     this.expressions_ = {};
   }
 
+  /**
+   * Function that add customized jsonObj to the bindService data set.
+   * @param {!Object} newData
+   */
   addData(newData) {
     for (var key in newData) {
       this.scope_[key] = newData[key];
     }
   }
 
+  /**
+   * Function that set variable from val expression and event detail
+   * @param {string} name
+   * @param {string} valExp
+   * @param {!Event} event
+   */
   setVariable(name, valExp, event) {
     const eval = ngExpressions.compile(name);
     if (event) {
@@ -42,6 +52,10 @@ export class BindService {
     delete this.scope_['ampEventData'];
   }
 
+  /**
+   * Helper function that help extract unused character from expression string
+   * @param {string} expStr
+   */
   cleanExpression(expStr) {
     if (expStr.indexOf('{{') != 0) {
       expStr = "'" + expStr + "'";
@@ -50,6 +64,12 @@ export class BindService {
     }
     return expStr;
   }
+
+  /**
+   * Function that register observer function to expression change.
+   * @param {string} expStr
+   * @param {!Function} observer
+   */
   observeExpression(expStr, observer) {
     expStr = this.cleanExpression(expStr);
     if (this.expressions_[expStr]) {
@@ -65,6 +85,11 @@ export class BindService {
     };
   }
 
+  /**
+   * Function that evaluate all expression when val changed, and call their
+   * corresponding observer function for them.
+   * @private
+   */
   reEvaluate_() {
     const all = Object.keys(this.expressions_);
     all.forEach((key) => {
@@ -83,6 +108,11 @@ export class BindService {
   }
 }
 
+/**
+ * Get bindService for the document
+ * @param {!Document} ampdoc
+ * @return {!BindService}
+ */
 export function installBindServiceForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'bindService', BindService);
 };
