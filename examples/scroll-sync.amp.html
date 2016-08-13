@@ -39,7 +39,7 @@
     Nullam in libero nisi.
   </p>
 
-  <div>
+  <!-- <div>
     <amp-fx-scroll-sync name='dock-top'>
     </amp-fx-scroll-sync>
     <amp-fx-scroll-sync name='scale'
@@ -54,8 +54,21 @@
             data-param-controls=1
             width="480" height="270">
     </amp-youtube>
-  </div>
+  </div> -->
 
+  <div>
+    <amp-fx-scroll-sync name='rotate'
+      rotate-angle='180'
+      starting-position='500'
+      ending-position='800'>
+    </amp-fx-scroll-sync>
+    <amp-youtube
+            data-videoid="mGENRKrdoGY"
+            layout="responsive"
+            data-param-controls=1
+            width="480" height="270">
+    </amp-youtube>
+  </div>
 
   <p>
     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -87,19 +100,6 @@
     ac posuere velit semper.
   </p>
 
-  <!-- <div>
-    <amp-fx-scroll-sync name='scale'
-      end-scale='0.5'
-      starting-position='1600'
-      ending-position='2000'>
-    </amp-fx-scroll-sync>
-    <amp-youtube
-            data-videoid="mGENRKrdoGY"
-            layout="responsive"
-            data-param-controls=1
-            width="480" height="270">
-    </amp-youtube>
-  </div> -->
   <p>
     Fusce pretium tempor justo, vitae consequat dolor maximus eget.
     Aliquam iaculis tincidunt quam sed maximus. Suspendisse faucibus

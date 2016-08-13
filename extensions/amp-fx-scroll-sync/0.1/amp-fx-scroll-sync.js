@@ -16,6 +16,7 @@
 
 import {dev} from '../../../src/log';
 import {ScrollSyncEffect} from './scroll-sync-effect';
+import {ScrollSyncRotateEffect} from './scroll-sync-rotate-effect';
 import {ScrollSyncStickyTopEffect} from './scroll-sync-sticky-top-effect';
 import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
 import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
@@ -55,6 +56,14 @@ class AmpScrollSync extends AMP.BaseElement {
       config['scale-origin'] = this.element
           .getAttribute('scale-origin');
       scrollSyncEffect = new ScrollSyncScaleEffect(element, config);
+    } else if (this.effectName_ == 'rotate') {
+      config['rotate-angle'] = getLengthNumeral(this.element
+          .getAttribute('rotate-angle'));
+      config['starting-position'] = getLengthNumeral(this.element
+          .getAttribute('starting-position'));
+      config['ending-position'] = getLengthNumeral(this.element
+          .getAttribute('ending-position'));
+      scrollSyncEffect = new ScrollSyncRotateEffect(element, config);
     } else if (this.effectName_ == 'scroll-away') {
       scrollSyncEffect = new ScrollSyncScrollAwayEffect(element, config);
     }
