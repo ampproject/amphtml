@@ -21,6 +21,7 @@ import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
 import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
 import {installScrollSyncService} from './scroll-sync-service';
 import {getService} from '../../../src/service';
+import {getLengthNumeral} from '../../../src/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-fx-scroll-sync';
@@ -45,9 +46,14 @@ class AmpScrollSync extends AMP.BaseElement {
     if (this.effectName_ == 'dock-top') {
       scrollSyncEffect = new ScrollSyncStickyTopEffect(element, config);
     } else if (this.effectName_ == 'scale') {
-      config['end-scale'] = this.element.getAttribute('end-scale');
-      config['starting-position'] = this.element.getAttribute('starting-position');
-      config['ending-position'] = this.element.getAttribute('ending-position');
+      config['end-scale'] = getLengthNumeral(this.element
+          .getAttribute('end-scale'));
+      config['starting-position'] = getLengthNumeral(this.element
+          .getAttribute('starting-position'));
+      config['ending-position'] = getLengthNumeral(this.element
+          .getAttribute('ending-position'));
+      config['scale-origin'] = this.element
+          .getAttribute('scale-origin');
       scrollSyncEffect = new ScrollSyncScaleEffect(element, config);
     } else if (this.effectName_ == 'scroll-away') {
       scrollSyncEffect = new ScrollSyncScrollAwayEffect(element, config);

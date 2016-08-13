@@ -15,10 +15,16 @@
  */
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
+import {setStyles, getStyle} from '../../../src/style';
 
 export class ScrollSyncScaleEffect extends ScrollSyncEffect {
   constructor(element, config) {
     super(element);
+    this.scrollMin_ = config['starting-position'];
+    this.scrollMax_ = config['ending-position'];
+    this.endScale_ = config['end-scale'];
+    this.scaleOrigin_ = config['scale-origin'];
+    this.layoutBox_ = null;
   }
 
   /** @override */
@@ -38,16 +44,20 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
 
   /** @override */
   getScrollMin() {
-
+    return this.scrollMin_;
   }
 
   /** @override */
   getScrollMax() {
-
+    return this.scrollMax_;
   }
 
   /** @override */
   transition(position) {
-
+    let scale = 1 - this.endScale_ * position;
+    setStyles(this.element, {'transform': `scale(${scale})`});
+    if (this.scaleOrigin_) {
+      setStyles(this.element, {'transform-origin': this.scaleOrigin_});
+    }
   }
 }

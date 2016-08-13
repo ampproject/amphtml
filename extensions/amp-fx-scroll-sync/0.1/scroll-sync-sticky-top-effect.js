@@ -25,8 +25,8 @@ export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
 
   constructor(element, config) {
     super(element);
-    this.scrollMax_ = config.endingScroll;
-    this.scrollMin_ = config.startingScroll;
+    this.scrollMax_ = null;
+    this.scrollMin_ = null;
     this.layoutBox_ = null;
     this.isDocked = false;
     this.elementShim_ = null;
