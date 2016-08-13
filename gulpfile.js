@@ -628,6 +628,8 @@ function deployCastReceiver(options) {
 
     fs.copySync(path + '/app.yaml', destDir + '/app.yaml');
     $$.util.log('Built app.yaml');
+
+    $$.util.log('Run: appcfg.py update build/receiver --oauth2');
   });
 }
 

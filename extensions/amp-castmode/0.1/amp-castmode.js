@@ -76,11 +76,14 @@ class AmpCastmode extends AMP.BaseElement {
     this.playButton_ = createButton('play', this.handlePlay_);
     /** @const @private {!Element} */
     this.pauseButton_ = createButton('pause', this.handlePause_);
+    /** @const @private {!Element} */
+    this.link_ = createButton('link', () => {});
 
     this.playButton_.appendChild(createPlayOverlay(100));
     this.pauseButton_.appendChild(createPauseOverlay(100));
     st.toggle(this.playButton_, false);
     st.toggle(this.pauseButton_, false);
+    st.toggle(this.link_, false);
 
     this.rcContainer_.onclick = this.handleClick_.bind(this);
 
@@ -110,6 +113,9 @@ class AmpCastmode extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.playing_ = false;
+
+    /** @private {number} */
+    this.nextCount_ = 0;
 
     this.registerAction('close', this.close.bind(this));
 
@@ -272,6 +278,7 @@ class AmpCastmode extends AMP.BaseElement {
       st.toggle(this.playButton_, !this.playing_);
       st.toggle(this.pauseButton_, this.playing_);
     }
+    st.toggle(this.link_, false);
   }
 
   /** @private */
@@ -318,6 +325,32 @@ class AmpCastmode extends AMP.BaseElement {
     this.updateCastState_();
   }
 
+  /**
+   * @param {!CastInfo} ad
+   * @private
+   */
+  showAd_(ad) {
+    this.preview_.textContent = '';
+    const thumb = createThumb(ad);
+    this.preview_.appendChild(thumb);
+    const scale = 2.5;
+    console.log('ad scale: ', scale);
+    thumb.style.transform = `scale(${scale})`;
+
+    const adText = document.createElement('div');
+    adText.textContent = 'Sponsored Ad';
+    adText.style.position = 'absolute';
+    adText.style.top = '80px';
+    adText.style.left = '10px';
+    adText.style.zIndex = 1;
+    adText.style.color = '#fff';
+    adText.style.background = '#222';
+    this.preview_.appendChild(adText);
+
+    this.link_.textContent = 'Go to the advertizer';
+    st.toggle(this.link_, true);
+  }
+
   /** @private */
   updateCastState_() {
     const startIndex = Math.floor(this.selectedIndex_ / 3) * 3;
@@ -346,6 +379,19 @@ class AmpCastmode extends AMP.BaseElement {
 
   /** @private */
   handleNext_() {
+    if (this.mode_ == Mode.VIEW) {
+      this.nextCount_++;
+      if (this.nextCount_ == 3) {
+        this.showAd_({
+          type: 'AD',
+          playable: false,
+          thumbImage: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
+          source: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
+          link: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
+        });
+        return;
+      }
+    }
     if (this.selectedIndex_ + 1 < this.candidates_.length) {
       this.setSelectedThumb_(this.selectedIndex_ + 1);
     }

@@ -118,6 +118,18 @@ amp-castmode {
   --background-image: url('/examples/video/media-playback-pause-2400px.png');
 }
 
+.-amp-cast-rc-link {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  padding: 8px;
+  background: #fff;
+  color: #222;
+  width: auto;
+  height: auto;
+}
+
 .-amp-cast-view {
   position: absolute;
   top: 0;
