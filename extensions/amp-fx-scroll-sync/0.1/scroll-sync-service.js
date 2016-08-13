@@ -98,7 +98,8 @@ function onScroll(state) {
     } else if (scrollTop >= effect.getScrollMin() - scrollBuffer &&
         scrollTop <= effect.getScrollMax() + scrollBuffer ) {
       const range = effect.getScrollMax() - effect.getScrollMin();
-      const normPosition = (scrollTop - effect.getScrollMin()) / range;
+      let normPosition = (scrollTop - effect.getScrollMin()) / range;
+      normPosition = Math.max(0, Math.min(normPosition, 1));
       effect.transition(normPosition);
     }
 
