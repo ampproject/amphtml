@@ -213,10 +213,11 @@ attribute requirements.
 To uniquely identify an amp-live-list (since multiple are allowed on a single
 page).
 
-**data-poll-interval** (Required)
+**data-poll-interval** (Optional)
 
 Time (in milliseconds) interval between checks for new content (15000 ms minimum is
-enforced).
+enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
+minimum.
 
 **data-max-items-per-page** (Required)
 
