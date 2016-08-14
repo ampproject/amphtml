@@ -24,6 +24,9 @@ class CastSender {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {!Object<string, function(*)>} */
+    this.actions_ = {};
   }
 
   /**
@@ -47,6 +50,31 @@ class CastSender {
    */
   sendAction(action, payload) {
     return dev.assert(null, 'not implemented');
+  }
+
+  /**
+   * @param {string} action
+   * @param {function(*)} handler
+   */
+  onAction(action, handler) {
+    if (this.actions_[action]) {
+      throw new Error('duplicate action: ', action);
+    }
+    this.actions_[action] = handler;
+  }
+
+  /**
+   * @param {string} action
+   * @param {*} payload
+   * @protected
+   */
+  fireAction_(action, payload) {
+    const handler = this.actions_[action];
+    if (handler) {
+      handler(payload);
+    } else {
+      console.log('[WARN] unknown action: ' + action);
+    }
   }
 }
 
@@ -151,6 +179,20 @@ export class CastSenderProd extends CastSender {
     //   onMediaDiscovered('onRequestSessionSuccess', session.media[0]);
     // }
   }
+
+  /** @private */
+  receiveAction_(messageString) {
+    // XXX
+    let message;
+    try {
+      message = JSON.parse(messageString);
+    } catch (e) {
+      console.error('failed to parse message: ', e, messageString);
+    }
+    if (message && message.action) {
+      this.fireAction_(message.action, message.payload);
+    }
+  }
 }
 
 
@@ -170,7 +212,7 @@ export class CastSenderDebug extends CastSender {
           this.waitForReceiver_();
           this.waitForReceiver_ = null;
         }
-        // TODO(dvoytenko): may be needed to process responses.
+        this.receiveAction_();
       }
     });
   }
@@ -212,5 +254,22 @@ export class CastSenderDebug extends CastSender {
     const messageString = JSON.stringify(message);
     this.storage_.setItem(this.senderKey_, messageString);
     return Promise.resolve();
+  }
+
+  /** @private */
+  receiveAction_() {
+    const messageString = this.storage_.getItem(this.receiverKey_);
+    if (!messageString) {
+      return;
+    }
+    let message;
+    try {
+      message = JSON.parse(messageString);
+    } catch (e) {
+      console.error('failed to parse message: ', e, messageString);
+    }
+    if (message && message.action) {
+      this.fireAction_(message.action, message.payload);
+    }
   }
 }

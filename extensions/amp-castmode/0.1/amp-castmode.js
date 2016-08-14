@@ -222,6 +222,7 @@ class AmpCastmode extends AMP.BaseElement {
     for (let i = 0; i < this.candidates_.length; i++) {
       const candidate = this.candidates_[i];
       const castInfo = this.getCastInfo_(candidate);
+      castInfo.id = 'ID' + Math.random();
       this.castInfo_.push(castInfo);
       const thumb = this.win.document.createElement('div');
       thumb.classList.add('-amp-cast-gallery-thumb');
@@ -244,6 +245,7 @@ class AmpCastmode extends AMP.BaseElement {
     const logoMeta = document.querySelector('meta[name="logo"]');
     const previewMeta = document.querySelector('meta[name="preview"]');
     this.sender_.sendAction('article', {
+      debug: true,
       themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
       logo: logoMeta ? logoMeta.getAttribute('content') : null,
       preview: previewMeta ? previewMeta.getAttribute('content') : null,
@@ -263,6 +265,7 @@ class AmpCastmode extends AMP.BaseElement {
     this.container_.classList.toggle('-amp-cast-mode-view',
         mode == Mode.VIEW);
     this.updateActions_();
+    this.castView_();
   }
 
   /** @private */
@@ -285,6 +288,9 @@ class AmpCastmode extends AMP.BaseElement {
   togglePlay_() {
     this.playing_ = !this.playing_;
     this.updateActions_();
+    this.sender_.sendAction('playstate', {
+      playing: this.playing_
+    });
   }
 
   /**
@@ -323,6 +329,7 @@ class AmpCastmode extends AMP.BaseElement {
 
     // Send to cast.
     this.updateCastState_();
+    this.castView_();
   }
 
   /**
@@ -349,6 +356,11 @@ class AmpCastmode extends AMP.BaseElement {
 
     this.link_.textContent = 'Go to the advertizer';
     st.toggle(this.link_, true);
+
+    this.sender_.sendAction('view', {
+      item: ad,
+      autoplay: ad.playable,
+    });
   }
 
   /** @private */
@@ -371,6 +383,18 @@ class AmpCastmode extends AMP.BaseElement {
   }
 
   /** @private */
+  castView_() {
+    if (this.mode_ != Mode.VIEW) {
+      return;
+    }
+    const castInfo = this.castInfo_[this.selectedIndex_];
+    this.sender_.sendAction('view', {
+      item: castInfo,
+      autoplay: castInfo.playable,
+    });
+  }
+
+  /** @private */
   handlePrev_() {
     if (this.selectedIndex_ - 1 >= 0) {
       this.setSelectedThumb_(this.selectedIndex_ - 1);
@@ -383,7 +407,7 @@ class AmpCastmode extends AMP.BaseElement {
       this.nextCount_++;
       if (this.nextCount_ == 3) {
         this.showAd_({
-          type: 'AD',
+          type: 'IMG',
           playable: false,
           thumbImage: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',
           source: 'https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n',

@@ -78,12 +78,28 @@
       flex-wrap: nowrap;
     }
 
-    #gallery {
+    #gallery, #view {
       position: absolute;
       top: 0;
       left: 0;
       bottom: 0;
       right: 0;
+    }
+
+    .full-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+    }
+
+    .centering {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
     }
 
     #prev-indicator, #next-indicator {
@@ -169,6 +185,7 @@
         <div id="prev-indicator"></div>
         <div id="next-indicator"></div>
       </div>
+      <div id="view"></div>
     </div>
 
     <!-- Log -->

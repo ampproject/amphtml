@@ -54,6 +54,12 @@ class CastChannel {
   /**
    * @param {string} action
    * @param {*} payload
+   */
+  sendAction(action, payload) {}
+
+  /**
+   * @param {string} action
+   * @param {*} payload
    * @protected
    */
   fireAction_(action, payload) {
@@ -91,6 +97,11 @@ export class CastChannelDebug extends CastChannel {
       } else if (event.key == this.receiverKey_) {
       }
     });
+  }
+
+  /** @override */
+  sendAction(action, payload) {
+    this.sendMessage_(action, payload);
   }
 
   /**
@@ -178,5 +189,14 @@ export class CastChannelProd extends CastChannel {
 
     this.manager_.start({statusText: "Application is starting"});
     log('starting...');
+  }
+
+  /** @override */
+  sendAction(action, payload) {
+    const message = {action, payload, time: Date.now()};
+    const messageString = JSON.stringify(message);
+    log('send message: ' + action + ' -- ' + messageString);
+    this.messageBus_.broadcast(messageString);
+    return Promise.resolve();
   }
 }
