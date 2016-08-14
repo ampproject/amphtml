@@ -245,7 +245,7 @@ class AmpCastmode extends AMP.BaseElement {
     const logoMeta = document.querySelector('meta[name="logo"]');
     const previewMeta = document.querySelector('meta[name="preview"]');
     this.sender_.sendAction('article', {
-      debug: true,
+      debug: false,
       themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
       logo: logoMeta ? logoMeta.getAttribute('content') : null,
       preview: previewMeta ? previewMeta.getAttribute('content') : null,
@@ -266,6 +266,9 @@ class AmpCastmode extends AMP.BaseElement {
         mode == Mode.VIEW);
     this.updateActions_();
     this.castView_();
+    if (this.mode_ == Mode.GALLERY) {
+      this.sender_.sendAction('to-gallery', {});
+    }
   }
 
   /** @private */

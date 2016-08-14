@@ -80,6 +80,13 @@ export class App {
     channel.onAction('gallery', this.handleGallery_.bind(this));
     channel.onAction('view', this.handleView_.bind(this));
     channel.onAction('playstate', this.handlePlayState_.bind(this));
+    channel.onAction('to-gallery', () => {
+      st.toggle(this.gallery_, true);
+      st.toggle(this.view_, false);
+      if (this.viewController_) {
+        this.viewController_.pause();
+      }
+    });
   }
 
   /**
@@ -203,11 +210,6 @@ export class App {
     }
     if (item.type == 'TWITTER') {
       // XXX: source: this.element.getAttribute('data-tweetID'),
-      /*
-<blockquote class="twitter-tweet" data-lang="en">
-  <p lang="en" dir="ltr">We are all witnesses <a href="https://t.co/f6buxJO9sk">pic.twitter.com/f6buxJO9sk</a></p>&mdash; Deadspin (@Deadspin) <a href="https://twitter.com/Deadspin/status/764272526516187136">August 13, 2016</a></blockquote>
-<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-      */
       return new IframeViewController({src: 'XXX'});
     }
 
