@@ -303,6 +303,7 @@ class AmpCastmode extends AMP.BaseElement {
 
     this.selectedIndex_ = index;
     const element = this.candidates_[index];
+    const castInfo = this.castInfo_[index];
     const thumb = this.thumbs_[index];
 
     // Update thumbs.
@@ -324,7 +325,7 @@ class AmpCastmode extends AMP.BaseElement {
     previewThumb.style.transform = `scale(${scale})`;
 
     // Update actions.
-    this.playing_ = false;
+    this.playing_ = castInfo.playable;
     this.updateActions_();
 
     // Send to cast.
