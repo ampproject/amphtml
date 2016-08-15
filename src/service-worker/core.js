@@ -77,7 +77,7 @@ function isCdnJsFile(url) {
  *
  * @type {!Object<string, string>}
  */
-let clientsMap = Object.create(null);
+const clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
@@ -273,7 +273,7 @@ self.addEventListener('fetch', event => {
 
       // Tears! We have nothing cached, so we'll have to make a request.
       return requestVersion;
-    }).then((version) => {
+    }).then(version => {
       // Determining the version to serve is racey, since there are parallel
       // requests coming in for all the CDN JS files. If one of them "won"
       // the race, respect the winner.
