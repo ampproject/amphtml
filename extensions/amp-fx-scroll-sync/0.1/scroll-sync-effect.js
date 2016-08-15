@@ -39,7 +39,7 @@ export class ScrollSyncEffect {
 
   }
 
-  transition(position) {
+  transition(unusedPosition) {
 
   }
 }

@@ -23,7 +23,7 @@ const ELEMENT_SHIM_TAG = 'i-amp-scroll-sync-shim';
 
 export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
 
-  constructor(element, config) {
+  constructor(element, unusedConfig) {
     super(element);
     this.scrollMax_ = null;
     this.scrollMin_ = null;

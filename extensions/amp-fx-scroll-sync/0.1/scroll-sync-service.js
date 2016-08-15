@@ -18,7 +18,7 @@ import {getService} from '../../../src/service';
 import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
-let lastScrollTop_ = 0;
+
 
 class ScrollSyncService {
 
@@ -79,7 +79,8 @@ function measureScrollTop(state) {
   state.scrollTop = state.viewport.getScrollTop();
   // TODO: Loop over effects call measure on them in a performant way. We have to
   // figure out when do we need measurement and only then do measurement.
-  for (const effect of state.effects) {
+  for (let i = 0; i < state.effects.length; i++) {
+    const effect = state.effects[i];
     effect.measure();
   }
 }
@@ -88,7 +89,8 @@ function measureScrollTop(state) {
 function onScroll(state) {
   const scrollTop = state.scrollTop;
   const scrollBuffer = 100;
-  for (const effect of state.effects) {
+  for (let i = 0; i < state.effects.length; i++) {
+    const effect = state.effects[i];
     // TODO: This probably need a bit more thinking on when the directional animation
     // should be transitioned and what data does it need. Otherwise this will
     // call transition for directional animations ALL the time.
@@ -106,7 +108,6 @@ function onScroll(state) {
     // If last scroll is a LOT different than current scroll.
     // Do unsync transition.
   }
-  lastScrollTop_ = scrollTop;
 }
 
 
