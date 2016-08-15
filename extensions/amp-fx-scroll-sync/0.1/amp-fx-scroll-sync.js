@@ -40,7 +40,7 @@ class AmpScrollSync extends AMP.BaseElement {
     this.effectName_ = this.element.getAttribute('name');
     dev().fine(TAG, 'effectName_: ' + this.effectName_);
 
-    let config = {};
+    const config = {};
     let scrollSyncEffect = null;
     const element = this.element.parentElement;
     if (this.effectName_ == 'dock-top') {

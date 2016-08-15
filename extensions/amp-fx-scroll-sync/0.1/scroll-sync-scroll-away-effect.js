@@ -17,7 +17,7 @@
 import {ScrollSyncEffect} from './scroll-sync-effect';
 
 export class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
-  constructor(element, config) {
+  constructor(element, unusedConfig) {
     super(element);
   }
 
@@ -47,7 +47,7 @@ export class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
   }
 
   /** @override */
-  transition(position) {
+  transition(unusedPosition) {
 
   }
  }

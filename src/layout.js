@@ -153,7 +153,8 @@ export function parseLength(s) {
   if (!s) {
     return undefined;
   }
-  if (!/^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/.test(s)) {
+  if (!/^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/
+      .test(s)) {
     return undefined;
   }
   if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
@@ -171,8 +172,8 @@ export function parseLength(s) {
  */
 export function assertLength(length) {
   user().assert(
-      /^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
-      'Invalid length value: %s', length);
+      /^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/
+      .test(length), 'Invalid length value: %s', length);
   return length;
 }
 
