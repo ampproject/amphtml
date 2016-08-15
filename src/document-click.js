@@ -56,7 +56,7 @@ export class ClickHandler {
    * @param {!Window} window
    */
   constructor(window) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = window;
 
     /** @private @const {!./service/viewport-impl.Viewport} */
