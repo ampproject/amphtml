@@ -21,18 +21,26 @@ import {writeScript, checkData} from '../3p/3p';
  * @param {!Object} data
  */
 export function contentad(global, data) {
-	checkData(data, ['id', 'd', 'wid', 'url']);
-	/*eslint "google-camelcase/google-camelcase": 0*/
-	global.id = data.id;
-	global.d = data.d;
-	global.wid = data.wid;
-	global.url = data.url;
-	
-	/* Create div to contain ad */
-	cad_div = document.createElement('div');
-	cad_div.id = "contentad" + global.wid;
-	document.body.appendChild(cad_div);
-	
-	/* Call Content.ad Widget */
-	writeScript(global, 'https://api.content.ad/Scripts/widget2.aspx?id='+encodeURIComponent(global.id)+'&d='+encodeURIComponent(global.d)+'&wid='+global.wid+'&url='+encodeURIComponent(global.url)+'&cb='+(new Date()).getTime());
+  checkData(data, ['id', 'd', 'wid', 'url']);
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  global.id = data.id;
+  global.d = data.d;
+  global.wid = data.wid;
+  global.url = data.url;
+  
+  /* Create div for ad to target */
+  cad_div = document.createElement('div');
+  cad_div.id = "contentad" + global.wid;
+  document.body.appendChild(cad_div);
+  
+  /* Build API URL */
+  var cad_api = 'https://api.content.ad/Scripts/widget2.aspx';
+  cad_api += '?id=' + encodeURIComponent(global.id);
+  cad_api += '&d=' + encodeURIComponent(global.d);
+  cad_api += '&wid=' + global.wid;
+  cad_api += '&url=' + encodeURIComponent(global.url);
+  cad_api += '&cb=' + Date.now();
+  
+  /* Call Content.ad Widget */
+  writeScript(global, cad_api);
 }
