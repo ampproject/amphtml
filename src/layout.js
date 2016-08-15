@@ -153,10 +153,10 @@ export function parseLength(s) {
   if (!s) {
     return undefined;
   }
-  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/.test(s)) {
+  if (!/^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)?$/.test(s)) {
     return undefined;
   }
-  if (/^\d+(\.\d+)?$/.test(s)) {
+  if (/^[+-]?\d+(\.\d+)?$/.test(s)) {
     return s + 'px';
   }
   return s;
@@ -171,7 +171,7 @@ export function parseLength(s) {
  */
 export function assertLength(length) {
   user().assert(
-      /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
+      /^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }
@@ -186,7 +186,7 @@ export function assertLength(length) {
  * @return {!LengthDef}
  */
 export function assertLengthOrPercent(length) {
-  user().assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+  user().assert(/^[+-]?\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
       'Invalid length or percent value: %s', length);
   return length;
 }
@@ -204,6 +204,18 @@ export function getLengthUnits(length) {
   return m[0];
 }
 
+/**
+ * Returns units from the CSS length value
+ * (including percent unit).
+ * @param {!LengthDef} length
+ * @return {string}
+ */
+export function getLengthUnitsOrPercent(length) {
+  assertLengthOrPercent(length);
+  const m = user().assert(length.match(/[a-z%]+/i),
+      'Failed to read units from %s', length);
+  return m[0];
+}
 
 /**
  * Returns the numeric value of a CSS length value.
