@@ -143,6 +143,12 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
+  {
+    id: 'amp-apester-media',
+    name: 'AMP extension for Apester media',
+    spec: 'https://github.com/ampproject/amphtml/issues/3233',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
+  },
 ];
 
 if (getMode().localDev) {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,55 @@
 /* apester-iframe */
 
 .-amp-apester-iframe {
-    transition: 0.4s opacity;
+	transition: 0.4s opacity;
+	opacity: 0;
+}
+
+.-amp-apester-iframe-ready {
+	opacity: 1 !important;
 }
 
 .-amp-apester-loader {
-    height: 100px;
-    width: 100px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    webkit-transform: translate(-50%, -50%);
-    margin-top: -22px;
+	height: 100px;
+	width: 100px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	webkit-transform: translate(-50%, -50%);
+	margin-top: -22px;
 }
 
 .-amp-apester-loader-container {
-    background-color: white;
+	background-color: white;
 }
 
 .-amp-apester-container {
-    max-width: 700px;
-    margin: 0 auto;
-    display: block;
-    position: relative;
-    min-height: 350px;
-    width: 100%;
+	max-width: 700px;
+	margin: 0 auto;
+	display: block;
+	position: relative;
+	/*min-height: 350px;*/
+	width: 100%;
+}
+
+.-amp-apester-overflow-container {
+	position: absolute;
+	margin: auto;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.-amp-apester-overflow-button {
+	border: none;
+	z-index: 10000;
+	border: 3px solid #fff;
+	background: white;
+	cursor: pointer;
+	padding: 25px 80px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	font-weight: 700;
+	outline: none;
+	position: relative;
 }
