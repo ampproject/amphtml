@@ -15,7 +15,7 @@
  */
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
-import {setStyles, getStyle} from '../../../src/style';
+import {setStyles} from '../../../src/style';
 
 export class ScrollSyncScaleEffect extends ScrollSyncEffect {
   constructor(element, config) {
@@ -54,7 +54,7 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
 
   /** @override */
   transition(position) {
-    let scale = 1 - this.endScale_ * position;
+    const scale = 1 - this.endScale_ * position;
     setStyles(this.element, {'transform': `scale(${scale})`});
     if (this.scaleOrigin_) {
       setStyles(this.element, {'transform-origin': this.scaleOrigin_});

@@ -15,13 +15,11 @@
  */
 
 import {dev} from '../../../src/log';
-import {ScrollSyncEffect} from './scroll-sync-effect';
 import {ScrollSyncRotateEffect} from './scroll-sync-rotate-effect';
 import {ScrollSyncStickyTopEffect} from './scroll-sync-sticky-top-effect';
 import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
 import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
 import {installScrollSyncService} from './scroll-sync-service';
-import {getService} from '../../../src/service';
 import {getLengthNumeral} from '../../../src/layout';
 
 /** @private @const {string} */
@@ -30,7 +28,7 @@ const TAG = 'amp-fx-scroll-sync';
 class AmpScrollSync extends AMP.BaseElement {
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported(unusedLayout) {
     return true;
   }
 
