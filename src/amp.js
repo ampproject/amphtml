@@ -41,35 +41,35 @@ import {maybeTrackImpression} from './impression';
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(self);  // Also calls makeBodyVisible on errors.
 
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
-  const ampdocService = installDocService(window, /* isSingleDoc */ true);
-  const ampdoc = ampdocService.getAmpDoc(window.document);
+  const ampdocService = installDocService(self, /* isSingleDoc */ true);
+  const ampdoc = ampdocService.getAmpDoc(self.document);
 
-  const perf = installPerformanceService(window);
+  const perf = installPerformanceService(self);
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
       // Core services.
-      installRuntimeServices(window);
+      installRuntimeServices(self);
       installAmpdocServices(ampdoc);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
-      maybeTrackImpression(window);
+      maybeTrackImpression(self);
 
       // Builtins.
-      installBuiltins(window);
+      installBuiltins(self);
 
       // Final configuration and stubbing.
-      adopt(window);
-      stubElements(window);
+      adopt(self);
+      stubElements(self);
 
-      installPullToRefreshBlocker(window);
-      installGlobalClickListener(window);
+      installPullToRefreshBlocker(self);
+      installGlobalClickListener(self);
 
-      maybeValidate(window);
+      maybeValidate(self);
       makeBodyVisible(document, /* waitForExtensions */ true);
     } catch (e) {
       makeBodyVisible(document);
@@ -90,9 +90,9 @@ try {
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
-if (window.console) {
+if (self.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-window.document.documentElement.setAttribute('amp-version',
+self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

@@ -21,7 +21,7 @@
  * module.
  * @type {Object}
  */
-const env = window.AMP_CONFIG || {};
+const env = self.AMP_CONFIG || {};
 
 export const urls = {
   thirdParty: env.thirdPartyUrl || 'https://3p.ampproject.net',

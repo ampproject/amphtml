@@ -266,7 +266,7 @@ export function isValidAttr(attrName, attrValue) {
  */
 function resolveAttrValue(tagName, attrName, attrValue) {
   if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
-    return resolveUrlAttr(tagName, attrName, attrValue, window.location);
+    return resolveUrlAttr(tagName, attrName, attrValue, self.location);
   }
   return attrValue;
 }
