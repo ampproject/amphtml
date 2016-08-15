@@ -28,8 +28,6 @@ class ScrollSyncService {
   constructor(win) {
     this.win_ = win;
 
-    this.lastScrollTop_ = 0;
-
     /** @private @const {!Array<!ScrollSyncEffect>} */
     this.effects_ = [];
 
@@ -110,7 +108,6 @@ function onScroll(state) {
     // If last scroll is a LOT different than current scroll.
     // Do unsync transition.
   }
-  this.lastScrollTop_ = scrollTop;
 }
 
 
