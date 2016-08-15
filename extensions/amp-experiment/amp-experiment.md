@@ -100,7 +100,7 @@ Allocated variants are available as a [URL substitution variable](https://github
 
 ```html
 <amp-pixel src="https://example.com?xname=aExperiment&xvar=VARIANT(aExperiment)">
-``` 
+```
 
 For experiments with no variants allocated, this variable resolves to string literal `none`.
 
