@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ScrollSyncEffect} from './scroll-sync-effect';
 import {getService} from '../../../src/service';
 import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
@@ -96,7 +95,7 @@ function onScroll(state) {
     if (effect.isDirectional()) {
       effect.transition(scrollTop);
     } else if (scrollTop >= effect.getScrollMin() - scrollBuffer &&
-        scrollTop <= effect.getScrollMax() + scrollBuffer ) {
+        scrollTop <= effect.getScrollMax() + scrollBuffer) {
       const range = effect.getScrollMax() - effect.getScrollMin();
       let normPosition = (scrollTop - effect.getScrollMin()) / range;
       normPosition = Math.max(0, Math.min(normPosition, 1));
