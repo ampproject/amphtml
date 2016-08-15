@@ -19,6 +19,7 @@ import {ScrollSyncRotateEffect} from './scroll-sync-rotate-effect';
 import {ScrollSyncStickyTopEffect} from './scroll-sync-sticky-top-effect';
 import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
 import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
+import {ScrollSyncTranslateXEffect} from './scroll-sync-translate-x-effect';
 import {installScrollSyncService} from './scroll-sync-service';
 import {getLengthNumeral} from '../../../src/layout';
 
@@ -64,6 +65,13 @@ class AmpScrollSync extends AMP.BaseElement {
       scrollSyncEffect = new ScrollSyncRotateEffect(element, config);
     } else if (this.effectName_ == 'scroll-away') {
       scrollSyncEffect = new ScrollSyncScrollAwayEffect(element, config);
+    } else if (this.effectName_ == 'translate-x') {
+      config['translate-x'] = this.element.getAttribute('translate-x');
+      config['starting-position'] = getLengthNumeral(this.element
+          .getAttribute('starting-position'));
+      config['ending-position'] = getLengthNumeral(this.element
+          .getAttribute('ending-position'));
+      scrollSyncEffect = new ScrollSyncTranslateXEffect(element, config);
     }
     /** @private */
     this.scrollSyncService_ = installScrollSyncService(this.win);
