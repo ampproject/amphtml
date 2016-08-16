@@ -26,31 +26,31 @@ amp-social-share {
 }
 
 /* Twitter Styling */
-amp-social-share[type=twitter] {
+amp-social-share[type="twitter"] {
   background-color: #55acee;
 }
 
 /* Facebook Styling */
-amp-social-share[type=facebook] {
+amp-social-share[type="facebook"] {
   background-color: #3b5998;
 }
 
 /* Pinterest Styling */
-amp-social-share[type=pinterest] {
+amp-social-share[type="pinterest"] {
   background-color: #bd081c;
 }
 
 /* LinkedIn Styling */
-amp-social-share[type=linkedin] {
+amp-social-share[type="linkedin"] {
   background-color: #0077b5;
 }
 
 /* Google+ Styling */
-amp-social-share[type=gplus] {
+amp-social-share[type="gplus"] {
   background-color: #dc4e41;
 }
 
 /* Email Styling */
-amp-social-share[type=email] {
+amp-social-share[type="email"] {
   background-color: #000000;
 }
