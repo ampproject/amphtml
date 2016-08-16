@@ -420,6 +420,7 @@ export class AmpSlideScroll extends BaseSlides {
         this.scheduleLayout(this.slides_[showIndex]);
         this.scheduleResume(this.slides_[showIndex]);
       } else {
+        this.schedulePause(this.slides_[showIndex]);
         this.schedulePreload(this.slides_[showIndex]);
       }
     });
