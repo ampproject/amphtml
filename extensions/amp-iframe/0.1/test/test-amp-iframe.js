@@ -559,8 +559,10 @@ describe('amp-iframe', () => {
       width: 300,
       height: 250,
       position: 'fixed',
-    }).then(amp => {
-      expect(amp.iframe).to.be.null;
-    }).catch(() => {});
+    }).then(() => {
+      throw new Error('must never happen');
+    }, error => {
+      expect(error.message).to.match(/not used for displaying fixed ad/);
+    });
   });
 });
