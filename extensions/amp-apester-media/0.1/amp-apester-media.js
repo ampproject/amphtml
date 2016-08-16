@@ -134,24 +134,20 @@ class AmpApesterMedia extends AMP.BaseElement {
 
 
   /** @override */
-  createPlaceholderCallback() {
-    const img = this.element.ownerDocument.createElement('amp-img');
-    const placeholder = this.element.ownerDocument.createElement('div');
-
-    // white background
-    placeholder.setAttribute('placeholder', '');
-    //placeholder.width = this.element.getAttribute('width');
-    placeholder.height = this.element.getAttribute('height');
-    placeholder.className = '-amp-apester-loader-container';
-
-    // loading gif
-    img.className = '-amp-apester-loader';
-    img.setAttribute('src', 'https://images.apester.com/images%2Floader.gif');
-    img.setAttribute('layout', 'fill');
-    img.setAttribute('noloading', '');
-    placeholder.appendChild(img);
-    return placeholder;
-  }
+  // createPlaceholderCallback() {
+  //   const img = this.element.ownerDocument.createElement('amp-img');
+  //   const placeholder = this.element.ownerDocument.createElement('div');
+  //   placeholder.setAttribute('placeholder', '');
+  //   //placeholder.width = this.element.getAttribute('width');
+  //   placeholder.height = this.element.getAttribute('height');
+  //   placeholder.className = '-amp-apester-loader-container';
+  //   img.className = '-amp-apester-loader';
+  //   img.setAttribute('src', 'https://images.apester.com/images%2Floader.gif');
+  //   img.setAttribute('layout', 'fill');
+  //   img.setAttribute('noloading', '');
+  //   placeholder.appendChild(img);
+  //   return placeholder;
+  // }
 
   /** @override */
   unlayoutOnPause() {
