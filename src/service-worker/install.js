@@ -18,7 +18,7 @@ import {calculateScriptBaseUrl} from '../service/extensions-impl';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 
 /** @const */
 const TAG = 'cache-service-worker';
@@ -27,7 +27,7 @@ const TAG = 'cache-service-worker';
  * Registers the Google AMP Cache service worker if the browser supports SWs.
  */
 export function installCacheServiceWorker(win) {
-  timer.delay(() => {
+  timerFor(win).delay(() => {
     if (!isExperimentOn(win, TAG)) {
       return;
     }
