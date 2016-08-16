@@ -20,7 +20,11 @@ import {assertHttpsUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
 import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
+import {
+  isProxyOrigin,
+  removeFragment,
+  serializeQueryString,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
@@ -261,18 +265,11 @@ export class AccessServerJwtAdapter {
       const encoded = resp.encoded;
       const jwt = resp.jwt;
       const accessData = jwt['amp_authdata'];
-      const request = {
+      const request = serializeQueryString({
         'url': removeFragment(this.win.location.href),
         'state': this.serverState_,
         'jwt': encoded,
-      };
-      let requestString = '';
-      for (const k in request) {
-        if (requestString) {
-          requestString += '&';
-        }
-        requestString += k + '=' + encodeURIComponent(request[k])
-      }
+      });
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
@@ -281,7 +278,7 @@ export class AccessServerJwtAdapter {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
-            body: requestString,
+            body: request,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },

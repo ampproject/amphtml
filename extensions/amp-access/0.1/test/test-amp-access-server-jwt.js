@@ -16,7 +16,7 @@
 
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
 import {getMode} from '../../../../src/mode';
-import {removeFragment} from '../../../../src/url';
+import {removeFragment, serializeQueryString} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
 import * as sinon from 'sinon';
 
@@ -191,10 +191,11 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request =
-            'url=' + encodeURIComponent(removeFragment(window.location.href))
-            + '&state=STATE1'
-            + '&jwt=' + encodeURIComponent(encoded);
+        const request = serializeQueryString({
+          'url': removeFragment(window.location.href),
+          'state': 'STATE1',
+          'jwt': encoded,
+        });
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
@@ -222,10 +223,11 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request =
-            'url=' + encodeURIComponent(removeFragment(window.location.href))
-            + '&state=STATE1'
-            + '&jwt=' + encodeURIComponent(encoded);
+        const request = serializeQueryString({
+          'url': removeFragment(window.location.href),
+          'state': 'STATE1',
+          'jwt': encoded,
+        });
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
@@ -255,10 +257,11 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request =
-            'url=' + encodeURIComponent(removeFragment(window.location.href))
-            + '&state=STATE1'
-            + '&jwt=' + encodeURIComponent(encoded);
+        const request = serializeQueryString({
+          'url': removeFragment(window.location.href),
+          'state': 'STATE1',
+          'jwt': encoded,
+        });
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',

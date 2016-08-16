@@ -164,12 +164,28 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  const paramsString = Object.keys(params)
-      .reduce((paramsString, key) => {
-        return paramsString +
-            `&${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
-      }, '');
-  return appendParamStringToUrl(url, paramsString.substring(1));
+  return appendParamStringToUrl(url, serializeQueryString(params));
+}
+
+/**
+ * Serializes the passed parameter map into a query string with both keys
+ * and values encoded.
+ * @param {!Object<string, *>} params
+ * @return {string}
+ */
+export function serializeQueryString(params) {
+  let s = '';
+  for (const k in params) {
+    const v = params[k];
+    if (v == null) {
+      continue;
+    }
+    if (s.length > 0) {
+      s += '&';
+    }
+    s += `${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
+  }
+  return s;
 }
 
 /**
