@@ -24,7 +24,7 @@ describe('amp-ad-api-handler', () => {
   let container;
   let iframe;
   let adElement;
-  let ad;
+  let adImpl;
   let apiHandler;
   const iframeSrc = '//ads.localhost:' + location.port +
             '/base/test/fixtures/served/iframe.html';
@@ -35,8 +35,8 @@ describe('amp-ad-api-handler', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     adElement = document.createElement('amp-ad');
-    ad = new BaseElement(adElement);
-    apiHandler = new AmpAdApiHandler(ad, ad.element);
+    adImpl = new BaseElement(adElement);
+    apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
     return createIframePromise().then(c => {
       container = c;
       iframe = c.doc.createElement('iframe');
@@ -51,7 +51,7 @@ describe('amp-ad-api-handler', () => {
   afterEach(() => {
     sandbox.restore();
     adElement = null;
-    ad = null;
+    adImpl = null;
     apiHandler = null;
   });
 
