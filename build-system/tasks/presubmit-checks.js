@@ -308,6 +308,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/storage.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],
   },
   'localStorage': {
