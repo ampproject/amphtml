@@ -33,6 +33,7 @@ import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
+import {installTimerService} from './service/timer-impl'
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
@@ -74,6 +75,7 @@ export function installRuntimeServices(global) {
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installTimerService(global);
   installVsyncService(global);
   installResourcesService(global);
   installUrlReplacementsService(global);
