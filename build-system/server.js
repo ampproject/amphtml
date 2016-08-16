@@ -79,7 +79,28 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+const ORIGIN_REGEX = new RegExp("http://localhost:8000|" +
+    "https?://.+\.herokuapp\.com:8000");
+const SOURCE_ORIGIN_REGEX = new RegExp("http://localhost:8000|" +
+    "https?://.+\.herokuapp\.com:8000/");
+
 app.use('/form/html/post', function(req, res) {
+  if(!ORIGIN_REGEX.test(req.headers.origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: 'Origin header is invalid.'
+    }));
+    return;
+  }
+
+  if(!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: '__amp_source_origin parameter is invalid.'
+    }));
+    return;
+  }
+
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -99,6 +120,22 @@ app.use('/form/html/post', function(req, res) {
 });
 
 app.use('/form/echo-json/post', function(req, res) {
+  if(!ORIGIN_REGEX.test(req.headers.origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: 'Origin header is invalid.'
+    }));
+    return;
+  }
+
+  if(!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: '__amp_source_origin parameter is invalid.'
+    }));
+    return;
+  }
+
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'application/json');

@@ -248,12 +248,7 @@ export class Xhr {
    * @return {string}
    */
   getCorsUrl(win, url) {
-    const sourceOrigin = getSourceOrigin(win.location.href);
-    const parsedUrl = parseUrl(url);
-    const query = parseQueryString(parsedUrl.search);
-    user().assert(!(SOURCE_ORIGIN_PARAM in query),
-        'Source origin is not allowed in %s', url);
-    return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    return getCorsUrl(win, url);
   }
 
 }
@@ -533,6 +528,22 @@ class FetchResponseHeaders {
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
+}
+
+
+/**
+ * Add "__amp_source_origin" query parameter to the URL.
+ * @param {!Window} win
+ * @param {string} url
+ * @return {string}
+ */
+export function getCorsUrl(win, url) {
+  const sourceOrigin = getSourceOrigin(win.location.href);
+  const parsedUrl = parseUrl(url);
+  const query = parseQueryString(parsedUrl.search);
+  user().assert(!(SOURCE_ORIGIN_PARAM in query),
+      'Source origin is not allowed in %s', url);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }
 
 

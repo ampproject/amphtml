@@ -58,6 +58,7 @@ describe('amp-form', () => {
     nameInput.setAttribute('value', 'John Miller');
     form.appendChild(nameInput);
     form.setAttribute('action-xhr', 'https://example.com');
+    form.setAttribute('action', 'https://example.com');
 
     if (button1) {
       const submitBtn = doc.createElement('input');
@@ -92,6 +93,24 @@ describe('amp-form', () => {
         /form requires at least one <input type=submit>/);
     form = getForm(document, true, false);
     expect(() => new AmpForm(form)).to.not.throw;
+  });
+
+  it('should assert valid action and append __amp_source_origin to it', () => {
+    const form = getForm();
+    form.removeAttribute('action');
+    expect(() => new AmpForm(form)).to.throw(
+        /form action is required/);
+    form.setAttribute('action', 'http://example.com');
+    expect(() => new AmpForm(form)).to.throw(
+        /form action must start with/);
+    form.setAttribute('action', 'https://cdn.ampproject.org/example.com');
+    expect(() => new AmpForm(form)).to.throw(
+        /form action should not be on cdn\.ampproject\.org/);
+    form.setAttribute('action', 'https://example.com');
+    expect(() => new AmpForm(form)).to.not.throw;
+    new AmpForm(form);
+    expect(form.getAttribute('action')).to.contain(
+        '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
   });
 
   it('should assert valid action-xhr when provided', () => {

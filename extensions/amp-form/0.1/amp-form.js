@@ -20,6 +20,7 @@ import {assertHttpsUrl} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
+import {getCorsUrl} from '../../../src/service/xhr-impl';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
@@ -145,6 +146,16 @@ export class AmpForm {
 
     /** @private {?string} */
     this.state_ = null;
+
+    // Update the form non-xhr action to add `__amp_source_origin` parameter.
+    // This allows publishers to understand where the request is coming from.
+    const action = this.form_.getAttribute('action');
+    user().assert(action, 'form action is required: %s',
+        this.form_);
+    assertHttpsUrl(action, this.form_, 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on cdn.ampproject.org: %s', this.form_);
+    this.form_.setAttribute('action', getCorsUrl(this.win_, action));
 
     this.installSubmitHandler_();
   }
