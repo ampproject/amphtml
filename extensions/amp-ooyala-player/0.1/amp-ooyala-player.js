@@ -45,15 +45,15 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
 
-    const embedCode = user.assert(
+    const embedCode = user().assert(
         encodeURIComponent(this.element.getAttribute('data-embedcode')),
         'The data-embedcode attribute is required for <amp-ooyala-player> %s',
         this.element);
-    const pCode = user.assert(
+    const pCode = user().assert(
         this.element.getAttribute('data-pcode'),
         'The data-pcode attribute is required for <amp-ooyala-player> %s',
         this.element);
-    const playerId = user.assert(
+    const playerId = user().assert(
         this.element.getAttribute('data-playerid'),
         'The data-playerid attribute is required for <amp-ooyala-player> %s',
         this.element);
