@@ -241,8 +241,9 @@ describe('SlideScroll', () => {
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
           .to.be.false;
-      expect(schedulePauseSpy).to.not.have.been.called;
-      expect(schedulePauseSpy.callCount).to.equal(0);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
+      expect(schedulePauseSpy.callCount).to.equal(2);
 
       impl.showSlide_(0);
 
@@ -257,8 +258,9 @@ describe('SlideScroll', () => {
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
           .to.be.false;
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-      expect(schedulePauseSpy.callCount).to.equal(1);
+      expect(schedulePauseSpy.callCount).to.equal(4);
 
       impl.showSlide_(4);
 
@@ -276,7 +278,8 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
-      expect(schedulePauseSpy.callCount).to.equal(3);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
+      expect(schedulePauseSpy.callCount).to.equal(7);
     });
   });
 
@@ -633,7 +636,9 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[4].style.order).to.equal('');
 
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
-        expect(schedulePauseSpy.callCount).to.equal(1);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
+        expect(schedulePauseSpy.callCount).to.equal(3);
 
         impl.showSlide_(0);
 
@@ -655,7 +660,9 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[3].style.order).to.equal('');
         expect(impl.slideWrappers_[4].style.order).to.equal('1');
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-        expect(schedulePauseSpy.callCount).to.equal(2);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(schedulePauseSpy.callCount).to.equal(6);
 
         impl.showSlide_(4);
 
@@ -676,9 +683,10 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[2].style.order).to.equal('');
         expect(impl.slideWrappers_[3].style.order).to.equal('1');
         expect(impl.slideWrappers_[4].style.order).to.equal('2');
-        expect(schedulePauseSpy).to.not.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
-        expect(schedulePauseSpy.callCount).to.equal(3);
+        expect(schedulePauseSpy.callCount).to.equal(9);
       });
     });
 

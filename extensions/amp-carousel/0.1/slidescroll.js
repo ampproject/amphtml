@@ -447,12 +447,18 @@ export class AmpSlideScroll extends BaseSlides {
   hideRestOfTheSlides_(indexArr) {
     const noOfSlides_ = this.noOfSlides_;
     for (let i = 0; i < noOfSlides_; i++) {
-      if (indexArr.indexOf(i) == -1 &&
-          this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+      if (!this.slideWrappers_[i].classList.contains(SHOWN_CSS_CLASS)) {
+        continue;
+      }
+      // Hide if not shown anymore
+      if (indexArr.indexOf(i) == -1) {
         if (this.shouldLoop) {
           setStyle(this.slideWrappers_[i], 'order', '');
         }
         this.slideWrappers_[i].classList.remove(SHOWN_CSS_CLASS);
+      }
+      // Pause if not the current slide
+      if (this.slideIndex_ != i) {
         this.schedulePause(this.slides_[i]);
       }
     }
