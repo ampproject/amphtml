@@ -18,6 +18,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 import '../amp-social-share';
+import {platformFor} from '../../../../src/platform';
 
 adopt(window);
 
@@ -33,6 +34,9 @@ const STRINGS = {
 describe('amp-social-share', () => {
 
   let sandbox;
+  let platform;
+  let isIos = false;
+  let isSafari = false;
 
   function getShare(type, opt_endpoint, opt_params) {
     return getCustomShare(iframe => {
@@ -56,6 +60,9 @@ describe('amp-social-share', () => {
 
   function getCustomShare(modifier) {
     return createIframePromise().then(iframe => {
+      platform = platformFor(iframe.win);
+      sandbox.stub(platform, 'isIos', () => isIos);
+      sandbox.stub(platform, 'isSafari', () => isSafari);
       const canonical = iframe.doc.createElement('link');
 
       iframe.doc.title = 'doc title';
@@ -69,6 +76,8 @@ describe('amp-social-share', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    isIos = false;
+    isSafari = false;
   });
 
   afterEach(() => {
@@ -163,6 +172,20 @@ describe('amp-social-share', () => {
         'https://twitter.com/intent/tweet?text=doc%20title&' +
           'url=https%3A%2F%2Fcanonicalexample.com%2F',
           '_blank', 'resizable,scrollbars,width=640,height=480'
+      )).to.be.true;
+    });
+  });
+
+  it('opens mailto: window in _self on iOS Safari', () => {
+    isIos = true;
+    isSafari = true;
+    return getShare('email').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.win.open.called).to.be.true;
+      expect(el.implementation_.win.open.calledWith(
+          'mailto:?subject=doc%20title&' +
+            'body=https%3A%2F%2Fcanonicalexample.com%2F',
+          '_self', 'resizable,scrollbars,width=640,height=480'
       )).to.be.true;
     });
   });
