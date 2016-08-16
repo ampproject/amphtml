@@ -15,7 +15,7 @@
  */
 
 import {createIframePromise} from '../../../../testing/iframe';
-import {platform} from '../../../../src/platform';
+import {platformFor} from '../../../../src/platform';
 import * as sinon from 'sinon';
 import {toggleExperiment} from '../../../../src/experiments';
 import {vsyncFor} from '../../../../src/vsync';
@@ -29,11 +29,18 @@ import {
 import {xhrFor} from '../../../../src/xhr';
 import {installStorageService} from '../../../amp-analytics/0.1/storage-impl';
 import '../../../amp-analytics/0.1/amp-analytics';
+import {timerFor} from '../../../../src/timer';
 
 describe('amp-app-banner', () => {
 
   let sandbox;
   let vsync;
+  let platform;
+  let isAndroid = false;
+  let isIos = false;
+  let isChrome = false;
+  let isSafari = false;
+
   const meta = {
     content: 'app-id=828256236, app-argument=medium://p/cb7f223fad86',
   };
@@ -61,13 +68,14 @@ describe('amp-app-banner', () => {
     }
   }
 
-  function getAppBanner(config = {}) {
+  function getTestFrame() {
     return createIframePromise(true).then(iframe => {
       installStorageService(iframe.win);
-      const link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', 'https://example.com/amps.html');
-      iframe.doc.head.appendChild(link);
+      platform = platformFor(iframe.win);
+      sandbox.stub(platform, 'isIos', () => isIos);
+      sandbox.stub(platform, 'isAndroid', () => isAndroid);
+      sandbox.stub(platform, 'isChrome', () => isChrome);
+      sandbox.stub(platform, 'isSafari', () => isSafari);
 
       vsync = vsyncFor(iframe.win);
       sandbox.stub(vsync, 'runPromise', (task, state) => {
@@ -75,8 +83,18 @@ describe('amp-app-banner', () => {
         return Promise.resolve();
       });
       sandbox.stub(vsync, 'run', runTask);
-
       toggleExperiment(iframe.win, 'amp-app-banner', true);
+      return iframe;
+    });
+  }
+
+  function getAppBanner(config = {}) {
+    return getTestFrame().then(iframe => {
+      const link = iframe.doc.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', 'https://example.com/amps.html');
+      iframe.doc.head.appendChild(link);
+
       if (config.meta) {
         const meta = iframe.doc.createElement('meta');
         meta.setAttribute('name', 'apple-itunes-app');
@@ -142,6 +160,15 @@ describe('amp-app-banner', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    platform = platformFor(window);
+    sandbox.stub(platform, 'isIos', () => isIos);
+    sandbox.stub(platform, 'isAndroid', () => isAndroid);
+    sandbox.stub(platform, 'isChrome', () => isChrome);
+    sandbox.stub(platform, 'isSafari', () => isSafari);
+    isAndroid = false;
+    isIos = false;
+    isChrome = false;
+    isSafari = false;
   });
 
   afterEach(() => {
@@ -150,31 +177,33 @@ describe('amp-app-banner', () => {
 
   describe('Choosing platform', () => {
     it('should upgrade to AmpIosAppBanner on iOS', () => {
-      sandbox.stub(platform, 'isIos').returns(true);
-      const banner = new AmpAppBanner(document.createElement('div'));
-      const newInstance = banner.upgradeCallback();
-      expect(newInstance instanceof AmpIosAppBanner).to.be.true;
+      isIos = true;
+      return getTestFrame().then(() => {
+        const banner = new AmpAppBanner(document.createElement('div'));
+        const newInstance = banner.upgradeCallback();
+        expect(newInstance instanceof AmpIosAppBanner).to.be.true;
+      });
     });
 
     it('should upgrade to AmpAndroidAppBanner on Android', () => {
-      sandbox.stub(platform, 'isAndroid').returns(true);
-      const banner = new AmpAppBanner(document.createElement('div'));
-      const newInstance = banner.upgradeCallback();
-      expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
+      isAndroid = true;
+      return getTestFrame().then(() => {
+        const banner = new AmpAppBanner(document.createElement('div'));
+        const newInstance = banner.upgradeCallback();
+        expect(newInstance instanceof AmpAndroidAppBanner).to.be.true;
+      });
     });
 
     it('should not upgrade if platform not supported', () => {
-      sandbox.stub(platform, 'isAndroid').returns(false);
-      sandbox.stub(platform, 'isIos').returns(false);
-      const banner = new AmpAppBanner(document.createElement('div'));
-      expect(banner.upgradeCallback()).to.be.null;
+      return getTestFrame().then(() => {
+        const banner = new AmpAppBanner(document.createElement('div'));
+        expect(banner.upgradeCallback()).to.be.null;
+      });
     });
   });
 
   describe('non-supported platform', () => {
     it('should remove the banner', () => {
-      sandbox.stub(platform, 'isIos').returns(false);
-      sandbox.stub(platform, 'isAndroid').returns(false);
       return getAppBanner().then(banner => {
         expect(banner.parentElement).to.be.null;
       });
@@ -182,11 +211,8 @@ describe('amp-app-banner', () => {
   });
 
   describe('iOS', () => {
-    let isSafari;
     beforeEach(() => {
-      isSafari = false;
-      sandbox.stub(platform, 'isIos').returns(true);
-      sandbox.stub(platform, 'isSafari', () => isSafari);
+      isIos = true;
     });
 
     it('should preconnect to app store', () => {
@@ -233,11 +259,9 @@ describe('amp-app-banner', () => {
   });
 
   describe('Android', () => {
-    let isChrome;
     beforeEach(() => {
+      isAndroid = true;
       isChrome = false;
-      sandbox.stub(platform, 'isAndroid').returns(true);
-      sandbox.stub(platform, 'isChrome', () => isChrome);
     });
 
     it('should preconnect to play store and preload manifest', () => {
@@ -287,10 +311,6 @@ describe('amp-app-banner', () => {
   });
 
   describe('Abstract App Banner', () => {
-    let clock;
-    beforeEach(() => {
-      clock = sandbox.useFakeTimers();
-    });
     it('should setup click listener', () => {
       return createIframePromise(true).then(iframe => {
         const win = iframe.win;
@@ -308,9 +328,12 @@ describe('amp-app-banner', () => {
         sandbox.stub(banner, 'redirectTopLocation_', () => {});
         banner.openLinkClicked_('open-link', 'install-link');
         expect(win.open.calledWith('open-link', '_top')).to.be.true;
-        clock.tick(1501);
-        expect(banner.redirectTopLocation_.calledWith('install-link'))
-            .to.be.true;
+        return timerFor(iframe.win).delay(() => {
+          expect(banner.redirectTopLocation_.called)
+              .to.be.true;
+          expect(banner.redirectTopLocation_.calledWith('install-link'))
+              .to.be.true;
+        }, 2000);
       });
     });
 
