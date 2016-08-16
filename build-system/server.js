@@ -142,6 +142,10 @@ app.use('/form/echo-json/post', function(req, res) {
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
+    res.setHeader('Access-Control-Allow-Origin',
+        req.protocol + '://' + req.headers.host);
+    res.setHeader('Access-Control-Expose-Headers',
+        'AMP-Access-Control-Allow-Source-Origin')
     res.setHeader('AMP-Access-Control-Allow-Source-Origin',
         req.protocol + '://' + req.headers.host);
     res.end(JSON.stringify(fields));
