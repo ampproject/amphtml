@@ -282,6 +282,8 @@ describe('Resources pause/resume/unlayout scheduling', () => {
   let child0;
   let child1;
   let child2;
+  let grandChild;
+  let grandGrandChild;
 
   function createElement() {
     return {
@@ -439,6 +441,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
 
       resources.scheduleResume(parent, children);
       expect(stub1.calledOnce).to.be.true;
+      expect(stub2.calledOnce).to.be.true;
       expect(stub3.calledOnce).to.be.true;
     });
 
