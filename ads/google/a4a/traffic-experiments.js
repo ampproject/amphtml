@@ -121,7 +121,16 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  const expParam = parseQueryString(win.location.search)['exp'];
+  let queryString = win.location.search;
+  // If we're inside the AMP viewer, the hash fragment will have been moved
+  // to the originalHash field.
+  const hash = win.location.originalHash || win.location.hash;
+  if (hash) {
+    // Drop the leading '#' and replace with a
+    // param separator.
+    queryString += '&' + decodeURIComponent(hash.substring(1));
+  }
+  const expParam = parseQueryString(queryString)['exp'];
   if (!expParam) {
     return;
   }

@@ -271,6 +271,87 @@ describe('a4a_config', () => {
             'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
       }
     });
+
+    it(`should find param in originalHash when pattern is ${urlBase}`, () => {
+      win.location.search = '?somewhere=over&the=rainbow';
+      win.location.originalHash = '#' + encodeURIComponent(
+          urlBase.substr(1).replace('PARAM', 'a4a:-1'));
+      // Ensure that internal branches aren't attached, even if the PRNG
+      // would normally trigger them.
+      rand.onFirstCall().returns(-1);
+      const element = document.createElement('div');
+      // Should not register as 'A4A enabled', but should still attach the
+      // control experiment ID.
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.false;
+      expect(isInManualExperiment(element), 'element in manual experiment')
+          .to.be.true;
+      // And it shouldn't be in any *other* experiments.
+      for (const branch in EXTERNAL_BRANCHES) {
+        expect(isInExperiment(element, EXTERNAL_BRANCHES[branch]),
+            'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
+      }
+      for (const branch in EXTERNAL_BRANCHES) {
+        expect(isInExperiment(element, INTERNAL_BRANCHES[branch]),
+            'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
+      }
+    });
+
+    it(`should find param in hash when !originalHash and pattern=${urlBase}`,
+        () => {
+          win.location.search = '?somewhere=over&the=rainbow';
+          win.location.hash = '#' + encodeURIComponent(
+                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
+          // Ensure that internal branches aren't attached, even if the PRNG
+          // would normally trigger them.
+          rand.onFirstCall().returns(-1);
+          const element = document.createElement('div');
+          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+          expect(win.document.cookie).to.be.null;
+          expect(rand.called, 'rand called at least once').to.be.false;
+          expect(element.getAttribute('data-experiment-id')).to.equal(
+              EXTERNAL_BRANCHES.experiment);
+        });
+
+    it(`originalHash should trump hash; pattern=${urlBase}`,
+        () => {
+          win.location.search = '?somewhere=over&the=rainbow';
+          win.location.originalHash = '#' + encodeURIComponent(
+                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
+          win.location.hash = '#' + encodeURIComponent(
+                  urlBase.substr(1).replace('PARAM', 'a4a:-1'));
+          // Ensure that internal branches aren't attached, even if the PRNG
+          // would normally trigger them.
+          rand.onFirstCall().returns(-1);
+          const element = document.createElement('div');
+          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+          expect(win.document.cookie).to.be.null;
+          expect(rand.called, 'rand called at least once').to.be.false;
+          expect(element.getAttribute('data-experiment-id')).to.equal(
+              EXTERNAL_BRANCHES.experiment);
+        });
+
+    it(`originalHash should trump search; pattern=${urlBase}`,
+        () => {
+          win.location.search = urlBase.replace('PARAM', 'a4a:-1');
+          win.location.originalHash = '#' + encodeURIComponent(
+                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
+          // Ensure that internal branches aren't attached, even if the PRNG
+          // would normally trigger them.
+          rand.onFirstCall().returns(-1);
+          const element = document.createElement('div');
+          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+          expect(win.document.cookie).to.be.null;
+          expect(rand.called, 'rand called at least once').to.be.false;
+          expect(element.getAttribute('data-experiment-id')).to.equal(
+              EXTERNAL_BRANCHES.experiment);
+        });
+
   });
 
 });
