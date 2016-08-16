@@ -41,8 +41,8 @@ class AmpO2Player extends AMP.BaseElement {
     const macros = this.element.getAttribute('data-macros');
     const env = this.element.getAttribute('data-env');
     user().assert(
-        (pid && bcid) || vid,
-        'Either data-pid and data-bcid or data-vid attribute is required ' +
+        pid && bcid,
+        'Data-pid and data-bcid attributes are required ' +
         'for <amp-o2-player> %s',
         this.element);
     /** @private {string} */
