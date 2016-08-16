@@ -20,7 +20,7 @@ import {removeFragment} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
 import * as sinon from 'sinon';
 
-describe('AccessServerJwtAdapter', () => {
+describe.only('AccessServerJwtAdapter', () => {
 
   let sandbox;
   let clock;
@@ -191,15 +191,14 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request = {
-          'url': removeFragment(window.location.href),
-          'state': 'STATE1',
-          'jwt': encoded,
-        };
+        const request =
+            'url=' + encodeURIComponent(removeFragment(window.location.href))
+            + '&state=STATE1'
+            + '&jwt=' + encodeURIComponent(encoded);
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
-              body: 'request=' + encodeURIComponent(JSON.stringify(request)),
+              body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
@@ -223,11 +222,10 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request = {
-          'url': removeFragment(window.location.href),
-          'state': 'STATE1',
-          'jwt': encoded,
-        };
+        const request =
+            'url=' + encodeURIComponent(removeFragment(window.location.href))
+            + '&state=STATE1'
+            + '&jwt=' + encodeURIComponent(encoded);
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
@@ -257,11 +255,10 @@ describe('AccessServerJwtAdapter', () => {
         const encoded = 'rAnDoM';
         sandbox.stub(adapter, 'fetchJwt_',
             () => Promise.resolve({jwt, encoded}));
-        const request = {
-          'url': removeFragment(window.location.href),
-          'state': 'STATE1',
-          'jwt': encoded,
-        };
+        const request =
+            'url=' + encodeURIComponent(removeFragment(window.location.href))
+            + '&state=STATE1'
+            + '&jwt=' + encodeURIComponent(encoded);
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',

@@ -266,6 +266,13 @@ export class AccessServerJwtAdapter {
         'state': this.serverState_,
         'jwt': encoded,
       };
+      let requestString = '';
+      for (const k in request) {
+        if (requestString) {
+          requestString += '&';
+        }
+        requestString += k + '=' + encodeURIComponent(request[k])
+      }
       dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
       dev().fine(TAG, '- access data: ', accessData);
       // Note that `application/x-www-form-urlencoded` is used to avoid
@@ -274,7 +281,7 @@ export class AccessServerJwtAdapter {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchDocument(this.serviceUrl_, {
             method: 'POST',
-            body: 'request=' + encodeURIComponent(JSON.stringify(request)),
+            body: requestString,
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
             },
