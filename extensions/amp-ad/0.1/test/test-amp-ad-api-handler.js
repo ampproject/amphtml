@@ -15,7 +15,7 @@
  */
 
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl'
+import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 

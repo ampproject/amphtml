@@ -70,7 +70,6 @@ export class AmpAdApiHandler {
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
-    console.log('in startUP');
     user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -79,10 +78,9 @@ export class AmpAdApiHandler {
     this.baseInstance_.applyFillContent(this.iframe_);
     this.intersectionObserver_ = new IntersectionObserver(
         this.baseInstance_, this.iframe_, is3p);
-    console.log(this.iframe_);
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
-        () => {console.log('aaaadfsdf'); this.sendEmbedInfo_(this.baseInstance_.isInViewport());});
+        () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
     // Triggered by context.noContentAvailable() inside the ad iframe.
     listenForOnce(this.iframe_, 'no-content', () => {
       if (this.noContentCallback_) {
