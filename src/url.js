@@ -61,8 +61,8 @@ export let Location;
  */
 export function parseUrl(url) {
   if (!a) {
-    a = window.document.createElement('a');
-    cache = window.UrlCache || (window.UrlCache = Object.create(null));
+    a = self.document.createElement('a');
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
   }
 
   const fromCache = cache[url];
