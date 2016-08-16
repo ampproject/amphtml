@@ -20,7 +20,7 @@ import {removeFragment} from '../../../../src/url';
 import {isUserErrorMessage} from '../../../../src/log';
 import * as sinon from 'sinon';
 
-describe.only('AccessServerJwtAdapter', () => {
+describe('AccessServerJwtAdapter', () => {
 
   let sandbox;
   let clock;
@@ -229,7 +229,7 @@ describe.only('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
-              body: 'request=' + encodeURIComponent(JSON.stringify(request)),
+              body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
@@ -262,7 +262,7 @@ describe.only('AccessServerJwtAdapter', () => {
         xhrMock.expects('fetchDocument')
             .withExactArgs('http://localhost:8000/af', {
               method: 'POST',
-              body: 'request=' + encodeURIComponent(JSON.stringify(request)),
+              body: request,
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
               },
