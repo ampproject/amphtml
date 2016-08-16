@@ -23,8 +23,6 @@ describe('amp-ad-api-handler', () => {
   let sandbox;
   let container;
   let iframe;
-  let adElement;
-  let adImpl;
   let apiHandler;
   const iframeSrc = '//ads.localhost:' + location.port +
             '/base/test/fixtures/served/iframe.html';
@@ -34,8 +32,8 @@ describe('amp-ad-api-handler', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    adElement = document.createElement('amp-ad');
-    adImpl = new BaseElement(adElement);
+    const adElement = document.createElement('amp-ad');
+    const adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
     return createIframePromise().then(c => {
       container = c;
@@ -50,17 +48,15 @@ describe('amp-ad-api-handler', () => {
 
   afterEach(() => {
     sandbox.restore();
-    adElement = null;
-    adImpl = null;
     apiHandler = null;
   });
 
   it('embed-state API', () => {
     return new Promise(resolve => {
       apiHandler.sendEmbedInfo_ = () => {
-        resolve(apiHandler);
+        resolve();
       };
-      iframe.onload = function() {
+      iframe.onload = () => {
         iframe.contentWindow.postMessage({
           sentinel: 'amp-test',
           type: 'subscribeToEmbedState',
@@ -69,8 +65,8 @@ describe('amp-ad-api-handler', () => {
         }, '*');
         apiHandler.iframe_.src = iframeSrc;
       };
-      expect(apiHandler.embedStateApi_.clientWindows_.length).to.equal(0);
-    }).then(apiHandler => {
+      expect(apiHandler.embedStateApi_.clientWindows_).to.be.empty;
+    }).then(() => {
       expect(apiHandler.embedStateApi_.clientWindows_.length).to.equal(1);
     });
   });
