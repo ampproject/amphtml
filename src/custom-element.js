@@ -71,7 +71,7 @@ let templateTagSupported;
  */
 function isTemplateTagSupported() {
   if (templateTagSupported === undefined) {
-    const template = window.document.createElement('template');
+    const template = self.document.createElement('template');
     templateTagSupported = 'content' in template;
   }
   return templateTagSupported;

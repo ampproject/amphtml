@@ -50,7 +50,7 @@ const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
  * @return {!ModeDef}
  */
 export function getMode(opt_win) {
-  const win = opt_win || window;
+  const win = opt_win || self;
   if (win.AMP_MODE) {
     return win.AMP_MODE;
   }

@@ -371,7 +371,7 @@ export function user() {
   if (userLog) {
     return userLog;
   }
-  return userLog = new Log(window, mode => {
+  return userLog = new Log(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
@@ -402,7 +402,7 @@ export function dev() {
   if (devLog) {
     return devLog;
   }
-  return devLog = new Log(window, mode => {
+  return devLog = new Log(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (logNum >= 3) {
       return LogLevel.FINE;

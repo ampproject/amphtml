@@ -189,7 +189,7 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(window, 'bootstrapBaseUrl', () => {
+  return getService(self, 'bootstrapBaseUrl', () => {
     return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
       getDefaultBootstrapBaseUrl(parentWindow);
   });

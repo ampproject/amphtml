@@ -31,24 +31,24 @@ import {stubElements} from './custom-element';
 
 
 // Declare that this runtime will support multiple shadow-root docs.
-installDocService(window, /* isSingleDoc */ false);
+installDocService(self, /* isSingleDoc */ false);
 
 // Core services.
-installRuntimeServices(window);
+installRuntimeServices(self);
 
 // Builtins.
-installBuiltins(window);
+installBuiltins(self);
 
 // Final configuration and stubbing.
-adoptShadowMode(window);
-stubElements(window);
+adoptShadowMode(self);
+stubElements(self);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
-if (window.console) {
+if (self.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML shadows – Version $internalRuntimeVersion$');
 }
-window.document.documentElement.setAttribute('amp-version',
+self.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');
