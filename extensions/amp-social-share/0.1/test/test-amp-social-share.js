@@ -40,9 +40,9 @@ describe('amp-social-share', () => {
 
   function getShare(type, opt_endpoint, opt_params) {
     return getCustomShare(iframe => {
+      sandbox.stub(iframe.win, 'open').returns(true);
       const share = iframe.doc.createElement('amp-social-share');
       share.addEventListener = sandbox.spy();
-      iframe.win.open = sandbox.spy();
       if (opt_endpoint) {
         share.setAttribute('data-share-endpoint', opt_endpoint);
       }
@@ -139,8 +139,8 @@ describe('amp-social-share', () => {
           'https://twitter.com/intent/tweet');
 
       expect(el.implementation_.href_).to.not.contain('TITLE');
-      expect(el.addEventListener.called).to.be.true;
-      expect(el.addEventListener.calledWith('click')).to.be.true;
+      expect(el.addEventListener).to.be.calledOnce;
+      expect(el.addEventListener).to.be.calledWith('click');
     });
   });
 
@@ -167,12 +167,12 @@ describe('amp-social-share', () => {
   it('opens share window in _blank', () => {
     return getShare('twitter').then(el => {
       el.implementation_.handleClick_();
-      expect(el.implementation_.win.open.called).to.be.true;
-      expect(el.implementation_.win.open.calledWith(
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
         'https://twitter.com/intent/tweet?text=doc%20title&' +
           'url=https%3A%2F%2Fcanonicalexample.com%2F',
           '_blank', 'resizable,scrollbars,width=640,height=480'
-      )).to.be.true;
+      );
     });
   });
 
@@ -181,12 +181,12 @@ describe('amp-social-share', () => {
     isSafari = true;
     return getShare('email').then(el => {
       el.implementation_.handleClick_();
-      expect(el.implementation_.win.open.called).to.be.true;
-      expect(el.implementation_.win.open.calledWith(
+      expect(el.implementation_.win.open).to.be.calledOnce;
+      expect(el.implementation_.win.open).to.be.calledWith(
           'mailto:?subject=doc%20title&' +
             'body=https%3A%2F%2Fcanonicalexample.com%2F',
           '_self', 'resizable,scrollbars,width=640,height=480'
-      )).to.be.true;
+      );
     });
   });
 });
