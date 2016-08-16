@@ -46,9 +46,8 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (!this.isExperimentOn_()) {
       getService(this.win, 'share-tracking',
           () => Promise.reject(user().createError(TAG + ' disabled')));
+      user().assert(false, `${TAG} experiment is disabled`);
     }
-
-    user().assert(this.isExperimentOn_(), `${TAG} experiment is disabled`);
 
     /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
