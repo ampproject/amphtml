@@ -1431,7 +1431,7 @@ export class Resources {
    * Finds resources within the parent resource's shallow or deep subtree.
    * @param {!Resource} parentResource
    * @param {!Array<!Element>} elements
-   * @param {!boolean} deepSubtree Whether the parent resource's shallow or deep
+   * @param {boolean} deepSubtree Whether the parent resource's shallow or deep
    * subtree is searched for resources.
    * @param {function(!Resource)} callback
    */
