@@ -21,6 +21,18 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
+/*
+ * We are using `require()` instead of `import` here for two reasons:
+ *    1- vega expects d3 to be available on window at import time but babel
+ *       re-orders imports so setting window.d3 happens after loading vega.
+ *    2- d3 and vega are commonJS modules and behaviour of `import *` differs
+ *       between babel and closure compiler (used for dist). In the babel case
+ *       one needs to do x.default but not in the closure compiler case.
+ */
+/* global require: false */
+window.d3 = require('../../../third_party/d3/d3');
+const vega = require('../../../third_party/vega/vega');
+
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
 
@@ -124,15 +136,17 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    // TODO(aghassemi): Replace with actual rendering implementation.
-    return new Promise((resolve, unused) => {
-      const text = 'To be replaced with Vega graph with data: ' +
-          JSON.stringify(this.data_);
-      vsyncFor(this.win).mutate(() => {
-        const textNode = this.element.ownerDocument.createTextNode(text);
-        this.container_.appendChild(textNode);
+    return new Promise((resolve, reject) => {
+      vega.parse.spec(this.data_, (error, chart) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        vsyncFor(this.win).mutate(() => {
+          chart({el: this.container_}).update();
+          resolve();
+        });
       });
-      resolve();
     });
   }
 

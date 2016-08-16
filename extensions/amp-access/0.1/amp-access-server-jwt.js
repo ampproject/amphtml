@@ -236,7 +236,7 @@ export class AccessServerJwtAdapter {
     } else {
       audForAmp = (aud == AMP_AUD);
     }
-    user().assert(audForAmp, '"aud" must be "ampproject.org": %s', aud);
+    user().assert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
   }
 
   /**

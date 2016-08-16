@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import '../../third_party/babel/custom-babel-helpers';
-import '../../src/polyfills';
-import {dev} from '../../src/log';
-import {getCookie, setCookie} from '../../src/cookies';
-import {getMode} from '../../src/mode';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
-import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-ready';
+import "../../third_party/babel/custom-babel-helpers";
+import "../../src/polyfills";
+import {dev} from "../../src/log";
+import {getCookie, setCookie} from "../../src/cookies";
+import {getMode} from "../../src/mode";
+import {isExperimentOn, toggleExperiment} from "../../src/experiments";
+import {listenOnce} from "../../src/event-helper";
+import {onDocumentReady} from "../../src/document-ready";
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -49,7 +49,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'README.md#amp-dev-channel',
+    'README.md#amp-dev-channel',
   },
   {
     id: 'alp',
@@ -61,14 +61,14 @@ const EXPERIMENTS = [
     id: 'amp-experiment',
     name: 'AMP Experiment',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-experiment/amp-experiment.md',
+    'extensions/amp-experiment/amp-experiment.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4004',
   },
   {
     id: 'amp-fx-flying-carpet',
     name: 'AMP Flying Carpet',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
+    'extensions/amp-fx-flying-carpet/amp-fx-flying-carpet.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4003',
   },
   {
@@ -86,6 +86,12 @@ const EXPERIMENTS = [
   {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
@@ -123,7 +129,7 @@ const EXPERIMENTS = [
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-google-vrview-image/amp-google-vrview-image.md',
+    'amp-google-vrview-image/amp-google-vrview-image.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
@@ -148,13 +154,21 @@ const EXPERIMENTS = [
     name: 'AMP extension for Apester media',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
+    id: 'amp-ios-overflow-x',
+    name: 'Fixes a horizontal scroll issue on iOS browsers.',
+    spec: 'https://github.com/ampproject/amphtml/issues/3712',
+  },
+  {
+    id: 'amp-app-banner',
+    name: 'Shows a native app install/open banner.',
+    spec: 'https://github.com/ampproject/amphtml/issues/800',
   },
 ];
 
 if (getMode().localDev) {
   EXPERIMENTS.forEach(experiment => {
     dev().assert(experiment.cleanupIssue, `experiment ${experiment.name} must` +
-        ' have a `cleanupIssue` field.');
+      ' have a `cleanupIssue` field.');
   });
 }
 
@@ -164,7 +178,7 @@ if (getMode().localDev) {
  */
 function build() {
   const table = document.getElementById('experiments-table');
-  EXPERIMENTS.forEach(function(experiment) {
+  EXPERIMENTS.forEach(function (experiment) {
     table.appendChild(buildExperimentRow(experiment));
   });
 }
@@ -204,7 +218,7 @@ function buildExperimentRow(experiment) {
   button.appendChild(buttonOff);
 
   button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
-      experiment.name, undefined));
+    experiment.name, undefined));
 
   return tr;
 }
@@ -234,7 +248,7 @@ function buildLinkMaybe(text, link) {
  * Updates states of all experiments in the table.
  */
 function update() {
-  EXPERIMENTS.forEach(function(experiment) {
+  EXPERIMENTS.forEach(function (experiment) {
     updateExperimentRow(experiment);
   });
 }
@@ -276,13 +290,13 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmMessage = on ?
-      'Do you really want to activate the AMP experiment' :
-      'Do you really want to deactivate the AMP experiment';
+    'Do you really want to activate the AMP experiment' :
+    'Do you really want to deactivate the AMP experiment';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
       const validUntil = Date.now() +
-          COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+        COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
       setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
     } else {
       toggleExperiment(window, id, on);
@@ -301,9 +315,9 @@ function showConfirmation_(message, callback) {
   const container = dev().assert(document.getElementById('popup-container'));
   const messageElement = dev().assert(document.getElementById('popup-message'));
   const confirmButton = dev().assert(
-      document.getElementById('popup-button-ok'));
+    document.getElementById('popup-button-ok'));
   const cancelButton = dev().assert(
-      document.getElementById('popup-button-cancel'));
+    document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');
@@ -315,9 +329,9 @@ function showConfirmation_(message, callback) {
 
   messageElement.textContent = message;
   unlistenSet.push(listenOnce(confirmButton, 'click',
-      () => closePopup(true)));
+    () => closePopup(true)));
   unlistenSet.push(listenOnce(cancelButton, 'click',
-      () => closePopup(false)));
+    () => closePopup(false)));
   container.classList.add('show');
 }
 
