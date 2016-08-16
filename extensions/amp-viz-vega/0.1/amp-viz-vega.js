@@ -55,11 +55,11 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {boolean} */
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
-    /** @private {?number} */
-    this.measuredWidth_;
+    /** @private {number} */
+    this.measuredWidth_ = 0;
 
-    /** @private {?number} */
-    this.measuredHeight_;
+    /** @private {number} */
+    this.measuredHeight_ = 0;
 
     /**
      * @private
