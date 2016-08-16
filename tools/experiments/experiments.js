@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import "../../third_party/babel/custom-babel-helpers";
-import "../../src/polyfills";
-import {dev} from "../../src/log";
-import {getCookie, setCookie} from "../../src/cookies";
-import {getMode} from "../../src/mode";
-import {isExperimentOn, toggleExperiment} from "../../src/experiments";
-import {listenOnce} from "../../src/event-helper";
-import {onDocumentReady} from "../../src/document-ready";
+import '../../third_party/babel/custom-babel-helpers';
+import '../../src/polyfills';
+import {dev} from '../../src/log';
+import {getCookie, setCookie} from '../../src/cookies';
+import {getMode} from '../../src/mode';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {listenOnce} from '../../src/event-helper';
+import {onDocumentReady} from '../../src/document-ready';
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
