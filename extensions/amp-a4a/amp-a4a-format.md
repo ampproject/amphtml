@@ -23,47 +23,62 @@ _This set of standards is still in development and is likely to be revised.
 Feedback from the community is welcome.  Please comment here or on the [Intent
 to Implement](https://github.com/ampproject/amphtml/issues/4264)_.
 
-A4A (AMP Ads for AMPHTML Pages) is a mechanism for rendering fast, performant
-ads in AMP pages.  To ensure that A4A ad documents ("A4A creatives") can be
-rendered quickly and smoothly in the browser and do not degrade user experience,
-A4A creatives must obey a set of validation rules.  Similar in spirit to the
-[AMP format rules](../../spec/amp-html-format.md), A4A creatives have access to
-a limited set of allowed tags, capabilities, and extensions.
+A4A (AMP Ads for AMPHTML Pages) is a mechanism for rendering fast,
+performant ads in AMP pages.  To ensure that A4A ad documents ("A4A
+creatives") can be rendered quickly and smoothly in the browser and do
+not degrade user experience, A4A creatives must obey a set of validation
+rules.  Similar in spirit to the
+[AMP format rules](../../spec/amp-html-format.md), A4A creatives have
+access to a limited set of allowed tags, capabilities, and extensions.
 
 ## A4A Format Rules
  
-1. Unless otherwise specified below, the creative must obey all rules given by 
-the [AMP format rules](../../spec/amp-html-format.md), included here by 
-reference.  For example, the
-A4A [Boilerplate](amp-a4a-format.md#2) 
-deviates from the AMP standard boilerplate.
+1. Unless otherwise specified below, the creative must obey all rules
+   given by the [AMP format rules](../../spec/amp-html-format.md),
+   included here by reference.  For example, the A4A
+   [Boilerplate](amp-a4a-format.md#2) deviates from the AMP
+   standard boilerplate.
 
-  _*In addition*_:
+   _*In addition*_:
 
 1. The creative must use `<html a4⚡>` or `<html a4amp>` as its enclosing tags.
 
    _Rationale_: Allows validators to identify a creative document as either a 
- general AMP doc or a restricted A4A doc and to dispatch appropriately.
+   general AMP doc or a restricted A4A doc and to dispatch appropriately.
 
-1. Media: Videos must not enable autoplay.
+1. Unlike in general AMP, the creative must not include a `<link 
+rel="canonical">` tag.
 
-  _Rationale_: Autoplay forces video content to be downloaded immediately, which
- slows the page load.
+   _Rationale_: Ad creatives don't have a "non-AMP canonical version"
+   and won't be independently search-indexed, so self-referencing
+   would be useless.
 
-1. Media: Audio must not enable autoplay.
+1. Media: Videos must not enable autoplay.  This includes 
+both the `<amp-video>`
+   tag as well as autoplay on `<amp-anim>`, `<amp-carousel>`, and 3P video 
+   tags such as `<amp-youtube>`.
 
-  _Rationale_: Same as for video.
+   _Rationale_: Autoplay forces video content to be downloaded immediately, 
+   which slows the page load.
+
+1. Media: Audio must not enable autoplay.  This includes both the `<amp-audio>`
+   tag as well as all audio-including video tags, as described in the previous 
+   point.
+
+   _Rationale_: Same as for video.
 
 1. Analytics: `<amp-analytics>` viewability tracking may only target the full-ad
-selector, via  `"visibilitySpec": { "selector": "amp-ad" }`, as defined in
-[Issue #4018](https://github.com/ampproject/amphtml/issues/4018) and
-[PR #4368](https://github.com/ampproject/amphtml/pull/4368).  In
-particular, it may not target any selectors for elements within the ad creative.
+   selector, via  `"visibilitySpec": { "selector": "amp-ad" }`, as defined in
+   [Issue #4018](https://github.com/ampproject/amphtml/issues/4018) and
+   [PR #4368](https://github.com/ampproject/amphtml/pull/4368).  In
+   particular, it may not target any selectors for elements within the ad 
+   creative.
 
-  _Rationale_: In some cases, A4A may choose to render an ad creative in an 
-  iframe.  In those cases, host page analytics can only target the entire iframe anyway, and won’t have access to any finer-grained selectors.
+   _Rationale_: In some cases, A4A may choose to render an ad creative in an 
+   iframe.  In those cases, host page analytics can only target the entire 
+   iframe anyway, and won’t have access to any finer-grained selectors.
 
-  _Example_:
+   _Example_:
   
   ```html
 <amp-analytics id="nestedAnalytics">
@@ -83,13 +98,17 @@ particular, it may not target any selectors for elements within the ad creative.
   </script>
 </amp-analytics>
   ```
+  
+  _This configuration sends a request to URL
+  `https://example.com/nestedAmpAnalytics` when 50% of the enclosing ad has been
+  continuously visible on the screen for 1 second._
 
 ### Boilerplate
 
 A4A creatives require a different, and considerably simpler, boilerplate style line than
 [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
-```
+```html
 <style amp-a4a-boilerplate>body{visibility:hidden}</style>
 ```
 
@@ -115,19 +134,23 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 1. `position:fixed` and `position:sticky` are prohibited in 
 creative CSS.
 
-  _Rationale_: position:fixed breaks out of shadow DOM, which A4A depends on.  Also, Ads in AMP are already not allowed to use fixed position.
+   _Rationale_: position:fixed breaks out of shadow DOM, which A4A depends on.
+   Also, Ads in AMP are already not allowed to use fixed position.
 
 1. `touch-action` is prohibited.
 
-  _Rationale_: An ad that can manipulate `touch-action` can interfere with the user's ability to scroll the host document.
+   _Rationale_: An ad that can manipulate `touch-action` can interfere with 
+   the user's ability to scroll the host document.
 
-1. Creative CSS is limited to 20kb.
+1. Creative CSS is limited to 20,000 bytes.
 
-  _Rationale_: Large CSS blocks bloat the creative, increase network latency, and degrade page performance.
+   _Rationale_: Large CSS blocks bloat the creative, increase network 
+   latency, and degrade page performance.
 
 1. CSS: transition and animation are subject to additional restrictions.
 
-  _Rationale_: AMP must be able to control all animations belonging to an ad, so that it can stop them when the ad is not on screen or system resources are very low.
+   _Rationale_: AMP must be able to control all animations belonging to an 
+   ad, so that it can stop them when the ad is not on screen or system resources are very low.
 
 #### CSS Animations and Transitions
 
@@ -261,11 +284,9 @@ should not attempt to include them directly.
   <tr><td>amp-pinterest</td></tr>
   <tr><td>amp-reach-player</td></tr>
   <tr><td>amp-share-tracking</td></tr>
-  <tr><td>amp-slides</td></tr>
   <tr><td>amp-social-share</td></tr>
   <tr><td>amp-soundcloud</td></tr>
   <tr><td>amp-springboard-player</td></tr>
-  <tr><td>amp-sticky-ad</td></tr>
   <tr><td>amp-twitter</td></tr>
   <tr><td>amp-vimeo</td></tr>
   <tr><td>amp-vine</td></tr>
@@ -291,10 +312,14 @@ HTML5 compatible.
   - Must use types `<html a4⚡>` or `<html a4amp>`
 
 #### 4.2 Document metadata
-4.2.1 `<head>`  
-4.2.2 `<title>`  
-4.2.4 `<link>`  
+4.2.1 `<head>`
+
+4.2.2 `<title>`
+
+4.2.4 `<link>`
   - `<link rel=...>` tags are disallowed, except for `<link rel=stylesheet>`.
+  - __Note:__ Unlike in general AMP, `<link rel="canonical">` tags are
+    prohibited.
 
 4.2.5 `<meta>`
   - Only `<meta charset=utf8>` and `<meta name=viewport>` are allowed.
@@ -311,6 +336,7 @@ HTML5 compatible.
 4.3.7 `<header>`  
 4.3.8 `<footer>`  
 4.3.9 `<address>`  
+
 #### 4.4 Grouping Content
 4.4.1 `<p>`  
 4.4.2 `<hr>`  
@@ -326,6 +352,7 @@ HTML5 compatible.
 4.4.12 `<figcaption>`  
 4.4.13 `<div>`  
 4.4.14 `<main>`  
+
 #### 4.5 Text-level semantics
 4.5.1 `<a>`  
 4.5.2 `<em>`  
