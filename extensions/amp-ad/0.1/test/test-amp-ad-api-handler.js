@@ -15,7 +15,7 @@
  */
 
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
-import {AmpAd3PImpl} from '../amp-ad-3p-impl';
+import {BaseElement} from '../../../../src/base-element';
 import {createIframePromise} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
@@ -26,7 +26,7 @@ describe('amp-ad-api-handler', () => {
   let adElement;
   let ad;
   let apiHandler;
-  const iframeSrc = 'http://ads.localhost:' + location.port +
+  const iframeSrc = '//ads.localhost:' + location.port +
             '/base/test/fixtures/served/iframe.html';
   function insert(iframe) {
     container.doc.body.appendChild(iframe);
@@ -35,13 +35,12 @@ describe('amp-ad-api-handler', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     adElement = document.createElement('amp-ad');
-    ad = new AmpAd3PImpl(adElement);
+    ad = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(ad, ad.element);
     return createIframePromise().then(c => {
       container = c;
-      const i = c.doc.createElement('iframe');
-      i.src = iframeSrc;
-      iframe = i;
+      iframe = c.doc.createElement('iframe');
+      iframe.src = iframeSrc;
       iframe.setAttribute(
         'data-amp-3p-sentinel', 'amp3ptest');
       apiHandler.startUp(iframe, true);
