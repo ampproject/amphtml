@@ -62,14 +62,14 @@ export function isObject(value) {
 }
 
 /**
- * Determines if value is actually a number.
- * NaN is not considered a number in this function.
- * String numbers are not considered numbers in this function.
+ * Determines if value is of number type and finite.
+ * NaN and Infinity are not considered a finite number.
+ * String numbers are not considered numbers.
  * @param {*} value
  * @return {boolean}
  */
-export function isNumber(value) {
-  return (typeof value === 'number' && !isNaN(value));
+export function isFiniteNumber(value) {
+  return (typeof value === 'number' && isFinite(value));
 }
 
 /**

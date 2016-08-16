@@ -396,7 +396,7 @@ function concatFiles(destFilePath, files) {
 		return fs.readFileSync(filePath, 'utf-8');
 	});
 
-	fs.writeFileSync(destFilePath, all.join('\n'), 'utf-8');
+	fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
 }
 
 /**

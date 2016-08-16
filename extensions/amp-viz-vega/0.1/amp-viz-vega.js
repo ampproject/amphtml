@@ -20,7 +20,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
-import {isObject, isNumber} from '../../../src/types';
+import {isObject, isFiniteNumber} from '../../../src/types';
 import {assertHttpsUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
@@ -55,12 +55,18 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {boolean} */
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
+    /** @private {?number} */
+    this.measuredWidth_;
+
+    /** @private {?number} */
+    this.measuredHeight_;
+
     /**
      * @private
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
-    this.vega_ = window.vg;
+    this.vega_ = this.win.vg;
 
     /**
      * @private
@@ -126,15 +132,10 @@ export class AmpVizVega extends AMP.BaseElement {
     dev().assert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
-      let err;
       this.data_ = tryParseJson(this.inlineData_, err => {
-        err = err;
-      });
-      if (err) {
         user().assert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
-        return Promise.reject();
-      }
+      });
       return Promise.resolve();
     } else {
       // TODO(aghassemi): We may need to expose credentials and set
@@ -201,6 +202,8 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 
   /**
+   * Gets the padding defined in the Vega data for either width or height.
+   * @param {!string} widthOrHeight One of 'width' or 'height' string values.
    * @return {!Number}
    * @private
    */
@@ -209,7 +212,7 @@ export class AmpVizVega extends AMP.BaseElement {
     if (!p) {
       return 0;
     }
-    if (isNumber(p)) {
+    if (isFiniteNumber(p)) {
       return p;
     }
     if (isObject(p)) {

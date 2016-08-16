@@ -93,25 +93,25 @@ describe('Types', () => {
     });
   });
 
-  describe('isNumber', () => {
+  describe('isFiniteNumber', () => {
 
     it('should yield false for non-numbers', () => {
-      expect(types.isNumber(null)).to.be.false;
-      expect(types.isNumber(undefined)).to.be.false;
-      expect(types.isNumber('')).to.be.false;
-      expect(types.isNumber('2')).to.be.false;
-      expect(types.isNumber([])).to.be.false;
-      expect(types.isNumber([2])).to.be.false;
-      expect(types.isNumber({})).to.be.false;
-      expect(types.isNumber({'a': 2})).to.be.false;
-      expect(types.isNumber(true)).to.be.false;
-      expect(types.isNumber(NaN)).to.be.false;
+      expect(types.isFiniteNumber(null)).to.be.false;
+      expect(types.isFiniteNumber(undefined)).to.be.false;
+      expect(types.isFiniteNumber('')).to.be.false;
+      expect(types.isFiniteNumber('2')).to.be.false;
+      expect(types.isFiniteNumber([])).to.be.false;
+      expect(types.isFiniteNumber([2])).to.be.false;
+      expect(types.isFiniteNumber({})).to.be.false;
+      expect(types.isFiniteNumber({'a': 2})).to.be.false;
+      expect(types.isFiniteNumber(true)).to.be.false;
+      expect(types.isFiniteNumber(NaN)).to.be.false;
     });
 
     it('should yield true for numbers', () => {
-      expect(types.isNumber(3)).to.be.true;
-      expect(types.isNumber(3.2)).to.be.true;
-      expect(types.isNumber(123e5)).to.be.true;
+      expect(types.isFiniteNumber(3)).to.be.true;
+      expect(types.isFiniteNumber(3.2)).to.be.true;
+      expect(types.isFiniteNumber(123e5)).to.be.true;
     });
   });
 });
