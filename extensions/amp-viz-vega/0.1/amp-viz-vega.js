@@ -175,28 +175,30 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    return new Promise((resolve, reject) => {
+    const parsePromise = new Promise((resolve, reject) => {
       this.vega_.parse.spec(this.data_, (error, chartFactory) => {
         if (error) {
           reject(error);
-          return;
         }
-        vsyncFor(this.win).mutate(() => {
-          dom.removeChildren(this.container_);
-          this.chart_ = chartFactory({el: this.container_});
-          if (!this.useDataWidth_) {
-            const w = this.measuredWidth_ - this.getDataPadding_('width');
-            this.chart_.width(w);
-          }
-          if (!this.useDataHeight_) {
-            const h = this.measuredHeight_ - this.getDataPadding_('height');
-            this.chart_.height(h);
-          }
+        resolve(chartFactory);
+      });
+    });
 
-          this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
-          this.chart_.update();
-          resolve();
-        });
+    return parsePromise.then(chartFactory => {
+      return vsyncFor(this.win).mutatePromise(() => {
+        dom.removeChildren(this.container_);
+        this.chart_ = chartFactory({el: this.container_});
+        if (!this.useDataWidth_) {
+          const w = this.measuredWidth_ - this.getDataPadding_('width');
+          this.chart_.width(w);
+        }
+        if (!this.useDataHeight_) {
+          const h = this.measuredHeight_ - this.getDataPadding_('height');
+          this.chart_.height(h);
+        }
+
+        this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
+        this.chart_.update();
       });
     });
   }
