@@ -27,6 +27,7 @@ import {
   removeFragment,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
+  serializeQueryString,
 } from '../../src/url';
 
 describe('parseUrl', () => {
@@ -215,6 +216,30 @@ describe('parseQueryString', () => {
     });
   });
 });
+
+
+describe('serializeQueryString', () => {
+  it('should return empty string for empty params', () => {
+    expect(serializeQueryString({})).to.equal('');
+    expect(serializeQueryString({
+      nullValue: null,
+      undefValue: undefined,
+    })).to.equal('');
+  });
+  it('should serialize a single value', () => {
+    expect(serializeQueryString({a: 'A'})).to.equal('a=A');
+  });
+  it('should serialize multiple values', () => {
+    expect(serializeQueryString({a: 'A', b: 'B'})).to.equal('a=A&b=B');
+  });
+  it('should coerce to string', () => {
+    expect(serializeQueryString({a: 1, b: true})).to.equal('a=1&b=true');
+  });
+  it('should encode values and keys', () => {
+    expect(serializeQueryString({'a+b': 'A+B'})).to.equal('a%2Bb=A%2BB');
+  });
+});
+
 
 describe('assertHttpsUrl', () => {
   const referenceElement = document.createElement('div');
