@@ -26,7 +26,7 @@ import {timerFor} from '../../../src/timer';
 export class Poller {
 
   constructor(win, wait, work) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private {number} */
