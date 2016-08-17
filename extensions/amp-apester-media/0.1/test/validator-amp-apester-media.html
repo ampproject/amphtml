@@ -24,7 +24,7 @@
 <head>
     <meta charset="utf-8">
     <title>Apester Media Smart Unit</title>
-    <link rel="canonical" href="amps.html"/>
+    <link rel="canonical" href=""/>
     <meta name="viewport" content="width=device-width,minimum-scale=1">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
@@ -38,23 +38,34 @@
 <!-- Valid: simplest possible example -->
 <amp-apester-media
         height="390"
-        data-apester-media-id="578f8407132b5d5f1dfd7cdc">
+        data-apester-media-id="577faac633e3688a2952199a">
 </amp-apester-media>
 
 <!-- Valid: a simple example with explicit fixed layout -->
 <amp-apester-media
         height="390"
         layout="fixed-height"
-        data-apester-media-id="578f8407132b5d5f1dfd7cdc">
+        data-apester-media-id="577faac633e3688a2952199a">
+</amp-apester-media>
+
+<!-- Valid: playlist example -->
+<amp-apester-media
+        height="350"
+        data-apester-channel-token="5704d3bae474a97e70ab27b3">
+</amp-apester-media>
+
+<!-- Valid: a simple playlist example with explicit fixed layout -->
+<amp-apester-media
+        height="390"
+        layout="fixed-height"
+        data-apester-channel-token="5704d3bae474a97e70ab27b3">
 </amp-apester-media>
 
 
 <!-- Invalid: a simple example with no size -->
 <amp-apester-media
-        data-apester-media-id="578f8407132b5d5f1dfd7cdc">
+        data-apester-media-id="577faac633e3688a2952199a">
 </amp-apester-media>
-
-<!--LOCAL ONLY 578f82bd132b5d5f1dfd7cd3-->
 
 <!-- Invalid: a simple example with no data id -->
 <amp-apester-media
@@ -62,5 +73,4 @@
 </amp-apester-media>
 
 </body>
-
 </html>

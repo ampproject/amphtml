@@ -24,7 +24,6 @@ import {adopt} from '../../../../src/runtime';
 adopt(window);
 
 describe('amp-apester-media', () => {
-
   function getApester(mediaId, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
@@ -38,7 +37,6 @@ describe('amp-apester-media', () => {
       return iframe.addElement(media);
     });
   }
-
 
   function testLoader(image) {
     expect(image).to.not.be.null;
@@ -61,14 +59,11 @@ describe('amp-apester-media', () => {
       testLoader(ins.querySelector('amp-img'));
     });
   });
-
-
   it('renders responsively', () => {
     return getApester('media', true).then(ins => {
       expect(ins.className).to.match(/amp-layout-responsive/);
     });
   });
-
   it('requires  media-id', () => {
     expect(getApester('')).to.be.rejectedWith(
       /The media-id attribute is required for/);

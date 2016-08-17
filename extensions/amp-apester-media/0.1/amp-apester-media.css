@@ -59,7 +59,6 @@
 .-amp-apester-overflow-button {
 	border: none;
 	z-index: 10000;
-	border: 3px solid #fff;
 	background: white;
 	cursor: pointer;
 	padding: 25px 80px;
