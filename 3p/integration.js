@@ -44,15 +44,19 @@ import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
+import {adsnative} from '../ads/adsnative';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
@@ -91,6 +95,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
+
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -111,18 +116,22 @@ register('adition', adition);
 register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
+register('adsnative', adsnative);
 register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('contentad', contentad);
 register('criteo', criteo);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
+register('ezoic', ezoic);
 register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);
@@ -200,14 +209,14 @@ const waitForRenderStart = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user.assert(win.context.location.originValidated != null,
+  user().assert(win.context.location.originValidated != null,
       'Origin should have been validated');
 
-  user.assert(isTagNameAllowed(data.type, win.context.tagName),
+  user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user.assert(data,
+      user().assert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -413,7 +422,7 @@ function onResizeDenied(observerCallback) {
  * @param {string} entityId See comment above for content.
  */
 function reportRenderedEntityIdentifier(entityId) {
-  user.assert(typeof entityId == 'string',
+  user().assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
     id: entityId,
@@ -438,7 +447,7 @@ export function validateParentOrigin(window, parentLocation) {
     parentLocation.originValidated = false;
     return;
   }
-  user.assert(ancestors[0] == parentLocation.origin,
+  user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
@@ -467,7 +476,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user.assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
 }
 

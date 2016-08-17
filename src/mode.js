@@ -50,7 +50,7 @@ const developmentScriptQuery = 'script[src*="/dist/"],script[src*="/base/"]';
  * @return {!ModeDef}
  */
 export function getMode(opt_win) {
-  const win = opt_win || window;
+  const win = opt_win || self;
   if (win.AMP_MODE) {
     return win.AMP_MODE;
   }
@@ -87,6 +87,10 @@ function getMode_(win) {
     fullVersion = getFullVersion_(win, isLocalDev);
   }
 
+  // The `minified`, `test` and `localDev` properties are replaced
+  // as boolean literals when we run `gulp dist` without the `--fortesting`
+  // flags. This improved DCE on the production file we deploy as the code
+  // paths for localhost/testing/development are eliminated.
   return {
     localDev: isLocalDev,
     // Triggers validation

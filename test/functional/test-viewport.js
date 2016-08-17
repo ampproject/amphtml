@@ -60,7 +60,9 @@ describe('Viewport', () => {
         documentElement: {style: {}},
       },
       location: {},
+      navigator: window.navigator,
       setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
     installViewerService(windowApi);
@@ -601,6 +603,9 @@ describe('Viewport META', () => {
             return undefined;
           },
         },
+        navigator: window.navigator,
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
         location: {},
       };
       installViewerService(windowApi);
@@ -691,6 +696,8 @@ describe('ViewportBindingNatural', () => {
   let documentElement;
   let documentBody;
   let windowEventHandlers;
+  let viewer;
+  let viewerMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -712,11 +719,20 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNatural_(windowApi);
+    viewer = {
+      getPaddingTop: () => 19,
+      onViewportEvent: () => {},
+      requestFullOverlay: () => {},
+      cancelFullOverlay: () => {},
+      postScroll: sandbox.spy(),
+    };
+    viewerMock = sandbox.mock(viewer);
+    binding = new ViewportBindingNatural_(windowApi, viewer);
   });
 
   afterEach(() => {
     windowMock.verify();
+    viewerMock.verify();
     sandbox.restore();
   });
 
@@ -845,7 +861,6 @@ describe('ViewportBindingNatural', () => {
 
 describe('ViewportBindingNaturalIosEmbed', () => {
   let sandbox;
-  let clock;
   let windowMock;
   let binding;
   let windowApi;
@@ -855,7 +870,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowEventHandlers = {};
     bodyEventListeners = {};
@@ -890,7 +904,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNaturalIosEmbed_(windowApi);
-    clock.tick(1);
     return Promise.resolve();
   });
 

@@ -830,6 +830,22 @@ describe('Resources discoverWork', () => {
     expect(resources.pendingBuildResources_.length).to.equal(0);
   });
 
+  it('should update inViewport before scheduling layouts', () => {
+    resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+    const setInViewport = sandbox.spy(resource1, 'setInViewport');
+    const schedule = sandbox.spy(resources, 'scheduleLayoutOrPreload_');
+
+    resources.discoverWork_();
+
+    expect(resource1.isInViewport()).to.be.true;
+    expect(setInViewport).to.have.been.calledBefore(schedule);
+  });
+
 });
 
 
@@ -979,7 +995,7 @@ describe('Resources changeSize', () => {
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 
-  describe('attemptChangeSize rules when element is in viewport', () => {
+  describe('attemptChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
 
@@ -994,33 +1010,21 @@ describe('Resources changeSize', () => {
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
     });
 
-    it('should NOT change size and calls overflowCallback', () => {
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
+    it('should NOT change size when height is unchanged', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50};
+      resources.scheduleChangeSize_(resource1, 50, 120, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
-    });
-
-    it('should change size when new height/width is lower', () => {
-      resources.scheduleChangeSize_(resource1, 10, 11, false);
-      resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.not.been.called;
     });
 
     it('should change size when forced', () => {
       resources.scheduleChangeSize_(resource1, 111, 222, true);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
@@ -1031,9 +1035,9 @@ describe('Resources changeSize', () => {
       );
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
@@ -1041,9 +1045,9 @@ describe('Resources changeSize', () => {
       resource1.element.contains = () => true;
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
@@ -1052,56 +1056,22 @@ describe('Resources changeSize', () => {
           height: 50};
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledOnce;
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-    });
-
-    it('should change size when slightly above the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 190,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
-      resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
-    });
-
-    it('should NOT change size when in the middle of the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 100,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 111, 222, false);
-      resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(1);
-      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
-      expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
-      expect(overflowCallbackSpy.firstCall.args[2]).to.equal(222);
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
-    });
-
-    it('should NOT change size when below viewport, but decreases', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
-          height: 50};
-      resources.scheduleChangeSize_(resource1, 50, 120, false);
-      resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
     });
 
     it('should defer when above the viewport and scrolling on', () => {
       resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
           height: 50};
       resources.lastVelocity_ = 10;
-      resources.lastScrollTime_ = new Date().getTime();
+      resources.lastScrollTime_ = Date.now();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_.length).to.equal(1);
-      expect(resource1.changeSize.callCount).to.equal(0);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.not.been.called;
     });
 
     it('should change size when above the vp and adjust scrolling', () => {
@@ -1113,8 +1083,8 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(0);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.been.called;
 
       expect(vsyncSpy.callCount).to.be.greaterThan(1);
       const task = vsyncSpy.lastCall.args[0];
@@ -1126,9 +1096,8 @@ describe('Resources changeSize', () => {
       viewportMock.expects('getScrollHeight').returns(3999).once();
       viewportMock.expects('setScrollTop').withExactArgs(2777).once();
       task.mutate(state);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
-      expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
 
@@ -1141,8 +1110,8 @@ describe('Resources changeSize', () => {
       clock.tick(5000);
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(0);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.been.called;
 
       expect(vsyncSpy.callCount).to.be.greaterThan(1);
       const task = vsyncSpy.lastCall.args[0];
@@ -1154,10 +1123,28 @@ describe('Resources changeSize', () => {
       viewportMock.expects('getScrollHeight').returns(2999).once();
       viewportMock.expects('setScrollTop').never();
       task.mutate(state);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
-      expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('in vp should NOT call overflowCallback if new height smaller', () => {
+      resources.scheduleChangeSize_(resource1, 10, 11, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.not.been.called;
+    });
+
+    it('in viewport should NOT change size and calls overflowCallback', () => {
+      resources.scheduleChangeSize_(resource1, 111, 222, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeSize_.length).to.equal(0);
+      expect(resource1.changeSize).to.not.been.called;
+      expect(overflowCallbackSpy).to.be.calledOnce;
+      expect(overflowCallbackSpy).to.be.calledWith(true, 111, 222);
+      expect(resource1.getPendingChangeSize()).to.jsonEqual(
+          {height: 111, width: 222});
     });
 
     it('should reset pending change size when rescheduling', () => {
@@ -1173,20 +1160,19 @@ describe('Resources changeSize', () => {
     it('should force resize after focus', () => {
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resource1.getPendingChangeSize().height).to.equal(111);
-      expect(resource1.getPendingChangeSize().width).to.equal(222);
-      expect(resources.requestsChangeSize_.length).to.equal(0);
+      expect(resource1.getPendingChangeSize()).to.jsonEqual(
+          {height: 111, width: 222});
+      expect(resources.requestsChangeSize_).to.be.empty;
 
       resources.checkPendingChangeSize_(resource1.element);
       expect(resource1.getPendingChangeSize()).to.be.undefined;
       expect(resources.requestsChangeSize_.length).to.equal(1);
 
       resources.mutateWork_();
-      expect(resources.requestsChangeSize_.length).to.equal(0);
-      expect(resource1.changeSize.callCount).to.equal(1);
-      expect(resource1.changeSize.firstCall.args[0]).to.equal(111);
-      expect(resource1.changeSize.firstCall.args[1]).to.equal(222);
-      expect(overflowCallbackSpy.callCount).to.equal(2);
+      expect(resources.requestsChangeSize_).to.be.empty;
+      expect(resource1.changeSize).to.be.calledOnce;
+      expect(resource1.changeSize).to.be.calledWith(111, 222);
+      expect(overflowCallbackSpy).to.be.calledTwice;
       expect(overflowCallbackSpy.lastCall.args[0]).to.equal(false);
     });
   });
@@ -1204,14 +1190,14 @@ describe('Resources changeSize', () => {
       viewportMock.expects('getScrollHeight').returns(10000).once();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(0);
+      expect(resource1.changeSize).to.not.been.called;
     });
 
     it('should change size when close to the bottom of the document', () => {
       viewportMock.expects('getScrollHeight').returns(110).once();
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
-      expect(resource1.changeSize.callCount).to.equal(1);
+      expect(resource1.changeSize).to.be.calledOnce;
     });
   });
 });
@@ -1437,6 +1423,8 @@ describe('Resources.add', () => {
   });
 
   it('should build elements immediately if the document is ready', () => {
+    child1.isBuilt = () => false;
+    child2.isBuilt = () => false;
     resources.documentReady_ = false;
     resources.add(child1);
     expect(child1.build.called).to.be.false;
@@ -1461,12 +1449,14 @@ describe('Resources.add', () => {
 
   describe('buildReadyResources_', () => {
     it('should build ready resources and remove them from pending', () => {
+      sandbox.stub(resources, 'schedulePass');
       resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
+      expect(resources.schedulePass.called).to.be.false;
 
       child1.nextSibling = child2;
       resources.buildReadyResources_();
@@ -1474,6 +1464,7 @@ describe('Resources.add', () => {
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
+      expect(resources.schedulePass.calledOnce).to.be.true;
 
       child2.parentNode = parent;
       parent.nextSibling = true;
@@ -1481,6 +1472,7 @@ describe('Resources.add', () => {
       expect(child1.build.calledTwice).to.be.false;
       expect(child2.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
+      expect(resources.schedulePass.calledTwice).to.be.true;
     });
 
     it('should not try to build resources already being built', () => {

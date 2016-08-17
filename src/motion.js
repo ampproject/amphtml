@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
 /** @const {!Funtion} */
@@ -108,7 +107,7 @@ class Motion {
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+    this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;
@@ -135,7 +134,7 @@ class Motion {
     this.velocityY_ = 0;
 
     /** @private {time} */
-    this.startTime_ = timer.now();
+    this.startTime_ = Date.now();
 
     /** @private {time} */
     this.lastTime_ = this.startTime_;
@@ -225,7 +224,7 @@ class Motion {
       return false;
     }
 
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -248,7 +247,7 @@ class Motion {
       return;
     }
     this.continuing_ = false;
-    this.lastTime_ = timer.now();
+    this.lastTime_ = Date.now();
     this.fireMove_();
     if (success) {
       this.resolve_();

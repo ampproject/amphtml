@@ -62,10 +62,6 @@ var forbiddenTerms = {
     whitelist: [
       'build-system/server.js',
       'validator/nodejs/index.js',  // NodeJs only.
-      'validator/parse-css.js',  // TODO(powdercloud): remove
-      'validator/validator-full.js',  // TODO(powdercloud): remove
-      'validator/validator-in-browser.js', // TODO(powdercloud): remove
-      'validator/validator.js',  // TODO(powdercloud): remove
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
       'validator/engine/validator.js',
@@ -312,6 +308,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/storage.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],
   },
   'localStorage': {
@@ -354,10 +351,8 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
-      'validator/index.js',  // NodeJs only.
-      'validator/tokenize-css.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/engine/tokenize-css.js',
+      'validator/engine/validator.js',
       // exports.startsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ]
@@ -397,8 +392,7 @@ var forbiddenTerms = {
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
       'tools/experiments/experiments.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/engine/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {

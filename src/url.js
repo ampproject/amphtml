@@ -19,13 +19,19 @@ import {user} from './log';
 import {getMode} from './mode';
 import {urls} from './config';
 
-// Cached a-tag to avoid memory allocation during URL parsing.
-const a = window.document.createElement('a');
+/**
+ * Cached a-tag to avoid memory allocation during URL parsing.
+ * @type {HTMLAnchorElement}
+ */
+let a;
 
-// We cached all parsed URLs. As of now there are no use cases
-// of AMP docs that would ever parse an actual large number of URLs,
-// but we often parse the same one over and over again.
-const cache = window.UrlCache || (window.UrlCache = Object.create(null));
+/**
+ * We cached all parsed URLs. As of now there are no use cases
+ * of AMP docs that would ever parse an actual large number of URLs,
+ * but we often parse the same one over and over again.
+ * @type {Object<string, !Location>}
+ */
+let cache;
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
@@ -54,6 +60,11 @@ export let Location;
  * @return {!Location}
  */
 export function parseUrl(url) {
+  if (!a) {
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+  }
+
   const fromCache = cache[url];
   if (fromCache) {
     return fromCache;
@@ -153,12 +164,25 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  const paramsString = Object.keys(params)
-      .reduce((paramsString, key) => {
-        return paramsString +
-            `&${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
-      }, '');
-  return appendParamStringToUrl(url, paramsString.substring(1));
+  return appendParamStringToUrl(url, serializeQueryString(params));
+}
+
+/**
+ * Serializes the passed parameter map into a query string with both keys
+ * and values encoded.
+ * @param {!Object<string, string>} params
+ * @return {string}
+ */
+export function serializeQueryString(params) {
+  const s = [];
+  for (const k in params) {
+    const v = params[k];
+    if (v == null) {
+      continue;
+    }
+    s.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+  }
+  return s.join('&');
 }
 
 /**
@@ -174,17 +198,18 @@ export function addParamsToUrl(url, params) {
  */
 export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
-  user.assert(urlString != null, '%s %s must be available',
+  user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  const url = parseUrl(urlString);
-  user.assert(
+  // (erwinm, #4560): type cast necessary until #4560 is fixed
+  const url = parseUrl(/** @type {string} */ (urlString));
+  user().assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
       '%s %s must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
       elementContext, sourceName, urlString);
-  return urlString;
+  return /** @type {string} */ (urlString);
 }
 
 /**
@@ -193,7 +218,7 @@ export function assertHttpsUrl(
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  user.assert(/^https?\:/i.test(urlString),
+  user().assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;
@@ -305,14 +330,14 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  user.assert(prefix == 'c' || prefix == 'v',
+  user().assert(prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + decodeURIComponent(path[3])
       : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
-  user.assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
+  user().assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
   return origin + path.join('/') + removeAmpJsParams(url.search) +
       (url.hash || '');

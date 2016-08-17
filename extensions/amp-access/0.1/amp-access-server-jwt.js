@@ -15,10 +15,18 @@
  */
 
 import {AccessClientAdapter} from './amp-access-client';
+import {JwtHelper} from './jwt';
+import {assertHttpsUrl} from '../../../src/url';
+import {getMode} from '../../../src/mode';
+import {isArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {isProxyOrigin, removeFragment} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {timer} from '../../../src/timer';
+import {
+  isProxyOrigin,
+  removeFragment,
+  serializeQueryString,
+} from '../../../src/url';
+import {dev, user} from '../../../src/log';
+import {timerFor} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
@@ -29,13 +37,16 @@ const TAG = 'amp-access-server-jwt';
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
 
+/** @const {string} */
+const AMP_AUD = 'ampproject.org';
+
 
 /**
- * This class implements server-side authorization protocol. In this approach
- * only immediately visible sections are downloaded. For authorization, the
- * CDN calls the authorization endpoint directly and returns back to the
- * authorization response and the authorized content fragments, which are
- * merged into the document.
+ * This class implements server-side authorization protocol with JWT. In this
+ * approach only immediately visible sections are downloaded. For authorization,
+ * the client calls the authorization endpoint, which returns a signed JWT
+ * token with `amp_authdata` field. The client calls CDN with this JWT token,
+ * and CDN returns back the authorized content fragments.
  *
  * The approximate diagram looks like this:
  *
@@ -45,9 +56,13 @@ const AUTHORIZATION_TIMEOUT = 3000;
  *            ||      authorization are exlcuded]
  *            ||
  *            \/
- *    Authorize request to CDN
+ *    Authorize request to Publisher
  *            ||
- *            ||   [Authorization response]
+ *            ||   [Authorization response as JWT]
+ *            ||
+ *            \/
+ *    Authorize request to CDN w/JWT
+ *            ||
  *            ||   [Authorized fragments]
  *            ||
  *            \/
@@ -83,7 +98,7 @@ export class AccessServerJwtAdapter {
     this.xhr_ = xhrFor(win);
 
     /** @const @private {!Timer} */
-    this.timer_ = timer;
+    this.timer_ = timerFor(win);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(win);
@@ -105,6 +120,14 @@ export class AccessServerJwtAdapter {
 
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride || removeFragment(win.location.href);
+
+    /** @const @private {string} */
+    this.keyUrl_ = user().assert(configJson['publicKeyUrl'],
+        '"publicKeyUrl" URL must be specified');
+    assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
+
+    /** @private @const {!JwtHelper} */
+    this.jwtHelper_ = new JwtHelper(win);
   }
 
   /** @override */
@@ -113,6 +136,7 @@ export class AccessServerJwtAdapter {
       'client': this.clientAdapter_.getConfig(),
       'proxy': this.isProxyOrigin_,
       'serverState': this.serverState_,
+      'publicKeyUrl': this.keyUrl_,
     };
   }
 
@@ -123,56 +147,14 @@ export class AccessServerJwtAdapter {
 
   /** @override */
   authorize() {
-    dev.fine(TAG, 'Start authorization with ',
+    dev().fine(TAG, 'Start authorization with ',
         this.isProxyOrigin_ ? 'proxy' : 'non-proxy',
         this.serverState_,
         this.clientAdapter_.getAuthorizationUrl());
     if (!this.isProxyOrigin_ || !this.serverState_) {
-      dev.fine(TAG, 'Proceed via client protocol');
-      return this.clientAdapter_.authorize();
+      return this.authorizeOnClient_();
     }
-
-    dev.fine(TAG, 'Proceed via server protocol');
-
-    const varsPromise = this.context_.collectUrlVars(
-        this.clientAdapter_.getAuthorizationUrl(),
-        /* useAuthData */ false);
-    return varsPromise.then(vars => {
-      const requestVars = {};
-      for (const k in vars) {
-        if (vars[k] != null) {
-          requestVars[k] = String(vars[k]);
-        }
-      }
-      const request = {
-        'url': removeFragment(this.win.location.href),
-        'state': this.serverState_,
-        'vars': requestVars,
-      };
-      dev.fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
-      // Note that `application/x-www-form-urlencoded` is used to avoid
-      // CORS preflight request.
-      return this.timer_.timeoutPromise(
-          AUTHORIZATION_TIMEOUT,
-          this.xhr_.fetchDocument(this.serviceUrl_, {
-            method: 'POST',
-            body: 'request=' + encodeURIComponent(JSON.stringify(request)),
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-          }));
-    }).then(response => {
-      dev.fine(TAG, 'Authorization response: ', response);
-      const accessDataString = dev.assert(
-          response.querySelector('script[id="amp-access-data"]'),
-          'No authorization data available').textContent;
-      const accessData = JSON.parse(accessDataString);
-      dev.fine(TAG, '- access data: ', accessData);
-
-      return this.replaceSections_(response).then(() => {
-        return accessData;
-      });
-    });
+    return this.authorizeOnServer_();
   }
 
   /** @override */
@@ -181,12 +163,139 @@ export class AccessServerJwtAdapter {
   }
 
   /**
+   * @return {!Promise<{encoded:string, jwt:!JSONObject}>}
+   * @private
+   */
+  fetchJwt_() {
+    const urlPromise = this.context_.buildUrl(
+        this.clientAdapter_.getAuthorizationUrl(),
+        /* useAuthData */ false);
+    let jwtPromise = urlPromise.then(url => {
+      dev().fine(TAG, 'Authorization URL: ', url);
+      return this.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchText(url, {
+            credentials: 'include',
+            requireAmpResponseSourceOrigin: true,
+          }));
+    }).then(encoded => {
+      const jwt = this.jwtHelper_.decode(encoded);
+      user().assert(jwt['amp_authdata'],
+          '"amp_authdata" must be present in JWT');
+      return {encoded, jwt};
+    });
+    if (this.shouldBeValidated_()) {
+      // Validate JWT in the development mode.
+      if (this.jwtHelper_.isVerificationSupported()) {
+        jwtPromise = jwtPromise.then(resp => {
+          return this.jwtHelper_.decodeAndVerify(resp.encoded, this.keyUrl_)
+              .then(() => resp);
+        });
+      } else {
+        user().warn(TAG, 'Cannot verify signature on this browser since' +
+            ' it doesn\'t support WebCrypto APIs');
+      }
+      jwtPromise = jwtPromise.then(resp => {
+        this.validateJwt_(resp.jwt);
+        return resp;
+      });
+    }
+    return jwtPromise.catch(reason => {
+      throw user().createError('JWT fetch or validation failed: ', reason);
+    });
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  shouldBeValidated_() {
+    return getMode().development;
+  }
+
+  /**
+   * @param {!JSONObject} jwt
+   * @private
+   */
+  validateJwt_(jwt) {
+    const now = Date.now();
+
+    // exp: expiration time.
+    const exp = jwt['exp'];
+    user().assert(exp, '"exp" field must be specified');
+    user().assert(parseFloat(exp) * 1000 > now,
+        'token has expired: %s', exp);
+
+    // aud: audience.
+    const aud = jwt['aud'];
+    user().assert(aud, '"aud" field must be specified');
+    let audForAmp = false;
+    if (isArray(aud)) {
+      for (let i = 0; i < aud.length; i++) {
+        if (aud[i] == AMP_AUD) {
+          audForAmp = true;
+          break;
+        }
+      }
+    } else {
+      audForAmp = (aud == AMP_AUD);
+    }
+    user().assert(audForAmp, '"aud" must be "%s": %s', AMP_AUD, aud);
+  }
+
+  /**
+   * @return {!Promise<!JSONType>}
+   * @private
+   */
+  authorizeOnClient_() {
+    dev().fine(TAG, 'Proceed via client protocol via ',
+        this.clientAdapter_.getAuthorizationUrl());
+    return this.fetchJwt_().then(resp => {
+      return resp.jwt['amp_authdata'];
+    });
+  }
+
+  /**
+   * @return {!Promise<!JSONType>}
+   * @private
+   */
+  authorizeOnServer_() {
+    dev().fine(TAG, 'Proceed via server protocol');
+    return this.fetchJwt_().then(resp => {
+      const encoded = resp.encoded;
+      const jwt = resp.jwt;
+      const accessData = jwt['amp_authdata'];
+      const request = serializeQueryString({
+        'url': removeFragment(this.win.location.href),
+        'state': this.serverState_,
+        'jwt': encoded,
+      });
+      dev().fine(TAG, 'Authorization request: ', this.serviceUrl_, request);
+      dev().fine(TAG, '- access data: ', accessData);
+      // Note that `application/x-www-form-urlencoded` is used to avoid
+      // CORS preflight request.
+      return this.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchDocument(this.serviceUrl_, {
+            method: 'POST',
+            body: request,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          })).then(response => {
+            dev().fine(TAG, 'Authorization response: ', response);
+            return this.replaceSections_(response);
+          }).then(() => accessData);
+    });
+  }
+
+  /**
    * @param {!Document} doc
    * @return {!Promise}
    */
   replaceSections_(doc) {
     const sections = doc.querySelectorAll('[i-amp-access-id]');
-    dev.fine(TAG, '- access sections: ', sections);
+    dev().fine(TAG, '- access sections: ', sections);
     return this.vsync_.mutatePromise(() => {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
@@ -194,7 +303,7 @@ export class AccessServerJwtAdapter {
         const target = this.win.document.querySelector(
             '[i-amp-access-id="' + sectionId + '"]');
         if (!target) {
-          dev.warn(TAG, 'Section not found: ', sectionId);
+          dev().warn(TAG, 'Section not found: ', sectionId);
           continue;
         }
         target.parentElement.replaceChild(

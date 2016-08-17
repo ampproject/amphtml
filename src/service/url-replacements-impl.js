@@ -17,6 +17,7 @@
 import {accessServiceForOrNull} from '../access-service';
 import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
+import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
 import {documentInfoFor} from '../document-info';
 import {fromClass} from '../service';
@@ -54,8 +55,11 @@ export class UrlReplacements {
     /** @private @const {function():!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /** @private @const {!Promise<?Object<string, ?string>>} */
     this.variants_ = variantForOrNull(win);
+
+    /** @private @const {!Promise<?Object<string, string>>} */
+    this.shareTrackingFragments_ = shareTrackingForOrNull(win);
 
     /** @private {boolean} */
     this.initialized_ = false;
@@ -149,7 +153,7 @@ export class UrlReplacements {
     });
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      user.assert(param,
+      user().assert(param,
           'The first argument to QUERY_PARAM, the query string ' +
           'param is required');
       const url = parseUrl(this.win_.location.href);
@@ -161,7 +165,7 @@ export class UrlReplacements {
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user().assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -183,9 +187,9 @@ export class UrlReplacements {
     // Returns assigned variant name for the given experiment.
     this.set_('VARIANT', experiment => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        user.assert(variants[experiment] !== undefined,
+        user().assert(variants[experiment] !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
         const variant = variants[experiment];
@@ -197,7 +201,7 @@ export class UrlReplacements {
     // Returns all assigned experiment variants in a serialized form.
     this.set_('VARIANTS', () => {
       return this.variants_.then(variants => {
-        user.assert(variants,
+        user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
 
         const experiments = [];
@@ -211,9 +215,27 @@ export class UrlReplacements {
       });
     });
 
+    // Returns incoming share tracking fragment.
+    this.set_('SHARE_TRACKING_INCOMING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.incomingFragment;
+      });
+    });
+
+    // Returns outgoing share tracking fragment.
+    this.set_('SHARE_TRACKING_OUTGOING', () => {
+      return this.shareTrackingFragments_.then(fragments => {
+        user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
+            'amp-share-tracking should be configured');
+        return fragments.outgoingFragment;
+      });
+    });
+
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return new Date().getTime();
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
@@ -347,7 +369,7 @@ export class UrlReplacements {
 
     // Access: data from the authorization response.
     this.set_('AUTHDATA', field => {
-      user.assert(field,
+      user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
@@ -367,7 +389,7 @@ export class UrlReplacements {
     });
 
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return this.getTimingData_(startAttribute, endAttribute);
     });
@@ -395,7 +417,7 @@ export class UrlReplacements {
     return this.getAccessService_(this.win_).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        user.error(TAG, 'Access service is not installed to access: ', expr);
+        user().error(TAG, 'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
@@ -468,7 +490,7 @@ export class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
-    dev.assert(varName.indexOf('RETURN') == -1);
+    dev().assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;

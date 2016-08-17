@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {timer} from '../../../src/timer';
+import {timerFor} from '../../../src/timer';
 
 export class BaseCarousel extends AMP.BaseElement {
 
@@ -25,18 +25,33 @@ export class BaseCarousel extends AMP.BaseElement {
     /** @private {!Element} */
     this.nextButton_;
 
-    this.buildCarousel();
-    this.buildButtons();
-    this.setupGestures();
-    this.setControlsState();
-
     /** @const @private {boolean} */
     this.showControls_ = this.element.hasAttribute('controls');
 
     if (this.showControls_) {
       this.element.classList.add('-amp-carousel-has-controls');
     }
+    this.buildCarousel();
+    this.buildButtons();
+    this.setupGestures();
+    this.setControlsState();
   }
+
+  /** @override */
+  viewportCallback(inViewport) {
+    this.onViewportCallback(inViewport);
+    if (inViewport) {
+      this.hintControls();
+    }
+  }
+
+  /**
+   * Handles element specific viewport based events.
+   * @param {boolean} unusedInViewport.
+   * @protected
+   */
+  onViewportCallback(unusedInViewport) {}
+
 
   buildButtons() {
     this.prevButton_ = this.element.ownerDocument.createElement('div');
@@ -91,17 +106,19 @@ export class BaseCarousel extends AMP.BaseElement {
    * desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
+   * @param {boolean=} opt_autoplay
    */
-  go(dir, animate) {
-    this.goCallback(dir, animate);
+  go(dir, animate, opt_autoplay = false) {
+    this.goCallback(dir, animate, opt_autoplay);
   }
 
   /**
    * Proceeds to the next slide in the desired direction.
    * @param {number} unusedDir -1 or 1
    * @param {boolean} unusedAnimate
+   * @param {boolean=} opt_autoplay
    */
-  goCallback(unusedDir, unusedAnimate) {
+  goCallback(unusedDir, unusedAnimate, opt_autoplay) {
     // Subclasses may override.
   }
 
@@ -125,7 +142,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.getVsync().mutate(() => {
       const className = '-amp-carousel-button-start-hint';
       this.element.classList.add(className);
-      timer.delay(() => {
+      timerFor(this.win).delay(() => {
         this.deferMutate(() => this.element.classList.remove(className));
       }, 1000);
     });
@@ -155,7 +172,7 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   interactionNext() {
     if (!this.nextButton_.classList.contains('amp-disabled')) {
-      this.go(1, true);
+      this.go(/* dir */ 1, /* animate */ true, /* autoplay */ false);
     }
   }
 
@@ -164,7 +181,7 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   interactionPrev() {
     if (!this.prevButton_.classList.contains('amp-disabled')) {
-      this.go(-1, true);
+      this.go(/* dir */ -1, /* animate */ true, /* autoplay */ false);
     }
   }
 }

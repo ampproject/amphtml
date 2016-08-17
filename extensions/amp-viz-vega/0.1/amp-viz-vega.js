@@ -21,6 +21,18 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 import {vsyncFor} from '../../../src/vsync';
 
+/*
+ * We are using `require()` instead of `import` here for two reasons:
+ *    1- vega expects d3 to be available on window at import time but babel
+ *       re-orders imports so setting window.d3 happens after loading vega.
+ *    2- d3 and vega are commonJS modules and behaviour of `import *` differs
+ *       between babel and closure compiler (used for dist). In the babel case
+ *       one needs to do x.default but not in the closure compiler case.
+ */
+/* global require: false */
+window.d3 = require('../../../third_party/d3/d3');
+const vega = require('../../../third_party/vega/vega');
+
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
 
@@ -33,7 +45,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    user.assert(isExperimentOn(this.win, EXPERIMENT),
+    user().assert(isExperimentOn(this.win, EXPERIMENT),
         `Experiment ${EXPERIMENT} disabled`);
 
     /** @private {?JSONType} */
@@ -45,12 +57,12 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {?string} */
     this.src_ = this.element.getAttribute('src');
 
-    user.assert(this.inlineData_ || this.src_,
+    user().assert(this.inlineData_ || this.src_,
         '%s: neither `src` attribute nor a ' +
         'valid <script type="application/json"> child was found for Vega data.',
         this.getName_());
 
-    user.assert(!(this.inlineData_ && this.src_),
+    user().assert(!(this.inlineData_ && this.src_),
         '%s: both `src` attribute and a valid ' +
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
@@ -82,11 +94,11 @@ export class AmpVizVega extends AMP.BaseElement {
   loadData_() {
     // Validation in buildCallback should ensure one and only one of
     // src_/inlineData_ is ever set.
-    dev.assert(!this.src_ != !this.inlineData_);
+    dev().assert(!this.src_ != !this.inlineData_);
 
     if (this.inlineData_) {
       this.data_ = tryParseJson(this.inlineData_, err => {
-        user.assert(!err, 'data could not be ' +
+        user().assert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
       });
     } else {
@@ -109,11 +121,11 @@ export class AmpVizVega extends AMP.BaseElement {
       return;
     }
 
-    user.assert(scripts.length == 1, '%s: more than one ' +
+    user().assert(scripts.length == 1, '%s: more than one ' +
         '<script> tags found. Only one allowed.', this.getName_());
 
     const child = scripts[0];
-    user.assert(isJsonScriptTag(child), '%s: data should ' +
+    user().assert(isJsonScriptTag(child), '%s: data should ' +
         'be put in a <script type="application/json"> tag.', this.getName_());
 
     return child.textContent;
@@ -124,15 +136,17 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    // TODO(aghassemi): Replace with actual rendering implementation.
-    return new Promise((resolve, unused) => {
-      const text = 'To be replaced with Vega graph with data: ' +
-          JSON.stringify(this.data_);
-      vsyncFor(this.win).mutate(() => {
-        const textNode = this.element.ownerDocument.createTextNode(text);
-        this.container_.appendChild(textNode);
+    return new Promise((resolve, reject) => {
+      vega.parse.spec(this.data_, (error, chart) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        vsyncFor(this.win).mutate(() => {
+          chart({el: this.container_}).update();
+          resolve();
+        });
       });
-      resolve();
     });
   }
 

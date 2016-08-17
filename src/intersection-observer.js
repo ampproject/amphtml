@@ -18,7 +18,7 @@ import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
-import {timer} from './timer';
+import {timerFor} from './timer';
 
 /**
  * Produces a change entry for that should be compatible with
@@ -44,7 +44,7 @@ export function getIntersectionChangeEntry(
 
   const boundingClientRect =
       moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  dev.assert(boundingClientRect.width >= 0 &&
+  dev().assert(boundingClientRect.width >= 0 &&
       boundingClientRect.height >= 0, 'Negative dimensions in ad.');
   boundingClientRect.x = boundingClientRect.left;
   boundingClientRect.y = boundingClientRect.top;
@@ -95,6 +95,8 @@ export class IntersectionObserver extends Observable {
     super();
     /** @private @const */
     this.baseElement_ = baseElement;
+    /** @private @const {!Timer} */
+    this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
     /** @private {boolean} */
@@ -211,7 +213,7 @@ export class IntersectionObserver extends Observable {
       // Send one immediately, …
       this.flush_();
       // but only send a maximum of 10 postMessages per second.
-      this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
+      this.flushTimeout_ = this.timer_.delay(this.boundFlush_, 100);
     }
   }
 
@@ -233,7 +235,7 @@ export class IntersectionObserver extends Observable {
    * Provide a function to clear timeout before set this intersection to null.
    */
   destroy() {
-    timer.cancel(this.flushTimeout_);
+    this.timer_.cancel(this.flushTimeout_);
     this.flushTimeout_ = 0;
     this.unlistenOnOutViewport_();
   }

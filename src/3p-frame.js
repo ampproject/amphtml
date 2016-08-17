@@ -25,7 +25,6 @@ import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
-import {timer} from './timer';
 import {user} from './log';
 import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
@@ -50,11 +49,11 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
-  const startTime = timer.now();
+  const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
-  user.assert(type, 'Attribute type required for <amp-ad>: %s', element);
+  user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
@@ -83,7 +82,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: getIntersectionChangeEntry(
-        timer.now(),
+        Date.now(),
         viewportFor(parentWindow).getRect(),
         element.getLayoutBox()),
     startTime,
@@ -154,7 +153,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
   if (json) {
     const obj = tryParseJson(json);
     if (obj === undefined) {
-      throw user.createError(
+      throw user().createError(
           'Error parsing JSON in json attribute in element %s',
           element);
     }
@@ -166,17 +165,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Preloads URLs related to the bootstrap iframe.
- * @param {!Window} parentWindow
+ * @param {!Window} window
  * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
+
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(
-      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
+  const scriptUrl = getMode().localDev
+      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
+      : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+  preconnect.preload(scriptUrl, 'script');
 }
 
 /**
@@ -187,7 +189,7 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(window, 'bootstrapBaseUrl', () => {
+  return getService(self, 'bootstrapBaseUrl', () => {
     return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
       getDefaultBootstrapBaseUrl(parentWindow);
   });
@@ -207,15 +209,18 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
-    const prefix = getMode().test ? '/base' : '';
-    return 'http://ads.localhost:' +
-        (parentWindow.location.port || parentWindow.parent.location.port) +
-        prefix + '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
-        '.html';
+    return getAdsLocalhost(parentWindow)
+        + '/dist.3p/current'
+        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+}
+
+function getAdsLocalhost(win) {
+  return 'http://ads.localhost:'
+      + (win.location.port || win.parent.location.port);
 }
 
 /**
@@ -262,14 +267,14 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
     return null;
   }
   const url = assertHttpsUrl(meta.getAttribute('content'), meta);
-  user.assert(url.indexOf('?') == -1,
+  user().assert(url.indexOf('?') == -1,
       '3p iframe url must not include query string %s in element %s.',
       url, meta);
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
   const parsed = parseUrl(url);
-  user.assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
+  user().assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrl(parentWindow.location.href).origin,
       '3p iframe url must not be on the same origin as the current doc' +
       'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +

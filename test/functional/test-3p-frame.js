@@ -149,7 +149,7 @@ describe('3p-frame', () => {
     expect(JSON.parse(srcParts[1])).to.deep.equal(JSON.parse(fragment));
 
     // Switch to same origin for inner tests.
-    iframe.src = '/base/dist.3p/current/frame.max.html#' + fragment;
+    iframe.src = '/dist.3p/current/frame.max.html#' + fragment;
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
@@ -186,7 +186,7 @@ describe('3p-frame', () => {
   it('should pick the right bootstrap url for testing mode', () => {
     window.AMP_MODE = {test: true};
     expect(getBootstrapBaseUrl(window)).to.equal(
-        'http://ads.localhost:9876/base/dist.3p/current/frame.max.html');
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
   it('should pick the right bootstrap unique url (prod)', () => {
@@ -223,10 +223,10 @@ describe('3p-frame', () => {
       const fetches = document.querySelectorAll(
           'link[rel=prefetch],link[rel=preload]');
       expect(fetches).to.have.length(2);
-      expect(fetches[0].href).to.equal(
+      expect(fetches[0]).to.have.property('href',
           'http://ads.localhost:9876/dist.3p/current/frame.max.html');
-      expect(fetches[1].href).to.equal(
-          'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+      expect(fetches[1]).to.have.property('href',
+          'http://ads.localhost:9876/dist.3p/current/integration.js');
     });
   });
 

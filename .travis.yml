@@ -52,3 +52,7 @@ branches:
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"
+
+cache:
+  directories:
+  - node_modules

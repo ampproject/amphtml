@@ -16,7 +16,7 @@
 
 import {documentContains} from '../dom';
 import {dev, user} from '../log';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {setStyle, setStyles} from '../style';
 
 const TAG = 'FixedLayer';
@@ -106,9 +106,10 @@ export class FixedLayer {
     // Sort in document order.
     this.sortInDomOrder_();
 
+    const platform = platformFor(this.doc.defaultView);
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
-      user.warn(TAG, 'Please test this page inside of an AMP Viewer such' +
+      user().warn(TAG, 'Please test this page inside of an AMP Viewer such' +
           ' as Google\'s because the fixed positioning might have slightly' +
           ' different layout.');
     }
@@ -296,7 +297,7 @@ export class FixedLayer {
       },
     }, {}).catch(error => {
       // Fail silently.
-      dev.error(TAG, 'Failed to mutate fixed elements:', error);
+      dev().error(TAG, 'Failed to mutate fixed elements:', error);
     });
   }
 
@@ -310,7 +311,7 @@ export class FixedLayer {
   }
 
   /**
-   * Calls `setupFixedSelectors` in a try-catch.
+   * Calls `setupFixedSelectors_` in a try-catch.
    * Fails quietly with a dev error if call fails.
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
@@ -320,10 +321,10 @@ export class FixedLayer {
    */
   trySetupFixedSelectorsNoInline(fixedSelectors) {
     try {
-      this.setupFixedSelectors(fixedSelectors);
+      this.setupFixedSelectors_(fixedSelectors);
     } catch (e) {
       // Fail quietly.
-      dev.error(TAG, 'Failed to setup fixed elements:', e);
+      dev().error(TAG, 'Failed to setup fixed elements:', e);
     }
   }
 
@@ -333,7 +334,7 @@ export class FixedLayer {
    * @param {!Array<string>} fixedSelectors
    * @private
    */
-  setupFixedSelectors(fixedSelectors) {
+  setupFixedSelectors_(fixedSelectors) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.doc.querySelectorAll(fixedSelector);
@@ -466,8 +467,8 @@ export class FixedLayer {
       return;
     }
 
-    dev.fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user.warn(TAG, 'In order to improve scrolling performance in Safari,' +
+    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user().warn(TAG, 'In order to improve scrolling performance in Safari,' +
         ' we now move the element to a fixed positioning layer:', fe.element);
 
     if (!fe.placeholder) {
@@ -489,7 +490,7 @@ export class FixedLayer {
     const matches = fe.selectors.some(
         selector => this.matches_(element, selector));
     if (!matches) {
-      user.warn(TAG,
+      user().warn(TAG,
           'Failed to move the element to the fixed position layer.' +
           ' This is most likely due to the compound CSS selector:',
           fe.element);
@@ -514,7 +515,7 @@ export class FixedLayer {
       }
     } catch (e) {
       // Fail silently.
-      dev.error(TAG, 'Failed to test query match:', e);
+      dev().error(TAG, 'Failed to test query match:', e);
     }
     return false;
   }
@@ -527,7 +528,7 @@ export class FixedLayer {
     if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
       return;
     }
-    dev.fine(TAG, 'return from fixed:', fe.id, fe.element);
+    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
     if (documentContains(this.doc, fe.element)) {
       if (fe.element.style.zIndex) {
         fe.element.style.zIndex = '';
@@ -574,6 +575,14 @@ export class FixedLayer {
       visibility: 'visible',
     });
     this.doc.documentElement.appendChild(this.fixedLayer_);
+    // TODO(erwinm, #4097): Remove this when safari technology preview has merged
+    // the fix for https://github.com/ampproject/amphtml/issues/4047
+    // https://bugs.webkit.org/show_bug.cgi?id=159791 which is in r202950.
+    if (this.fixedLayer_.style['webkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['webkitAnimation'] = 'none';
+    } else if (this.fixedLayer_.style['WebkitAnimation'] !== undefined) {
+      this.fixedLayer_.style['WebkitAnimation'] = 'none';
+    }
     return this.fixedLayer_;
   }
 

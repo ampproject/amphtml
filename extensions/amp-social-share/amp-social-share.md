@@ -82,7 +82,7 @@ __height__: default 44px
 #### Custom Styles:
 Sometimes you want to provide your own style. You can simply override the provided styles like the following: 
 ```css
-amp-social-share[type=twitter] {
+amp-social-share[type="twitter"] {
   background: red;
   background-image: url(datauri:svg/myownsvgicon);
 }

@@ -24,12 +24,13 @@ import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
 import {onDocumentReady, whenDocumentReady} from '../document-ready';
-import {platform} from '../platform';
+import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {waitForBody} from '../dom';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -391,7 +392,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -482,7 +483,7 @@ export class Viewport {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
-      dev.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
+      dev().fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
     }
@@ -517,7 +518,7 @@ export class Viewport {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
     const scrollLeft = this.getScrollLeft();
-    dev.fine(TAG_, 'changed event:',
+    dev().fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
         'left=', scrollLeft,
@@ -548,9 +549,9 @@ export class Viewport {
     this.scrollTop_ = newScrollTop;
     if (!this.scrollTracking_) {
       this.scrollTracking_ = true;
-      const now = timer.now();
+      const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -569,20 +570,20 @@ export class Viewport {
    */
   throttledScroll_(referenceTime, referenceTop) {
     const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
-    const now = timer.now();
+    const now = Date.now();
     let velocity = 0;
     if (now != referenceTime) {
       velocity = (newScrollTop - referenceTop) /
           (now - referenceTime);
     }
-    dev.fine(TAG_, 'scroll: ' +
+    dev().fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timer.delay(() => this.vsync_.measure(
+      timerFor(this.win_).delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -728,9 +729,15 @@ export class ViewportBindingNatural_ {
   /**
    * @param {!Window} win
    */
-  constructor(win) {
+  constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!../platform.Platform} */
+    this.platform_ = platformFor(win);
+
+    /** @private @const {!./viewer-impl.Viewer} */
+    this.viewer_ = viewer;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -747,10 +754,18 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
+        if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
+                this.platform_.isIos() &&
+                this.viewer_.getParam('webview') === '1') {
+          setStyles(this.win.document.body, {
+            overflowX: 'hidden',
+            overflowY: 'visible',
+          });
+        }
       });
     }
 
-    dev.fine(TAG_, 'initialized natural viewport');
+    dev().fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
@@ -860,7 +875,7 @@ export class ViewportBindingNatural_ {
         // scrolling purposes. This has mostly being resolved via
         // `scrollingElement` property, but this branch is still necessary
         // for backward compatibility purposes.
-        && platform.isWebKit()) {
+        && this.platform_.isWebKit()) {
       return doc.body;
     }
     return doc.documentElement;
@@ -910,7 +925,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     whenDocumentReady(this.win.document).then(() => this.setup_());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
+    dev().fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
 
   /** @override */
@@ -1262,7 +1277,7 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
-    binding = new ViewportBindingNatural_(window);
+    binding = new ViewportBindingNatural_(window, viewer);
   }
   return new Viewport(window, binding, viewer);
 }

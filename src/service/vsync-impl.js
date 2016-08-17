@@ -18,7 +18,6 @@ import {Pass} from '../pass';
 import {cancellation} from '../error';
 import {getService} from '../service';
 import {dev} from '../log';
-import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
 
 
@@ -220,7 +219,7 @@ export class Vsync {
    * @return {boolean}
    */
   canAnimate(contextNode) {
-    return this.canAnimate_(dev.assert(contextNode));
+    return this.canAnimate_(dev().assert(contextNode));
   }
 
   /**
@@ -244,7 +243,7 @@ export class Vsync {
   runAnim(contextNode, task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate_(contextNode)) {
-      dev.warn('Vsync', 'Did not schedule a vsync request, because doc' +
+      dev().warn('Vsync', 'Did not schedule a vsync request, because doc' +
           'ument was invisible');
       return false;
     }
@@ -284,11 +283,11 @@ export class Vsync {
       return Promise.reject(cancellation());
     }
     return new Promise((resolve, reject) => {
-      const startTime = timer.now();
+      const startTime = Date.now();
       let prevTime = 0;
       const task = this.createAnimTask(contextNode, {
         mutate: state => {
-          const timeSinceStart = timer.now() - startTime;
+          const timeSinceStart = Date.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
             resolve();
@@ -370,7 +369,7 @@ export class Vsync {
     }
     let lastTime = 0;
     return fn => {
-      const now = new Date().getTime();
+      const now = Date.now();
       // By default we take 16ms between frames, but if the last frame is say
       // 10ms ago, we only want to wait 6ms.
       const timeToCall = Math.max(0, FRAME_TIME - (now - lastTime));

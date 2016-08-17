@@ -32,6 +32,14 @@ export class Platform {
   }
 
   /**
+   * Whether the current platform an Android device.
+   * @return {boolean}
+   */
+  isAndroid() {
+    return /Android/i.test(this.navigator.userAgent);
+  }
+
+  /**
    * Whether the current platform an iOS device.
    * @return {boolean}
    */
@@ -139,5 +147,3 @@ export class Platform {
 export function platformFor(window) {
   return fromClass(window, 'platform', Platform);
 };
-
-export const platform = platformFor(window);

@@ -73,7 +73,7 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return dev.assert(Resource.forElementOptional(element),
+    return dev().assert(Resource.forElementOptional(element),
         'Missing resource prop on %s', element);
   }
 
@@ -92,7 +92,7 @@ export class Resource {
    * @param {!AmpElement} owner
    */
   static setOwner(element, owner) {
-    dev.assert(owner.contains(element), 'Owner must contain the element');
+    dev().assert(owner.contains(element), 'Owner must contain the element');
     element[OWNER_PROP_] = owner;
   }
 
@@ -146,13 +146,6 @@ export class Resource {
 
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
-
-    /**
-     * Only used in the "runtime off" case when the monitoring code needs to
-     * known when the element is upgraded.
-     * @private {!Function|undefined}
-     */
-    this.onUpgraded_ = undefined;
 
    /**
     * Pending change size that was requested but could not be satisfied.
@@ -232,7 +225,7 @@ export class Resource {
     try {
       this.element.build();
     } catch (e) {
-      dev.error(TAG, 'failed to build:', this.debugid, e);
+      dev().error(TAG, 'failed to build:', this.debugid, e);
       this.blacklisted_ = true;
       return;
     }
@@ -281,7 +274,6 @@ export class Resource {
     this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
-  /** @private */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -488,18 +480,18 @@ export class Resource {
       return Promise.reject('already failed');
     }
 
-    dev.assert(this.state_ != ResourceState.NOT_BUILT,
+    dev().assert(this.state_ != ResourceState.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
-      dev.fine(TAG, 'layout canceled due to non pre-renderable element:',
+      dev().fine(TAG, 'layout canceled due to non pre-renderable element:',
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
     }
 
     if (!this.isInViewport() && !this.renderOutsideViewport()) {
-      dev.fine(TAG, 'layout canceled due to element not being in viewport:',
+      dev().fine(TAG, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState.READY_FOR_LAYOUT;
       return Promise.resolve();
@@ -508,20 +500,20 @@ export class Resource {
     // Double check that the element has not disappeared since scheduling
     this.measure();
     if (!this.isDisplayed()) {
-      dev.fine(TAG, 'layout canceled due to element loosing display:',
+      dev().fine(TAG, 'layout canceled due to element loosing display:',
           this.debugid, this.state_);
       return Promise.resolve();
     }
 
     // Not-wanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      dev.fine(TAG, 'layout canceled since it wasn\'t requested:',
+      dev().fine(TAG, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
       this.state_ = ResourceState.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
-    dev.fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+    dev().fine(TAG, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState.LAYOUT_SCHEDULED;
 
@@ -548,9 +540,9 @@ export class Resource {
     this.state_ = success ? ResourceState.LAYOUT_COMPLETE :
         ResourceState.LAYOUT_FAILED;
     if (success) {
-      dev.fine(TAG, 'layout complete:', this.debugid);
+      dev().fine(TAG, 'layout complete:', this.debugid);
     } else {
-      dev.fine(TAG, 'loading failed:', this.debugid, opt_reason);
+      dev().fine(TAG, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
   }
@@ -589,7 +581,7 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
-    dev.fine(TAG, 'inViewport:', this.debugid, inViewport);
+    dev().fine(TAG, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }
@@ -626,10 +618,6 @@ export class Resource {
    */
   pause() {
     if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
-      if (this.paused_) {
-        dev.error(TAG, 'pause() called on an already paused resource:',
-          this.debugid);
-      }
       return;
     }
     this.paused_ = true;
@@ -672,46 +660,5 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
-  }
-
-  /**
-   * Only allowed in dev mode when runtime is turned off. Performs all steps
-   * necessary to render an element.
-   * @return {!Promise}
-   * @export
-   */
-  forceAll() {
-    dev.assert(!this.resources_.isRuntimeOn());
-    let p = Promise.resolve();
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      if (!this.element.isUpgraded()) {
-        p = p.then(() => {
-          return new Promise(resolve => {
-            this.onUpgraded_ = resolve;
-          });
-        });
-      }
-      p = p.then(() => {
-        this.onUpgraded_ = undefined;
-        this.build(true);
-      });
-    }
-    return p.then(() => {
-      this.applySizesAndMediaQuery();
-      this.measure();
-      if (this.layoutPromise_) {
-        return this.layoutPromise_;
-      }
-      if (this.state_ == ResourceState.LAYOUT_COMPLETE ||
-              this.state_ == ResourceState.LAYOUT_FAILED ||
-              this.layoutCount_ > 0) {
-        return;
-      }
-      if (!this.isDisplayed()) {
-        return;
-      }
-      this.layoutCount_++;
-      return this.element.layoutCallback();
-    });
   }
 }

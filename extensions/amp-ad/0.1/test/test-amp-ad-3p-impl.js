@@ -17,6 +17,7 @@
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('amp-ad-3p-impl', tests('amp-ad'));
 
@@ -74,11 +75,10 @@ function tests(name) {
               'link[rel=preload]');
         }
         expect(fetches).to.have.length(2);
-        expect(fetches[0].href).to.equal(
-            'http://ads.localhost:' + location.port +
-            '/base/dist.3p/current/frame.max.html');
-        expect(fetches[1].href).to.equal(
-            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+        expect(fetches[0]).to.have.property('href',
+            'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+        expect(fetches[1]).to.have.property('href',
+            'http://ads.localhost:9876/dist.3p/current/integration.js');
         const preconnects = doc.querySelectorAll(
             'link[rel=preconnect]');
         expect(preconnects[preconnects.length - 1].href).to.equal(
@@ -93,7 +93,7 @@ function tests(name) {
     describe('ad resize', () => {
       it('should listen for resize events', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
+            '/test/fixtures/served/iframe.html';
         return getAd({
           width: 100,
           height: 100,
@@ -128,9 +128,46 @@ function tests(name) {
         });
       });
 
+      it('should listen for resize events from nested frames', () => {
+        const iframeSrc = 'http://ads.localhost:' + location.port +
+            '/test/fixtures/served/iframe-resize-outer.html';
+        return getAd({
+          width: 100,
+          height: 100,
+          type: '_ping_',
+          src: 'testsrc',
+          resizable: '',
+        }, 'https://schema.org').then(element => {
+          return new Promise((resolve, unusedReject) => {
+            const impl = element.implementation_;
+            impl.layoutCallback();
+            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
+              expect(newHeight).to.equal(217);
+              expect(newWidth).to.equal(114);
+              resolve(impl);
+            };
+            impl.iframe_.onload = function() {
+              impl.iframe_.contentWindow.frames[0].postMessage({
+                sentinel: 'amp-test',
+                type: 'requestHeight',
+                is3p: true,
+                height: 217,
+                width: 114,
+                amp3pSentinel:
+                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
+              }, '*');
+            };
+            impl.iframe_.src = iframeSrc;
+          });
+        }).then(impl => {
+          expect(impl.iframe_.height).to.equal('217');
+          expect(impl.iframe_.width).to.equal('114');
+        });
+      });
+
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
+            '/test/fixtures/served/iframe.html';
         return getAd({
           width: 100,
           height: 100,
@@ -438,8 +475,9 @@ function tests(name) {
       }
 
       it('should not return false after scrolling, then false for 1s', () => {
-        const clock = sandbox.useFakeTimers();
+        let clock;
         return getGoodAd(ad => {
+          clock = lolex.install(ad.win);
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }).then(ad => {
           // False because we just rendered one.
@@ -452,8 +490,9 @@ function tests(name) {
       });
 
       it('should prefer-viewability-over-views', () => {
-        const clock = sandbox.useFakeTimers();
+        let clock;
         return getGoodAd(ad => {
+          clock = lolex.install(ad.win);
           expect(ad.renderOutsideViewport()).not.to.be.false;
         }, 'prefer-viewability-over-views').then(ad => {
           // False because we just rendered one.
@@ -462,44 +501,6 @@ function tests(name) {
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
           expect(ad.renderOutsideViewport()).to.equal(1.25);
-        });
-      });
-    });
-
-    describe('embed-state API', () => {
-      it('should support subscription via send-embed-state', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.sendEmbedInfo_ = () => {
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.postMessage({
-                sentinel: 'amp-test',
-                type: 'subscribeToEmbedState',
-                is3p: true,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-            // Precondition check.
-            expect(impl.apiHandler_.embedStateApi_.clientWindows_.length)
-                  .to.equal(0);
-          });
-        }).then(impl => {
-          // Check that we have a new subscription.
-          expect(impl.apiHandler_.embedStateApi_.clientWindows_.length)
-              .to.equal(1);
         });
       });
     });

@@ -20,10 +20,10 @@ import {getAdCid} from '../../../src/ad-cid';
 import {documentInfoFor} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
-import {timer} from '../../../src/timer';
 import {isProxyOrigin} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {string} */
 const AMP_SIGNATURE_HEADER = 'X-AmpAdSignature';
@@ -56,7 +56,7 @@ export function isGoogleAdsA4AValidEnvironment(win) {
   // around that, just say that we're A4A eligible if we're in local dev
   // mode, regardless of origin path.
   return supportsNativeCrypto &&
-      (isProxyOrigin(win.location) || getMode().localDev);
+      (isProxyOrigin(win.location) || getMode().localDev || getMode().test);
 }
 
 /**
@@ -79,21 +79,6 @@ export function googleAdUrl(
 
 
 /**
- * @param {string} str
- * @return {!Uint8Array}
- * @visibleForTesting
- */
-export function base64ToByteArray(str) {
-  const bytesAsString = atob(str);
-  const len = bytesAsString.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = bytesAsString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-/**
  * @param {!ArrayBuffer} creative
  * @param {!Headers} responseHeaders
  * @return {!Promise<!AdResponseDef>}
@@ -103,7 +88,8 @@ export function extractGoogleAdCreativeAndSignature(
   let signature = null;
   try {
     if (responseHeaders.has(AMP_SIGNATURE_HEADER)) {
-      signature = base64ToByteArray(responseHeaders.get(AMP_SIGNATURE_HEADER));
+      signature =
+        base64UrlDecodeToBytes(responseHeaders.get(AMP_SIGNATURE_HEADER));
     }
   } finally {
     return Promise.resolve({creative, signature});
@@ -171,7 +157,7 @@ function buildAdUrl(
       {name: 'ref', value: referrer},
     ]
   );
-  dtdParam.value = elapsedTimeWithCeiling(timer.now(), startTime);
+  dtdParam.value = elapsedTimeWithCeiling(Date.now(), startTime);
   return buildUrl(
       baseUrl, allQueryParams, MAX_URL_LENGTH, {name: 'trunc', value: '1'});
 }
@@ -214,7 +200,7 @@ function iframeNestingDepth(global) {
     win = win.parent;
     depth++;
   }
-  dev.assert(win == global.top);
+  dev().assert(win == global.top);
   return depth;
 }
 
@@ -299,7 +285,7 @@ function secondWindowFromTop(global) {
   while (secondFromTop.parent != secondFromTop.parent.parent) {
     secondFromTop = secondFromTop.parent;
   }
-  dev.assert(secondFromTop.parent == global.top);
+  dev().assert(secondFromTop.parent == global.top);
   return secondFromTop;
 }
 
