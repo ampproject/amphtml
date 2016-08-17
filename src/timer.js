@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-
 import {getExistingServiceForWindow} from './service';
-
 
 /**
  * Returns service implemented in service/timer-impl.
  * @param {!Window} window
- * @return {!Timer}
+ * @return {!./service/timer-impl.Timer}
  */
 export function timerFor(window) {
   return getExistingServiceForWindow(window, 'timer');

@@ -155,7 +155,8 @@ export class Timer {
 
 /**
  * @param {!Window} window
+ * @return {!Timer} Timer
  */
 export function installTimerService(window) {
-  fromClass(window, 'timer', Timer)
+  return fromClass(window, 'timer', Timer);
 };

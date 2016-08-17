@@ -72,10 +72,10 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installTimerService(global);
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
-  installTimerService(global);
   installVsyncService(global);
   installResourcesService(global);
   installUrlReplacementsService(global);
