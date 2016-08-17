@@ -15,7 +15,7 @@
  */
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
-import {setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {getLengthNumeral} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -47,14 +47,14 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
     this.endScale_ = getLengthNumeral(endScale);
     this.scaleOrigin_ = scaleOrigin;
     this.layoutBox_ = null;
+    if (this.scaleOrigin_) {
+      setStyle(this.element, 'transform-origin', this.scaleOrigin_);
+    }
   }
 
   /** @override */
   transition(position) {
     const scale = 1 - this.endScale_ * position;
-    setStyles(this.element, {'transform': `scale(${scale})`});
-    if (this.scaleOrigin_) {
-      setStyles(this.element, {'transform-origin': this.scaleOrigin_});
-    }
+    setStyle(this.element, 'transform', `scale(${scale})`);
   }
 }
