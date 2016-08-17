@@ -15,30 +15,35 @@
  */
 
 import {ElementStub, resetLoadingCheckForTests} from '../../src/element-stub';
-import {
-    createIframePromise,
-    doNotLoadExternalResourcesInTest,
-} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe';
 import '../../extensions/amp-ad/0.1/amp-ad';
 import '../../extensions/amp-analytics/0.1/amp-analytics';
+import {installPerformanceService,} from
+    '../../src/service/performance-impl';
 
 
 describe('test-element-stub', () => {
 
   let iframe;
 
+  beforeEach(() => {
+    installPerformanceService(window);
+  });
+
   afterEach(() => {
     resetLoadingCheckForTests();
   });
 
   function getElementStubIframe(name) {
-    return createIframePromise().then(f => {
-      doNotLoadExternalResourcesInTest(f.win);
+    return createIframePromise(null, ele => {
+      const win = ele.ownerDocument.defaultView;
+      installPerformanceService(win);
+    }).then(f => {
       iframe = f;
       const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
       testElement.setAttribute('height', '250');
-      testElement.setAttribute('type', 'a9');
+      testElement.setAttribute('type', '_ping_');
       testElement.setAttribute('data-aax_size', '300*250');
       testElement.setAttribute('data-aax_pubname', 'abc123');
       testElement.setAttribute('data-aax_src', '302');

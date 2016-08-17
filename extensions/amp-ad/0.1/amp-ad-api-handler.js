@@ -25,6 +25,7 @@ import {
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
+import {timerFor} from '../../../src/timer';
 
 export class AmpAdApiHandler {
 
@@ -63,7 +64,7 @@ export class AmpAdApiHandler {
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
@@ -121,21 +122,36 @@ export class AmpAdApiHandler {
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
-    listenForOnce(this.iframe_, 'render-start', () => {
-      if (!this.iframe_) {
-        return;
+
+    const promise = new Promise(resolve => {
+      listenForOnce(this.iframe_, 'render-start', () => {
+        resolve();
+      }, this.is3p_);
+    });
+
+    this.renderStartPromise_ = timerFor(this.baseInstance_.win).timeoutPromise(
+        2000, promise,
+        'fail to receive render-start event from ad server, timeout');
+
+    this.renderStartPromise_.then(() => {
+      //TODO: report performance
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      if (this.baseInstance_.renderStartResolve_) {
-        this.baseInstance_.renderStartResolve_();
-        this.baseInstance_.renderStartResolve_ = null;
+    }).catch(() => {
+      //TODO: report performance
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      this.iframe_.style.visibility = '';
-    }, this.is3p_);
+    });
+
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
-    return loadPromise(this.iframe_);
+    return loadPromise(this.iframe_).then(() => {
+      return this.renderStartPromise_;
+    });
   }
 
   /** @override  */
