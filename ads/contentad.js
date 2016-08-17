@@ -33,9 +33,9 @@ export function contentad(global, data) {
   ad_url = ad_url.replace(window.context.location.host, data.url);
 
   /* Create div for ad to target */
-  const cad_div = document.createElement('div');
+  const cad_div = window.document.createElement('div');
   cad_div.id = 'contentad' + global.wid;
-  document.body.appendChild(cad_div);
+  window.document.body.appendChild(cad_div);
 
   /* Build API URL */
   const cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
