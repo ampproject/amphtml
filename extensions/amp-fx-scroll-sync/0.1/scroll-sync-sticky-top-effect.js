@@ -49,7 +49,7 @@ export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
   /** @override */
   measure() {
     if (!this.scrollMin_) {
-      this.scrollMin_ = this.element.offsetTop;
+      this.scrollMin_ = this.element./*OK*/offsetTop;
     }
     if (!this.scrollMax_) {
       this.scrollMax_ = this.scrollMin_ + 1;
