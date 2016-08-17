@@ -52,6 +52,8 @@ tags: {  # <amp-o2-player>
   also_requires_tag: "amp-o2-player extension .js script"
   attrs: { name: "data-pid" mandatory: true }
   attrs: { name: "data-bcid" mandatory: true }
+  attrs: { name: "data-bid" }
+  attrs: { name: "data-vid" }
   # If data-embed is missing, the default value is "default".
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-o2-player.html"
