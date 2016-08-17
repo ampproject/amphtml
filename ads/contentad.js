@@ -38,7 +38,7 @@ export function contentad(global, data) {
   document.body.appendChild(cad_div);
 
   /* Build API URL */
-  let cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
+  const cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
   + '?id=' + encodeURIComponent(global.id)
   + '&d=' + encodeURIComponent(global.d)
   + '&wid=' + global.wid
