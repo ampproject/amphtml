@@ -20,7 +20,13 @@ var karmaConf = path.resolve('karma.conf.js');
 
 var commonTestPaths = [
   'test/_init_tests.js',
-  'test/fixtures/**/*.html',
+  'test/fixtures/*.html',
+  {
+    pattern: 'test/fixtures/served/*.html',
+    included: false,
+    nocache: false,
+    watched: true,
+  },
   {
     pattern: 'dist/**/*.js',
     included: false,
