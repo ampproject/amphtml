@@ -155,3 +155,7 @@ window.MADSAdrequest.adrequest;
  */
 window.EzoicAmpAd = function(global, data) {};
 window.EzoicAmpAd.prototype.createAd;
+data.id;
+data.d;
+data.wid;
+data.url;
