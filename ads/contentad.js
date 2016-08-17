@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,10 @@ export function contentad(global, data) {
   global.wid = data.wid;
   global.url = data.url;
   
+  /* Match current href to requested domain */
+  var ad_url = window.context.location.href;
+  ad_url = ad_url.replace(window.context.location.host, data.url);
+  
   /* Create div for ad to target */
   cad_div = document.createElement('div');
   cad_div.id = "contentad" + global.wid;
@@ -38,7 +42,7 @@ export function contentad(global, data) {
   cad_api += '?id=' + encodeURIComponent(global.id);
   cad_api += '&d=' + encodeURIComponent(global.d);
   cad_api += '&wid=' + global.wid;
-  cad_api += '&url=' + encodeURIComponent(global.url);
+  cad_api += '&url=' + encodeURIComponent(ad_url);
   cad_api += '&cb=' + Date.now();
   
   /* Call Content.ad Widget */
