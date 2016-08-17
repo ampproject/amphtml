@@ -40,7 +40,7 @@ describe('test-iframe-createIframeWithMessageStub', () => {
 
   it('should get message from fragment and post back to parent window', () => {
     iframe.postMessageToParent(data1);
-    expectPostMessage(iframe.contentWindow, window, data1)
+    return expectPostMessage(iframe.contentWindow, window, data1)
         .then(receivedMessage => {
           expect(receivedMessage).to.jsonEqual(data1);
         })
