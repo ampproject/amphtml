@@ -16,9 +16,12 @@
 
 export class ScrollSyncEffect {
   constructor(element) {
+    /** @private {Element} */
     this.element = element;
-    this.scrollMin_ = null;
-    this.scrollMax_ = null;
+    /** @private {number} */
+    this.scrollMin_ = 0;
+    /** @private {number} */
+    this.scrollMax_ = 0;
   }
 
   isDirectional() {
