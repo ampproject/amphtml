@@ -61,7 +61,7 @@ export let Location;
  */
 export function parseUrl(url) {
   if (!a) {
-    a = self.document.createElement('a');
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
     cache = self.UrlCache || (self.UrlCache = Object.create(null));
   }
 
@@ -170,7 +170,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, *>} params
+ * @param {!Object<string, string>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -200,7 +200,8 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  const url = parseUrl(urlString);
+  // (erwinm, #4560): type cast necessary until #4560 is fixed
+  const url = parseUrl(/** @type {string} */ (urlString));
   user().assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
@@ -208,7 +209,7 @@ export function assertHttpsUrl(
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',
       elementContext, sourceName, urlString);
-  return urlString;
+  return /** @type {string} */ (urlString);
 }
 
 /**

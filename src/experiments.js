@@ -36,7 +36,7 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
-/** @type {Object<string, boolean>} */
+/** @type {Object<string, boolean>|undefined} */
 let toggles_;
 
 /**
