@@ -21,13 +21,13 @@
       .social-box {
         max-width: 300px;
       }
-      amp-social-share[type=baidu] {
+      amp-social-share[type="baidu"] {
         background-color: black;
         color: #fff;
         font-size: 32px;
         text-align: center;
       }
-      amp-social-share[type=whatsapp] {
+      amp-social-share[type="whatsapp"] {
         background: #25d366;
         text-align: center;
         color: #0e5829;
@@ -51,12 +51,12 @@
       <amp-social-share type="twitter"></amp-social-share>
       <amp-social-share type="linkedin" width="108" height="44" layout="fixed"></amp-social-share>
 
-      <amp-social-share type="baidu"
+      <amp-social-share layout="responsive" width="40" height="40" type="baidu"
                         data-share-endpoint="http://cang.baidu.com/do/add"
                         data-param-iu="CANONICAL_URL"
                         data-param-it="TITLE">B</amp-social-share>
 
-      <amp-social-share type="whatsapp"
+      <amp-social-share layout="responsive" width="40" height="40" type="whatsapp"
                         layout="container"
                         data-share-endpoint="whatsapp://send"
                         data-param-text="Check out this article: TITLE - CANONICAL_URL">

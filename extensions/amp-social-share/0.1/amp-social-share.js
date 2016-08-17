@@ -71,6 +71,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
     this.element.setAttribute('role', 'link');
     this.element.addEventListener('click', () => this.handleClick_());
+    this.element.classList.add(`amp-social-share-${typeAttr}`);
   }
 
   /** @private */
