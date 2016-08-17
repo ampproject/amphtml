@@ -26,7 +26,7 @@ adopt(window);
 describe('amp-o2-player', () => {
 
   function getO2player(attributes, opt_responsive) {
-    return createIframePromise(true).then(iframe => {
+    return createIframePromise().then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const o2 = iframe.doc.createElement('amp-o2-player');
       for (const key in attributes) {
@@ -72,20 +72,20 @@ describe('amp-o2-player', () => {
   it('requires data-pid', () => {
     return getO2player({
       'data-bcid': '50d595ec0364e95588c77bd2',
-    }, true).should.eventually.be.rejectedWith(
-        /Data-pid and data-bcid attributes are required for/);
+    }).should.eventually.be.rejectedWith(
+        /Data-pid attribute is required for/);
   });
 
   it('requires data-bcid', () => {
     return getO2player({
       'data-pid': '573acb47e4b0564ec2e10011',
-    }, true).should.eventually.be.rejectedWith(
-        /Data-pid and data-bcid attributes are required for/);
+    }).should.eventually.be.rejectedWith(
+        /Data-bcid attribute is required for/);
   });
 
   it('requires data-pid && data-bcid', () => {
     return getO2player({}).should.eventually.be.rejectedWith(
-        /Data-pid and data-bcid attributes are required for/);
+        /Data-pid attribute is required for/);
   });
 
   it('renders with data-vid passed', () => {
