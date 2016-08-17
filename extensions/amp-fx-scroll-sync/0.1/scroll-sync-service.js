@@ -18,10 +18,7 @@ import {getService} from '../../../src/service';
 import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 
-
-
 class ScrollSyncService {
-
   /**
    * @param {!Window} win
    */
@@ -76,7 +73,7 @@ class ScrollSyncService {
 }
 
 function measureScrollTop(state) {
-  state.scrollTop = state.viewport.getScrollTop();
+  state.scrollTop_ = state.viewport.getScrollTop();
   // TODO: Loop over effects call measure on them in a performant way. We have to
   // figure out when do we need measurement and only then do measurement.
   for (let i = 0; i < state.effects.length; i++) {
@@ -85,9 +82,8 @@ function measureScrollTop(state) {
   }
 }
 
-
 function onScroll(state) {
-  const scrollTop = state.scrollTop;
+  const scrollTop = state.scrollTop_;
   const scrollBuffer = 100;
   for (let i = 0; i < state.effects.length; i++) {
     const effect = state.effects[i];
@@ -109,7 +105,6 @@ function onScroll(state) {
     // Do unsync transition.
   }
 }
-
 
 /**
  * @param {!Window} win
