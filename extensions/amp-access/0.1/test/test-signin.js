@@ -170,20 +170,20 @@ describe('SignInProtocol', () => {
       });
     });
 
-    it('should return null for post-login when no grant in query', () => {
+    it('should return null for post-login when no auth code in query', () => {
       viewerMock.expects('sendMessage').never();
       expect(signin.postLoginResult({})).to.be.null;
     });
 
-    it('should call viewer for post-login with grant', () => {
+    it('should call viewer for post-login with auth code', () => {
       viewerMock.expects('sendMessage')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
-            accessGrant: 'X',
+            authorizationCode: 'X',
           })
           .returns(Promise.resolve('access token X'))
           .once();
-      return signin.postLoginResult({'access_grant': 'X'}).then(token => {
+      return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.equal('access token X');
         expect(errorStub.callCount).to.equal(0);
         // The previous token is updated as well.
@@ -193,16 +193,16 @@ describe('SignInProtocol', () => {
       });
     });
 
-    it('should recorver from viewer error on post-login with grant', () => {
+    it('should recorver from viewer error on post-login with auth code', () => {
       signin.updateAccessToken_('access token');
       viewerMock.expects('sendMessage')
           .withExactArgs('storeAccessToken', {
             origin: ORIGIN,
-            accessGrant: 'X',
+            authorizationCode: 'X',
           })
           .returns(Promise.reject(new Error('intentional')))
           .once();
-      return signin.postLoginResult({'access_grant': 'X'}).then(token => {
+      return signin.postLoginResult({'code': 'X'}).then(token => {
         expect(token).to.be.null;
         expect(errorStub.callCount).to.equal(1);
         // The previous token is left unchanged.
@@ -273,7 +273,7 @@ describe('SignInProtocol', () => {
 
     it('should return null for post-login', () => {
       viewerMock.expects('sendMessage').never();
-      expect(signin.postLoginResult({'access_grant': 'X'})).to.be.null;
+      expect(signin.postLoginResult({'code': 'X'})).to.be.null;
     });
 
     it('should return null for request sign-in', () => {
