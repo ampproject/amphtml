@@ -37,12 +37,12 @@ export function contentad(global, data) {
   document.body.appendChild(cad_div);
 
   /* Build API URL */
-  let cad_api = 'https://api.content.ad/Scripts/widget2.aspx';
-  cad_api += '?id=' + encodeURIComponent(global.id);
-  cad_api += '&d=' + encodeURIComponent(global.d);
-  cad_api += '&wid=' + global.wid;
-  cad_api += '&url=' + encodeURIComponent(ad_url);
-  cad_api += '&cb=' + Date.now();
+  let cad_api = 'https://api.content.ad/Scripts/widget2.aspx'
+  + '?id=' + encodeURIComponent(global.id)
+  + '&d=' + encodeURIComponent(global.d)
+  + '&wid=' + global.wid
+  + '&url=' + encodeURIComponent(ad_url)
+  + '&cb=' + Date.now();
 
   /* Call Content.ad Widget */
   writeScript(global, cad_api);
