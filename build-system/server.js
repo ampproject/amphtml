@@ -79,13 +79,13 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
-const ORIGIN_REGEX = new RegExp("http://localhost:8000|" +
-    "https?://.+\.herokuapp\.com:8000");
-const SOURCE_ORIGIN_REGEX = new RegExp("http://localhost:8000|" +
-    "https?://.+\.herokuapp\.com:8000/");
+const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000');
+const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000/');
 
 app.use('/form/html/post', function(req, res) {
-  if(!ORIGIN_REGEX.test(req.headers.origin)) {
+  if (!ORIGIN_REGEX.test(req.headers.origin)) {
     res.statusCode = 500;
     res.end(JSON.stringify({
       message: 'Origin header is invalid.'
@@ -93,7 +93,7 @@ app.use('/form/html/post', function(req, res) {
     return;
   }
 
-  if(!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
     res.statusCode = 500;
     res.end(JSON.stringify({
       message: '__amp_source_origin parameter is invalid.'
@@ -120,7 +120,7 @@ app.use('/form/html/post', function(req, res) {
 });
 
 app.use('/form/echo-json/post', function(req, res) {
-  if(!ORIGIN_REGEX.test(req.headers.origin)) {
+  if (!ORIGIN_REGEX.test(req.headers.origin)) {
     res.statusCode = 500;
     res.end(JSON.stringify({
       message: 'Origin header is invalid.'
@@ -128,7 +128,7 @@ app.use('/form/echo-json/post', function(req, res) {
     return;
   }
 
-  if(!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
     res.statusCode = 500;
     res.end(JSON.stringify({
       message: '__amp_source_origin parameter is invalid.'
@@ -147,7 +147,7 @@ app.use('/form/echo-json/post', function(req, res) {
     res.setHeader('Access-Control-Expose-Headers',
         'AMP-Access-Control-Allow-Source-Origin')
     res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.protocol + '://' + req.headers.host);
+        req.query.__amp_source_origin);
     res.end(JSON.stringify(fields));
   });
 });

@@ -17,10 +17,8 @@
 import {dev, user} from '../log';
 import {fromClass} from '../service';
 import {
-  addParamToUrl,
   getSourceOrigin,
-  parseQueryString,
-  parseUrl,
+  getCorsUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 
@@ -53,9 +51,6 @@ const allowedFetchTypes_ = {
   text: 2,
   arraybuffer: 3,
 };
-
-/** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
@@ -528,22 +523,6 @@ class FetchResponseHeaders {
   get(name) {
     return this.xhr_.getResponseHeader(name);
   }
-}
-
-
-/**
- * Add "__amp_source_origin" query parameter to the URL.
- * @param {!Window} win
- * @param {string} url
- * @return {string}
- */
-export function getCorsUrl(win, url) {
-  const sourceOrigin = getSourceOrigin(win.location.href);
-  const parsedUrl = parseUrl(url);
-  const query = parseQueryString(parsedUrl.search);
-  user().assert(!(SOURCE_ORIGIN_PARAM in query),
-      'Source origin is not allowed in %s', url);
-  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }
 
 

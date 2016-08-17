@@ -16,11 +16,10 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, getCorsUrl} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
-import {getCorsUrl} from '../../../src/service/xhr-impl';
 import {toArray} from '../../../src/types';
 import {startsWith} from '../../../src/string';
 import {templatesFor} from '../../../src/template';
