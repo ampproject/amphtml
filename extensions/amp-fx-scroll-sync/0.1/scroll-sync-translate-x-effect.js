@@ -28,31 +28,6 @@ export class ScrollSyncTranslateXEffect extends ScrollSyncEffect {
   }
 
   /** @override */
-  isDirectional() {
-    return false;
-  }
-
-  /** @override */
-  measure() {
-
-  }
-
-  /** @override */
-  requestMeasure() {
-
-  }
-
-  /** @override */
-  getScrollMin() {
-    return this.scrollMin_;
-  }
-
-  /** @override */
-  getScrollMax() {
-    return this.scrollMax_;
-  }
-
-  /** @override */
   transition(position) {
     const x = position * this.translateX_;
     setStyles(this.element,
