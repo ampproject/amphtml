@@ -54,6 +54,6 @@ The resulting HTTP response has to also contain the following headers:
 When making CORS requests that would change the state of your system (e.g. uer subscribes to or unsubscribes from a mailing list) the first two steps you need to make sure to do:
 
 1. Check the `Origin` header. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
-2. Check the `__amp_source_origin` query parameter. If it's not publisher's origin stop and return an error response.
+2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
 
 It's very important that these are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.
