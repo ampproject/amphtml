@@ -497,29 +497,96 @@ describe('amp-form', () => {
     });
   });
 
-  it('should allow GET submissions', () => {
-    return getAmpForm().then(ampForm => {
-      ampForm.method_ = 'GET';
-      ampForm.form_.setAttribute('method', 'GET');
-      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
-      const event = {
-        stopImmediatePropagation: sandbox.spy(),
-        target: ampForm.form_,
-        preventDefault: sandbox.spy(),
-      };
-      ampForm.handleSubmit_(event);
-      expect(event.preventDefault).to.be.calledOnce;
-      expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
-      expect(ampForm.xhr_.fetchJson).to.be.calledWith(
-          'https://example.com?name=John%20Miller');
+  describe('GET requests', () => {
+    it('should allow GET submissions', () => {
+      return getAmpForm().then(ampForm => {
+        ampForm.method_ = 'GET';
+        ampForm.form_.setAttribute('method', 'GET');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: ampForm.form_,
+          preventDefault: sandbox.spy(),
+        };
+        ampForm.handleSubmit_(event);
+        expect(event.preventDefault).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller');
 
-      const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
-      const config = xhrCall.args[1];
-      expect(config.body).to.be.null;
-      expect(config.method).to.equal('GET');
-      expect(config.credentials).to.equal('include');
-      expect(config.requireAmpResponseSourceOrigin).to.be.true;
+        const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
+        const config = xhrCall.args[1];
+        expect(config.body).to.be.null;
+        expect(config.method).to.equal('GET');
+        expect(config.credentials).to.equal('include');
+        expect(config.requireAmpResponseSourceOrigin).to.be.true;
+      });
     });
+
+    it('should not send disabled or nameless inputs', () => {
+      return getAmpForm().then(ampForm => {
+        const form = ampForm.form_;
+        ampForm.method_ = 'GET';
+        form.setAttribute('method', 'GET');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+        const fieldset = document.createElement('fieldset');
+        const emailInput = document.createElement('input');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('required', '');
+        fieldset.appendChild(emailInput);
+        const usernameInput = document.createElement('input');
+        usernameInput.setAttribute('name', 'nickname');
+        usernameInput.setAttribute('required', '');
+        fieldset.appendChild(usernameInput);
+        form.appendChild(fieldset);
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: ampForm.form_,
+          preventDefault: sandbox.spy(),
+        };
+
+        usernameInput.disabled = true;
+        usernameInput.value = 'coolbeans';
+        emailInput.value = 'cool@bea.ns';
+        ampForm.handleSubmit_(event);
+        expect(event.preventDefault).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller&email=cool%40bea.ns');
+
+        ampForm.setState_('submit-success');
+        ampForm.xhr_.fetchJson.reset();
+        usernameInput.removeAttribute('disabled');
+        usernameInput.value = 'coolbeans';
+        emailInput.value = 'cool@bea.ns';
+        ampForm.handleSubmit_(event);
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller&email=cool%40bea.ns&' +
+            'nickname=coolbeans');
+
+        ampForm.setState_('submit-success');
+        ampForm.xhr_.fetchJson.reset();
+        fieldset.disabled = true;
+        ampForm.handleSubmit_(event);
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller');
+
+        ampForm.setState_('submit-success');
+        ampForm.xhr_.fetchJson.reset();
+        fieldset.removeAttribute('disabled');
+        usernameInput.removeAttribute('name');
+        emailInput.removeAttribute('required');
+        emailInput.value = '';
+        ampForm.handleSubmit_(event);
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller&email=');
+      });
+    });
+
   });
 
   describe('User Validity', () => {

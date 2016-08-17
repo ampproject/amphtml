@@ -230,7 +230,7 @@ export class AmpForm {
     const inputs = this.form_.querySelectorAll('input,select,textarea');
     for (let i = 0; i < inputs.length; i++) {
       const input = inputs[i];
-      if (!input.name || !input.value) {
+      if (!input.name || isDisabled_(input, /*checkAncestors*/ true)) {
         continue;
       }
 
@@ -457,6 +457,30 @@ function checkUserValidity(element, propagate = false) {
 export function onInputInteraction_(e) {
   const input = e.target;
   checkUserValidity(input, /* propagate */ true);
+}
+
+
+/**
+ * Checks if a field is disabled.
+ * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} element
+ * @param {boolean=} checkAncestors Whether to check fieldset ancestors for disabled
+ * fieldsets that encapsulates the input.
+ */
+function isDisabled_(element, checkAncestors = true) {
+  if (element.disabled) {
+    return true;
+  }
+
+  if (checkAncestors) {
+    const ancestors = ancestorElementsByTag(element, 'fieldset');
+    for (let i = 0; i < ancestors.length; i++) {
+      if (ancestors[i].disabled) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 
