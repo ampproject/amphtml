@@ -340,8 +340,10 @@ export class Resource {
    */
   completeCollapse() {
     toggle(this.element, false);
-    this.layoutBox_.width = 0;
-    this.layoutBox_.height = 0;
+    this.layoutBox_ = layoutRectLtwh(
+        this.layoutBox_.left,
+        this.layoutBox_.top,
+        0, 0);
     this.isFixed_ = false;
     this.element.updateLayoutBox(this.layoutBox_);
   }
