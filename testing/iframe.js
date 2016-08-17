@@ -261,7 +261,7 @@ export function createServedIframe(src) {
   });
 }
 
-const IFRAME_SRC =
+const IFRAME_STUB_URL =
     '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
 
 /**
@@ -279,14 +279,14 @@ const IFRAME_SRC =
  */
 export function createIframeWithMessageStub(win) {
   const element = win.document.createElement('iframe');
-  element.src = IFRAME_SRC;
+  element.src = IFRAME_STUB_URL;
   win.document.body.appendChild(element);
 
   /**
    * Instructs the iframe to send a message to parent window.
    */
   element.postMessageToParent = msg => {
-    element.src = IFRAME_SRC + encodeURIComponent(JSON.stringify(msg));
+    element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
   };
 
   /**
