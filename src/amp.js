@@ -35,6 +35,7 @@ import {
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 import {maybeTrackImpression} from './impression';
+import {maybeSelectText} from './select-text';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -71,6 +72,8 @@ try {
 
       maybeValidate(self);
       makeBodyVisible(document, /* waitForExtensions */ true);
+
+      maybeSelectText(window);
     } catch (e) {
       makeBodyVisible(document);
       throw e;
