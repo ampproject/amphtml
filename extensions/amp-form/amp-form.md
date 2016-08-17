@@ -76,7 +76,7 @@ __required__
 Action must be provided, `https` and is non-cdn link (does **NOT** link to https://cdn.ampproject.org).
 
 **action-xhr**
-__optional__
+__(optional)__
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
 This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
