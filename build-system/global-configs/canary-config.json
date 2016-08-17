@@ -2,6 +2,6 @@
   "canary": true,
   "no-auth-in-prerender": 1,
   "amp-sticky-ad": 1,
-  "expAdsenseA4A": 0.05,
-  "expDoubleclickA4A": 0.05
+  "expAdsenseA4A": 0.01,
+  "expDoubleclickA4A": 0.01
 }

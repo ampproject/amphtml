@@ -84,6 +84,9 @@ describe('Layout', () => {
     expect(getLengthNumeral('10.1px')).to.equal(10.1);
     expect(getLengthNumeral('10.1em')).to.equal(10.1);
     expect(getLengthNumeral('10.1vmin')).to.equal(10.1);
+
+    expect(getLengthNumeral(null)).to.equal(undefined);
+    expect(getLengthNumeral('auto')).to.equal(undefined);
   });
 
   it('assertLength', () => {

@@ -189,7 +189,7 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(window, 'bootstrapBaseUrl', () => {
+  return getService(self, 'bootstrapBaseUrl', () => {
     return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
       getDefaultBootstrapBaseUrl(parentWindow);
   });
@@ -220,8 +220,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
 
 function getAdsLocalhost(win) {
   return 'http://ads.localhost:'
-      + (win.location.port || win.parent.location.port)
-      + (getMode().test ? '/base' : '');
+      + (win.location.port || win.parent.location.port);
 }
 
 /**

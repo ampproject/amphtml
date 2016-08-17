@@ -336,25 +336,29 @@ export class Resources {
       element.id = 'AMP_' + resource.getId();
     }
     this.resources_.push(resource);
-    this.buildOrScheduleBuildForElement_(resource);
+    this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
    * Builds the element if ready to be built, otherwise adds it to pending resources.
    * @param {!Resource} resource
+   * @param {boolean=} checkForDupes
    * @private
    */
-  buildOrScheduleBuildForElement_(resource) {
+  buildOrScheduleBuildForResource_(resource, checkForDupes = false) {
     if (this.isRuntimeOn_) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
         resource.build();
         this.schedulePass();
       } else if (!resource.element.isBuilt()) {
-        // Otherwise add to pending resources and try to build any ready ones.
-        this.pendingBuildResources_.push(resource);
-        this.buildReadyResources_();
+        if (!checkForDupes ||
+            this.pendingBuildResources_.indexOf(resource) == -1) {
+          // Otherwise add to pending resources and try to build any ready ones.
+          this.pendingBuildResources_.push(resource);
+          this.buildReadyResources_();
+        }
       }
     }
   }
@@ -428,7 +432,7 @@ export class Resources {
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
-    this.buildOrScheduleBuildForElement_(resource);
+    this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -940,7 +944,7 @@ export class Resources {
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT) {
-        continue;
+        this.buildOrScheduleBuildForResource_(r, /* checkForDupes */ true);
       }
       if (relayoutAll || r.getState() == ResourceState.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();

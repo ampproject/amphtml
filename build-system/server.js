@@ -329,7 +329,7 @@ app.get('/examples/*', function(req, res, next) {
       file = file.replace(/\.max\.js/g, '.js');
       file = file.replace('/dist/amp.js', '/dist/v0.js');
     }
-    res.end(file);
+    res.send(file);
   }).catch(() => {
     next();
   });

@@ -196,7 +196,6 @@ export class Store {
   /**
    * @param {string} name
    * @return {*|undefined}
-   * @private
    */
   get(name) {
     // The structure is {key: {v: *, t: time}}
@@ -207,7 +206,6 @@ export class Store {
   /**
    * @param {string} name
    * @param {*} value
-   * @private
    */
   set(name, value) {
     dev().assert(name != '__proto__' && name != 'prototype',
@@ -241,7 +239,6 @@ export class Store {
 
   /**
    * @param {string} name
-   * @private
    */
   remove(name) {
     // The structure is {key: {v: *, t: time}}
