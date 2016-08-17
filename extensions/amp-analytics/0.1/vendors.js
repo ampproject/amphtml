@@ -162,7 +162,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 15,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'pageping',
       },
@@ -724,7 +724,7 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'max-timer-length': 1200,
+          'maxTimerLength': 1200,
         },
         'request': 'timer',
       },
