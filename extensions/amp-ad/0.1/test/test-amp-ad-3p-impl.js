@@ -504,43 +504,5 @@ function tests(name) {
         });
       });
     });
-
-    describe('embed-state API', () => {
-      it('should support subscription via send-embed-state', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.sendEmbedInfo_ = () => {
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.postMessage({
-                sentinel: 'amp-test',
-                type: 'subscribeToEmbedState',
-                is3p: true,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-            // Precondition check.
-            expect(impl.apiHandler_.embedStateApi_.clientWindows_.length)
-                  .to.equal(0);
-          });
-        }).then(impl => {
-          // Check that we have a new subscription.
-          expect(impl.apiHandler_.embedStateApi_.clientWindows_.length)
-              .to.equal(1);
-        });
-      });
-    });
   };
 }

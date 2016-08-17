@@ -482,6 +482,6 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
  * @return {boolean}
  */
 function shouldUseCompiledJs() {
-  return getMode().test && window.ampTestRuntimeConfig &&
-      window.ampTestRuntimeConfig.useCompiledJs;
+  return getMode().test && self.ampTestRuntimeConfig &&
+      self.ampTestRuntimeConfig.useCompiledJs;
 }

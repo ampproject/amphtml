@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {addParamsToUrl} from '../../../src/url';
+import {addParamsToUrl, parseUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -22,6 +22,7 @@ import {dev, user} from '../../../src/log';
 import {openWindowDialog} from '../../../src/dom';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
+import {platformFor} from '../../../src/platform';
 
 /** @const */
 const TAG = 'amp-social-share';
@@ -49,12 +50,23 @@ class AmpSocialShare extends AMP.BaseElement {
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
 
+    /** @private @const {!../../../src/platform.Platform} */
+    this.platform_ = platformFor(this.win);
+
     /** @private {string} */
     this.href_ = null;
+
+    /** @private {string} */
+    this.target_ = null;
+
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = urlReplacementsFor(this.win);
     urlReplacements.expand(hrefWithVars).then(href => {
       this.href_ = href;
+      // mailto: protocol breaks when opened in _blank on iOS Safari.
+      const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
+      const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
+      this.target_ = (isIosSafari && isMailTo) ? '_self' : '_blank';
     });
 
     this.element.setAttribute('role', 'link');
@@ -68,7 +80,8 @@ class AmpSocialShare extends AMP.BaseElement {
       return;
     }
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-    openWindowDialog(this.win, this.href_, '_blank', windowFeatures);
+
+    openWindowDialog(this.win, this.href_, this.target_, windowFeatures);
   }
 
 };
