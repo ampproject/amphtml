@@ -27,24 +27,23 @@ export function contentad(global, data) {
   global.d = data.d;
   global.wid = data.wid;
   global.url = data.url;
-  
+
   /* Match current href to requested domain */
-  var ad_url = window.context.location.href;
-  ad_url = ad_url.replace(window.context.location.host, data.url);
+  let ad_url = window.context.location.href.replace(window.context.location.host, data.url);
   
   /* Create div for ad to target */
-  cad_div = document.createElement('div');
-  cad_div.id = "contentad" + global.wid;
+  let cad_div = document.createElement('div');
+  cad_div.id = 'contentad' + global.wid;
   document.body.appendChild(cad_div);
-  
+
   /* Build API URL */
-  var cad_api = 'https://api.content.ad/Scripts/widget2.aspx';
+  let cad_api = 'https://api.content.ad/Scripts/widget2.aspx';
   cad_api += '?id=' + encodeURIComponent(global.id);
   cad_api += '&d=' + encodeURIComponent(global.d);
   cad_api += '&wid=' + global.wid;
   cad_api += '&url=' + encodeURIComponent(ad_url);
   cad_api += '&cb=' + Date.now();
-  
+
   /* Call Content.ad Widget */
   writeScript(global, cad_api);
 }
