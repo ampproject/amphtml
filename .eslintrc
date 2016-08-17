@@ -37,6 +37,7 @@
     "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dot-location": [2, "property"],
+    "enforce-private-props": 2,
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
     "indent": [2, 2, { "SwitchCase": 1 }],

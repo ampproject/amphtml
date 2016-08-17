@@ -274,7 +274,6 @@ export class Resource {
     this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
-  /** @private */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }

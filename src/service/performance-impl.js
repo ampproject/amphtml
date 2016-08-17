@@ -81,7 +81,7 @@ export class Performance {
     this.viewer_ = null;
 
     /** @private {?./resources-impl.Resources} */
-    this.resources = null;
+    this.resources_ = null;
 
     /** @private {boolean} */
     this.isMessagingReady_ = false;

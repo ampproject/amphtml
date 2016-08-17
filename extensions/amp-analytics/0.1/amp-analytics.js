@@ -111,7 +111,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     /**
      * @private {JSONType}
      */
-    this.remoteConfig = {};
+    this.remoteConfig_ = {};
 
     return this.consentPromise_
         .then(this.fetchRemoteConfig_.bind(this))

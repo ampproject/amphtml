@@ -148,7 +148,7 @@ export class Extensions {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private @const {!Object<string, !ExtensionHolderDef>} */
