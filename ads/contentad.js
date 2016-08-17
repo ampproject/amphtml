@@ -29,10 +29,11 @@ export function contentad(global, data) {
   global.url = data.url;
 
   /* Match current href to requested domain */
-  let ad_url = window.context.location.href.replace(window.context.location.host, data.url);
-  
+  let ad_url = window.context.location.href;
+  ad_url = ad_url.replace(window.context.location.host, data.url);
+
   /* Create div for ad to target */
-  let cad_div = document.createElement('div');
+  const cad_div = document.createElement('div');
   cad_div.id = 'contentad' + global.wid;
   document.body.appendChild(cad_div);
 
