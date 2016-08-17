@@ -68,11 +68,8 @@ function tests(name) {
           setCookie(window, cidScope, 'sentinel123',
               Date.now() + 5000);
           installCidService(win);
-          console.log('aaaabbbb');
           return ad;
         }).then(ad => {
-          //const impl = ad.implementation_;
-          console.log('aaa');
           expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
         });
       });

@@ -17,6 +17,8 @@
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {createIframePromise} from '../../../../testing/iframe';
+import {installPerformanceService,} from
+    '../../../../src/service/performance-impl';
 import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
@@ -36,12 +38,15 @@ describe('amp-ad-api-handler', () => {
     const adElement = document.createElement('amp-ad');
     const adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
-    return createIframePromise().then(c => {
+    return createIframePromise(null, () => {
+    }).then(c => {
       container = c;
+      iframe = createIframeWithMessageStub(window);
       iframe = c.doc.createElement('iframe');
       iframe.src = iframeSrc;
       iframe.setAttribute(
         'data-amp-3p-sentinel', 'amp3ptest');
+      installPerformanceService(apiHandler.baseInstance_.win);
     });
   });
 
@@ -93,7 +98,11 @@ describe('amp-ad-api-handler', () => {
           apiHandler.iframe_.src = iframeSrc;
         };
         return apiHandler.renderStartPromise_.then(() => {
-          expect(apiHandler.iframe_.style.visibility).to.equal('');
+          return startUpPromise.then(() => {
+            expect(apiHandler.iframe_.style.visibility).to.equal('');
+          });
+        }, () => {
+          throw new Error('should never happen');
         });
       });
 

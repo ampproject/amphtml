@@ -26,7 +26,7 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
-//import {performanceFor} from '../../../src/performance';
+import {performanceFor} from '../../../src/performance';
 
 export class AmpAdApiHandler {
 
@@ -62,14 +62,6 @@ export class AmpAdApiHandler {
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
 
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
-      this.renderStartResolve_ = resolve;
-    });
-
-    /** @private @const {!Performance|null} */
-    this.performance_ = null;
-
     /** @private @const {number|null} */
     this.initTime_ = null;
   }
@@ -84,10 +76,8 @@ export class AmpAdApiHandler {
    */
   startUp(iframe, is3p, opt_defaultVisible) {
     // TODO: get performance to pass tests
-    // if (!getMode().test) {
-    //   this.performance_ = performanceFor(this.baseInstance_.win);
-    //   this.initTime_ = Date.now();
-    // }
+    this.initTime_ = Date.now();
+
     user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -149,23 +139,19 @@ export class AmpAdApiHandler {
     this.renderStartPromise_ = timerFor(this.baseInstance_.win).timeoutPromise(
         2000, promise,
         'fail to receive render-start event from ad server, timeout');
+
     this.renderStartPromise_.then(() => {
-      // TODO: get tick delta
-      //   if (!getMode().test) {
-      //     const now = Date.now();
-      //     this.tickDelta('rs', now - this.initTime_);
-      //     this.performance_.flush();
-      //   }
-      if (!this.iframe_) {
-        return;
+      const now = Date.now();
+      this.reportPerformance_('rs', now - this.initTime_);
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      this.iframe_.style.visibility = '';
     }).catch(() => {
-      //get tick delta
-      if (!this.iframe_) {
-        return;
+      const now = Date.now();
+      this.reportPerformance_('rsf', now - this.initTime_);
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      this.iframe_.style.visibility = '';
     });
 
     this.viewer_.onVisibilityChanged(() => {
@@ -175,6 +161,18 @@ export class AmpAdApiHandler {
     return loadPromise(this.iframe_).then(() => {
       return this.renderStartPromise_;
     });
+  }
+
+  /**
+   * Report performance
+   * @param {string} label
+   * @param {number} value
+   * @private
+   */
+  reportPerformance_(label, value) {
+    const performance = performanceFor(this.baseInstance_.win);
+    performance.tickDelta(label, value);
+    performance.flush();
   }
 
   /** @override  */
