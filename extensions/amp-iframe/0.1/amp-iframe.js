@@ -148,7 +148,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.isClickToPlay_ = !!this.placeholder_;
 
     /** @private {boolean} */
-    this.isLikeFixedAd_ = false;
+    this.isDisallowedAsAd_ = false;
 
     /**
      * Call to stop listening to viewport changes.
@@ -181,7 +181,7 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isLikeFixedAd_ = isAdLike(this.element) &&
+    this.isDisallowedAsAd_ = isAdLike(this.element) &&
         !isAdPositionAllowed(this.element, this.win);
 
     // We remeasured this tag, lets also remeasure the iframe. Should be
@@ -218,7 +218,7 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    user().assert(!this.isLikeFixedAd_, 'amp-iframe is not used for ' +
+    user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
         'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
 
     if (!this.isClickToPlay_) {
