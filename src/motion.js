@@ -107,7 +107,7 @@ class Motion {
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+    this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;

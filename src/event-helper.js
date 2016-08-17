@@ -160,7 +160,7 @@ function racePromise_(promise, unlisten1, unlisten2, timeout) {
     racePromise = promise;
   } else {
     // Timeout has been specified: add a timeout condition.
-    racePromise = timerFor(window).timeoutPromise(timeout || 0, promise);
+    racePromise = timerFor(self).timeoutPromise(timeout || 0, promise);
   }
   if (unlisten1) {
     racePromise.then(unlisten1, unlisten1);
