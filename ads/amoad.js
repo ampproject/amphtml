@@ -21,13 +21,26 @@ import {loadScript, checkData, validateDataExists} from '../3p/3p';
  * @param {!Object} data
  */
 export function amoad(global, data) {
-  checkData(data, ['sid']);
+  checkData(data, ['sid', 'adType']);
   validateDataExists(data, ['sid']);
 
+  let script;
+  const attrs = {};
+  if (data['adType'] === 'native') {
+    script = 'https://j.amoad.com/js/n.js';
+    attrs['class'] = 'amoad_native';
+    attrs['data-sid'] = data.sid;
+  } else {
+    script = 'https://j.amoad.com/js/a.js';
+    attrs['class'] = `amoad_frame sid_${data.sid} container_div sp`;
+  }
+  global.amoadOption = {ampData: data};
+
   const d = global.document.createElement('div');
-  const cls = `amoad_frame sid_${data.sid} container_div sp`;
-  d.setAttribute('class', cls);
+  Object.keys(attrs).forEach(k => {
+    d.setAttribute(k, attrs[k]);
+  });
   global.document.getElementById('c').appendChild(d);
 
-  loadScript(global, 'https://j.amoad.com/js/a.js');
+  loadScript(global, script);
 }
