@@ -174,18 +174,15 @@ export function addParamsToUrl(url, params) {
  * @return {string}
  */
 export function serializeQueryString(params) {
-  let s = '';
+  const s = [];
   for (const k in params) {
     const v = params[k];
     if (v == null) {
       continue;
     }
-    if (s.length > 0) {
-      s += '&';
-    }
-    s += `${encodeURIComponent(k)}=${encodeURIComponent(v)}`;
+    s.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
   }
-  return s;
+  return s.join('&');
 }
 
 /**
