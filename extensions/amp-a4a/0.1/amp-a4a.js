@@ -370,30 +370,31 @@ export class AmpA4A extends AMP.BaseElement {
   /**
    * Handles uncaught errors within promise flow.
    * @param {string|Error} error
-   * @return {!Promise<string>}
+   * @return {string|Error}
    * @private
    */
   promiseErrorHandler_(error) {
-    if (error && error.message && error.message.indexOf('amp-a4a: ') == 0) {
-      // caught previous call to promiseErrorHandler?  Infinite loop?
-      return Promise.reject(error);
-    }
-    if (error && error instanceof Error &&
-        error.message == cancellation().message) {
-      // Rethrow if cancellation
-      throw error;
+    if (error instanceof Error) {
+      if (error.message.indexOf('amp-a4a: ') == 0) {
+        // caught previous call to promiseErrorHandler?  Infinite loop?
+        return error;
+      }
+      if (error.message == cancellation().message) {
+        // Rethrow if cancellation
+        throw error;
+      }
     }
     // Returning promise reject should trigger unhandledrejection which will
     // trigger reporting via src/error.js
     const adQueryIdx = this.adUrl_ ? this.adUrl_.indexOf('?') : -1;
     const state = {
-      'm': error ? error.message : '',
+      'm': error instanceof Error ? error.message : error,
       'tag': this.element.tagName,
       'type': this.element.getAttribute('type'),
       'au': adQueryIdx < 0 ? '' :
             this.adUrl_.substring(adQueryIdx + 1, adQueryIdx + 251),
     };
-    return Promise.reject(new Error('amp-a4a: ' + JSON.stringify(state)));
+    return new Error('amp-a4a: ' + JSON.stringify(state));
   }
 
   /** @override */
@@ -409,13 +410,21 @@ export class AmpA4A extends AMP.BaseElement {
     // valid AMP.
     this.timerId_ = incrementLoadingAds(this.win);
     return this.adPromise_.then(rendered => {
+      if (rendered instanceof Error) {
+        // If we got as far as getting a URL, then load the ad, but note the
+        // error.
+        if (this.adUrl_) {
+          this.renderViaIframe_(true);
+        }
+        throw rendered;
+      };
       if (!rendered) {
         // Was not AMP creative so wrap in cross domain iframe.  layoutCallback
         // has already executed so can do so immediately.
         this.renderViaIframe_(true);
       }
       this.rendered_ = true;
-    }).catch(error => this.promiseErrorHandler_(error));
+    }).catch(error => Promise.reject(this.promiseErrorHandler_(error)));
   }
 
   /** @override  */
@@ -582,7 +591,6 @@ export class AmpA4A extends AMP.BaseElement {
         // layoutCallback) as the the creative has been verified as AMP and
         // will run efficiently.
         this.renderViaIframe_();
-        this.rendered_ = true;
         return true;
       } else {
         try {
@@ -672,6 +680,7 @@ export class AmpA4A extends AMP.BaseElement {
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
         iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+      this.rendered_ = true;
     });
   }
 
