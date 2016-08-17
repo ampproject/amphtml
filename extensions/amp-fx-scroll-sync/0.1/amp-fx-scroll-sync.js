@@ -21,7 +21,6 @@ import {ScrollSyncScaleEffect} from './scroll-sync-scale-effect';
 import {ScrollSyncScrollAwayEffect} from './scroll-sync-scroll-away-effect';
 import {ScrollSyncTranslateXEffect} from './scroll-sync-translate-x-effect';
 import {installScrollSyncService} from './scroll-sync-service';
-import {getLengthNumeral} from '../../../src/layout';
 
 /** @private @const {string} */
 const TAG = 'amp-fx-scroll-sync';
@@ -37,41 +36,21 @@ class AmpScrollSync extends AMP.BaseElement {
   buildCallback() {
     dev().fine(TAG, 'building');
 
-    this.effectName_ = this.element.getAttribute('name');
-    dev().fine(TAG, 'effectName_: ' + this.effectName_);
+    this.effectType_ = this.element.getAttribute('type');
+    dev().fine(TAG, 'effectType_: ' + this.effectType_);
 
-    const config = {};
     let scrollSyncEffect = null;
     const element = this.element.parentElement;
-    if (this.effectName_ == 'dock-top') {
-      scrollSyncEffect = new ScrollSyncStickyTopEffect(element, config);
-    } else if (this.effectName_ == 'scale') {
-      config['end-scale'] = getLengthNumeral(this.element
-          .getAttribute('end-scale'));
-      config['starting-position'] = getLengthNumeral(this.element
-          .getAttribute('starting-position'));
-      config['ending-position'] = getLengthNumeral(this.element
-          .getAttribute('ending-position'));
-      config['scale-origin'] = this.element
-          .getAttribute('scale-origin');
-      scrollSyncEffect = new ScrollSyncScaleEffect(element, config);
-    } else if (this.effectName_ == 'rotate') {
-      config['rotate-angle'] = getLengthNumeral(this.element
-          .getAttribute('rotate-angle'));
-      config['starting-position'] = getLengthNumeral(this.element
-          .getAttribute('starting-position'));
-      config['ending-position'] = getLengthNumeral(this.element
-          .getAttribute('ending-position'));
-      scrollSyncEffect = new ScrollSyncRotateEffect(element, config);
-    } else if (this.effectName_ == 'scroll-away') {
-      scrollSyncEffect = new ScrollSyncScrollAwayEffect(element, config);
-    } else if (this.effectName_ == 'translate-x') {
-      config['translate-x'] = this.element.getAttribute('translate-x');
-      config['starting-position'] = getLengthNumeral(this.element
-          .getAttribute('starting-position'));
-      config['ending-position'] = getLengthNumeral(this.element
-          .getAttribute('ending-position'));
-      scrollSyncEffect = new ScrollSyncTranslateXEffect(element, config);
+    if (this.effectType_ == 'dock-top') {
+      scrollSyncEffect = new ScrollSyncStickyTopEffect(element);
+    } else if (this.effectType_ == 'scale') {
+      scrollSyncEffect = new ScrollSyncScaleEffect(element);
+    } else if (this.effectType_ == 'rotate') {
+      scrollSyncEffect = new ScrollSyncRotateEffect(element);
+    } else if (this.effectType_ == 'translate-x') {
+      scrollSyncEffect = new ScrollSyncTranslateXEffect(element);
+    } else if (this.effectType_ == 'scroll-away') {
+      scrollSyncEffect = new ScrollSyncScrollAwayEffect(element);
     }
     /** @private */
     this.scrollSyncService_ = installScrollSyncService(this.win);
