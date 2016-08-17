@@ -228,7 +228,9 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
-    user().assert(container, 'amp-live-list must have an `items` slot');
+    if (!container) {
+      return this.updateTime_;
+    }
     this.validateLiveListItems_(container);
     const mutateItems = this.getUpdates_(container);
 

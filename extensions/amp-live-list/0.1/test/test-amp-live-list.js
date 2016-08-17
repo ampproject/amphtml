@@ -270,21 +270,11 @@ describe('amp-live-list', () => {
       expect(stub.callCount).to.equal(1);
     });
 
-    it('asserts that an items slot was provided on update', () => {
+    it('no items slot on update should be a no op update', () => {
       const update = document.createElement('div');
-      const updateLiveListItems = document.createElement('div');
-      update.appendChild(updateLiveListItems);
-      updateLiveListItems.appendChild(document.createElement('div'));
-
       expect(() => {
         liveList.update(update);
-      }).to.throw(/amp-live-list must have an `items` slot/);
-
-      updateLiveListItems.setAttribute('items', '');
-
-      expect(() => {
-        liveList.update(update);
-      }).to.not.throw(/amp-live-list must have an `items` slot/);
+      }).to.not.throw();
     });
 
     it('discovers children to insert when they have newly discovered ' +
