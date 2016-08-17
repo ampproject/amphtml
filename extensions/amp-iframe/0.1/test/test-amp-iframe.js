@@ -75,6 +75,9 @@ describe('amp-iframe', () => {
       const viewport = viewportFor(iframe.win);
       viewport.resize_();
       i.style.position = 'absolute';
+      if (attributes.position) {
+        i.style.position = attributes.position;
+      }
       i.style.top = top;
       if (opt_translateY) {
         i.style.transform = 'translateY(' + opt_translateY + ')';
@@ -547,5 +550,19 @@ describe('amp-iframe', () => {
     expect(isAdLike(e(320, 100))).to.be.true;
     expect(isAdLike(e(335, 100))).to.be.true;
     expect(isAdLike(e(341, 100))).to.be.false;
+  });
+
+  it('should not render fixed ad', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 300,
+      height: 250,
+      position: 'fixed',
+    }).then(() => {
+      throw new Error('must never happen');
+    }, error => {
+      expect(error.message).to.match(/not used for displaying fixed ad/);
+    });
   });
 });

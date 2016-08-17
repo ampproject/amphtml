@@ -15,6 +15,7 @@
  */
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
@@ -146,6 +147,9 @@ export class AmpIframe extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isClickToPlay_ = !!this.placeholder_;
 
+    /** @private {boolean} */
+    this.isDisallowedAsAd_ = false;
+
     /**
      * Call to stop listening to viewport changes.
      * @private {?function()}
@@ -177,6 +181,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
+    this.isDisallowedAsAd_ = isAdLike(this.element) &&
+        !isAdPositionAllowed(this.element, this.win);
+
     // We remeasured this tag, lets also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -211,6 +218,9 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    user().assert(!this.isDisallowedAsAd_, 'amp-iframe is not used for ' +
+        'displaying fixed ad. Please use amp-sticky-ad and amp-ad instead.');
+
     if (!this.isClickToPlay_) {
       this.assertPosition();
     }
