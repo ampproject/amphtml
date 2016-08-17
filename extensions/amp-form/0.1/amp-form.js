@@ -16,7 +16,7 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
@@ -111,7 +111,7 @@ export class AmpForm {
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
-    this.method_ = this.form_.getAttribute('method') || 'GET';
+    this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
 
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
@@ -194,8 +194,13 @@ export class AmpForm {
       e.preventDefault();
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
-      this.xhr_.fetchJson(this.xhrAction_, {
-        body: new FormData(this.form_),
+      const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+      let xhrUrl = this.xhrAction_;
+      if (isHeadOrGet) {
+        xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
+      }
+      this.xhr_.fetchJson(xhrUrl, {
+        body: isHeadOrGet ? null : new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
@@ -213,6 +218,29 @@ export class AmpForm {
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
     }
+  }
+
+  /**
+   * Returns form data as an object.
+   * @return {!Object}
+   * @private
+   */
+  getFormAsObject_() {
+    const data = {};
+    const inputs = this.form_.querySelectorAll('input,select,textarea');
+    for (let i = 0; i < inputs.length; i++) {
+      const input = inputs[i];
+      if (!input.name || !input.value) {
+        continue;
+      }
+
+      if (input.type == 'checkbox' || input.type == 'radio') {
+        data[input.name] = input.checked ? input.value : '';
+      } else {
+        data[input.name] = input.value;
+      }
+    }
+    return data;
   }
 
   /**

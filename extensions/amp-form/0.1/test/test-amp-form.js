@@ -280,13 +280,13 @@ describe('amp-form', () => {
         preventDefault: sandbox.spy(),
       };
       ampForm.handleSubmit_(event);
-      expect(event.preventDefault.called).to.be.true;
-      expect(ampForm.xhr_.fetchJson.called).to.be.true;
-      expect(ampForm.xhr_.fetchJson.calledWith(
-          'https://example.com')).to.be.true;
+      expect(event.preventDefault).to.be.calledOnce;
+      expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+      expect(ampForm.xhr_.fetchJson).to.be.calledWith('https://example.com');
 
       const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
       const config = xhrCall.args[1];
+      expect(config.body).to.not.be.null;
       expect(config.method).to.equal('POST');
       expect(config.credentials).to.equal('include');
       expect(config.requireAmpResponseSourceOrigin).to.be.true;
@@ -408,7 +408,6 @@ describe('amp-form', () => {
     });
   });
 
-
   it('should allow rendering responses through templates', () => {
     return getAmpForm(true).then(ampForm => {
       const form = ampForm.form_;
@@ -449,7 +448,6 @@ describe('amp-form', () => {
       });
     });
   });
-
 
   it('should replace previously rendered responses', () => {
     return getAmpForm(true).then(ampForm => {
@@ -496,6 +494,31 @@ describe('amp-form', () => {
         expect(renderedTemplates.length).to.equal(1);
         expect(renderedTemplates[0]).to.equal(newRender);
       });
+    });
+  });
+
+  it('should allow GET submissions', () => {
+    return getAmpForm().then(ampForm => {
+      ampForm.method_ = 'GET';
+      ampForm.form_.setAttribute('method', 'GET');
+      sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+      const event = {
+        stopImmediatePropagation: sandbox.spy(),
+        target: ampForm.form_,
+        preventDefault: sandbox.spy(),
+      };
+      ampForm.handleSubmit_(event);
+      expect(event.preventDefault).to.be.calledOnce;
+      expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+      expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+          'https://example.com?name=John%20Miller');
+
+      const xhrCall = ampForm.xhr_.fetchJson.getCall(0);
+      const config = xhrCall.args[1];
+      expect(config.body).to.be.null;
+      expect(config.method).to.equal('GET');
+      expect(config.credentials).to.equal('include');
+      expect(config.requireAmpResponseSourceOrigin).to.be.true;
     });
   });
 
