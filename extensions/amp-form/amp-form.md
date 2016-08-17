@@ -79,7 +79,7 @@ Action must be provided, `https` and is non-cdn link (does **NOT** link to https
 __optional__
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
-This attribute can be the same or a different endpoint that action and has the same action requirement above.
+This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
 **Important**: Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
 
@@ -90,17 +90,18 @@ Currently, `<input type=button>`, `<input type=file>`, `<input type=image>` and 
 
 ## Events
 `amp-form` exposes 3 events:
-**submit**
+
+* **submit**
 Emitted whenever the form is submitted and before the submission is complete.
 
-**submit-success**
+* **submit-success**
 Emitted whenever the form submission is done and response is a success.
 
-**submit-error**
+* **submit-error**
 Emitted whenever the form submission is done and response is an error.
 
-These events can be used through the [on attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on).
-For example, the following listens to both submit success and submit error and shows different lightboxes depending on the event
+These events can be used through the [`on` attribute](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#on).
+For example, the following listens to both `submit-success` and `submit-error` and shows different lightboxes depending on the event.
 
 ```html
 <form ... on="submit-success:success-lightbox;submit-error:error-lightbox" ...>
@@ -133,7 +134,7 @@ The response is expected to be a valid JSON Object. For example, if the publishe
 }
 ```
 
-Publishers can render these in a template inside their forms as follow.
+Publishers can render these in a template inside their forms as follows.
 
 ```html
 <form ...>
@@ -143,7 +144,7 @@ Publishers can render these in a template inside their forms as follow.
     <div submit-success>
         <template type="amp-mustache">
             Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
-            to confirm! After that we'll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{{{/interests}}.
+            to confirm! After that we'll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.
         </template>
     </div>
     <div submit-error>
@@ -157,26 +158,26 @@ Publishers can render these in a template inside their forms as follow.
 See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html).
 
 ## Polyfills
-`amp-form` polyfill behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
+`amp-form` provide polyfills for behaviors and functionality missing from some browsers or being implemented in the next version of CSS.
 
 #### Invalid Submit Blocking and Validation Message Bubble
-Browsers that uses webkit-based engines, currently (as of August 2016) do not support invalid form submissions. These include Safari on all platforms, and all iOS browsers. `amp-form` polyfill this behavior to block any invalid submissions and show validation message bubbles on invalid inputs.
+Browsers that uses webkit-based engines currently (as of August 2016) do not support invalid form submissions. These include Safari on all platforms, and all iOS browsers. `amp-form` polyfills this behavior to block any invalid submissions and show validation message bubbles on invalid inputs.
 
 **Note**: Messages are sometimes limited to few words like "required field", these messages are provided by the browser implementation. We'll be working on allowing publisher-provided custom validation messages as well as custom validation UIs (instead of the builtin/polyfill'd bubbles).
 
 #### :user-invalid/:user-valid
-These pseudo classes are part of [future CSS Selectors 4 spec](https://drafts.csswg.org/selectors-4/#user-pseudos) and are introduced to allow better hooks for styling invalid/valid fields based on few criteria.
+These pseudo classes are part of the [future CSS Selectors 4 spec](https://drafts.csswg.org/selectors-4/#user-pseudos) and are introduced to allow better hooks for styling invalid/valid fields based on a few criteria.
 
-One of the main differences between `:invalid` and `:user-invalid` is when are they applied to the element. The latter being focused on being applied after a significant interaction from the user with the field (e.g. User types in a field, or blur from the field).
+One of the main differences between `:invalid` and `:user-invalid` is when are they applied to the element. :user-invalid is applied after a significant interaction from the user with the field (e.g. user types in a field, or blur from the field).
 
-`amp-form` provides classes (See below) to polyfill these pseudo-classes. `amp-form` also propagates these to ancestors `fieldset`s and `form`.
+`amp-form` provides classes (see below) to polyfill these pseudo-classes. `amp-form` also propagates these to ancestors `fieldset`s and `form`.
 
 
 ## Classes and CSS Hooks
-`amp-form` provides few classes and CSS hooks for publishers to style their forms and inputs.
+`amp-form` provides classes and CSS hooks for publishers to style their forms and inputs.
 
 `.amp-form-submitting`, `.amp-form-submit-success` and `.amp-form-submit-error` are added to indicate the state of the form submission.
 
-`.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be more responsive with the user actions (e.g. highlighting an invalid input after user blurs from it with a red border).
+`.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be responsive to user actions (e.g. highlighting an invalid input with a red border after user blurs from it).
 
 See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html) on using these.
