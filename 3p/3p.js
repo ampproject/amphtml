@@ -154,23 +154,6 @@ export function validateSrcContains(string, src) {
 }
 
 /**
- * Throws a non-interrupting exception if data contains a field not supported
- * by this embed type.
- * @param {!Object} data
- * @param {!Array<string>} allowedFields
- */
-export function checkData(data, allowedFields) {
-  // Throw in a timeout, because we do not want to interrupt execution,
-  // because that would make each removal an instant backward incompatible
-  // change.
-  try {
-    validateData(data, allowedFields);
-  } catch (e) {
-    rethrowAsync(e);
-  }
-}
-
-/**
  * Utility function to perform a potentially asynchronous task
  * exactly once for all frames of a given type and the provide the respective
  * value to all frames.
@@ -213,13 +196,31 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 /**
  * Throws an exception if data does not contains a mandatory field.
  * @param {!Object} data
- * @param {!Array<string>} mandatoryFields
+ * @param {!Array<string|Array<string>>} mandatoryFields
+ * @param opt_optionalFields
+ */
+export function validateData(data, mandatoryFields, opt_optionalFields) {
+  validateDataExists(data, mandatoryFields);
+
+  if (opt_optionalFields) {
+    checkData(data, mandatoryFields.concat(opt_optionalFields));
+  }
+}
+
+/**
+ * Throws an exception if data does not contains a mandatory field.
+ * @param {!Object} data
+ * @param {!Array<string|Array<string>>} mandatoryFields
  */
 export function validateDataExists(data, mandatoryFields) {
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
-    user().assert(data[field],
-        'Missing attribute for %s: %s.', data.type, field);
+    if (Array.isArray(field)) {
+      validateExactlyOne(data, field);
+    } else {
+      user().assert(data[field],
+          'Missing attribute for %s: %s.', data.type, field);
+    }
   }
 }
 
@@ -246,12 +247,30 @@ export function validateExactlyOne(data, alternativeFields) {
 }
 
 /**
- * Throws an exception if data contains a field not supported
+ * Throws a non-interrupting exception if data contains a field not supported
  * by this embed type.
  * @param {!Object} data
  * @param {!Array<string>} allowedFields
  */
-export function validateData(data, allowedFields) {
+export function checkData(data, allowedFields) {
+  // Throw in a timeout, because we do not want to interrupt execution,
+  // because that would make each removal an instant backward incompatible
+  // change.
+  try {
+    checkDataSync(data, allowedFields);
+  } catch (e) {
+    rethrowAsync(e);
+  }
+}
+
+/**
+ * Throws an exception if data contains a field not supported
+ * by this embed type.
+ * @param {!Object} data
+ * @param {!Array<string>} allowedFields
+ * @visibleForTesting
+ */
+export function checkDataSync(data, allowedFields) {
   const defaultAvailableFields = {
     width: true,
     height: true,

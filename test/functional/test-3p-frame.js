@@ -25,7 +25,7 @@ import {
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {resetServiceForTesting} from '../../src/service';
-import {validateData} from '../../3p/3p';
+import {checkDataSync} from '../../3p/3p';
 import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
 
@@ -171,7 +171,7 @@ describe('3p-frame', () => {
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
-      validateData(win.context.data, ['ping', 'testAttr']);
+      checkDataSync(win.context.data, ['ping', 'testAttr']);
       document.head.removeChild(link);
     });
   });

@@ -20,7 +20,7 @@ import {
   validateSrcContains,
   checkData,
   nextTick,
-  validateData,
+  checkDataSync,
   validateDataExists,
   validateExactlyOne,
 } from '../../3p/3p';
@@ -139,8 +139,8 @@ describe('3p', () => {
     }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
 
     expect(() => {
-      // Sync throw, not validateData vs. checkData
-      validateData({
+      // Sync throw, not checkDataSync vs. checkData
+      checkDataSync({
         type: 'TEST',
         foo: true,
         'not-whitelisted2': true,
