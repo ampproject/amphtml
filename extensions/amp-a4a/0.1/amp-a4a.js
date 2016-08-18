@@ -527,11 +527,10 @@ export class AmpA4A extends AMP.BaseElement {
     return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(unusedReason => {
-          // Error so set rendered_ so iframe will not be written on
-          // layoutCallback.
-          // TODO: is this the appropriate action?  Perhaps we should just allow
-          // the ad to be rendered via iframe.
-          this.rendered_ = true;
+          // If an error occurs, let the ad be rendered via iframe after delay.
+          // TODO(taymonbeal): Figure out a more sophisticated test for deciding
+          // whether to retry with an iframe after an ad request failure or just
+          // give up and render the fallback content (or collapse the ad slot).
           return null;
         });
   }
