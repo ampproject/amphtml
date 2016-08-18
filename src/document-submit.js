@@ -51,8 +51,8 @@ export function onDocumentFormSubmit_(e) {
   if (!form || form.tagName != 'FORM') {
     return;
   }
-  const win = form.ownerDocument.defaultView;
 
+  const win = form.ownerDocument.defaultView;
   const action = form.getAttribute('action');
   user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
