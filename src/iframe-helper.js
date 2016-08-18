@@ -313,7 +313,7 @@ export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
 /**
  * Return a promise that resolve when listenForOnce function has listened to the message
  * @param {!Element} iframe
- * @param {typeOfMessage}
+ * @param {string} typeOfMessage
  * @param {boolean=} opt_is3P
  * @return {!Promise}
  */
