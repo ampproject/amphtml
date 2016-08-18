@@ -194,7 +194,15 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 }
 
 /**
- * Throws an exception if data does not contains a mandatory field.
+ * Validates given data. Throws an exception if the data does not
+ * contains a mandatory field. If called with the optional param
+ * opt_optionalFields, it also validates that the data contains no fields other
+ * than mandatory and optional fields.
+ *
+ * Mandatory fields also accept a string Array as an item. All items in that
+ * array are considered as alternatives to each other. So the validation checks
+ * that the data contains exactly one of those alternatives.
+ *
  * @param {!Object} data
  * @param {!Array<string|Array<string>>} mandatoryFields
  * @param {Array<string>=} opt_optionalFields
