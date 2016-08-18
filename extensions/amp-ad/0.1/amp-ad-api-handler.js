@@ -20,12 +20,14 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
+  listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
+import {dev} from '../../../src/log';
 
 export class AmpAdApiHandler {
 
@@ -60,11 +62,17 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
+
+    /** @private {!Promise|null} */
+    this.renderStartPromise_ = null;
+
+    /** @private {!Promise|null} */
+    this.renderStartTimeoutPromise_ = null;
   }
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-
+   * @param {!Element} iframe
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
@@ -123,34 +131,30 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = 'hidden';
     }
 
-    const promise = new Promise(resolve => {
-      listenForOnce(this.iframe_, 'render-start', () => {
-        resolve();
-      }, this.is3p_);
-    });
-
-    this.renderStartPromise_ = timerFor(this.baseInstance_.win).timeoutPromise(
-        2000, promise,
-        'fail to receive render-start event from ad server, timeout');
-
-    this.renderStartPromise_.then(() => {
-      //TODO: report performance
-      if (this.iframe_) {
-        this.iframe_.style.visibility = '';
-      }
-    }).catch(() => {
-      //TODO: report performance
-      if (this.iframe_) {
-        this.iframe_.style.visibility = '';
-      }
-    });
+    this.renderStartPromise_ =
+        listenForOncePromise(this.iframe_, 'render-start', this.is3p_);
 
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
-      return this.renderStartPromise_;
+      this.renderStartTimeoutPromise_ = timerFor(this.baseInstance_.win)
+          .timeoutPromise(200, this.renderStartPromise_,
+          'render-start-event timed out');
+      this.renderStartTimeoutPromise_.then(() => {
+        //TODO: report performance
+        if (this.iframe_) {
+          this.iframe_.style.visibility = '';
+        }
+      }).catch(error => {
+        //TODO: report performance
+        if (this.iframe_) {
+          this.iframe_.style.visibility = '';
+        }
+        dev().error(error);
+      });
+      return this.renderStartTimeoutPromise_;
     });
   }
 

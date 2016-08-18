@@ -35,10 +35,7 @@ describe('test-element-stub', () => {
   });
 
   function getElementStubIframe(name) {
-    return createIframePromise(null, ele => {
-      const win = ele.ownerDocument.defaultView;
-      installPerformanceService(win);
-    }).then(f => {
+    return createIframePromise().then(f => {
       iframe = f;
       const testElement = iframe.doc.createElement(name);
       testElement.setAttribute('width', '300');
