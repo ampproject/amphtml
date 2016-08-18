@@ -572,12 +572,4 @@ describe('getCorsUrl', () => {
         .to.equal('http://example.com/?name=hello&' +
             '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
   });
-
-  it('should override __amp_source_origin if already set', () => {
-    expect(getCorsUrl(window,
-        'http://example.com?a=1&__amp_source_origin=example1.com&b=2', true))
-            .to.equal(
-                'http://example.com/?a=1&' +
-                '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876&b=2');
-  });
 });
