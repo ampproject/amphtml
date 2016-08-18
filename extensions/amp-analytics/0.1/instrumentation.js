@@ -15,7 +15,7 @@
  */
 
 import {dev} from '../../../src/log';
-import {isVisibilitySpecValid} from './visibility-impl';
+import {getElement, isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
@@ -42,10 +42,13 @@ let AnalyticsEventListenerDef;
  * @param {!Window} window Window object to listen on.
  * @param {!JSONType} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
- *          fires.
+ *  fires.
+ * @param {!Element} analyticsElement The element associated with the
+ *  config.
  */
-export function addListener(window, config, listener) {
-  return instrumentationServiceFor(window).addListener(config, listener);
+export function addListener(window, config, listener, analyticsElement) {
+  return instrumentationServiceFor(window).addListener(config, listener,
+      analyticsElement);
 }
 
 /**
@@ -130,13 +133,15 @@ export class InstrumentationService {
   /**
    * @param {!JSONType} config Configuration for instrumentation.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
-   *   occurs.
+   *  occurs.
+   * @param {!Element} analyticsElement The element associated with the
+   *  config.
    */
-  addListener(config, listener) {
+  addListener(config, listener, analyticsElement) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
       this.createVisibilityListener_(listener, config,
-          AnalyticsEventType.VISIBLE);
+          AnalyticsEventType.VISIBLE, analyticsElement);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
         user().error(this.TAG_, 'Missing required selector on click trigger');
@@ -221,9 +226,11 @@ export class InstrumentationService {
    *   occurs.
    * @param {!JSONType} config Configuration for instrumentation.
    * @param {AnalyticsEventType} eventType Event type for which the callback is triggered.
+   * @param {!Element} analyticsElement The element assoicated with the
+   *   config.
    * @private
    */
-  createVisibilityListener_(callback, config, eventType) {
+  createVisibilityListener_(callback, config, eventType, analyticsElement) {
     dev().assert(eventType == AnalyticsEventType.VISIBLE ||
         eventType == AnalyticsEventType.HIDDEN,
         'createVisibilityListener should be called with visible or hidden ' +
@@ -237,18 +244,13 @@ export class InstrumentationService {
 
       visibilityFor(this.win_).then(visibility => {
         visibility.listenOnce(spec, vars => {
-          if (spec['selector']) {
-            const attr = getDataParamsFromAttributes(
-              this.win_.document.getElementById(spec['selector'].slice(1)),
-              null,
-              VARIABLE_DATA_ATTRIBUTE_KEY
-            );
-            for (const key in attr) {
-              vars[key] = attr[key];
-            }
+          const attr = getDataParamsFromAttributes(getElement(spec['selector']),
+              null, VARIABLE_DATA_ATTRIBUTE_KEY);
+          for (const key in attr) {
+            vars[key] = attr[key];
           }
           callback(new AnalyticsEvent(eventType, vars));
-        }, shouldBeVisible);
+        }, shouldBeVisible, analyticsElement);
       });
     } else {
       if (this.viewer_.isVisible() == shouldBeVisible) {

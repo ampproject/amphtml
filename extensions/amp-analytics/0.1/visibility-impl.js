@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {closestByTag} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
@@ -70,7 +71,7 @@ const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
  * @private
  */
 export function isPositiveNumber_(num) {
-  return num === undefined || Math.sign(num) >= 0;
+  return num === undefined || (typeof num == 'number' && Math.sign(num) >= 0);
 }
 
 /**
@@ -83,7 +84,8 @@ export function isPositiveNumber_(num) {
  * @return {boolean}
  */
 export function isValidPercentage_(num) {
-  return num === undefined || (Math.sign(num) >= 0 && num <= 100);
+  return num === undefined ||
+      (typeof num == 'number' && Math.sign(num) >= 0 && num <= 100);
 }
 
 /**
@@ -98,7 +100,8 @@ export function isVisibilitySpecValid(config) {
   }
 
   const spec = config['visibilitySpec'];
-  if (!spec['selector'] || spec['selector'][0] != '#') {
+  const selector = spec['selector'];
+  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
     user().error('Visibility spec requires an id selector');
     return false;
   }
@@ -135,6 +138,30 @@ export function isVisibilitySpecValid(config) {
   return true;
 }
 
+/**
+ * Returns the element that matches the selector. If the selector is an
+ * id, the element with that id is returned. If the selector is a tag name, an
+ * ancestor of the analytics element with that tag name is returned.
+ *
+ * @param {string} selector The selector for the element to track.
+ * @param {!Element} el Element whose ancestors to search.
+ * @param {!String} selectionMethod The method to use to find the element..
+ * @return {?Element} Element corresponding to the selector if found.
+ */
+export function getElement(selector, el, selectionMethod) {
+  if (!el) {
+    return null;
+  }
+  if (selectionMethod == 'closest') {
+    // Only tag names are supported currently.
+    return closestByTag(el, selector);
+  } else if (selectionMethod == 'scope') {
+    return el.querySelector(selector);
+  } else if (selector[0] == '#') {
+    return el.parentDocument.getElementById(selector.slice(1));
+  }
+  return null;
+}
 
 /**
  * This type signifies a callback that gets called when visibility conditions
@@ -236,11 +263,21 @@ export class Visibility {
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
+   * @param {Element} analyticsElement The amp-analytics element that the
+   *  config is associated with.
    */
-  listenOnce(config, callback, shouldBeVisible) {
-    const element = this.win_.document.getElementById(config['selector']
-        .slice(1));
+  listenOnce(config, callback, shouldBeVisible, analyticsElement) {
+    const selector = config['selector'];
+    const element = getElement(selector, analyticsElement,
+        config['selectionMethod']);
+    if (!element) {
+      user().error('Element not found for visibilitySpec: ' + selector);
+    }
     const res = this.resourcesService_.getResourceForElement(element);
+    if (!res) {
+      user().error('Visibility tracking not supported on element: ' + element);
+    }
+
     const resId = res.getId();
 
     this.registerForViewportEvents_();
