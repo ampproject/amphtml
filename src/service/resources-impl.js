@@ -24,7 +24,7 @@ import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -62,14 +62,17 @@ let ChangeSizeRequestDef;
 
 export class Resources {
   /**
-   * @param {!Window} window
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = window;
+    this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = installViewerService(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -192,7 +195,7 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.onReady(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -270,9 +273,9 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    waitForBody(this.win.document, () => {
+    this.ampdoc.onBody(body => {
       this.vsync_.mutate(() => {
-        this.win.document.body.classList.toggle(clazz, on);
+        body.classList.toggle(clazz, on);
       });
     });
   }
@@ -1616,9 +1619,9 @@ function elements_(elements) {
 export let SizeDef;
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
-export function installResourcesService(win) {
-  return fromClass(win, 'resources', Resources);
+export function installResourcesServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'resources', Resources);
 };

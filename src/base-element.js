@@ -16,7 +16,7 @@
 
 import {Layout} from './layout';
 import {preconnectFor} from './preconnect';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
@@ -148,7 +148,7 @@ export class BaseElement {
     this.preconnect = preconnectFor(this.win);
 
     /** @private {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(this.win);
+    this.resources_ = resourcesForDoc(this.element);// XXX: move out of here into custom element
   }
 
   /**
