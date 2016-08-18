@@ -384,6 +384,13 @@ describe('addParamsToUrl', () => {
     url = addParamsToUrl(url, params);
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
+
+    expect(addParamsToUrl('http://example.com', {
+      firstname: 'Cool',
+      lastname: 'Beans',
+      interests: ['Basketball', 'Food', 'Running'],
+    })).to.equal('http://example.com?firstname=Cool&lastname=Beans&' +
+        'interests=Basketball&interests=Food&interests=Running');
   });
 
   it('should keep host and path intact', () => {

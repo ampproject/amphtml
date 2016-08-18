@@ -234,9 +234,15 @@ export class AmpForm {
         continue;
       }
 
-      if (input.type == 'checkbox' || input.type == 'radio') {
-        data[input.name] = input.checked ? input.value : '';
-      } else {
+
+      if (input.type != 'checkbox' && input.type != 'radio') {
+        data[input.name] = input.value;
+      } else if (input.type == 'checkbox' && input.checked) {
+        if (data[input.name] === undefined) {
+          data[input.name] = [];
+        }
+        data[input.name].push(input.value);
+      } else if (input.type == 'radio' && input.checked) {
         data[input.name] = input.value;
       }
     }

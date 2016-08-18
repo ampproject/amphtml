@@ -587,6 +587,93 @@ describe('amp-form', () => {
       });
     });
 
+
+    it('should properly serialize inputs to query params', () => {
+      return getAmpForm().then(ampForm => {
+        const form = ampForm.form_;
+        ampForm.method_ = 'GET';
+        form.setAttribute('method', 'GET');
+        sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
+
+        // Group of Radio buttons.
+        const genderFS = document.createElement('fieldset');
+        const maleRadio = document.createElement('input');
+        maleRadio.setAttribute('type', 'radio');
+        maleRadio.setAttribute('name', 'gender');
+        maleRadio.setAttribute('value', 'Male');
+        genderFS.appendChild(maleRadio);
+        const femaleRadio = document.createElement('input');
+        femaleRadio.setAttribute('type', 'radio');
+        femaleRadio.setAttribute('name', 'gender');
+        femaleRadio.setAttribute('value', 'Female');
+        genderFS.appendChild(femaleRadio);
+        form.appendChild(genderFS);
+
+        // Group of Checkboxes.
+        const interestsFS = document.createElement('fieldset');
+        const basketballCB = document.createElement('input');
+        basketballCB.setAttribute('type', 'checkbox');
+        basketballCB.setAttribute('name', 'interests');
+        basketballCB.setAttribute('value', 'Basketball');
+        interestsFS.appendChild(basketballCB);
+        const footballCB = document.createElement('input');
+        footballCB.setAttribute('type', 'checkbox');
+        footballCB.setAttribute('name', 'interests');
+        footballCB.setAttribute('value', 'Football');
+        interestsFS.appendChild(footballCB);
+        const foodCB = document.createElement('input');
+        foodCB.setAttribute('type', 'checkbox');
+        foodCB.setAttribute('name', 'interests');
+        foodCB.setAttribute('value', 'Food');
+        interestsFS.appendChild(foodCB);
+        form.appendChild(interestsFS);
+
+        // Select w/ options.
+        const citySelect = document.createElement('select');
+        citySelect.setAttribute('name', 'city');
+        const sfOption = document.createElement('option');
+        sfOption.setAttribute('value', 'San Francisco');
+        citySelect.appendChild(sfOption);
+        const mtvOption = document.createElement('option');
+        mtvOption.setAttribute('value', 'Mountain View');
+        citySelect.appendChild(mtvOption);
+        const nyOption = document.createElement('option');
+        nyOption.setAttribute('value', 'New York');
+        citySelect.appendChild(nyOption);
+        form.appendChild(citySelect);
+
+        const event = {
+          stopImmediatePropagation: sandbox.spy(),
+          target: ampForm.form_,
+          preventDefault: sandbox.spy(),
+        };
+
+        ampForm.handleSubmit_(event);
+        expect(event.preventDefault).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller&city=San%20Francisco');
+
+        ampForm.setState_('submit-success');
+        ampForm.xhr_.fetchJson.reset();
+        foodCB.checked = true;
+        footballCB.checked = true;
+        ampForm.handleSubmit_(event);
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller' +
+            '&interests=Football&interests=Food&city=San%20Francisco');
+
+        ampForm.setState_('submit-success');
+        femaleRadio.checked = true;
+        ampForm.xhr_.fetchJson.reset();
+        ampForm.handleSubmit_(event);
+        expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
+        expect(ampForm.xhr_.fetchJson).to.be.calledWith(
+            'https://example.com?name=John%20Miller&gender=Female' +
+            '&interests=Football&interests=Food&city=San%20Francisco');
+      });
+    });
   });
 
   describe('User Validity', () => {
