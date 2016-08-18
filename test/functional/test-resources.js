@@ -1203,7 +1203,7 @@ describe('Resources changeSize', () => {
 });
 
 
-describe('Resources mutateElement', () => {
+describe('Resources mutateElement and collapse', () => {
 
   function createElement(rect, isAmp) {
     return {
@@ -1247,6 +1247,7 @@ describe('Resources mutateElement', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
+    resource.completeCollapse = sandbox.spy();
     return resource;
   }
 
@@ -1370,6 +1371,33 @@ describe('Resources mutateElement', () => {
       expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
       expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
     });
+  });
+
+  it('should complete collapse and trigger relayout', () => {
+    const oldTop = resource1.getLayoutBox().top;
+    resources.collapseElement(resource1.element);
+    expect(resource1.completeCollapse.callCount).to.equal(1);
+    expect(relayoutTopStub.callCount).to.equal(1);
+    expect(relayoutTopStub.args[0][0]).to.equal(oldTop);
+  });
+
+  it('should ignore relayout on an already collapsed element', () => {
+    resource1.layoutBox_.width = 0;
+    resource1.layoutBox_.height = 0;
+    resources.collapseElement(resource1.element);
+    expect(resource1.completeCollapse.callCount).to.equal(1);
+    expect(relayoutTopStub.callCount).to.equal(0);
+  });
+
+  it('should notify owner', () => {
+    const owner = {
+      contains: () => true,
+      collapsedCallback: sandbox.spy(),
+    };
+    Resource.setOwner(resource1.element, owner);
+    resources.collapseElement(resource1.element);
+    expect(owner.collapsedCallback.callCount).to.equal(1);
+    expect(owner.collapsedCallback.args[0][0]).to.equal(resource1.element);
   });
 });
 

@@ -32,7 +32,6 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
-import {toggle} from '../style';
 
 
 const TAG_ = 'Resources';
@@ -656,13 +655,18 @@ export class Resources {
     });
   }
 
+  /**
+   * Collapses the element: ensures that it's `display:none`, notifies its
+   * owner and updates the layout box.
+   * @param {!Element} element
+   */
   collapseElement(element) {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);
     }
-    toggle(element, false);
+    resource.completeCollapse();
 
     const owner = resource.getOwner();
     if (owner) {

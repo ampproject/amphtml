@@ -983,8 +983,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       if (this.sourceImage_) {
         this.sourceImage_.classList.remove('-amp-ghost');
       }
+      this./*OK*/collapse();
       st.setStyles(this.element, {
-        display: 'none',
         opacity: '',
       });
       st.setStyles(this.container_, {opacity: ''});

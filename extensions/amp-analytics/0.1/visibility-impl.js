@@ -289,7 +289,8 @@ export class Visibility {
       const change = res.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
-      const visible = ir.width * ir.height * 100 / (br.height * br.width);
+      const visible = br.height * br.width == 0 ? 0 :
+          ir.width * ir.height * 100 / (br.height * br.width);
 
       const listeners = this.listeners_[res.getId()];
       for (let c = listeners.length - 1; c >= 0; c--) {

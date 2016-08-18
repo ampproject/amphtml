@@ -34,6 +34,7 @@ describe('Resource', () => {
 
     element = {
       tagName: 'AMP-AD',
+      style: {},
       isBuilt: () => false,
       isUpgraded: () => false,
       prerenderAllowed: () => false,
@@ -296,6 +297,22 @@ describe('Resource', () => {
         .once();
     resource.measure();
     expect(resource.isFixed()).to.be.true;
+  });
+
+  it('should hide and update layout box on collapse', () => {
+    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    resource.isFixed_ = true;
+    elementMock.expects('updateLayoutBox')
+        .withExactArgs(sinon.match(data => {
+          return data.width == 0 && data.height == 0;
+        }))
+        .once();
+
+    resource.completeCollapse();
+    expect(resource.element.style.display).to.equal('none');
+    expect(resource.getLayoutBox().width).to.equal(0);
+    expect(resource.getLayoutBox().height).to.equal(0);
+    expect(resource.isFixed()).to.be.false;
   });
 
 
