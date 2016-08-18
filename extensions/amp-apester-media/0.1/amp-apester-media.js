@@ -197,7 +197,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       });
   }
 
-  /*/!** @override *!/
+  /** @override */
   createPlaceholderCallback() {
     const img = this.element.ownerDocument.createElement('amp-img');
     const placeholder = this.element.ownerDocument.createElement('div');
@@ -211,7 +211,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     img.setAttribute('noloading', '');
     placeholder.appendChild(img);
     return placeholder;
-  }*/
+  }
 
   /** @override */
   unlayoutOnPause() {
