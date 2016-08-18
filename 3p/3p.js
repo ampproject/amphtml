@@ -197,19 +197,9 @@ export function computeInMasterFrame(global, taskId, work, cb) {
  * Throws an exception if data does not contains a mandatory field.
  * @param {!Object} data
  * @param {!Array<string|Array<string>>} mandatoryFields
- * @param {!Array<string>} opt_optionalFields
+ * @param {Array<string>=} opt_optionalFields
  */
 export function validateData(data, mandatoryFields, opt_optionalFields) {
-  validateDataExists(data, mandatoryFields, opt_optionalFields);
-}
-
-/**
- * Throws an exception if data does not contains a mandatory field.
- * @param {!Object} data
- * @param {!Array<string|Array<string>>} mandatoryFields
- * @param {!Array<string>} opt_optionalFields
- */
-export function validateDataExists(data, mandatoryFields, opt_optionalFields) {
   let allowedFields = opt_optionalFields || [];
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
@@ -223,7 +213,7 @@ export function validateDataExists(data, mandatoryFields, opt_optionalFields) {
     }
   }
   if (opt_optionalFields) {
-    checkData(data, allowedFields);
+    validateAllowedFields(data, allowedFields);
   }
 }
 
@@ -233,7 +223,7 @@ export function validateDataExists(data, mandatoryFields, opt_optionalFields) {
  * @param {!Object} data
  * @param {!Array<string>} alternativeFields
  */
-export function validateExactlyOne(data, alternativeFields) {
+function validateExactlyOne(data, alternativeFields) {
   let countFileds = 0;
 
   for (let i = 0; i < alternativeFields.length; i++) {
@@ -255,25 +245,7 @@ export function validateExactlyOne(data, alternativeFields) {
  * @param {!Object} data
  * @param {!Array<string>} allowedFields
  */
-export function checkData(data, allowedFields) {
-  // Throw in a timeout, because we do not want to interrupt execution,
-  // because that would make each removal an instant backward incompatible
-  // change.
-  try {
-    checkDataSync(data, allowedFields);
-  } catch (e) {
-    rethrowAsync(e);
-  }
-}
-
-/**
- * Throws an exception if data contains a field not supported
- * by this embed type.
- * @param {!Object} data
- * @param {!Array<string>} allowedFields
- * @visibleForTesting
- */
-export function checkDataSync(data, allowedFields) {
+function validateAllowedFields(data, allowedFields) {
   const defaultAvailableFields = {
     width: true,
     height: true,
@@ -285,12 +257,20 @@ export function checkDataSync(data, allowedFields) {
     mode: true,
     consentNotificationId: true,
   };
-  for (const field in data) {
-    if (!data.hasOwnProperty(field) ||
-        field in defaultAvailableFields) {
-      continue;
+
+  // Throw in a timeout, because we do not want to interrupt execution,
+  // because that would make each removal an instant backward incompatible
+  // change.
+  try {
+    for (const field in data) {
+      if (!data.hasOwnProperty(field) ||
+          field in defaultAvailableFields) {
+        continue;
+      }
+      user().assert(allowedFields.indexOf(field) != -1,
+          'Unknown attribute for %s: %s.', data.type, field);
     }
-    user().assert(allowedFields.indexOf(field) != -1,
-        'Unknown attribute for %s: %s.', data.type, field);
+  } catch (e) {
+    rethrowAsync(e);
   }
 }

@@ -18,12 +18,8 @@ import {
   computeInMasterFrame,
   validateSrcPrefix,
   validateSrcContains,
-  checkData,
   nextTick,
-  checkDataSync,
   validateData,
-  validateDataExists,
-  validateExactlyOne,
 } from '../../3p/3p';
 import * as sinon from 'sinon';
 
@@ -74,102 +70,6 @@ describe('3p', () => {
 
   it('should not throw if source contains /addyn/', () => {
     validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/');
-  });
-
-  // TODO(lannka, #4598): remove tests for deprecated methods.
-  it('should accept good host supplied data', () => {
-    checkData({
-      width: '',
-      height: false,
-      type: true,
-      referrer: true,
-      canonicalUrl: true,
-      pageViewId: true,
-      location: true,
-      mode: true,
-    }, []);
-    clock.tick(1);
-
-    checkData({
-      width: '',
-      foo: true,
-      bar: true,
-    }, ['foo', 'bar']);
-    clock.tick(1);
-  });
-
-  it('should accept supplied data', () => {
-    validateDataExists({
-      width: '',
-      height: false,
-      type: 'taboola',
-      referrer: true,
-      canonicalUrl: true,
-      pageViewId: true,
-      location: true,
-      mode: true,
-    }, []);
-    clock.tick(1);
-
-    validateDataExists({
-      width: '',
-      type: 'taboola',
-      foo: true,
-      bar: true,
-    }, ['foo', 'bar']);
-    clock.tick(1);
-  });
-
-  it('should accept supplied data', () => {
-    validateExactlyOne({
-      width: '',
-      type: 'taboola',
-      foo: true,
-      bar: true,
-    }, ['foo', 'day', 'night']);
-    clock.tick(1);
-  });
-
-  it('should complain about unexpected args', () => {
-    checkData({
-      type: 'TEST',
-      foo: true,
-      'not-whitelisted': true,
-    }, ['foo']);
-    expect(() => {
-      clock.tick(1);
-    }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
-
-    expect(() => {
-      // Sync throw, not checkDataSync vs. checkData
-      checkDataSync({
-        type: 'TEST',
-        foo: true,
-        'not-whitelisted2': true,
-      }, ['not-whitelisted', 'foo']);
-    }).to.throw(/Unknown attribute for TEST: not-whitelisted2./);
-  });
-
-  it('should complain about missing args', () => {
-
-    expect(() => {
-      validateDataExists({
-        width: '',
-        type: 'xxxxxx',
-        foo: true,
-        bar: true,
-      }, ['foo', 'bar', 'persika']);
-    }).to.throw(/Missing attribute for xxxxxx: persika./);
-
-    expect(() => {
-      validateExactlyOne({
-        width: '',
-        type: 'xxxxxx',
-        foo: true,
-        bar: true,
-      }, ['red', 'green', 'blue']);
-    }).to.throw(
-        /xxxxxx must contain exactly one of attributes: red, green, blue./);
   });
 
   describe('validateData', () => {
