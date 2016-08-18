@@ -43,16 +43,16 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {?JSONType} */
     this.data_ = null;
 
-    /** @private {?string} */
+    /** @const @private {?string} */
     this.inlineData_ = this.getInlineData_();
 
-    /** @private {?string} */
+    /** @const @private {?string} */
     this.src_ = this.element.getAttribute('src');
 
-    /** @private {boolean} */
+    /** @const @private {boolean} */
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
 
-    /** @private {boolean} */
+    /** @const @private {boolean} */
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
 
     /** @private {number} */
@@ -62,7 +62,7 @@ export class AmpVizVega extends AMP.BaseElement {
     this.measuredHeight_ = 0;
 
     /**
-     * @private {Object}
+     * @const @private {!Object}
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
