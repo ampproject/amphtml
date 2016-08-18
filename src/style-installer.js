@@ -16,6 +16,7 @@
 
 import {setStyles} from './style';
 import {waitForBody} from './dom';
+import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {waitForExtensions} from './render-delaying-extensions';
 import {dev} from './log';
@@ -159,6 +160,9 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
     }
   };
   waitForBody(doc, () => {
+    const perf = performanceFor(doc.defaultView);
+    perf.tick('mvb');
+    perf.flush();
     const extensionsPromise = opt_waitForExtensions ?
         waitForExtensions(doc.defaultView) : null;
     if (extensionsPromise) {
