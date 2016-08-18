@@ -184,11 +184,13 @@ export function serializeQueryString(params) {
     if (v == null) {
       continue;
     } else if (isArray(v)) {
+      const sv = /** @type {string} */ (v[i]);
       for (let i = 0; i < v.length; i++) {
         s.push(`${encodeURIComponent(k)}=${encodeURIComponent(v[i])}`);
       }
     } else {
-      s.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+      const sv = /** @type {string} */ (v);
+      s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
     }
   }
   return s.join('&');
