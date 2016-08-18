@@ -68,6 +68,16 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
   });
 
+  it('should add __amp_source_origin to action before submit', () => {
+    expect(evt.target.getAttribute('action')).to.not.contain(
+        '__amp_source_origin');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('action')).to.contain(
+        '__amp_source_origin');
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw(
+        /Source origin is not allowed in/);
+  });
+
   it('should do nothing if already prevented', () => {
     evt.defaultPrevented = true;
     onDocumentFormSubmit_(evt);

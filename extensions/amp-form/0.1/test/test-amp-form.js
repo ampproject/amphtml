@@ -95,24 +95,6 @@ describe('amp-form', () => {
     expect(() => new AmpForm(form)).to.not.throw;
   });
 
-  it('should assert valid action and append __amp_source_origin to it', () => {
-    const form = getForm();
-    form.removeAttribute('action');
-    expect(() => new AmpForm(form)).to.throw(
-        /form action is required/);
-    form.setAttribute('action', 'http://example.com');
-    expect(() => new AmpForm(form)).to.throw(
-        /form action must start with/);
-    form.setAttribute('action', 'https://cdn.ampproject.org/example.com');
-    expect(() => new AmpForm(form)).to.throw(
-        /form action should not be on cdn\.ampproject\.org/);
-    form.setAttribute('action', 'https://example.com');
-    expect(() => new AmpForm(form)).to.not.throw;
-    new AmpForm(form);
-    expect(form.getAttribute('action')).to.contain(
-        '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
-  });
-
   it('should assert valid action-xhr when provided', () => {
     const form = getForm();
     form.setAttribute('action-xhr', 'http://example.com');

@@ -16,7 +16,7 @@
 
 import {startsWith} from './string';
 import {user} from './log';
-import {assertHttpsUrl} from './url';
+import {assertHttpsUrl, getCorsUrl} from './url';
 import {urls} from './config';
 
 
@@ -51,12 +51,18 @@ export function onDocumentFormSubmit_(e) {
   if (!form || form.tagName != 'FORM') {
     return;
   }
+  const win = form.ownerDocument.defaultView;
 
   const action = form.getAttribute('action');
   user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
   user().assert(!startsWith(action, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
+  // Update the form non-xhr action to add `__amp_source_origin` parameter.
+  // This allows publishers to understand where the request is coming from.
+  if (action.indexOf('__amp_source_origin=') == -1) {
+    form.setAttribute('action', getCorsUrl(win, action));
+  }
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);
