@@ -466,11 +466,11 @@ export function calculateExtensionScriptUrl(path, base, extensionId, isTest,
   if (getMode().localDev) {
     if ((isTest && !isUsingCompiledJs)
         || path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
-      return base + `/dist/v0/${extensionId}-0.1.max.js`;
+      return `${base}/dist/v0/${extensionId}-0.1.max.js`;
     }
     if ((isTest && isUsingCompiledJs)
         || path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
-      return base + `/dist/v0/${extensionId}-0.1.js`;
+      return `${base}/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
