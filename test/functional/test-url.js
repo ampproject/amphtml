@@ -239,6 +239,10 @@ describe('serializeQueryString', () => {
   it('should encode values and keys', () => {
     expect(serializeQueryString({'a+b': 'A+B'})).to.equal('a%2Bb=A%2BB');
   });
+  it('should serialize multiple valued parameters', () => {
+    expect(serializeQueryString({a: [1,2,3], b: true})).to.equal(
+        'a=1&a=2&a=3&b=true');
+  });
 });
 
 
