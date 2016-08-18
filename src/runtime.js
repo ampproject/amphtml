@@ -34,6 +34,7 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
+import {installLightboxManagerForDoc} from './service/lightbox-manager-impl';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installShadowDoc} from './service/ampdoc-impl';
@@ -93,6 +94,7 @@ export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installLightboxManagerForDoc(ampdoc);
 }
 
 
