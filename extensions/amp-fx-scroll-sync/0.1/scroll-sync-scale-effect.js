@@ -46,13 +46,13 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
     this.scrollMax_ = getLengthNumeral(endingPosition);
     this.endScale_ = getLengthNumeral(endScale);
     if (scaleOrigin) {
-      setStyle(this.element, 'transform-origin', scaleOrigin);
+      setStyle(this.element_, 'transform-origin', scaleOrigin);
     }
   }
 
   /** @override */
   transition(position) {
     const scale = 1 - this.endScale_ * position;
-    setStyle(this.element, 'transform', `scale(${scale})`);
+    setStyle(this.element_, 'transform', `scale(${scale})`);
   }
 }

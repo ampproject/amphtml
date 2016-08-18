@@ -49,6 +49,6 @@ export class ScrollSyncRotateEffect extends ScrollSyncEffect {
   /** @override */
   transition(position) {
     const angle = position * this.rotateAngle_;
-    setStyle(this.element, 'transform', `rotate(${angle}deg)`);
+    setStyle(this.element_, 'transform', `rotate(${angle}deg)`);
   }
 }

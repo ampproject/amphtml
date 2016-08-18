@@ -17,7 +17,7 @@
 export class ScrollSyncEffect {
   constructor(element) {
     /** @private {Element} */
-    this.element = element;
+    this.element_ = element;
     /** @private {number} */
     this.scrollMin_ = 0;
     /** @private {number} */

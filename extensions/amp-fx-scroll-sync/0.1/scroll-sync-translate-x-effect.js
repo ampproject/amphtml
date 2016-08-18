@@ -54,7 +54,7 @@ export class ScrollSyncTranslateXEffect extends ScrollSyncEffect {
   /** @override */
   transition(position) {
     const x = position * this.translateX_;
-    setStyle(this.element, 'transform',
+    setStyle(this.element_, 'transform',
         `translateX(${x}${this.translateXUnit_})`);
   }
 }
