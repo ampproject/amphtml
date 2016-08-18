@@ -221,6 +221,26 @@ class AmpYoutube extends AMP.BaseElement {
       });
     });
   }
+
+  /** @override */
+  getCastInfo() {
+    return {
+      type: 'YOUTUBE',
+      playable: true,
+      thumbImage: 'https://i.ytimg.com/vi/' +
+          encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine',
+      thumbText: null,
+      source: this.videoid_,
+    };
+  }
+
+  /** @override */
+  toThumbnail() {
+    const img = this.element.ownerDocument.createElement('img');
+    img.src = 'https://i.ytimg.com/vi/' +
+        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+    return img;
+  }
 };
 
 AMP.registerElement('amp-youtube', AmpYoutube);

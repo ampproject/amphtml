@@ -65,6 +65,7 @@ function buildExtensions(options) {
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-castmode', '0.1', true, options);
   buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-experiment', '0.1', false, options);
@@ -199,6 +200,9 @@ function watch() {
   buildExtensions({
     watch: true,
   });
+  buildCastReceiver({
+    watch: true,
+  });
   compile(true);
 }
 
@@ -314,6 +318,7 @@ function dist() {
   compile(false, true, true);
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
+  buildCastReceiver({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
 }
@@ -393,8 +398,9 @@ var activeBundleOperationCount = 0;
  * @param {string} srcFilename Name of the JS source file
  * @param {string} destDir Destination folder for output script
  * @param {?Object} options
+ * @param {function()=} opt_done
  */
-function compileJs(srcDir, srcFilename, destDir, options) {
+function compileJs(srcDir, srcFilename, destDir, options, opt_done) {
   options = options || {};
   if (options.minify) {
     function minify() {
@@ -452,6 +458,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
           $$.util.log($$.util.colors.green('All current JS updates done.'));
+        }
+        if (opt_done) {
+          opt_done();
         }
       });
   }
@@ -532,6 +541,97 @@ function buildExperiments(options) {
           checkTypes: options.checkTypes,
         });
       });
+}
+
+
+/**
+ * Build all the AMP Cast receiver.
+ *
+ * @param {!Object} options
+ * @param {function()=} opt_done
+ */
+function buildCastReceiver(options, opt_done) {
+  options = options || {};
+  $$.util.log('Bundling receiver.html/js');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return $$.util.log($$.util.colors.red('copy error: ', err));
+    }
+    $$.util.log($$.util.colors.green('copied ' + name));
+  }
+
+  var path = 'extensions/amp-castmode/0.1/receiver';
+  var htmlPath = path + '/receiver.html';
+  var jsPath = path + '/receiver.js';
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    $$.watch(path + '/*', function() {
+      buildCastReceiver(copy);
+    });
+  }
+
+  // Build JS.
+  var builtName = 'receiver.max.js';
+  var minifiedName = 'receiver.js';
+  return compileJs(path + '/', 'receiver.js', './build/receiver/', {
+    watch: false,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    toName: builtName,
+    minifiedName: minifiedName,
+    checkTypes: options.checkTypes,
+  }, opt_done);
+}
+
+/**
+ * @param {!Object} options
+ */
+function deployCastReceiver(options) {
+  var destDir = './build/receiver';
+  // Build JS.
+  buildCastReceiver({
+    minify: false,
+    preventRemoveAndMakeDir: true
+  }, function() {
+    // Build html
+    var path = 'extensions/amp-castmode/0.1/receiver';
+    var htmlPath = path + '/receiver.html';
+    var html = fs.readFileSync(htmlPath, 'utf8');
+    var js = fs.readFileSync(destDir + '/receiver.max.js');
+    $$.util.log('Processing ' + htmlPath);
+    var deployHtml = html
+        .replace(
+          '<script>window.DEBUG=true;</script>',
+          '<script>window.DEBUG=false;</script>')
+        .replace(
+          '<script>window.VERSION=\'0.1\';</script>',
+          '<script>window.VERSION=\'0.1-' + Date.now() + '\';</script>')
+        .replace(
+          '<script type="text/javascript" src="../../../../build/receiver/receiver.max.js"></script>',
+          '<script>' + js + '</script>')
+        ;
+    fs.writeFileSync(destDir + '/receiver.html', deployHtml, 'utf-8');
+    mkdirSync(destDir + '/static');
+    fs.writeFileSync(destDir + '/static/receiver.html', deployHtml, 'utf-8');
+    $$.util.log('Built receiver.html');
+
+    fs.copySync(path + '/app.yaml', destDir + '/app.yaml');
+    $$.util.log('Built app.yaml');
+
+    $$.util.log('Run: appcfg.py update build/receiver --oauth2');
+  });
 }
 
 
@@ -675,3 +775,5 @@ gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
 gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);
+gulp.task('build-receiver', 'Builds cast receiver', buildCastReceiver);
+gulp.task('deploy-receiver', 'Builds cast receiver', deployCastReceiver);

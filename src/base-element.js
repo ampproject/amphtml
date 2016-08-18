@@ -769,4 +769,20 @@ export class BaseElement {
    * @protected
    */
   onLayoutMeasure() {}
+
+  /**
+   * @return {?{...}}
+   * @protected
+   */
+  getCastInfo() {
+    return null;
+  }
+
+  /**
+   * @return {?Element}
+   * @protected
+   */
+  toThumbnail() {
+    return null;
+  }
 };
