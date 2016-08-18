@@ -15,7 +15,7 @@
  */
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
-import {setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {getLengthNumeral, getLengthUnitsOrPercent} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -54,7 +54,7 @@ export class ScrollSyncTranslateXEffect extends ScrollSyncEffect {
   /** @override */
   transition(position) {
     const x = position * this.translateX_;
-    setStyles(this.element,
-        {'transform': `translateX(${x}${this.translateXUnit_})`});
+    setStyle(this.element, 'transform',
+        `translateX(${x}${this.translateXUnit_})`);
   }
 }

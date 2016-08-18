@@ -15,7 +15,7 @@
  */
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
-import {setStyles} from '../../../src/style';
+import {setStyle} from '../../../src/style';
 import {getLengthNumeral} from '../../../src/layout';
 import {user} from '../../../src/log';
 
@@ -49,6 +49,6 @@ export class ScrollSyncRotateEffect extends ScrollSyncEffect {
   /** @override */
   transition(position) {
     const angle = position * this.rotateAngle_;
-    setStyles(this.element, {'transform': `rotate(${angle}deg)`});
+    setStyle(this.element, 'transform', `rotate(${angle}deg)`);
   }
 }
