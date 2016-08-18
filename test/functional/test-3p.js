@@ -21,6 +21,7 @@ import {
   checkData,
   nextTick,
   checkDataSync,
+  validateData,
   validateDataExists,
   validateExactlyOne,
 } from '../../3p/3p';
@@ -75,6 +76,7 @@ describe('3p', () => {
     validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/');
   });
 
+  // TODO(lannka, #4598): remove tests for deprecated methods.
   it('should accept good host supplied data', () => {
     checkData({
       width: '',
@@ -168,6 +170,100 @@ describe('3p', () => {
       }, ['red', 'green', 'blue']);
     }).to.throw(
         /xxxxxx must contain exactly one of attributes: red, green, blue./);
+  });
+
+  describe('validateData', () => {
+
+    it('should check mandatory fields', () => {
+      validateData({
+        width: '',
+        height: false,
+        type: 'taboola',
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, []);
+      clock.tick(1);
+
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, ['foo', 'bar']);
+      clock.tick(1);
+
+      expect(() => {
+        validateData({
+          width: '',
+          type: 'xxxxxx',
+          foo: true,
+          bar: true,
+        }, ['foo', 'bar', 'persika']);
+      }).to.throw(/Missing attribute for xxxxxx: persika./);
+
+      expect(() => {
+        validateData({
+          width: '',
+          type: 'xxxxxx',
+          foo: true,
+          bar: true,
+        }, [['red', 'green', 'blue']]);
+      }).to.throw(
+          /xxxxxx must contain exactly one of attributes: red, green, blue./);
+    });
+
+    it('should check mandatory fields with alternative options', () => {
+      validateData({
+        width: '',
+        type: 'taboola',
+        foo: true,
+        bar: true,
+      }, [['foo', 'day', 'night']]);
+      clock.tick(1);
+    });
+
+    it('should check optional fields', () => {
+      validateData({
+        width: '',
+        height: false,
+        type: true,
+        referrer: true,
+        canonicalUrl: true,
+        pageViewId: true,
+        location: true,
+        mode: true,
+      }, /* mandatory */[], /* optional */[]);
+      clock.tick(1);
+
+      validateData({
+        width: '',
+        foo: true,
+        bar: true,
+      }, /* mandatory */[], ['foo', 'bar']);
+      clock.tick(1);
+
+      validateData({
+        type: 'TEST',
+        foo: true,
+        'not-whitelisted': true,
+      }, [], ['foo']);
+
+      expect(() => {
+        clock.tick(1);
+      }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+    });
+
+    it('should check mandatory and optional fields', () => {
+      validateData({
+        width: '',
+        foo: true,
+        bar: true,
+        halo: 'world',
+      }, [['foo', 'fo'], 'bar'], ['halo']);
+    });
   });
 
   it('should run in next tick', () => {

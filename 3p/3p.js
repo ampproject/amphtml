@@ -197,30 +197,33 @@ export function computeInMasterFrame(global, taskId, work, cb) {
  * Throws an exception if data does not contains a mandatory field.
  * @param {!Object} data
  * @param {!Array<string|Array<string>>} mandatoryFields
- * @param opt_optionalFields
+ * @param {!Array<string>} opt_optionalFields
  */
 export function validateData(data, mandatoryFields, opt_optionalFields) {
-  validateDataExists(data, mandatoryFields);
-
-  if (opt_optionalFields) {
-    checkData(data, mandatoryFields.concat(opt_optionalFields));
-  }
+  validateDataExists(data, mandatoryFields, opt_optionalFields);
 }
 
 /**
  * Throws an exception if data does not contains a mandatory field.
  * @param {!Object} data
  * @param {!Array<string|Array<string>>} mandatoryFields
+ * @param {!Array<string>} opt_optionalFields
  */
-export function validateDataExists(data, mandatoryFields) {
+export function validateDataExists(data, mandatoryFields, opt_optionalFields) {
+  let allowedFields = opt_optionalFields || [];
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
     if (Array.isArray(field)) {
       validateExactlyOne(data, field);
+      allowedFields = allowedFields.concat(field);
     } else {
       user().assert(data[field],
           'Missing attribute for %s: %s.', data.type, field);
+      allowedFields.push(field);
     }
+  }
+  if (opt_optionalFields) {
+    checkData(data, allowedFields);
   }
 }
 
