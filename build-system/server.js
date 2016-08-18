@@ -79,8 +79,21 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+/**
+ * In practice this would be *.ampproject.org and the publishers
+ * origin. Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
 const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
     '^https?://.+\.herokuapp\.com:8000');
+
+/**
+ * In practice this would be the publishers origin.
+ * Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
 const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
     '^https?://.+\.herokuapp\.com:8000/');
 
@@ -143,7 +156,7 @@ app.use('/form/echo-json/post', function(req, res) {
       res.statusCode = 500;
     }
     res.setHeader('Access-Control-Allow-Origin',
-        req.protocol + '://' + req.headers.host);
+        req.headers.origin);
     res.setHeader('Access-Control-Expose-Headers',
         'AMP-Access-Control-Allow-Source-Origin')
     res.setHeader('AMP-Access-Control-Allow-Source-Origin',
