@@ -62,14 +62,14 @@ export class AmpVizVega extends AMP.BaseElement {
     this.measuredHeight_ = 0;
 
     /**
-     * @private
+     * @private {Object}
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
     this.vega_ = this.win.vg;
 
     /**
-     * @private
+     * @private {Object}
      * Instance of Vega chart object. https://goo.gl/laszHL
      */
     this.chart_ = null;
