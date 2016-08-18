@@ -173,11 +173,11 @@ export class AmpAnalytics extends AMP.BaseElement {
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
             addListener(this.win, trigger, this.handleEvent_.bind(this,
-                  trigger));
+                  trigger), this.element);
 
           } else {
             addListener(this.win, trigger,
-                this.handleEvent_.bind(this, trigger));
+                this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }
