@@ -45,10 +45,8 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
     this.scrollMin_ = getLengthNumeral(startingPosition);
     this.scrollMax_ = getLengthNumeral(endingPosition);
     this.endScale_ = getLengthNumeral(endScale);
-    this.scaleOrigin_ = scaleOrigin;
-    this.layoutBox_ = null;
-    if (this.scaleOrigin_) {
-      setStyle(this.element, 'transform-origin', this.scaleOrigin_);
+    if (scaleOrigin) {
+      setStyle(this.element, 'transform-origin', scaleOrigin);
     }
   }
 
