@@ -42,9 +42,9 @@ export function installCacheServiceWorker(win) {
       getMode().localDev, getMode().test);
     const url = `${base}/sw.js`;
     navigator.serviceWorker.register(url).then(reg => {
-      dev.info(TAG, 'ServiceWorker registration successful: ', reg);
+      dev().info(TAG, 'ServiceWorker registration successful: ', reg);
     }, err => {
-      dev.error(TAG, 'ServiceWorker registration failed: ', err);
+      dev().error(TAG, 'ServiceWorker registration failed: ', err);
     });
   });
 }
