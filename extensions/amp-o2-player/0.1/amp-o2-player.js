@@ -63,17 +63,13 @@ class AmpO2Player extends AMP.BaseElement {
         (env != 'stage' ? '' : 'dev.') + 'vidible.tv';
     let src = `${this.domain_}/htmlembed/`;
     const queryParams = [];
-    if (this.pid_ && this.bcid_) {
-      src += 'pid=' + encodeURIComponent(this.pid_) + '/'
-          + encodeURIComponent(this.bcid_) + '.html';
-      if (bid) {
-        queryParams.push('bid=' + encodeURIComponent(bid));
-      }
-      if (vid) {
-        queryParams.push('vid=' + encodeURIComponent(vid));
-      }
-    } else if (vid) {
-      src += encodeURIComponent(vid) + '.html';
+    src += 'pid=' + encodeURIComponent(this.pid_) + '/'
+        + encodeURIComponent(this.bcid_) + '.html';
+    if (bid) {
+      queryParams.push('bid=' + encodeURIComponent(bid));
+    }
+    if (vid) {
+      queryParams.push('vid=' + encodeURIComponent(vid));
     }
     if (macros) {
       queryParams.push(macros);
@@ -83,7 +79,7 @@ class AmpO2Player extends AMP.BaseElement {
     }
 
     /** @private {string} */
-    this.src = src;
+    this.src_ = src;
   }
 
   /** @override */
@@ -100,7 +96,7 @@ class AmpO2Player extends AMP.BaseElement {
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = this.src;
+    iframe.src = this.src_;
     this.applyFillContent(iframe);
     iframe.width = this.width_;
     iframe.height = this.height_;
