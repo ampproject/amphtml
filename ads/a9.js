@@ -21,6 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function a9(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], ['aax_size', 'aax_pubname', 'aax_src']);
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.aax_size = data.aax_size;

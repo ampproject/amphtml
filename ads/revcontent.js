@@ -21,6 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function revcontent(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [],
       ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
   global.data = data;

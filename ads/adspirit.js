@@ -21,6 +21,7 @@ import {validateData} from '../3p/3p';
   * @param {!Object} data
   */
 export function adspirit(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], ['asmParams', 'asmHost']);
   const i = global.document.createElement('ins');
   i.setAttribute('data-asm-params', data['asmParams']);

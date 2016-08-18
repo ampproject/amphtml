@@ -26,6 +26,7 @@ import {doubleclick} from '../ads/google/doubleclick';
 export function openx(global, data) {
   const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp'];
   const dfpData = Object.assign({}, data); // Make a copy for dfp.
+  // TODO: check mandatory fields
   validateData(data, [], openxData);
 
   // Consolidate Doubleclick inputs for forwarding -

@@ -22,6 +22,7 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function pulsepoint(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], [
     'pid', 'tagid', 'tagtype', 'slot', 'timeout',
   ]);

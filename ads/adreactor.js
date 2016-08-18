@@ -21,6 +21,7 @@ import {writeScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adreactor(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], ['zid', 'pid', 'custom3']);
   const url = 'https://adserver.adreactor.com' +
       '/servlet/view/banner/javascript/zone?' +

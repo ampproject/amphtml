@@ -21,6 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function adstir(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], ['appId', 'adSpot']);
 
   const v = '4.0';

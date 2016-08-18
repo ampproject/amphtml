@@ -21,6 +21,7 @@
  * @param {!Object} data
  */
  export function flite(global, data) {
+  // TODO: check mandatory fields
    validateData(data, [], ['guid','mixins']);
    const guid = data.guid, o = global, e = encodeURIComponent, x = 0;
    let r = '', m, url, dep = '';

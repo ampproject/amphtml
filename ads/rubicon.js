@@ -25,6 +25,7 @@ import {doubleclick} from '../ads/google/doubleclick';
  * @param {!Object} data
  */
 export function rubicon(global, data) {
+  // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',

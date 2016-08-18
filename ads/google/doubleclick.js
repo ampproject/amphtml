@@ -35,6 +35,7 @@ const GladeExperiment = {
 export function doubleclick(global, data) {
   const experimentFraction = 0.1;
 
+  // TODO: check mandatory fields
   validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
