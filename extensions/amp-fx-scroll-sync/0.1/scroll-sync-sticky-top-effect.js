@@ -25,8 +25,6 @@ export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
 
   constructor(element, unusedConfig) {
     super(element);
-    this.scrollMax_ = null;
-    this.scrollMin_ = null;
     this.layoutBox_ = null;
     this.isDocked = false;
     this.elementShim_ = null;
@@ -42,11 +40,6 @@ export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
   }
 
   /** @override */
-  isDirectional() {
-    return false;
-  }
-
-  /** @override */
   measure() {
     if (!this.scrollMin_) {
       this.scrollMin_ = this.element./*OK*/offsetTop;
@@ -56,21 +49,6 @@ export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
     }
 
     this.layoutBox_ = this.viewport_.getLayoutRect(this.element);
-  }
-
-  /** @override */
-  requestMeasure() {
-
-  }
-
-  /** @override */
-  getScrollMin() {
-    return this.scrollMin_;
-  }
-
-  /** @override */
-  getScrollMax() {
-    return this.scrollMax_;
   }
 
   /** @override */

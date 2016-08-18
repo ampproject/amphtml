@@ -28,31 +28,6 @@ export class ScrollSyncScaleEffect extends ScrollSyncEffect {
   }
 
   /** @override */
-  isDirectional() {
-    return false;
-  }
-
-  /** @override */
-  measure() {
-
-  }
-
-  /** @override */
-  requestMeasure() {
-
-  }
-
-  /** @override */
-  getScrollMin() {
-    return this.scrollMin_;
-  }
-
-  /** @override */
-  getScrollMax() {
-    return this.scrollMax_;
-  }
-
-  /** @override */
   transition(position) {
     const scale = 1 - this.endScale_ * position;
     setStyles(this.element, {'transform': `scale(${scale})`});

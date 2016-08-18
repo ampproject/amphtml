@@ -16,7 +16,12 @@
 
 export class ScrollSyncEffect {
   constructor(element) {
+    /** @private {Element} */
     this.element = element;
+    /** @private {number} */
+    this.scrollMin_ = 0;
+    /** @private {number} */
+    this.scrollMax_ = 0;
   }
 
   isDirectional() {
@@ -32,11 +37,11 @@ export class ScrollSyncEffect {
   }
 
   getScrollMin() {
-
+    return this.scrollMin_;
   }
 
   getScrollMax() {
-
+    return this.scrollMax_;
   }
 
   transition(unusedPosition) {

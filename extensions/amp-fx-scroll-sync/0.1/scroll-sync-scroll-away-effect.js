@@ -20,34 +20,4 @@ export class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
   constructor(element, unusedConfig) {
     super(element);
   }
-
-  /** @override */
-  isDirectional() {
-    return true;
-  }
-
-  /** @override */
-  measure() {
-
-  }
-
-  /** @override */
-  requestMeasure() {
-
-  }
-
-  /** @override */
-  getScrollMin() {
-
-  }
-
-  /** @override */
-  getScrollMax() {
-
-  }
-
-  /** @override */
-  transition(unusedPosition) {
-
-  }
  }
