@@ -101,8 +101,8 @@ i-amp-sizer {
 
 .-amp-fill-content {
   display: block;
-  min-width: 100%;     /* These lines are a work around to this issue in iOS: */
-  max-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198         */
+  width: 1px;          /* These lines are a work around to this issue in iOS: */
+  min-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198      */
   height: 100%;
   margin: auto;
 }
