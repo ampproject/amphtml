@@ -16,14 +16,36 @@
 
 import {ScrollSyncEffect} from './scroll-sync-effect';
 import {setStyles} from '../../../src/style';
+import {getLengthNumeral} from '../../../src/layout';
+import {user} from '../../../src/log';
 
 export class ScrollSyncScaleEffect extends ScrollSyncEffect {
-  constructor(element, config) {
+  constructor(element) {
     super(element);
-    this.scrollMin_ = config['starting-position'];
-    this.scrollMax_ = config['ending-position'];
-    this.endScale_ = config['end-scale'];
-    this.scaleOrigin_ = config['scale-origin'];
+    // TODO: only one effect of the same type is allowed now,
+    // figure out how to have multiple of the same effect without conflict
+    const scaleEffectElements = element.querySelectorAll('[type="scale"]');
+    user().assert(scaleEffectElements.length == 1,
+        'Only one <amp-fx-scroll-sync> with type="scale" is allowed ' +
+        'for element: %s', element);
+    const scaleEffectElement = scaleEffectElements[0];
+    const startingPosition = user().assert(
+        scaleEffectElement.getAttribute('starting-position'),
+        'The starting-position attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="scale": %s', scaleEffectElement);
+    const endingPosition = user().assert(
+        scaleEffectElement.getAttribute('ending-position'),
+        'The ending-position attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="scale": %s', scaleEffectElement);
+    const endScale = user().assert(
+        scaleEffectElement.getAttribute('end-scale'),
+        'The end-scale attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="scale": %s', scaleEffectElement);
+    const scaleOrigin = scaleEffectElement.getAttribute('scale-origin');
+    this.scrollMin_ = getLengthNumeral(startingPosition);
+    this.scrollMax_ = getLengthNumeral(endingPosition);
+    this.endScale_ = getLengthNumeral(endScale);
+    this.scaleOrigin_ = scaleOrigin;
     this.layoutBox_ = null;
   }
 

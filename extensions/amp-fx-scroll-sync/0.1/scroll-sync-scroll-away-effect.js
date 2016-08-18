@@ -17,7 +17,7 @@
 import {ScrollSyncEffect} from './scroll-sync-effect';
 
 export class ScrollSyncScrollAwayEffect extends ScrollSyncEffect {
-  constructor(element, unusedConfig) {
+  constructor(element) {
     super(element);
   }
  }

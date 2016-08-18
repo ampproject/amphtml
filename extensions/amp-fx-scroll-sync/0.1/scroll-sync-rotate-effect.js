@@ -14,20 +14,41 @@
  * limitations under the License.
  */
 
- import {ScrollSyncEffect} from './scroll-sync-effect';
- import {setStyles} from '../../../src/style';
+import {ScrollSyncEffect} from './scroll-sync-effect';
+import {setStyles} from '../../../src/style';
+import {getLengthNumeral} from '../../../src/layout';
+import {user} from '../../../src/log';
 
- export class ScrollSyncRotateEffect extends ScrollSyncEffect {
-   constructor(element, config) {
-     super(element);
-     this.scrollMin_ = config['starting-position'];
-     this.scrollMax_ = config['ending-position'];
-     this.rotateAngle_ = config['rotate-angle'];
-   }
+export class ScrollSyncRotateEffect extends ScrollSyncEffect {
+  constructor(element) {
+    super(element);
+    // TODO: only one effect of the same type is allowed now,
+    // figure out how to have multiple of the same effect without conflict
+    const rotateEffectElements = element.querySelectorAll('[type="rotate"]');
+    user().assert(rotateEffectElements.length == 1,
+        'Only one <amp-fx-scroll-sync> with type="rotate" is allowed ' +
+        'for element: %s', element);
+    const rotateEffectElement = rotateEffectElements[0];
+    const startingPosition = user().assert(
+        rotateEffectElement.getAttribute('starting-position'),
+        'The starting-position attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="rotate": %s', rotateEffectElement);
+    const endingPosition = user().assert(
+        rotateEffectElement.getAttribute('ending-position'),
+        'The ending-position attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="rotate": %s', rotateEffectElement);
+    const rotateAngle = user().assert(
+        rotateEffectElement.getAttribute('rotate-angle'),
+        'The rotate-angle attribute is required for element ' +
+        '<amp-fx-scroll-sync> with type="rotate": %s', rotateEffectElement);
+    this.scrollMin_ = getLengthNumeral(startingPosition);
+    this.scrollMax_ = getLengthNumeral(endingPosition);
+    this.rotateAngle_ = getLengthNumeral(rotateAngle);
+  }
 
-   /** @override */
-   transition(position) {
-     const angle = position * this.rotateAngle_;
-     setStyles(this.element, {'transform': `rotate(${angle}deg)`});
-   }
- }
+  /** @override */
+  transition(position) {
+    const angle = position * this.rotateAngle_;
+    setStyles(this.element, {'transform': `rotate(${angle}deg)`});
+  }
+}

@@ -23,7 +23,7 @@ const ELEMENT_SHIM_TAG = 'i-amp-scroll-sync-shim';
 
 export class ScrollSyncStickyTopEffect extends ScrollSyncEffect {
 
-  constructor(element, unusedConfig) {
+  constructor(element) {
     super(element);
     this.layoutBox_ = null;
     this.isDocked = false;
