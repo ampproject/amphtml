@@ -15,25 +15,30 @@
  */
 
 import {whenDocumentReady} from '../document-ready';
-import {applyLayout} from '../service';
-import {fromClassForDoc} from '../service';
-import {dev} from '../log';
+import {isExperimentOn} from '../experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
+import {dev} from '../log';
+import {fromClassForDoc} from '../service';
 import {timerFor} from '../timer';
 
 /**
- * LighboxManager is a document-scoped service responsible for:
+ * LightboxManager is a document-scoped service responsible for:
  *  -Finding elements marked to be lightboxable (via lightbox attribute)
  *  -Keeping an ordered list of lightboxable elements
  *  -Providing functionality to get next/previous lightboxable element given
  *   the current element.
+ *  -Discovering elements that can be auto-lightboxed and add the
+ *   `lightbox` attribute and possibly an on-tap handler on them.
  */
-class LighboxManager {
+class LightboxManager {
 
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+
+    // Extra safety check, we don't install this service if experiment of off.
+    dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
 
     /** @const @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
@@ -48,8 +53,6 @@ class LighboxManager {
      * @private {Promise}
      **/
     this.initPromise_ = null;
-
-    this.autoLightboxExperimentIsOn_ = true;
 
     // TODO(aghassemi): Find a better time to initialize, maybe after the first
     // layoutPass is done for all elements?
@@ -123,7 +126,7 @@ class LighboxManager {
     if (this.initPromise_) {
       return this.initPromise_;
     }
-    if (this.autoLightboxExperimentIsOn_) {
+    if (isExperimentOn(this.ampdoc_.win, 'amp-lightbox-viewer-auto')) {
       this.initPromise_ = autoDiscoverLightboxables(this.ampdoc_).then(() => {
         return this.scanLightboxables_();
       });
@@ -159,5 +162,5 @@ class LighboxManager {
 }
 
 export function installLightboxManagerForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'lightboxManager', LighboxManager);
+  return fromClassForDoc(ampdoc, 'lightboxManager', LightboxManager);
 };

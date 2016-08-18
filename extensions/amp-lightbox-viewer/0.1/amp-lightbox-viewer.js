@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+/** @const */
+const EXPERIMENT = 'amp-lightbox-viewer';
+
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
+import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {lightboxManagerForDoc} from '../../../src/lightbox-manager';
 import {user, dev} from '../../../src/log';
@@ -34,6 +38,8 @@ class AmpLightboxViewer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    user().assert(isExperimentOn(this.win, EXPERIMENT),
+        `Experiment ${EXPERIMENT} disabled`);
 
     /** @private {boolean} */
     this.active_ = false;

@@ -94,7 +94,9 @@ export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
-  installLightboxManagerForDoc(ampdoc);
+  if (isExperimentOn(ampdoc.win, 'amp-lightbox-viewer')) {
+    installLightboxManagerForDoc(ampdoc);
+  }
 }
 
 

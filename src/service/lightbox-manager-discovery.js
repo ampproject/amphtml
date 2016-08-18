@@ -16,6 +16,7 @@
 
 import {extensionsFor} from '../extensions';
 import {elementByTag} from '../dom';
+import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 
 const ELIGIBLE_TAGS = [
@@ -54,6 +55,11 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
  * @return {!Promise}
  */
 export function autoDiscoverLightboxables(ampdoc) {
+
+  // Extra safety check, manager should not call this if experiments are off
+  dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
+  dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto'));
+
   return new Promise((resolve, unused) => {
     const viewerId = maybeInstallLightboxViewer(ampdoc);
 
@@ -87,17 +93,8 @@ function meetsHeuristics(elem) {
     return false;
   }
 
-  if (elem.getAttribute('layout') == 'nodisplay') {
-    return false;
-  }
-
-  if (elem.hasAttribute('placeholder')) {
-    return false;
-  }
-
   if (elem.getLayoutBox) {
     const layoutBox = elem.getLayoutBox();
-
     if (layoutBox.left < 0 ||
         layoutBox.width < 50 ||
         layoutBox.height < 50
