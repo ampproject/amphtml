@@ -30,6 +30,7 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {user} from '../src/log';
+import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -109,21 +110,14 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
-// used for extracting fakead3p from production code.
-const IS_DEV = true;
+const data = parseFragment(location.hash);
+window.context = data._context;
 
-if (IS_DEV) {
-  let toRegister = false;
-  const parseData = parseFragment(location.hash);
-  if (parseData && parseData._context && parseData._context.mode) {
-    const mode = parseData._context.mode;
-    toRegister = mode.test || mode.localDev;
-  }
-  if (toRegister) {
-    register('_ping_', function(win, data) {
-      win.document.getElementById('c').textContent = data.ping;
-    });
-  }
+if (getMode().localDev) {
+  register('_ping_', function(win, data) {
+    win.document.getElementById('c').textContent = data.ping;
+  });
+  register('fakead3p', fakead3p);
 }
 
 // Keep the list in alphabetic order
@@ -292,8 +286,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -313,10 +305,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
-
-    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
-      register('fakead3p', fakead3p);
-    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
