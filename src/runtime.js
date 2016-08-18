@@ -79,9 +79,7 @@ export function installRuntimeServices(global) {
   installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
-  if (isExperimentOn(global, 'form-submit')) {
-    installGlobalSubmitListener(global);
-  }
+  installGlobalSubmitListener(global);
 }
 
 

@@ -114,18 +114,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4232',
   },
   {
-    id: 'form-submit',
-    name: 'Global document form submit handler',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3999',
-  },
-  {
-    id: 'amp-form',
-    name: 'AMP Form Extension',
-    spec: 'https://github.com/ampproject/amphtml/issues/3343',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3998',
-  },
-  {
     id: 'amp-google-vrview-image',
     name: 'AMP VR Viewer for images via Google VRView',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
