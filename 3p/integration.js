@@ -226,7 +226,6 @@ const defaultAllowedTypesInCustomFrame = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {

@@ -20,6 +20,8 @@ import {dev,user} from '../../../src/log';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
 import {toggle} from '../../../src/style';
+import {waitForRenderStart} from '../../../3p/integration';
+import {listenOnce} from '../../../src/event-helper';
 
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -59,6 +61,7 @@ class AmpStickyAd extends AMP.BaseElement {
         'amp-sticky-ad must have a single amp-ad child');
 
     this.ad_ = children[0];
+
     this.setAsOwner(this.ad_);
 
     // On viewport scroll, check requirements for amp-stick-ad to display.
@@ -82,6 +85,7 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   unlayoutCallback() {
     this.viewport_.updatePaddingBottom(0);
+    this.element.classList.remove('amp-sticky-ad-loaded');
     return true;
   }
 
@@ -131,23 +135,70 @@ class AmpStickyAd extends AMP.BaseElement {
         this.visible_ = true;
         this.element.classList.add('-amp-sticky-ad-visible');
         this.viewport_.addToFixedLayer(this.element);
-        this.updateInViewport(dev().assertElement(this.ad_), true);
-        this.scheduleLayout(dev().assertElement(this.ad_));
         // Add border-bottom to the body to compensate space that was taken
         // by sticky ad, so no content would be blocked by sticky ad unit.
         const borderBottom = this.element./*OK*/offsetHeight;
         this.viewport_.updatePaddingBottom(borderBottom);
         this.addCloseButton_();
-        timerFor(this.win).delay(() => {
-          // Unfortunately we don't really have a good way to measure how long it
-          // takes to load an ad, so we'll just pretend it takes 1 second for
-          // now.
-          this.vsync_.mutate(() => {
-            this.element.classList.add('amp-sticky-ad-loaded');
-          });
-        }, 1000);
+        this.scheduleLayoutForAd_();
       });
     }
+  }
+
+  /**
+   * Function that check if ad has been built
+   * If not, wait for the amp:built event
+   * otherwise schedule layout for ad.
+   * @private
+   */
+  scheduleLayoutForAd_() {
+    if (this.ad_.isBuilt()) {
+      this.layoutAd_();
+    } else {
+      listenOnce(this.ad_, 'amp:built', () => {
+        this.layoutAd_();
+      });
+    }
+  }
+
+  /**
+   * Layout ad, and change sticky-ad container style
+   * @private
+   */
+  layoutAd_() {
+    this.updateInViewport(dev().assertElement(this.ad_), true);
+    this.scheduleLayout(dev().assertElement(this.ad_));
+    this.delayAdLoad_();
+  }
+
+  /**
+   * Change sticky-ad container style to ad-loaded-style after certain delay.
+   * For ad type that support return render-start wait until ad layoutCallback
+   * resolve and receive amp:load:end.
+   * For ad type that don't support render-start, wait for 1 sec.
+   * @private
+   */
+  delayAdLoad_() {
+    listenOnce(this.ad_, 'amp:load:end', () => {
+      const type = this.ad_.getAttribute('type');
+      if (waitForRenderStart.indexOf(type) < 0) {
+        timerFor(this.win).delay(() => {
+          this.displayAfterAdLoad_();
+        }, 1000);
+      } else {
+        this.displayAfterAdLoad_();
+      }
+    });
+  }
+
+  /**
+   * Change sticky-ad container style by adding class name
+   * @private
+   */
+  displayAfterAdLoad_() {
+    this.vsync_.mutate(() => {
+      this.element.classList.add('amp-sticky-ad-loaded');
+    });
   }
 
   /**

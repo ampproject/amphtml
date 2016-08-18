@@ -589,6 +589,10 @@ function createBaseAmpElementProto(win) {
     return this.built_;
   };
 
+  ElementProto.isFirstLayoutCompleted = function() {
+    return this.isFirstLayoutCompleted_;
+  };
+
   /**
    * Get the priority to load the element.
    * @return {number} @this {!Element}
@@ -897,7 +901,6 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Dispatches a custom event only in testing environment.
-   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
@@ -1000,6 +1003,7 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
+        this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not
