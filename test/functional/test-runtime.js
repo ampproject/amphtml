@@ -499,7 +499,7 @@ describe('runtime', () => {
       expect(extHolder.docFactories).to.have.length(1);
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
+      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
 
       // Not installed.
       expect(getServicePromiseOrNullForDoc(ampdoc, 'service1')).to.be.null;
@@ -531,10 +531,12 @@ describe('runtime', () => {
       importDoc.head = document.createElement('dochead');
       importDoc.body = document.createElement('docbody');
       importDoc.body.appendChild(document.createElement('child'));
-      ampdoc = new AmpDocShadow(win, document.createElement('div'));
+      ampdoc = new AmpDocShadow(win, docUrl, document.createElement('div'));
 
       ampdocServiceMock.expects('installShadowDoc_')
-          .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
+          .withExactArgs(
+              docUrl,
+              sinon.match(arg => arg == hostElement.shadowRoot))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')

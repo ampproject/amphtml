@@ -16,6 +16,7 @@
 
 
 import {Timer} from '../src/timer';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
 import {cssText} from '../build/css';
@@ -197,6 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      installDocService(iframe.contentWindow, true);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);

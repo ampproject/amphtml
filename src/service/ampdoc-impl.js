@@ -26,12 +26,13 @@ const AMPDOC_PROP = '__AMPDOC';
 /**
  * Creates and installs the ampdoc for the shadow root.
  * @param {!AmpDocService} ampdocService
- * param {!ShadowRoot} shadowRoot
+ * @param {string} url
+ * @param {!ShadowRoot} shadowRoot
  * @return {!AmpDoc}
  * @restricted
  */
-export function installShadowDoc(ampdocService, shadowRoot) {
-  return ampdocService.installShadowDoc_(shadowRoot);
+export function installShadowDoc(ampdocService, url, shadowRoot) {
+  return ampdocService.installShadowDoc_(url, shadowRoot);
 }
 
 
@@ -114,14 +115,15 @@ export class AmpDocService {
 
   /**
    * Creates and installs the ampdoc for the shadow root.
+   * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    * @return {!AmpDoc}
    * @private
    */
-  installShadowDoc_(shadowRoot) {
+  installShadowDoc_(url, shadowRoot) {
     dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
-    const ampdoc = new AmpDocShadow(this.win, shadowRoot);
+    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -162,6 +164,14 @@ export class AmpDoc {
    * @return {!Window}
    */
   getWin() {
+    return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * Returns the URL from which the document was loaded.
+   * @return {string}
+   */
+  getUrl() {
     return dev().assert(null, 'not implemented');
   }
 
@@ -208,6 +218,11 @@ export class AmpDocSingle extends AmpDoc {
   getRootNode() {
     return this.win.document;
   }
+
+  /** @override */
+  getUrl() {
+    return this.win.location.href;
+  }
 }
 
 
@@ -219,12 +234,15 @@ export class AmpDocSingle extends AmpDoc {
 export class AmpDocShadow extends AmpDoc {
   /**
    * @param {!Window} win
+   * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    */
-  constructor(win, shadowRoot) {
+  constructor(win, url, shadowRoot) {
     super();
     /** @const {!Window} */
     this.win = win;
+    /** @private @const {string} */
+    this.url_ = url;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
   }
@@ -242,6 +260,11 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   getRootNode() {
     return this.shadowRoot_;
+  }
+
+  /** @override */
+  getUrl() {
+    return this.url_;
   }
 }
 

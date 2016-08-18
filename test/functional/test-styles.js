@@ -80,7 +80,7 @@ describe('Styles', () => {
     style.setAttribute('amp-runtime', '');
     style.textContent = '/*runtime*/';
     parentRoot.appendChild(style);
-    const ampdoc = new AmpDocShadow(window, parentRoot);
+    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
     const shadowRoot = document.createElement('div');
     styles.copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
 
