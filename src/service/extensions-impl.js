@@ -454,7 +454,7 @@ export class Extensions {
  * Calculate script url for amp-ad.
  * @visibleForTesting
  * @param {string} path Pathname of the window's location
- * @param {string} pathBase Protocol and Host of the window's location
+ * @param {string} base Protocol and Host of the window's location
  * @param {string} extensionId
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
