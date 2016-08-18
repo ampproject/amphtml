@@ -415,13 +415,19 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
  * Add "__amp_source_origin" query parameter to the URL.
  * @param {!Window} win
  * @param {string} url
+ * @param {boolean=} override
  * @return {string}
  */
-export function getCorsUrl(win, url) {
+export function getCorsUrl(win, url, override = false) {
   const sourceOrigin = getSourceOrigin(win.location.href);
-  const parsedUrl = parseUrl(url);
-  const query = parseQueryString(parsedUrl.search);
-  user().assert(!(SOURCE_ORIGIN_PARAM in query),
+  const pUrl = parseUrl(url);
+  const query = parseQueryString(pUrl.search);
+  user().assert(override || !(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
+  if (override) {
+    query[SOURCE_ORIGIN_PARAM] = sourceOrigin;
+    const baseUrl = `${pUrl.protocol}//${pUrl.host}${pUrl.pathname}`;
+    return `${addParamsToUrl(baseUrl, query)}${pUrl.hash}`;
+  }
   return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }

@@ -76,6 +76,13 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
         '__amp_source_origin');
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw(
         /Source origin is not allowed in/);
+
+    // Should override __amp_source_origin on every submit.
+    evt.target.setAttribute('action',
+        'https://www.example.com/?a=1&__amp_source_origin=example1.com&b=2');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('action')).to.contain(
+        '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
   });
 
   it('should do nothing if already prevented', () => {

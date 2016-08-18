@@ -60,9 +60,7 @@ export function onDocumentFormSubmit_(e) {
       'form action should not be on AMP CDN: %s', form);
   // Update the form non-xhr action to add `__amp_source_origin` parameter.
   // This allows publishers to understand where the request is coming from.
-  if (action.indexOf('__amp_source_origin=') == -1) {
-    form.setAttribute('action', getCorsUrl(win, action));
-  }
+  form.setAttribute('action', getCorsUrl(win, action, /*override*/ true));
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);
