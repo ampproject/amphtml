@@ -297,12 +297,11 @@ export function createIframeWithMessageStub(win) {
     return new Promise(resolve => {
       const listener = event => {
         if (event.source == element.contentWindow
-            && event.data.testStubEcho) {
-          delete event.data.testStubEcho;
-          if (JSON.stringify(msg) == JSON.stringify(event.data)) {
-            win.removeEventListener('message', listener);
-            resolve(event.data);
-          }
+            && event.data.testStubEcho
+            && JSON.stringify(msg)
+                == JSON.stringify(event.data.receivedMessage)) {
+          win.removeEventListener('message', listener);
+          resolve(msg);
         }
       };
       win.addEventListener('message', listener);

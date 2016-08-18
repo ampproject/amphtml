@@ -21,7 +21,10 @@
   // 'testStubEcho'.
   window.addEventListener('message', event => {
     if (event.source == window.parent && !event.data.testStubEcho) {
-      const data = Object.assign(event.data, {testStubEcho: true});
+      const data = {
+        testStubEcho: true,
+        receivedMessage: event.data,
+      };
       window.parent.postMessage(data, '*');
       console.log('echoed message to parent window: ' + JSON.stringify(data));
     }
