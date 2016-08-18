@@ -22,6 +22,8 @@ import {user} from '../../../src/log';
 export class ScrollSyncScaleEffect extends ScrollSyncEffect {
   constructor(element) {
     super(element);
+    // TODO: only one effect of the same type is allowed now,
+    // figure out how to have multiple of the same effect without conflict
     const scaleEffectElements = element.querySelectorAll('[type="scale"]');
     user().assert(scaleEffectElements.length == 1,
         'Only one <amp-fx-scroll-sync> with type="scale" is allowed ' +

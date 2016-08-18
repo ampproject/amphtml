@@ -22,6 +22,8 @@ import {user} from '../../../src/log';
 export class ScrollSyncTranslateXEffect extends ScrollSyncEffect {
   constructor(element) {
     super(element);
+    // TODO: only one effect of the same type is allowed now,
+    // figure out how to have multiple of the same effect without conflict
     const translatexEffectElements = element.querySelectorAll(
         '[type="translate-x"]');
     user().assert(translatexEffectElements.length == 1,
