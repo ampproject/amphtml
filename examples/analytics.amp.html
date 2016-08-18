@@ -171,9 +171,28 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 <p></p>
-    <amp-anim src="https://goo.gl/FBCKQO" id="anim-id"
-        width="400" height="225" layout="responsive" data-vars-sub-title="Example sub title">
-      <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
-    </amp-anim>
+<amp-anim src="https://goo.gl/FBCKQO" id="anim-id" width="400" height="225" layout="responsive">
+  <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
+  <amp-analytics id="nestedAnalytics">
+    <script type="application/json">
+    {
+      "requests": {
+        "visibility": "https://example.com/nestedAmpAnalytics"
+      },
+      "triggers": {
+        "visibility": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-anim",
+            "visiblePercentageMin": 20,
+            "visiblePercentageMax": 80
+          }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
+</amp-anim>
 </body>
 </html>

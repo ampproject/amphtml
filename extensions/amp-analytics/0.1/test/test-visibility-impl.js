@@ -323,22 +323,32 @@ describe('amp-analytics.visibility', () => {
   });
 
   describe('utils', () => {
-    it('isPositiveNumber_', () => {
-      ['', 1, 0, undefined, 100, 101].forEach(num => {
-        expect(isPositiveNumber_(num)).to.be.true;
+    function checkPositive(value, expectedResult) {
+      it('isPositiveNumber_(' + value + ')', () => {
+        expect(isPositiveNumber_(value)).to.equal(expectedResult);
       });
-      [-1, NaN].forEach(num => {
-        expect(isPositiveNumber_(num)).to.be.false;
-      });
+    }
+
+    [1, 0, undefined, 100, 101].forEach(num => {
+      checkPositive(num, true);
     });
 
-    it('isValidPercentage_', () => {
-      ['', 1, 0, undefined, 100].forEach(num => {
-        expect(isValidPercentage_(num)).to.be.true;
+    ['', -1, NaN].forEach(num => {
+      checkPositive(num, false);
+    });
+
+    function checkValidPercentage(value, expectedResult) {
+      it('isValidPercentage_(' + value + ')', () => {
+        expect(isValidPercentage_(value)).to.equal(expectedResult);
       });
-      [-1, NaN, 101].forEach(num => {
-        expect(isValidPercentage_(num)).to.be.false;
-      });
+    };
+
+    [1, 0, undefined, 100].forEach(num => {
+      checkValidPercentage(num, true);
+    });
+
+    ['', -1, NaN, 101].forEach(num => {
+      checkValidPercentage(num, false);
     });
   });
 });
