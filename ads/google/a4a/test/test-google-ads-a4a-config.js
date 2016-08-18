@@ -20,12 +20,14 @@ import {
     isInManualExperiment,
 } from '../traffic-experiments';
 import {resetExperimentToggles_} from '../../../../src/experiments';
+import {Viewer} from '../../../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
 describe('a4a_config', () => {
   let sandbox;
   let win;
   let rand;
+  let viewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -38,6 +40,7 @@ describe('a4a_config', () => {
         href: 'https://cdn.ampproject.org/fnord',
         pathname: '/fnord',
         origin: 'https://cdn.ampproject.org',
+        hash: '',
       },
       document: {
         cookie: null,
@@ -46,7 +49,9 @@ describe('a4a_config', () => {
         subtle: true,
         webkitSubtle: true,
       },
+      navigator: window.navigator,
     };
+    viewer = new Viewer(win);
   });
 
   afterEach(() => {
@@ -68,6 +73,7 @@ describe('a4a_config', () => {
     rand.onFirstCall().returns(-1);  // Force experiment on.
     rand.onSecondCall().returns(0.75);  // Select second branch.
     const element = document.createElement('div');
+    const v = new Viewer(win);
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         EXTERNAL_BRANCHES, INTERNAL_BRANCHES),
            'googleAdsIsA4AEnabled').to.be.true;

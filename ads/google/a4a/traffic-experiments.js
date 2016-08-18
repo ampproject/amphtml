@@ -26,6 +26,7 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {viewerFor} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{string: {branches: !Branches}}} */
@@ -121,16 +122,8 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  let queryString = win.location.search;
-  // If we're inside the AMP viewer, the hash fragment will have been moved
-  // to the originalHash field.
-  const hash = win.location.originalHash || win.location.hash;
-  if (hash) {
-    // Drop the leading '#' and replace with a
-    // param separator.
-    queryString += '&' + decodeURIComponent(hash.substring(1));
-  }
-  const expParam = parseQueryString(queryString)['exp'];
+  const expParam = viewerFor(win).getParam('exp') ||
+      parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return;
   }
