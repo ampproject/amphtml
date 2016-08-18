@@ -16,58 +16,51 @@
 
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
 import {BaseElement} from '../../../../src/base-element';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createIframeWithMessageStub} from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
   let sandbox;
-  let container;
   let iframe;
   let apiHandler;
-  const iframeSrc = '//ads.localhost:' + location.port +
-            '/base/test/fixtures/served/iframe.html';
-  function insert(iframe) {
-    container.doc.body.appendChild(iframe);
-  }
+  let testIndex = 0;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const adElement = document.createElement('amp-ad');
     const adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
-    return createIframePromise().then(c => {
-      container = c;
-      iframe = c.doc.createElement('iframe');
-      iframe.src = iframeSrc;
-      iframe.setAttribute(
-        'data-amp-3p-sentinel', 'amp3ptest');
-      apiHandler.startUp(iframe, true);
-      insert(iframe);
-    });
+    const beforeAttachedToDom = element => {
+      element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+      apiHandler.startUp(element, true);
+    };
+    return createIframeWithMessageStub(window, beforeAttachedToDom)
+        .then(newIframe => {
+          iframe = newIframe;
+        });
   });
 
   afterEach(() => {
     sandbox.restore();
     apiHandler = null;
+    testIndex++;
   });
 
   it('embed-state API', () => {
-    return new Promise(resolve => {
-      apiHandler.sendEmbedInfo_ = () => {
-        resolve();
-      };
-      iframe.onload = () => {
-        iframe.contentWindow.postMessage({
-          sentinel: 'amp-test',
-          type: 'subscribeToEmbedState',
-          is3p: true,
-          amp3pSentinel: 'amp3ptest',
-        }, '*');
-        apiHandler.iframe_.src = iframeSrc;
-      };
-      expect(apiHandler.embedStateApi_.clientWindows_).to.be.empty;
-    }).then(() => {
-      expect(apiHandler.embedStateApi_.clientWindows_.length).to.equal(1);
+    const embedStateData = {
+      sentinel: 'amp3ptest' + testIndex,
+      type: 'send-embed-state',
+    };
+
+    const embedStateDataReply = 'amp-' + JSON.stringify({
+      inViewport: false,
+      pageHidden: false,
+      type: 'embed-state',
+      sentinel: 'amp3ptest' + testIndex,
     });
+
+    iframe.postMessageToParent(embedStateData);
+    return iframe.expectMessageFromParent(embedStateDataReply);
   });
 });
+

@@ -277,9 +277,12 @@ const IFRAME_STUB_URL =
  * @param win {!Window}
  * @returns {!Promise<!HTMLIFrameElement>}
  */
-export function createIframeWithMessageStub(win) {
+export function createIframeWithMessageStub(win, beforeAttachToDom) {
   const element = win.document.createElement('iframe');
   element.src = IFRAME_STUB_URL;
+  if (beforeAttachToDom) {
+    beforeAttachToDom(element);
+  }
   win.document.body.appendChild(element);
 
   /**
@@ -296,10 +299,17 @@ export function createIframeWithMessageStub(win) {
   element.expectMessageFromParent = msg => {
     return new Promise(resolve => {
       const listener = event => {
+        let expectMsg = msg;
+        let eventMsg = event.data.receivedMessage;
+        if (typeof expectMsg !== 'string') {
+          expectMsg = JSON.stringify(expectMsg);
+        }
+        if (typeof eventMsg !== 'string') {
+          eventMsg = JSON.stringify(eventMsg);
+        }
         if (event.source == element.contentWindow
             && event.data.testStubEcho
-            && JSON.stringify(msg)
-                == JSON.stringify(event.data.receivedMessage)) {
+            && expectMsg == eventMsg) {
           win.removeEventListener('message', listener);
           resolve(msg);
         }
