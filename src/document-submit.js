@@ -53,7 +53,7 @@ export function onDocumentFormSubmit_(e) {
   }
 
   const win = form.ownerDocument.defaultView;
-  let action = form.getAttribute('action');
+  const action = form.getAttribute('action');
   user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, form, 'action');
   user().assert(!startsWith(action, urls.cdn),
