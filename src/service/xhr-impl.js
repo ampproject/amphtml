@@ -82,8 +82,8 @@ export class Xhr {
    * be either the native fetch or our polyfill.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!FetchResponse>}
+   * @param {!FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>|!Promise<!Response>}
    * @private
    */
   fetch_(input, opt_init) {
@@ -98,7 +98,7 @@ export class Xhr {
     // responseType = 'document'. We do this so we don't have to do any parsing
     // and document construction on the UI thread which would be expensive.
     if (opt_init && opt_init.responseType == 'document') {
-      return fetchPolyfill.apply(null, arguments);
+      return fetchPolyfill(input, opt_init);
     }
     return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
@@ -112,16 +112,13 @@ export class Xhr {
    * if the `init.requireAmpResponseSourceOrigin = true`.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise<!FetchResponse>}
    * @private
    */
   fetchAmpCors_(input, opt_init) {
     input = this.getCorsUrl(this.win, input);
-    return this.fetch_(input, opt_init).catch(reason => {
-      user().assert(false, 'Fetch failed %s: %s', input,
-          reason && reason.message);
-    }).then(response => {
+    return this.fetch_(input, opt_init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
@@ -139,6 +136,9 @@ export class Xhr {
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
+    }, reason => {
+      user().assert(false, 'Fetch failed %s: %s', input,
+          reason && reason.message);
     });
   }
 
@@ -230,7 +230,7 @@ export class Xhr {
    * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
-   * @param {?FetchInitDef=} opt_init
+   * @param {!FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
@@ -447,7 +447,7 @@ export class FetchResponse {
     /** @type {number} */
     this.status = this.xhr_.status;
 
-    /** @private @const {!FetchResponseHeaders} */
+    /** @const {!FetchResponseHeaders} */
     this.headers = new FetchResponseHeaders(xhr);
 
     /** @type {boolean} */
@@ -479,7 +479,8 @@ export class FetchResponse {
    * @return {!Promise<!JSONType>}
    */
   json() {
-    return this.drainText_().then(JSON.parse);
+    return /** @type {!Promise<!JSONType>} */ (
+        this.drainText_().then(JSON.parse.bind(JSON)));
   }
 
   /**
@@ -499,14 +500,16 @@ export class FetchResponse {
   /**
    * Drains the response and returns a promise that resolves with the response
    * ArrayBuffer.
-   * @return {!Promise<ArrayBuffer>}
+   * @return {!Promise<!ArrayBuffer>}
    */
   arrayBuffer() {
+    user().assert(this.xhr_.response, 'arrayBuffer response should exist.');
     dev().assert(this.xhr_.responseType == 'arraybuffer',
                'responseType was not "arraybuffer"');
     dev().assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    return Promise.resolve(this.xhr_.response);
+    return /** @type {!Promise<!ArrayBuffer>} */ (
+        Promise.resolve(this.xhr_.response));
   }
 }
 

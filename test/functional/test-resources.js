@@ -1203,7 +1203,7 @@ describe('Resources changeSize', () => {
 });
 
 
-describe('Resources mutateElement', () => {
+describe('Resources mutateElement and collapse', () => {
 
   function createElement(rect, isAmp) {
     return {
@@ -1247,6 +1247,7 @@ describe('Resources mutateElement', () => {
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeSize = sandbox.spy();
+    resource.completeCollapse = sandbox.spy();
     return resource;
   }
 
@@ -1371,6 +1372,33 @@ describe('Resources mutateElement', () => {
       expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
     });
   });
+
+  it('should complete collapse and trigger relayout', () => {
+    const oldTop = resource1.getLayoutBox().top;
+    resources.collapseElement(resource1.element);
+    expect(resource1.completeCollapse.callCount).to.equal(1);
+    expect(relayoutTopStub.callCount).to.equal(1);
+    expect(relayoutTopStub.args[0][0]).to.equal(oldTop);
+  });
+
+  it('should ignore relayout on an already collapsed element', () => {
+    resource1.layoutBox_.width = 0;
+    resource1.layoutBox_.height = 0;
+    resources.collapseElement(resource1.element);
+    expect(resource1.completeCollapse.callCount).to.equal(1);
+    expect(relayoutTopStub.callCount).to.equal(0);
+  });
+
+  it('should notify owner', () => {
+    const owner = {
+      contains: () => true,
+      collapsedCallback: sandbox.spy(),
+    };
+    Resource.setOwner(resource1.element, owner);
+    resources.collapseElement(resource1.element);
+    expect(owner.collapsedCallback.callCount).to.equal(1);
+    expect(owner.collapsedCallback.args[0][0]).to.equal(resource1.element);
+  });
 });
 
 
@@ -1423,6 +1451,8 @@ describe('Resources.add', () => {
   });
 
   it('should build elements immediately if the document is ready', () => {
+    child1.isBuilt = () => false;
+    child2.isBuilt = () => false;
     resources.documentReady_ = false;
     resources.add(child1);
     expect(child1.build.called).to.be.false;
@@ -1447,12 +1477,14 @@ describe('Resources.add', () => {
 
   describe('buildReadyResources_', () => {
     it('should build ready resources and remove them from pending', () => {
+      sandbox.stub(resources, 'schedulePass');
       resources.documentReady_ = false;
       resources.pendingBuildResources_ = [resource1, resource2];
       resources.buildReadyResources_();
       expect(child1.build.called).to.be.false;
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(2);
+      expect(resources.schedulePass.called).to.be.false;
 
       child1.nextSibling = child2;
       resources.buildReadyResources_();
@@ -1460,6 +1492,7 @@ describe('Resources.add', () => {
       expect(child2.build.called).to.be.false;
       expect(resources.pendingBuildResources_.length).to.be.equal(1);
       expect(resources.pendingBuildResources_[0]).to.be.equal(resource2);
+      expect(resources.schedulePass.calledOnce).to.be.true;
 
       child2.parentNode = parent;
       parent.nextSibling = true;
@@ -1467,6 +1500,7 @@ describe('Resources.add', () => {
       expect(child1.build.calledTwice).to.be.false;
       expect(child2.build.called).to.be.true;
       expect(resources.pendingBuildResources_.length).to.be.equal(0);
+      expect(resources.schedulePass.calledTwice).to.be.true;
     });
 
     it('should not try to build resources already being built', () => {

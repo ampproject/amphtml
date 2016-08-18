@@ -28,10 +28,14 @@ export const adPrefetch = {
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   // TODO: Remove this once we switch over to the direct request version of adsense.js.
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  adsnative: 'https://static.adsnative.com/static/js/render.v1.js',
   adstir: 'https://js.ad-stir.com/js/adstir_async.js',
   adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
   aduptech: 'https://s.d.adup-tech.com/jsapi',
-  amoad: 'https://j.amoad.com/js/a.js',
+  amoad: [
+    'https://j.amoad.com/js/a.js',
+    'https://j.amoad.com/js/n.js',
+  ],
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
   caprofitx: [
     'https://cdn.caprofitx.com/pfx.min.js',
@@ -101,6 +105,7 @@ export const adPreconnect = {
   adition: 'https://imagesrv.adition.com',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
+  adsnative: 'https://api.adsnative.com',
   adstir: 'https://ad.ad-stir.com',
   adtech: [
     'https://mads.at.atwola.com',

@@ -311,7 +311,7 @@ export class FixedLayer {
   }
 
   /**
-   * Calls `setupFixedSelectors` in a try-catch.
+   * Calls `setupFixedSelectors_` in a try-catch.
    * Fails quietly with a dev error if call fails.
    * This method should not be inlined to prevent TryCatch deoptimization.
    * NoInline keyword at the end of function name also prevents Closure compiler
@@ -321,7 +321,7 @@ export class FixedLayer {
    */
   trySetupFixedSelectorsNoInline(fixedSelectors) {
     try {
-      this.setupFixedSelectors(fixedSelectors);
+      this.setupFixedSelectors_(fixedSelectors);
     } catch (e) {
       // Fail quietly.
       dev().error(TAG, 'Failed to setup fixed elements:', e);
@@ -334,7 +334,7 @@ export class FixedLayer {
    * @param {!Array<string>} fixedSelectors
    * @private
    */
-  setupFixedSelectors(fixedSelectors) {
+  setupFixedSelectors_(fixedSelectors) {
     for (let i = 0; i < fixedSelectors.length; i++) {
       const fixedSelector = fixedSelectors[i];
       const elements = this.doc.querySelectorAll(fixedSelector);

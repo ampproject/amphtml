@@ -21,10 +21,19 @@ import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
 import {urls} from './config';
 
-const globalExponentialBackoff = exponentialBackoff(1.5);
-
 const CANCELLED = 'CANCELLED';
 
+/**
+ * A wrapper around our exponentialBackoff, to lazy initialize it to avoid an
+ * un-DCE'able side-effect.
+ * @param {function()} work the function to execute after backoff
+ * @return {number} the setTimeout id
+ */
+let globalExponentialBackoff = function(work) {
+  // Set globalExponentialBackoff as the lazy-created function. JS Vooodoooo.
+  globalExponentialBackoff = exponentialBackoff(1.5);
+  return globalExponentialBackoff(work);
+};
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -37,7 +46,7 @@ const CANCELLED = 'CANCELLED';
  * @param {!Element=} opt_associatedElement
  */
 export function reportError(error, opt_associatedElement) {
-  if (!window.console) {
+  if (!self.console) {
     return;
   }
   if (!error) {
@@ -149,26 +158,26 @@ export function getErrorReportUrl(message, filename, line, col, error) {
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message.replace(USER_ERROR_SENTINEL, '')) +
       '&a=' + (isUserErrorMessage(message) ? 1 : 0);
-  if (window.context && window.context.location) {
+  if (self.context && self.context.location) {
     url += '&3p=1';
   }
-  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+  if (self.AMP_CONFIG && self.AMP_CONFIG.canary) {
     url += '&ca=1';
   }
-  if (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) {
-    url += '&or=' + encodeURIComponent(window.location.ancestorOrigins[0]);
+  if (self.location.ancestorOrigins && self.location.ancestorOrigins[0]) {
+    url += '&or=' + encodeURIComponent(self.location.ancestorOrigins[0]);
   }
-  if (window.viewerState) {
-    url += '&vs=' + encodeURIComponent(window.viewerState);
+  if (self.viewerState) {
+    url += '&vs=' + encodeURIComponent(self.viewerState);
   }
   // Is embedded?
-  if (window.parent && window.parent != window) {
+  if (self.parent && self.parent != self) {
     url += '&iem=1';
   }
 
-  if (window.AMP.viewer) {
-    const resolvedViewerUrl = window.AMP.viewer.getResolvedViewerUrl();
-    const messagingOrigin = window.AMP.viewer.maybeGetMessagingOrigin();
+  if (self.AMP.viewer) {
+    const resolvedViewerUrl = self.AMP.viewer.getResolvedViewerUrl();
+    const messagingOrigin = self.AMP.viewer.maybeGetMessagingOrigin();
     if (resolvedViewerUrl) {
       url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
     }

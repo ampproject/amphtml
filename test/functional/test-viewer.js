@@ -500,28 +500,48 @@ describe('Viewer', () => {
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
   });
 
-  it('should not request cid', () => {
-    sandbox.stub(viewer, 'isTrustedViewer', () => {
-      return Promise.resolve(false);
+  describe('baseCid', () => {
+    const cidData = JSON.stringify({
+      time: 100,
+      cid: 'cid-123',
     });
-    sandbox.stub(viewer, 'sendMessage', () => {
-      return Promise.reject('should not be requested');
-    });
-    return viewer.getBaseCid().then(cid => {
-      expect(cid).to.be.undefined;
-    });
-  });
+    let trustedViewer;
+    let persistedCidData;
 
-  it('should request cid for trusted viewer', () => {
-    sandbox.stub(viewer, 'isTrustedViewer', () => {
-      return Promise.resolve(true);
+    beforeEach(() => {
+      clock.tick(100);
+      trustedViewer = true;
+      persistedCidData = cidData;
+      sandbox.stub(viewer, 'isTrustedViewer',
+          () => Promise.resolve(trustedViewer));
+      sandbox.stub(viewer, 'sendMessage', (message, payload) => {
+        if (message != 'cid') {
+          return Promise.reject();
+        }
+        if (payload) {
+          persistedCidData = payload;
+        }
+        return Promise.resolve(persistedCidData);
+      });
     });
-    sandbox.stub(viewer, 'sendMessage', name => {
-      expect(name).to.equal('cid');
-      return Promise.resolve('from-viewer');
+
+    it('should return CID', () => {
+      expect(viewer.baseCid()).to.eventually.equal(cidData);
     });
-    return viewer.getBaseCid().then(cid => {
-      expect(cid).to.be.equal('from-viewer');
+
+    it('should not request cid for untrusted viewer', () => {
+      trustedViewer = false;
+      expect(viewer.baseCid()).to.eventually.be.undefined;
+    });
+
+    it('should convert CID returned by legacy API to new format', () => {
+      persistedCidData = 'cid-123';
+      expect(viewer.baseCid()).to.eventually.equal(cidData);
+    });
+
+    it('should send message to store cid', () => {
+      const newCidData = JSON.stringify({time: 101, cid: 'cid-456'});
+      expect(viewer.baseCid(newCidData)).to.eventually.equal(newCidData);
     });
   });
 
