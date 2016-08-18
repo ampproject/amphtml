@@ -528,6 +528,10 @@ function createBaseAmpElementProto(win) {
     return this.built_;
   };
 
+  ElementProto.isFirstLayoutCompleted = function() {
+    return this.isFirstLayoutCompleted_;
+  };
+
   /**
    * Get the priority to load the element.
    * @return {number} @this {!Element}
@@ -747,7 +751,7 @@ function createBaseAmpElementProto(win) {
         if (!this.isUpgraded()) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEvent('amp:stubbed');
+          this.dispatchCustomEventForTesting('amp:stubbed');
         } else {
           this.dispatchCustomEvent('amp:attached');
         }
@@ -811,17 +815,11 @@ function createBaseAmpElementProto(win) {
   /**
    * Dispatches a custom event.
    *
-   * NOTE: This is currently only active for tests.
-   * Do not rely on this mechanism for production code.
-   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
-    if (!getMode().test) {
-      return;
-    }
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
@@ -829,6 +827,23 @@ function createBaseAmpElementProto(win) {
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
+  };
+
+  /**
+   * Dispatches a custom event only for testing.
+   *
+   * NOTE: This is currently only active for tests.
+   * Do not rely on this mechanism for production code.
+   *
+   * @param {string} name
+   * @param {!Object=} opt_data Event data.
+   * @final @this {!Element}
+   */
+  ElementProto.dispatchCustomEventForTesting = function(name, opt_data) {
+    if (!getMode().test) {
+      return;
+    }
+    this.dispatchCustomEvent(name, opt_data);
   };
 
   /**
@@ -909,7 +924,7 @@ function createBaseAmpElementProto(win) {
     assertNotTemplate(this);
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
-    this.dispatchCustomEvent('amp:load:start');
+    this.dispatchCustomEventForTesting('amp:load:start');
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
@@ -922,6 +937,7 @@ function createBaseAmpElementProto(win) {
       if (this.isFirstLayoutCompleted_) {
         this.implementation_.firstLayoutCompleted();
         this.isFirstLayoutCompleted_ = false;
+        this.dispatchCustomEvent('amp:load:end');
       }
     }, reason => {
       // add layoutCount_ by 1 despite load fails or not

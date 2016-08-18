@@ -25,6 +25,8 @@ import {
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
+import {timerFor} from '../../../src/timer';
+import {performanceFor} from '../../../src/performance';
 
 export class AmpAdApiHandler {
 
@@ -59,17 +61,23 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
+
+    /** @private @const {number|null} */
+    this.initTime_ = null;
   }
 
   /**
    * Sets up listeners and iframe state for iframe containing ad creative.
-   * @param {!Element} iframe
+
    * @param {boolean} is3p whether iframe was loaded via 3p.
    * @param {boolean} opt_defaultVisible when true, visibility hidden is NOT
    *    set on the iframe element (remains visible
    * @return {!Promise} awaiting load event for ad frame
    */
   startUp(iframe, is3p, opt_defaultVisible) {
+    // TODO: get performance to pass tests
+    this.initTime_ = Date.now();
+
     user().assert(
       !this.iframe, 'multiple invocations of startup without destroy!');
     this.iframe_ = iframe;
@@ -121,21 +129,50 @@ export class AmpAdApiHandler {
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
-    listenForOnce(this.iframe_, 'render-start', () => {
-      if (!this.iframe_) {
-        return;
+
+    const promise = new Promise(resolve => {
+      listenForOnce(this.iframe_, 'render-start', () => {
+        resolve();
+      }, this.is3p_);
+    });
+
+    this.renderStartPromise_ = timerFor(this.baseInstance_.win).timeoutPromise(
+        2000, promise,
+        'fail to receive render-start event from ad server, timeout');
+
+    this.renderStartPromise_.then(() => {
+      const now = Date.now();
+      this.reportPerformance_('rs', now - this.initTime_);
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      if (this.baseInstance_.renderStartResolve_) {
-        this.baseInstance_.renderStartResolve_();
-        this.baseInstance_.renderStartResolve_ = null;
+    }).catch(() => {
+      const now = Date.now();
+      this.reportPerformance_('rsf', now - this.initTime_);
+      if (this.iframe_) {
+        this.iframe_.style.visibility = '';
       }
-      this.iframe_.style.visibility = '';
-    }, this.is3p_);
+    });
+
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
-    return loadPromise(this.iframe_);
+    return loadPromise(this.iframe_).then(() => {
+      return this.renderStartPromise_;
+    });
+  }
+
+  /**
+   * Report performance
+   * @param {string} label
+   * @param {number} value
+   * @private
+   */
+  reportPerformance_(label, value) {
+    const performance = performanceFor(this.baseInstance_.win);
+    performance.tickDelta(label, value);
+    performance.flush();
   }
 
   /** @override  */

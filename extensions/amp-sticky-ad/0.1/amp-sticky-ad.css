@@ -51,7 +51,6 @@ amp-sticky-ad {
 
 
 .amp-sticky-ad-close-button {
-  visibility: hidden;
   position: absolute;
   width: 32px;
   height: 32px;
@@ -62,10 +61,6 @@ amp-sticky-ad {
   background-position: center;
   background-color: #fff;
   border: 1px solid #c8c8c8;
-}
-
-.amp-sticky-ad-loaded .amp-sticky-ad-close-button {
-  visibility: visible;
 }
 
 

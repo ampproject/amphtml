@@ -236,6 +236,7 @@ export class Resource {
     } else {
       this.state_ = ResourceState.NOT_LAID_OUT;
     }
+    this.element.dispatchCustomEvent('amp:built');
   }
 
   /**
