@@ -204,7 +204,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
  * that the data contains exactly one of those alternatives.
  *
  * @param {!Object} data
- * @param {!Array<string|Array<string>>} mandatoryFields
+ * @param {!Array<string|!Array<string>>} mandatoryFields
  * @param {Array<string>=} opt_optionalFields
  */
 export function validateData(data, mandatoryFields, opt_optionalFields) {
