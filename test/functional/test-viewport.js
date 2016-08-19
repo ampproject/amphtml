@@ -484,6 +484,28 @@ describe('Viewport META', () => {
             'minimum-scale': '1',
           });
     });
+    it('should support semicolon', () => {
+      expect(parseViewportMeta('width=device-width;minimum-scale=1'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+          });
+    });
+    it('should support mix of comma and semicolon', () => {
+      expect(parseViewportMeta('width=device-width,minimum-scale=1;test=3;'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+            'test': '3',
+          });
+    });
+    it('should ignore extra mix delims', () => {
+      expect(parseViewportMeta(',,;;,width=device-width;;,minimum-scale=1,,;'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+          });
+    });
   });
 
   describe('stringifyViewportMeta', () => {
