@@ -34,14 +34,14 @@ function tests(name) {
   function getAdInAdContainer() {
     return createIframePromise().then(iframe => {
       const adContainer = iframe.doc.createElement('amp-sticky-ad');
-      const ampAd = createElementWithAttributes(iframe, 'amp-ad', {
+      const ampAd = createElementWithAttributes(iframe.doc, 'amp-ad', {
         width: 300,
         height: 50,
         type: '_ping_',
         src: 'testsrc',
       });
       adContainer.appendChild(ampAd);
-      const link = createElementWithAttributes(iframe, 'link', {
+      const link = createElementWithAttributes(iframe.doc, 'link', {
         rel: 'canonical',
         href: 'blan',
       });

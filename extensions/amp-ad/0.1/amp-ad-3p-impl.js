@@ -18,7 +18,7 @@ import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed, POSITION_FIXED_TAG_WHITELIST,}
+import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
@@ -94,23 +94,6 @@ export function incrementLoadingAds(win) {
   }, 1000);
   loadingAds[timerId] = 1;
   return timerId;
-}
-
-/**
- * @param {!Element} el
- * @param {!Window} win
- * @return {string|null} a string that contains all containers of the ad.
- * This is called during layout measure.
- */
-
-export function getAdContainer(el) {
-  while (el && el.tagName != 'BODY') {
-    el = el.parentNode;
-    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return el.tagName;
-    }
-  }
-  return null;
 }
 
 /** @const {!string} Tag name for 3P AD implementation. */
@@ -222,10 +205,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** detect ad containers, add the list to element as a new attribute */
     if (!this.container_) {
       this.container_ = getAdContainer(this.element);
-      if (this.container_) {
+      if (this.container_ != 'none') {
         this.element.setAttribute('amp-container-element', this.container_);
-      } else {
-        this.container_ = 'none';
       }
     }
     // We remeasured this tag, let's also remeasure the iframe. Should be

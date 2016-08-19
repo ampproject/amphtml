@@ -27,16 +27,16 @@ export function stubService(sandbox, win, serviceId, method) {
 }
 
 /**
- * @param {!Element} iframe
+ * @param {!Document} doc
  * @param {string} tagName
  * @param {!Object} attributes
  * @return {!Element} created element
  */
-export function createElementWithAttributes(iframe, tagName, attributes) {
-  if (!iframe || !iframe.doc) {
+export function createElementWithAttributes(doc, tagName, attributes) {
+  if (!doc) {
     return;
   }
-  const element = iframe.doc.createElement(tagName);
+  const element = doc.createElement(tagName);
   for (const attr in attributes) {
     element.setAttribute(attr, attributes[attr]);
   }

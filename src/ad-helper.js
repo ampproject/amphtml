@@ -18,7 +18,7 @@
  * Tags that are allowed to have fixed positioning
  * @const {!Object<string, boolean>}
  */
-export const POSITION_FIXED_TAG_WHITELIST = {
+const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
@@ -49,4 +49,20 @@ export function isAdPositionAllowed(el, win) {
     el = el.parentNode;
   } while (el && el.tagName != 'BODY');
   return !hasFixedAncestor;
+}
+
+/**
+ * @param {!Element} el
+ * @param {!Window} win
+ * @return {string|null} a string that contains all containers of the ad.
+ * This is called during layout measure.
+ */
+export function getAdContainer(el) {
+  while (el && el.tagName != 'BODY') {
+    el = el.parentNode;
+    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
+      return el.tagName;
+    }
+  }
+  return 'none';
 }
