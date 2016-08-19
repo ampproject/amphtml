@@ -239,6 +239,10 @@ describe('serializeQueryString', () => {
   it('should encode values and keys', () => {
     expect(serializeQueryString({'a+b': 'A+B'})).to.equal('a%2Bb=A%2BB');
   });
+  it('should serialize multiple valued parameters', () => {
+    expect(serializeQueryString({a: [1,2,3], b: true})).to.equal(
+        'a=1&a=2&a=3&b=true');
+  });
 });
 
 
@@ -384,6 +388,13 @@ describe('addParamsToUrl', () => {
     url = addParamsToUrl(url, params);
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
+
+    expect(addParamsToUrl('http://example.com', {
+      firstname: 'Cool',
+      lastname: 'Beans',
+      interests: ['Basketball', 'Food', 'Running'],
+    })).to.equal('http://example.com?firstname=Cool&lastname=Beans&' +
+        'interests=Basketball&interests=Food&interests=Running');
   });
 
   it('should keep host and path intact', () => {
