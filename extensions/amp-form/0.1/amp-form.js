@@ -90,8 +90,12 @@ export class AmpForm {
   /**
    * Adds functionality to the passed form element and listens to submit event.
    * @param {!HTMLFormElement} element
+   * @param {string} id
    */
-  constructor(element) {
+  constructor(element, id) {
+    /** @private @const {string} */
+    this.id_ = id;
+
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
 
@@ -274,13 +278,13 @@ export class AmpForm {
   renderTemplate_(data = {}) {
     const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
-      const randId = `rendered-message-${Math.random() * 1000}`;
+      const messageId = `rendered-message-${this.id_}`;
       container.setAttribute('role', 'alert');
-      container.setAttribute('aria-labeledby', randId);
+      container.setAttribute('aria-labeledby', messageId);
       container.setAttribute('aria-live', 'assertive');
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
-            rendered.id = randId;
+            rendered.id = messageId;
             rendered.setAttribute('i-amp-rendered', '');
             container.appendChild(rendered);
           });
@@ -336,7 +340,7 @@ function onInvalidInputKeyUp_(event) {
     event.target.removeAttribute('aria-invalid');
     validationBubble.hide();
   } else {
-    event.target.setAttribute('aria-invalid', true);
+    event.target.setAttribute('aria-invalid', 'true');
     validationBubble.show(event.target, event.target.validationMessage);
   }
 }
@@ -498,8 +502,8 @@ function isDisabled_(element) {
  */
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, doc => {
-    toArray(doc.forms).forEach(form => {
-      new AmpForm(form);
+    toArray(doc.forms).forEach((form, index) => {
+      new AmpForm(form, `amp-form-${index}`);
     });
   });
 }
@@ -513,7 +517,7 @@ export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(win);
+        validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
         installSubmissionHandlers(win);
       });
     }

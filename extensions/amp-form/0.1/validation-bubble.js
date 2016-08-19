@@ -27,8 +27,11 @@ export class ValidationBubble {
   /**
    * Creates a bubble component to display messages in.
    * @param {!Window} win
+   * @param {string} id
    */
-  constructor(win) {
+  constructor(win, id) {
+    /** @private @const {string} */
+    this.id_ = id;
 
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(win);
@@ -49,9 +52,6 @@ export class ValidationBubble {
     this.bubbleElement_ = win.document.createElement('div');
     this.bubbleElement_.classList.add('-amp-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
-    this.bubbleElement_.setAttribute('aria-labeledby',
-        `bubble-message-${Math.random() * 1000}`);
-
     win.document.body.appendChild(this.bubbleElement_);
   }
 
@@ -95,6 +95,7 @@ export class ValidationBubble {
       targetElement,
       bubbleElement: this.bubbleElement_,
       viewport: this.viewport_,
+      id: this.id_,
     };
     this.vsync_.run({
       measure: measureTargetElement,
@@ -137,8 +138,9 @@ function measureTargetElement(state) {
 function showBubbleElement(state) {
   removeChildren(state.bubbleElement);
   const messageDiv = state.bubbleElement.ownerDocument.createElement('div');
-  messageDiv.id = state.bubbleElement.getAttribute('aria-labeledby');
+  messageDiv.id = `bubble-message-${state.id}`;
   messageDiv.textContent = state.message;
+  state.bubbleElement.setAttribute('aria-labeledby', messageDiv.id);
   state.bubbleElement.setAttribute('role', 'alert');
   state.bubbleElement.setAttribute('aria-live', 'assertive');
   state.bubbleElement.appendChild(messageDiv);
