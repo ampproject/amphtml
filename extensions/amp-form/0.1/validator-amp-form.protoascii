@@ -14,6 +14,8 @@
 # limitations under the license.
 #
 tags: {  # amp-form
+  html_format: AMP
+  html_format: A4A
   # Accepted form elements can be found in validator-main.protoascii
   # under section "4.10 Forms"
   tag_name: "SCRIPT"

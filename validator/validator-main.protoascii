@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 266
+spec_file_revision: 267
 
 reference_points_can_define_reference_points: true
 
@@ -2458,6 +2458,8 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 tags: {  # <amp-img>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
@@ -2477,6 +2479,8 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
@@ -2497,6 +2501,8 @@ tags: {  # <amp-pixel>
   }
 }
 tags: {  # <amp-video>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
