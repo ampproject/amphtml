@@ -274,8 +274,13 @@ export class AmpForm {
   renderTemplate_(data = {}) {
     const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
+      const randId = `rendered-message-${Math.random() * 1000}`;
+      container.setAttribute('role', 'alert');
+      container.setAttribute('aria-labeledby', randId);
+      container.setAttribute('aria-live', 'assertive');
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
+            rendered.id = randId;
             rendered.setAttribute('i-amp-rendered', '');
             container.appendChild(rendered);
           });
@@ -328,8 +333,10 @@ function reportFormValidity(form) {
  */
 function onInvalidInputKeyUp_(event) {
   if (event.target.checkValidity()) {
+    event.target.removeAttribute('aria-invalid');
     validationBubble.hide();
   } else {
+    event.target.setAttribute('aria-invalid', true);
     validationBubble.show(event.target, event.target.validationMessage);
   }
 }

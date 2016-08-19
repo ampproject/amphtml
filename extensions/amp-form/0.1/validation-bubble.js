@@ -17,6 +17,7 @@
 import {vsyncFor} from '../../../src/vsync';
 import {viewportFor} from '../../../src/viewport';
 import {setStyles} from '../../../src/style';
+import {removeChildren} from '../../../src/dom';
 
 /** @type {string} */
 const OBJ_PROP = '__BUBBLE_OBJ';
@@ -35,10 +36,22 @@ export class ValidationBubble {
     /** @private @const {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
 
+    /** @private {?Element} */
+    this.currentTargetElement_ = null;
+
+    /** @private {string} */
+    this.currentMessage_ = '';
+
+    /** @private {boolean} */
+    this.isVisible_ = false;
+
     /** @private @const {!HTMLDivElement} */
     this.bubbleElement_ = win.document.createElement('div');
     this.bubbleElement_.classList.add('-amp-validation-bubble');
     this.bubbleElement_[OBJ_PROP] = this;
+    this.bubbleElement_.setAttribute('aria-labeledby',
+        `bubble-message-${Math.random() * 1000}`);
+
     win.document.body.appendChild(this.bubbleElement_);
   }
 
@@ -46,6 +59,14 @@ export class ValidationBubble {
    * Hides the bubble off screen.
    */
   hide() {
+    if (!this.isVisible_) {
+      return;
+    }
+
+    this.isVisible_ = false;
+    this.currentTargetElement_ = null;
+    this.currentMessage_ = '';
+
     // TODO(#3776): Use .mutate method when it supports passing state.
     this.vsync_.run({
       measure: undefined,
@@ -61,6 +82,14 @@ export class ValidationBubble {
    * @param {string} message
    */
   show(targetElement, message) {
+    if (this.isVisible_ && targetElement == this.currentTargetElement_ &&
+        message == this.currentMessage_) {
+      return;
+    }
+
+    this.isVisible_ = true;
+    this.currentTargetElement_ = targetElement;
+    this.currentMessage_ = message;
     const state = {
       message,
       targetElement,
@@ -81,6 +110,9 @@ export class ValidationBubble {
  * @private
  */
 function hideBubble(state) {
+  state.bubbleElement.removeAttribute('aria-alert');
+  state.bubbleElement.removeAttribute('role');
+  removeChildren(state.bubbleElement);
   setStyles(state.bubbleElement, {
     display: 'none',
   });
@@ -103,7 +135,13 @@ function measureTargetElement(state) {
  * @private
  */
 function showBubbleElement(state) {
-  state.bubbleElement.textContent = state.message;
+  removeChildren(state.bubbleElement);
+  const messageDiv = state.bubbleElement.ownerDocument.createElement('div');
+  messageDiv.id = state.bubbleElement.getAttribute('aria-labeledby');
+  messageDiv.textContent = state.message;
+  state.bubbleElement.setAttribute('role', 'alert');
+  state.bubbleElement.setAttribute('aria-live', 'assertive');
+  state.bubbleElement.appendChild(messageDiv);
   setStyles(state.bubbleElement, {
     display: 'block',
     top: `${state.targetRect.top - 10}px`,
