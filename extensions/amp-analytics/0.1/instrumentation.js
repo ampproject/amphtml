@@ -172,7 +172,7 @@ export class InstrumentationService {
       }
     } else if (eventType === AnalyticsEventType.HIDDEN) {
       this.createVisibilityListener_(listener, config,
-          AnalyticsEventType.HIDDEN);
+          AnalyticsEventType.HIDDEN, analyticsElement);
     } else {
       let observers = this.customEventObservers_[eventType];
       if (!observers) {
@@ -244,10 +244,14 @@ export class InstrumentationService {
 
       visibilityFor(this.win_).then(visibility => {
         visibility.listenOnce(spec, vars => {
-          const attr = getDataParamsFromAttributes(getElement(spec['selector']),
-              null, VARIABLE_DATA_ATTRIBUTE_KEY);
-          for (const key in attr) {
-            vars[key] = attr[key];
+          const el = getElement(spec['selector'], analyticsElement,
+              spec['selectionMethod']);
+          if (el) {
+            const attr = getDataParamsFromAttributes(el, null,
+                VARIABLE_DATA_ATTRIBUTE_KEY);
+            for (const key in attr) {
+              vars[key] = attr[key];
+            }
           }
           callback(new AnalyticsEvent(eventType, vars));
         }, shouldBeVisible, analyticsElement);

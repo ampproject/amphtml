@@ -182,23 +182,35 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 <p></p>
-<amp-anim src="https://goo.gl/FBCKQO" id="anim-id" width="400" height="225" layout="responsive">
-  <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
+<amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
+  <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
   <amp-analytics id="nestedAnalytics">
     <script type="application/json">
     {
+      "transport": {"beacon": false, "xhrpost": false},
       "requests": {
-        "visibility": "https://example.com/nestedAmpAnalytics"
+        "visibility": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png?${type}&RANDOM"
       },
       "triggers": {
-        "visibility": {
+        "visibilityScope": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-img",
+            "selectionMethod": "scope",
+            "visiblePercentageMin": 10
+          },
+          "vars": { "type": "scope" }
+        },
+        "visibilityClosest": {
           "on": "visible",
           "request": "visibility",
           "visibilitySpec": {
             "selector": "amp-anim",
-            "visiblePercentageMin": 20,
-            "visiblePercentageMax": 80
-          }
+            "selectionMethod": "closest",
+            "visiblePercentageMin": 20
+          },
+          "vars": { "type": "closest" }
         }
       }
     }

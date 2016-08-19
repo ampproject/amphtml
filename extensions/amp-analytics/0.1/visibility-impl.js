@@ -156,9 +156,9 @@ export function getElement(selector, el, selectionMethod) {
     // Only tag names are supported currently.
     return closestByTag(el, selector);
   } else if (selectionMethod == 'scope') {
-    return el.querySelector(selector);
+    return el.parentElement.querySelector(selector);
   } else if (selector[0] == '#') {
-    return el.parentDocument.getElementById(selector.slice(1));
+    return el.ownerDocument.getElementById(selector.slice(1));
   }
   return null;
 }
