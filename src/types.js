@@ -62,6 +62,17 @@ export function isObject(value) {
 }
 
 /**
+ * Determines if value is of number type and finite.
+ * NaN and Infinity are not considered a finite number.
+ * String numbers are not considered numbers.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isFiniteNumber(value) {
+  return (typeof value === 'number' && isFinite(value));
+}
+
+/**
  * Determines if value is of FormData type.
  * @param {*} value
  * @return {boolean}
