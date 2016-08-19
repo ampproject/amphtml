@@ -16,6 +16,7 @@
 
 import {adopt} from '../../../../src/runtime';
 import {
+  getElement,
   isPositiveNumber_,
   isValidPercentage_,
   isVisibilitySpecValid,
@@ -350,6 +351,49 @@ describe('amp-analytics.visibility', () => {
 
     ['', -1, NaN, 101].forEach(num => {
       checkValidPercentage(num, false);
+    });
+  });
+
+  describe('getElement', () => {
+    let div, img1, img2, analytics;
+    beforeEach(() => {
+      div = document.createElement('div');
+      div.id = 'div';
+      img1 = document.createElement('amp-img');
+      img1.id = 'img1';
+      img2 = document.createElement('amp-img');
+      img2.id = 'img2';
+      analytics = document.createElement('amp-analytics');
+      analytics.id = 'analytics';
+      div.appendChild(img1);
+      img1.appendChild(analytics);
+      img1.appendChild(img2);
+      document.body.appendChild(div);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(div);
+    });
+
+    it('finds element by id', () => {
+      expect(getElement('#div', analytics, undefined)).to.equal(div);
+    });
+
+    // In the following tests, getElement returns non-amp elements. Those are
+    // discarded by visibility-impl later in the code.
+    it('finds element by tagname, selectionMethod=closest', () => {
+      expect(getElement('div', analytics, 'closest')).to.equal(div);
+      expect(getElement('amp-img', analytics, 'closest')).to.equal(img1);
+    });
+
+    it('finds element by id, selectionMethod=scope', () => {
+      expect(getElement('#div', analytics, 'scope')).to.equal(null);
+      expect(getElement('#img2', analytics, 'scope')).to.equal(img2);
+    });
+
+    it('finds element by tagname, selectionMethod=scope', () => {
+      expect(getElement('div', analytics, 'scope')).to.equal(null);
+      expect(getElement('amp-img', analytics, 'scope')).to.equal(img2);
     });
   });
 });
