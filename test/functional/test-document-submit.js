@@ -68,6 +68,29 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
   });
 
+  it('should add __amp_source_origin to action before submit', () => {
+    evt.target.setAttribute('action',
+        'https://example.com/?__amp_source_origin=12');
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/Source origin is not allowed in/);
+
+    evt.target.__AMP_INIT_ACTION__ = null;
+    evt.target.setAttribute('action', 'https://example.com/');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('action')).to.contain(
+        '__amp_source_origin');
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw(
+        /Source origin is not allowed in/);
+
+    // Should not throw on any subsequent submits and use initial
+    // value of action.
+    evt.target.setAttribute('action',
+        'https://www.example.com/?a=1&__amp_source_origin=example1.com&b=2');
+    onDocumentFormSubmit_(evt);
+    expect(evt.target.getAttribute('action')).to.contain(
+        '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
+  });
+
   it('should do nothing if already prevented', () => {
     evt.defaultPrevented = true;
     onDocumentFormSubmit_(evt);

@@ -79,7 +79,41 @@ app.use('/api/echo/post', function(req, res) {
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+/**
+ * In practice this would be *.ampproject.org and the publishers
+ * origin. Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
+const ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000');
+
+/**
+ * In practice this would be the publishers origin.
+ * Please see AMP CORS docs for more details:
+ *    https://goo.gl/F6uCAY
+ * @type {RegExp}
+ */
+const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
+    '^https?://.+\.herokuapp\.com:8000/');
+
 app.use('/form/html/post', function(req, res) {
+  if (!ORIGIN_REGEX.test(req.headers.origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: 'Origin header is invalid.'
+    }));
+    return;
+  }
+
+  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: '__amp_source_origin parameter is invalid.'
+    }));
+    return;
+  }
+
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'text/html');
@@ -99,14 +133,34 @@ app.use('/form/html/post', function(req, res) {
 });
 
 app.use('/form/echo-json/post', function(req, res) {
+  if (!ORIGIN_REGEX.test(req.headers.origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: 'Origin header is invalid.'
+    }));
+    return;
+  }
+
+  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+    res.statusCode = 500;
+    res.end(JSON.stringify({
+      message: '__amp_source_origin parameter is invalid.'
+    }));
+    return;
+  }
+
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields) {
     res.setHeader('Content-Type', 'application/json');
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
+    res.setHeader('Access-Control-Allow-Origin',
+        req.headers.origin);
+    res.setHeader('Access-Control-Expose-Headers',
+        'AMP-Access-Control-Allow-Source-Origin')
     res.setHeader('AMP-Access-Control-Allow-Source-Origin',
-        req.protocol + '://' + req.headers.host);
+        req.query.__amp_source_origin);
     res.end(JSON.stringify(fields));
   });
 });

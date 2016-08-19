@@ -36,6 +36,9 @@ let cache;
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
+/** @private @const {string} */
+const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+
 /**
  * @typedef {({
  *   href: string,
@@ -405,4 +408,20 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
           basePath.slice(0, basePath.length - 1).join('/') :
           '') +
       '/' + relativeUrlString;
+}
+
+
+/**
+ * Add "__amp_source_origin" query parameter to the URL.
+ * @param {!Window} win
+ * @param {string} url
+ * @return {string}
+ */
+export function getCorsUrl(win, url) {
+  const sourceOrigin = getSourceOrigin(win.location.href);
+  const parsedUrl = parseUrl(url);
+  const query = parseQueryString(parsedUrl.search);
+  user().assert(!(SOURCE_ORIGIN_PARAM in query),
+      'Source origin is not allowed in %s', url);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }

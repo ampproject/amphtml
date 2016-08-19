@@ -58,6 +58,7 @@ describe('amp-form', () => {
     nameInput.setAttribute('value', 'John Miller');
     form.appendChild(nameInput);
     form.setAttribute('action-xhr', 'https://example.com');
+    form.setAttribute('action', 'https://example.com');
 
     if (button1) {
       const submitBtn = doc.createElement('input');
