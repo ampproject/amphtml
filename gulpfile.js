@@ -278,7 +278,8 @@ function buildExtension(name, version, hasCss, options) {
  * @return {!Stream} Gulp object
  */
 function buildExtensionJs(path, name, version, options) {
-  compileJs(path + '/', name + '.js', './dist/v0', {
+  var filename = options.filename || name + '.js';
+  compileJs(path + '/', filename, './dist/v0', {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
@@ -290,8 +291,8 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: '(window.AMP = window.AMP || [])' +
-        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});',
+    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
 
@@ -302,6 +303,7 @@ function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
+  buildSw();
   buildExtensions({bundleOnlyIfListedInFiles: true});
   compile();
 }
@@ -314,6 +316,7 @@ function dist() {
   cleanupBuildDir();
   compile(false, true, true);
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
@@ -326,6 +329,11 @@ function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildSw({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
@@ -631,6 +639,32 @@ function buildAlp(options) {
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildSw(options) {
+  console.log('Bundling service-worker.js');
+  var opts = {};
+  for (var prop in options) {
+    opts[prop] = options[prop];
+  }
+
+  // The service-worker script loaded by the browser.
+  compileJs('./src/service-worker/', 'shell.js', './dist/', {
+    toName: 'sw.max.js',
+    minifiedName: 'sw.js',
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+  });
+  // The script imported by the service-worker. This is the "core".
+  opts.noWrapper = true;
+  opts.filename = 'core.js';
+  buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1', opts);
 }
 
 /**

@@ -64,7 +64,6 @@ const TAG = 'runtime';
 /** @type {!Object} */
 const elementsForTesting = {};
 
-
 /**
  * Install runtime-level services.
  * @param {!Window} global Global scope to adopt.

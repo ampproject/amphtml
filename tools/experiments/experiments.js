@@ -159,6 +159,11 @@ const EXPERIMENTS = [
     name: 'Shows a native app install/open banner.',
     spec: 'https://github.com/ampproject/amphtml/issues/800',
   },
+  {
+    id: 'cache-service-worker',
+    name: 'AMP Cache Service Worker',
+    spec: 'https://github.com/ampproject/amphtml/issues/1199',
+  },
 ];
 
 if (getMode().localDev) {
