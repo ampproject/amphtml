@@ -275,7 +275,7 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
- * @param opt_beforeAttachToDom {function=}
+ * @param opt_beforeAttachToDom {function(!HTMLIFrameElement)=}
  * @returns {!Promise<!HTMLIFrameElement>}
  */
 export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
@@ -301,14 +301,14 @@ export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
     return new Promise(resolve => {
       const listener = event => {
         let expectMsg = msg;
-        let eventMsg = event.data.receivedMessage;
+        let actualMsg = event.data.receivedMessage;
         if (typeof expectMsg !== 'string') {
           expectMsg = JSON.stringify(expectMsg);
-          eventMsg = JSON.stringify(eventMsg);
+          actualMsg = JSON.stringify(actualMsg);
         }
         if (event.source == element.contentWindow
             && event.data.testStubEcho
-            && expectMsg == eventMsg) {
+            && expectMsg == actualMsg) {
           win.removeEventListener('message', listener);
           resolve(msg);
         }
