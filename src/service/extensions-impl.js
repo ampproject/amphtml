@@ -440,8 +440,9 @@ export class Extensions {
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
     const pathStr = this.win.location.pathname;
+    const base = this.win.location.protocol + '//' + this.win.location.host;
     const useCompiledJs = shouldUseCompiledJs();
-    const scriptSrc = calculateExtensionScriptUrl(pathStr, extensionId,
+    const scriptSrc = calculateExtensionScriptUrl(pathStr, base, extensionId,
         getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
@@ -452,23 +453,24 @@ export class Extensions {
 /**
  * Calculate script url for amp-ad.
  * @visibleForTesting
- * @param {string} path Location path of the window
+ * @param {string} path Pathname of the window's location
+ * @param {string} base Protocol and Host of the window's location
  * @param {string} extensionId
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
  * @visibleForTesting
  */
-export function calculateExtensionScriptUrl(path, extensionId, isTest,
+export function calculateExtensionScriptUrl(path, base, extensionId, isTest,
     isUsingCompiledJs) {
   if (getMode().localDev) {
     if ((isTest && !isUsingCompiledJs)
         || path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
-      return `/dist/v0/${extensionId}-0.1.max.js`;
+      return `${base}/dist/v0/${extensionId}-0.1.max.js`;
     }
     if ((isTest && isUsingCompiledJs)
         || path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
-      return `/dist/v0/${extensionId}-0.1.js`;
+      return `${base}/dist/v0/${extensionId}-0.1.js`;
     }
     return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
   }
