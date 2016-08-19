@@ -632,7 +632,7 @@ describe('amp-analytics', function() {
     beforeEach(() => {
       config = {
         vars: {host: 'example.com', path: 'helloworld'},
-        extraUrlParams: {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+        extraUrlParams: {'s.evar0': '0', 's.evar1': '${path}', 'foofoo': 'baz'},
         requests: {foo: 'https://${host}/${path}?a=b'},
         triggers: {trig: {'on': 'visible', 'request': 'foo'}},
       };
@@ -640,23 +640,24 @@ describe('amp-analytics', function() {
 
     function verifyRequest() {
       expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
-      expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
+      expect(sendRequestSpy.args[0][0]).to.have.string('v1=helloworld');
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
       expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
       expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
     }
 
     it('are sent', () => {
-      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(
-            'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=1&foofoo=baz');
+            'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=helloworld' +
+            '&foofoo=baz');
       });
     });
 
     it('are renamed by extraUrlParamsReplaceMap', () => {
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
-      const analytics = getAnalyticsTag(config , {'config': 'config1'});
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         verifyRequest();
       });
@@ -665,7 +666,7 @@ describe('amp-analytics', function() {
     it('are supported at trigger level', () => {
       config.triggers.trig.extraUrlParams = {c: 'd', 's.evar': 'e'};
       config.extraUrlParamsReplaceMap = {'s.evar': 'v'};
-      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         verifyRequest();
         expect(sendRequestSpy.args[0][0]).to.have.string('c=d');
@@ -675,10 +676,11 @@ describe('amp-analytics', function() {
 
     it('are supported as a var in URL', () => {
       config.requests.foo = 'https://${host}/${path}?${extraUrlParams}&a=b';
-      const analytics = getAnalyticsTag(config, {'config': 'config1'});
+      const analytics = getAnalyticsTag(config);
       return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.args[0][0]).to.equal(
-            'https://example.com/helloworld?s.evar0=0&s.evar1=1&foofoo=baz&a=b');
+            'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld' +
+            '&foofoo=baz&a=b');
       });
     });
   });
