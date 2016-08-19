@@ -67,8 +67,13 @@
 <body>
   <script>
     setTimeout(function() {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-        AMP.toggleExperiment('amp-lightbox-viewer');
+      if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
+          AMP.toggleExperiment('amp-lightbox-viewer');
+        }
+        if (AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+          AMP.toggleExperiment('amp-lightbox-viewer-auto');
+        }
         location.reload();
       }
     }, 1000);
@@ -79,7 +84,7 @@
   <h1>Lightbox Viewer (Opt-in)</h1>
 
   <h2>Image - Lightboxable with Tap</h2>
-  <amp-img lightbox lightbox-on-tap on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image - Lightboxable no Tap</h2>
   <amp-img lightbox src="http://placehold.it/800x600/651FFF?text=2" layout="responsive" width="8" height="6"></amp-img>
@@ -88,7 +93,7 @@
   <amp-img src="http://placehold.it/800x600/FFC400?text=Not Lightboxable" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image Fixed Size - Lightboxable with Tap</h2>
-  <amp-img lightbox lightbox-on-tap on="tap:myLightboxViewer.open" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
 
   <h2>Youtube - Lightboxable</h3>
   <button on="tap:myLightboxViewer.open(id='yt')">Open video in Lightbox</button>
@@ -116,7 +121,7 @@
 
   <h2>Image inside a different stacking context</h2>
   <div class="create-new-stacking-context">
-    <amp-img lightbox lightbox-on-tap on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/FF9100?text=Stacking Context Test" layout="responsive" width="8" height="6"></amp-img>
+    <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/FF9100?text=Stacking Context Test" layout="responsive" width="8" height="6"></amp-img>
   </div>
 </body>
 </html>
