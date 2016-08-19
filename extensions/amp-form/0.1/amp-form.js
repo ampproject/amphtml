@@ -228,12 +228,11 @@ export class AmpForm {
   getFormAsObject_() {
     const data = {};
     const inputs = this.form_.elements;
+    const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+    const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
+    const checkableType = /^(?:checkbox|radio)$/i;
     for (let i = 0; i < inputs.length; i++) {
       const input = inputs[i];
-      const submittableTagsRegex = /^(?:input|select|textarea)$/i;
-      const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
-      const checkableType = /^(?:checkbox|radio)$/i;
-
       if (!input.name || isDisabled_(input) ||
           !submittableTagsRegex.test(input.tagName) ||
           unsubmittableTypesRegex.test(input.type) ||
