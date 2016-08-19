@@ -19,6 +19,7 @@ import {elementByTag} from '../dom';
 import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 
+
 const ELIGIBLE_TAGS = [
   'amp-img',
   'amp-anim',
@@ -40,7 +41,7 @@ const ELIGIBLE_TAGS = [
 
 const ELIGIBLE_TAP_TAGS = {
   'amp-img': true,
-  'amp-anim' : true,
+  'amp-anim': true,
 };
 
 const DEFAULT_VIEWER_ID = 'amp-lightbox-viewer';
@@ -48,7 +49,7 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
 
 /**
  * Finds elements in the document that meet our heuristics for automatically
- * becoming lightboxable and adds the "lightbox" attribute to them.
+ * becoming lightboxable and adds `lightbox` attribute to them.
  * It may also install a tap handler on elements that meet our heuristics
  * to automatically open in lightbox on tap.
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
@@ -89,6 +90,7 @@ function meetsHeuristics(elem) {
 
   // TODO(aghassemi): This will become complicated soon, create a pluggable
   // system for this.
+
   if (elem.hasAttribute('lightbox')) {
     return false;
   }

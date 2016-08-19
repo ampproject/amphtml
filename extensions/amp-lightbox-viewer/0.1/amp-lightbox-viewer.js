@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-/** @const */
-const EXPERIMENT = 'amp-lightbox-viewer';
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
 import {isExperimentOn} from '../../../src/experiments';
@@ -23,6 +21,9 @@ import {Layout} from '../../../src/layout';
 import {lightboxManagerForDoc} from '../../../src/lightbox-manager';
 import {user, dev} from '../../../src/log';
 import {ancestorElements} from '../../../src/dom';
+
+/** @const */
+const EXPERIMENT = 'amp-lightbox-viewer';
 
 class AmpLightboxViewer extends AMP.BaseElement {
 
@@ -45,7 +46,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
     this.active_ = false;
 
     /** @private {Element} */
-    this.activeElem = null;
+    this.activeElem_ = null;
 
     /** @private {function(!Event)} */
     this.boundHandleKeyboardEvents_ = this.handleKeyboardEvents_.bind(this);
@@ -56,12 +57,13 @@ class AmpLightboxViewer extends AMP.BaseElement {
      */
     this.manager_ = lightboxManagerForDoc(this.win.document.documentElement);
 
+    /** @const @private {Element} */
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('-amp-lightbox-viewer');
     this.buildMask_();
     this.buildControls_();
-
     this.element.appendChild(this.container_);
+
     this.registerAction('open', this.activate.bind(this));
   }
 
@@ -122,17 +124,15 @@ class AmpLightboxViewer extends AMP.BaseElement {
    * Opens the lightbox-viewer with either the invocation source or
    * the element referenced by the `id` argument.
    * Examples:
-   *  // Opens the element tapped in the viewer.
-   *  on="tap:amp-lightbox-viewer'
+   *  // Opens the element tapped.
+   *  on="tap:myLightboxViewer'
    *
-   *  // Opens the element referenced by elementId in the viewer
-   *  on="tap:amp-lightbox-viewer.open(id='<elementId>')
+   *  // Opens the element referenced by elementId
+   *  on="tap:myLightboxViewer.open(id='<elementId>')
    * @override
    */
   activate(invocation) {
     let target = invocation.source;
-    // Action optionally accepts the id of the element to open in the
-    // lightbox. on="tap:amp-lightbox-viewer.open(id='<elementId>')
     if (invocation.args && invocation.args.id) {
       const targetId = invocation.args.id;
       target = this.win.document.getElementById(targetId);
@@ -207,7 +207,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
   }
 
   /**
-   * Updates the viewer to display the new element and tear down the old element
+   * Updates the viewer to display the new element and tears down the old one
    * @param {!Element} newElem
    * @private
    */
@@ -296,7 +296,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
    *
    * @param {Element} elem
    * @param {boolean} reset Whether to add or remove the
-   * `-amp-lightboxed-ancestor` classname.
+   * `-amp-lightboxed-ancestor` class.
    * @private
    */
   updateStackingContext_(elem, reset) {
@@ -314,9 +314,9 @@ class AmpLightboxViewer extends AMP.BaseElement {
 
   /**
    * Handles keyboard events for the lightbox.
-   *  Esc will close the lightbox.
-   *  Right arrow goes to next
-   *  Left arrow goes to previous
+   *  -Esc will close the lightbox.
+   *  -Right arrow goes to next
+   *  -Left arrow goes to previous
    * @private
    */
   handleKeyboardEvents_(event) {

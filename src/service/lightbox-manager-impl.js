@@ -21,14 +21,15 @@ import {dev} from '../log';
 import {fromClassForDoc} from '../service';
 import {timerFor} from '../timer';
 
+
 /**
  * LightboxManager is a document-scoped service responsible for:
- *  -Finding elements marked to be lightboxable (via lightbox attribute)
+ *  -Finding elements marked to be lightboxable (via `lightbox` attribute)
  *  -Keeping an ordered list of lightboxable elements
  *  -Providing functionality to get next/previous lightboxable element given
  *   the current element.
  *  -Discovering elements that can be auto-lightboxed and add the
- *   `lightbox` attribute and possibly an on-tap handler on them.
+ *   `lightbox` attribute and possibly an on-tap handler to them
  */
 class LightboxManager {
 
@@ -37,19 +38,20 @@ class LightboxManager {
    */
   constructor(ampdoc) {
 
-    // Extra safety check, we don't install this service if experiment of off.
+    // Extra safety check, we don't install this service if experiment is off
     dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
 
     /** @const @private {!./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /**
-     * Ordered list of lightboxable elements.
+     * Ordered list of lightboxable elements
      * @private {!Array<!Element>}
      **/
     this.elements_ = null;
 
     /**
+     * Cache for the `maybeInit()` call.
      * @private {Promise}
      **/
     this.initPromise_ = null;
@@ -58,16 +60,16 @@ class LightboxManager {
     // layoutPass is done for all elements?
     // NOTE(aghassemi): Since all methods are async, initialize can run at
     // any time, if a method call comes in before this timer initializes, we
-    // are still fine and manager will be initialized at that point and method
-    // call will still go through.
+    // are still fine since manager will be initialized at that point and method
+    // call will go through.
     timerFor(ampdoc.win).delay(() => {
       this.maybeInit_();
     }, 500);
   }
 
   /**
-   * Returns the next lightboxable element after `curElem` or `null`
-   * if there is no next element.
+   * Returns the next lightboxable element after `curElem` or `null` if there
+   * is no next element.
    * @param {!Element} curElem Current element.
    * @return {!Promise<Element>} Next element or null
    */
@@ -83,8 +85,8 @@ class LightboxManager {
   }
 
   /**
-   * Returns the previous lightboxable element before `curElem` or `null`
-   * if there is no previous element.
+   * Returns the previous lightboxable element before `curElem` or `null` if
+   * there is no previous element.
    * @param {!Element} curElem Current element.
    * @return {!Promise<Element>} Previous element or null
    */
@@ -122,6 +124,10 @@ class LightboxManager {
     });
   }
 
+  /**
+   * Initializes the manager only once.
+   * @return {!Promise}
+   */
   maybeInit_() {
     if (this.initPromise_) {
       return this.initPromise_;
@@ -138,15 +144,13 @@ class LightboxManager {
   }
 
   /**
-   * Scans the document for lightboxable elements and updates `this.element_`
+   * Scans the document for lightboxable elements and updates `this.elements_`
    * accordingly.
-   * @param {boolean} skipCache Whether cache should be skipped to perform a
-   * full new scan.
    * @private
    * @return {!Promise}
    */
-  scanLightboxables_(skipCache) {
-    this.scanPromiseCache_ = whenDocumentReady(this.ampdoc_).then(() => {
+  scanLightboxables_() {
+    return whenDocumentReady(this.ampdoc_).then(() => {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
@@ -156,8 +160,6 @@ class LightboxManager {
         }
       }
     });
-
-    return this.scanPromiseCache_;
   }
 }
 

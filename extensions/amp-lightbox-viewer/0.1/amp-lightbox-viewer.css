@@ -17,8 +17,9 @@
 /**
  * .amp-lightboxed gets added to the element when displayed in the lightbox.
  * .amp-lightboxed is designed to provide a reasonable default behaviour for
- * arbitary elements when lightboxed. However both components and page authors
- * are free to customize the style of the element when inside the lightbox.
+ * lightboxing of arbitary elements.
+ * Both components and page authors are free to customize the style of the
+ * element when inside the lightbox.
  * Example:
  *    .myDiv {
  *       color: blue;
@@ -43,8 +44,8 @@
  * The following rule is needed to reset the stacking context.
  * By resetting the properties that create new stacking context on the
  * ancestors of the item being lightboxed, we end up with a single stacking
- * context and therefore the z-index will work. More info: https://goo.gl/uqY5CN
- * Code is mostly copied from Chrome's FullScreen Css https://goo.gl/gjbKoI
+ * context and therefore the z-index will be absolute. See https://goo.gl/uqY5CN
+ * Code is copied from Webkit's FullScreen Css https://goo.gl/gjbKoI
  */
 .-amp-lightboxed-ancestor {
   z-index: auto !important;
@@ -59,6 +60,7 @@
   -webkit-box-reflect: none !important;
   -webkit-perspective: none !important;
   -webkit-transform-style: flat !important;
+  /* TODO(aghassemi): Add MS and Moz support */
 }
 :root.-amp-lightboxed-ancestor {
   overflow: hidden !important;

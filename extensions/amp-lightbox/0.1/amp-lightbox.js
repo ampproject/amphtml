@@ -21,6 +21,7 @@ import {historyFor} from '../../../src/history';
 import {vsyncFor} from '../../../src/vsync';
 import * as st from '../../../src/style';
 
+
 class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
