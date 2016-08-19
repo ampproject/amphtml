@@ -98,6 +98,37 @@
 <form method="post"
       action="/form/html/post"
       action-xhr="/form/echo-json/post"
+      target="_blank">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" required>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+
+    <div submit-success>
+        <template type="amp-mustache">
+            Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
+        to confirm!
+        </template>
+    </div>
+    <div submit-error>
+        <template type="amp-mustache">
+            Oops! {{name}}, We apologies something went wrong. Please try again later.
+        </template>
+    </div>
+</form>
+
+<h2>Subscribe to our weekly Newsletter (xhr + submit events)</h2>
+
+<form method="post"
+      action="/form/html/post"
+      action-xhr="/form/echo-json/post"
       target="_blank"
       on="submit-success:success-lightbox;submit-error:error-lightbox">
     <fieldset>
@@ -124,7 +155,7 @@
     <div submit-success>
         <template type="amp-mustache">
             Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}
-        to confirm!
+            to confirm!
         </template>
     </div>
     <div submit-error>
