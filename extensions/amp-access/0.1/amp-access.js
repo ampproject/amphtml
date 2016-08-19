@@ -28,7 +28,7 @@ import {cidFor} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
-import {installStyles} from '../../../src/styles';
+import {installStyles} from '../../../src/style-installer';
 import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';

@@ -17,7 +17,7 @@
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {getStyle} from '../../src/style';
 import * as sinon from 'sinon';
-import * as styles from '../../src/styles';
+import * as styles from '../../src/style-installer';
 
 
 describe('Styles', () => {

@@ -18,7 +18,7 @@
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
 import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
-import {makeBodyVisible} from './styles';
+import {makeBodyVisible} from './style-installer';
 import {urls} from './config';
 
 const CANCELLED = 'CANCELLED';

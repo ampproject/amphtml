@@ -22,7 +22,7 @@ import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListener} from './document-click';
-import {installStyles, makeBodyVisible} from './styles';
+import {installStyles, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
 import {stubElements} from './custom-element';

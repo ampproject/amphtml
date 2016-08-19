@@ -28,7 +28,7 @@ import {
   childElementByAttr,
   ancestorElementsByTag,
 } from '../../../src/dom';
-import {installStyles} from '../../../src/styles';
+import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';

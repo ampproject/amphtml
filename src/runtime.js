@@ -38,7 +38,7 @@ import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installShadowDoc} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStyles, installStylesForShadowRoot} from './styles';
+import {installStyles, installStylesForShadowRoot} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
