@@ -408,8 +408,9 @@ export class UrlReplacements {
 
   /**
    * Resolves the value via document info.
-   * @param {function(!DocumentInfoDef):*} getter
-   * @return {*}
+   * @param {function(!DocumentInfoDef):T} getter
+   * @return {T}
+   * @template T
    */
   getDocInfoValue_(getter) {
     return getter(documentInfoForDoc(this.win_.document));
@@ -418,9 +419,10 @@ export class UrlReplacements {
   /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):*} getter
+   * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {*|null}
+   * @return {T|null}
+   * @template T
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.win_).then(accessService => {
