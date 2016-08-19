@@ -101,7 +101,7 @@ function buildExtensions(options) {
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
-  buildExtension('amp-viz-vega', '0.1', false, options);
+  buildExtension('amp-viz-vega', '0.1', true, options);
   buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -396,6 +396,38 @@ function thirdPartyBootstrap(watch, shouldMinify) {
 var activeBundleOperationCount = 0;
 
 /**
+ * Synchronously concatenates the given files into the given destination
+ *
+ * @param {string} destFilePath File path to write the concatenated files to
+ * @param {Array<string>} files List of file paths to concatenate
+ */
+function concatFiles(destFilePath, files) {
+	var all = files.map(function(filePath) {
+		return fs.readFileSync(filePath, 'utf-8');
+	});
+
+	fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
+}
+
+/**
+ * Allows (ap|pre)pending to the already compiled, minified JS file
+ *
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destFilePath File path to the compiled JS file
+ */
+function appendToCompiledFile(srcFilename, destFilePath) {
+  if (srcFilename == 'amp-viz-vega.js') {
+    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
+    concatFiles(destFilePath, [
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+      destFilePath,
+    ]);
+  }
+}
+
+/**
  * Compile a javascript file
  *
  * @param {string} srcDir Path to the src directory
@@ -411,6 +443,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
           options)
           .then(function() {
+            appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
             fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
             if (options.latestName) {
               fs.copySync(
@@ -442,6 +475,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
+  var destFilename = options.toName || srcFilename;
   function rebundle() {
     activeBundleOperationCount++;
     bundler.bundle()
@@ -454,9 +488,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         }
       })
       .pipe(lazybuild())
-      .pipe($$.rename(options.toName || srcFilename))
+      .pipe($$.rename(destFilename))
       .pipe(lazywrite())
       .on('end', function() {
+        appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
         $$.util.log('Compiled ' + srcFilename);
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {

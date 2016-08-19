@@ -92,4 +92,26 @@ describe('Types', () => {
       expect(types.isShadowRoot(fragment)).to.be.false;
     });
   });
+
+  describe('isFiniteNumber', () => {
+
+    it('should yield false for non-numbers', () => {
+      expect(types.isFiniteNumber(null)).to.be.false;
+      expect(types.isFiniteNumber(undefined)).to.be.false;
+      expect(types.isFiniteNumber('')).to.be.false;
+      expect(types.isFiniteNumber('2')).to.be.false;
+      expect(types.isFiniteNumber([])).to.be.false;
+      expect(types.isFiniteNumber([2])).to.be.false;
+      expect(types.isFiniteNumber({})).to.be.false;
+      expect(types.isFiniteNumber({'a': 2})).to.be.false;
+      expect(types.isFiniteNumber(true)).to.be.false;
+      expect(types.isFiniteNumber(NaN)).to.be.false;
+    });
+
+    it('should yield true for numbers', () => {
+      expect(types.isFiniteNumber(3)).to.be.true;
+      expect(types.isFiniteNumber(3.2)).to.be.true;
+      expect(types.isFiniteNumber(123e5)).to.be.true;
+    });
+  });
 });

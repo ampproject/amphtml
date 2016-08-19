@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-import {isJsonScriptTag, childElementsByTag} from '../../../src/dom';
+import {CSS} from '../../../build/amp-viz-vega-0.1.css';
+import * as dom from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
+import {isObject, isFiniteNumber} from '../../../src/types';
+import {assertHttpsUrl} from '../../../src/url';
 import {vsyncFor} from '../../../src/vsync';
-
-/*
- * We are using `require()` instead of `import` here for two reasons:
- *    1- vega expects d3 to be available on window at import time but babel
- *       re-orders imports so setting window.d3 happens after loading vega.
- *    2- d3 and vega are commonJS modules and behaviour of `import *` differs
- *       between babel and closure compiler (used for dist). In the babel case
- *       one needs to do x.default but not in the closure compiler case.
- */
-/* global require: false */
-window.d3 = require('../../../third_party/d3/d3');
-const vega = require('../../../third_party/vega/vega');
+import {xhrFor} from '../../../src/xhr';
 
 /** @const */
 const EXPERIMENT = 'amp-viz-vega';
@@ -51,11 +43,36 @@ export class AmpVizVega extends AMP.BaseElement {
     /** @private {?JSONType} */
     this.data_ = null;
 
-    /** @private {?string} */
+    /** @const @private {?string} */
     this.inlineData_ = this.getInlineData_();
 
-    /** @private {?string} */
+    /** @const @private {?string} */
     this.src_ = this.element.getAttribute('src');
+
+    /** @const @private {boolean} */
+    this.useDataWidth_ = this.element.hasAttribute('use-data-width');
+
+    /** @const @private {boolean} */
+    this.useDataHeight_ = this.element.hasAttribute('use-data-height');
+
+    /** @private {number} */
+    this.measuredWidth_ = 0;
+
+    /** @private {number} */
+    this.measuredHeight_ = 0;
+
+    /**
+     * @const @private {!Object}
+     * Global vg (and implicitly d3) are required and they are created by
+     * appending vega and d3 minified files during the build process.
+     */
+    this.vega_ = this.win.vg;
+
+    /**
+     * @private {Object}
+     * Instance of Vega chart object. https://goo.gl/laszHL
+     */
+    this.chart_ = null;
 
     user().assert(this.inlineData_ || this.src_,
         '%s: neither `src` attribute nor a ' +
@@ -67,12 +84,30 @@ export class AmpVizVega extends AMP.BaseElement {
         '<script type="application/json"> child were found for Vega data. ' +
         'Only one way of specifying the data is allowed.',
         this.getName_());
+
+    if (this.src_) {
+      assertHttpsUrl(this.src_, this.element, this.getName_());
+    }
   }
 
   /** @override */
   layoutCallback() {
     this.initialize_();
     return this.loadData_().then(() => this.renderGraph_());
+  }
+
+  /** @override */
+  onLayoutMeasure() {
+    const box = this.element.getLayoutBox();
+    if (this.measuredWidth_ == box.width &&
+        this.measuredHeight_ == box.height) {
+      return;
+    }
+    this.measuredWidth_ = box.width;
+    this.measuredHeight_ = box.height;
+    if (this.chart_) {
+      this.renderGraph_();
+    }
   }
 
   /**
@@ -101,14 +136,18 @@ export class AmpVizVega extends AMP.BaseElement {
         user().assert(!err, 'data could not be ' +
             'parsed. Is it in a valid JSON format?: %s', err);
       });
+      return Promise.resolve();
     } else {
-      // TODO(aghassemi): Fetch and validate the data file.
-      this.data_ = {
-        'url': this.src_,
-      };
+      // TODO(aghassemi): We may need to expose credentials and set
+      // requireAmpResponseSourceOrigin to true as well. But for now Vega
+      // runtime also does XHR to load subresources (e.g. Vega spec can
+      // point to other Vega specs) an they don't include credentials on those
+      // calls. We may want to intercept all "urls" in spec and do the loading
+      // and parsing ourselves.
+      return xhrFor(this.win).fetchJson(this.src_).then(data => {
+        this.data_ = data;
+      });
     }
-
-    return Promise.resolve();
   }
 
   /**
@@ -116,7 +155,7 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   getInlineData_() {
-    const scripts = childElementsByTag(this.element, 'SCRIPT');
+    const scripts = dom.childElementsByTag(this.element, 'SCRIPT');
     if (scripts.length == 0) {
       return;
     }
@@ -125,7 +164,7 @@ export class AmpVizVega extends AMP.BaseElement {
         '<script> tags found. Only one allowed.', this.getName_());
 
     const child = scripts[0];
-    user().assert(isJsonScriptTag(child), '%s: data should ' +
+    user().assert(dom.isJsonScriptTag(child), '%s: data should ' +
         'be put in a <script type="application/json"> tag.', this.getName_());
 
     return child.textContent;
@@ -136,18 +175,56 @@ export class AmpVizVega extends AMP.BaseElement {
    * @private
    */
   renderGraph_() {
-    return new Promise((resolve, reject) => {
-      vega.parse.spec(this.data_, (error, chart) => {
+    const parsePromise = new Promise((resolve, reject) => {
+      this.vega_.parse.spec(this.data_, (error, chartFactory) => {
         if (error) {
           reject(error);
-          return;
         }
-        vsyncFor(this.win).mutate(() => {
-          chart({el: this.container_}).update();
-          resolve();
-        });
+        resolve(chartFactory);
       });
     });
+
+    return parsePromise.then(chartFactory => {
+      return vsyncFor(this.win).mutatePromise(() => {
+        dom.removeChildren(this.container_);
+        this.chart_ = chartFactory({el: this.container_});
+        if (!this.useDataWidth_) {
+          const w = this.measuredWidth_ - this.getDataPadding_('width');
+          this.chart_.width(w);
+        }
+        if (!this.useDataHeight_) {
+          const h = this.measuredHeight_ - this.getDataPadding_('height');
+          this.chart_.height(h);
+        }
+
+        this.chart_.viewport([this.measuredWidth_, this.measuredHeight_]);
+        this.chart_.update();
+      });
+    });
+  }
+
+  /**
+   * Gets the padding defined in the Vega data for either width or height.
+   * @param {!string} widthOrHeight One of 'width' or 'height' string values.
+   * @return {!Number}
+   * @private
+   */
+  getDataPadding_(widthOrHeight) {
+    const p = this.data_.padding;
+    if (!p) {
+      return 0;
+    }
+    if (isFiniteNumber(p)) {
+      return p;
+    }
+    if (isObject(p)) {
+      if (widthOrHeight == 'width') {
+        return (p.left || 0) + (p.right || 0);
+      } else if (widthOrHeight == 'height') {
+        return (p.top || 0) + (p.bottom || 0);
+      }
+    }
+    return 0;
   }
 
   /**
@@ -161,4 +238,4 @@ export class AmpVizVega extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-viz-vega', AmpVizVega);
+AMP.registerElement('amp-viz-vega', AmpVizVega, CSS);
