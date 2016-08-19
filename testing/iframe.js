@@ -275,13 +275,14 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
+ * @param opt_beforeAttachToDom {function=}
  * @returns {!Promise<!HTMLIFrameElement>}
  */
-export function createIframeWithMessageStub(win, beforeAttachToDom) {
+export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
   const element = win.document.createElement('iframe');
   element.src = IFRAME_STUB_URL;
-  if (beforeAttachToDom) {
-    beforeAttachToDom(element);
+  if (opt_beforeAttachToDom) {
+    opt_beforeAttachToDom(element);
   }
   win.document.body.appendChild(element);
 
@@ -303,8 +304,6 @@ export function createIframeWithMessageStub(win, beforeAttachToDom) {
         let eventMsg = event.data.receivedMessage;
         if (typeof expectMsg !== 'string') {
           expectMsg = JSON.stringify(expectMsg);
-        }
-        if (typeof eventMsg !== 'string') {
           eventMsg = JSON.stringify(eventMsg);
         }
         if (event.source == element.contentWindow
