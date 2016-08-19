@@ -53,13 +53,6 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
- * List of tag names of elements that are not allowed to be AMP placeholders.
- * @private @const {!RegExp}
- */
-const BLACKLISTED_PLACEHOLDER_TAGS_REGEX_ = /^(?:input|select|textarea)$/i;
-
-
-/**
  * Map from element name to implementation class.
  * @const {Object}
  */
@@ -1139,8 +1132,7 @@ function createBaseAmpElementProto(win) {
    */
   ElementProto.getPlaceholder = function() {
     return dom.lastChildElement(this, el => {
-      return el.hasAttribute('placeholder') &&
-          !BLACKLISTED_PLACEHOLDER_TAGS_REGEX_.test(el.tagName);
+      return el.hasAttribute('placeholder') && !('placeholder' in el);
     });
   };
 
