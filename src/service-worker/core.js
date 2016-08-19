@@ -15,6 +15,7 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
+import urls from '../config';
 import indexedDBP from '../../third_party/indexed-db-as-promised/index';
 
 /**
@@ -65,8 +66,8 @@ function versionedUrl(url, version) {
  */
 function isCdnJsFile(url) {
   return url.endsWith('.js') && (
-    url.startsWith('https://cdn.ampproject.org/rtv') ||
-    url.startsWith('https://cdn.ampproject.org/v0')
+    url.startsWith(`${urls.cdn}/rtv`) ||
+    url.startsWith(`${urls.cdn}/v0`)
   );
 }
 
