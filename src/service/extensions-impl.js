@@ -459,7 +459,7 @@ export class Extensions {
 export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
   if (isLocalDev) {
     if (isTest || isMax(location) || isMin(location)) {
-      return location.protocol + '//' + location.host + ':' location.port;
+      return `${location.protocol}//${location.host}/dist`;
     }
   }
   return urls.cdn;
@@ -505,7 +505,7 @@ function isMax(location) {
  * @param {!Location} location
  * @return {boolean}
  */
-function isMax(location) {
+function isMin(location) {
   const path = location.pathname;
   return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
