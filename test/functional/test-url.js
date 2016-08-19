@@ -28,6 +28,7 @@ import {
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
   serializeQueryString,
+  getCorsUrl,
 } from '../../src/url';
 
 describe('parseUrl', () => {
@@ -555,4 +556,20 @@ describe('resolveRelativeUrl', () => {
       'file?f=0#h',
       parseUrl('http://base.org/bfile?bf=0#bh'),
       'http://base.org/file?f=0#h');
+});
+
+
+describe('getCorsUrl', () => {
+  it('should error if __amp_source_origin is set', () => {
+    expect(() => getCorsUrl(window, 'http://example.com/?__amp_source_origin'))
+        .to.throw(/Source origin is not allowed in/);
+    expect(() => getCorsUrl(window, 'http://example.com/?name=hello'))
+        .to.not.throw;
+  });
+
+  it('should set __amp_source_origin as a url param', () => {
+    expect(getCorsUrl(window, 'http://example.com/?name=hello'))
+        .to.equal('http://example.com/?name=hello&' +
+            '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
+  });
 });
