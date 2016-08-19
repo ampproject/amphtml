@@ -227,24 +227,24 @@ export class AmpForm {
    */
   getFormAsObject_() {
     const data = {};
-    const inputs = this.form_.querySelectorAll('input,select,textarea');
+    const inputs = this.form_.elements;
     for (let i = 0; i < inputs.length; i++) {
       const input = inputs[i];
-      if (!input.name || isDisabled_(input, /*checkAncestors*/ true)) {
+      const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+      const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
+      const checkableType = /^(?:checkbox|radio)$/i;
+
+      if (!input.name || isDisabled_(input) ||
+          !submittableTagsRegex.test(input.tagName) ||
+          unsubmittableTypesRegex.test(input.type) ||
+          (checkableType.test(input.type) && !input.checked)) {
         continue;
       }
 
-
-      if (input.type != 'checkbox' && input.type != 'radio') {
-        data[input.name] = input.value;
-      } else if (input.type == 'checkbox' && input.checked) {
-        if (data[input.name] === undefined) {
-          data[input.name] = [];
-        }
-        data[input.name].push(input.value);
-      } else if (input.type == 'radio' && input.checked) {
-        data[input.name] = input.value;
+      if (data[input.name] === undefined) {
+        data[input.name] = [];
       }
+      data[input.name].push(input.value);
     }
     return data;
   }
@@ -469,23 +469,19 @@ export function onInputInteraction_(e) {
 /**
  * Checks if a field is disabled.
  * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} element
- * @param {boolean=} checkAncestors Whether to check fieldset ancestors for disabled
- * fieldsets that encapsulates the input.
+ * @private
  */
-function isDisabled_(element, checkAncestors = true) {
+function isDisabled_(element) {
   if (element.disabled) {
     return true;
   }
 
-  if (checkAncestors) {
-    const ancestors = ancestorElementsByTag(element, 'fieldset');
-    for (let i = 0; i < ancestors.length; i++) {
-      if (ancestors[i].disabled) {
-        return true;
-      }
+  const ancestors = ancestorElementsByTag(element, 'fieldset');
+  for (let i = 0; i < ancestors.length; i++) {
+    if (ancestors[i].disabled) {
+      return true;
     }
   }
-
   return false;
 }
 

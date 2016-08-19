@@ -595,6 +595,15 @@ describe('amp-form', () => {
         form.setAttribute('method', 'GET');
         sandbox.stub(ampForm.xhr_, 'fetchJson').returns(Promise.resolve());
 
+        const otherNamesFS = document.createElement('fieldset');
+        const otherName1Input = document.createElement('input');
+        otherName1Input.setAttribute('name', 'name');
+        otherNamesFS.appendChild(otherName1Input);
+        const otherName2Input = document.createElement('input');
+        otherName2Input.setAttribute('name', 'name');
+        otherNamesFS.appendChild(otherName2Input);
+        form.appendChild(otherNamesFS);
+
         // Group of Radio buttons.
         const genderFS = document.createElement('fieldset');
         const maleRadio = document.createElement('input');
@@ -652,7 +661,8 @@ describe('amp-form', () => {
         expect(event.preventDefault).to.be.calledOnce;
         expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
         expect(ampForm.xhr_.fetchJson).to.be.calledWith(
-            'https://example.com?name=John%20Miller&city=San%20Francisco');
+            'https://example.com?name=John%20Miller&name=&name=&' +
+            'city=San%20Francisco');
 
         ampForm.setState_('submit-success');
         ampForm.xhr_.fetchJson.reset();
@@ -661,17 +671,19 @@ describe('amp-form', () => {
         ampForm.handleSubmit_(event);
         expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
         expect(ampForm.xhr_.fetchJson).to.be.calledWith(
-            'https://example.com?name=John%20Miller' +
+            'https://example.com?name=John%20Miller&name=&name=' +
             '&interests=Football&interests=Food&city=San%20Francisco');
 
         ampForm.setState_('submit-success');
         femaleRadio.checked = true;
+        otherName1Input.value = 'John Maller';
         ampForm.xhr_.fetchJson.reset();
         ampForm.handleSubmit_(event);
         expect(ampForm.xhr_.fetchJson).to.be.calledOnce;
         expect(ampForm.xhr_.fetchJson).to.be.calledWith(
-            'https://example.com?name=John%20Miller&gender=Female' +
-            '&interests=Football&interests=Food&city=San%20Francisco');
+            'https://example.com?name=John%20Miller&name=John%20Maller&name=&' +
+            'gender=Female&interests=Football&interests=Food&' +
+            'city=San%20Francisco');
       });
     });
   });
