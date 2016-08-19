@@ -266,19 +266,15 @@ function validateAllowedFields(data, allowedFields) {
     consentNotificationId: true,
   };
 
-  // Throw in a timeout, because we do not want to interrupt execution,
-  // because that would make each removal an instant backward incompatible
-  // change.
-  try {
-    for (const field in data) {
-      if (!data.hasOwnProperty(field) ||
-          field in defaultAvailableFields) {
-        continue;
-      }
-      user().assert(allowedFields.indexOf(field) != -1,
-          'Unknown attribute for %s: %s.', data.type, field);
+  for (const field in data) {
+    if (!data.hasOwnProperty(field) || field in defaultAvailableFields) {
+      continue;
     }
-  } catch (e) {
-    rethrowAsync(e);
+    if (allowedFields.indexOf(field) < 0) {
+      // Throw in a timeout, because we do not want to interrupt execution,
+      // because that would make each removal an instant backward incompatible
+      // change.
+      rethrowAsync(new Error(`Unknown attribute for ${data.type}: ${field}.`));
+    }
   }
 }
