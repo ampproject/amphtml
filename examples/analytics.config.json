@@ -10,6 +10,7 @@
       "on": "visible",
       "request": "event"
     }
-  }
+  },
+  "transport" : {"beacon": false, "xhrpost": false}
 }
 
