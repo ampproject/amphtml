@@ -45,11 +45,11 @@ export function documentInfoForDoc(nodeOrDoc) {
   return getServiceForDoc(nodeOrDoc, 'documentInfo', ampdoc => {
     const url = ampdoc.getUrl();
     const sourceUrl = getSourceUrl(url);
-    let canonicalUrl = ampdoc.getRootNode() && ampdoc.getRootNode().AMP &&
-        ampdoc.getRootNode().AMP.canonicalUrl;
+    const rootNode = ampdoc.getRootNode();
+    let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
     if (!canonicalUrl) {
       const canonicalTag = user().assert(
-          ampdoc.getRootNode().querySelector('link[rel=canonical]'),
+          rootNode.querySelector('link[rel=canonical]'),
           'AMP files are required to have a <link rel=canonical> tag.');
       canonicalUrl = parseUrl(canonicalTag.href).href;
     }
