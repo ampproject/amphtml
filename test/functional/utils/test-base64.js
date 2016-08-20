@@ -17,6 +17,8 @@
 import {
   base64UrlDecodeToBytes,
   base64DecodeToBytes,
+  base64UrlEncodeFromBytes,
+  base64EncodeFromBytes,
 } from '../../../src/utils/base64';
 import {stringToBytes} from '../../../src/utils/bytes';
 
@@ -72,5 +74,33 @@ describe('base64DecodeToBytes', () => {
 
   it('should signal an error with bad padding', () => {
     expect(() => base64DecodeToBytes('c3Vy=')).to.throw();
+  });
+});
+
+describe('base64EncodeFromBytes', () => {
+  it('should encode a bytes array to base64url string correctly', () => {
+    expect(base64UrlEncodeFromBytes(new Uint8Array()))
+      .to.equal('');
+    expect(base64UrlEncodeFromBytes(stringToBytes('s')))
+      .to.equal('cw..');
+    expect(base64UrlEncodeFromBytes(stringToBytes('su')))
+      .to.equal('c3U.');
+    expect(base64UrlEncodeFromBytes(stringToBytes('sur')))
+      .to.equal('c3Vy');
+    expect(base64UrlEncodeFromBytes(new Uint8Array([255, 239])))
+      .to.equal('_-8.');
+  });
+
+  it('should encode a bytes array to base64 string correctly', () => {
+    expect(base64EncodeFromBytes(new Uint8Array()))
+      .to.equal('');
+    expect(base64EncodeFromBytes(stringToBytes('s')))
+      .to.equal('cw==');
+    expect(base64EncodeFromBytes(stringToBytes('su')))
+      .to.equal('c3U=');
+    expect(base64EncodeFromBytes(stringToBytes('sur')))
+      .to.equal('c3Vy');
+    expect(base64EncodeFromBytes(new Uint8Array([255, 239])))
+      .to.equal('/+8=');
   });
 });

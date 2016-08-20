@@ -16,6 +16,8 @@
 
 import {
   stringToBytes,
+  bytesToString,
+  getRandomBytesArray,
 } from '../../../src/utils/bytes';
 
 describe('stringToBytes', function() {
@@ -33,4 +35,22 @@ describe('stringToBytes', function() {
     }).to.throw();
   });
 
+  it('should convert bytes array to string', () => {
+    const str = bytesToString(new Uint8Array([102, 111, 111]));
+    expect(str).to.equal('foo');
+  });
+
+  it('should generate random bytes array', () => {
+    Math.random = () => 0.1111111111111111;
+    expect(getRandomBytesArray(1)).to.deep.equal(new Uint8Array([28]));
+    expect(getRandomBytesArray(2)).to.deep.equal(new Uint8Array([28, 113]));
+    expect(getRandomBytesArray(3)).to.deep
+        .equal(new Uint8Array([28, 113, 199]));
+    expect(getRandomBytesArray(4)).to.deep
+        .equal(new Uint8Array([28, 113, 199, 28]));
+    expect(getRandomBytesArray(5)).to.deep
+        .equal(new Uint8Array([28, 113, 199, 28, 113]));
+    expect(getRandomBytesArray(6)).to.deep
+        .equal(new Uint8Array([28, 113, 199, 28, 113, 199]));
+  });
 });

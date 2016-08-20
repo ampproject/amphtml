@@ -31,6 +31,7 @@ describe('amp-share-tracking', () => {
     sandbox = sinon.sandbox.create();
     viewerForMock = sandbox.stub(Viewer.prototype, 'getFragment');
     xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
+    sandbox.stub(Math, 'random').returns(0.1111111111111111234);
   });
 
   afterEach(() => {
@@ -92,7 +93,7 @@ describe('amp-share-tracking', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(fragments.outgoingFragment).to.equal('rAmDoM');
+        expect(fragments.outgoingFragment).to.equal('HHHHHHHH');
       });
     });
   });

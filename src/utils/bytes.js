@@ -32,3 +32,28 @@ export function stringToBytes(str) {
   }
   return bytes;
 };
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+export function bytesToString(bytes) {
+  return String.fromCharCode.apply(String, bytes);
+};
+
+/**
+ * Generate a random bytes array with specific length
+ * @param {!number} length
+ * @return {!Uint8Array}
+ */
+export function getRandomBytesArray(length) {
+  let random = Math.random();
+  const bytes = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    random *= 256;
+    bytes[i] = Math.floor(random);
+    random -= bytes[i];
+  }
+  return bytes;
+}
