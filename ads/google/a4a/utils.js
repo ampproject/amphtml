@@ -17,7 +17,7 @@
 import {buildUrl} from './url-builder';
 import {makeCorrelator} from '../correlator';
 import {getAdCid} from '../../../src/ad-cid';
-import {documentInfoFor} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isProxyOrigin} from '../../../src/url';
@@ -111,7 +111,7 @@ function buildAdUrl(
     a4a, baseUrl, startTime, slotNumber, queryParams, unboundedQueryParams,
     clientId, referrer) {
   const global = a4a.win;
-  const documentInfo = documentInfoFor(global);
+  const documentInfo = documentInfoForDoc(a4a.element);
   if (!global.gaGlobal) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {

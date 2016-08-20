@@ -16,7 +16,11 @@
 
 import '../amp-install-serviceworker';
 import {adopt} from '../../../../src/runtime';
-import {getService} from '../../../../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -151,13 +155,16 @@ describe('amp-install-serviceworker', () => {
         },
         setTimeout: window.setTimeout,
         clearTimeout: window.clearTimeout,
+        document: {nodeType: /* document */ 9},
       };
+      win.document.defaultView = win;
       implementation.win = win;
       documentInfo = {
         canonicalUrl: 'https://www.example.com/path',
         sourceUrl: 'https://source.example.com/path',
       };
-      getService(win, 'documentInfo', () => {
+      resetServiceForTesting(window, 'documentInfo');
+      getServiceForDoc(document, 'documentInfo', () => {
         return documentInfo;
       });
       whenVisible = Promise.resolve();

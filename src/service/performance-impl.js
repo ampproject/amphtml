@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {documentInfoFor} from '../document-info';
+import {documentInfoForDoc} from '../document-info';
 import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
@@ -330,7 +330,7 @@ export class Performance {
   setDocumentInfoParams_() {
     return this.whenViewportLayoutComplete_().then(() => {
       const params = Object.create(null);
-      const sourceUrl = documentInfoFor(this.win).sourceUrl
+      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
           .replace(/#.*/, '');
       params['sourceUrl'] = sourceUrl;
 

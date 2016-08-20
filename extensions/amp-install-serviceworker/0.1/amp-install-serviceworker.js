@@ -15,7 +15,7 @@
  */
 
 import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
-import {documentInfoFor} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
@@ -47,7 +47,7 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
       if (iframeSrc) {
         assertHttpsUrl(iframeSrc, this.element);
         const origin = parseUrl(iframeSrc).origin;
-        const docInfo = documentInfoFor(win);
+        const docInfo = documentInfoForDoc(this.element);
         const sourceUrl = parseUrl(docInfo.sourceUrl);
         const canonicalUrl = parseUrl(docInfo.canonicalUrl);
         user().assert(

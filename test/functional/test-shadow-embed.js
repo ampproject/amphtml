@@ -45,7 +45,7 @@ describe('createShadowEmbedRoot', () => {
     const style = document.createElement('style');
     style.setAttribute('amp-runtime', '');
     root.appendChild(style);
-    const ampdoc = new AmpDocShadow(window, root);
+    const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
     const ampdocService = ampdocFor(window);
     sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
   });

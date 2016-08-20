@@ -19,10 +19,10 @@ import {cidFor} from '../cid';
 import {variantForOrNull} from '../variant-service';
 import {shareTrackingForOrNull} from '../share-tracking-service';
 import {dev, user, rethrowAsync} from '../log';
-import {documentInfoFor} from '../document-info';
+import {documentInfoForDoc} from '../document-info';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
-import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from '../url';
+import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
@@ -76,27 +76,27 @@ export class UrlReplacements {
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set_('CANONICAL_URL', () => {
-      return documentInfoFor(this.win_).canonicalUrl;
-    });
+    this.set_('CANONICAL_URL', this.getDocInfoValue_.bind(this, info => {
+      return info.canonicalUrl;
+    }));
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOST', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOST', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.host;
-    });
+    }));
 
     // Returns the hostname of the canonical URL for this AMP document.
-    this.set_('CANONICAL_HOSTNAME', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.hostname;
-    });
+    }));
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set_('CANONICAL_PATH', () => {
-      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+    this.set_('CANONICAL_PATH', this.getDocInfoValue_.bind(this, info => {
+      const url = parseUrl(info.canonicalUrl);
       return url && url.pathname;
-    });
+    }));
 
     // Returns the referrer URL.
     this.set_('DOCUMENT_REFERRER', () => {
@@ -126,31 +126,31 @@ export class UrlReplacements {
     });
 
     // Returns the Source URL for this AMP document.
-    this.set_('SOURCE_URL', () => {
-      return removeFragment(getSourceUrl(this.win_.location.href));
-    });
+    this.set_('SOURCE_URL', this.getDocInfoValue_.bind(this, info => {
+      return removeFragment(info.sourceUrl);
+    }));
 
     // Returns the host of the Source URL for this AMP document.
-    this.set_('SOURCE_HOST', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).host;
-    });
+    this.set_('SOURCE_HOST', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).host;
+    }));
 
     // Returns the hostname of the Source URL for this AMP document.
-    this.set_('SOURCE_HOSTNAME', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
-    });
+    this.set_('SOURCE_HOSTNAME', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).hostname;
+    }));
 
     // Returns the path of the Source URL for this AMP document.
-    this.set_('SOURCE_PATH', () => {
-      return parseUrl(getSourceUrl(this.win_.location.href)).pathname;
-    });
+    this.set_('SOURCE_PATH', this.getDocInfoValue_.bind(this, info => {
+      return parseUrl(info.sourceUrl).pathname;
+    }));
 
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
-    this.set_('PAGE_VIEW_ID', () => {
-      return documentInfoFor(this.win_).pageViewId;
-    });
+    this.set_('PAGE_VIEW_ID', this.getDocInfoValue_.bind(this, info => {
+      return info.pageViewId;
+    }));
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
       user().assert(param,
@@ -407,11 +407,22 @@ export class UrlReplacements {
   }
 
   /**
+   * Resolves the value via document info.
+   * @param {function(!DocumentInfoDef):T} getter
+   * @return {T}
+   * @template T
+   */
+  getDocInfoValue_(getter) {
+    return getter(documentInfoForDoc(this.win_.document));
+  }
+
+  /**
    * Resolves the value via access service. If access service is not configured,
    * the resulting value is `null`.
-   * @param {function(!AccessService):*} getter
+   * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {*|null}
+   * @return {T|null}
+   * @template T
    */
   getAccessValue_(getter, expr) {
     return this.getAccessService_(this.win_).then(accessService => {

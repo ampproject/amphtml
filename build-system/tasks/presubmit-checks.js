@@ -150,6 +150,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/iframe.js',
     ],
   },
   'installPerformanceService': {

@@ -17,7 +17,7 @@
 
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
-import {documentInfoFor} from './document-info';
+import {documentInfoForDoc} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -60,7 +60,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
-  const docInfo = documentInfoFor(parentWindow);
+  const docInfo = documentInfoForDoc(element);
   const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children

@@ -432,7 +432,7 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
-  const ampdoc = installShadowDoc(ampdocService, shadowRoot);
+  const ampdoc = installShadowDoc(ampdocService, url, shadowRoot);
   dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
   // Install runtime CSS.
