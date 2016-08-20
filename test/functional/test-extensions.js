@@ -225,7 +225,7 @@ describe('Extensions', () => {
       }, {});
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
+      const ampdoc = new AmpDocShadow(windowApi, 'https://a.org/', shadowRoot);
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
@@ -273,7 +273,7 @@ describe('Extensions', () => {
 
       // Install into shadow doc.
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(windowApi, shadowRoot);
+      const ampdoc = new AmpDocShadow(windowApi, 'https://a.org/', shadowRoot);
       const promise = installExtensionsInShadowDoc(
           extensions, ampdoc, ['amp-ext']);
       return promise.then(() => {
