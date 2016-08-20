@@ -31,7 +31,7 @@ describe('amp-share-tracking', () => {
     sandbox = sinon.sandbox.create();
     viewerForMock = sandbox.stub(Viewer.prototype, 'getFragment');
     xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-    sandbox.stub(Math, 'random', () => 0.111111111111111111111111111111);
+    sandbox.stub(Math, 'random').returns(0.1111111111111111234);
   });
 
   afterEach(() => {

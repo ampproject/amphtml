@@ -53,6 +53,7 @@ export function getRandomBytesArray(length) {
   for (let i = 0; i < length; i++) {
     random *= 256;
     bytes[i] = Math.floor(random);
+    random -= bytes[i];
   }
   return bytes;
 }

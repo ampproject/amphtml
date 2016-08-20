@@ -19,19 +19,8 @@ import {
   bytesToString,
   getRandomBytesArray,
 } from '../../../src/utils/bytes';
-import * as sinon from 'sinon';
 
 describe('stringToBytes', function() {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('should map a sample string appropriately', () => {
     const bytes = stringToBytes('abÿ');
     expect(bytes.length).to.equal(3);
@@ -47,12 +36,12 @@ describe('stringToBytes', function() {
   });
 
   it('should convert bytes array to string', () => {
-    const string = bytesToString(new Uint8Array([102, 111, 111]));
-    expect(string).to.equal('foo');
+    const str = bytesToString(new Uint8Array([102, 111, 111]));
+    expect(str).to.equal('foo');
   });
 
   it('should generate random bytes array', () => {
-    sandbox.stub(Math, 'random').returns(0.111111111111111111111111111111);
+    Math.random = () => 0.1111111111111111;
     expect(getRandomBytesArray(1)).to.deep.equal(new Uint8Array([28]));
     expect(getRandomBytesArray(2)).to.deep.equal(new Uint8Array([28, 113]));
     expect(getRandomBytesArray(3)).to.deep

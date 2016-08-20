@@ -87,7 +87,7 @@ export function base64UrlEncode(str) {
 
 /**
  * Converts a bytes array into base64url encoded string.
-* base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
+ * base64url is defined in RFC 4648. It is sometimes referred to as "web safe".
  * @param {!Uint8Array} bytes
  * @return {string}
  */

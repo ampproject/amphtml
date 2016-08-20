@@ -87,6 +87,8 @@ describe('base64EncodeFromBytes', () => {
       .to.equal('c3U.');
     expect(base64UrlEncodeFromBytes(stringToBytes('sur')))
       .to.equal('c3Vy');
+    expect(base64UrlEncodeFromBytes(new Uint8Array([255, 239])))
+      .to.equal('_-8.');
   });
 
   it('should encode a bytes array to base64 string correctly', () => {
@@ -98,5 +100,7 @@ describe('base64EncodeFromBytes', () => {
       .to.equal('c3U=');
     expect(base64EncodeFromBytes(stringToBytes('sur')))
       .to.equal('c3Vy');
+    expect(base64EncodeFromBytes(new Uint8Array([255, 239])))
+      .to.equal('/+8=');
   });
 });
