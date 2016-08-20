@@ -14,6 +14,7 @@
 # limitations under the license.
 #
 tags: {  # <script custom-element="amp-sticky-ad">
+  html_format: AMP  # Ads are not allowed inside ads.
   tag_name: "SCRIPT"
   spec_name: "amp-sticky-ad extension .js script"
   mandatory_parent: "HEAD"
@@ -46,6 +47,7 @@ tags: {  # <script custom-element="amp-sticky-ad">
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sticky-ad.html"
 }
 tags: {  # <amp-sticky-ad>
+  html_format: AMP
   tag_name: "AMP-STICKY-AD"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-sticky-ad extension .js script"

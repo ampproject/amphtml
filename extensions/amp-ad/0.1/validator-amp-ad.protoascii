@@ -17,6 +17,7 @@
 # extension, so we include them both here.
 
 tags: {  # amp-ad
+  html_format: AMP  # Ads are not allowed inside ads
   tag_name: "SCRIPT"
   spec_name: "amp-ad extension .js script"
   mandatory_parent: "HEAD"
@@ -49,6 +50,7 @@ tags: {  # amp-ad
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-ad.html"
 }
 tags: {  # <amp-ad>
+  html_format: AMP  # Ads are not allowed inside ads
   tag_name: "AMP-AD"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded.
@@ -77,6 +79,7 @@ tags: {  # <amp-ad>
   }
 }
 tags: {  # <amp-embed>
+  html_format: AMP
   tag_name: "AMP-EMBED"
   # Typically we'd require the extension j/s, but for historical reasons
   # many pages don't have it, so it ends up late loaded.

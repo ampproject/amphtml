@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 266
+spec_file_revision: 272
 
 reference_points_can_define_reference_points: true
 
@@ -687,6 +687,7 @@ tags: {  # Special custom 'author' spreadsheet for A4A
         allow_relative: true
         allow_empty: true
       }
+      validate_a4a: true
     }
     blacklisted_cdata_regex: {
       regex: "<!--"
@@ -701,33 +702,6 @@ tags: {  # Special custom 'author' spreadsheet for A4A
     blacklisted_cdata_regex: {
       regex: "!important"
       error_message: "CSS !important"
-    }
-    blacklisted_cdata_regex: {
-      regex: "position: *(fixed|sticky)"
-      error_message: "CSS position fixed and sticky"
-    }
-    # Blacklisting transition, animation, transform, visibility, and opacity
-    # for the moment. This is *too* strict, so:
-    # TODO: Relax this constraint according to A4A spec.
-    blacklisted_cdata_regex: {
-      regex: "transition"
-      error_message: "CSS transition"
-    }
-    blacklisted_cdata_regex: {
-      regex: "animation"
-      error_message: "CSS animation"
-    }
-    blacklisted_cdata_regex: {
-      regex: "transform"
-      error_message: "CSS transform"
-    }
-    blacklisted_cdata_regex: {
-      regex: "visibility"
-      error_message: "CSS visibility"
-    }
-    blacklisted_cdata_regex: {
-      regex: "opacity"
-      error_message: "CSS opacity"
     }
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
@@ -1646,7 +1620,6 @@ tags: {
 }
 tags: {
   tag_name: "SVG"
-  disallowed_ancestor: "SVG"
   attrs: { name: "class" }
   attrs: { name: "contentscripttype" }
   attrs: { name: "contentstyletype" }
@@ -2458,6 +2431,8 @@ attr_lists: {
   attrs: { name: "noloading" value: "" }
 }
 tags: {  # <amp-img>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-IMG"
   # <amp-img> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "AMP-SIDEBAR"
@@ -2477,6 +2452,8 @@ tags: {  # <amp-img>
   }
 }
 tags: {  # <amp-pixel>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-PIXEL"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: {
@@ -2497,6 +2474,8 @@ tags: {  # <amp-pixel>
   }
 }
 tags: {  # <amp-video>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-VIDEO"
   disallowed_ancestor: "AMP-SIDEBAR"
   attrs: { name: "alt" }
@@ -2713,6 +2692,23 @@ error_specificity {
   code: CHILD_TAG_DOES_NOT_SATISFY_REFERENCE_POINT_SINGULAR
   specificity: 64
 }
+error_specificity { code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE specificity: 65 }
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
+  specificity: 66
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
+  specificity: 67
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  specificity: 68
+}
+error_specificity {
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  specificity: 69
+}
 error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 100 }
 error_specificity { code: DEPRECATED_ATTR specificity: 101 }
 error_specificity { code: DEPRECATED_TAG specificity: 102 }
@@ -2916,12 +2912,12 @@ error_formats {
 }
 error_formats {
   code: DISALLOWED_MANUFACTURED_BODY
-  format: "Tag or Text which is only allowed inside the body section found "
+  format: "Tag or text which is only allowed inside the body section found "
           "outside of the body section."
 }
 error_formats {
   code: DEPRECATED_MANUFACTURED_BODY
-  format: "Tag or Text which is only allowed inside the body section found "
+  format: "Tag or text which is only allowed inside the body section found "
           "outside of the body section. This will soon be an error."
 }
 error_formats {
@@ -3029,3 +3025,32 @@ error_formats {
   format: "CSS syntax error in tag '%1' - invalid attribute selector."
 }
 
+# The following codes are currently used only by A4A CSS validation.
+# All of these use %1 for the tag name (in practice 'style' by default).
+# TODO(powdercloud): These codes are not yet translated. Until then do
+# not use them for anything but A4a.
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE
+  format: "CSS syntax error in tag '%1' - the property '%2' is set "
+          "to the disallowed value '%3'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT
+  format: "CSS syntax error in tag '%1' - the property '%2' is set "
+          "to the disallowed value '%3'. Allowed values: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "within @%3. Allowed properties: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "together with '%3'. Allowed properties are: %4."
+}
+error_formats {
+  code: CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION
+  format: "CSS syntax error in tag '%1' - the property '%2' is disallowed "
+          "unless the enclosing rule is prefixed with the '%3' qualification."
+}
