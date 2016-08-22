@@ -32,11 +32,7 @@
 export const adPrefetch = {
   // Keep the list in alphabetic order
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
-<<<<<<< HEAD
   //adagio: 'https://js-ssl.neodatagroup.com/adagio_amp.js',
-=======
-  adagio: 'https://js-ssl.neodatagroup.com/adagio_amp.js',
->>>>>>> Neodata Changes
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   // TODO: Remove this once we switch over to the direct request version of adsense.js.
@@ -113,11 +109,7 @@ export const adPreconnect = {
   adagio: [
     'https://js-ssl.neodatagroup.com',
     'https://ad-aws-it.neodatagroup.com',
-<<<<<<< HEAD
-    'https://tracker.neodatagroup.com',
-=======
     'https://tracker.neodatagroup.com'
->>>>>>> Neodata Changes
   ],
   adblade: [
     'https://staticd.cdn.adblade.com',
@@ -183,13 +175,8 @@ export const adPreconnect = {
     'https://output.nend.net',
     'https://img1.nend.net',
   ],
-<<<<<<< HEAD
   neo4w: 'https://js-ssl.neodatagroup.com',
   neo4wPPN: 'https://js-ssl.neodatagroup.com',
-=======
-  neo4w: 'https://js-ssl.neodatagroup.com/4wr.js',
-  neo4wPPN: 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js',
->>>>>>> Neodata Changes
   openx: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
@@ -242,7 +229,7 @@ export const adPreconnect = {
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
-  ]
+  ],
 };
 
 /**

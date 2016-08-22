@@ -22,13 +22,7 @@ import {loadScript,validateData} from '../3p/3p';
  */
 export function adagio(global, data) {
 
-<<<<<<< HEAD
   validateData(data, ['sid', 'loc']);
-=======
-  checkData(data, ['sid', 'loc']);
->>>>>>> Neodata Changes
-
-  const $neodata = global;
 
   $neodata._adagio = {};
   $neodata._adagio.Q = [];
@@ -37,18 +31,9 @@ export function adagio(global, data) {
   $neodata._adagio.B.addBanner = null;
   $neodata._adagio.amp = data;
 
-<<<<<<< HEAD
   $neodata._adagio.Q.push(['setup', function() {
     $neodata._adagio.B.setSid(data.sid);
     $neodata._adagio.B.addBanner(data.loc, 'c');
   }]);
   loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
-=======
-  $neodata._adagio.Q.push(['setup', function () {
-    $neodata._adagio.B.setSid(data.sid);
-    $neodata._adagio.B.addBanner(data.loc, 'c');
-  }]);
-
- loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
->>>>>>> Neodata Changes
 }
