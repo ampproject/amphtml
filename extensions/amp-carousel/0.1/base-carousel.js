@@ -28,6 +28,9 @@ export class BaseCarousel extends AMP.BaseElement {
     /** @const @private {boolean} */
     this.showControls_ = this.element.hasAttribute('controls');
 
+    /** @const @private {Array<!Element>} */
+    this.realChildren_ = this.getRealChildren();
+
     if (this.showControls_) {
       this.element.classList.add('-amp-carousel-has-controls');
     }
@@ -150,7 +153,18 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   unlayoutCallback() {
+    this.scheduleUnlayout(this.realChildren_);
     return true;
+  }
+
+  /** @override */
+  pauseCallback() {
+    this.schedulePause(this.realChildren_);
+  }
+
+  /** @override */
+  resumeCallback() {
+    this.scheduleResume(this.realChildren_);
   }
 
   /**

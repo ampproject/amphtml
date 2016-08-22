@@ -114,6 +114,11 @@ describe('BaseSlides', () => {
     }
 
     /** @override */
+    getRealChildren() {
+      return [];
+    }
+
+    /** @override */
     goCallback() {
       goCallbackSpy();
     }
