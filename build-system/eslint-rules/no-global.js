@@ -27,7 +27,7 @@ module.exports = function(context) {
       if (!(name in GLOBALS)) {
         return;
       }
-      if (!(/Expression$/.test(node.parent.type))) {
+      if (!(/Expression/.test(node.parent.type))) {
         return;
       }
 
