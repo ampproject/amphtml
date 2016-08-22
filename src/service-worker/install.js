@@ -40,7 +40,10 @@ export function installCacheServiceWorker(win) {
     }
     const base = calculateScriptBaseUrl(win.location.pathname,
       getMode().localDev, getMode().test);
-    const url = `${base}/sw.js`;
+    // The kill experiment is really just a configuration that allows us to
+    // quickly kill the cache service worker without cutting a new version.
+    const kill = isExperimentOn(win, `${TAG}-kill`);
+    const url = `${base}/sw${kill ? '-kill' : ''}.js`;
     navigator.serviceWorker.register(url).then(reg => {
       dev().info(TAG, 'ServiceWorker registration successful: ', reg);
     }, err => {
