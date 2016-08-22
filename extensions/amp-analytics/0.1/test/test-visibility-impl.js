@@ -22,6 +22,7 @@ import {
   Visibility,
 } from '../visibility-impl';
 import {layoutRectLtwh, rectIntersection} from '../../../../src/layout-rect';
+import {isFiniteNumber} from '../../../../src/types';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {viewerFor} from '../../../../src/viewer';
 import * as sinon from 'sinon';
@@ -129,7 +130,7 @@ describe('amp-analytics.visibility', () => {
       elementHeight: '100',
       loadTimeVisibility: '50',
       totalTime: sinon.match(value => {
-        return !isNaN(Number(value));
+        return isFiniteNumber(Number(value));
       }),
     })]);
   });
@@ -150,7 +151,7 @@ describe('amp-analytics.visibility', () => {
       elementHeight: '100',
       loadTimeVisibility: '50',
       totalTime: sinon.match(value => {
-        return !isNaN(Number(value));
+        return isFiniteNumber(Number(value));
       }),
     })]);
   });
