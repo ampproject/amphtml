@@ -20,52 +20,57 @@ import {
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
 describe('amp-apester-media', () => {
-  function getApester(mediaId, opt_responsive, opt_beforeLayoutCallback) {
+  function getApester(mediaId, channelToken, opt_responsive,
+                      opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
       media.setAttribute('data-apester-media-id', mediaId);
+      media.setAttribute('data-apester-channel-token', channelToken);
       media.setAttribute('height', '390');
-      media.setAttribute('alt', 'Testing');
-      if (opt_responsive) {
-        media.setAttribute('layout', 'responsive');
-      }
+      // if (opt_responsive) {
+      //   media.setAttribute('layout', 'fixed-height');
+      // }
       return iframe.addElement(media);
     });
   }
 
-  function testLoader(image) {
-    expect(image).to.not.be.null;
-    expect(image.getAttribute('src')).to.equal(
-      'http://images.apester.com/images%2Floader.gif');
-    expect(image.getAttribute('layout')).to.equal('fill');
-    // expect(image.getAttribute('alt')).to.equal('Testing');
-  }
+  // function testLoader(image) {
+  //   expect(image).to.not.be.null;
+  //   expect(image.getAttribute('src')).to.equal(
+  //     'https://images.apester.com/images%2Floader.gif');
+  //   expect(image.getAttribute('layout')).to.equal('fill');
+  // }
 
   function testIframe(iframe) {
     expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('http://stage3-renderer.qmerce.com/interaction/578b4d6d2d9fb72943ce465c');
+    expect(iframe.src).to.equal(
+      'https://renderer.qmerce.com/interaction/577faac633e3688a2952199a');
     expect(iframe.getAttribute('height')).to.equal('390');
-    //  expect(iframe.getAttribute('title')).to.equal('Apester: Testing');
   }
 
   it('renders', () => {
-    return getApester('578b4d6d2d9fb72943ce465c').then(ins => {
+    toggleExperiment(window, 'amp-apester-media', true);
+    return getApester('', '577faac633e3688a2952199a').then(ins => {
       testIframe(ins.querySelector('iframe'));
-      testLoader(ins.querySelector('amp-img'));
+      // testLoader(ins.querySelector('amp-img'));
     });
   });
-  it('renders responsively', () => {
-    return getApester('media', true).then(ins => {
-      expect(ins.className).to.match(/amp-layout-responsive/);
+
+  it('render playlist', () => {
+    toggleExperiment(window, 'amp-apester-media', true);
+    return getApester('5704d3bae474a97e70ab27b3').then(ins => {
+      testIframe(ins.querySelector('iframe'));
+      //testLoader(ins.querySelector('amp-img'));
     });
   });
-  it('requires  media-id', () => {
-    expect(getApester('')).to.be.rejectedWith(
+  it('requires media-id or channel-token', () => {
+    expect(getApester()).to.be.rejectedWith(
       /The media-id attribute is required for/);
   });
 });

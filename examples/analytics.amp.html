@@ -34,17 +34,15 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "transport": {"beacon": false, "xhrpost": false},
   "requests": {
     "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
-    "test-ping": "${endpoint}?title=${title}&acct=${account}",
-    "base": "${endpoint}?path=${canonicalPath}&name=${eventName}",
-    "pageview": "${base}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
+    "base": "${endpoint}?${type}&path=${canonicalPath}",
     "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
-    "visibility": "${endpoint}?visibility&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}"
+    "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${fistVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}"
   },
   "vars": {
     "title": "Example Request"
   },
   "extraUrlParams": {
-    "param1": "Interesting value",
+    "param1": "${random}",
     "platform": "AMP"
   },
   "extraUrlParamsReplaceMap": {
@@ -53,10 +51,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "triggers": {
     "defaultPageview": {
       "on": "visible",
-      "request": "pageview",
+      "request": "base",
       "vars": {
-        "eventName": "page-loaded",
-        "eventId": "42"
+        "type": "pageLoad"
       },
       "extraUrlParams": {
         "param1": "Another value"
@@ -73,7 +70,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "continuousTimeMin": 2000
       },
       "vars": {
-        "eventName": "visibility event"
+        "type": "visibility"
       }
     },
     "hidden": {
@@ -84,7 +81,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "visiblePercentageMin": 20,
         "continuousTimeMax": 5000
       },
-      "extraUrlParams": { "on": "hidden"}
+      "vars": {
+        "type": "hidden"
+      }
     },
     "scrollPings": {
       "on": "scroll",
@@ -94,16 +93,28 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "horizontalBoundaries": [100]
       },
       "vars": {
-        "eventName": "scroll"
+        "type": "scroll"
+      }
+    },
+    "clickPings": {
+      "on": "click",
+      "selector": "${img}",
+      "request": "event",
+      "vars": {
+        "type": "click",
+        "img": "#anim-id, #container"
       }
     },
     "timer": {
       "on": "timer",
       "timerSpec": {
         "interval": 5,
-        "max-timer-length": 300
+        "maxTimerLength": 20
       },
-      "request": "test-ping"
+      "request": "base",
+      "vars": {
+        "type": "timer"
+      }
     }
   }
 }

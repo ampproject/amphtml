@@ -16,7 +16,7 @@
 
 import {ampdocFor} from './ampdoc';
 import {extensionsFor} from './extensions';
-import {copyRuntimeStylesToShadowRoot} from './styles';
+import {copyRuntimeStylesToShadowRoot} from './style-installer';
 
 
 /**

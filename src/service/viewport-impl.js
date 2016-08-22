@@ -1194,7 +1194,7 @@ export function parseViewportMeta(content) {
   if (!content) {
     return params;
   }
-  const pairs = content.split(',');
+  const pairs = content.split(/,|;/);
   for (let i = 0; i < pairs.length; i++) {
     const pair = pairs[i];
     const split = pair.split('=');

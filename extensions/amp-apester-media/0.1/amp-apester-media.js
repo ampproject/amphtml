@@ -16,12 +16,14 @@
 
 
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {Layout} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {vsyncFor} from '../../../src/vsync';
+import {xhrFor} from '../../../src/xhr';
+
 
 /** @const */
 const TAG = 'amp-apester-media';
@@ -36,17 +38,16 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.preconnect.url(this.rendererBaseUrl_, onLayout);
   }
 
-
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeDefined(layout);
   }
 
   /** @override */
   viewportCallback(inViewport) {
     if (inViewport && !this.seen_) {
-      if (this.iframe_.contentWindow) {
-        console.log('seen');
+      if (this.iframe_) {
+        dev().fine(TAG, 'media seen');
         this.seen_ = true;
         this.iframe_.contentWindow./*OK*/postMessage('interaction seen', '*');
       }
@@ -60,29 +61,35 @@ class AmpApesterMedia extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, TAG), `Enable ${TAG} experiment`);
 
     /**
-     * @const @private {?String}
+     * @const @private {?string}
      */
     this.rendererBaseUrl_ = 'https://renderer.qmerce.com';
 
     /**
-     * @const @private {?String}
+     * @const @private {?string}
      */
     this.displayBaseUrl_ = 'https://display.apester.com';
 
     /**
-     * @const @private {?String}
+     * @private {boolean}
+     */
+    this.random = false;
+
+    /**
+     * @const @private {?string}
      */
     this.mediaAttribute_ = user().assert(
-      (this.element.getAttribute('data-apester-media-id') ||
-      (this.random = this.element.getAttribute('data-apester-channel-token'))),
-      'Either the data-apester-media-id or the data-apester-channel-token '
-      + 'attributes must be specified for <amp-apester-media> %s',
-      this.element);
+        (this.element.getAttribute('data-apester-media-id') ||
+         (this.random =
+             this.element.getAttribute('data-apester-channel-token'))),
+        'Either the data-apester-media-id or the data-apester-channel-token ' +
+        'attributes must be specified for <amp-apester-media> %s',
+        this.element);
 
     /**
      * @private {?Element}
      */
-    this.iframe_ = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = null;
 
     /**
      * @private {?Promise}
@@ -90,69 +97,69 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.iframePromise_ = null;
 
     /**
-     * @private {?Promise}
+     * @private {boolean}
      */
     this.seen_ = false;
-    this.element.classList.add('-amp-apester-container');
+    this.element.classList.add('apester-container');
   }
 
   /** @override */
   firstLayoutCompleted() {
+    this.viewportCallback(this.isInViewport());
+
     // Do not hide placeholder
   }
 
+  /**
+   * @return {string}
+   **/
   buildUrl_() {
-    const suffix = (this.random) ? '/tokens/' + this.mediaAttribute_
-    + '/interactions/random' : '/interactions/' + this.mediaAttribute_
-    + '/display';
-    return this.displayBaseUrl_ + suffix;
+    const suffix = (this.random) ?
+        `/tokens/${this.mediaAttribute_}/interactions/random` :
+        `/interactions/${this.mediaAttribute_}/display`;
+    return encodeURIComponent(`${this.displayBaseUrl_}${suffix}`);
   }
 
+  /**
+   * @return {!Promise<!JSONType>}
+   **/
   queryMedia_() {
-    return new Promise(function(resolve, reject) {
-      const req = new XMLHttpRequest();
-      const url = this.buildUrl_();
-      req.open('GET', url);
-      req.onload = function() {
-        if (req.status == 200) {
-          resolve(JSON.parse(req.responseText).payload);
-        } else {
-          reject(Error(req.statusText));
-        }
-      };
-
-      // network errors
-      req.onerror = function() {
-        reject(Error('Network Error'));
-      };
-      req.send();
-    }.bind(this));
+    const url = decodeURIComponent(this.buildUrl_());
+    return xhrFor(this.win).fetchJson(url);
   }
 
+  /** @param {string}
+   * @return {string}
+   * */
   constructUrlFromMedia_(id) {
-    return this.rendererBaseUrl_ + '/interaction/' + id;
+    return encodeURIComponent(this.rendererBaseUrl_ + '/interaction/' + id);
   }
 
+  /** @param {string}
+   * @return {!Element}
+   */
   constructIframe_(src) {
-    const iframe = this.iframe_;
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('scrolling', 'no');
     iframe.src = src;
     iframe.height = this.element.getAttribute('height');
-    iframe.classList.add('-amp-apester-iframe');
+    iframe.classList.add('apester-iframe');
     this.applyFillContent(iframe);
     return iframe;
   }
 
-  //TODO remove overflow when 'changeHeight' PR approved
+  /**
+   * @return {!Element}
+   */
   constructOverflow_() {
     const overflow = this.element.ownerDocument.createElement('div');
     overflow.setAttribute('overflow', '');
-    overflow.className = '-amp-apester-overflow-container';
+    overflow.className = 'apester-overflow-container';
     const overflowButton = this.element.ownerDocument.createElement('button');
-    overflowButton.className = '-amp-apester-overflow-button';
-    overflowButton.innerHTML = 'Start Here';
+    overflowButton.className = 'apester-overflow-button';
+    overflowButton.textContent = 'Start Here';
     overflow.appendChild(overflowButton);
     return overflow;
   }
@@ -160,58 +167,41 @@ class AmpApesterMedia extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     return this.queryMedia_()
-      .then(media => {
-        const src = this.constructUrlFromMedia_(media.interactionId);
-        const iframe = this.constructIframe_(src);
-        const overflow = this.constructOverflow_();
-        const mutate = state => {
-          state.element.classList.add('-amp-apester-iframe-ready');
-        };
-        const state = {
-          element: iframe, mutator: mutate,
-        };
-        this.iframe_ = iframe;
-        this.element.appendChild(overflow);
-        this.element.appendChild(iframe);
-        return this.iframePromise_ = loadPromise(iframe).then(() => {
-          vsyncFor(this.win).runPromise({mutate}, state);
-          return media;
+        .then(response => {
+          const media = response.payload;
+          const src = decodeURIComponent(this.constructUrlFromMedia_(media.interactionId));
+          const iframe = this.constructIframe_(src);
+          const overflow = this.constructOverflow_();
+          const mutate = state => {
+            state.element.classList.add('apester-iframe-ready');
+          };
+          const state = {
+            element: iframe, mutator: mutate,
+          };
+          this.iframe_ = iframe;
+          this.element.appendChild(overflow);
+          this.element.appendChild(iframe);
+          return this.iframePromise_ = loadPromise(iframe).then(() => {
+            vsyncFor(this.win).runPromise({mutate}, state);
+            return media;
+          });
+        }, error => {
+          dev().error(TAG, 'Display', error);
+          return undefined;
+        }).then(media => {
+          this.togglePlaceholder(false);
+          let height = 0;
+          if (media) {
+            height = media.data.size.height;
+            const width = media.data.size.width;
+            height += (media.layout.directive === 'contest-poll') ? 40 : 0;
+            const amp = this.element;
+            amp.setAttribute('height', height);
+            amp.setAttribute('width', width);
+          }
+          this./*OK*/attemptChangeHeight(height);
         });
-      }, () => {
-        return undefined;
-      }).then(media => {
-        // hide placeholder
-        this.togglePlaceholder(false);
-        let height = 0;
-        if (media) {
-          height = media.data.size.height;
-          const width = media.data.size.width;
-          height += (media.layout.directive === 'contest-poll') ? 40 : 0;
-          const amp = this.element;
-          amp.setAttribute('height', height);
-          amp.setAttribute('width', width);
-        }
-
-        //TODO: PR change from attemptChangeHeight to changeHeight
-        this./*OK*/attemptChangeHeight(height);
-      });
   }
-
-  /*/!** @override *!/
-  createPlaceholderCallback() {
-    const img = this.element.ownerDocument.createElement('amp-img');
-    const placeholder = this.element.ownerDocument.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.height = this.element.getAttribute('height');
-    placeholder.className = '-amp-apester-loader-container';
-    img.className = '-amp-apester-loader';
-    img.setAttribute('src',
-                     'https://images.apester.com/images%2Floader.gif');
-    img.setAttribute('layout', 'fill');
-    img.setAttribute('noloading', '');
-    placeholder.appendChild(img);
-    return placeholder;
-  }*/
 
   /** @override */
   unlayoutOnPause() {
@@ -225,7 +215,7 @@ class AmpApesterMedia extends AMP.BaseElement {
       this.iframe_ = null;
       this.iframePromise_ = null;
     }
-    return true;  // Call laycxoutCallback again.
+    return true; //Call layoutCallback again.
   }
 }
 

@@ -1163,6 +1163,15 @@ describe('CustomElement Service Elements', () => {
     expect(element.getPlaceholder()).to.equal(placeholder2);
   });
 
+  it('getPlaceholder should blacklist some tags', () => {
+    const placeholder1 = element.appendChild(createWithAttr('placeholder'));
+    const input = document.createElement('input');
+    input.setAttribute('placeholder', '');
+    element.appendChild(input);
+    expect(element.getPlaceholder()).to.not.equal(input);
+    expect(element.getPlaceholder()).to.equal(placeholder1);
+  });
+
   it('togglePlaceholder should do nothing when no placeholder is found', () => {
     expect(element.getPlaceholder()).to.be.null;
     element.togglePlaceholder(false);

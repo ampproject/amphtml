@@ -19,6 +19,8 @@ import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
+import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
+import {getRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
@@ -91,7 +93,7 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return this.getOutgoingRandomFragment_();
+    return this.getRandomBase64_();
   }
 
   /**
@@ -122,14 +124,12 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 
   /**
-   * Get a random outgoing share-tracking fragment
+   * Get a random base64url string using 48 bits (6 bytes) random number
    * @return {!Promise<string>}
    * @private
    */
-  getOutgoingRandomFragment_() {
-    // TODO(yuxichen): Generate random outgoing fragment
-    const randomFragment = 'rAmDoM';
-    return Promise.resolve(randomFragment);
+  getRandomBase64_() {
+    return Promise.resolve(base64UrlEncodeFromBytes(getRandomBytesArray(6)));
   }
 }
 

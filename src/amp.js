@@ -22,9 +22,10 @@ import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListener} from './document-click';
-import {installStyles, makeBodyVisible} from './styles';
+import {installStyles, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
+import {installCacheServiceWorker} from './service-worker/install';
 import {stubElements} from './custom-element';
 import {
   installAmpdocServices,
@@ -71,6 +72,7 @@ try {
 
       maybeValidate(self);
       makeBodyVisible(document, /* waitForExtensions */ true);
+      installCacheServiceWorker(self);
     } catch (e) {
       makeBodyVisible(document);
       throw e;
