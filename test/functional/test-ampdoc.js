@@ -19,7 +19,11 @@ import {
   AmpDocSingle,
   AmpDocShadow,
   installShadowDoc,
+  shadowDocHasBody,
+  shadowDocReady,
 } from '../../src/service/ampdoc-impl';
+import * as dom from '../../src/dom';
+import * as docready from '../../src/document-ready';
 import * as sinon from 'sinon';
 
 
@@ -167,10 +171,16 @@ describe('AmpDocService', () => {
 
 describe('AmpDocSingle', () => {
 
+  let sandbox;
   let ampdoc;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     ampdoc = new AmpDocSingle(window);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should return window', () => {
@@ -190,6 +200,54 @@ describe('AmpDocSingle', () => {
     document.body.appendChild(element);
     expect(ampdoc.getElementById(id)).to.equal(element);
   });
+
+  it('should initialize ready state and body immediately', () => {
+    expect(ampdoc.getBody()).to.equal(window.document.body);
+    const onBody = sandbox.spy();
+    const onReady = sandbox.spy();
+    ampdoc.onBody(onBody);
+    expect(onBody.callCount).to.equal(1);
+    expect(onBody.args[0][0]).to.equal(window.document.body);
+    expect(ampdoc.getBody()).to.equal(window.document.body);
+    ampdoc.onReady(onReady);
+    expect(onReady.callCount).to.equal(1);
+    expect(ampdoc.isReady()).to.be.true;
+  });
+
+  it('should wait for body and ready state', () => {
+    const doc = {body: null};
+    const win = {document: doc};
+    const ampdoc = new AmpDocSingle(win);
+    const onBody = sandbox.spy();
+    const onReady = sandbox.spy();
+
+    let bodyCallback;
+    sandbox.stub(dom, 'waitForBody', (doc, callback) => {
+      bodyCallback = callback;
+    });
+    let readyCallback;
+    sandbox.stub(docready, 'onDocumentReady', (doc, callback) => {
+      readyCallback = callback;
+    });
+
+    expect(ampdoc.getBody()).to.be.null;
+    expect(ampdoc.isReady()).to.be.false;
+    ampdoc.onBody(onBody);
+    ampdoc.onReady(onReady);
+    expect(onBody.callCount).to.equal(0);
+    expect(onReady.callCount).to.equal(0);
+
+    doc.body = {};
+    bodyCallback();
+    expect(onBody.callCount).to.equal(1);
+    expect(onBody.args[0][0]).to.equal(doc.body);
+    expect(onReady.callCount).to.equal(0);
+    expect(ampdoc.getBody()).to.equal(doc.body);
+
+    readyCallback();
+    expect(onReady.callCount).to.equal(1);
+    expect(ampdoc.isReady()).to.be.true;
+  });
 });
 
 
@@ -197,10 +255,12 @@ describe('AmpDocShadow', () => {
 
   const URL = 'https://example.org/document';
 
+  let sandbox;
   let content, host, shadowRoot;
   let ampdoc;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     content = document.createElement('div');
     host = document.createElement('div');
     if (host.createShadowRoot) {
@@ -208,6 +268,10 @@ describe('AmpDocShadow', () => {
       shadowRoot.appendChild(content);
       ampdoc = new AmpDocShadow(window, URL, shadowRoot);
     }
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('should return window', () => {
@@ -235,5 +299,62 @@ describe('AmpDocShadow', () => {
     element.setAttribute('id', id);
     content.appendChild(element);
     expect(ampdoc.getElementById(id)).to.equal(element);
+  });
+
+  it('should update when body is available', () => {
+    const onBody = sandbox.spy();
+
+    // Body is still expected.
+    expect(ampdoc.getBody()).to.be.null;
+    expect(ampdoc.bodyResolver_).to.be.ok;
+    expect(ampdoc.bodyPromise_).to.be.ok;
+
+    // Set body.
+    ampdoc.onBody(onBody);
+    const bodyPromise = ampdoc.bodyPromise_;
+    const body = {};
+    shadowDocHasBody(ampdoc, body);
+    expect(ampdoc.getBody()).to.equal(body);
+    expect(ampdoc.bodyResolver_).to.be.undefined;
+    expect(ampdoc.bodyPromise_).to.be.undefined;
+    return bodyPromise.then(() => {
+      expect(onBody.callCount).to.equal(1);
+      expect(onBody.args[0][0]).to.equal(body);
+    });
+  });
+
+  it('should only allow one body update', () => {
+    const body = {};
+    shadowDocHasBody(ampdoc, body);
+    expect(() => {
+      shadowDocHasBody(ampdoc, body);
+    }).to.throw(/Duplicate body/);
+  });
+
+  it('should update when doc is ready', () => {
+    const onReady = sandbox.spy();
+
+    // "Ready" is still expected.
+    expect(ampdoc.isReady()).to.be.false;
+    expect(ampdoc.readyResolver_).to.be.ok;
+    expect(ampdoc.readyPromise_).to.be.ok;
+
+    // Set ready.
+    ampdoc.onReady(onReady);
+    const readyPromise = ampdoc.readyPromise_;
+    shadowDocReady(ampdoc);
+    expect(ampdoc.isReady()).to.be.true;
+    expect(ampdoc.readyResolver_).to.be.undefined;
+    expect(ampdoc.readyPromise_).to.be.undefined;
+    return readyPromise.then(() => {
+      expect(onReady.callCount).to.equal(1);
+    });
+  });
+
+  it('should only allow one ready update', () => {
+    shadowDocReady(ampdoc);
+    expect(() => {
+      shadowDocReady(ampdoc);
+    }).to.throw(/Duplicate ready state/);
   });
 });
