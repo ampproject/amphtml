@@ -381,7 +381,6 @@ export class Viewer {
     // instance is constructed, the document is already `visible`.
     this.recheckVisibilityState_();
     this.onVisibilityChange_();
-    dev().fine(TAG_, 'TDRL : viewer init completed; win = ', this.win);
   }
 
   /**
