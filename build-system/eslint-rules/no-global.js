@@ -27,6 +27,9 @@ module.exports = function(context) {
       if (!(name in GLOBALS)) {
         return;
       }
+      if (!(/Expression$/.test(node.parent.type))) {
+        return;
+      }
 
       if (node.parent.type === 'MemberExpression' &&
           node.parent.property === node) {
