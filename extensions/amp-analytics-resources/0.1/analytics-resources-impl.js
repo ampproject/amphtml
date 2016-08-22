@@ -15,6 +15,7 @@
  */
 
 import {getService} from '../../../src/service';
+import {parseUrl} from '../../../src/url';
 import {
   getResourceTiming as rtcGetResourceTiming,
 } from 'resourcetiming-compression/src/resourcetiming-compression';
@@ -27,7 +28,8 @@ export class AnalyticsResourcesService {
   }
 
   /**
-   * Rendered byte count of base page. This may not be what was sent on the network.
+   * Returns rendered byte count of base page. This may not be what was sent on the network.
+   * @return {!Promise<string|undefined>}
    */
   getDocumentLength() {
     const innerHTML = this.win_['document'] &&
@@ -40,119 +42,126 @@ export class AnalyticsResourcesService {
   }
 
   /**
-   * Number of resources in ResourceTiming.
+   * Returns number of resources in ResourceTiming.
+   * @return {!Promise<string|undefined>}
    */
   getResourceCount() {
     const res = this.getResources_();
-    return (res && res.length) ?
-        Promise.resolve(String(res.length)) : Promise.resolve('0');
+    return (res && typeof res.length === 'number') ?
+        Promise.resolve(String(res.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of DOM nodes on the page.
+   * @return {!Promise<string|undefined>}
    */
   getDomNodeCount() {
     const nodes = this.getNodes_('*');
-    return (nodes && nodes.length) ?
-        Promise.resolve(String(nodes.length)) : Promise.resolve('0');
+    return (nodes && typeof nodes.length === 'number') ?
+        Promise.resolve(String(nodes.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of image nodes on the page.
+   * @return {!Promise<string|undefined>}
    */
   getDomImgCount() {
     const nodes = this.getNodes_('img');
-    return (nodes && nodes.length) ?
-        Promise.resolve(String(nodes.length)) : Promise.resolve('0');
+    return (nodes && typeof nodes.length === 'number') ?
+        Promise.resolve(String(nodes.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of image nodes on the page that referenced external URLs.
+   * @return {!Promise<string|undefined>}
    */
   getDomExtImgCount() {
     const nodes = this.getNodes_('img', el =>
         { return el.src && !el.src.match(/^(?:about:|javascript:|data:|#)/); });
-    return (nodes && nodes.length) ?
-        Promise.resolve(String(nodes.length)) : Promise.resolve('0');
+    return (nodes && typeof nodes.length === 'number') ?
+        Promise.resolve(String(nodes.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of script nodes on the page.
+   * @return {!Promise<string|undefined>}
    */
   getDomScriptCount() {
     const nodes = this.getNodes_('script');
-    return (nodes && nodes.length) ?
-        Promise.resolve(String(nodes.length)) : Promise.resolve('0');
+    return (nodes && typeof nodes.length === 'number') ?
+        Promise.resolve(String(nodes.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of script nodes on the page that referenced external URLs.
+   * @return {!Promise<string|undefined>}
    */
   getDomExtScriptCount() {
     const nodes = this.getNodes_('script', el =>
         { return el.src && !el.src.match(/^(?:about:|javascript:|#)/); });
-    return (nodes && nodes.length) ?
-        Promise.resolve(String(nodes.length)) : Promise.resolve('0');
+    return (nodes && typeof nodes.length === 'number') ?
+        Promise.resolve(String(nodes.length)) : Promise.resolve();
   }
 
   /**
    * Returns number of distinct domains referenced from the page.
+   * @return {!Promise<string|undefined>}
    */
   getDomainCount() {
     const res = this.getResources_();
     const doms = {};
-    let a;
-    if (!res || !this.win_['document']
-        || typeof this.win_['document']['createElement'] !== 'function') {
+    let urlInfo;
+    if (res === null) {
       return Promise.resolve();
     }
 
-    // use an 'a' element to do the url parsing
-    a = this.win_.document.createElement('a');
     [].forEach.call(res, r => {
-      a.href = r.name;
-      doms[a.hostname] = true;
+      urlInfo = parseUrl(r.name);
+      if (urlInfo.hostname) {
+        doms[urlInfo.hostname] = true;
+      }
     });
 
     return Promise.resolve(String(Object.keys(doms).length));
   }
 
   /**
-   * Returns the compressed resource timing data.
+   * Returns compressed resource timing data.
+   * @return {!Promise<string|undefined>}
    */
   getResourceTiming() {
+    let rt;
     this.from_ = Date.now();
-    return Promise.resolve(
-        JSON.stringify(rtcGetResourceTiming(this.win_))
-    );
+    rt = rtcGetResourceTiming(this.win_);
+    return (rt && Object.keys(rt).length > 0) ? Promise.resolve(JSON.stringify(rt)) : Promise.resolve();
   }
 
   /**
-   * Get ResourceTiming entries
-   * @return {!Array} array of PerformanceResourceTiming entries
+   * Get ResourceTiming entries.
+   * @return {Array<PerformanceResourceTiming>}
    * @private
    */
   getResources_() {
     const p = ('performance' in this.win_) && this.win_['performance'];
     if (!p || typeof p['getEntriesByType'] !== 'function') {
       // ResourceTiming interface is not supported.
-      return [];
+      return null;
     }
     return p.getEntriesByType('resource');
   }
 
   /**
-   * Get DOM elements that match type and filter
+   * Get DOM elements that match type and filter.
    * @param {String} element type
    * @param {function(Object)=} filter
-   * @return {!Array} array of DOM elements
+   * @return {Array<HTMLElement>} DOM elements
    * @private
    */
   getNodes_(type, filter) {
     const d = this.win_['document'];
     let nodes, node, result = [], i = -1, length;
     if (!d || typeof d['getElementsByTagName'] !== 'function') {
-      return Promise.resolve();
+      return null;
     }
     nodes = d.getElementsByTagName(type);
     if (nodes && typeof filter === 'function') {
@@ -174,7 +183,6 @@ export class AnalyticsResourcesService {
 /**
  * @param {!Window} win
  * @return {!Object} All services need to return an object to "load".
- * @visiblefortesting
  */
 export function installAmpAnalyticsResourcesService(window) {
   return getService(window, 'analytics-resources', () => {
