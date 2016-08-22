@@ -25,17 +25,17 @@ export function neo4w(global, data) {
   checkData(data, ['pid', 'taxonomy']);
 
   const $neodata = global;
-
+  const taxonomy=data['taxonomy'];
   $neodata._4wRecom = {};
   $neodata._4wRecom.Q = [];
   $neodata._4wRecom.T = {};
-  $neodata._4wRecom.T.setTaxonomy=void(0);
+  $neodata._4wRecom.T.setTaxonomy = null;
   $neodata._4wRecom.B = {};
-  $neodata._4wRecom.B.addPosition=void(0);
+  $neodata._4wRecom.B.addPosition = null;
 
   $neodata._4wRecom.amp = data;
   $neodata._4wRecom.Q.push(['setup', function() {
-    taxonomy=data.taxonomy;
+
     $neodata._4wRecom.T.setTaxonomy(taxonomy);
     $neodata._4wRecom.B.addPosition(data.pid, 'c');
   }]);

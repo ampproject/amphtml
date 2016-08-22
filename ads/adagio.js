@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//import {loadScript, checkData} from '../3p/3p';
+import {loadScript, checkData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -29,13 +29,13 @@ export function adagio(global, data) {
   $neodata._adagio = {};
   $neodata._adagio.Q = [];
   $neodata._adagio.B = {};
-  $neodata._adagio.B.setSid=void(0);
-  $neodata._adagio.B.addBanner=void(0);
+  $neodata._adagio.B.setSid = null;
+  $neodata._adagio.B.addBanner = null;
   $neodata._adagio.amp = data;
 
   $neodata._adagio.Q.push(['setup', function() {
     $neodata._adagio.B.setSid(data.sid);
     $neodata._adagio.B.addBanner(data.loc, 'c');
   }]);
- // loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
+  loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
 }
