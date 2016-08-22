@@ -413,28 +413,28 @@ export class UrlReplacements {
     // Returns the rendered document size in bytes.
     // This may not be what was sent on the network.
     this.set_('PAGE_DOC_LENGTH', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDocumentLength();
       });
     });
 
     // Returns number of resources in ResourceTiming.
     this.set_('RESOURCE_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getResourceCount();
       });
     });
 
     // Returns the number of DOM nodes on the page.
     this.set_('DOM_NODE_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomNodeCount();
       });
     });
 
     // Returns the number of image nodes on the page.
     this.set_('DOM_IMG_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomImgCount();
       });
     });
@@ -442,35 +442,35 @@ export class UrlReplacements {
     // Returns the number of image nodes on the page that referenced
     // external URLs.
     this.set_('DOM_EXT_IMG_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomExtImgCount();
       });
     });
 
     // Returns the number of script nodes on the page.
     this.set_('DOM_SCRIPT_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomScriptCount();
       });
     });
 
     // Returns the number of script nodes that referenced external URLs.
     this.set_('DOM_EXT_SCRIPT_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomExtScriptCount();
       });
     });
 
     // Returns number of distinct domains referenced from the page.
     this.set_('PAGE_DOMAIN_COUNT', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getDomainCount();
       });
     });
 
     // Returns the compressed resource timing data.
     this.set_('RESOURCE_TIMING', () => {
-      return analyticsResourcesFor(window).then(rt => {
+      return analyticsResourcesFor(this.win_).then(rt => {
         return rt.getResourceTiming();
       });
     });

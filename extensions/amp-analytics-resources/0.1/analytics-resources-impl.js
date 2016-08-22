@@ -133,7 +133,8 @@ export class AnalyticsResourcesService {
     let rt;
     this.from_ = Date.now();
     rt = rtcGetResourceTiming(this.win_);
-    return (rt && Object.keys(rt).length > 0) ? Promise.resolve(JSON.stringify(rt)) : Promise.resolve();
+    return (rt && Object.keys(rt).length > 0) ?
+        Promise.resolve(JSON.stringify(rt)) : Promise.resolve();
   }
 
   /**
