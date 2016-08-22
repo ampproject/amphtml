@@ -43,10 +43,7 @@ describe('a4a_config', () => {
   let sandbox;
   let win;
   let rand;
-  let viewer;
   let events;
-  let platform;
-  let docState;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -76,8 +73,8 @@ describe('a4a_config', () => {
       navigator: window.navigator,
     };
     events = {};
-    platform = platformFor(win);
-    docState = documentStateFor(win);
+    platformFor(win);
+    documentStateFor(win);
     installViewerService(win);
   });
 
@@ -303,10 +300,7 @@ describe('a4a_config hash param parsing', () => {
   let sandbox;
   let win;
   let rand;
-  let viewer;
   let events;
-  let platform;
-  let docState;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -337,8 +331,8 @@ describe('a4a_config hash param parsing', () => {
       navigator: window.navigator,
     };
     events = {};
-    platform = platformFor(win);
-    docState = documentStateFor(win);
+    platformFor(win);
+    documentStateFor(win);
   });
   afterEach(() => {
     resetExperimentToggles_();  // Clear saved, page-level experiment state.
@@ -355,7 +349,7 @@ describe('a4a_config hash param parsing', () => {
     it(`should find viewer param when pattern is ${hashBase}`, () => {
       win.location.hash = hashBase.replace('PARAM', 'a4a:-1');
       installViewerService(win);
-      const v = viewerFor(win);
+      viewerFor(win);
       // Ensure that internal branches aren't attached, even if the PRNG
       // would normally trigger them.
       rand.onFirstCall().returns(-1);
@@ -379,22 +373,21 @@ describe('a4a_config hash param parsing', () => {
       }
     });
 
-    it(`hash should trump search; pattern=${hashBase}`,
-        () => {
-          win.location.search = hashBase.replace('PARAM', 'a4a:-1');
-          win.location.hash = hashBase.replace('PARAM', 'a4a:2');
-          installViewerService(win);
-          const v = viewerFor(win);
-          // Ensure that internal branches aren't attached, even if the PRNG
-          // would normally trigger them.
-          rand.onFirstCall().returns(-1);
-          const element = document.createElement('div');
-          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
-          expect(win.document.cookie).to.be.null;
-          expect(rand.called, 'rand called at least once').to.be.false;
-          expect(element.getAttribute('data-experiment-id')).to.equal(
-              EXTERNAL_BRANCHES.experiment);
-        });
+    it(`hash should trump search; pattern=${hashBase}`, () => {
+      win.location.search = hashBase.replace('PARAM', 'a4a:-1');
+      win.location.hash = hashBase.replace('PARAM', 'a4a:2');
+      installViewerService(win);
+      viewerFor(win);
+      // Ensure that internal branches aren't attached, even if the PRNG
+      // would normally trigger them.
+      rand.onFirstCall().returns(-1);
+      const element = document.createElement('div');
+      expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
+          INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
+      expect(win.document.cookie).to.be.null;
+      expect(rand.called, 'rand called at least once').to.be.false;
+      expect(element.getAttribute('data-experiment-id')).to.equal(
+          EXTERNAL_BRANCHES.experiment);
+    });
   });
 });
