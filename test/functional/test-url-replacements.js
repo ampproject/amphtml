@@ -470,66 +470,84 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace PAGE_DOC_LENGTH', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=PAGE_DOC_LENGTH', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=PAGE_DOC_LENGTH', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace RESOURCE_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=RESOURCE_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=RESOURCE_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace DOM_NODE_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=DOM_NODE_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=DOM_NODE_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace DOM_IMG_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=DOM_IMG_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=DOM_IMG_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace DOM_EXT_IMG_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=DOM_EXT_IMG_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=DOM_EXT_IMG_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace DOM_SCRIPT_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=DOM_SCRIPT_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=DOM_SCRIPT_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace DOM_EXT_SCRIPT_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=DOM_EXT_SCRIPT_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=DOM_EXT_SCRIPT_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace PAGE_DOMAIN_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=PAGE_DOMAIN_COUNT', false, true).then(res => {
-      expect(res).to.match(/sh=\d+/);
-    });
+    return replacements.expand('?sh=PAGE_DOMAIN_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
   });
 
   it('should replace RESOURCE_TIMING', () => {
+    const replacements = installUrlReplacementsService(window);
     installAmpAnalyticsResourcesService(window);
-    return expand('?sh=RESOURCE_TIMING', false, true).then(res => {
-      expect(res).to.match(/sh=[a-zA-Z0-9,{}\.%]+/);
-    });
+    return replacements.expand('?sh=RESOURCE_TIMING', false, true).then(
+      res => {
+        expect(res).to.match(/sh=[a-zA-Z0-9,{}\.%]+/);
+      });
   });
 
   it('should accept $expressions', () => {

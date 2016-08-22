@@ -22,9 +22,9 @@ import {
 
 /** @private Visible for testing. */
 export class AnalyticsResourcesService {
-  constructor(window) {
-    /** @const {!Window} */
-    this.win_ = window;
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /**
