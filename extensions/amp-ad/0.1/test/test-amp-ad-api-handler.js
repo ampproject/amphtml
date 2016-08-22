@@ -79,14 +79,5 @@ describe('amp-ad-api-handler', () => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
-
-    it('time out resolve promise', () => {
-      apiHandler.renderStartPromise_ = Promise.reject(new Error());
-      return startUpPromise.then(() => {
-        throw new Error('must have failed');
-      }, error => {
-        expect(error.message).to.match(/render-start-event timed out/);
-      });
-    });
   });
 });

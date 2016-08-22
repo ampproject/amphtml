@@ -22,7 +22,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
-import {dev, user} from '../../../src/log';
+import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
@@ -247,8 +247,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
-    dev().error('AMP_AD',
-        'Failed to create iframe in layoutCallback(iframe already exists');
     return loadPromise(this.iframe_);
   }
 
