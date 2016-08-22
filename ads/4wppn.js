@@ -31,8 +31,8 @@ export function neo4wPPN(global, data) {
   $neodata._neodata.amp = data;
 
   $neodata._neodata.adagioTag.push({
-    "loc": data.loc,
-    "ph": "c"
+    'loc': data.loc,
+    'ph': 'c',
   });
 
   loadScript($neodata, 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js');

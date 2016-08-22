@@ -109,7 +109,7 @@ export const adPreconnect = {
   adagio: [
     'https://js-ssl.neodatagroup.com',
     'https://ad-aws-it.neodatagroup.com',
-    'https://tracker.neodatagroup.com'
+    'https://tracker.neodatagroup.com',
   ],
   adblade: [
     'https://staticd.cdn.adblade.com',
@@ -229,7 +229,7 @@ export const adPreconnect = {
   zergnet: [
     'https://www.zergnet.com',
     'https://zergnet.com',
-  ]
+  ],
 };
 
 /**

@@ -30,7 +30,7 @@ export function neo4w(global, data) {
   $neodata._4wRecom.Q = [];
   $neodata._4wRecom.amp = data;
 
-  $neodata._4wRecom.Q.push(['setup', function () {
+  $neodata._4wRecom.Q.push(['setup', function() {
     $neodata._4wRecom.T.setTaxonomy(data.taxonomy);
     $neodata._4wRecom.B.addPosition(data.pid, 'c');
   }]);
