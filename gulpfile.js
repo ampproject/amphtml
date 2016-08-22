@@ -696,6 +696,14 @@ function buildSw(options) {
     minify: opts.minify || argv.minify,
     preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
   });
+  // The service-worker kill script that may be loaded by the browser.
+  compileJs('./src/service-worker/', 'kill.js', './dist/', {
+    toName: 'sw-kill.max.js',
+    minifiedName: 'sw-kill.js',
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+  });
   // The script imported by the service-worker. This is the "core".
   opts.noWrapper = true;
   opts.filename = 'core.js';

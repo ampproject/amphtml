@@ -330,6 +330,7 @@ var forbiddenTerms = {
     whitelist: [
       // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
       'src/service-worker/core.js',
+      'src/service-worker/kill.js',
     ]
   },
   'openDatabase': requiresReviewPrivacy,
