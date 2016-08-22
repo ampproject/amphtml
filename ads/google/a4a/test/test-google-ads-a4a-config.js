@@ -20,14 +20,33 @@ import {
     isInManualExperiment,
 } from '../traffic-experiments';
 import {resetExperimentToggles_} from '../../../../src/experiments';
-import {Viewer} from '../../../../src/service/viewer-impl';
+import {installViewerService} from '../../../../src/service/viewer-impl';
+import {resetServiceForTesting} from '../../../../src/service';
+import {viewerFor} from '../../../../src/viewer';
+import {documentStateFor} from '../../../../src/document-state';
+import {platformFor} from '../../../../src/platform';
 import * as sinon from 'sinon';
+
+const EXP_ID = 'EXP_ID';
+/** @type {!Branches} */
+const EXTERNAL_BRANCHES = {
+  control: 'EXT_CONTROL',
+  experiment: 'EXT_EXPERIMENT',
+};
+/** @type {!Branches} */
+const INTERNAL_BRANCHES = {
+  control: 'INT_CONTROL',
+  experiment: 'INT_EXPERIMENT',
+};
 
 describe('a4a_config', () => {
   let sandbox;
   let win;
   let rand;
   let viewer;
+  let events;
+  let platform;
+  let docState;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -43,7 +62,12 @@ describe('a4a_config', () => {
         hash: '',
       },
       document: {
+        hidden: false,
         cookie: null,
+        visibilityState: 'visible',
+        addEventListener: function(type, listener) {
+          events[type] = listener;
+        },
       },
       crypto: {
         subtle: true,
@@ -51,29 +75,22 @@ describe('a4a_config', () => {
       },
       navigator: window.navigator,
     };
-    viewer = new Viewer(win);
+    events = {};
+    platform = platformFor(win);
+    docState = documentStateFor(win);
+    installViewerService(win);
   });
 
   afterEach(() => {
     resetExperimentToggles_();  // Clear saved, page-level experiment state.
+    resetServiceForTesting(win, 'viewer');
     sandbox.restore();
   });
-
-  const EXP_ID = 'EXP_ID';
-  const EXTERNAL_BRANCHES = {
-    control: 'EXT_CONTROL',
-    experiment: 'EXT_EXPERIMENT',
-  };
-  const INTERNAL_BRANCHES = {
-    control: 'INT_CONTROL',
-    experiment: 'INT_EXPERIMENT',
-  };
 
   it('should attach expt ID and return true when expt is on', () => {
     rand.onFirstCall().returns(-1);  // Force experiment on.
     rand.onSecondCall().returns(0.75);  // Select second branch.
     const element = document.createElement('div');
-    const v = new Viewer(win);
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID,
         EXTERNAL_BRANCHES, INTERNAL_BRANCHES),
            'googleAdsIsA4AEnabled').to.be.true;
@@ -277,11 +294,68 @@ describe('a4a_config', () => {
             'element in ', EXTERNAL_BRANCHES[branch]).to.be.false;
       }
     });
+  });
+});
 
-    it(`should find param in originalHash when pattern is ${urlBase}`, () => {
-      win.location.search = '?somewhere=over&the=rainbow';
-      win.location.originalHash = '#' + encodeURIComponent(
-          urlBase.substr(1).replace('PARAM', 'a4a:-1'));
+// These tests are separated because they need to invoke installViewerService
+// within the test, rather than in the beforeEach().
+describe('a4a_config hash param parsing', () => {
+  let sandbox;
+  let win;
+  let rand;
+  let viewer;
+  let events;
+  let platform;
+  let docState;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    rand = sandbox.stub(Math, 'random');
+    win = {
+      AMP_MODE: {
+        localDev: true,
+      },
+      location: {
+        href: 'https://cdn.ampproject.org/fnord',
+        pathname: '/fnord',
+        origin: 'https://cdn.ampproject.org',
+        hash: '',
+        search: 'somewhere=over&the=rainbow',
+      },
+      document: {
+        hidden: false,
+        cookie: null,
+        visibilityState: 'visible',
+        addEventListener: function(type, listener) {
+          events[type] = listener;
+        },
+      },
+      crypto: {
+        subtle: true,
+        webkitSubtle: true,
+      },
+      navigator: window.navigator,
+    };
+    events = {};
+    platform = platformFor(win);
+    docState = documentStateFor(win);
+  });
+  afterEach(() => {
+    resetExperimentToggles_();  // Clear saved, page-level experiment state.
+    resetServiceForTesting(win, 'viewer');
+    sandbox.restore();
+  });
+
+  const hashBaseConditions = ['#exp=PARAM',
+    '#p=blarg&exp=PARAM',
+    '#p=blarg&exp=PARAM&s=987',
+    '#p=blarg&exp=zort:123,PARAM,spaz:987&s=987'];
+
+  hashBaseConditions.forEach(hashBase => {
+    it(`should find viewer param when pattern is ${hashBase}`, () => {
+      win.location.hash = hashBase.replace('PARAM', 'a4a:-1');
+      installViewerService(win);
+      const v = viewerFor(win);
       // Ensure that internal branches aren't attached, even if the PRNG
       // would normally trigger them.
       rand.onFirstCall().returns(-1);
@@ -305,11 +379,12 @@ describe('a4a_config', () => {
       }
     });
 
-    it(`should find param in hash when !originalHash and pattern=${urlBase}`,
+    it(`hash should trump search; pattern=${hashBase}`,
         () => {
-          win.location.search = '?somewhere=over&the=rainbow';
-          win.location.hash = '#' + encodeURIComponent(
-                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
+          win.location.search = hashBase.replace('PARAM', 'a4a:-1');
+          win.location.hash = hashBase.replace('PARAM', 'a4a:2');
+          installViewerService(win);
+          const v = viewerFor(win);
           // Ensure that internal branches aren't attached, even if the PRNG
           // would normally trigger them.
           rand.onFirstCall().returns(-1);
@@ -321,43 +396,5 @@ describe('a4a_config', () => {
           expect(element.getAttribute('data-experiment-id')).to.equal(
               EXTERNAL_BRANCHES.experiment);
         });
-
-    it(`originalHash should trump hash; pattern=${urlBase}`,
-        () => {
-          win.location.search = '?somewhere=over&the=rainbow';
-          win.location.originalHash = '#' + encodeURIComponent(
-                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
-          win.location.hash = '#' + encodeURIComponent(
-                  urlBase.substr(1).replace('PARAM', 'a4a:-1'));
-          // Ensure that internal branches aren't attached, even if the PRNG
-          // would normally trigger them.
-          rand.onFirstCall().returns(-1);
-          const element = document.createElement('div');
-          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
-          expect(win.document.cookie).to.be.null;
-          expect(rand.called, 'rand called at least once').to.be.false;
-          expect(element.getAttribute('data-experiment-id')).to.equal(
-              EXTERNAL_BRANCHES.experiment);
-        });
-
-    it(`originalHash should trump search; pattern=${urlBase}`,
-        () => {
-          win.location.search = urlBase.replace('PARAM', 'a4a:-1');
-          win.location.originalHash = '#' + encodeURIComponent(
-                  urlBase.substr(1).replace('PARAM', 'a4a:2'));
-          // Ensure that internal branches aren't attached, even if the PRNG
-          // would normally trigger them.
-          rand.onFirstCall().returns(-1);
-          const element = document.createElement('div');
-          expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
-              INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
-          expect(win.document.cookie).to.be.null;
-          expect(rand.called, 'rand called at least once').to.be.false;
-          expect(element.getAttribute('data-experiment-id')).to.equal(
-              EXTERNAL_BRANCHES.experiment);
-        });
-
   });
-
 });
