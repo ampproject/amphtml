@@ -21,7 +21,6 @@ import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
   let sandbox;
-  let iframe;
   let apiHandler;
   let testIndex = 0;
 
@@ -30,37 +29,64 @@ describe('amp-ad-api-handler', () => {
     const adElement = document.createElement('amp-ad');
     const adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
-    const beforeAttachedToDom = element => {
-      element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
-      apiHandler.startUp(element, true);
-    };
-    return createIframeWithMessageStub(window, beforeAttachedToDom)
-        .then(newIframe => {
-          iframe = newIframe;
-        });
+    testIndex++;
   });
 
   afterEach(() => {
     sandbox.restore();
     apiHandler = null;
-    testIndex++;
   });
 
-  it('embed-state API', () => {
-    const embedStateData = {
-      sentinel: 'amp3ptest' + testIndex,
-      type: 'send-embed-state',
+  describe('startUp test', () => {
+    let iframe;
+    let startUpPromise;
+    const beforeAttachedToDom = element => {
+      element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+      startUpPromise = apiHandler.startUp(element, true);
     };
-
-    const embedStateDataReply = 'amp-' + JSON.stringify({
-      inViewport: false,
-      pageHidden: false,
-      type: 'embed-state',
-      sentinel: 'amp3ptest' + testIndex,
+    beforeEach(() => {
+      return createIframeWithMessageStub(window, beforeAttachedToDom)
+        .then(newIframe => {
+          iframe = newIframe;
+        });
     });
 
-    iframe.postMessageToParent(embedStateData);
-    return iframe.expectMessageFromParent(embedStateDataReply);
+    it('embed-state API', () => {
+      const embedStateData = {
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'send-embed-state',
+      };
+
+      const embedStateDataReply = 'amp-' + JSON.stringify({
+        inViewport: false,
+        pageHidden: false,
+        type: 'embed-state',
+        sentinel: 'amp3ptest' + testIndex,
+      });
+
+      iframe.postMessageToParent(embedStateData);
+      return iframe.expectMessageFromParent(embedStateDataReply);
+    });
+
+    it('render-start API resolve promise', () => {
+      const renderStartData = {
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'render-start',
+      };
+      expect(iframe.style.visibility).to.equal('hidden');
+      iframe.postMessageToParent(renderStartData);
+      return startUpPromise.then(() => {
+        expect(iframe.style.visibility).to.equal('');
+      });
+    });
+
+    it('time out resolve promise', () => {
+      apiHandler.renderStartPromise_ = Promise.reject(new Error());
+      return startUpPromise.then(() => {
+        throw new Error('must have failed');
+      }, error => {
+        expect(error.message).to.match(/render-start-event timed out/);
+      });
+    });
   });
 });
-

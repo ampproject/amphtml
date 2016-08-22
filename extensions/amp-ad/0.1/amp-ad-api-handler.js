@@ -27,7 +27,6 @@ import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
-import {dev} from '../../../src/log';
 
 export class AmpAdApiHandler {
 
@@ -139,22 +138,21 @@ export class AmpAdApiHandler {
     });
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
-      this.renderStartTimeoutPromise_ = timerFor(this.baseInstance_.win)
+      return timerFor(this.baseInstance_.win)
           .timeoutPromise(200, this.renderStartPromise_,
-          'render-start-event timed out');
-      this.renderStartTimeoutPromise_.then(() => {
-        //TODO: report performance
-        if (this.iframe_) {
-          this.iframe_.style.visibility = '';
-        }
-      }).catch(error => {
-        //TODO: report performance
-        if (this.iframe_) {
-          this.iframe_.style.visibility = '';
-        }
-        dev().error(error);
-      });
-      return this.renderStartTimeoutPromise_;
+          'render-start-event timed out')
+          .catch(error => {
+            //TODO: report performance
+            if (this.iframe_) {
+              this.iframe_.style.visibility = '';
+            }
+            throw error;
+          }).then(() => {
+            //TODO: report performance
+            if (this.iframe_) {
+              this.iframe_.style.visibility = '';
+            }
+          });
     });
   }
 
