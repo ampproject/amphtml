@@ -169,6 +169,7 @@ describe('Carousel layout scheduling and viewport updates', () => {
   let sandbox;
   let element;
   let cell0, cell1, cell2;
+  let children;
   let carousel;
 
   function setupElements() {
@@ -186,7 +187,8 @@ describe('Carousel layout scheduling and viewport updates', () => {
     cell1.style.width = '300px';
     cell2.classList.add('cell2');
     cell2.style.width = '300px';
-    element.getRealChildren = () => [cell0, cell1, cell2];
+    children = [cell0, cell1, cell2];
+    element.getRealChildren = () => children;
     return element;
   }
 
@@ -222,6 +224,8 @@ describe('Carousel layout scheduling and viewport updates', () => {
     carousel.scheduleLayout = sandbox.spy();
     carousel.updateInViewport = sandbox.spy();
     carousel.schedulePause = sandbox.spy();
+    carousel.scheduleResume = sandbox.spy();
+    carousel.scheduleUnlayout = sandbox.spy();
     carousel.schedulePreload = sandbox.spy();
   });
   afterEach(() => {
@@ -236,6 +240,17 @@ describe('Carousel layout scheduling and viewport updates', () => {
             carousel.doLayout_)).to.be.true;
     expect(carousel.updateInViewport_.calledWith(320, 0)).to.be.true;
     expect(carousel.doLayout_.calledWith(320)).to.be.true;
+  });
+
+  it('should propagate pause/resume/unlayout to its owned children', () => {
+    carousel.pauseCallback();
+    expect(carousel.schedulePause.calledWith(children)).to.be.true;
+
+    carousel.resumeCallback();
+    expect(carousel.scheduleResume.calledWith(children)).to.be.true;
+
+    carousel.unlayoutCallback();
+    expect(carousel.scheduleUnlayout.calledWith(children)).to.be.true;
   });
 
 });
