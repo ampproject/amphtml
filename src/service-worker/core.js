@@ -25,6 +25,14 @@ import indexedDBP from '../../third_party/indexed-db-as-promised/index';
 const VERSION = '$internalRuntimeVersion$';
 
 /**
+ * A list of blacklisted AMP versions that must never be served from cache.
+ * Versions may be blacklist if they contain a significant implementation bug.
+ * TODO(jridgewell): Figure out how to get this from environment variables so
+ * a past version may be blacklist without cutting a new version.
+ */
+const BLACKLIST = [];
+
+/**
  * Returns the version of a given versioned JS file.
  *
  * @param {string} url
@@ -71,6 +79,16 @@ function isCdnJsFile(url) {
   );
 }
 
+/**
+ * Determines if a AMP version is blacklisted.
+ * @param {string} version
+ * @return {boolean}
+ */
+function isBlacklisted(version) {
+  // Trim the RTV perfix.
+  version = version.substr(2);
+  return BLACKLIST.indexOf(version) > -1;
+}
 
 /**
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
@@ -268,7 +286,7 @@ self.addEventListener('fetch', event => {
     // If not, do we have this version cached?
     return getCachedVersion(requestFile, requestVersion).then(version => {
       // We have a cached version! Serve it up!
-      if (version) {
+      if (version && !isBlacklisted(version)) {
         return version;
       }
 
