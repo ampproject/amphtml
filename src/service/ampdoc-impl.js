@@ -181,6 +181,7 @@ export class AmpDoc {
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
    * @return {!Window}
+   * @deprecated. Use `ampdoc.win` instead.
    */
   getWin() {
     return this.win;
@@ -271,11 +272,6 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getWin() {
-    return this.win;
-  }
-
-  /** @override */
   isSingleDoc() {
     return true;
   }
@@ -355,11 +351,6 @@ export class AmpDocShadow extends AmpDoc {
     this.readyPromise_ = new Promise(resolve => {
       this.readyResolver_ = resolve;
     });
-  }
-
-  /** @override */
-  getWin() {
-    return this.win;
   }
 
   /** @override */
