@@ -160,6 +160,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/800',
   },
   {
+    id: 'cache-service-worker',
+    name: 'AMP Cache Service Worker',
+    spec: 'https://github.com/ampproject/amphtml/issues/1199',
+  },
+  {
     id: 'amp-lightbox-viewer',
     name: 'Enables a new lightbox experience via the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',

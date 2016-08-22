@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-  checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
-  const revampServiceUrl = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  // TODO: check mandatory fields
+  validateData(data, [],
+      ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
   global.data = data;
-  writeScript(window, revampServiceUrl);
+  writeScript(window,
+      'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js');
 }

@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-install-serviceworker
+  html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "SCRIPT"
   spec_name: "amp-install-serviceworker extension .js script"
   mandatory_parent: "HEAD"
@@ -47,6 +48,7 @@ tags: {  # amp-install-serviceworker
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
 }
 tags: {  # <amp-install-serviceworker>
+  html_format: AMP  # Ads cannot install serviceworkers
   tag_name: "AMP-INSTALL-SERVICEWORKER"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-install-serviceworker extension .js script"

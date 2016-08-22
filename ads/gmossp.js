@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 const gmosspFields = ['width', 'height', 'id'];
 
@@ -23,8 +23,7 @@ const gmosspFields = ['width', 'height', 'id'];
  * @param {!Object} data
  */
 export function gmossp(global, data) {
-  checkData(data, gmosspFields);
-  validateDataExists(data, gmosspFields);
+  validateData(data, gmosspFields, []);
 
   global.gmosspParam = data;
   writeScript(global, 'https://cdn.gmossp-sp.jp/ads/amp.js');

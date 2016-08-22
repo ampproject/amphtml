@@ -186,8 +186,8 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
-        nodeOrDoc);
+    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }

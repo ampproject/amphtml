@@ -1,0 +1,110 @@
+{
+  "padding": {"top":0, "bottom":0, "left":0, "right":0},
+
+  "signals": [
+    {
+      "name": "hover", "init": null,
+      "streams": [
+        { "type": "symbol:mouseover",
+          "expr": "datum._id" },
+        { "type": "window:mouseup, symbol:mouseout", "expr": "null" }
+      ]
+    },
+    {
+      "name": "grab", "init": null,
+      "streams": [
+        { "type": "symbol:touchstart, symbol:mousedown",
+          "expr": "datum._id" },
+        { "type": "touchend, window:mouseup", "expr": "null" }
+      ]
+    },
+    {
+      "name": "active", "init": null,
+      "streams": [
+        { "type": "hover, grab", "expr": "{id: grab || hover}" },
+        {
+          "type": "symbol:touchmove, [symbol:mousedown, window:mouseup] > window:mousemove",
+          "expr": "{x: eventX(), y: eventY(), id: grab, update: true}"
+        }
+      ]
+    },
+    {
+      "name": "dblclick", "init": null, "verbose": true,
+      "streams": [
+        { "type": "symbol:dblclick", "expr": "datum._id" }
+      ]
+    }
+  ],
+
+  "data": [
+    {
+      "name": "fixed",
+      "modify": [
+        {"type": "toggle", "signal": "dblclick", "field": "id"}
+      ]
+    },
+    {
+      "name": "edges",
+      "url": "vega-data/miserables.json",
+      "format": {"type": "json", "property": "links"}
+    },
+    {
+      "name": "nodes",
+      "url": "vega-data/miserables.json",
+      "format": {"type": "json", "property": "nodes"},
+      "transform": [
+        {
+          "type": "force",
+          "links": "edges",
+          "linkDistance": 30,
+          "linkStrength": 0.5,
+          "charge": -80,
+          "interactive": true,
+          "fixed": "fixed",
+          "active": {"signal": "active"}
+        }
+      ]
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "path",
+      "from": {
+        "data": "edges",
+        "transform": [
+          { "type": "lookup", "on": "nodes",
+            "keys": ["source", "target"],
+            "as":   ["_source", "_target"] },
+          { "type": "linkpath", "shape": "line" }
+        ]
+      },
+      "properties": {
+        "update": {
+          "path": {"field": "layout_path"},
+          "stroke": {"value": "#ccc"},
+          "strokeWidth": {"value": 0.5}
+        }
+      }
+    },
+    {
+      "type": "symbol",
+      "from": {"data": "nodes"},
+      "properties": {
+        "enter": {
+          "fillOpacity": {"value": 0.3},
+          "fill": {"value": "steelblue"}
+        },
+        "update": {
+          "x": {"field": "layout_x"},
+          "y": {"field": "layout_y"},
+          "stroke": [
+            { "test": "indata('fixed', datum._id, 'id')",
+              "value": "firebrick" },
+            { "value": "steelblue" }
+          ]
+        }
+      }
+    }
+  ]
+}

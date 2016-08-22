@@ -36,6 +36,7 @@
 
 import {FontLoader} from './fontloader';
 import {timerFor} from '../../../src/timer';
+import {isFiniteNumber} from '../../../src/types';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
@@ -188,7 +189,7 @@ export class AmpFont extends AMP.BaseElement {
    */
   getTimeout_() {
     let timeoutInMs = parseInt(this.element.getAttribute('timeout'), 10);
-    timeoutInMs = isNaN(timeoutInMs) || timeoutInMs < 0 ?
+    timeoutInMs = !isFiniteNumber(timeoutInMs) || timeoutInMs < 0 ?
         DEFAULT_TIMEOUT_ : timeoutInMs;
     timeoutInMs = Math.max(
       (timeoutInMs - timerFor(this.win).timeSinceStart()),

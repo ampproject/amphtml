@@ -22,7 +22,7 @@ import {
   preloadBootstrap,
   resetCountForTesting,
 } from '../../src/3p-frame';
-import {documentInfoFor} from '../../src/document-info';
+import {documentInfoForDoc} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {resetServiceForTesting} from '../../src/service';
 import {validateData} from '../../3p/3p';
@@ -119,7 +119,7 @@ describe('3p-frame', () => {
     const src = iframe.src;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
-    const docInfo = documentInfoFor(window);
+    const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
     const width = window.innerWidth;
     const height = window.innerHeight;

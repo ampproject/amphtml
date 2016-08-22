@@ -16,6 +16,7 @@
 
 
 import {Timer} from '../src/timer';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
 import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
 import {cssText} from '../build/css';
@@ -197,6 +198,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      installDocService(iframe.contentWindow, true);
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
@@ -275,11 +277,15 @@ const IFRAME_STUB_URL =
  * See /test/fixtures/served/iframe-stub.html for implementation.
  *
  * @param win {!Window}
+ * @param opt_beforeAttachToDom {function(!HTMLIFrameElement)=}
  * @returns {!Promise<!HTMLIFrameElement>}
  */
-export function createIframeWithMessageStub(win) {
+export function createIframeWithMessageStub(win, opt_beforeAttachToDom) {
   const element = win.document.createElement('iframe');
   element.src = IFRAME_STUB_URL;
+  if (opt_beforeAttachToDom) {
+    opt_beforeAttachToDom(element);
+  }
   win.document.body.appendChild(element);
 
   /**
@@ -296,10 +302,15 @@ export function createIframeWithMessageStub(win) {
   element.expectMessageFromParent = msg => {
     return new Promise(resolve => {
       const listener = event => {
+        let expectMsg = msg;
+        let actualMsg = event.data.receivedMessage;
+        if (typeof expectMsg !== 'string') {
+          expectMsg = JSON.stringify(expectMsg);
+          actualMsg = JSON.stringify(actualMsg);
+        }
         if (event.source == element.contentWindow
             && event.data.testStubEcho
-            && JSON.stringify(msg)
-                == JSON.stringify(event.data.receivedMessage)) {
+            && expectMsg == actualMsg) {
           win.removeEventListener('message', listener);
           resolve(msg);
         }

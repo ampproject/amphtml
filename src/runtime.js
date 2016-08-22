@@ -39,7 +39,7 @@ import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
 import {installShadowDoc} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStyles, installStylesForShadowRoot} from './styles';
+import {installStyles, installStylesForShadowRoot} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
@@ -64,7 +64,6 @@ const TAG = 'runtime';
 
 /** @type {!Object} */
 const elementsForTesting = {};
-
 
 /**
  * Install runtime-level services.
@@ -437,7 +436,7 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
-  const ampdoc = installShadowDoc(ampdocService, shadowRoot);
+  const ampdoc = installShadowDoc(ampdocService, url, shadowRoot);
   dev().fine(TAG, 'Attach to shadow root:', shadowRoot, ampdoc);
 
   // Install runtime CSS.
