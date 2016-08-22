@@ -311,17 +311,17 @@ export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
 }
 
 /**
- * Return a promise that resolve when listenForOnce function has listened to the message
+ * Returns a promise that resolves when the given message has been observed
+ * for the first time.
  * @param {!Element} iframe
  * @param {string} typeOfMessage
  * @param {boolean=} opt_is3P
  * @return {!Promise}
  */
 export function listenForOncePromise(iframe, typeOfMessage, opt_is3P) {
-  const promise = new Promise(resolve => {
+  return new Promise(resolve => {
     listenForOnce(iframe, typeOfMessage, resolve, opt_is3P);
   });
-  return promise;
 }
 
 /**

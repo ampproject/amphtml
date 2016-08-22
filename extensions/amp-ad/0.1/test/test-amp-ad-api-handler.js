@@ -37,7 +37,7 @@ describe('amp-ad-api-handler', () => {
     apiHandler = null;
   });
 
-  describe('startUp test', () => {
+  describe('iframe that is initialized by startUp()', () => {
     let iframe;
     let startUpPromise;
     const beforeAttachedToDom = element => {
@@ -51,30 +51,25 @@ describe('amp-ad-api-handler', () => {
         });
     });
 
-    it('embed-state API', () => {
-      const embedStateData = {
+    it('should be able to use embed-state API', () => {
+      iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
         type: 'send-embed-state',
-      };
-
-      const embedStateDataReply = 'amp-' + JSON.stringify({
+      });
+      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         inViewport: false,
         pageHidden: false,
         type: 'embed-state',
         sentinel: 'amp3ptest' + testIndex,
-      });
-
-      iframe.postMessageToParent(embedStateData);
-      return iframe.expectMessageFromParent(embedStateDataReply);
+      }));
     });
 
-    it('render-start API resolve promise', () => {
-      const renderStartData = {
+    it('should resolve startUp() when render-start API is called', () => {
+      expect(iframe.style.visibility).to.equal('hidden');
+      iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
         type: 'render-start',
-      };
-      expect(iframe.style.visibility).to.equal('hidden');
-      iframe.postMessageToParent(renderStartData);
+      });
       return startUpPromise.then(() => {
         expect(iframe.style.visibility).to.equal('');
       });
