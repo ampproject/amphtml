@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateDataExists, checkData, loadScript} from '../3p/3p';
+import {validateData, loadScript} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 import {rethrowAsync} from '../src/log';
 
@@ -23,11 +23,10 @@ import {rethrowAsync} from '../src/log';
  * @param {!Object} data
  */
 export function yieldbot(global, data) {
-  checkData(data, ['psn', 'ybSlot', 'slot',
-                   'targeting', 'categoryExclusions',
-                   'tagForChildDirectedTreatment', 'cookieOptions',
-                   'overrideWidth', 'overrideHeight']);
-  validateDataExists(data, ['psn', 'ybSlot', 'slot']);
+  validateData(data, ['psn', 'ybSlot', 'slot'], [
+    'targeting', 'categoryExclusions', 'tagForChildDirectedTreatment',
+    'cookieOptions','overrideWidth', 'overrideHeight',
+  ]);
 
   global.ybotq = global.ybotq || [];
 

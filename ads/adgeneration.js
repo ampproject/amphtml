@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adgeneration(global, data) {
-  // Allow fields
-  checkData(data, ['id', 'targetid', 'displayid', 'adtype', 'async', 'option']);
-
-  // Validate empty fields
-  validateDataExists(data, ['id']);
+  validateData(data, ['id'],
+      ['targetid', 'displayid', 'adtype', 'async', 'option']);
 
   // URL encoding
   const option = data.option ? encodeQueryValue(data.option) : null;
