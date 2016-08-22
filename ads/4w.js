@@ -28,12 +28,16 @@ export function neo4w(global, data) {
 
   $neodata._4wRecom = {};
   $neodata._4wRecom.Q = [];
-  $neodata._4wRecom.amp = data;
+  $neodata._4wRecom.T = {};
+  $neodata._4wRecom.T.setTaxonomy=void(0);
+  $neodata._4wRecom.B = {};
+  $neodata._4wRecom.B.addPosition=void(0);
 
+  $neodata._4wRecom.amp = data;
   $neodata._4wRecom.Q.push(['setup', function() {
-    $neodata._4wRecom.T.setTaxonomy(data.taxonomy);
+    taxonomy=data.taxonomy;
+    $neodata._4wRecom.T.setTaxonomy(taxonomy);
     $neodata._4wRecom.B.addPosition(data.pid, 'c');
   }]);
-
   loadScript($neodata, 'https://js-ssl.neodatagroup.com/4wr.js');
 }

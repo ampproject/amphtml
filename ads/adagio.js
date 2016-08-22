@@ -28,6 +28,9 @@ export function adagio(global, data) {
 
   $neodata._adagio = {};
   $neodata._adagio.Q = [];
+  $neodata._adagio.B = {};
+  $neodata._adagio.B.setSid=void(0);
+  $neodata._adagio.B.addBanner=void(0);
   $neodata._adagio.amp = data;
 
   $neodata._adagio.Q.push(['setup', function() {
