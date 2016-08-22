@@ -103,6 +103,7 @@ function buildExtensions(options) {
   buildExtension('amp-viz-vega', '0.1', true, options);
   buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
+  buildExtension('amp-timeline', '0.1', true, options);
 }
 
 

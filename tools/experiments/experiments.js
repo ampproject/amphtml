@@ -164,6 +164,14 @@ const EXPERIMENTS = [
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
+
+  // Amp Timeline
+  {
+    id: 'amp-timeline',
+    name: 'Amp Timeline',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-timeline/amp-timeline.md',
+  },
 ];
 
 if (getMode().localDev) {
