@@ -98,6 +98,7 @@ Current list of extended components by category:
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md) | Allows for a “lightbox” or similar experience. |
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
 | [`amp-sidebar`](amp-sidebar/amp-sidebar.md) | Provides a way to display meta content intended for temporary access such as navigation, links, buttons, menus. |
+| [`amp-sticky-ad`](amp-sticky-ad/amp-sticky-ad.md) | Provides a way to display and stick ad content at the bottom of the page.|
 | [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
 
 ### Scripts
