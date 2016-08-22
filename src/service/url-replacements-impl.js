@@ -22,6 +22,7 @@ import {dev, user, rethrowAsync} from '../log';
 import {documentInfoForDoc} from '../document-info';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
+import {isFiniteNumber} from '../types';
 import {parseUrl, removeFragment, parseQueryString} from '../url';
 import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
@@ -457,7 +458,7 @@ export class UrlReplacements {
         ? timingInfo[startEvent]
         : timingInfo[endEvent] - timingInfo[startEvent];
 
-    if (isNaN(metric) || metric == Infinity) {
+    if (!isFiniteNumber(metric)) {
       // The metric is not supported.
       return Promise.resolve();
     } else if (metric < 0) {
@@ -466,7 +467,7 @@ export class UrlReplacements {
         metric = (endEvent === undefined)
             ? timingInfo[startEvent]
             : timingInfo[endEvent] - timingInfo[startEvent];
-        return (isNaN(metric) || metric == Infinity || metric < 0)
+        return (!isFiniteNumber(metric) || metric < 0)
             ? undefined
             : String(metric);
       });
