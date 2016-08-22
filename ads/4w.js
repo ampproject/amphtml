@@ -25,7 +25,7 @@ export function neo4w(global, data) {
   checkData(data, ['pid', 'taxonomy']);
 
   const $neodata = global;
-  const taxonomy=data['taxonomy'];
+  const taxonomy = data['taxonomy'];
   $neodata._4wRecom = {};
   $neodata._4wRecom.Q = [];
   $neodata._4wRecom.T = {};
