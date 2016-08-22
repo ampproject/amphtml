@@ -37,5 +37,5 @@ export function adagio(global, data) {
     $neodata._adagio.B.setSid(data.sid);
     $neodata._adagio.B.addBanner(data.loc, 'c');
   }]);
-  loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
+ // loadScript($neodata, 'https://js-ssl.neodatagroup.com/adagio_amp.js');
 }
