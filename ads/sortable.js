@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function sortable(global, data) {
-  validateDataExists(data, ['site', 'name']);
+  validateData(data, ['site', 'name']);
 
   const slot = global.document.getElementById('c');
   const ad = global.document.createElement('div');
@@ -29,5 +29,6 @@ export function sortable(global, data) {
   ad.setAttribute('data-ad-name', data.name);
   ad.setAttribute('data-ad-size', data.width + 'x' + data.height);
   slot.appendChild(ad);
-  loadScript(global, 'https://tags-cdn.deployads.com/a/' + encodeURIComponent(data.site) + '.js');
+  loadScript(global, 'https://tags-cdn.deployads.com/a/'
+      + encodeURIComponent(data.site) + '.js');
 }

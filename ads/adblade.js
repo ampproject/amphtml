@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 const adbladeFields = ['width', 'height', 'cid'];
 const adbladeHostname = 'web.adblade.com';
 const industrybrainsHostname = 'web.industrybrains.com';
 
 function addAdiantUnit(hostname, global, data) {
-  checkData(data, adbladeFields);
-  validateDataExists(data, adbladeFields);
+  validateData(data, adbladeFields, []);
 
   // create a data element so our script knows what to do
   const ins = global.document.createElement('ins');

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {checkData} from '../../3p/3p';
+import {validateData} from '../../3p/3p';
 
 /**
  * Make an adsense iframe.
@@ -22,8 +22,10 @@ import {checkData} from '../../3p/3p';
  * @param {!Object} data
  */
 export function adsense(global, data) {
-  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin',
-                   'experimentId']);
+  // TODO: check mandatory fields
+  validateData(data, [],
+      ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin', 'experimentId']);
+
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {

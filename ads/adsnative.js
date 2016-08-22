@@ -14,37 +14,18 @@
  * limitations under the License.
  */
 
-
-import {
-  validateDataExists,
-  writeScript,
-  checkData,
-} from '../3p/3p';
-
+import {writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsnative(global, data) {
-
-  // warn optional fields
-  checkData(data, [
-    'ankv',
-    'ancat',
-    'annid',
-    'anwid',
-    'antid',
-    'anapiid',
-  ]);
-
-  // error on mandatory fields
   try {
-    validateDataExists(data, ['anapiid']);
+    validateData(data, ['anapiid'], ['ankv', 'ancat', 'antid']);
   } catch (e) {
-    validateDataExists(data, ['annid', 'anwid']);
+    validateData(data, ['annid', 'anwid'], ['ankv', 'ancat', 'antid']);
   }
-
 
   // convert string to object
   let actualkv = undefined;
