@@ -30,7 +30,6 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {user} from '../src/log';
-import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -110,15 +109,8 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
-const data = parseFragment(location.hash);
-window.context = data._context;
-
-if (getMode().localDev || getMode().test) {
-  register('_ping_', function(win, data) {
-    win.document.getElementById('c').textContent = data.ping;
-  });
-  register('fakead3p', fakead3p);
-}
+// used for extracting fakead3p from production code.
+const IS_DEV = true;
 
 // Keep the list in alphabetic order
 register('a9', a9);
@@ -184,7 +176,9 @@ register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
 
-
+register('_ping_', function(win, data) {
+  win.document.getElementById('c').textContent = data.ping;
+});
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -286,6 +280,8 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
+    const data = parseFragment(location.hash);
+    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -305,6 +301,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
+
+    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
+      register('fakead3p', fakead3p);
+    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
