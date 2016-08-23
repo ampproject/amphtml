@@ -160,7 +160,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     setupA2AListener(this.win);
 
-    /** @private {string=} */
+    /** @private {string|undefined} */
     this.container_ = undefined;
   }
 

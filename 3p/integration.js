@@ -113,7 +113,7 @@ const AMP_EMBED_ALLOWED = {
 const data = parseFragment(location.hash);
 window.context = data._context;
 
-if (getMode().localDev) {
+if (getMode().localDev || getMode().test) {
   register('_ping_', function(win, data) {
     win.document.getElementById('c').textContent = data.ping;
   });
