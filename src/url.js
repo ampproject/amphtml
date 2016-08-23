@@ -38,7 +38,7 @@ let cache;
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
 /** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
  * @typedef {({
