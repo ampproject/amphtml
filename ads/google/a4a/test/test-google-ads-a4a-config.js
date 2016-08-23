@@ -126,7 +126,7 @@ describe('a4a_config', () => {
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand, 'rand called ever').to.not.be.called;
+    expect(rand).to.not.be.called;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
   });
 
@@ -138,7 +138,7 @@ describe('a4a_config', () => {
     expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
         INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
     expect(win.document.cookie).to.be.null;
-    expect(rand, 'rand called ever').to.not.be.called;
+    expect(rand).to.not.be.called;
     expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
   });
 
@@ -230,7 +230,7 @@ describe('a4a_config', () => {
           expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
               INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
           expect(win.document.cookie).to.be.null;
-          expect(rand, 'rand never called').to.not.be.called;
+          expect(rand).to.not.be.called;
           expect(element.getAttribute('data-experiment-id')).to.equal(
               EXTERNAL_BRANCHES.experiment);
         });
@@ -246,7 +246,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand never called').to.not.be.called;
+      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           EXTERNAL_BRANCHES.control);
     });
@@ -262,7 +262,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.false;
       expect(win.document.cookie).to.be.null;
-      expect(rand.called, 'rand called at least once').to.be.false;
+      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.not.be.ok;
     });
 
@@ -277,7 +277,7 @@ describe('a4a_config', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand never called').to.not.be.called;
+      expect(rand).to.not.be.called;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
       // And it shouldn't be in any *other* experiments.
@@ -357,7 +357,7 @@ describe('a4a_config hash param parsing', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand, 'rand never called').to.not.be.called;
+      expect(rand).to.not.be.called;
       expect(isInManualExperiment(element), 'element in manual experiment')
           .to.be.true;
       // And it shouldn't be in any *other* experiments.
@@ -382,7 +382,7 @@ describe('a4a_config hash param parsing', () => {
       expect(googleAdsIsA4AEnabled(win, element, EXP_ID, EXTERNAL_BRANCHES,
           INTERNAL_BRANCHES), 'googleAdsIsA4AEnabled').to.be.true;
       expect(win.document.cookie).to.be.null;
-      expect(rand.called, 'rand called at least once').to.be.false;
+      expect(rand).to.not.be.called;
       expect(element.getAttribute('data-experiment-id')).to.equal(
           EXTERNAL_BRANCHES.experiment);
     });
