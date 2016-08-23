@@ -15,7 +15,7 @@
  */
 
 import {makeCorrelator} from './correlator';
-import {checkData, loadScript} from '../../3p/3p';
+import {validateData, loadScript} from '../../3p/3p';
 
 /**
  * @enum {number}
@@ -35,7 +35,8 @@ const GladeExperiment = {
 export function doubleclick(global, data) {
   const experimentFraction = 0.1;
 
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',

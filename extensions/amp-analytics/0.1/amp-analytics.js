@@ -380,9 +380,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     // Add any given extraUrlParams as query string param
     if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
-      const params = {};
+      const params = Object.create(null);
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
+      for (const k in params) {
+        params[k] = this.expandTemplate_(params[k], trigger, event);
+      }
       if (request.indexOf('${extraUrlParams}') >= 0) {
         const extraUrlParams = addParamsToUrl('', params).substr(1);
         request = request.replace('${extraUrlParams}', extraUrlParams);

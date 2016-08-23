@@ -17,6 +17,7 @@
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
+import {installPerformanceService} from '../../src/service/performance-impl';
 import {resourcesFor} from '../../src/resources';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
@@ -203,6 +204,7 @@ describe('CustomElement', () => {
   let testElementGetInsersectionElementLayoutBox;
 
   beforeEach(() => {
+    installPerformanceService(window);
     sandbox = sinon.sandbox.create();
     resourcesMock = sandbox.mock(resources);
     clock = sandbox.useFakeTimers();
@@ -222,6 +224,7 @@ describe('CustomElement', () => {
   });
 
   afterEach(() => {
+    resetServiceForTesting(window, 'performance');
     resourcesMock.verify();
     sandbox.restore();
   });
@@ -1161,6 +1164,15 @@ describe('CustomElement Service Elements', () => {
     element.appendChild(createWithAttr('placeholder'));
     const placeholder2 = element.appendChild(createWithAttr('placeholder'));
     expect(element.getPlaceholder()).to.equal(placeholder2);
+  });
+
+  it('getPlaceholder should blacklist some tags', () => {
+    const placeholder1 = element.appendChild(createWithAttr('placeholder'));
+    const input = document.createElement('input');
+    input.setAttribute('placeholder', '');
+    element.appendChild(input);
+    expect(element.getPlaceholder()).to.not.equal(input);
+    expect(element.getPlaceholder()).to.equal(placeholder1);
   });
 
   it('togglePlaceholder should do nothing when no placeholder is found', () => {

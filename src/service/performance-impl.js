@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {documentInfoFor} from '../document-info';
+import {documentInfoForDoc} from '../document-info';
 import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
@@ -121,6 +121,11 @@ export class Performance {
     // Can be null which would mean this AMP page is not embedded
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
+
+    this.viewer_.whenFirstVisible().then(() => {
+      this.tick('ofv');
+      this.flush();
+    });
 
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
@@ -330,7 +335,7 @@ export class Performance {
   setDocumentInfoParams_() {
     return this.whenViewportLayoutComplete_().then(() => {
       const params = Object.create(null);
-      const sourceUrl = documentInfoFor(this.win).sourceUrl
+      const sourceUrl = documentInfoForDoc(this.win.document).sourceUrl
           .replace(/#.*/, '');
       params['sourceUrl'] = sourceUrl;
 

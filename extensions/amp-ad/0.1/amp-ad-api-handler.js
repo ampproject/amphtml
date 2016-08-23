@@ -20,6 +20,7 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
+  listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
 import {IntersectionObserver} from '../../../src/intersection-observer';
@@ -59,6 +60,9 @@ export class AmpAdApiHandler {
 
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
+
+    /** @private {!Promise|null} */
+    this.renderStartPromise_ = null;
   }
 
   /**
@@ -121,21 +125,22 @@ export class AmpAdApiHandler {
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
-    listenForOnce(this.iframe_, 'render-start', () => {
-      if (!this.iframe_) {
-        return;
-      }
-      if (this.baseInstance_.renderStartResolve_) {
-        this.baseInstance_.renderStartResolve_();
-        this.baseInstance_.renderStartResolve_ = null;
-      }
-      this.iframe_.style.visibility = '';
-    }, this.is3p_);
+
+    this.renderStartPromise_ =
+        listenForOncePromise(this.iframe_, 'render-start', this.is3p_);
+
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
     this.element_.appendChild(this.iframe_);
-    return loadPromise(this.iframe_);
+    return loadPromise(this.iframe_).then(() => {
+      return this.renderStartPromise_.then(() => {
+        //TODO: add performance reporting
+        if (this.iframe_) {
+          this.iframe_.style.visibility = '';
+        }
+      });
+    });
   }
 
   /** @override  */

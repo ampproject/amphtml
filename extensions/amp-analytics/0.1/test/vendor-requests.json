@@ -1,4 +1,10 @@
 {
+  "afsanalytics": {
+   "host": "//$server.afsanalytics.com",
+   "base": "//$server.afsanalytics.com/cgi_bin/",
+   "pageview": "//$server.afsanalytics.com/cgi_bin/connect.cgi?usr=$websiteidPauto&js=1&amp=1&title=_title_&url=_canonical_url_&refer=_document_referrer_&resolution=_screen_width_x_screen_height_&color=_screen_color_depth_&Tips=_random_",
+   "click":   "//$server.afsanalytics.com/cgi_bin/click.cgi?usr=$websiteid&event=$event&exit=$clicklabel"
+  },
   "atinternet": {
     "base": "https://$log$domain/hit.xiti?s=$site&ts=_timestamp_&r=_screen_width_x_screen_height_x_screen_color_depth_&re=_available_screen_width_x_available_screen_height_",
     "suffix": "&medium=amp&$extraUrlParams&ref=_document_referrer_",

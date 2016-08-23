@@ -103,6 +103,9 @@ function normalizeRows(rows) {
   // normalize amp-shadow.js
   normalizeRow(rows, 'shadow-v0.js', 'amp-shadow.js', true);
 
+  // normalize sw.js
+  normalizeRow(rows, 'sw.js', 'sw.max.js', true);
+
   // normalize extensions
   var curName = null;
   var i = rows.length;

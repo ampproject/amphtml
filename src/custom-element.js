@@ -1131,7 +1131,13 @@ function createBaseAmpElementProto(win) {
    * @package @final @this {!Element}
    */
   ElementProto.getPlaceholder = function() {
-    return dom.lastChildElementByAttr(this, 'placeholder');
+    return dom.lastChildElement(this, el => {
+      return el.hasAttribute('placeholder') &&
+          // Blacklist elements that has a native placeholder property
+          // like input and textarea. These are not allowed to be AMP
+          // placeholders.
+          !('placeholder' in el);
+    });
   };
 
   /**

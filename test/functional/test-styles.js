@@ -16,8 +16,10 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {getStyle} from '../../src/style';
+import {installPerformanceService} from '../../src/service/performance-impl';
+import {resetServiceForTesting} from '../../src/service';
 import * as sinon from 'sinon';
-import * as styles from '../../src/styles';
+import * as styles from '../../src/style-installer';
 
 
 describe('Styles', () => {
@@ -27,9 +29,11 @@ describe('Styles', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    installPerformanceService(document.defaultView);
   });
 
   afterEach(() => {
+    resetServiceForTesting(document.defaultView, 'performance');
     sandbox.restore();
   });
 
@@ -80,7 +84,7 @@ describe('Styles', () => {
     style.setAttribute('amp-runtime', '');
     style.textContent = '/*runtime*/';
     parentRoot.appendChild(style);
-    const ampdoc = new AmpDocShadow(window, parentRoot);
+    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
     const shadowRoot = document.createElement('div');
     styles.copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
 
