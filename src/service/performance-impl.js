@@ -122,6 +122,11 @@ export class Performance {
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
 
+    this.viewer_.whenFirstVisible().then(() => {
+      this.tick('ofv');
+      this.flush();
+    });
+
     // We don't check `isPerformanceTrackingOn` here since there are some
     // events that we call on the viewer even though performance tracking
     // is off we only need to know if the AMP page has a messaging

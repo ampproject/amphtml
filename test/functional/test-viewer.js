@@ -17,6 +17,8 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platformFor} from '../../src/platform';
+import {installPerformanceService} from '../../src/service/performance-impl';
+import {resetServiceForTesting} from '../../src/service';
 import * as sinon from 'sinon';
 
 
@@ -49,6 +51,8 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
+    installPerformanceService(windowApi);
+    installPerformanceService(window);
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
@@ -79,6 +83,8 @@ describe('Viewer', () => {
   });
 
   afterEach(() => {
+    resetServiceForTesting(windowApi, 'performance');
+    resetServiceForTesting(window, 'performance');
     windowMock.verify();
     sandbox.restore();
   });
