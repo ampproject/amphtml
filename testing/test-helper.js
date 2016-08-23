@@ -25,20 +25,3 @@ export function stubService(sandbox, win, serviceId, method) {
   });
   return stub;
 }
-
-/**
- * @param {!Document} doc
- * @param {string} tagName
- * @param {!Object} attributes
- * @return {!Element} created element
- */
-export function createElementWithAttributes(doc, tagName, attributes) {
-  if (!doc) {
-    return;
-  }
-  const element = doc.createElement(tagName);
-  for (const attr in attributes) {
-    element.setAttribute(attr, attributes[attr]);
-  }
-  return element;
-}

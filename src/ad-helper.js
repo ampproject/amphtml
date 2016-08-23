@@ -64,5 +64,4 @@ export function getAdContainer(el) {
       return el.tagName;
     }
   }
-  return 'none';
 }
