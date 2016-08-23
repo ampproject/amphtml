@@ -103,7 +103,7 @@ const cachePromise = caches.open('cdn-js').then(result => {
  * @param {!Request} request
  * @param {string} requestFile the basename of the request
  * @param {string} requestVersion the version of the request
- * @return {!Promise<Response>}
+ * @return {!Promise<!Response>}
  */
 function fetchAndCache(request, requestFile, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
@@ -115,7 +115,7 @@ function fetchAndCache(request, requestFile, requestVersion) {
       // You must clone to prevent double reading the body.
       cache.put(request, response.clone());
 
-      // Store the file version in IndexedDB
+      // Prune old versions of this file from the cache.
       // This intentionally does not block the request resolution to speed
       // things up. This is likely fine since you don't have multiple
       // `<script>`s with the same `src` on a page.
