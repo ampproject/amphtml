@@ -141,6 +141,15 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics, 100);
   }
 
+  function clearIframePing(config) {
+    for (const t in config.triggers) {
+      if (config.triggers[t].iframePing) {
+        config.triggers[t].iframePing = undefined;
+      }
+    }
+    return config;
+  }
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -162,9 +171,7 @@ describe('amp-analytics', function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag({
-              requests: config.requests,
-            });
+            const analytics = getAnalyticsTag(clearIframePing(config));
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
