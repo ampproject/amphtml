@@ -24,13 +24,16 @@ import indexedDBP from '../../third_party/indexed-db-as-promised/index';
  */
 const VERSION = '$internalRuntimeVersion$';
 
+/** @const */
+const TAG = 'cache-service-worker';
+
 /**
- * A list of blacklisted AMP versions that must never be served from cache.
- * Versions may be blacklist if they contain a significant implementation bug.
- * TODO(jridgewell): Figure out how to get this from environment variables so
- * a past version may be blacklist without cutting a new version.
+ * A list of blacklisted AMP versions that must never be served from
+ * cache. Versions may be blacklisted if they contain a significant
+ * implementation bug.
  */
-const BLACKLIST = [];
+const BLACKLIST = (self.AMP_CONFIG &&
+    self.AMP_CONFIG[`${TAG}-blacklist`]) || [];
 
 /**
  * Returns the version of a given versioned JS file.
