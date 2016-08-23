@@ -74,5 +74,38 @@ describe('amp-ad-api-handler', () => {
         expect(iframe.style.visibility).to.equal('');
       });
     });
+
+    it('should be able to use embed-size API, change size deny', () => {
+      iframe.postMessageToParent({
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'embed-size',
+        height: 217,
+        width: 114,
+      });
+      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-denied',
+        sentinel: 'amp3ptest' + testIndex,
+      }));
+    });
+
+    it('should be able to use embed-size API, change size succeed', () => {
+      sandbox.stub(apiHandler.baseInstance_, 'attemptChangeSize', () => {
+        return Promise.resolve();
+      });
+      iframe.postMessageToParent({
+        sentinel: 'amp3ptest' + testIndex,
+        type: 'embed-size',
+        height: 217,
+        width: 114,
+      });
+      return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+        requestedWidth: 114,
+        requestedHeight: 217,
+        type: 'embed-size-changed',
+        sentinel: 'amp3ptest' + testIndex,
+      }));
+    });
   });
 });

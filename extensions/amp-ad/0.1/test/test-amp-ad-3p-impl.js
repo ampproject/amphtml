@@ -128,43 +128,6 @@ function tests(name) {
         });
       });
 
-      it('should listen for resize events from nested frames', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe-resize-outer.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.equal(114);
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.frames[0].postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                width: 114,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
-        });
-      });
-
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
             '/test/fixtures/served/iframe.html';
@@ -200,7 +163,7 @@ function tests(name) {
         });
       });
 
-      it('should try changeSize when updateSize_, and send response', () => {
+      it('should fallback for resize with overflow', () => {
         return getAd({
           width: 100,
           height: 100,
@@ -209,48 +172,11 @@ function tests(name) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           const impl = element.implementation_;
-          const attemptChangeSize = sandbox.stub(impl, 'attemptChangeSize',
-              () => {
-                return Promise.resolve();
-              });
-          const sendEmbedSizeResponseSpy = sandbox.spy(impl.apiHandler_,
-              'sendEmbedSizeResponse_');
-          impl.apiHandler_.updateSize_(217, 114, null, 'test-origin');
-          expect(attemptChangeSize.callCount).to.equal(1);
-          expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-          expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
-          return attemptChangeSize().then(() => {
-            expect(sendEmbedSizeResponseSpy).to.be.calledOnce;
-            expect(sendEmbedSizeResponseSpy.firstCall.args).to.jsonEqual([true,
-                114, 217, null, 'test-origin']);
-          });
-        });
-      });
-
-      it('should send response back when fail to changeSize', () => {
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          const impl = element.implementation_;
-          const attemptChangeSize = sandbox.stub(impl, 'attemptChangeSize',
-              () => {
-                return Promise.reject(new Error('Fake error for testing'));
-              });
-          const sendEmbedSizeResponseSpy = sandbox.spy(impl.apiHandler_,
-              'sendEmbedSizeResponse_');
-          impl.apiHandler_.updateSize_(217, 114, null, 'test-origin');
-          expect(attemptChangeSize.callCount).to.equal(1);
-          expect(attemptChangeSize.firstCall.args[0]).to.equal(217);
-          expect(attemptChangeSize.firstCall.args[1]).to.equal(114);
-          return attemptChangeSize().catch(() => {
-            expect(sendEmbedSizeResponseSpy).to.be.calledOnce;
-            expect(sendEmbedSizeResponseSpy.firstCall.args).to
-                .jsonEqual([false, 114, 217, null, 'test-origin']);
-          });
+          const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
+          impl.apiHandler_.updateSize_(217, 114);
+          expect(attemptChangeSizeSpy.callCount).to.equal(1);
+          expect(attemptChangeSizeSpy.firstCall.args[0]).to.equal(217);
+          expect(attemptChangeSizeSpy.firstCall.args[1]).to.equal(114);
         });
       });
 
