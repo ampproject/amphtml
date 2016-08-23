@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// adagio
+// adagio js
 import {loadScript, checkData} from '../3p/3p';
 
 /**
