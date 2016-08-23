@@ -16,7 +16,6 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import urls from '../config';
-import indexedDBP from '../../third_party/indexed-db-as-promised/index';
 
 /**
  * The SW's current version.
@@ -88,15 +87,6 @@ const clientsMap = Object.create(null);
 let cache;
 
 /**
- * A (wrapped) IndexedDB Database, where we record which versions of a file
- * have been cached. Used to determine if we have another version of the same
- * file cached when we miss.
- *
- * @type {../../third_party/indexed-db-as-promised/classes/database.Database}
- */
-let db;
-
-/**
  * A promise to open up our CDN JS cache, which will be resolved before any
  * requests are intercepted by the SW.
  *
@@ -107,36 +97,15 @@ const cachePromise = caches.open('cdn-js').then(result => {
 });
 
 /**
- * A promise to open up our Indexed DB database, which will be resolved before
- * any requests are intercepted by the SW.
- *
- * @type {!Promise}
- */
-const dbPromise = Promise.resolve(indexedDBP.open('cdn-js', 1, {
-  upgrade(db, event) {
-    const oldVersion = event.oldVersion;
-    // Do we need to create our database?
-    if (oldVersion == 0) {
-      const files = db.createObjectStore('js-files', {autoIncrement: true});
-      files.createIndex('files', 'file');
-      files.createIndex('fileVersions', ['file', 'version']);
-    }
-  },
-}).then(result => {
-  db = result;
-}));
-
-/**
  * Fetches the request, and stores it in the cache. Since we only store one
  * version of each file, we'll prune all older versions after we cache this.
  *
  * @param {!Request} request
+ * @param {string} requestFile the basename of the request
+ * @param {string} requestVersion the version of the request
+ * @return {!Promise<!Response>}
  */
-function fetchAndCache(request) {
-  const url = request.url;
-  const requestFile = basename(url);
-  const requestVersion = ampVersion(url);
-
+function fetchAndCache(request, requestFile, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
 
@@ -146,45 +115,23 @@ function fetchAndCache(request) {
       // You must clone to prevent double reading the body.
       cache.put(request, response.clone());
 
-      // Store the file version in IndexedDB
+      // Prune old versions of this file from the cache.
       // This intentionally does not block the request resolution to speed
       // things up. This is likely fine since you don't have multiple
       // `<script>`s with the same `src` on a page.
-      db.transaction('js-files', 'readwrite').run(transaction => {
-        const files = transaction.objectStore('js-files');
-        // Push the item into our cached files. We do this first so it might be
-        // caught if the user refreshes quickly.
-        return files.add({
-          file: requestFile,
-          version: requestVersion,
-        }).then(key => {
-          // Now, let's prune all the older versions.
-          return files.index('files').openCursor(requestFile).while(cursor => {
-            // Don't prune the file-version we just added.
-            if (cursor.primaryKey === key) {
-              return '';
-            }
-
-            // We'll want to remove this from the cache, too.
-            const version = cursor.value.version;
-            cursor.delete();
-            return version;
-          });
-        });
-      }).then(removedVersions => {
-        removedVersions.forEach(version => {
-          // Is the return value for the file-version we added (we explicitly
-          // returned an empty string for it)?
-          if (!version) {
-            return;
+      cache.keys().then(requests => {
+        for (let i = 0; i < requests.length; i++) {
+          const request = requests[i];
+          const url = request.url;
+          if (requestFile !== basename(url)) {
+            continue;
+          }
+          if (requestVersion === ampVersion(url)) {
+            continue;
           }
 
-          const deleteUrl = versionedUrl(url, version);
-          // We only want to delete RTV files.
-          if (url !== deleteUrl) {
-            cache.delete(deleteUrl);
-          }
-        });
+          cache.delete(request);
+        }
       });
     }
 
@@ -200,42 +147,23 @@ function fetchAndCache(request) {
  *  - An empty string, meaning we have nothing cached for this file.
  *
  * @param {string} requestFile
- * @param {string} requestVersion
- * @return {!Promise<string>} Not really a promise, but a Promise-like.
+ * @return {!Promise<string>}
  */
-function getCachedVersion(requestFile, requestVersion) {
-  return db.transaction('js-files', 'readonly').run(transaction => {
-    const files = transaction.objectStore('js-files');
-    const id = [requestFile, requestVersion];
-
-    // First check if we have this exact file-version.
-    return files.index('fileVersions').get(id).then(file => {
-      // We have it cached!
-      if (file) {
-        return file.version;
+function getCachedVersion(requestFile) {
+  return cache.keys().then(requests => {
+    for (let i = 0; i < requests.length; i++) {
+      const url = requests[i].url;
+      if (requestFile === basename(url)) {
+        return ampVersion(url);
       }
+    }
 
-      // Do we have any versions of this file cached?
-      // To get the first cached file, we must open a cursor. We won't actually
-      // iterate past the first match, though, since we do not advance the
-      // cursor.
-      return files.index('files').openCursor(requestFile).iterate(cursor => {
-        return cursor.value.version;
-      }).then(versions => {
-        // We have a version in cache (cause we iterated over it)!
-        if (versions.length) {
-          return versions[0];
-        }
-
-        // This is the first request we've seen for this file.
-        return '';
-      });
-    });
+    return '';
   });
 }
 
 self.addEventListener('install', install => {
-  install.waitUntil(Promise.all([cachePromise, dbPromise]));
+  install.waitUntil(cachePromise);
 });
 
 // Setup the Fetch listener
@@ -256,9 +184,9 @@ self.addEventListener('fetch', event => {
   const requestFile = basename(url);
   const requestVersion = ampVersion(url);
 
-  // Wait for the cachePromise and dbPromise to resolve. This is necessary
+  // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
-  const response = Promise.all([cachePromise, dbPromise]).then(() => {
+  const response = cachePromise.then(() => {
     // If we already registered this client, we must always use the same
     // version.
     if (clientsMap[clientId]) {
@@ -266,7 +194,7 @@ self.addEventListener('fetch', event => {
     }
 
     // If not, do we have this version cached?
-    return getCachedVersion(requestFile, requestVersion).then(version => {
+    return getCachedVersion(requestFile).then(version => {
       // We have a cached version! Serve it up!
       if (version) {
         return version;
@@ -297,14 +225,14 @@ self.addEventListener('fetch', event => {
         // they requested this exact version; If we served an old version,
         // let's get the new one.
         if (version !== requestVersion && requestVersion.endsWith(VERSION)) {
-          fetchAndCache(request);
+          fetchAndCache(request, requestFile, requestVersion);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchAndCache(versionedRequest);
+      return fetchAndCache(versionedRequest, requestFile, version);
     });
   });
 
