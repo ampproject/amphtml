@@ -22,7 +22,7 @@ import {loadScript, checkData} from '../3p/3p';
  */
 export function adagio(global, data) {
 
-  checkData(data, ['sid', 'loc']);
+  //checkData(data, ['sid', 'loc']);
 
   const $neodata = global;
 

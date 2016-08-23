@@ -22,7 +22,7 @@ import {loadScript, checkData} from '../3p/3p';
  */
 export function neo4wPPN(global, data) {
 
-  checkData(data, ['loc']);
+//  checkData(data, ['loc']);
 
   const $neodata = global;
 

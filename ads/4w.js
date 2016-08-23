@@ -22,7 +22,7 @@ import {loadScript, checkData} from '../3p/3p';
  */
 export function neo4w(global, data) {
 
-  checkData(data, ['pid', 'taxonomy']);
+  //checkData(data, ['pid', 'taxonomy']);
 
   const $neodata = global;
   const taxonomy = data['taxonomy'];
