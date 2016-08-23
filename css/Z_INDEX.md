@@ -14,8 +14,8 @@ amp-image-lightbox                          |   1000      |   extensions/amp-ima
 amp-live-list > [update]                    |   1000      |   extensions/amp-live-list/0.1/amp-live-list.css
 amp-user-notification                       |   1000      |   extensions/amp-user-notification/0.1/amp-user-notification.css
 .-amp-image-lightbox-trans                  |   1001      |   extensions/amp-image-lightbox/0.1/amp-image-lightbox.css
+.-amp-sidebar-mask                          |   9998      |   extensions/amp-sidebar/0.1/amp-sidebar.css
+amp-sidebar                                 |   9999      |   extensions/amp-sidebar/0.1/amp-sidebar.css
 .-amp-lightbox-viewer-mask                  |  2147483644 |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lightboxed                             |  2147483645 |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
 .amp-lightbox-viewer-button                 |  2147483646 |   extensions/amp-lightbox-viewer/0.1/amp-lightbox-viewer.css
-.-amp-sidebar-mask                          |   9998      |   extensions/amp-sidebar/0.1/amp-sidebar.css
-amp-sidebar                                 |   9999      |   extensions/amp-sidebar/0.1/amp-sidebar.css

@@ -66,6 +66,8 @@
 </head>
 <body>
   <script>
+    // Enable amp-lightbox-viewer experiment automatically if it is not enabled.
+    // Disable amp-lightbox-viewer-auto experiment if it is enabled.
     setTimeout(function() {
       if (!AMP.isExperimentOn('amp-lightbox-viewer') || AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
         if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
@@ -84,7 +86,7 @@
   <h1>Lightbox Viewer (Opt-in)</h1>
 
   <h2>Image - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/F50057?text=1" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image - Lightboxable no Tap</h2>
   <amp-img lightbox src="http://placehold.it/800x600/651FFF?text=2" layout="responsive" width="8" height="6"></amp-img>
@@ -93,21 +95,21 @@
   <amp-img src="http://placehold.it/800x600/FFC400?text=Not Lightboxable" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Image Fixed Size - Lightboxable with Tap</h2>
-  <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
+  <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/200x200/FF3D00?text=3" layout="fixed" width="200" height="200"></amp-img>
 
   <h2>Youtube - Lightboxable</h3>
-  <button on="tap:myLightboxViewer.open(id='yt')">Open video in Lightbox</button>
+  <button on="tap:myLightboxViewer.activate(id='yt')">Open video in Lightbox</button>
   <amp-youtube id='yt' lightbox data-videoid="mGENRKrdoGY" width="480" height="270" layout="responsive"></amp-youtube>
 
   <h2>Youtube - Not Lightboxable</h3>
   <amp-youtube data-videoid="rddtw6uMNoo" width="480" height="270" layout="responsive"></amp-youtube>
 
   <h2>Twitter Lightboxable</h2>
-  <button on="tap:myLightboxViewer.open(id='twit')">Open Twitter in Lightbox</button>
+  <button on="tap:myLightboxViewer.activate(id='twit')">Open Twitter in Lightbox</button>
   <amp-twitter lightbox id='twit' data-tweetID="585110598171631616" width=486 height=256 layout="responsive"></amp-twitter>
 
   <h2>UL/LI - Lightboxable with Tap</h2>
-  <ul lightbox on="tap:myLightboxViewer.open">
+  <ul lightbox on="tap:myLightboxViewer.activate">
     <li>Apple</li>
     <li>Beer</li>
     <li>Milk</li>
@@ -115,13 +117,13 @@
   </ul>
 
   <h2>Blockquote - Lightboxable with Tap</h2>
-  <blockquote lightbox on="tap:myLightboxViewer.open">
+  <blockquote lightbox on="tap:myLightboxViewer.activate">
     Some say that his tears are adhesive, and that if he caught fire, he'd burn for a thousand days... all we know is, he's called the Stig
   </blockquote>
 
   <h2>Image inside a different stacking context</h2>
   <div class="create-new-stacking-context">
-    <amp-img lightbox on="tap:myLightboxViewer.open" src="http://placehold.it/800x600/FF9100?text=Stacking Context Test" layout="responsive" width="8" height="6"></amp-img>
+    <amp-img lightbox on="tap:myLightboxViewer.activate" src="http://placehold.it/800x600/FF9100?text=Stacking Context Test" layout="responsive" width="8" height="6"></amp-img>
   </div>
 </body>
 </html>

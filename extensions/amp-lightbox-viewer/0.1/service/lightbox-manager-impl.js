@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {whenDocumentReady} from '../document-ready';
-import {isExperimentOn} from '../experiments';
+import {whenDocumentReady} from '../../../../src/document-ready';
+import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
-import {dev} from '../log';
-import {fromClassForDoc} from '../service';
-import {timerFor} from '../timer';
+import {dev} from '../../../../src/log';
+import {fromClassForDoc} from '../../../../src/service';
+import {timerFor} from '../../../../src/timer';
 
 
 /**
@@ -46,13 +46,13 @@ class LightboxManager {
 
     /**
      * Ordered list of lightboxable elements
-     * @private {!Array<!Element>}
+     * @private {?Array<!Element>}
      **/
     this.elements_ = null;
 
     /**
      * Cache for the `maybeInit()` call.
-     * @private {Promise}
+     * @private {?Promise}
      **/
     this.initPromise_ = null;
 
@@ -68,14 +68,14 @@ class LightboxManager {
   }
 
   /**
-   * Returns the next lightboxable element after `curElem` or `null` if there
+   * Returns the next lightboxable element after `curElement` or `null` if there
    * is no next element.
-   * @param {!Element} curElem Current element.
-   * @return {!Promise<Element>} Next element or null
+   * @param {!Element} curElement Current element.
+   * @return {!Promise<?Element>} Next element or null
    */
-  getNext(curElem) {
+  getNext(curElement) {
     return this.maybeInit_().then(() => {
-      const curIndex = this.elements_.indexOf(curElem);
+      const curIndex = this.elements_.indexOf(curElement);
       dev().assert(curIndex != -1);
       if (curIndex == this.elements_.length - 1) {
         return null;
@@ -85,41 +85,40 @@ class LightboxManager {
   }
 
   /**
-   * Returns the previous lightboxable element before `curElem` or `null` if
+   * Returns the previous lightboxable element before `curElement` or `null` if
    * there is no previous element.
-   * @param {!Element} curElem Current element.
-   * @return {!Promise<Element>} Previous element or null
+   * @param {!Element} curElement Current element.
+   * @return {!Promise<?Element>} Previous element or null
    */
-  getPrevious(curElem) {
+  getPrevious(curElement) {
     return this.maybeInit_().then(() => {
-      const curIndex = this.elements_.indexOf(curElem);
+      const curIndex = this.elements_.indexOf(curElement);
       dev().assert(curIndex != -1);
       if (curIndex == 0) {
         return null;
       }
       return this.elements_[curIndex - 1];
     });
-
   }
 
   /**
-   * Returns whether there is a next lightboxable element after `curElem`
-   * @param {!Element} curElem Current element.
-   * @return {!Promise<boolean>}
+   * Returns whether there is a next lightboxable element after `curElement`
+   * @param {!Element} curElement Current element.
+   * @return {!Promise<!boolean>}
    */
-  hasNext(curElem) {
-    return this.getNext(curElem).then(next => {
+  hasNext(curElement) {
+    return this.getNext(curElement).then(next => {
       return !!next;
     });
   }
 
   /**
-   * Returns whether there is previous lightboxable element before `curElem`
-   * @param {!Element} curElem Current element.
-   * @return {!Promise<boolean>}
+   * Returns whether there is previous lightboxable element before `curElement`
+   * @param {!Element} curElement Current element.
+   * @return {!Promise<!boolean>}
    */
-  hasPrevious(curElem) {
-    return this.getPrevious(curElem).then(prev => {
+  hasPrevious(curElement) {
+    return this.getPrevious(curElement).then(prev => {
       return !!prev;
     });
   }
@@ -154,9 +153,9 @@ class LightboxManager {
       const matches = this.ampdoc_.getRootNode().querySelectorAll('[lightbox]');
       this.elements_ = [];
       for (let i = 0; i < matches.length; i++) {
-        const elem = matches[i];
-        if (elem.getAttribute('lightbox').toLowerCase() != 'none') {
-          this.elements_.push(elem);
+        const element = matches[i];
+        if (element.getAttribute('lightbox').toLowerCase() != 'none') {
+          this.elements_.push(element);
         }
       }
     });

@@ -55,13 +55,13 @@
   clip: none !important;
   transition: none !important;
   will-change: auto !important;
-  -webkit-mask: none !important;
-  -webkit-filter: none !important;
-  -webkit-box-reflect: none !important;
-  -webkit-perspective: none !important;
-  -webkit-transform-style: flat !important;
-  /* TODO(aghassemi): Add MS and Moz support */
+  mask: none !important;
+  filter: none !important;
+  box-reflect: none !important;
+  perspective: none !important;
+  transform-style: flat !important;
 }
+
 :root.-amp-lightboxed-ancestor {
   overflow: hidden !important;
 }
@@ -75,25 +75,30 @@
   right: 0 !important;
   bottom: 0 !important;
   background-image: none !important;
+  /* For now we force a non-transparent shim until we find a good solution
+   * for the background page shifting when items get lightboxed.
+   */
   opacity: 1 !important;
   background-color: rgba(0,0,0, 1) !important;
 }
 
 /* Controls */
 .amp-lightbox-viewer-button-next,
-.amp-lightbox-viewer-button-previous,
+.amp-lightbox-viewer-button-prev,
 .amp-lightbox-viewer-button-close {
   z-index: 2147483646 !important;
   position: fixed !important;
+  cursor: pointer;
   width: 50px;
   height: 50px;
   background-repeat: no-repeat;
   background-position: center center;
   background-color: rgba(0,0,0,0.7);
 }
+
 /* TODO(aghassemi): Polish the controls and add RTL support */
 .amp-lightbox-viewer-button-next,
-.amp-lightbox-viewer-button-previous {
+.amp-lightbox-viewer-button-prev {
   top: 50%;
   transform: translateY(-50%);
 }
@@ -103,7 +108,7 @@
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z" /></svg>');
 }
 
-.amp-lightbox-viewer-button-previous {
+.amp-lightbox-viewer-button-prev {
   left: 0;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" /></svg>');
 }
@@ -118,6 +123,6 @@
   display: none;
 }
 
-.-amp-lightbox-viewer[no-prev] .amp-lightbox-viewer-button-previous {
+.-amp-lightbox-viewer[no-prev] .amp-lightbox-viewer-button-prev {
   display: none;
 }

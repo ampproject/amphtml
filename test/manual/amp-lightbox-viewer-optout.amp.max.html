@@ -17,13 +17,16 @@
 </head>
 <body>
   <script>
+    // Enable the experiments automatically if they are not enabled.
+    // Enable the experiments automatically if they are not enabled.
     setTimeout(function() {
-      if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
-        AMP.toggleExperiment('amp-lightbox-viewer');
-        location.reload();
-      }
-      if (!AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
-        AMP.toggleExperiment('amp-lightbox-viewer-auto');
+      if (!AMP.isExperimentOn('amp-lightbox-viewer') || !AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+        if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
+          AMP.toggleExperiment('amp-lightbox-viewer');
+        }
+        if (!AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
+          AMP.toggleExperiment('amp-lightbox-viewer-auto');
+        }
         location.reload();
       }
     }, 1000);

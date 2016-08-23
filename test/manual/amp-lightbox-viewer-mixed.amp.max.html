@@ -33,6 +33,7 @@
 </head>
 <body>
   <script>
+    // Enable the experiments automatically if they are not enabled.
     setTimeout(function() {
       if (!AMP.isExperimentOn('amp-lightbox-viewer') || !AMP.isExperimentOn('amp-lightbox-viewer-auto')) {
         if (!AMP.isExperimentOn('amp-lightbox-viewer')) {
@@ -56,7 +57,7 @@
   <amp-img lightbox="none" src="http://placehold.it/800x600/FFC400?text=2" layout="responsive" width="8" height="6"></amp-img>
 
   <h2>Blockquote with tap - Manually opted in</h2>
-  <blockquote lightbox on="tap:myLightboxViewer.open">
+  <blockquote lightbox on="tap:myLightboxViewer.activate">
     Some say that his tears are adhesive, and that if he caught fire, he'd burn for a thousand days... all we know is, he's called the Stig
   </blockquote>
 

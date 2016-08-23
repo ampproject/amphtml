@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {extensionsFor} from '../extensions';
-import {elementByTag} from '../dom';
-import {isExperimentOn} from '../experiments';
-import {dev} from '../log';
+import {extensionsFor} from '../../../../src/extensions';
+import {elementByTag, waitForBodyPromise} from '../../../../src/dom';
+import {isExperimentOn} from '../../../../src/experiments';
+import {dev} from '../../../../src/log';
 
 
 const ELIGIBLE_TAGS = [
@@ -61,42 +61,39 @@ export function autoDiscoverLightboxables(ampdoc) {
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
   dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer-auto'));
 
-  return new Promise((resolve, unused) => {
-    const viewerId = maybeInstallLightboxViewer(ampdoc);
-
+  return maybeInstallLightboxViewer(ampdoc).then(viewerId => {
     const tagsQuery = ELIGIBLE_TAGS.join(',');
     const matches = ampdoc.getRootNode().querySelectorAll(tagsQuery);
     for (let i = 0; i < matches.length; i++) {
-      const elem = matches[i];
-      if (!meetsHeuristics(elem)) {
+      const element = matches[i];
+      if (element.hasAttribute('lightbox') || !meetsHeuristics(element)) {
         continue;
       }
-      elem.setAttribute('lightbox', '');
-      if (meetsHeuristicsForTap(elem)) {
-        elem.setAttribute('on', 'tap:' + viewerId + '.open');
+      element.setAttribute('lightbox', '');
+
+      // TODO(aghassemi): This is best to do via default action. E.g. we can add
+      // a tap listener via Action service and invoke lightbox if conditions are
+      // met.
+      if (meetsHeuristicsForTap(element)) {
+        element.setAttribute('on', 'tap:' + viewerId + '.activate');
       }
     }
-    resolve();
   });
 }
 
 /**
  * Decides whether an element meets the heuristics to become lightboxable.
- * @param {!Element} elem
+ * @param {!Element} element
  * @return {boolean}
  */
-function meetsHeuristics(elem) {
-  dev().assert(elem);
+function meetsHeuristics(element) {
+  dev().assert(element);
 
   // TODO(aghassemi): This will become complicated soon, create a pluggable
   // system for this.
 
-  if (elem.hasAttribute('lightbox')) {
-    return false;
-  }
-
-  if (elem.getLayoutBox) {
-    const layoutBox = elem.getLayoutBox();
+  if (element.getLayoutBox) {
+    const layoutBox = element.getLayoutBox();
     if (layoutBox.left < 0 ||
         layoutBox.width < 50 ||
         layoutBox.height < 50
@@ -110,43 +107,44 @@ function meetsHeuristics(elem) {
 /**
  * Decides whether an already lightboxable element should automatically get
  * a tap handler to open in the lightbox.
- * @param {!Element} elem
+ * @param {!Element} element
  * @return {boolean}
  */
-function meetsHeuristicsForTap(elem) {
-  dev().assert(elem);
-  dev().assert(elem.hasAttribute('lightbox'));
+function meetsHeuristicsForTap(element) {
+  dev().assert(element);
+  dev().assert(element.hasAttribute('lightbox'));
 
-  if (!ELIGIBLE_TAP_TAGS[elem.tagName.toLowerCase()]) {
+  if (!ELIGIBLE_TAP_TAGS[element.tagName.toLowerCase()]) {
     return false;
   }
-  if (elem.hasAttribute('on')) {
+  if (element.hasAttribute('on')) {
     return false;
   }
   return true;
 }
 
 /**
- * Tries to find an existing amp-lightbox-viewer, if there is none, it loads
- * the extension and adds a default one.
+ * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
+ * default one.
  * @param {!Element} elem
  * @return {string} Returns the id of the amp-lightbox-viewer.
  */
 function maybeInstallLightboxViewer(ampdoc) {
-  const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
-  if (existingViewer) {
-    if (!existingViewer.id) {
-      existingViewer.id = DEFAULT_VIEWER_ID;
+  // TODO(aghassemi): Use the upcoming ampdoc.waitForBody
+  return waitForBodyPromise(ampdoc.getRootNode()).then(() => {
+    const existingViewer = elementByTag(ampdoc.getRootNode(), VIEWER_TAG);
+    if (existingViewer) {
+      if (!existingViewer.id) {
+        existingViewer.id = DEFAULT_VIEWER_ID;
+      }
+      return existingViewer.id;
     }
-    return existingViewer.id;
-  }
 
-  const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
-  viewer.setAttribute('layout', 'nodisplay');
-  viewer.setAttribute('id', DEFAULT_VIEWER_ID);
-  ampdoc.getRootNode().body.appendChild(viewer);
+    const viewer = ampdoc.getRootNode().createElement(VIEWER_TAG);
+    viewer.setAttribute('layout', 'nodisplay');
+    viewer.setAttribute('id', DEFAULT_VIEWER_ID);
+    ampdoc.getRootNode().body.appendChild(viewer);
 
-  extensionsFor(ampdoc.win).loadExtension(VIEWER_TAG);
-
-  return viewer.id;
+    return viewer.id;
+  });
 }
