@@ -286,6 +286,9 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  user().assert(attrValue.indexOf('__amp_source_origin') == -1,
+      'Source origin is not allowed in %s', attrValue);
+
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
