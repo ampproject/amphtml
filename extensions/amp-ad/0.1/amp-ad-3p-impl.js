@@ -158,14 +158,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.win);
-
-    /** @private @const {function()|null} */
-    this.renderStartResolve_ = null;
-
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
-      this.renderStartResolve_ = resolve;
-    });
   }
 
   /**
@@ -251,7 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
+            this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }

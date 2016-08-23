@@ -52,16 +52,16 @@ function tests(name) {
 
       afterEach(() => {
         sandbox.restore();
-        delete clientIdScope['with_cid'];
+        delete clientIdScope['_ping_'];
         setCookie(window, cidScope, '', Date.now() - 5000);
       });
 
       it('provides cid to ad', () => {
-        clientIdScope['with_cid'] = cidScope;
+        clientIdScope['_ping_'] = cidScope;
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -75,11 +75,11 @@ function tests(name) {
       });
 
       it('proceeds on failed CID', () => {
-        clientIdScope['with_cid'] = cidScope;
+        clientIdScope['_ping_'] = cidScope;
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -93,11 +93,11 @@ function tests(name) {
       });
 
       it('waits for consent', () => {
-        clientIdScope['with_cid'] = cidScope;
+        clientIdScope['_ping_'] = cidScope;
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
           'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
@@ -124,7 +124,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
           'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
@@ -152,7 +152,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -173,11 +173,11 @@ function tests(name) {
       });
 
       it('provides null if cid service not available', () => {
-        clientIdScope['with_cid'] = cidScope;
+        clientIdScope['_ping_'] = cidScope;
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           setCookie(window, cidScope, 'XXX',
