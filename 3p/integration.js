@@ -105,6 +105,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   plista: true,
   zergnet: true,
+  _ping_: true,
 };
 
 // Keep the list in alphabetic order
