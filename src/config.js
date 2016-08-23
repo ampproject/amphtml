@@ -23,7 +23,8 @@
  */
 const env = self.AMP_CONFIG || {};
 
-export const urls = {
+/* global exports: true */
+exports.urls = {
   thirdParty: env.thirdPartyUrl || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env.thirdPartyFrameHost || 'ampproject.net',
   thirdPartyFrameRegex: env.thirdPartyFrameRegex ||
