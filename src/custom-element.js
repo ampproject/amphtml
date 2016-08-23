@@ -60,12 +60,22 @@ const knownElements = {};
 
 
 /**
- * Whether this platform supports template tags.
- * @const {boolean}
+ * Caches whether the template tag is supported to avoid memory allocations.
+ * @type {boolean|undefined}
  */
-const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
-  'template'
-);
+let templateTagSupported;
+
+/**
+ * Whether this platform supports template tags.
+ * @return {boolean}
+ */
+function isTemplateTagSupported() {
+  if (templateTagSupported === undefined) {
+    const template = self.document.createElement('template');
+    templateTagSupported = 'content' in template;
+  }
+  return templateTagSupported;
+}
 
 
 /**
@@ -712,7 +722,7 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.attachedCallback = function() {
-    if (!TEMPLATE_TAG_SUPPORTED && this.isInTemplate_ === undefined) {
+    if (!isTemplateTagSupported() && this.isInTemplate_ === undefined) {
       this.isInTemplate_ = !!dom.closestByTag(this, 'template');
     }
     if (this.isInTemplate_) {
@@ -1121,7 +1131,13 @@ function createBaseAmpElementProto(win) {
    * @package @final @this {!Element}
    */
   ElementProto.getPlaceholder = function() {
-    return dom.lastChildElementByAttr(this, 'placeholder');
+    return dom.lastChildElement(this, el => {
+      return el.hasAttribute('placeholder') &&
+          // Blacklist elements that has a native placeholder property
+          // like input and textarea. These are not allowed to be AMP
+          // placeholders.
+          !('placeholder' in el);
+    });
   };
 
   /**

@@ -20,6 +20,7 @@
  */
 
 import {dev, user} from './log';
+import {isFiniteNumber} from './types';
 
 
 /**
@@ -208,10 +209,11 @@ export function getLengthUnits(length) {
 /**
  * Returns the numeric value of a CSS length value.
  * @param {!LengthDef|string} length
- * @return {number}
+ * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
-  return parseFloat(length);
+  const res = parseFloat(length);
+  return !isFiniteNumber(res) ? undefined : res;
 }
 
 

@@ -15,7 +15,7 @@
  */
 
 import {makeCorrelator} from './correlator';
-import {checkData, loadScript} from '../../3p/3p';
+import {validateData, loadScript} from '../../3p/3p';
 
 /**
  * @enum {number}
@@ -24,7 +24,8 @@ import {checkData, loadScript} from '../../3p/3p';
 const GladeExperiment = {
   NO_EXPERIMENT: 0,
   GLADE_CONTROL: 1,
-  GLADE_OPT_OUT: 2,
+  GLADE_EXPERIMENT: 2,
+  GLADE_OPT_OUT: 3,
 };
 
 /**
@@ -32,9 +33,10 @@ const GladeExperiment = {
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.5;
+  const experimentFraction = 0.1;
 
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
@@ -54,13 +56,13 @@ export function doubleclick(global, data) {
   } else {
     const dice = Math.random();
     const href = global.context.location.href;
-    if ((href.indexOf('google_glade=1') > 0 || dice < experimentFraction)
-        && href.indexOf('google_glade=0') < 0) {
-      doubleClickWithGlade(global, data);
+    if ((href.indexOf('google_glade=0') > 0 || dice < experimentFraction)
+        && href.indexOf('google_glade=1') < 0) {
+      doubleClickWithGpt(global, data, GladeExperiment.GLADE_CONTROL);
     } else {
       const exp = (dice < 2 * experimentFraction) ?
-        GladeExperiment.GLADE_CONTROL : GladeExperiment.NO_EXPERIMENT;
-      doubleClickWithGpt(global, data, exp);
+        GladeExperiment.GLADE_EXPERIMENT : GladeExperiment.NO_EXPERIMENT;
+      doubleClickWithGlade(global, data, exp);
     }
   }
 }
@@ -139,8 +141,9 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGlade(global, data) {
+function doubleClickWithGlade(global, data, gladeExperiment) {
   const requestHeight = parseInt(data.overrideHeight || data.height, 10);
   const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
@@ -157,6 +160,9 @@ function doubleClickWithGlade(global, data) {
   }
   if (data.targeting) {
     jsonParameters.targeting = data.targeting;
+  }
+  if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
+    jsonParameters.gladeExp = '1';
   }
 
   const slot = global.document.querySelector('#c');

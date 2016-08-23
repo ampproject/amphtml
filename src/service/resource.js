@@ -16,6 +16,7 @@
 
 import {layoutRectLtwh, layoutRectsOverlap} from '../layout-rect';
 import {dev} from '../log';
+import {toggle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -147,13 +148,6 @@ export class Resource {
     /** @private {?Promise<undefined>} */
     this.layoutPromise_ = null;
 
-    /**
-     * Only used in the "runtime off" case when the monitoring code needs to
-     * known when the element is upgraded.
-     * @private {!Function|undefined}
-     */
-    this.onUpgraded_ = undefined;
-
    /**
     * Pending change size that was requested but could not be satisfied.
     * @private {!./resources-impl.SizeDef|undefined}
@@ -281,7 +275,6 @@ export class Resource {
     this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
-  /** @private */
   resetPendingChangeSize() {
     this.pendingChangeSize_ = undefined;
   }
@@ -338,6 +331,20 @@ export class Resource {
     this.isFixed_ = isFixed;
 
     this.element.updateLayoutBox(box);
+  }
+
+  /**
+   * Completes collapse: ensures that the element is `display:none` and
+   * updates layout box.
+   */
+  completeCollapse() {
+    toggle(this.element, false);
+    this.layoutBox_ = layoutRectLtwh(
+        this.layoutBox_.left,
+        this.layoutBox_.top,
+        0, 0);
+    this.isFixed_ = false;
+    this.element.updateLayoutBox(this.layoutBox_);
   }
 
   /**
@@ -626,10 +633,6 @@ export class Resource {
    */
   pause() {
     if (this.state_ == ResourceState.NOT_BUILT || this.paused_) {
-      if (this.paused_) {
-        dev().error(TAG, 'pause() called on an already paused resource:',
-          this.debugid);
-      }
       return;
     }
     this.paused_ = true;
@@ -672,46 +675,5 @@ export class Resource {
   unload() {
     this.pause();
     this.unlayout();
-  }
-
-  /**
-   * Only allowed in dev mode when runtime is turned off. Performs all steps
-   * necessary to render an element.
-   * @return {!Promise}
-   * @export
-   */
-  forceAll() {
-    dev().assert(!this.resources_.isRuntimeOn());
-    let p = Promise.resolve();
-    if (this.state_ == ResourceState.NOT_BUILT) {
-      if (!this.element.isUpgraded()) {
-        p = p.then(() => {
-          return new Promise(resolve => {
-            this.onUpgraded_ = resolve;
-          });
-        });
-      }
-      p = p.then(() => {
-        this.onUpgraded_ = undefined;
-        this.build(true);
-      });
-    }
-    return p.then(() => {
-      this.applySizesAndMediaQuery();
-      this.measure();
-      if (this.layoutPromise_) {
-        return this.layoutPromise_;
-      }
-      if (this.state_ == ResourceState.LAYOUT_COMPLETE ||
-              this.state_ == ResourceState.LAYOUT_FAILED ||
-              this.layoutCount_ > 0) {
-        return;
-      }
-      if (!this.isDisplayed()) {
-        return;
-      }
-      this.layoutCount_++;
-      return this.element.layoutCallback();
-    });
   }
 }

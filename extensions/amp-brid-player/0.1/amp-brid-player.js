@@ -133,7 +133,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.applyFillContent(imgPlaceholder);
 
     loadPromise(imgPlaceholder).catch(() => {
-      imgPlaceholder.src = 'https://services.brid.tv/ugc/default/defaultSnapshot.png';
+      imgPlaceholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
       return loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {

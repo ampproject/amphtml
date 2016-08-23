@@ -109,7 +109,7 @@ describe('AmpDocService', () => {
         service.getAmpDoc(content);
       }).to.throw(/No ampdoc found/);
 
-      const newAmpDoc = installShadowDoc(service, shadowRoot);
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
       expect(ampDoc).to.exist;
@@ -132,9 +132,9 @@ describe('AmpDocService', () => {
       if (!shadowRoot) {
         return;
       }
-      installShadowDoc(service, shadowRoot);
+      installShadowDoc(service, 'https://a.org/', shadowRoot);
       expect(() => {
-        installShadowDoc(service, shadowRoot);
+        installShadowDoc(service, 'https://a.org/', shadowRoot);
       }).to.throw(/The shadow root already contains ampdoc/);
     });
 
@@ -143,7 +143,7 @@ describe('AmpDocService', () => {
         return;
       }
 
-      const newAmpDoc = installShadowDoc(service, shadowRoot);
+      const newAmpDoc = installShadowDoc(service, 'https://a.org/', shadowRoot);
       const ampDoc = service.getAmpDoc(content);
       expect(ampDoc).to.equal(newAmpDoc);
 
@@ -175,6 +175,7 @@ describe('AmpDocSingle', () => {
 
   it('should return window', () => {
     expect(ampdoc.win).to.equal(window);
+    expect(ampdoc.getUrl()).to.equal(window.location.href);
   });
 
   it('should return document as root', () => {
@@ -194,6 +195,8 @@ describe('AmpDocSingle', () => {
 
 describe('AmpDocShadow', () => {
 
+  const URL = 'https://example.org/document';
+
   let content, host, shadowRoot;
   let ampdoc;
 
@@ -203,7 +206,7 @@ describe('AmpDocShadow', () => {
     if (host.createShadowRoot) {
       shadowRoot = host.createShadowRoot();
       shadowRoot.appendChild(content);
-      ampdoc = new AmpDocShadow(window, shadowRoot);
+      ampdoc = new AmpDocShadow(window, URL, shadowRoot);
     }
   });
 
@@ -213,6 +216,7 @@ describe('AmpDocShadow', () => {
     }
     expect(ampdoc.win).to.equal(window);
     expect(ampdoc.isSingleDoc()).to.be.false;
+    expect(ampdoc.getUrl()).to.equal(URL);
   });
 
   it('should return document as root', () => {

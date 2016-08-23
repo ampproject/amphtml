@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {writeScript, validateDataExists, checkData} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function widespace(global, data) {
-  checkData(data, ['sid']);
-  validateDataExists(data, ['sid']);
+  validateData(data, ['sid'], []);
 
-  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1&sid=' + encodeURIComponent(data.sid);
+  const url = 'https://engine.widespace.com/map/engine/dynamic?isamp=1&sid='
+      + encodeURIComponent(data.sid);
 
   writeScript(global, url);
 }

@@ -56,8 +56,10 @@ function buildExtensions(options) {
   buildExtension('amp-ad', '0.1', false, options);
   buildExtension('amp-ad-network-adsense-impl', 0.1, false, options);
   buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
+  buildExtension('amp-ad-network-fake-impl', 0.1, false, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
+  buildExtension('amp-app-banner', '0.1', true, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
@@ -99,7 +101,7 @@ function buildExtensions(options) {
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
-  buildExtension('amp-viz-vega', '0.1', false, options);
+  buildExtension('amp-viz-vega', '0.1', true, options);
   buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -276,7 +278,8 @@ function buildExtension(name, version, hasCss, options) {
  * @return {!Stream} Gulp object
  */
 function buildExtensionJs(path, name, version, options) {
-  compileJs(path + '/', name + '.js', './dist/v0', {
+  var filename = options.filename || name + '.js';
+  compileJs(path + '/', filename, './dist/v0', {
     watch: options.watch,
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
@@ -288,8 +291,8 @@ function buildExtensionJs(path, name, version, options) {
     // The `function` is wrapped in `()` to avoid lazy parsing it,
     // since it will be immediately executed anyway.
     // See https://github.com/ampproject/amphtml/issues/3977
-    wrapper: '(window.AMP = window.AMP || [])' +
-        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});',
+    wrapper: options.noWrapper ? '' : ('(window.AMP = window.AMP || [])' +
+        '.push({n:"' + name + '", f:(function(AMP) {<%= contents %>\n})});'),
   });
 }
 
@@ -300,6 +303,7 @@ function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
+  buildSw();
   buildExtensions({bundleOnlyIfListedInFiles: true});
   compile();
 }
@@ -312,6 +316,7 @@ function dist() {
   cleanupBuildDir();
   compile(false, true, true);
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
@@ -324,6 +329,11 @@ function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   buildAlp({
+    minify: true,
+    checkTypes: true,
+    preventRemoveAndMakeDir: true,
+  });
+  buildSw({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
@@ -386,6 +396,38 @@ function thirdPartyBootstrap(watch, shouldMinify) {
 var activeBundleOperationCount = 0;
 
 /**
+ * Synchronously concatenates the given files into the given destination
+ *
+ * @param {string} destFilePath File path to write the concatenated files to
+ * @param {Array<string>} files List of file paths to concatenate
+ */
+function concatFiles(destFilePath, files) {
+	var all = files.map(function(filePath) {
+		return fs.readFileSync(filePath, 'utf-8');
+	});
+
+	fs.writeFileSync(destFilePath, all.join(';'), 'utf-8');
+}
+
+/**
+ * Allows (ap|pre)pending to the already compiled, minified JS file
+ *
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destFilePath File path to the compiled JS file
+ */
+function appendToCompiledFile(srcFilename, destFilePath) {
+  if (srcFilename == 'amp-viz-vega.js') {
+    // Prepend minified d3 and vega third_party to compiled amp-viz-vega.js
+    concatFiles(destFilePath, [
+      'third_party/d3/d3.js',
+      'third_party/d3-geo-projection/d3-geo-projection.js',
+      'third_party/vega/vega.js',
+      destFilePath,
+    ]);
+  }
+}
+
+/**
  * Compile a javascript file
  *
  * @param {string} srcDir Path to the src directory
@@ -401,6 +443,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
           options)
           .then(function() {
+            appendToCompiledFile(srcFilename, destDir + '/' + options.minifiedName);
             fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
             if (options.latestName) {
               fs.copySync(
@@ -432,6 +475,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
+  var destFilename = options.toName || srcFilename;
   function rebundle() {
     activeBundleOperationCount++;
     bundler.bundle()
@@ -444,9 +488,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         }
       })
       .pipe(lazybuild())
-      .pipe($$.rename(options.toName || srcFilename))
+      .pipe($$.rename(destFilename))
       .pipe(lazywrite())
       .on('end', function() {
+        appendToCompiledFile(srcFilename, destDir + '/' + destFilename);
         $$.util.log('Compiled ' + srcFilename);
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
@@ -629,6 +674,40 @@ function buildAlp(options) {
     minifiedName: 'alp.js',
     preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
   });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildSw(options) {
+  console.log('Bundling service-worker.js');
+  var opts = {};
+  for (var prop in options) {
+    opts[prop] = options[prop];
+  }
+
+  // The service-worker script loaded by the browser.
+  compileJs('./src/service-worker/', 'shell.js', './dist/', {
+    toName: 'sw.max.js',
+    minifiedName: 'sw.js',
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+  });
+  // The service-worker kill script that may be loaded by the browser.
+  compileJs('./src/service-worker/', 'kill.js', './dist/', {
+    toName: 'sw-kill.max.js',
+    minifiedName: 'sw-kill.js',
+    watch: opts.watch,
+    minify: opts.minify || argv.minify,
+    preventRemoveAndMakeDir: opts.preventRemoveAndMakeDir,
+  });
+  // The script imported by the service-worker. This is the "core".
+  opts.noWrapper = true;
+  opts.filename = 'core.js';
+  buildExtensionJs('./src/service-worker', 'cache-service-worker', '0.1', opts);
 }
 
 /**

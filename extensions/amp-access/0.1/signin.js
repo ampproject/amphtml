@@ -42,9 +42,9 @@ const TAG = 'amp-access-signin';
  * No special security measures are applied in AMP Runtime since the token is
  * expected to be encrypted or signed by the source origin.
  *
- * Login dialog may return an access grant via `#access_grant` in the hash
+ * Login dialog may return an authorization code via `#code=` in the hash
  * response. When `acceptAccessToken: true` is specified, the viewer may be
- * asked to exchange this access grant for an access token using the
+ * asked to exchange this authorization code for an access token using the
  * `storeAccessToken` message.
  *
  * Request sign-in is configured via `signinServices: []` configuration option.
@@ -160,15 +160,15 @@ export class SignInProtocol {
   }
 
   /**
-   * Processes login dialog's result. And if `#access_grant=` hash parameter
-   * is specified, will send this access grant to the viewer to exchange for
-   * the access token. This method returns promise that will resolve the
+   * Processes login dialog's result. And if `#code=` hash parameter
+   * is specified, will send this authorization code to the viewer to exchange
+   * for the access token. This method returns promise that will resolve the
    * exchanged access token.
    *
    * If viewer has not opted-in into signin protocol, this method returns
    * `null`. If source origin has not opted-in into signin protocol via
    * `acceptAccessToken: true` configration option and by returning
-   * `#access_grant=` response from the login dialog, this method returns
+   * `#code=` response from the login dialog, this method returns
    * `null`.
    *
    * The viewer is allowed to store the access token, but only when the user
@@ -181,13 +181,13 @@ export class SignInProtocol {
     if (!this.acceptAccessToken_) {
       return null;
     }
-    const grant = query['access_grant'];
-    if (!grant) {
+    const authorizationCode = query['code'];
+    if (!authorizationCode) {
       return null;
     }
     return this.viewer_.sendMessage('storeAccessToken', {
       origin: this.pubOrigin_,
-      accessGrant: grant,
+      authorizationCode,
     }).then(resp => {
       const accessToken = /** @type {?string} */ (resp);
       this.updateAccessToken_(accessToken);

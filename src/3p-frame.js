@@ -17,7 +17,7 @@
 
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
-import {documentInfoFor} from './document-info';
+import {documentInfoForDoc} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -60,7 +60,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
-  const docInfo = documentInfoFor(parentWindow);
+  const docInfo = documentInfoForDoc(element);
   const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
@@ -165,17 +165,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 
 /**
  * Preloads URLs related to the bootstrap iframe.
- * @param {!Window} parentWindow
+ * @param {!Window} window
  * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
   preconnect.preload(url, 'document');
+
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
-  preconnect.preload(
-      `${urls.thirdParty}/$internalRuntimeVersion$/f.js`, 'script');
+  const scriptUrl = getMode().localDev
+      ? getAdsLocalhost(window) + '/dist.3p/current/integration.js'
+      : `${urls.thirdParty}/$internalRuntimeVersion$/f.js`;
+  preconnect.preload(scriptUrl, 'script');
 }
 
 /**
@@ -186,7 +189,7 @@ export function preloadBootstrap(window) {
  * @visibleForTesting
  */
 export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
-  return getService(window, 'bootstrapBaseUrl', () => {
+  return getService(self, 'bootstrapBaseUrl', () => {
     return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
       getDefaultBootstrapBaseUrl(parentWindow);
   });
@@ -206,15 +209,18 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
     if (overrideBootstrapBaseUrl) {
       return overrideBootstrapBaseUrl;
     }
-    const prefix = getMode().test ? '/base' : '';
-    return 'http://ads.localhost:' +
-        (parentWindow.location.port || parentWindow.parent.location.port) +
-        prefix + '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
-        '.html';
+    return getAdsLocalhost(parentWindow)
+        + '/dist.3p/current'
+        + (getMode().minified ? '-min/frame' : '/frame.max')
+        + '.html';
   }
   return 'https://' + getSubDomain(parentWindow) +
       `.${urls.thirdPartyFrameHost}/$internalRuntimeVersion$/frame.html`;
+}
+
+function getAdsLocalhost(win) {
+  return 'http://ads.localhost:'
+      + (win.location.port || win.parent.location.port);
 }
 
 /**

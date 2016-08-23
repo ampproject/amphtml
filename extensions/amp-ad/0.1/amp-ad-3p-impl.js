@@ -18,6 +18,7 @@ import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
@@ -25,13 +26,6 @@ import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
 import {AmpAdApiHandler} from './amp-ad-api-handler';
-
-/** @const These tags are allowed to have fixed positioning */
-const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-FX-FLYING-CARPET': true,
-  'AMP-LIGHTBOX': true,
-  'AMP-STICKY-AD': true,
-};
 
 /**
  * Store loading ads info within window to ensure it can be properly stored
@@ -101,32 +95,6 @@ export function incrementLoadingAds(win) {
   return timerId;
 }
 
-/**
- * @param {!Element} el
- * @param {!Window} win
- * @return {boolean} whether element or its ancestors have position
- * fixed (unless they are POSITION_FIXED_TAG_WHITELIST).
- * This should only be called when a layout on the page was just forced
- * anyway.
- */
-export function isPositionFixed(el, win) {
-  let hasFixedAncestor = false;
-  do {
-    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return false;
-    }
-    if (win/*because only called from onLayoutMeasure */
-            ./*OK*/getComputedStyle(el).position == 'fixed') {
-      // Because certain blessed elements may contain a position fixed
-      // container (which contain an ad), we continue to search the
-      // ancestry tree.
-      hasFixedAncestor = true;
-    }
-    el = el.parentNode;
-  } while (el && el.tagName != 'BODY');
-  return hasFixedAncestor;
-}
-
 /** @const {!string} Tag name for 3P AD implementation. */
 export const TAG_3P_IMPL = 'amp-ad-3p-impl';
 
@@ -190,14 +158,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     setupA2AListener(this.win);
-
-    /** @private @const {function()|null} */
-    this.renderStartResolve_ = null;
-
-    /** @private @const {!Promise} */
-    this.renderStartPromise_ = new Promise(resolve => {
-      this.renderStartResolve_ = resolve;
-    });
   }
 
   /**
@@ -237,7 +197,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isInFixedContainer_ = isPositionFixed(this.element, this.win);
+    this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
@@ -283,7 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
         this.apiHandler_ = new AmpAdApiHandler(
-          this, this.element, this.boundNoContentHandler_);
+            this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }

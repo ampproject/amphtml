@@ -58,7 +58,7 @@ export class Animation {
     this.contextNode_ = contextNode;
 
     /** @private @const {!./service/vsync-impl.Vsync} */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+    this.vsync_ = opt_vsync || vsyncFor(self);
 
     /** @private {?./curve.CurveDef} */
     this.curve_ = null;

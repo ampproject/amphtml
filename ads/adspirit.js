@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {checkData} from '../3p/3p';
+import {validateData} from '../3p/3p';
 
 /**
   * @param {!Window} global
   * @param {!Object} data
   */
 export function adspirit(global, data) {
-  checkData(data, ['asmParams', 'asmHost']);
+  // TODO: check mandatory fields
+  validateData(data, [], ['asmParams', 'asmHost']);
   const i = global.document.createElement('ins');
   i.setAttribute('data-asm-params', data['asmParams']);
   i.setAttribute('data-asm-host', data['asmHost']);

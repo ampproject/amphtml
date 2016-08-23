@@ -75,6 +75,10 @@ describe.configure().retryOnSaucelabs().run('example', function() {
   const errorWhitelist = [
     /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
     /DISALLOWED_TAG content/,  // Experiments with shadow slots
+    // amp-app-banner related validation discrepancies.
+    /GENERAL_DISALLOWED_TAG script amp-app-banner.js/,
+    /DISALLOWED_TAG amp-app-banner/,
+    /DISALLOWED_ATTR open-link a/,
     /DISALLOWED_TAG amp-gfycat/,
   ];
 
@@ -86,7 +90,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
 
   examples.forEach(filename => {
     it(filename + ' should validate', () => {
-      const url = '/base/examples/' + filename;
+      const url = '/examples/' + filename;
       return get(url).then(html => {
         /* global amp: false */
         const validationResult = amp.validator.validateString(html);

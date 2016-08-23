@@ -143,6 +143,9 @@ export class AmpLiveList extends AMP.BaseElement {
         this.getItemsSlot_(this.element),
         'amp-live-list must have an "items" slot.');
 
+    /** @private {?Element} */
+    this.paginationSlot_ = this.getPaginationSlot_(this.element);
+
     /** @private @const {string} */
     this.liveListId_ = user().assert(this.element.getAttribute('id'),
         'amp-live-list must have an id.');
@@ -186,6 +189,9 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private @const {!Array<!Element>} */
     this.pendingItemsTombstone_ = [];
 
+    /** @private @const {?Element} */
+    this.pendingPagination_ = null;
+
     /**
      * This is the count of items we treat as "active" (exclusing tombstone'd
      * items). We increment it on insert operations done,
@@ -228,13 +234,17 @@ export class AmpLiveList extends AMP.BaseElement {
   /** @override */
   update(updatedElement) {
     const container = this.getItemsSlot_(updatedElement);
-    user().assert(container, 'amp-live-list must have an `items` slot');
+    if (!container) {
+      return this.updateTime_;
+    }
     this.validateLiveListItems_(container);
     const mutateItems = this.getUpdates_(container);
 
     this.preparePendingItemsInsert_(mutateItems.insert);
     this.preparePendingItemsReplace_(mutateItems.replace);
     this.preparePendingItemsTombstone_(mutateItems.tombstone);
+
+    this.pendingPagination_ = this.getPaginationSlot_(updatedElement);
 
     // We prefer user interaction if we have pending items to insert at the
     // top of the component.
@@ -260,11 +270,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * @private
    */
   updateAction_() {
-    const hasNewInsert = this.pendingItemsInsert_.length > 0;
+    const hasInsertItems = this.pendingItemsInsert_.length > 0;
+    const hasTombstoneItems = this.pendingItemsTombstone_.length > 0;
 
     let promise = this.mutateElement(() => {
 
-      if (hasNewInsert) {
+      if (hasInsertItems) {
         // Remove the new class from the previously inserted items if
         // we are inserting new items.
         this.eachChildElement_(this.itemsSlot_, child => {
@@ -287,8 +298,20 @@ export class AmpLiveList extends AMP.BaseElement {
         this.pendingItemsTombstone_.length = 0;
       }
 
+      // Only replace the pagination reference point if there are items
+      // to insert or tombstone as those are the times it makes sense
+      // the pagination section would have changes (item count change)
+      if ((hasInsertItems || hasTombstoneItems) && this.paginationSlot_
+            && this.pendingPagination_) {
+        this.element.replaceChild(this.pendingPagination_,
+            this.paginationSlot_);
+        this.paginationSlot_ = this.getPaginationSlot_(this.element);
+      }
+
       // Always hide update slot after mutation operation.
       this.toggleUpdateButton_(false);
+      // Always null out the pending pagination section after update
+      this.pendingPagination_ = null;
 
       // Insert and tombstone operations must happen first before we measure
       // number of items to delete down to `data-max-items-per-page`.
@@ -296,7 +319,7 @@ export class AmpLiveList extends AMP.BaseElement {
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
-    if (hasNewInsert) {
+    if (hasInsertItems) {
       promise = promise.then(() => {
         return this.viewport_.animateScrollIntoView(this.element);
       });
@@ -713,6 +736,14 @@ export class AmpLiveList extends AMP.BaseElement {
    */
   getItemsSlot_(parent) {
     return childElementByAttr(parent, 'items');
+  }
+
+  /**
+   * @param {?Element} parent
+   * @private
+   */
+  getPaginationSlot_(parent) {
+    return childElementByAttr(parent, 'pagination');
   }
 
   /**

@@ -44,15 +44,19 @@ import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
+import {adsnative} from '../ads/adsnative';
 import {adspirit} from '../ads/adspirit';
 import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
+import {contentad} from '../ads/contentad';
 import {criteo} from '../ads/criteo';
+import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
@@ -91,6 +95,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
+
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string, boolean>}
@@ -100,6 +105,7 @@ const AMP_EMBED_ALLOWED = {
   'mantis-recommend': true,
   plista: true,
   zergnet: true,
+  _ping_: true,
 };
 
 // Keep the list in alphabetic order
@@ -111,18 +117,22 @@ register('adition', adition);
 register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
+register('adsnative', adsnative);
 register('adspirit', adspirit);
 register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
+register('contentad', contentad);
 register('criteo', criteo);
 register('dotandads', dotandads);
 register('doubleclick', doubleclick);
 register('eplanning', eplanning);
+register('ezoic', ezoic);
 register('facebook', facebook);
 register('flite', flite);
 register('genieessp', genieessp);

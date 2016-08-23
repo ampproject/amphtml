@@ -19,6 +19,7 @@ import {Platform} from '../../src/platform';
 describe('Platform', () => {
 
   let isIos;
+  let isAndroid;
   let isChrome;
   let isFirefox;
   let isSafari;
@@ -29,6 +30,7 @@ describe('Platform', () => {
 
   beforeEach(() => {
     isIos = false;
+    isAndroid = false;
     isChrome = false;
     isSafari = false;
     isFirefox = false;
@@ -41,6 +43,7 @@ describe('Platform', () => {
   function testUserAgent(userAgentString) {
     const platform = new Platform({navigator: {userAgent: userAgentString}});
     expect(platform.isIos()).to.equal(isIos);
+    expect(platform.isAndroid()).to.equal(isAndroid);
     expect(platform.isChrome()).to.equal(isChrome);
     expect(platform.isSafari()).to.equal(isSafari);
     expect(platform.isFirefox()).to.equal(isFirefox);
@@ -106,6 +109,7 @@ describe('Platform', () => {
   });
 
   it('Nexus 6 Chrome', () => {
+    isAndroid = true;
     isChrome = true;
     isWebKit = true;
     majorVersion = 44;

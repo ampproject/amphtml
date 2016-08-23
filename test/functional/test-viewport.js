@@ -484,6 +484,28 @@ describe('Viewport META', () => {
             'minimum-scale': '1',
           });
     });
+    it('should support semicolon', () => {
+      expect(parseViewportMeta('width=device-width;minimum-scale=1'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+          });
+    });
+    it('should support mix of comma and semicolon', () => {
+      expect(parseViewportMeta('width=device-width,minimum-scale=1;test=3;'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+            'test': '3',
+          });
+    });
+    it('should ignore extra mix delims', () => {
+      expect(parseViewportMeta(',,;;,width=device-width;;,minimum-scale=1,,;'))
+          .to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1',
+          });
+    });
   });
 
   describe('stringifyViewportMeta', () => {
@@ -696,6 +718,8 @@ describe('ViewportBindingNatural', () => {
   let documentElement;
   let documentBody;
   let windowEventHandlers;
+  let viewer;
+  let viewerMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -717,11 +741,20 @@ describe('ViewportBindingNatural', () => {
       defaultView: windowApi,
     };
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNatural_(windowApi);
+    viewer = {
+      getPaddingTop: () => 19,
+      onViewportEvent: () => {},
+      requestFullOverlay: () => {},
+      cancelFullOverlay: () => {},
+      postScroll: sandbox.spy(),
+    };
+    viewerMock = sandbox.mock(viewer);
+    binding = new ViewportBindingNatural_(windowApi, viewer);
   });
 
   afterEach(() => {
     windowMock.verify();
+    viewerMock.verify();
     sandbox.restore();
   });
 

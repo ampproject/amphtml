@@ -39,7 +39,8 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
-  return win.services[id].obj;
+  return dev().assert(
+      win.services[id] && win.services[id].obj, `${id} service not found.`);
 }
 
 /**
@@ -50,7 +51,10 @@ export function getExistingServiceForWindow(win, id) {
  * @return {!Object} The service.
  */
 export function getExistingServiceForDoc(nodeOrDoc, id) {
-  return getAmpdocServiceHolder(nodeOrDoc).services[id].obj;
+  const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
+  return dev().assert(
+      serviceHolder.services[id] && serviceHolder.services[id].obj,
+      `${id} service not found.`);
 }
 
 /**
@@ -182,8 +186,8 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
  */
 function getAmpdoc(nodeOrDoc) {
   if (nodeOrDoc.nodeType) {
-    return getAmpdocService(nodeOrDoc.ownerDocument.defaultView).getAmpDoc(
-        nodeOrDoc);
+    const win = (nodeOrDoc.ownerDocument || nodeOrDoc).defaultView;
+    return getAmpdocService(win).getAmpDoc(nodeOrDoc);
   }
   return /** @type {!./service/ampdoc-impl.AmpDoc} */ (nodeOrDoc);
 }

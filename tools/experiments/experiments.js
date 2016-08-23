@@ -90,6 +90,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
   },
   {
+    id: 'amp-access-jwt',
+    name: 'AMP Access JWT prototype',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4000',
+  },
+  {
     id: 'amp-access-signin',
     name: 'AMP Access sign-in',
     spec: 'https://github.com/ampproject/amphtml/issues/4227',
@@ -142,6 +148,21 @@ const EXPERIMENTS = [
     name: 'AMP Visualization using Vega grammar',
     spec: 'https://github.com/ampproject/amphtml/issues/3991',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
+  },
+  {
+    id: 'amp-ios-overflow-x',
+    name: 'Fixes a horizontal scroll issue on iOS browsers.',
+    spec: 'https://github.com/ampproject/amphtml/issues/3712',
+  },
+  {
+    id: 'amp-app-banner',
+    name: 'Shows a native app install/open banner.',
+    spec: 'https://github.com/ampproject/amphtml/issues/800',
+  },
+  {
+    id: 'cache-service-worker',
+    name: 'AMP Cache Service Worker',
+    spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
 ];
 

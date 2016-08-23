@@ -148,7 +148,7 @@ export class Extensions {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @private @const {!Window} */
+    /** @const {!Window} */
     this.win = win;
 
     /** @private @const {!Object<string, !ExtensionHolderDef>} */
@@ -439,10 +439,10 @@ export class Extensions {
     scriptElement.async = true;
     scriptElement.setAttribute('custom-element', extensionId);
     scriptElement.setAttribute('data-script', extensionId);
-    const pathStr = this.win.location.pathname;
+    const loc = this.win.location;
     const useCompiledJs = shouldUseCompiledJs();
-    const scriptSrc = calculateExtensionScriptUrl(pathStr, extensionId,
-        getMode().test, useCompiledJs);
+    const scriptSrc = calculateExtensionScriptUrl(loc, extensionId,
+        getMode().version, getMode().localDev, getMode().test, useCompiledJs);
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
@@ -450,35 +450,64 @@ export class Extensions {
 
 
 /**
+ * Calculate the base url for any scripts.
+ * @param {!Location} location The window's location
+ * @param {boolean=} isLocalDev
+ * @param {boolean=} isTest
+ * @return {string}
+ */
+export function calculateScriptBaseUrl(location, isLocalDev, isTest) {
+  if (isLocalDev) {
+    if (isTest || isMax(location) || isMin(location)) {
+      return `${location.protocol}//${location.host}/dist`;
+    }
+  }
+  return urls.cdn;
+}
+
+/**
  * Calculate script url for amp-ad.
- * @visibleForTesting
- * @param {string} path Location path of the window
+ * @param {!Location} location The window's location
  * @param {string} extensionId
+ * @param {string} version
+ * @param {boolean=} isLocalDev
  * @param {boolean=} isTest
  * @param {boolean=} isUsingCompiledJs
  * @return {string}
- * @visibleForTesting
  */
-export function calculateExtensionScriptUrl(path, extensionId, isTest,
-    isUsingCompiledJs) {
-  if (getMode().localDev) {
-    if (isTest) {
-      if (isUsingCompiledJs) {
-        return `/base/dist/v0/${extensionId}-0.1.js`;
-      }
-      return `/base/dist/v0/${extensionId}-0.1.max.js`;
+export function calculateExtensionScriptUrl(location, extensionId, version,
+    isLocalDev, isTest, isUsingCompiledJs) {
+  const base = calculateScriptBaseUrl(location, isLocalDev, isTest);
+  if (isLocalDev) {
+    if ((isTest && !isUsingCompiledJs) || isMax(location)) {
+      return `${base}/v0/${extensionId}-0.1.max.js`;
     }
-    if (path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/') {
-      return `/dist/v0/${extensionId}-0.1.max.js`;
-    }
-    if (path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/') {
-      return `/dist/v0/${extensionId}-0.1.js`;
-    }
-    return `https://cdn.ampproject.org/v0/${extensionId}-0.1.js`;
+    return `${base}/v0/${extensionId}-0.1.js`;
   }
-  const folderPath = getMode().version == '$internalRuntimeVersion$' ?
-      '' : `rtv/${getMode().version}/`;
-  return `${urls.cdn}/${folderPath}v0/${extensionId}-0.1.js`;
+  const folderPath = version == '$internalRuntimeVersion$' ?
+      'v0' : `rtv/${version}/v0`;
+  return `${base}/${folderPath}/${extensionId}-0.1.js`;
+}
+
+
+/**
+ * Is this path to a max (unminified) version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMax(location) {
+  const path = location.pathname;
+  return path.indexOf('.max') >= 0 || path.substr(0, 5) == '/max/';
+}
+
+/**
+ * Is this path to a minified version?
+ * @param {!Location} location
+ * @return {boolean}
+ */
+function isMin(location) {
+  const path = location.pathname;
+  return path.indexOf('.min') >= 0 || path.substr(0, 5) == '/min/';
 }
 
 
@@ -486,6 +515,6 @@ export function calculateExtensionScriptUrl(path, extensionId, isTest,
  * @return {boolean}
  */
 function shouldUseCompiledJs() {
-  return getMode().test && window.ampTestRuntimeConfig &&
-      window.ampTestRuntimeConfig.useCompiledJs;
+  return getMode().test && self.ampTestRuntimeConfig &&
+      self.ampTestRuntimeConfig.useCompiledJs;
 }
