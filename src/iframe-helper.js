@@ -311,16 +311,28 @@ export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
 }
 
 /**
- * Returns a promise that resolves when the given message has been observed
- * for the first time.
+ * Returns a promise that resolves when one of given messages has been observed
+ * for the first time. And remove listener for all other messages.
  * @param {!Element} iframe
- * @param {string} typeOfMessage
+ * @param {!Array<string>} typeOfMessage
  * @param {boolean=} opt_is3P
- * @return {!Promise}
+ * @return {!Promise<string>}
  */
-export function listenForOncePromise(iframe, typeOfMessage, opt_is3P) {
+export function listenForMessagesOncePromise(iframe, typeOfMessages, opt_is3P) {
+  const unlistenList = [];
   return new Promise(resolve => {
-    listenForOnce(iframe, typeOfMessage, resolve, opt_is3P);
+    for (let i = 0; i < typeOfMessages.length; i++) {
+      const message = typeOfMessages[i];
+      const unlisten = listenForOnce(iframe, message, () => {
+        resolve(message);
+      }, opt_is3P);
+      unlistenList.push(unlisten);
+    }
+  }).then(message => {
+    for (let i = 0; i < unlistenList.length; i++) {
+      unlistenList[i]();
+    }
+    return message;
   });
 }
 

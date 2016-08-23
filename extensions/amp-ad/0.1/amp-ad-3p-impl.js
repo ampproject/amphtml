@@ -158,6 +158,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
+    /** @const {?string} */
+    this.adType = null;
+
     setupA2AListener(this.win);
 
     /** @private {string|undefined} */
@@ -172,6 +175,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
     const type = this.element.getAttribute('type');
+    this.type = type;
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {

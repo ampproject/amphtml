@@ -22,7 +22,9 @@ import {
   listenForOnce,
   listenForOncePromise,
   postMessageToWindows,
+  listenForMessagesOncePromise,
 } from '../../../src/iframe-helper';
+import {waitForRenderStart} from '../../../3p/integration.js';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -61,8 +63,11 @@ export class AmpAdApiHandler {
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
 
-    /** @private {!Promise|null} */
-    this.renderStartPromise_ = null;
+    /** @private {!boolean} */
+    this.isSupportRenderStart_ = false;
+
+    /** @private{!Promise|null} */
+    this.adResponsePromise_ = null;
   }
 
   /**
@@ -85,14 +90,6 @@ export class AmpAdApiHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
-    // Triggered by context.noContentAvailable() inside the ad iframe.
-    listenForOnce(this.iframe_, 'no-content', () => {
-      if (this.noContentCallback_) {
-        this.noContentCallback_();
-      } else {
-        user().info('no content callback was specified');
-      }
-    }, this.is3p_);
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
     listenForOnce(this.iframe_, 'entity-id', info => {
@@ -118,21 +115,52 @@ export class AmpAdApiHandler {
           }
         }, this.is3p_, this.is3p_));
 
+    // Install API that listen to ad response
+    if (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0) {
+      this.isSupportRenderStart_ = true;
+    }
+
+    if (this.isSupportRenderStart_) {
+      // If support render-start, create a race between render-start no-content
+      this.adResponsePromise_ = listenForMessagesOncePromise(this.iframe_,
+        ['render-start', 'no-content'], this.is3p_).then(value => {
+          if (value == 'render-start') {
+              //report performance
+          } else {
+            if (this.noContentCallback_) {
+              this.noContentCallback_();
+            } else {
+              user().info('no content callback was specified');
+            }
+          }
+        });
+    } else {
+      // If NOT support render-start, listen to bootstrap-loaded no-content
+      // respectively
+      this.adResponsePromise_ = listenForMessagesOncePromise(this.iframe_,
+        ['bootstrap-loaded'], this.is3p_);
+      listenForOnce(this.iframe_, 'no-content', () => {
+        if (this.noContentCallback_) {
+          this.noContentCallback_();
+        } else {
+          user().info('no content callback was specified');
+        }
+      }, this.is3p_);
+    }
+
     if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
 
-    this.renderStartPromise_ =
-        listenForOncePromise(this.iframe_, 'render-start', this.is3p_);
-
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
+
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
-      return this.renderStartPromise_.then(() => {
+      return this.adResponsePromise_.then(() => {
         //TODO: add performance reporting
         if (this.iframe_) {
           this.iframe_.style.visibility = '';

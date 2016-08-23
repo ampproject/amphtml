@@ -69,7 +69,7 @@ describe('amp-ad-api-handler', () => {
       expect(iframe.style.visibility).to.equal('hidden');
       iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
-        type: 'render-start',
+        type: 'bootstrap-loaded',
       });
       return startUpPromise.then(() => {
         expect(iframe.style.visibility).to.equal('');
