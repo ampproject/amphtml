@@ -150,6 +150,14 @@ export class AmpForm {
     /** @private {?string} */
     this.state_ = null;
 
+    const inputs = this.form_.elements;
+    for (let i = 0; i < inputs.length; i++) {
+      user().assert(!inputs[i].name ||
+          inputs[i].name.indexOf('__amp_source_origin') == -1,
+          'Illegal input name, __amp_source_origin found: %s',
+          inputs[i]);
+    }
+
     this.installSubmitHandler_();
   }
 

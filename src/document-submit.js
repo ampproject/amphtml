@@ -52,6 +52,14 @@ export function onDocumentFormSubmit_(e) {
     return;
   }
 
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    user().assert(!inputs[i].name ||
+        inputs[i].name.indexOf('__amp_source_origin') == -1,
+        'Illegal input name, __amp_source_origin found: %s',
+        inputs[i]);
+  }
+
   const win = form.ownerDocument.defaultView;
   const action = form.getAttribute('action');
   user().assert(action, 'form action attribute is required: %s', form);
