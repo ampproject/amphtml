@@ -51,7 +51,7 @@ try {
 
   const perf = installPerformanceService(self);
   perf.tick('is');
-  installStyles(document, cssText, () => {
+  installStyles(self.document, cssText, () => {
     try {
       // Core services.
       installRuntimeServices(self);
@@ -71,10 +71,10 @@ try {
       installGlobalClickListener(self);
 
       maybeValidate(self);
-      makeBodyVisible(document, /* waitForExtensions */ true);
+      makeBodyVisible(self.document, /* waitForExtensions */ true);
       installCacheServiceWorker(self);
     } catch (e) {
-      makeBodyVisible(document);
+      makeBodyVisible(self.document);
       throw e;
     } finally {
       perf.tick('e_is');
@@ -85,7 +85,7 @@ try {
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(document);
+  makeBodyVisible(self.document);
   throw e;
 }
 

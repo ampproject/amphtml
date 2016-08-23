@@ -17,12 +17,17 @@
 var astUtils = require('eslint/lib/ast-utils');
 
 var GLOBALS = Object.create(null);
-GLOBALS.window = true;
+GLOBALS.window = 'Use `self` instead.';
+GLOBALS.document = 'Reference it as `self.document` or similar instead.';
 
 module.exports = function(context) {
   return {
     Identifier: function(node) {
-      if (!GLOBALS[node.name]) {
+      var name = node.name;
+      if (!(name in GLOBALS)) {
+        return;
+      }
+      if (!(/Expression/.test(node.parent.type))) {
         return;
       }
 
@@ -37,8 +42,8 @@ module.exports = function(context) {
       }
 
       var message = 'Forbidden global `' + node.name + '`.';
-      if (node.name === 'window') {
-        message += ' Use `self` instead.';
+      if (GLOBALS[name]) {
+        message += ' ' + GLOBALS[name];
       }
       context.report(node, message);
     }

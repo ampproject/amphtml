@@ -394,19 +394,6 @@ var forbiddenTerms = {
       'src/dom.js',
     ],
   },
-  '\\sdocument(?![a-zA-Z0-9_:])': {
-    message: 'Use `window.document` or similar to access document, the global' +
-      '`document` is forbidden',
-    whitelist: [
-      'build-system/server.js',
-      'examples/pwa/pwa.js',
-      'examples/viewer-integr.js',
-      'testing/iframe.js',
-      'testing/screenshots/make-screenshot.js',
-      'tools/experiments/experiments.js',
-      'validator/engine/validator.js',
-    ],
-  },
   'getUnconfirmedReferrerUrl': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
