@@ -16,7 +16,7 @@
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
@@ -256,15 +256,11 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
 
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     this.iframe_ = iframe;
 
     this.applyFillContent(iframe);
-    iframe.width = getLengthNumeral(width);
-    iframe.height = getLengthNumeral(height);
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {

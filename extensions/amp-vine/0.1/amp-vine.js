@@ -39,8 +39,6 @@ class AmpVine extends AMP.BaseElement {
     const vineid = user().assert(this.element.getAttribute('data-vineid'),
       'The data-vineid attribute is required for <amp-vine> %s',
       this.element);
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
@@ -48,9 +46,6 @@ class AmpVine extends AMP.BaseElement {
       encodeURIComponent(vineid) + '/embed/simple';
 
     this.applyFillContent(iframe);
-
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
 
     /** @private {?Element} */
