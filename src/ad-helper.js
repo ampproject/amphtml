@@ -54,7 +54,7 @@ export function isAdPositionAllowed(el, win) {
 /**
  * @param {!Element} el
  * @param {!Window} win
- * @return {string} a string that contains container of the ad.
+ * @return {?string} a string that contains container of the ad.
  * This is called during layout measure.
  */
 export function getAdContainer(el) {
@@ -64,4 +64,5 @@ export function getAdContainer(el) {
       return el.tagName;
     }
   }
+  return null;
 }

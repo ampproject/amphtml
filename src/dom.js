@@ -142,7 +142,7 @@ export function copyChildren(from, to) {
 }
 
 /**
- * Create an new element on document with specified tagName and attributes.
+ * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
  * @param {!Object<string, string>} attributes

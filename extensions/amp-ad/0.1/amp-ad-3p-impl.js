@@ -160,8 +160,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     setupA2AListener(this.win);
 
-    /** @private {?string} */
-    this.container_ = null;
+    /** @private {string=} */
+    this.container_ = undefined;
   }
 
   /**
@@ -203,9 +203,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   onLayoutMeasure() {
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
     /** detect ad containers, add the list to element as a new attribute */
-    if (this.container_ === null) {
+    if (this.container_ === undefined) {
       this.container_ = getAdContainer(this.element);
-      if (this.container_ != undefined) {
+      if (this.container_) {
         this.element.setAttribute('amp-container-element', this.container_);
       }
     }

@@ -42,11 +42,6 @@ function tests(name) {
         src: 'testsrc',
       });
       adContainer.appendChild(ampAd);
-      const link = createElementWithAttributes(iframe.doc, 'link', {
-        rel: 'canonical',
-        href: 'blan',
-      });
-      iframe.doc.head.appendChild(link);
       return iframe.addElement(adContainer).then(() => {
         return Promise.resolve({
           iframe,
@@ -540,7 +535,6 @@ function tests(name) {
         ampAd.implementation_.onLayoutMeasure();
         expect(ampAd.getAttribute('amp-container-element'))
             .to.equal('AMP-STICKY-AD');
-        console.log(obj.ampAd);
       });
     });
   };
