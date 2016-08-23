@@ -22,7 +22,6 @@ import {
 import {resetExperimentToggles_} from '../../../../src/experiments';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
-import {viewerFor} from '../../../../src/viewer';
 import {documentStateFor} from '../../../../src/document-state';
 import {platformFor} from '../../../../src/platform';
 import * as sinon from 'sinon';
@@ -349,7 +348,6 @@ describe('a4a_config hash param parsing', () => {
     it(`should find viewer param when pattern is ${hashBase}`, () => {
       win.location.hash = hashBase.replace('PARAM', 'a4a:-1');
       installViewerService(win);
-      viewerFor(win);
       // Ensure that internal branches aren't attached, even if the PRNG
       // would normally trigger them.
       rand.onFirstCall().returns(-1);
@@ -377,7 +375,6 @@ describe('a4a_config hash param parsing', () => {
       win.location.search = hashBase.replace('PARAM', 'a4a:-1');
       win.location.hash = hashBase.replace('PARAM', 'a4a:2');
       installViewerService(win);
-      viewerFor(win);
       // Ensure that internal branches aren't attached, even if the PRNG
       // would normally trigger them.
       rand.onFirstCall().returns(-1);
