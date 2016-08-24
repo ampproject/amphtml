@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+import {loadScript,validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,18 +22,15 @@ import {loadScript} from '../3p/3p';
  */
 export function neo4wPPN(global, data) {
 
-//  checkData(data, ['loc']);
+  validateData(data, ['loc']);
 
-  const $neodata = global;
+  global._neodata = {
+    adagioTag: [{
+      'loc': data.loc,
+      'ph': 'c',
+    }],
+    amp: data,
+  }
 
-  $neodata._neodata = {};
-  $neodata._neodata.adagioTag = [];
-  $neodata._neodata.amp = data;
-
-  $neodata._neodata.adagioTag.push({
-    'loc': data.loc,
-    'ph': 'c',
-  });
-
-  loadScript($neodata, 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js');
+  loadScript(global, 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js');
 }

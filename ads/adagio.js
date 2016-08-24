@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 // adagio js
-import {loadScript} from '../3p/3p';
+import {loadScript,validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,7 +22,7 @@ import {loadScript} from '../3p/3p';
  */
 export function adagio(global, data) {
 
-  //checkData(data, ['sid', 'loc']);
+  validateData(data, ['sid', 'loc']);
 
   const $neodata = global;
 

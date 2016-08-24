@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+import {loadScript,validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,7 +22,7 @@ import {loadScript} from '../3p/3p';
  */
 export function neo4w(global, data) {
 
-  //checkData(data, ['pid', 'taxonomy']);
+  validateData(data, ['pid', 'taxonomy']);
 
   const $neodata = global;
   const taxonomy = data['taxonomy'];
