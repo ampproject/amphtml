@@ -273,17 +273,13 @@ export class Visibility {
     const selector = config['selector'];
     const element = getElement(selector, analyticsElement,
         config['selectionMethod']);
-    if (!element) {
-      user().assert(analyticsElement,
-          'Element not found for visibilitySpec: ' + selector);
-    }
+    user().assert(element, 'Element not found for visibilitySpec: ' + selector);
     let res = null;
     try {
       res = this.resourcesService_.getResourceForElement(element);
     } catch (e) {
-      user().error(TAG_,
+      user().assert(res,
           'Visibility tracking not supported on element: ', element);
-      return;
     }
 
     const resId = res.getId();
