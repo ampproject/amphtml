@@ -106,14 +106,10 @@ export class AmpAdApiHandler {
           if (data.width !== undefined) {
             newWidth = Math.max(this.element_./*OK*/offsetWidth +
                 data.width - this.iframe_./*OK*/offsetWidth, data.width);
-            this.iframe_.width = newWidth;
-            this.element_.setAttribute('width', newWidth);
           }
           if (data.height !== undefined) {
             newHeight = Math.max(this.element_./*OK*/offsetHeight +
                 data.height - this.iframe_./*OK*/offsetHeight, data.height);
-            this.iframe_.height = newHeight;
-            this.element_.setAttribute('height', newHeight);
           }
           if (newHeight !== undefined || newWidth !== undefined) {
             this.updateSize_(newHeight, newWidth, source, origin);
@@ -168,11 +164,17 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width, source, origin) {
-    this.baseInstance_.attemptChangeSize(height, width).then(
-        () => this.sendEmbedSizeResponse_(
-            true /* success */, width, height, source, origin),
-        () => this.sendEmbedSizeResponse_(
-            false /* success */, width, height, source, origin));
+    this.baseInstance_.attemptChangeSize(height, width).then(() => {
+      if (height) {
+        this.iframe_.height = height;
+      }
+      if (width) {
+        this.iframe_.width = width;
+      }
+      this.sendEmbedSizeResponse_(
+        true /* success */, width, height, source, origin);
+    }, () => this.sendEmbedSizeResponse_(
+        false /* success */, width, height, source, origin));
   }
 
   /**

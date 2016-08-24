@@ -130,7 +130,7 @@ function tests(name) {
             impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
               expect(newWidth).to.equal(114);
-              resolve(impl);
+              resolve();
             };
             impl.iframe_.onload = function() {
               impl.iframe_.contentWindow.postMessage({
@@ -145,9 +145,6 @@ function tests(name) {
             };
             impl.iframe_.src = iframeSrc;
           });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
         });
       });
 
@@ -167,7 +164,7 @@ function tests(name) {
             impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
               expect(newWidth).to.be.undefined;
-              resolve(impl);
+              resolve();
             };
             impl.iframe_.onload = function() {
               impl.iframe_.contentWindow.postMessage({
@@ -181,8 +178,6 @@ function tests(name) {
             };
             impl.iframe_.src = iframeSrc;
           });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
         });
       });
 
