@@ -57,9 +57,10 @@
   will-change: auto !important;
   mask: none !important;
   filter: none !important;
-  box-reflect: none !important;
   perspective: none !important;
   transform-style: flat !important;
+  /* Webkit specific, non-standard - not auto-prefixable */
+  -webkit-box-reflect: none !important;
 }
 
 :root.-amp-lightboxed-ancestor {
@@ -75,7 +76,8 @@
   right: 0 !important;
   bottom: 0 !important;
   background-image: none !important;
-  /* For now we force a non-transparent shim until we find a good solution
+  /*
+   * For now we force a non-transparent shim until we find a good solution
    * for the background page shifting when items get lightboxed.
    */
   opacity: 1 !important;
