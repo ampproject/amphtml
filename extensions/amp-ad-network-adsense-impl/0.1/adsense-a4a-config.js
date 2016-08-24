@@ -50,8 +50,8 @@ const ADSENSE_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
 
 /** @const {!Branches} @private */
 const ADSENSE_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152630',
-  experiment: '117152633',
+  control: '117152670',
+  experiment: '117152671',
 };
 
 /**

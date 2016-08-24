@@ -50,8 +50,8 @@ const DOUBLECLICK_A4A_EXTERNAL_EXPERIMENT_BRANCHES = {
 
 /** @const {!Branches} @private */
 const DOUBLECLICK_A4A_INTERNAL_EXPERIMENT_BRANCHES = {
-  control: '117152640',
-  experiment: '117152641',
+  control: '117152680',
+  experiment: '117152681',
 };
 
 /**
