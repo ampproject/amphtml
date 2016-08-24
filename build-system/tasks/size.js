@@ -105,6 +105,7 @@ function normalizeRows(rows) {
 
   // normalize sw.js
   normalizeRow(rows, 'sw.js', 'sw.max.js', true);
+  normalizeRow(rows, 'sw-kill.js', 'sw-kill.max.js', true);
 
   // normalize extensions
   var curName = null;
