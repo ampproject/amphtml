@@ -48,6 +48,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
 
+    /** @private @const {string} */
     this.mode_ = mode;
     /** @private @const {number} */
     this.contentId_ = contentId;

@@ -46,8 +46,7 @@ class AmpTwitter extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'twitter');
+    const iframe = getIframe(this.win, this.element, 'twitter');
     this.applyFillContent(iframe);
     const amp = this.element;
     // Triggered by context.updateDimensions() inside the iframe.
