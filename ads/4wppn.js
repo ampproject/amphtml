@@ -30,7 +30,7 @@ export function neo4wPPN(global, data) {
       'ph': 'c',
     }],
     amp: data,
-  }
+  };
 
   loadScript(global, 'https://js-ssl.neodatagroup.com/uploads/js/4wm.js');
 }
