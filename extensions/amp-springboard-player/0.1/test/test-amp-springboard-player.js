@@ -55,8 +55,6 @@ describe('amp-springboard-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://cms.springboardplatform.com/' +
           'embed_iframe/261/video/1578473/test401/test.com/10');
-      expect(iframe.getAttribute('width')).to.equal('480');
-      expect(iframe.getAttribute('height')).to.equal('270');
     });
   });
 
