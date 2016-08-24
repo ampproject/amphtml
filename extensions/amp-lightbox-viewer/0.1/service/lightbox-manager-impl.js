@@ -34,14 +34,14 @@ import {timerFor} from '../../../../src/timer';
 class LightboxManager {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
     // Extra safety check, we don't install this service if experiment is off
     dev().assert(isExperimentOn(ampdoc.win, 'amp-lightbox-viewer'));
 
-    /** @const @private {!./ampdoc-impl.AmpDoc} */
+    /** @const @private {!../../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
     /**

@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {extensionsFor} from '../../../../src/extensions';
 import {elementByTag, waitForBodyPromise} from '../../../../src/dom';
 import {isExperimentOn} from '../../../../src/experiments';
 import {dev} from '../../../../src/log';
-
 
 const ELIGIBLE_TAGS = [
   'amp-img',
@@ -52,7 +50,7 @@ const VIEWER_TAG = 'amp-lightbox-viewer';
  * becoming lightboxable and adds `lightbox` attribute to them.
  * It may also install a tap handler on elements that meet our heuristics
  * to automatically open in lightbox on tap.
- * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Promise}
  */
 export function autoDiscoverLightboxables(ampdoc) {
@@ -84,7 +82,7 @@ export function autoDiscoverLightboxables(ampdoc) {
 /**
  * Decides whether an element meets the heuristics to become lightboxable.
  * @param {!Element} element
- * @return {boolean}
+ * @return {!boolean}
  */
 function meetsHeuristics(element) {
   dev().assert(element);
@@ -108,7 +106,7 @@ function meetsHeuristics(element) {
  * Decides whether an already lightboxable element should automatically get
  * a tap handler to open in the lightbox.
  * @param {!Element} element
- * @return {boolean}
+ * @return {!boolean}
  */
 function meetsHeuristicsForTap(element) {
   dev().assert(element);
@@ -127,7 +125,7 @@ function meetsHeuristicsForTap(element) {
  * Tries to find an existing amp-lightbox-viewer, if there is none, it adds a
  * default one.
  * @param {!Element} elem
- * @return {string} Returns the id of the amp-lightbox-viewer.
+ * @return {!string} Returns the id of the amp-lightbox-viewer.
  */
 function maybeInstallLightboxViewer(ampdoc) {
   // TODO(aghassemi): Use the upcoming ampdoc.waitForBody

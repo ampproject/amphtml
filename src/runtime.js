@@ -214,7 +214,7 @@ function adoptShared(global, opts, callback) {
    * other configurations.
    */
   function installAutoLoadExtensions() {
-    if (isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
+    if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
       extensionsFor(global).loadExtension('amp-lightbox-viewer');
     }
   }

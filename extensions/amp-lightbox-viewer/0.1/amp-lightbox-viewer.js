@@ -28,7 +28,10 @@ import {toggle} from '../../../src/style';
 /** @const */
 const TAG = 'amp-lightbox-viewer';
 
-class AmpLightboxViewer extends AMP.BaseElement {
+/**
+ * @private visible for testing.
+ */
+export class AmpLightboxViewer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -56,7 +59,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
 
     /**
      * @const
-     * @private {!../../../src/service/lightbox-manager-impl.LightboxManager}
+     * @private {!./service/lightbox-manager-impl.LightboxManager}
      */
     this.manager_ = lightboxManagerForDoc(this.win.document.documentElement);
 
@@ -74,6 +77,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
     // layoutCallback for lightbox-viewer is meaningless, lightbox-viewer
     // doesn't have children, it just manages elements elsewhere in the page in
     // `open_` `close_` and `updateViewer_` methods.
+    return Promise.resolve();
   }
 
   /**
@@ -101,6 +105,9 @@ class AmpLightboxViewer extends AMP.BaseElement {
     this.buildButton_('Next', 'amp-lightbox-viewer-button-next', next);
     this.buildButton_('Previous', 'amp-lightbox-viewer-button-prev', prev);
     this.buildButton_('Close', 'amp-lightbox-viewer-button-close', close);
+
+    this.container_.setAttribute('no-prev', '');
+    this.container_.setAttribute('no-next', '');
   }
 
   /**
@@ -131,6 +138,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
    *  // Opens the element referenced by elementId
    *  on="tap:myLightboxViewer.open(id='<elementId>')
    * @override
+   * @return {!Promise}
    */
   activate(invocation) {
     let target = invocation.source;
@@ -140,20 +148,21 @@ class AmpLightboxViewer extends AMP.BaseElement {
       user().assert(target,
         'amp-lightbox-viewer.open: element with id: %s not found', targetId);
     }
-    this.open_(target);
+    return this.open_(target);
   }
 
   /**
    * Opens the lightbox-viewer and displays the given element inside.
    * @param {!Element} element Element to lightbox.
    * @private
+   * @return {!Promise}
    */
   open_(element) {
     if (this.activeElement_ == element) {
       return;
     }
 
-    this.updateViewer_(element);
+    const updateViewerPromise = this.updateViewer_(element);
     this.getViewport().enterLightboxMode();
 
     toggle(this.element, true);
@@ -161,6 +170,8 @@ class AmpLightboxViewer extends AMP.BaseElement {
 
     this.win.document.documentElement.addEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
+
+    return updateViewerPromise;
   }
 
   /**
@@ -179,6 +190,9 @@ class AmpLightboxViewer extends AMP.BaseElement {
     this.activeElement_ = null;
     this.active_ = false;
 
+    this.container_.setAttribute('no-prev', '');
+    this.container_.setAttribute('no-next', '');
+
     this.win.document.documentElement.removeEventListener(
         'keydown', this.boundHandleKeyboardEvents_);
   }
@@ -186,12 +200,13 @@ class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Opens the next element to be displayed in the lightbox.
    * @private
+   * @return {!Promise}
    */
   next_() {
     dev().assert(this.activeElement_);
-    this.manager_.getNext(this.activeElement_).then(nextElement => {
+    return this.manager_.getNext(this.activeElement_).then(nextElement => {
       if (nextElement) {
-        this.updateViewer_(nextElement);
+        return this.updateViewer_(nextElement);
       }
     });
   }
@@ -199,12 +214,13 @@ class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Opens the previous element to be displayed in the lightbox.
    * @private
+   * @return {!Promise}
    */
   previous_() {
     dev().assert(this.activeElement_);
-    this.manager_.getPrevious(this.activeElement_).then(prevElement => {
+    return this.manager_.getPrevious(this.activeElement_).then(prevElement => {
       if (prevElement) {
-        this.updateViewer_(prevElement);
+        return this.updateViewer_(prevElement);
       }
     });
   }
@@ -213,6 +229,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
    * Updates the viewer to display the new element and tears down the old one
    * @param {!Element} newElement
    * @private
+   * @return {!Promise}
    */
   updateViewer_(newElement) {
     const previousElement = this.activeElement_;
@@ -231,7 +248,7 @@ class AmpLightboxViewer extends AMP.BaseElement {
     this.activeElement_ = newElement;
 
     // update the controls
-    this.updateControls_();
+    const updateControlsPromise = this.updateControls_();
 
     // TODO(aghassemi): Preloading of +/- 1 elements
 
@@ -242,6 +259,8 @@ class AmpLightboxViewer extends AMP.BaseElement {
       newElement.__AMP__RESOURCE.setInViewport(true);
       newElement.resources_.scheduleLayout(newElement, newElement);
     }
+
+    return updateControlsPromise;
   }
 
   /**
@@ -267,11 +286,13 @@ class AmpLightboxViewer extends AMP.BaseElement {
   /**
    * Updates the controls based on the current active element.
    * @private
+   * @return {!Promise}
    */
   updateControls_() {
     dev().assert(this.activeElement_);
 
-    this.manager_.hasPrevious(this.activeElement_).then(hasPrev => {
+    const prevPromise = this.manager_.hasPrevious(this.activeElement_)
+    .then(hasPrev => {
       if (!hasPrev) {
         this.container_.setAttribute('no-prev', '');
       } else {
@@ -279,13 +300,16 @@ class AmpLightboxViewer extends AMP.BaseElement {
       }
     });
 
-    this.manager_.hasNext(this.activeElement_).then(hasNext => {
+    const nextPromise = this.manager_.hasNext(this.activeElement_)
+    .then(hasNext => {
       if (!hasNext) {
         this.container_.setAttribute('no-next', '');
       } else {
         this.container_.removeAttribute('no-next');
       }
     });
+
+    return Promise.all([nextPromise, prevPromise]);
   }
 
   /**
@@ -341,10 +365,17 @@ class AmpLightboxViewer extends AMP.BaseElement {
   }
 }
 
-if (isExperimentOn(AMP.win, TAG)) {
-  // TODO(aghassemi): This only works for singleDoc mode. We will move
-  // installation of LightboxManager to core after the experiment, okay for now.
-  const ampdoc = ampdocFor(AMP.win).getAmpDoc();
-  installLightboxManagerForDoc(ampdoc);
-  AMP.registerElement(TAG, AmpLightboxViewer, CSS);
+/**
+ * @private visible for testing.
+ */
+export function maybeInstallLightboxManager(win) {
+  if (isExperimentOn(win, TAG)) {
+    // TODO(aghassemi): This only works for singleDoc mode. We will move
+    // installation of LightboxManager to core after the experiment, okay for now.
+    const ampdoc = ampdocFor(win).getAmpDoc();
+    installLightboxManagerForDoc(ampdoc);
+  }
 }
+
+maybeInstallLightboxManager(AMP.win);
+AMP.registerElement(TAG, AmpLightboxViewer, CSS);

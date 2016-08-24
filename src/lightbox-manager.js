@@ -16,7 +16,9 @@
 
 import {getExistingServiceForDoc} from './service';
 
+/*
+ * @return {!../extensions/amp-lightbox-viewer/service/lightbox-manager-impl.LightboxManager}
+ **/
 export function lightboxManagerForDoc(nodeOrDoc) {
-  return /** @type {!./service/lightbox-manager-impl.LightboxManager} */ (
-      getExistingServiceForDoc(nodeOrDoc, 'lightboxManager'));
+  return getExistingServiceForDoc(nodeOrDoc, 'lightboxManager');
 };
