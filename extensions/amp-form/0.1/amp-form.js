@@ -16,7 +16,11 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  addParamsToUrl,
+  SOURCE_ORIGIN_PARAM,
+} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
@@ -149,6 +153,13 @@ export class AmpForm {
 
     /** @private {?string} */
     this.state_ = null;
+
+    const inputs = this.form_.elements;
+    for (let i = 0; i < inputs.length; i++) {
+      user().assert(!inputs[i].name ||
+          inputs[i].name.indexOf(SOURCE_ORIGIN_PARAM) == -1,
+          'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+    }
 
     this.installSubmitHandler_();
   }
