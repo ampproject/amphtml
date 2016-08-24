@@ -16,6 +16,7 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
+import {parseExperimentIds} from './a4a/traffic-experiments';
 
 /**
  * @enum {number}
@@ -41,6 +42,7 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+    'experimentId',
   ]);
 
   if (global.context.clientId) {
@@ -89,6 +91,12 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         pubads.markAsGladeControl();
       } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
         pubads.markAsGladeOptOut();
+      }
+
+      if (data['experimentId']) {
+        const experimentIdList = parseExperimentIds(data['experimentId']);
+        experimentIdList &&
+            experimentIdList.forEach(eid => pubads.forceExperiment(eid));
       }
 
       pubads.markAsAmp();
