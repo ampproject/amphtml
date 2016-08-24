@@ -61,12 +61,13 @@ export function onDocumentFormSubmit_(e) {
 
   const win = form.ownerDocument.defaultView;
   const action = form.getAttribute('action');
-  user().assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, form, 'action');
-  user().assert(!startsWith(action, urls.cdn),
+  form.__AMP_INIT_ACTION__ = form.__AMP_INIT_ACTION__ || action;
+  user().assert(form.__AMP_INIT_ACTION__,
+      'form action attribute is required: %s', form);
+  assertHttpsUrl(form.__AMP_INIT_ACTION__, form, 'action');
+  user().assert(!startsWith(form.__AMP_INIT_ACTION__, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
 
-  form.__AMP_INIT_ACTION__ = form.__AMP_INIT_ACTION__ || action;
   // Update the form non-xhr action to add `__amp_source_origin` parameter.
   // This allows publishers to understand where the request is coming from.
   form.setAttribute('action', getCorsUrl(win, form.__AMP_INIT_ACTION__));

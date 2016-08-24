@@ -211,6 +211,8 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
+  user().assert(urlString.indexOf(SOURCE_ORIGIN_PARAM) == -1,
+      'Source origin is not allowed in %s', urlString);
   // (erwinm, #4560): type cast necessary until #4560 is fixed
   const url = parseUrl(/** @type {string} */ (urlString));
   user().assert(
