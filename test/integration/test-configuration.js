@@ -19,23 +19,24 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 describe('Configuration', function() {
   this.timeout(5000);
 
+  let config;
+
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/configuration.html', 500)
+    config = {};
+    config.cdnUrl = 'http://foo.bar.com';
+    config.thirdPartyUrl = 'http://bar.baz.com';
+    config.thirdPartyFrameRegex = '/a-website\.com/';
+    config.errorReportingUrl = 'http://error.foo.com';
+    return createFixtureIframe('test/fixtures/configuration.html', 500, (win) => {
+      win.AMP_CONFIG = config;
+    })
     .then(f => {
       fixture = f;
     });
   });
 
   it('urls should be configurable', () => {
-    expect(fixture.win.AMP_CONFIG).to.equal(undefined);
-
-    const config = fixture.win.AMP_CONFIG = {};
-    config.cdnUrl = 'http://foo.bar.com';
-    config.thirdPartyUrl = 'http://bar.baz.com';
-    config.thirdPartyFrameRegex = /a-website\.com/;
-    config.errorReportingUrl = 'http://error.foo.com';
-
     return fixture.awaitEvent('amp:load:start', 1).then(() => {
       expect(fixture.win.AMP.config.urls.cdn).to.equal(config.cdnUrl);
       expect(fixture.win.AMP.config.urls.thirdParty)
