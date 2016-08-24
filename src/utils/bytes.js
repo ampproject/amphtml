@@ -43,17 +43,18 @@ export function bytesToString(bytes) {
 };
 
 /**
- * Generate a random bytes array with specific length
+ * Generate a random bytes array with specific length using
+ * win.crypto.getRandomValues. Return null if it is not available.
  * @param {!number} length
- * @return {!Uint8Array}
+ * @return {?Uint8Array}
  */
-export function getRandomBytesArray(length) {
-  let random = Math.random();
-  const bytes = new Uint8Array(length);
-  for (let i = 0; i < length; i++) {
-    random *= 256;
-    bytes[i] = Math.floor(random);
-    random -= bytes[i];
+export function getCryptoRandomBytesArray(win, length) {
+  // Widely available in browsers we support:
+  // http://caniuse.com/#search=getRandomValues
+  if (win.crypto && win.crypto.getRandomValues) {
+    const uint8array = new Uint8Array(length);
+    win.crypto.getRandomValues(uint8array);
+    return uint8array;
   }
-  return bytes;
+  return null;
 }
