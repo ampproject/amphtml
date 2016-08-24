@@ -38,7 +38,6 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
-import {resolveUrlAttr} from '../../../src/sanitizer';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
 
@@ -84,12 +83,11 @@ class AmpInstagram extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
     const image = this.win.document.createElement('amp-img');
+    image.setAttribute('no-prerender', '');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
-    const imgSrc = resolveUrlAttr('amp-img', 'src',
-        'https://www.instagram.com/p/' + encodeURIComponent(this.shortcode_) +
-        '/media/?size=l', this.win.location);
-    image.setAttribute('src', imgSrc);
+    image.setAttribute('src', 'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) + '/media/?size=l');
     image.setAttribute('layout', 'fill');
     image.setAttribute('referrerpolicy', 'origin');
 
