@@ -31,6 +31,14 @@ class AmpGfycat extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /**
+     * @private {?Element}
+     */
+    this.iframe_ = null;
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -38,13 +46,9 @@ class AmpGfycat extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const gfyid = user().assert(
-      (this.element.getAttribute('data-gfyid') ||
-      this.element.getAttribute('gfyid')),
+      this.element.getAttribute('data-gfyid'),
       'The data-gfyid attribute is required for <amp-gfycat> %s',
       this.element);
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const layoutType = this.element.getAttribute('layout');
     const autoplay = parseInt(this.element.getAttribute('data-autoplay') ||
         this.element.getAttribute('autoplay'), 10);
 
@@ -57,18 +61,8 @@ class AmpGfycat extends AMP.BaseElement {
     }
 
     iframe.src = src;
-
     this.applyFillContent(iframe);
-
-    if (layoutType !== 'responsive') {
-      iframe.width = width;
-      iframe.height = height;
-    }
     this.element.appendChild(iframe);
-
-    /**
-     * @private {?Element}
-     */
     this.iframe_ = iframe;
 
     return loadPromise(iframe);

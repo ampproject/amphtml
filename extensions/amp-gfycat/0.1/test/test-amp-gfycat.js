@@ -1,3 +1,4 @@
+
 /**
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
@@ -49,8 +50,6 @@ describe('amp-gfycat', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://gfycat.com/ifr/LeanMediocreBeardeddragon');
-      expect(iframe.getAttribute('width')).to.equal('640');
-      expect(iframe.getAttribute('height')).to.equal('640');
     });
   });
 
