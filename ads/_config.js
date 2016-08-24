@@ -214,6 +214,13 @@ export const adPreconnect = {
     'https://www.zergnet.com',
     'https://zergnet.com',
   ],
+  zucks: [
+    'https://j.zucks.net.zimg.jp',
+    'https://sh.zucks.net',
+    'https://zucks.co.jp',
+    'https://k.zucks.net',
+    'https://static.zucks.net.zimg.jp',
+  ],
 };
 
 /**
