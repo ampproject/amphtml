@@ -40,12 +40,8 @@ class AmpFacebook extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'facebook');
     this.applyFillContent(iframe);
-    const amp = this.element;
     // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
-      // TODO REVIEW
-      amp.setAttribute('height', data.height);
-      amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);

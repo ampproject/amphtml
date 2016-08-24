@@ -48,15 +48,10 @@ class AmpTwitter extends AMP.BaseElement {
   layoutCallback() {
     const iframe = getIframe(this.win, this.element, 'twitter');
     this.applyFillContent(iframe);
-    const amp = this.element;
-    // Triggered by context.updateDimensions() inside the iframe.
     listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
       // so hide the placeholder.
       this.togglePlaceholder(false);
-      // TODO Review
-      amp.setAttribute('height', data.height);
-      amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
