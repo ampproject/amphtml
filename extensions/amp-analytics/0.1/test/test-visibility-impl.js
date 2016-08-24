@@ -37,8 +37,8 @@ describe('amp-analytics.visibility', () => {
   let visibility;
   let getIntersectionStub;
   let callbackStub;
-  let win;
   let clock;
+  let ampElement;
 
   const INTERSECTION_0P = makeIntersectionEntry([100, 100, 100, 100],
       [0, 0, 100, 100]);
@@ -51,6 +51,9 @@ describe('amp-analytics.visibility', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
+    ampElement = document.createElement('amp-analytics');
+    ampElement.id = 'abc';
+    document.body.appendChild(ampElement);
     const getIdStub = sandbox.stub();
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
@@ -67,12 +70,13 @@ describe('amp-analytics.visibility', () => {
   });
 
   afterEach(() => {
+    document.body.removeChild(ampElement);
     sandbox.restore();
   });
 
   function makeIntersectionEntry(boundingClientRect, rootBounds) {
-    boundingClientRect = layoutRectLtwh.apply(win, boundingClientRect);
-    rootBounds = layoutRectLtwh.apply(win, rootBounds);
+    boundingClientRect = layoutRectLtwh.apply(null, boundingClientRect);
+    rootBounds = layoutRectLtwh.apply(null, rootBounds);
     return {
       intersectionRect: rectIntersection(boundingClientRect, rootBounds),
       boundingClientRect,
@@ -85,7 +89,7 @@ describe('amp-analytics.visibility', () => {
     opt_visible = opt_visible === undefined ? true : opt_visible;
     getIntersectionStub.returns(intersectionChange);
     config['selector'] = '#abc';
-    visibility.listenOnce(config, callbackStub, opt_visible);
+    visibility.listenOnce(config, callbackStub, opt_visible, ampElement);
     clock.tick(20);
     verifyExpectedVars(expectedCalls, opt_expectedVars);
   }

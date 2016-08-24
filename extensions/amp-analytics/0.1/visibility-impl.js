@@ -60,6 +60,7 @@ const TOTAL_TIME_MIN = 'totalTimeMin';
 const VISIBLE_PERCENTAGE_MIN = 'visiblePercentageMin';
 const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
+const TAG_ = 'Analytics.Visibility';
 /**
  * Checks if the value is undefined or positive number like.
  * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
@@ -102,7 +103,8 @@ export function isVisibilitySpecValid(config) {
   const spec = config['visibilitySpec'];
   const selector = spec['selector'];
   if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
-    user().error('Visibility spec requires an id selector');
+    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
+        'name starting with "amp-"');
     return false;
   }
 
@@ -113,7 +115,7 @@ export function isVisibilitySpecValid(config) {
 
   if (!isPositiveNumber_(ctMin) || !isPositiveNumber_(ctMax) ||
       !isPositiveNumber_(ttMin) || !isPositiveNumber_(ttMax)) {
-    user().error(
+    user().error(TAG_,
         'Timing conditions should be positive integers when specified.');
     return false;
   }
@@ -126,12 +128,13 @@ export function isVisibilitySpecValid(config) {
 
   if (!isValidPercentage_(spec[VISIBLE_PERCENTAGE_MAX]) ||
       !isValidPercentage_(spec[VISIBLE_PERCENTAGE_MIN])) {
-    user().error('visiblePercentage conditions should be between 0 and 100.');
+    user().error(TAG_,
+        'visiblePercentage conditions should be between 0 and 100.');
     return false;
   }
 
   if (spec[VISIBLE_PERCENTAGE_MAX] < spec[VISIBLE_PERCENTAGE_MIN]) {
-    user().error('visiblePercentageMax should be greater than ' +
+    user().error(TAG_, 'visiblePercentageMax should be greater than ' +
         'visiblePercentageMin');
     return false;
   }
@@ -271,11 +274,16 @@ export class Visibility {
     const element = getElement(selector, analyticsElement,
         config['selectionMethod']);
     if (!element) {
-      user().error('Element not found for visibilitySpec: ' + selector);
+      user().assert(analyticsElement,
+          'Element not found for visibilitySpec: ' + selector);
     }
-    const res = this.resourcesService_.getResourceForElement(element);
-    if (!res) {
-      user().error('Visibility tracking not supported on element: ' + element);
+    let res = null;
+    try {
+      res = this.resourcesService_.getResourceForElement(element);
+    } catch (e) {
+      user().error(TAG_,
+          'Visibility tracking not supported on element: ', element);
+      return;
     }
 
     const resId = res.getId();
