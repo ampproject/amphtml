@@ -33,8 +33,14 @@ window.draw3p;
 window.AMP_TEST;
 window.AMP_TEST_IFRAME;
 window.AMP_TAG;
-window.AMP_CONFIG;
+window.AMP_CONFIG = {};
 window.AMP = {};
+
+window.AMP_CONFIG.thirdPartyUrl;
+window.AMP_CONFIG.thirdPartyFrameHost;
+window.AMP_CONFIG.thirdPartyFrameRegex;
+window.AMP_CONFIG.cdnUrl;
+window.AMP_CONFIG.errorReportingUrl;
 
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
