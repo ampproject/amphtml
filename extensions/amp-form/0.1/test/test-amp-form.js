@@ -107,6 +107,17 @@ describe('amp-form', () => {
     expect(() => new AmpForm(form)).to.not.throw;
   });
 
+  it('should assert none of the inputs named __amp_source_origin', () => {
+    const form = getForm(document, true, false);
+    const illegalInput = document.createElement('input');
+    illegalInput.setAttribute('type', 'hidden');
+    illegalInput.setAttribute('name', '__amp_source_origin');
+    illegalInput.value = 'https://example.com';
+    form.appendChild(illegalInput);
+    expect(() => new AmpForm(form)).to.throw(
+        /Illegal input name, __amp_source_origin found/);
+  });
+
   it('should listen to submit event and inputs blur and input events', () => {
     const form = getForm();
     const nameInput = form.querySelector('input[name=name]');

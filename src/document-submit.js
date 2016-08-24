@@ -16,7 +16,7 @@
 
 import {startsWith} from './string';
 import {user} from './log';
-import {assertHttpsUrl, getCorsUrl} from './url';
+import {assertHttpsUrl, getCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
@@ -50,6 +50,13 @@ export function onDocumentFormSubmit_(e) {
   const form = e.target;
   if (!form || form.tagName != 'FORM') {
     return;
+  }
+
+  const inputs = form.elements;
+  for (let i = 0; i < inputs.length; i++) {
+    user().assert(!inputs[i].name ||
+        inputs[i].name.indexOf(SOURCE_ORIGIN_PARAM) == -1,
+        'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
 
   const win = form.ownerDocument.defaultView;
