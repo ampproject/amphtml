@@ -37,8 +37,8 @@ let cache;
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
 
-/** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+/** @const {string} */
+export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
  * @typedef {({
