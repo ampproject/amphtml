@@ -19,16 +19,17 @@
  * use the src/config.js module for various constants. We can use the
  * AMP_CONFIG global to translate user-defined configurations to this
  * module.
- * @type {Object}
+ * @type {!Object<string, string>}
  */
 const env = self.AMP_CONFIG || {};
 
+/** @type {!Object<string, string>} */
 export const urls = {
-  thirdParty: env.thirdPartyUrl || 'https://3p.ampproject.net',
-  thirdPartyFrameHost: env.thirdPartyFrameHost || 'ampproject.net',
-  thirdPartyFrameRegex: env.thirdPartyFrameRegex ||
-                        /^d-\d+\.ampproject\.net$/,
-  cdn: env.cdnUrl || 'https://cdn.ampproject.org',
-  errorReporting: env.errorReportingUrl ||
-                  'https://amp-error-reporting.appspot.com/r',
+  thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
+  thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
+  thirdPartyFrameRegex: env['thirdPartyFrameRegex'] ||
+      /^d-\d+\.ampproject\.net$/,
+  cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
+  errorReporting: env['errorReportingUrl'] ||
+      'https://amp-error-reporting.appspot.com/r',
 };

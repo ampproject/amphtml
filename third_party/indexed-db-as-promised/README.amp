@@ -1,5 +1,0 @@
-Version: 0.1.0
-License: MIT License
-
-Description:
-A wrapper library to give Indexed DB a promise interface.
