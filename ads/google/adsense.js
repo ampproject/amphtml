@@ -15,7 +15,6 @@
  */
 
 import {validateData} from '../../3p/3p';
-import {parseExperimentIds} from './a4a/traffic-experiments';
 
 /**
  * Make an adsense iframe.
@@ -57,7 +56,7 @@ export function adsense(global, data) {
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
   const initializer = {};
   if (data['experimentId']) {
-    const experimentIdList = parseExperimentIds(data['experimentId']);
+    const experimentIdList = data['experimentId'].split(',');
     if (experimentIdList) {
       initializer['params'] = {
         'google_ad_modifications': {
