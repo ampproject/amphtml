@@ -367,7 +367,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise.<string|undefined>} The request that was sent out.
+   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
@@ -388,7 +388,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {string} request The request to process.
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise.<string|undefined>} The request that was sent out.
+   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleRequestForEvent_(request, trigger, event) {
@@ -426,7 +426,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {!JSONType} trigger The config to use to determine sampling.
-   * @return {!Promise.<boolean>} Whether the request should be sampled in or
+   * @return {!Promise<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
    */
