@@ -363,15 +363,35 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Callback for events that are registered by the config's triggers. This
-   * method generates the request and sends the request out.
+   * method generates requests and sends them out.
    *
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise.<string|undefined>} The request that was sent out.
+   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
-    let request = this.requests_[trigger['request']];
+    const requests = isArray(trigger['request'])
+        ? trigger['request'] : [trigger['request']];
+
+    const resultPromises = [];
+    for (let r = 0; r < requests.length; r++) {
+      const request = this.requests_[requests[r]];
+      resultPromises.push(this.handleRequestForEvent_(request, trigger, event));
+    }
+    return Promise.all(resultPromises);
+  }
+
+  /**
+   * Processes a request for an event callback and sends it out.
+   *
+   * @param {string} request The request to process.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @private
+   */
+  handleRequestForEvent_(request, trigger, event) {
     if (!request) {
       user().error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
@@ -406,7 +426,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {!JSONType} trigger The config to use to determine sampling.
-   * @return {!Promise.<boolean>} Whether the request should be sampled in or
+   * @return {!Promise<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
    */

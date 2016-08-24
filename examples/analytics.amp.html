@@ -99,7 +99,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "clickPings": {
       "on": "click",
       "selector": "${img}",
-      "request": "event",
+      "request": ["endpoint", "base"],
       "vars": {
         "type": "click",
         "img": "#anim-id, #container"

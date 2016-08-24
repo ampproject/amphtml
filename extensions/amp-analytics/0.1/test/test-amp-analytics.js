@@ -186,7 +186,8 @@ describe('amp-analytics', function() {
                 request: name,
               }, {
                 vars: Object.create(null),
-              }).then(url => {
+              }).then(urls => {
+                const url = urls[0];
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {
                   throw new Error('Define ' + vendor + '.' + name +
@@ -279,7 +280,7 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('expands nested requests', function() {
+  it('expands nested requests (3 levels)', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
         'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
@@ -302,6 +303,20 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
           .to.equal('/bar&/bar&/bar&&baz&baz&baz');
+    });
+  });
+
+  it('sends multiple requests per trigger', function() {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo':
+        'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
+      'triggers': [{'on': 'visible', 'request': ['foo', 'foobar']}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledTwice).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
+      expect(sendRequestSpy.args[1][0]).to.equal('b1');
     });
   });
 
