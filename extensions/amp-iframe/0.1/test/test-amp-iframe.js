@@ -539,10 +539,11 @@ describe('amp-iframe', () => {
 
   it('should correctly classify ads', () => {
     function e(width, height) {
-      const element = document.createElement('test');
-      element.setAttribute('width', width);
-      element.setAttribute('height', height);
-      return element;
+      return {
+        getIntersectionElementLayoutBox() {
+          return {width, height};
+        },
+      };
     }
     expect(isAdLike(e(300, 250))).to.be.true;
     expect(isAdLike(e(320, 270))).to.be.true;
