@@ -20,6 +20,7 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  SOURCE_ORIGIN_PARAM,
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
@@ -286,6 +287,9 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  user().assert(attrValue.indexOf(SOURCE_ORIGIN_PARAM) == -1,
+      'Source origin is not allowed in %s', attrValue);
+
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 
