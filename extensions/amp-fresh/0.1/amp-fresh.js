@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {copyChildren} from '../../../src/dom';
+import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined, Layout} from '../../../src/layout';
+import {setStyle} from '../../../src/style';
 import {user} from '../../../src/log';
 
 
@@ -26,7 +29,7 @@ export class AmpFresh extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    return true;
   }
 
   buildCallback() {
@@ -34,6 +37,47 @@ export class AmpFresh extends AMP.BaseElement {
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
 
     user().assert(this.isExperimentOn_, `Experiment ${TAG} disabled`);
+
+    /** @private @const {string} */
+    this.ampFreshId_ = user().assert(this.element.getAttribute('id'),
+        'amp-fresh must have an id.');
+
+    /** @private @const {!AmpFreshManager} */
+    this.manager_ = getOrInsallAmpFreshManager(this.element);
+
+    this.manager_.register(this.ampFreshId_, this);
+
+    this.hide();
+  }
+
+  /**
+   * @param {!Element} surrogateAmpFresh
+   */
+  update(surrogateAmpFresh) {
+    // Never reparent the surrogate to the current document's subtree
+    // as this will trigger custom element life cycles,
+    // importing it shouldn't trigger.
+    surrogateAmpFresh = this.win.document.adoptNode(surrogateAmpFresh);
+    this.mutateElement(() => {
+      this.element.textContent = '';
+      copyChildren(surrogateAmpFresh, this.element);
+      this.show();
+    });
+  }
+
+  /**
+   * Toggles the element to be visible and active.
+   */
+  show() {
+    this.element.classList.remove('amp-hidden');
+    this.element.classList.add('amp-active');
+  }
+
+  /**
+   * Toggles the element to be hidden.
+   */
+  hide() {
+    this.element.classList.add('amp-hidden');
   }
 }
 
