@@ -37,6 +37,7 @@ import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
 import {a9} from '../ads/a9';
+import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
@@ -114,6 +115,7 @@ const IS_DEV = true;
 
 // Keep the list in alphabetic order
 register('a9', a9);
+register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adform', adform);
 register('adgeneration', adgeneration);
