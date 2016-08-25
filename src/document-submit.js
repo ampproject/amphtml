@@ -55,7 +55,7 @@ export function onDocumentFormSubmit_(e) {
   const inputs = form.elements;
   for (let i = 0; i < inputs.length; i++) {
     user().assert(!inputs[i].name ||
-        inputs[i].name.indexOf(SOURCE_ORIGIN_PARAM) == -1,
+        inputs[i].name != SOURCE_ORIGIN_PARAM,
         'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
 

@@ -108,6 +108,12 @@ describe('amp-analytics.transport', () => {
     }).to.throw(/https/);
   });
 
+  it('should NOT allow __amp_source_origin', () => {
+    expect(() => {
+      sendRequest(window, 'https://twitter.com?__amp_source_origin=1');
+    }).to.throw(/Source origin is not allowed in/);
+  });
+
   describe('sendRequestUsingIframe', () => {
     const url = 'http://iframe.localhost:9876/test/fixtures/served/iframe.html';
     it('should create and delete an iframe', () => {

@@ -211,8 +211,6 @@ export function assertHttpsUrl(
     urlString, elementContext, sourceName = 'source') {
   user().assert(urlString != null, '%s %s must be available',
       elementContext, sourceName);
-  user().assert(urlString.indexOf(SOURCE_ORIGIN_PARAM) == -1,
-      'Source origin is not allowed in %s', urlString);
   // (erwinm, #4560): type cast necessary until #4560 is fixed
   const url = parseUrl(/** @type {string} */ (urlString));
   user().assert(
@@ -428,10 +426,19 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
  * @return {string}
  */
 export function getCorsUrl(win, url) {
+  checkCorsUrl(url);
   const sourceOrigin = getSourceOrigin(win.location.href);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+}
+
+
+/**
+ * Checks if the url have __amp_source_origin and throws if it does.
+ * @param {string} url
+ */
+export function checkCorsUrl(url) {
   const parsedUrl = parseUrl(url);
   const query = parseQueryString(parsedUrl.search);
   user().assert(!(SOURCE_ORIGIN_PARAM in query),
       'Source origin is not allowed in %s', url);
-  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
 }

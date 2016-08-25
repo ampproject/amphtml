@@ -257,12 +257,6 @@ describe('assertHttpsUrl', () => {
     }).to.throw(/source must be available/);
     assertHttpsUrl('', referenceElement);
   });
-  it('should NOT allow __amp_source_origin', () => {
-    expect(() => {
-      assertHttpsUrl('https://twitter.com?__amp_source_origin=1',
-          referenceElement);
-    }).to.throw(/Source origin is not allowed in/);
-  });
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
   });
