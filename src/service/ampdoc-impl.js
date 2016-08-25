@@ -199,28 +199,38 @@ export class AmpDoc {
   }
 
   /**
-   * Returns the ampdoc's body. It can be null.
+   * Returns `true` if the ampdoc's body is available.
    *
-   * See `onBody`.
+   * @return {boolean}
+   */
+  isBodyAvailable() {
+    return dev().assert(false, 'not implemented');
+  }
+
+  /**
+   * Returns the ampdoc's body. Requires the body to already be available.
    *
-   * @return {?Element}
+   * See `isBodyAvailable` and `whenBodyAvailable`.
+   *
+   * @return {!Element}
    */
   getBody() {
     return dev().assert(null, 'not implemented');
   }
 
   /**
-   * Calls the callback when ampdoc's body is available.
-   * @param {function(!Element)} unusedCallback
+   * Returns a promise that will be resolved when the ampdoc's body is
+   * available.
+   * @return {!Promise<!Element>}
    */
-  onBody(unusedCallback) {
-    dev().assert(null, 'not implemented');
+  whenBodyAvailable() {
+    return dev().assert(null, 'not implemented');
   }
 
   /**
    * Returns `true` if document is ready.
    *
-   * See `onReady`.
+   * See `whenReady`.
    *
    * @return {?Element}
    */
@@ -229,11 +239,12 @@ export class AmpDoc {
   }
 
   /**
-   * Calls the callback when ampdoc is ready.
-   * @param {function()} unusedCallback
+   * Returns a promise that will be resolved when the ampdoc's DOM is fully
+   * ready.
+   * @return {!Promise}
    */
-  onReady(unusedCallback) {
-    dev().assert(null, 'not implemented');
+  whenReady() {
+    return dev().assert(null, 'not implemented');
   }
 
   /**
@@ -269,6 +280,18 @@ export class AmpDocSingle extends AmpDoc {
    */
   constructor(win) {
     super(win);
+
+    /** @private @const {!Promise<!Element>} */
+    this.bodyPromise_ = this.win.document.body ?
+        Promise.resolve(this.win.document.body) :
+        new Promise(resolve => waitForBody(this.win.document, () => {
+          resolve(this.win.document.body);
+        }));
+
+    /** @private @const {!Promise} */
+    this.readyPromise_ = isDocumentReady(this.win.document) ?
+        Promise.resolve() :
+        new Promise(resolve => onDocumentReady(this.win.document, resolve));
   }
 
   /** @override */
@@ -287,17 +310,18 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  getBody() {
-    return this.win.document.body;
+  isBodyAvailable() {
+    return !!this.win.document.body;
   }
 
   /** @override */
-  onBody(callback) {
-    if (this.win.document.body) {
-      callback(this.win.document.body);
-    } else {
-      waitForBody(this.win.document, () => callback(this.win.document.body));
-    }
+  getBody() {
+    return dev().assert(this.win.document.body, 'body not available');
+  }
+
+  /** @override */
+  whenBodyAvailable() {
+    return this.bodyPromise_;
   }
 
   /** @override */
@@ -306,8 +330,8 @@ export class AmpDocSingle extends AmpDoc {
   }
 
   /** @override */
-  onReady(callback) {
-    onDocumentReady(this.win.document, callback);
+  whenReady() {
+    return this.readyPromise_;
   }
 }
 
@@ -344,10 +368,10 @@ export class AmpDocShadow extends AmpDoc {
     /** @private {boolean} */
     this.ready_ = false;
 
-    /** @private {function(!Element)|undefined} */
+    /** @private {function()|undefined} */
     this.readyResolver_ = undefined;
 
-    /** @private {!Promise<!Element>|undefined} */
+    /** @private {!Promise} */
     this.readyPromise_ = new Promise(resolve => {
       this.readyResolver_ = resolve;
     });
@@ -369,8 +393,13 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
+  isBodyAvailable() {
+    return !!this.body_;
+  }
+
+  /** @override */
   getBody() {
-    return this.body_;
+    return dev().assert(this.body_, 'body not available');
   }
 
   /**
@@ -382,16 +411,11 @@ export class AmpDocShadow extends AmpDoc {
     this.body_ = body;
     this.bodyResolver_(body);
     this.bodyResolver_ = undefined;
-    this.bodyPromise_ = undefined;
   }
 
   /** @override */
-  onBody(callback) {
-    if (this.body_) {
-      callback(this.body_);
-    } else {
-      dev().assert(this.bodyPromise_).then(body => callback(body));
-    }
+  whenBodyAvailable() {
+    return this.bodyPromise_;
   }
 
   /** @override */
@@ -405,16 +429,11 @@ export class AmpDocShadow extends AmpDoc {
     this.ready_ = true;
     this.readyResolver_();
     this.readyResolver_ = undefined;
-    this.readyPromise_ = undefined;
   }
 
   /** @override */
-  onReady(callback) {
-    if (this.ready_) {
-      callback();
-    } else {
-      dev().assert(this.readyPromise_).then(() => callback());
-    }
+  whenReady() {
+    return this.readyPromise_;
   }
 }
 

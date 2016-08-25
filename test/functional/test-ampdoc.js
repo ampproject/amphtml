@@ -203,50 +203,54 @@ describe('AmpDocSingle', () => {
 
   it('should initialize ready state and body immediately', () => {
     expect(ampdoc.getBody()).to.equal(window.document.body);
-    const onBody = sandbox.spy();
-    const onReady = sandbox.spy();
-    ampdoc.onBody(onBody);
-    expect(onBody.callCount).to.equal(1);
-    expect(onBody.args[0][0]).to.equal(window.document.body);
-    expect(ampdoc.getBody()).to.equal(window.document.body);
-    ampdoc.onReady(onReady);
-    expect(onReady.callCount).to.equal(1);
+    expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.isReady()).to.be.true;
+    return Promise.all([ampdoc.whenBodyAvailable(), ampdoc.whenReady()])
+        .then(results => {
+          expect(results[0]).to.equal(window.document.body);
+          expect(ampdoc.getBody()).to.equal(window.document.body);
+          expect(ampdoc.isBodyAvailable()).to.be.true;
+          expect(ampdoc.isReady()).to.be.true;
+        })
   });
 
   it('should wait for body and ready state', () => {
     const doc = {body: null};
     const win = {document: doc};
-    const ampdoc = new AmpDocSingle(win);
-    const onBody = sandbox.spy();
-    const onReady = sandbox.spy();
 
     let bodyCallback;
     sandbox.stub(dom, 'waitForBody', (doc, callback) => {
       bodyCallback = callback;
+    });
+    let ready = false;
+    sandbox.stub(docready, 'isDocumentReady', () => {
+      return ready;
     });
     let readyCallback;
     sandbox.stub(docready, 'onDocumentReady', (doc, callback) => {
       readyCallback = callback;
     });
 
-    expect(ampdoc.getBody()).to.be.null;
-    expect(ampdoc.isReady()).to.be.false;
-    ampdoc.onBody(onBody);
-    ampdoc.onReady(onReady);
-    expect(onBody.callCount).to.equal(0);
-    expect(onReady.callCount).to.equal(0);
+    const ampdoc = new AmpDocSingle(win);
+
+    expect(ampdoc.isBodyAvailable()).to.be.false;
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
+    const bodyPromise = ampdoc.whenBodyAvailable();
+    const readyPromise = ampdoc.whenReady();
 
     doc.body = {};
     bodyCallback();
-    expect(onBody.callCount).to.equal(1);
-    expect(onBody.args[0][0]).to.equal(doc.body);
-    expect(onReady.callCount).to.equal(0);
-    expect(ampdoc.getBody()).to.equal(doc.body);
-
+    ready = true;
     readyCallback();
-    expect(onReady.callCount).to.equal(1);
+    expect(ampdoc.isBodyAvailable()).to.be.true;
+    expect(ampdoc.getBody()).to.equal(doc.body);
     expect(ampdoc.isReady()).to.be.true;
+    return Promise.all([bodyPromise, readyPromise]).then(results => {
+      expect(results[0]).to.equal(doc.body);
+      expect(ampdoc.isBodyAvailable()).to.be.true;
+      expect(ampdoc.getBody()).to.equal(doc.body);
+      expect(ampdoc.isReady()).to.be.true;
+    })
   });
 });
 
@@ -302,24 +306,22 @@ describe('AmpDocShadow', () => {
   });
 
   it('should update when body is available', () => {
-    const onBody = sandbox.spy();
-
     // Body is still expected.
-    expect(ampdoc.getBody()).to.be.null;
+    expect(ampdoc.isBodyAvailable()).to.be.false;
+    expect(() => ampdoc.getBody()).to.throw(/body not available/);
     expect(ampdoc.bodyResolver_).to.be.ok;
-    expect(ampdoc.bodyPromise_).to.be.ok;
 
     // Set body.
-    ampdoc.onBody(onBody);
-    const bodyPromise = ampdoc.bodyPromise_;
+    const bodyPromise = ampdoc.whenBodyAvailable();
     const body = {};
     shadowDocHasBody(ampdoc, body);
+    expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(body);
     expect(ampdoc.bodyResolver_).to.be.undefined;
-    expect(ampdoc.bodyPromise_).to.be.undefined;
+    expect(ampdoc.bodyPromise_).to.be.ok;
     return bodyPromise.then(() => {
-      expect(onBody.callCount).to.equal(1);
-      expect(onBody.args[0][0]).to.equal(body);
+      expect(ampdoc.isBodyAvailable()).to.be.true;
+      expect(ampdoc.getBody()).to.equal(body);
     });
   });
 
@@ -332,22 +334,18 @@ describe('AmpDocShadow', () => {
   });
 
   it('should update when doc is ready', () => {
-    const onReady = sandbox.spy();
-
     // "Ready" is still expected.
     expect(ampdoc.isReady()).to.be.false;
     expect(ampdoc.readyResolver_).to.be.ok;
-    expect(ampdoc.readyPromise_).to.be.ok;
 
     // Set ready.
-    ampdoc.onReady(onReady);
-    const readyPromise = ampdoc.readyPromise_;
+    const readyPromise = ampdoc.whenReady();
     shadowDocReady(ampdoc);
     expect(ampdoc.isReady()).to.be.true;
     expect(ampdoc.readyResolver_).to.be.undefined;
-    expect(ampdoc.readyPromise_).to.be.undefined;
+    expect(ampdoc.readyPromise_).to.be.ok;
     return readyPromise.then(() => {
-      expect(onReady.callCount).to.equal(1);
+      expect(ampdoc.isReady()).to.be.true;
     });
   });
 
