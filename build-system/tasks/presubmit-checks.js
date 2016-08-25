@@ -93,6 +93,7 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
+      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },

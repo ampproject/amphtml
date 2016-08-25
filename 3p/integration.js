@@ -60,6 +60,7 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
+import {fakead3p} from '../ads/fakead3p';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
@@ -107,6 +108,9 @@ const AMP_EMBED_ALLOWED = {
   zergnet: true,
   _ping_: true,
 };
+
+// used for extracting fakead3p from production code.
+const IS_DEV = true;
 
 // Keep the list in alphabetic order
 register('a9', a9);
@@ -297,6 +301,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
+
+    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
+      register('fakead3p', fakead3p);
+    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
