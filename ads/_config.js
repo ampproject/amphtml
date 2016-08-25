@@ -24,6 +24,7 @@
 export const adPrefetch = {
   // Keep the list in alphabetic order
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  accesstrade: 'https://h.accesstrade.net/js/amp/amp.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   // TODO: Remove this once we switch over to the direct request version of adsense.js.
