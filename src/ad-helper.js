@@ -50,3 +50,19 @@ export function isAdPositionAllowed(el, win) {
   } while (el && el.tagName != 'BODY');
   return !hasFixedAncestor;
 }
+
+/**
+ * @param {!Element} el
+ * @param {!Window} win
+ * @return {?string} a string that contains container of the ad.
+ * This is called during layout measure.
+ */
+export function getAdContainer(el) {
+  while (el && el.tagName != 'BODY') {
+    el = el.parentNode;
+    if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
+      return el.tagName;
+    }
+  }
+  return null;
+}

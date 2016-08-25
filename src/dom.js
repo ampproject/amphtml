@@ -141,6 +141,24 @@ export function copyChildren(from, to) {
   to.appendChild(frag);
 }
 
+/**
+ * Create a new element on document with specified tagName and attributes.
+ * @param {!Document} doc
+ * @param {string} tagName
+ * @param {!Object<string, string>} attributes
+ * @return {!Element} created element
+ */
+export function createElementWithAttributes(doc, tagName, attributes) {
+  if (!doc) {
+    return;
+  }
+  const element = doc.createElement(tagName);
+  for (const attr in attributes) {
+    element.setAttribute(attr, attributes[attr]);
+  }
+  return element;
+}
+
 
 /**
  * Finds the closest element that satisfies the callback from this element
