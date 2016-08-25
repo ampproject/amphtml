@@ -21,13 +21,14 @@ import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
   let sandbox;
+  let adImpl;
   let apiHandler;
   let testIndex = 0;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const adElement = document.createElement('amp-ad');
-    const adImpl = new BaseElement(adElement);
+    adImpl = new BaseElement(adElement);
     apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
     testIndex++;
   });
@@ -76,6 +77,9 @@ describe('amp-ad-api-handler', () => {
     });
 
     it('should be able to use embed-size API, change size deny', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+        return Promise.reject(new Error('for testing'));
+      });
       iframe.postMessageToParent({
         sentinel: 'amp3ptest' + testIndex,
         type: 'embed-size',
@@ -91,7 +95,7 @@ describe('amp-ad-api-handler', () => {
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(apiHandler.baseInstance_, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', () => {
         return Promise.resolve();
       });
       iframe.postMessageToParent({
