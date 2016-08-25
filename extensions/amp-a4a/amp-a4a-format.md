@@ -17,6 +17,8 @@ limitations under the License.
 
 # AMP A4A AD CREATIVE FORMAT
 
+![Draft standard](https://upload.wikimedia.org/wikipedia/commons/f/ff/DRAFT_ICON.png "By Reneman (Own work) [CC BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0)], via Wikimedia Commons")
+
 ** >> WORK IN PROGRESS.  SUBJECT TO CHANGE. << **
 
 _This set of standards is still in development and is likely to be revised.
