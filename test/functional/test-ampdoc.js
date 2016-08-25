@@ -211,7 +211,7 @@ describe('AmpDocSingle', () => {
           expect(ampdoc.getBody()).to.equal(window.document.body);
           expect(ampdoc.isBodyAvailable()).to.be.true;
           expect(ampdoc.isReady()).to.be.true;
-        })
+        });
   });
 
   it('should wait for body and ready state', () => {
@@ -250,7 +250,7 @@ describe('AmpDocSingle', () => {
       expect(ampdoc.isBodyAvailable()).to.be.true;
       expect(ampdoc.getBody()).to.equal(doc.body);
       expect(ampdoc.isReady()).to.be.true;
-    })
+    });
   });
 });
 

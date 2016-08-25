@@ -232,7 +232,7 @@ export class AmpDoc {
    *
    * See `whenReady`.
    *
-   * @return {?Element}
+   * @return {boolean}
    */
   isReady() {
     return dev().assert(null, 'not implemented');;
@@ -360,7 +360,7 @@ export class AmpDocShadow extends AmpDoc {
     /** @private {function(!Element)|undefined} */
     this.bodyResolver_ = undefined;
 
-    /** @private {!Promise<!Element>|undefined} */
+    /** @private {!Promise<!Element>} */
     this.bodyPromise_ = new Promise(resolve => {
       this.bodyResolver_ = resolve;
     });
