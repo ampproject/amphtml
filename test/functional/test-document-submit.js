@@ -68,6 +68,16 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
   });
 
+  it('should assert none of the inputs named __amp_source_origin', () => {
+    const illegalInput = document.createElement('input');
+    illegalInput.setAttribute('type', 'hidden');
+    illegalInput.setAttribute('name', '__amp_source_origin');
+    illegalInput.value = 'https://example.com';
+    tgt.appendChild(illegalInput);
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /Illegal input name, __amp_source_origin found/);
+  });
+
   it('should add __amp_source_origin to action before submit', () => {
     evt.target.setAttribute('action',
         'https://example.com/?__amp_source_origin=12');

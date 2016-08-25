@@ -16,6 +16,9 @@
 
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
+import {createIframePromise} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '../../../../src/dom';
+import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
@@ -26,6 +29,26 @@ function tests(name) {
       opt_beforeLayoutCallback) {
     return createAdPromise(name, attributes, canonical,
         opt_handleElement, opt_beforeLayoutCallback);
+  }
+
+  function getAdInAdContainer() {
+    return createIframePromise().then(iframe => {
+      const adContainer = createElementWithAttributes(iframe.doc,
+          'amp-sticky-ad', {layout: 'nodisplay'});
+      const ampAd = createElementWithAttributes(iframe.doc, 'amp-ad', {
+        width: 300,
+        height: 50,
+        type: '_ping_',
+        src: 'testsrc',
+      });
+      adContainer.appendChild(ampAd);
+      return iframe.addElement(adContainer).then(() => {
+        return Promise.resolve({
+          iframe,
+          ampAd,
+        });
+      });
+    });
   }
 
   return () => {
@@ -502,6 +525,16 @@ function tests(name) {
           clock.tick(100);
           expect(ad.renderOutsideViewport()).to.equal(1.25);
         });
+      });
+    });
+
+    it('should add container info when ad has a container', () => {
+      return getAdInAdContainer().then(obj => {
+        const ampAd = obj.ampAd;
+        expect(ampAd.getAttribute('amp-container-element')).to.be.null;
+        ampAd.implementation_.onLayoutMeasure();
+        expect(ampAd.getAttribute('amp-container-element'))
+            .to.equal('AMP-STICKY-AD');
       });
     });
   };
