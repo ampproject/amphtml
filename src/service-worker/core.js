@@ -23,6 +23,17 @@ import urls from '../config';
  */
 const VERSION = '$internalRuntimeVersion$';
 
+/** @const */
+const TAG = 'cache-service-worker';
+
+/**
+ * A list of blacklisted AMP versions that must never be served from
+ * cache. Versions may be blacklisted if they contain a significant
+ * implementation bug.
+ */
+const BLACKLIST = (self.AMP_CONFIG &&
+    self.AMP_CONFIG[`${TAG}-blacklist`]) || [];
+
 /**
  * Returns the version of a given versioned JS file.
  *
@@ -70,6 +81,16 @@ function isCdnJsFile(url) {
   );
 }
 
+/**
+ * Determines if a AMP version is blacklisted.
+ * @param {string} version
+ * @return {boolean}
+ */
+function isBlacklisted(version) {
+  // Trim the RTV perfix.
+  version = version.substr(2);
+  return BLACKLIST.indexOf(version) > -1;
+}
 
 /**
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
@@ -196,7 +217,7 @@ self.addEventListener('fetch', event => {
     // If not, do we have this version cached?
     return getCachedVersion(requestFile).then(version => {
       // We have a cached version! Serve it up!
-      if (version) {
+      if (version && !isBlacklisted(version)) {
         return version;
       }
 
