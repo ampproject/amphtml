@@ -219,16 +219,20 @@ describe('AmpDocSingle', () => {
     const win = {document: doc};
 
     let bodyCallback;
-    sandbox.stub(dom, 'waitForBody', (doc, callback) => {
-      bodyCallback = callback;
+    sandbox.stub(dom, 'waitForBodyPromise', () => {
+      return new Promise(resolve => {
+        bodyCallback = resolve;
+      });
     });
     let ready = false;
     sandbox.stub(docready, 'isDocumentReady', () => {
       return ready;
     });
     let readyCallback;
-    sandbox.stub(docready, 'onDocumentReady', (doc, callback) => {
-      readyCallback = callback;
+    sandbox.stub(docready, 'whenDocumentReady', () => {
+      return new Promise(resolve => {
+        readyCallback = resolve;
+      });
     });
 
     const ampdoc = new AmpDocSingle(win);

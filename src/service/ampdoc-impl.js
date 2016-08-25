@@ -18,8 +18,8 @@ import {closestNode} from '../dom';
 import {dev} from '../log';
 import {getService} from '../service';
 import {isShadowRoot} from '../types';
-import {isDocumentReady, onDocumentReady} from '../document-ready';
-import {waitForBody} from '../dom';
+import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {waitForBodyPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -284,14 +284,12 @@ export class AmpDocSingle extends AmpDoc {
     /** @private @const {!Promise<!Element>} */
     this.bodyPromise_ = this.win.document.body ?
         Promise.resolve(this.win.document.body) :
-        new Promise(resolve => waitForBody(this.win.document, () => {
-          resolve(this.win.document.body);
-        }));
+        waitForBodyPromise(this.win.document).then(() => this.getBody());
 
     /** @private @const {!Promise} */
     this.readyPromise_ = isDocumentReady(this.win.document) ?
         Promise.resolve() :
-        new Promise(resolve => onDocumentReady(this.win.document, resolve));
+        whenDocumentReady(this.win.document);
   }
 
   /** @override */

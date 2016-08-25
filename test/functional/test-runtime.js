@@ -614,11 +614,9 @@ describe('runtime', () => {
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
 
-      let isReady = false;
-      ampdoc.onReady(() => {
-        isReady = true;
+      return ampdoc.whenReady().then(() => {
+        expect(ampdoc.isReady()).to.be.true;
       });
-      expect(isReady).to.be.true;
     });
 
     it('should import body', () => {
