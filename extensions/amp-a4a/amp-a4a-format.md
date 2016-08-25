@@ -269,6 +269,7 @@ should not attempt to include them directly.
   <tr><td>amp-brightcove</td></tr>
   <tr><td>amp-carousel</td></tr>
   <tr><td>amp-dailymotion</td></tr>
+  <tr><td>amp-experiment</td></tr>
   <tr><td>amp-facebook</td></tr>
   <tr><td>amp-fit-text</td></tr>
   <tr><td>amp-font</td></tr>
@@ -281,15 +282,16 @@ should not attempt to include them directly.
   <tr><td>amp-kaltura-player</td></tr>
   <tr><td>amp-lightbox</td></tr>
   <tr><td>amp-list</td></tr>
-  <tr><td>amp-live-list</td></tr>
   <tr><td>amp-o2-player</td></tr>
   <tr><td>amp-pinterest</td></tr>
+  <tr><td>amp-pixel</td></tr>
   <tr><td>amp-reach-player</td></tr>
   <tr><td>amp-share-tracking</td></tr>
   <tr><td>amp-social-share</td></tr>
   <tr><td>amp-soundcloud</td></tr>
   <tr><td>amp-springboard-player</td></tr>
   <tr><td>amp-twitter</td></tr>
+  <tr><td>amp-video</td></tr>
   <tr><td>amp-vimeo</td></tr>
   <tr><td>amp-vine</td></tr>
   <tr><td>amp-youtube</td></tr>
