@@ -70,9 +70,10 @@ function buildExtensions(options) {
   buildExtension('amp-experiment', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
-  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-form', '0.1', true, options);
+  buildExtension('amp-fresh', '0.1', false, options);
+  buildExtension('amp-fx-flying-carpet', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
