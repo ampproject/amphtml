@@ -237,10 +237,10 @@ transition: background-color 2s;
 ```
 
 
-### AMP Extensions
+### AMP Extensions and Builtins
 
-The following are _allowed_ AMP extension modules in an A4A creative. Extensions
-not explicitly allowed are prohibited.
+The following are _allowed_ AMP extension modules and AMP builtin tags in an 
+A4A creative. Extensions or builtin tags not explicitly allowed are prohibited.
 
 Most of the omissions are either for performance or to make A4A creatives 
 simpler to analyze.
@@ -276,6 +276,7 @@ should not attempt to include them directly.
   <tr><td>amp-form</td></tr>
   <tr><td>amp-fx-flying-carpet</td></tr>
   <tr><td>amp-google-vrview-image</td></tr>
+  <tr><td>amp-img</td></tr>
   <tr><td>amp-image-lightbox</td></tr>
   <tr><td>amp-instagram</td></tr>
   <tr><td>amp-jwplayer</td></tr>
