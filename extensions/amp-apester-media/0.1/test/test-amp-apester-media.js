@@ -15,8 +15,8 @@
  */
 
 import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
@@ -25,52 +25,79 @@ import {toggleExperiment} from '../../../../src/experiments';
 adopt(window);
 
 describe('amp-apester-media', () => {
-  function getApester(mediaId, channelToken, opt_responsive,
-                      opt_beforeLayoutCallback) {
+  beforeEach(() => {
+    toggleExperiment(window, 'amp-apester-media', true);
+  });
+
+  function getApester(attributes, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
-      media.setAttribute('data-apester-media-id', mediaId);
-      media.setAttribute('data-apester-channel-token', channelToken);
+      for (const key in attributes) {
+        media.setAttribute(key, attributes[key]);
+      }
       media.setAttribute('height', '390');
-      // if (opt_responsive) {
-      //   media.setAttribute('layout', 'fixed-height');
-      // }
+      //todo test width?
+      if (opt_responsive) {
+        media.setAttribute('layout', 'responsive');
+      }
       return iframe.addElement(media);
     });
   }
 
-  // function testLoader(image) {
-  //   expect(image).to.not.be.null;
-  //   expect(image.getAttribute('src')).to.equal(
-  //     'https://images.apester.com/images%2Floader.gif');
-  //   expect(image.getAttribute('layout')).to.equal('fill');
-  // }
-
-  function testIframe(iframe) {
-    expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal(
-      'https://renderer.qmerce.com/interaction/577faac633e3688a2952199a');
-    expect(iframe.getAttribute('height')).to.equal('390');
-  }
-
   it('renders', () => {
-    toggleExperiment(window, 'amp-apester-media', true);
-    return getApester('', '577faac633e3688a2952199a').then(ins => {
-      testIframe(ins.querySelector('iframe'));
-      // testLoader(ins.querySelector('amp-img'));
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(iframe.getAttribute('height')).to.equal('444');
     });
   });
 
   it('render playlist', () => {
-    toggleExperiment(window, 'amp-apester-media', true);
-    return getApester('5704d3bae474a97e70ab27b3').then(ins => {
-      testIframe(ins.querySelector('iframe'));
-      //testLoader(ins.querySelector('amp-img'));
+    return getApester({
+      'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(iframe.getAttribute('height')).to.equal('444');
     });
   });
+
+//todo responsive layout isn't fully supported yet, just a stub
+  it('renders responsively', () => {
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+      'width': '500',
+    }, true).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe.className).to.match(/-amp-fill-content/);
+    });
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      const tag = ape.implementation_;
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
+    });
+  });
+
   it('requires media-id or channel-token', () => {
     expect(getApester()).to.be.rejectedWith(
-      /The media-id attribute is required for/);
+        /The media-id attribute is required for/);
   });
-});
+})
+;

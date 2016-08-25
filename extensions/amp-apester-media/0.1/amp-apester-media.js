@@ -18,7 +18,7 @@
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
 import {user, dev} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {removeElement} from '../../../src/dom';
 import {vsyncFor} from '../../../src/vsync';
@@ -59,6 +59,18 @@ class AmpApesterMedia extends AMP.BaseElement {
 
     // EXPERIMENT
     user().assert(isExperimentOn(this.win, TAG), `Enable ${TAG} experiment`);
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+
+    /**
+     *  @private @const {number}
+     *  */
+    this.width_ = getLengthNumeral(width);
+
+    /**
+     * @private @const {number}
+     * */
+    this.height_ = getLengthNumeral(height);
 
     /**
      * @const @private {?string}
@@ -100,7 +112,6 @@ class AmpApesterMedia extends AMP.BaseElement {
      * @private {boolean}
      */
     this.seen_ = false;
-    this.element.classList.add('apester-container');
   }
 
   /** @override */
@@ -144,7 +155,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     iframe.setAttribute('allowtransparency', 'true');
     iframe.setAttribute('scrolling', 'no');
     iframe.src = src;
-    iframe.height = this.element.getAttribute('height');
+    iframe.height = this.height_;
+    iframe.width = this.width_;
     iframe.classList.add('apester-iframe');
     this.applyFillContent(iframe);
     return iframe;
@@ -159,17 +171,19 @@ class AmpApesterMedia extends AMP.BaseElement {
     overflow.className = 'apester-overflow-container';
     const overflowButton = this.element.ownerDocument.createElement('button');
     overflowButton.className = 'apester-overflow-button';
-    overflowButton.textContent = 'Start Here';
+    overflowButton.textContent = 'Full Size';
     overflow.appendChild(overflowButton);
     return overflow;
   }
 
   /** @override */
   layoutCallback() {
+    this.element.classList.add('apester-container');
     return this.queryMedia_()
         .then(response => {
           const media = response.payload;
-          const src = decodeURIComponent(this.constructUrlFromMedia_(media.interactionId));
+          const src = decodeURIComponent(this.constructUrlFromMedia_(
+              media.interactionId));
           const iframe = this.constructIframe_(src);
           const overflow = this.constructOverflow_();
           const mutate = state => {
@@ -190,16 +204,15 @@ class AmpApesterMedia extends AMP.BaseElement {
           return undefined;
         }).then(media => {
           this.togglePlaceholder(false);
-          let height = 0;
-          if (media) {
-            height = media.data.size.height;
-            const width = media.data.size.width;
-            height += (media.layout.directive === 'contest-poll') ? 40 : 0;
-            const amp = this.element;
-            amp.setAttribute('height', height);
-            amp.setAttribute('width', width);
-          }
-          this./*OK*/attemptChangeHeight(height);
+          let height = 0 || media.data.size.height;
+          const width = 0 || media.data.size.width;
+          height += (media.layout.directive === 'contest-poll') ? 40 : 0;
+          const amp = this.element;
+          this.iframe_.height = height;
+          this.iframe_.width = width;
+          amp.setAttribute('height', height);
+          amp.setAttribute('width', width);
+          this./*OK*/attemptChangeHeight(height, width);
         });
   }
 
