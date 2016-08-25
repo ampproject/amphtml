@@ -151,43 +151,6 @@ function tests(name) {
         });
       });
 
-      it('should listen for resize events from nested frames', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe-resize-outer.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.equal(114);
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.frames[0].postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                width: 114,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
-        });
-      });
-
       it('should resize height only', () => {
         const iframeSrc = 'http://ads.localhost:' + location.port +
             '/test/fixtures/served/iframe.html';
