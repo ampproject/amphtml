@@ -152,6 +152,15 @@ describe('iframe-helper', function() {
     });
   });
 
+  it('listenForMessagesOncePromise resolve after listen to one msg', () => {
+    const promise = IframeHelper.listenForMessagesOncePromise(testIframe,
+        ['no-msg1', 'no-msg2', 'send-intersections']);
+    insert(testIframe);
+    promise.then(msg => {
+      expect(msg).to.equal('send-intersections');
+    });
+  });
+
   // TODO(#3314): Figure out why this fails. Probably have to do with removing
   // the iframes in _init_tests.
   it.skip('should un-listen on next message when iframe is unattached', () => {

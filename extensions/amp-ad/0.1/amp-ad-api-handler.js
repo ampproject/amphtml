@@ -20,7 +20,6 @@ import {
   SubscriptionApi,
   listenFor,
   listenForOnce,
-  listenForOncePromise,
   postMessageToWindows,
   listenForMessagesOncePromise,
 } from '../../../src/iframe-helper';

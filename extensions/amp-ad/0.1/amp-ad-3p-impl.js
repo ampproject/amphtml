@@ -175,7 +175,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
     const type = this.element.getAttribute('type');
-    this.type = type;
+    this.adType = type;
     const prefetch = adPrefetch[type];
     const preconnect = adPreconnect[type];
     if (typeof prefetch == 'string') {

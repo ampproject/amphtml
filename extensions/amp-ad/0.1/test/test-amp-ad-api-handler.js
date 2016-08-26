@@ -16,7 +16,10 @@
 
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
 import {BaseElement} from '../../../../src/base-element';
-import {createIframeWithMessageStub} from '../../../../testing/iframe';
+import {
+    createIframeWithMessageStub,
+    expectPostMessage,
+    } from '../../../../testing/iframe';
 import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
@@ -65,16 +68,79 @@ describe('amp-ad-api-handler', () => {
       }));
     });
 
-    it('should resolve startUp() when render-start API is called', () => {
-      expect(iframe.style.visibility).to.equal('hidden');
-      iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'bootstrap-loaded',
+    describe('should resolve startUp', () => {
+      it('if render-start NOT supported', () => {
+        expect(iframe.style.visibility).to.equal('hidden');
+        iframe.postMessageToParent({
+          sentinel: 'amp3ptest' + testIndex,
+          type: 'bootstrap-loaded',
+        });
+        return startUpPromise.then(() => {
+          expect(iframe.style.visibility).to.equal('');
+        });
       });
-      return startUpPromise.then(() => {
-        expect(iframe.style.visibility).to.equal('');
+
+      it('if render-start supported, receive render-start', () => {
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
+        apiHandler.noContentCallback_ = () => {};
+        const beforeAttachedToDom = element => {
+          adImpl.type = 'doubleclick';
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        const noContentCallbackSpy
+            = sandbox.spy(apiHandler, 'noContentCallback_');
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'render-start',
+              });
+              return startUpPromise.then(() => {
+                expect(iframe.style.visibility).to.equal('');
+              }).then(() => {
+                iframe.postMessageToParent({
+                  sentinel: 'amp3ptest' + testIndex,
+                  type: 'no-content',
+                });
+                return expectPostMessage(iframe.contentWindow, window, {
+                  sentinel: 'amp3ptest' + testIndex,
+                  type: 'no-content',
+                }).then(() => {
+                  expect(noContentCallbackSpy).to.not.been.called;
+                });
+              });
+            });
+      });
+
+      it('if render-start supported, receive no-content first', () => {
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
+        apiHandler.noContentCallback_ = () => {};
+        const beforeAttachedToDom = element => {
+          adImpl.type = 'doubleclick';
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        const noContentCallbackSpy
+            = sandbox.spy(apiHandler, 'noContentCallback_');
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'no-content',
+              });
+              return startUpPromise.then(() => {
+                expect(iframe.style.visibility).to.equal('');
+                expect(noContentCallbackSpy).to.be.calledOnce;
+              });
+            });
       });
     });
+
 
     it('should be able to use embed-size API, change size deny', () => {
       sandbox.stub(adImpl, 'attemptChangeSize', () => {
