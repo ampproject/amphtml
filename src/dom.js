@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
+import {documentStateFor} from './document-state';
 import {toArray} from './types';
 
 
@@ -57,7 +58,8 @@ export function waitForChild(parent, checkFunc, callback) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  waitForChild(doc.documentElement, () => !!doc.body, callback);
+  const docState = documentStateFor(doc.defaultView);
+  docState.onBodyAvailable(callback);
 }
 
 
