@@ -53,8 +53,6 @@ describe('amp-o2-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://delivery.vidible.tv/htmlembed/pid=123/456.html');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 
@@ -100,8 +98,6 @@ describe('amp-o2-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://delivery.vidible.tv/htmlembed/pid=123/456.html?bid=987&vid=789');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 
@@ -116,8 +112,6 @@ describe('amp-o2-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://delivery.vidible.tv/htmlembed/pid=123/456.html?m.test=test');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 
@@ -132,8 +126,6 @@ describe('amp-o2-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://delivery.dev.vidible.tv/htmlembed/pid=123/456.html');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 });
