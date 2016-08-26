@@ -16,17 +16,23 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {installLightboxManagerForDoc} from './service/lightbox-manager-impl';
 import {ampdocFor} from '../../../src/ampdoc';
 import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
-import {lightboxManagerForDoc} from '../../../src/lightbox-manager';
 import {user, dev} from '../../../src/log';
+import {resourcesFor} from '../../../src/resources';
 import {toggle} from '../../../src/style';
+import {LightboxManager} from './service/lightbox-manager-impl';
 
 /** @const */
 const TAG = 'amp-lightbox-viewer';
+
+/**
+ * TODO(aghassemi): Make lightbox-manager into a doc-level service.
+ * @private  {!./service/lightbox-manager-impl.LightboxManager}
+ * */
+let manager_;
 
 /**
  * @private visible for testing.
@@ -61,7 +67,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
      * @const
      * @private {!./service/lightbox-manager-impl.LightboxManager}
      */
-    this.manager_ = lightboxManagerForDoc(this.win.document.documentElement);
+    this.manager_ = dev().assert(manager_);
 
     /** @const @private {!Element} */
     this.container_ = this.win.document.createElement('div');
@@ -159,7 +165,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   open_(element) {
     if (this.activeElement_ == element) {
-      return;
+      return Promise.resolve();
     }
 
     const updateViewerPromise = this.updateViewer_(element);
@@ -180,7 +186,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   close_() {
     if (!this.active_) {
-      return;
+      return Promise.resolve();
     }
 
     toggle(this.element, false);
@@ -255,9 +261,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // TODO(aghassemi): This is a giant hack.
     // Find a proper way of scheduling layout for a resource that does not
     // not belong to the element requesting the layout.
-    if (newElement.resources_) {
+    if (newElement.__AMP__RESOURCE) {
       newElement.__AMP__RESOURCE.setInViewport(true);
-      newElement.resources_.scheduleLayout(newElement, newElement);
+      resourcesFor(this.win).scheduleLayout(newElement, newElement);
     }
 
     return updateControlsPromise;
@@ -293,19 +299,19 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     const prevPromise = this.manager_.hasPrevious(this.activeElement_)
     .then(hasPrev => {
-      if (!hasPrev) {
-        this.container_.setAttribute('no-prev', '');
-      } else {
+      if (hasPrev) {
         this.container_.removeAttribute('no-prev');
+      } else {
+        this.container_.setAttribute('no-prev', '');
       }
     });
 
     const nextPromise = this.manager_.hasNext(this.activeElement_)
     .then(hasNext => {
-      if (!hasNext) {
-        this.container_.setAttribute('no-next', '');
-      } else {
+      if (hasNext) {
         this.container_.removeAttribute('no-next');
+      } else {
+        this.container_.setAttribute('no-next', '');
       }
     });
 
@@ -368,14 +374,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 /**
  * @private visible for testing.
  */
-export function maybeInstallLightboxManager(win) {
+export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO(aghassemi): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
     const ampdoc = ampdocFor(win).getAmpDoc();
-    installLightboxManagerForDoc(ampdoc);
+    manager_ = new LightboxManager(ampdoc);
   }
 }
 
-maybeInstallLightboxManager(AMP.win);
+installLightboxManager(AMP.win);
 AMP.registerElement(TAG, AmpLightboxViewer, CSS);

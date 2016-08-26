@@ -18,7 +18,6 @@ import {whenDocumentReady} from '../../../../src/document-ready';
 import {isExperimentOn} from '../../../../src/experiments';
 import {autoDiscoverLightboxables} from './lightbox-manager-discovery';
 import {dev} from '../../../../src/log';
-import {fromClassForDoc} from '../../../../src/service';
 import {timerFor} from '../../../../src/timer';
 
 
@@ -31,7 +30,7 @@ import {timerFor} from '../../../../src/timer';
  *  -Discovering elements that can be auto-lightboxed and add the
  *   `lightbox` attribute and possibly an on-tap handler to them
  */
-class LightboxManager {
+export class LightboxManager {
 
   /**
    * @param {!../../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -161,7 +160,3 @@ class LightboxManager {
     });
   }
 }
-
-export function installLightboxManagerForDoc(ampdoc) {
-  return fromClassForDoc(ampdoc, 'lightboxManager', LightboxManager);
-};

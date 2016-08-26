@@ -19,7 +19,7 @@ import {ancestorElements} from '../../../../src/dom';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-import {maybeInstallLightboxManager} from '../amp-lightbox-viewer';
+import {installLightboxManager} from '../amp-lightbox-viewer';
 
 adopt(window);
 
@@ -227,7 +227,7 @@ describe('amp-lightbox-viewer', () => {
       setUpDocument(iframe.doc, autoLightbox);
       const viewer = iframe.doc.createElement('amp-lightbox-viewer');
       viewer.setAttribute('layout', 'nodisplay');
-      maybeInstallLightboxManager(iframe.win);
+      installLightboxManager(iframe.win);
       return iframe.addElement(viewer);
     });
   }
