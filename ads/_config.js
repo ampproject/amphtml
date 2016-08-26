@@ -67,6 +67,7 @@ export const adPrefetch = {
   nend: 'https://js1.nend.net/js/amp.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
+  pubmine: 'https://s.pubmine.com/showad.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
