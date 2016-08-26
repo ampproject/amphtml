@@ -85,13 +85,13 @@ describe('amp-ad-api-handler', () => {
       it('should resolve on message "render-start" if render-start is'
           + 'implemented by 3P"', () => {
         adImpl.adType = 'doubleclick';
-        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element, () => {});
+        const noContentCallbackSpy = sandbox.spy();
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
+            noContentCallbackSpy);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
         };
-        const noContentCallbackSpy
-            = sandbox.spy(apiHandler, 'noContentCallback_');
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
               iframe = newIframe;
@@ -120,13 +120,13 @@ describe('amp-ad-api-handler', () => {
       it('should resolve on message "no-content" if render-start is'
           + 'implemented by 3P', () => {
         adImpl.adType = 'doubleclick';
-        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element, () => {});
+        const noContentCallbackSpy = sandbox.spy();
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
+            noContentCallbackSpy);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
         };
-        const noContentCallbackSpy
-            = sandbox.spy(apiHandler, 'noContentCallback_');
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
               iframe = newIframe;
@@ -168,12 +168,7 @@ describe('amp-ad-api-handler', () => {
                 const timeoutPromise =
                     timerFor(window).timeoutPromise(2000, startUpPromise);
                 clock.tick(2001);
-                return timeoutPromise.then(() => {
-                  throw Error('startUp resolve on bootstrap-loaded when'
-                      + 'when render-start is supported');
-                }, error => {
-                  expect(error).to.match(/timeout/);
-                });
+                return timeoutPromise.should.be.rejectedWith(/timeout/);
               });
             });
       });

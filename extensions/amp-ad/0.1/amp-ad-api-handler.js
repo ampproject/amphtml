@@ -87,7 +87,7 @@ export class AmpAdApiHandler {
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOncePromise(this.iframe_, ['entity-id'], this.is3p_)
+    listenForOncePromise(this.iframe_, 'entity-id', this.is3p_)
         .then(info => {
           this.element_.creativeId = info.data.id;
         });
@@ -119,7 +119,7 @@ export class AmpAdApiHandler {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
-          if (info.message == 'render-start') {
+          if (info.data.type == 'render-start') {
               //report performance
           } else {
             //TODO: make noContentCallback_ default
@@ -134,8 +134,8 @@ export class AmpAdApiHandler {
       // If NOT support render-start, listen to bootstrap-loaded no-content
       // respectively
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
-        ['bootstrap-loaded'], this.is3p_);
-      listenForOncePromise(this.iframe_, ['no-content'], this.is3p_)
+        'bootstrap-loaded', this.is3p_);
+      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
           .then(() => {
             //TODO: make noContentCallback_ default
             if (this.noContentCallback_) {

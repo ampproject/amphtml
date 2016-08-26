@@ -151,6 +151,7 @@ describe('iframe-helper', function() {
         setTimeout(resolve, 50);
       }).then(() => {
         expect(calls).to.equal(total);
+        expect(total).to.equal(1);
       });
     });
   });

@@ -296,25 +296,23 @@ export function listenFor(
  * Returns a promise that resolves when one of given messages has been observed
  * for the first time. And remove listener for all other messages.
  * @param {!Element} iframe
- * @param {!Array<string>} typeOfMessage
+ * @param {!string|!Array<string>} typeOfMessage
  * @param {boolean=} opt_is3P
- * @return {!Promise<string>}
+ * @return {!Promise<Object{data, source, origin}>}
  */
 export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   const unlistenList = [];
-  let msgReceived = false;
+  if (typeof typeOfMessages == 'string') {
+    typeOfMessages = [typeOfMessages];
+  }
   return new Promise(resolve => {
     for (let i = 0; i < typeOfMessages.length; i++) {
-      if (msgReceived) {
-        break;
-      }
       const message = typeOfMessages[i];
       const unlisten = listenFor(iframe, message, (data, source, origin) => {
         for (let i = 0; i < unlistenList.length; i++) {
           unlistenList[i]();
         }
-        msgReceived = true;
-        resolve({message, data, source, origin});
+        resolve({data, source, origin});
       }, opt_is3P);
       unlistenList.push(unlisten);
     }
