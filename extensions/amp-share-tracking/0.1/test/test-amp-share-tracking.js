@@ -104,12 +104,12 @@ describe('amp-share-tracking', () => {
 
   it('should get outgoing fragment randomly if no vendor url ' +
       'is provided and fallback to Math.random generation', () => {
-    sandbox.stub(Math, 'random').returns(0.1111111111111111);
+    sandbox.stub(Math, 'random').returns(0.123456789123456789);
     randomBytesMock.onFirstCall().returns(null);
     viewerForMock.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(fragments.outgoingFragment).to.equal('HHHHHHHH');
+        expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
       });
     });
   });
