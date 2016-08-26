@@ -133,8 +133,7 @@ the [general AMP boilerplate](https://github.com/ampproject/amphtml/blob/master/
 
 ### CSS
 
-1. `position:fixed` and `position:sticky` are prohibited in 
-creative CSS.
+1. `position:fixed` and `position:sticky` are prohibited in creative CSS.
 
    _Rationale_: position:fixed breaks out of shadow DOM, which A4A depends on.
    Also, Ads in AMP are already not allowed to use fixed position.
@@ -153,6 +152,18 @@ creative CSS.
 
    _Rationale_: AMP must be able to control all animations belonging to an 
    ad, so that it can stop them when the ad is not on screen or system resources are very low.
+
+1. CSS: Vendor-specific prefixes are considered aliases for the same symbol
+   without the prefix for the purposes of validation.  This means that if
+   a symbol `foo` is prohibited by CSS validation rules, then the symbol
+   `-vendor-foo` will also be prohibited.
+   
+   _Rationale:_ Some vendor-prefixed properties provide equivalent functionality
+   to properties that are otherwise prohibited or constrained under these rules.
+   
+   _Example_: `-webkit-transition` and `-moz-transition` are both considered
+   aliases for `transition`.  They will only be allowed in contexts where
+   bare `transition` would be allowed (see [Selectors](#selectors) below).
 
 #### CSS Animations and Transitions
 
