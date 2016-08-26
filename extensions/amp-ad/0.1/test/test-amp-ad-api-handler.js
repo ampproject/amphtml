@@ -80,11 +80,11 @@ describe('amp-ad-api-handler', () => {
         });
       });
 
-      it('if render-start supported, receive render-start', () => {
+      it('if render-start supported, receive render-start first', () => {
+        adImpl.adType = 'doubleclick';
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
         apiHandler.noContentCallback_ = () => {};
         const beforeAttachedToDom = element => {
-          adImpl.type = 'doubleclick';
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
         };
@@ -116,10 +116,10 @@ describe('amp-ad-api-handler', () => {
       });
 
       it('if render-start supported, receive no-content first', () => {
+        adImpl.adType = 'doubleclick';
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
         apiHandler.noContentCallback_ = () => {};
         const beforeAttachedToDom = element => {
-          adImpl.type = 'doubleclick';
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
         };

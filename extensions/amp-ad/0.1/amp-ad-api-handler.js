@@ -23,7 +23,7 @@ import {
   postMessageToWindows,
   listenForMessagesOncePromise,
 } from '../../../src/iframe-helper';
-import {waitForRenderStart} from '../../../3p/integration.js';
+import {waitForRenderStart} from '../../../3p/integration';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
