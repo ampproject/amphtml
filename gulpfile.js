@@ -170,7 +170,9 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     wrapper: '<%= contents %>'
   });
-  thirdPartyBootstrap(watch, shouldMinify);
+  if (shouldMinify) {
+    thirdPartyBootstrap();
+  }
 }
 
 /**
@@ -351,45 +353,32 @@ function checkTypes() {
 /**
  * Copies frame.html to output folder, replaces js references to minified
  * copies, and generates symlink to it.
- *
- * @param {boolean} watch
- * @param {boolean} shouldMinify
  */
-function thirdPartyBootstrap(watch, shouldMinify) {
+function thirdPartyBootstrap() {
   var input = '3p/frame.max.html';
-  if (watch) {
-    $$.watch(input, function() {
-      thirdPartyBootstrap(false);
-    });
-  }
   $$.util.log('Processing ' + input);
-  var html = fs.readFileSync(input, 'utf8');
-  var min = html;
   // By default we use an absolute URL, that is independent of the
   // actual frame host for the JS inside the frame.
-  var jsPrefix = 'https://3p.ampproject.net/' + internalRuntimeVersion;
   // But during testing we need a relative reference because the
   // version is not available on the absolute path.
-  if (argv.fortesting) {
-    jsPrefix = '.';
-  }
+  var jsPrefix = argv.fortesting
+      ? '.'
+      : 'https://3p.ampproject.net/' + internalRuntimeVersion;
   // Convert default relative URL to absolute min URL.
-  min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
+  var html = fs.readFileSync(input, 'utf8')
+      .replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
   gulp.src(input)
-      .pipe($$.file('frame.html', min))
-      .pipe(gulp.dest(
-          'dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current')))
+      .pipe($$.file('frame.html', html))
+      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
-        if (shouldMinify) {
-          var aliasToLatestBuild = 'dist.3p/current-min';
-          if (fs.existsSync(aliasToLatestBuild)) {
-            fs.unlinkSync(aliasToLatestBuild);
-          }
-          fs.symlinkSync(
-              './' + internalRuntimeVersion,
-              aliasToLatestBuild,
-              'dir');
+        var aliasToLatestBuild = 'dist.3p/current-min';
+        if (fs.existsSync(aliasToLatestBuild)) {
+          fs.unlinkSync(aliasToLatestBuild);
         }
+        fs.symlinkSync(
+            './' + internalRuntimeVersion,
+            aliasToLatestBuild,
+            'dir');
       });
 }
 
