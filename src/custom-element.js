@@ -467,6 +467,16 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
+   * Returns Resources manager.
+   * @return {!./service/resources-impl.Resources}
+   * @final @this {!Element}
+   * @package
+   */
+  ElementProto.getResources = function() {
+    return this.resources_;
+  };
+
+  /**
    * Whether the element has been upgraded yet. Always returns false when
    * the element has not yet been added to DOM. After the element has been
    * added to DOM, the value depends on the `BaseElement` implementation and

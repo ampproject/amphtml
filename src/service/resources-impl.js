@@ -194,8 +194,10 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    this.ampdoc.onReady(() => {
+    this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -212,8 +214,6 @@ export class Resources {
       this.schedulePass();
       this.monitorInput_();
     });
-
-    this.schedulePass();
   }
 
   /**
@@ -273,7 +273,7 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    this.ampdoc.onBody(body => {
+    this.ampdoc.whenBodyAvailable().then(body => {
       this.vsync_.mutate(() => {
         body.classList.toggle(clazz, on);
       });
