@@ -613,6 +613,10 @@ describe('runtime', () => {
       // After timeout, it becomes visible again.
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
+
+      return ampdoc.whenReady().then(() => {
+        expect(ampdoc.isReady()).to.be.true;
+      });
     });
 
     it('should import body', () => {
@@ -626,6 +630,7 @@ describe('runtime', () => {
       expect(body).to.have.class('amp-shadow');
       expect(body.style.position).to.equal('relative');
       expect(body.querySelector('child')).to.exist;
+      expect(ampdoc.getBody()).to.exist;
     });
 
     it('should read title element', () => {

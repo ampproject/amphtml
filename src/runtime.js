@@ -37,7 +37,11 @@ import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
-import {installShadowDoc} from './service/ampdoc-impl';
+import {
+  installShadowDoc,
+  shadowDocHasBody,
+  shadowDocReady,
+} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles, installStylesForShadowRoot} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
@@ -467,7 +471,11 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
     body.classList.add('amp-shadow');
     body.style.position = 'relative';
     shadowRoot.appendChild(body);
+    shadowDocHasBody(ampdoc, body);
   }
+
+  // Document is ready.
+  shadowDocReady(ampdoc);
 
   // TODO(dvoytenko): find a better and more stable way to make content visible.
   // E.g. integrate with dynamic classes. In shadow case specifically, we have
