@@ -96,7 +96,8 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return this.getShareTrackingRandomBase64_();
+    return Promise.resolve(base64UrlEncodeFromBytes(
+        this.getShareTrackingRandomBytes_()));
   }
 
   /**
@@ -124,16 +125,6 @@ export class AmpShareTracking extends AMP.BaseElement {
       user().error(TAG, 'The request to share-tracking endpoint failed:' + err);
       return '';
     });
-  }
-
-  /**
-   * Get a random base64url string using 48 bits (6 bytes) random number
-   * @return {!Promise<string>}
-   * @private
-   */
-  getShareTrackingRandomBase64_() {
-    return Promise.resolve(base64UrlEncodeFromBytes(
-        this.getShareTrackingRandomBytes_()));
   }
 
   /**

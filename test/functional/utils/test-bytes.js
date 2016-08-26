@@ -63,11 +63,9 @@ describe('stringToBytes', function() {
       .equal(new Uint8Array([1, 2, 3]));
   });
 
-  it('should not generate random bytes array when win.crypto is' +
-      'not availble', () => {
+  it('should return null when trying to generate random bytes array if ' +
+      'win.crypto is not availble', () => {
     fakeWin.crypto = undefined;
     expect(getCryptoRandomBytesArray(fakeWin, 1)).to.be.null;
-    expect(getCryptoRandomBytesArray(fakeWin, 2)).to.be.null;
-    expect(getCryptoRandomBytesArray(fakeWin, 3)).to.be.null;
   });
 });

@@ -49,12 +49,13 @@ export function bytesToString(bytes) {
  * @return {?Uint8Array}
  */
 export function getCryptoRandomBytesArray(win, length) {
+  if (!win.crypto || !win.crypto.getRandomValues) {
+    return null;
+  }
+
   // Widely available in browsers we support:
   // http://caniuse.com/#search=getRandomValues
-  if (win.crypto && win.crypto.getRandomValues) {
-    const uint8array = new Uint8Array(length);
-    win.crypto.getRandomValues(uint8array);
-    return uint8array;
-  }
-  return null;
+  const uint8array = new Uint8Array(length);
+  win.crypto.getRandomValues(uint8array);
+  return uint8array;
 }
