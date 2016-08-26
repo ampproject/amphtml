@@ -256,22 +256,6 @@ export class AmpDoc {
   }
 
   /**
-   * Calls the callback when ampdoc is ready.
-   * @param {function()} callback
-   */
-  onReady(unusedCallback) {
-    dev().assert(null, 'not implemented');
-  }
-
-  /**
-   * Calls the callback when ampdoc's body is available.
-   * @param {function(!Element)} callback
-   */
-  onBody(callback) {
-    dev().assert(null, 'not implemented');
-  }
-
-  /**
    * Locates an element with the specified ID within the ampdoc. In the
    * shadow-doc mode, when multiple documents could be present, this method
    * localizes search only to the DOM subtree specific to this ampdoc.

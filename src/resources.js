@@ -23,5 +23,5 @@ import {getExistingServiceForDoc} from './service';
  */
 export function resourcesForDoc(nodeOrDoc) {
   return /** @type {!./service/resources-impl.Resources} */ (
-      getExistingServiceForDoc(window, 'resources'));
+      getExistingServiceForDoc(nodeOrDoc, 'resources'));
 };
