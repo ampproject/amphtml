@@ -49,6 +49,7 @@ let overrideBootstrapBaseUrl;
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
+  console.log(element.getAttribute('layout'));
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
@@ -81,6 +82,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     location: {
       href: locationHref,
     },
+    layout: element.getAttribute('layout'),
     tagName: element.tagName,
     mode: getModeObject(),
     hidden: !viewer.isVisible(),
