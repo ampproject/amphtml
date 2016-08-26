@@ -109,7 +109,7 @@ describe('amp-share-tracking', () => {
     viewerForMock.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(fragments.outgoingFragment).to.equal('AAAAAAAA');
+        expect(fragments.outgoingFragment).to.equal('HHHHHHHH');
       });
     });
   });

@@ -153,7 +153,7 @@ export class AmpShareTracking extends AMP.BaseElement {
       bytes = new Uint8Array(SHARE_TRACKING_NUMBER_OF_BYTES);
       let random = Math.random();
       for (let i = 0; i < SHARE_TRACKING_NUMBER_OF_BYTES; i++) {
-        random <<= 8;
+        random *= 256;
         bytes[i] = Math.floor(random);
         random -= bytes[i];
       }
