@@ -36,8 +36,6 @@ class AmpVimeo extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
@@ -50,8 +48,6 @@ class AmpVimeo extends AMP.BaseElement {
     iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(
         videoid);
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;

@@ -34,8 +34,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const mode = user().assert(
         this.element.getAttribute('data-mode'),
         'The data-mode attribute is required for <amp-springboard-player> %s',
@@ -50,10 +48,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
 
-    /** @private @const {number} */
-    this.width_ = width;
-    /** @private @const {number} */
-    this.height_ = height;
     /** @private @const {string} */
     this.mode_ = mode;
     /** @private @const {number} */
@@ -90,8 +84,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     	encodeURIComponent(playerId) + '/' + encodeURIComponent(this.domain_) +
     	'/' + encodeURIComponent(items);
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     /** @private {?Element} */
     this.iframe_ = iframe;
     this.element.appendChild(iframe);
@@ -127,12 +119,10 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         'snapshots/default_snapshot.png';
     }
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
-
-    this.element.appendChild(imgPlaceholder);
-    this.applyFillContent(imgPlaceholder);
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
+
+    this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
     loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {

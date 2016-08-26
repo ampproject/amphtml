@@ -31,8 +31,6 @@ class AmpReachPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const embedId = (this.element.getAttribute('data-embed-id') || 'default');
     const iframe = this.element.ownerDocument.createElement('iframe');
 
@@ -40,8 +38,6 @@ class AmpReachPlayer extends AMP.BaseElement {
     iframe.setAttribute('scrolling', 'no');
     iframe.src = 'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' + encodeURIComponent(embedId);
     this.applyFillContent(iframe);
-    iframe.height = height;
-    iframe.width = width;
     this.element.appendChild(iframe);
     /** @private {!Element} */
     this.iframe_ = iframe;

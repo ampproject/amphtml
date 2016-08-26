@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {assertHttpsUrl} from '../src/url';
-import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
+import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
@@ -38,11 +38,6 @@ export function installVideo(win) {
     buildCallback() {
       /** @private @const {!HTMLVideoElement} */
       this.video_ = this.element.ownerDocument.createElement('video');
-      const width = this.element.getAttribute('width');
-      const height = this.element.getAttribute('height');
-
-      this.video_.width = getLengthNumeral(width);
-      this.video_.height = getLengthNumeral(height);
 
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr && getMode().development) {

@@ -35,8 +35,6 @@ class AmpDailymotion extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const videoid = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
@@ -48,8 +46,6 @@ class AmpDailymotion extends AMP.BaseElement {
         videoid) + '?' + this.getQuery_();
 
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;

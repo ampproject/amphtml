@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
@@ -32,15 +32,6 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
     /** @private @const {string} */
     this.pid_ = user().assert(
         this.element.getAttribute('data-pid'),
@@ -98,8 +89,6 @@ class AmpO2Player extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = this.src_;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
