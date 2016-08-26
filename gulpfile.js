@@ -125,7 +125,8 @@ function polyfillsForTests() {
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
   compileCss();
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+  compileJs('./3p/', 'integration.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
     minifiedName: 'f.js',
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -376,19 +377,19 @@ function thirdPartyBootstrap(watch, shouldMinify) {
   min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
   gulp.src(input)
       .pipe($$.file('frame.html', min))
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
+      .pipe(gulp.dest(
+          'dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current')))
       .on('end', function() {
-        var aliasToLatestBuild = 'dist.3p/current';
         if (shouldMinify) {
-          aliasToLatestBuild += '-min';
+          var aliasToLatestBuild = 'dist.3p/current-min';
+          if (fs.existsSync(aliasToLatestBuild)) {
+            fs.unlinkSync(aliasToLatestBuild);
+          }
+          fs.symlinkSync(
+              './' + internalRuntimeVersion,
+              aliasToLatestBuild,
+              'dir');
         }
-        if (fs.existsSync(aliasToLatestBuild)) {
-          fs.unlinkSync(aliasToLatestBuild);
-        }
-        fs.symlinkSync(
-            './' + internalRuntimeVersion,
-            aliasToLatestBuild,
-            'dir');
       });
 }
 
