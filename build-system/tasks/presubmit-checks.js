@@ -499,6 +499,7 @@ var forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
+      'src/service/lightbox-manager-discovery.js',
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
