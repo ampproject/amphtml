@@ -13,5 +13,6 @@ npm-debug.log
 .tm_properties
 .settings
 build-system/runner/TESTS-TestSuites.xml
+.vscode/
 
 /test/manual/amp-ad.adtech.html

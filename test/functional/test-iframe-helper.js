@@ -134,13 +134,16 @@ describe('iframe-helper', function() {
     });
   });
 
-  it('should un-listen after first hit', () => {
+  it('should un-listen and resolve promise after first hit', () => {
     let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOnce(testIframe, 'send-intersections', () => {
-        calls++;
-        resolve();
-      });
+      IframeHelper.listenForOncePromise(testIframe,
+          ['no-msg', 'send-intersections', 'send-intersections'])
+          .then(obj => {
+            expect(obj.message = 'send-intersections');
+            calls++;
+            resolve();
+          });
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -149,15 +152,6 @@ describe('iframe-helper', function() {
       }).then(() => {
         expect(calls).to.equal(total);
       });
-    });
-  });
-
-  it('listenForMessagesOncePromise resolve after listen to one msg', () => {
-    const promise = IframeHelper.listenForMessagesOncePromise(testIframe,
-        ['no-msg1', 'no-msg2', 'send-intersections']);
-    insert(testIframe);
-    promise.then(msg => {
-      expect(msg).to.equal('send-intersections');
     });
   });
 

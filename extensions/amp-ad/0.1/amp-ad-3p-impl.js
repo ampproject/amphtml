@@ -158,7 +158,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
-    /** @const {?string} */
+    /** {?string} */
     this.adType = null;
 
     setupA2AListener(this.win);

@@ -17,9 +17,10 @@
 import {AmpAdApiHandler} from '../amp-ad-api-handler';
 import {BaseElement} from '../../../../src/base-element';
 import {
-    createIframeWithMessageStub,
-    expectPostMessage,
-    } from '../../../../testing/iframe';
+  createIframeWithMessageStub,
+  expectPostMessage,
+} from '../../../../testing/iframe';
+import {timerFor} from '../../../../src/timer';
 import * as sinon from 'sinon';
 
 describe('amp-ad-api-handler', () => {
@@ -68,8 +69,9 @@ describe('amp-ad-api-handler', () => {
       }));
     });
 
-    describe('should resolve startUp', () => {
-      it('if render-start NOT supported', () => {
+    describe('method startUp return promise', () => {
+      it('should resolve on message "bootstrap-loaded" if render-start is'
+          + 'NOT implemented by 3P', () => {
         expect(iframe.style.visibility).to.equal('hidden');
         iframe.postMessageToParent({
           sentinel: 'amp3ptest' + testIndex,
@@ -80,10 +82,10 @@ describe('amp-ad-api-handler', () => {
         });
       });
 
-      it('if render-start supported, receive render-start first', () => {
+      it('should resolve on message "render-start" if render-start is'
+          + 'implemented by 3P"', () => {
         adImpl.adType = 'doubleclick';
-        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
-        apiHandler.noContentCallback_ = () => {};
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element, () => {});
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
@@ -115,10 +117,10 @@ describe('amp-ad-api-handler', () => {
             });
       });
 
-      it('if render-start supported, receive no-content first', () => {
+      it('should resolve on message "no-content" if render-start is'
+          + 'implemented by 3P', () => {
         adImpl.adType = 'doubleclick';
-        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
-        apiHandler.noContentCallback_ = () => {};
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element, () => {});
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
@@ -136,6 +138,42 @@ describe('amp-ad-api-handler', () => {
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentCallbackSpy).to.be.calledOnce;
+              });
+            });
+      });
+
+      it('should NOT resolve on message "bootstrap-loaded" if render-start is'
+          + 'implemented by 3P', () => {
+        adImpl.adType = 'doubleclick';
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
+        const beforeAttachedToDom = element => {
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'bootstrap-loaded',
+              });
+            }).then(() => {
+              return expectPostMessage(iframe.contentWindow, window, {
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'bootstrap-loaded',
+              }).then(() => {
+                const clock = sandbox.useFakeTimers();
+                clock.tick(0);
+                const timeoutPromise =
+                    timerFor(window).timeoutPromise(2000, startUpPromise);
+                clock.tick(2001);
+                return timeoutPromise.then(() => {
+                  throw Error('startUp resolve on bootstrap-loaded when'
+                      + 'when render-start is supported');
+                }, error => {
+                  expect(error).to.match(/timeout/);
+                });
               });
             });
       });
