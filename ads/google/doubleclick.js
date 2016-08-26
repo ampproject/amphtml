@@ -171,6 +171,7 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
   if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
     jsonParameters.gladeExp = '1';
+    jsonParameters.gladeEids = '108809102';
   }
   const expIds = data['experimentId'];
   if (expIds) {
