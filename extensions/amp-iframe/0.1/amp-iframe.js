@@ -184,13 +184,14 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
+    // We remeasured this tag, lets also remeasure the iframe. Should be
+    // free now and it might have changed.
+    this.measureIframeLayoutBox_();
+
     this.isAdLike_ = isAdLike(this);
     this.isDisallowedAsAd_ = this.isAdLike_ &&
         !isAdPositionAllowed(this.element, this.win);
 
-    // We remeasured this tag, lets also remeasure the iframe. Should be
-    // free now and it might have changed.
-    this.measureIframeLayoutBox_();
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This does nothing
     // if we aren't currently in view.
@@ -214,6 +215,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
+    if (!this.iframe_) {
+      return super.getIntersectionElementLayoutBox();
+    }
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
