@@ -28,7 +28,7 @@ export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
   thirdPartyFrameRegex: env['thirdPartyFrameRegex'] ||
-      /^d-\d+\.ampproject\.net$/,
+      '^d-\\d+\.ampproject\\.net$',
   cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
   errorReporting: env['errorReportingUrl'] ||
       'https://amp-error-reporting.appspot.com/r',
