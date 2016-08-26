@@ -33,11 +33,6 @@ var url = require('url');
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 
-app.get('/dist.3p/current/frame.max.html', function(req, res, next) {
-  req.url = '/3p/frame.max.html';
-  next();
-});
-
 app.use('/pwa', function(req, res, next) {
   var file;
   var contentType;
