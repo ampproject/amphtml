@@ -82,12 +82,10 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
   // If the ad layout is responsive, center the fixed size ad in the container.
   if (global.context.layout == 'responsive') {
     const container = global.document.querySelector('#c');
-    console.log('before:' + container);
     container.style.top = '50%';
     container.style.left = '50%';
     container.style.margin = dimensions[0][1]/-2 + 'px 0 0 ' +
       dimensions[0][0]/-2 + 'px';
-    console.log('after:' + container);
   }
 
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
