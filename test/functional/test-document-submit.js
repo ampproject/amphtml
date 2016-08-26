@@ -48,22 +48,29 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
         /form action attribute is required/);
 
     tgt.setAttribute('action', 'http://example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form action must start with "https:/);
 
     tgt.setAttribute('action', 'https://cdn.ampproject.org');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form action should not be on AMP CDN/);
 
     tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.removeAttribute('target');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form target attribute is required/);
 
+    tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.setAttribute('target', '_self');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form target=_self is invalid/);
 
+    tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.setAttribute('target', '_blank');
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
   });
