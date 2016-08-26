@@ -27,7 +27,7 @@ before_script:
 script:
   - npm run ava
   - gulp lint
-  - gulp build --fortesting --css-only
+  - gulp build --css-only
   - gulp check-types
   - gulp dist --fortesting
   - gulp presubmit
@@ -35,9 +35,9 @@ script:
   # the css files into js files.
   - gulp dep-check
   # Unit tests with Travis' default chromium
-  - gulp test --nobuild --compiled --fortesting
+  - gulp test --nobuild --compiled
   # Integration tests with all saucelabs browsers
-  - gulp test --nobuild --saucelabs --integration --compiled --fortesting
+  - gulp test --nobuild --saucelabs --integration --compiled
   # All unit tests with an old chrome (best we can do right now to pass tests
   # and not start relying on new features).
   # Disabled because it regressed. Better to run the other saucelabs tests.
