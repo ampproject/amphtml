@@ -27,6 +27,10 @@ import {getMode} from '../src/mode';
  * @return {undefined}
  */
 export function installVideo(win) {
+
+  /**
+   * @implements {../src/video-interface.VideoInterface}
+   */
   class AmpVideo extends BaseElement {
 
     /** @override */
@@ -55,6 +59,7 @@ export function installVideo(win) {
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
+      this.dispatchCustomEvent('amp:video:built');
     }
 
     /** @override */
@@ -68,7 +73,7 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'autoplay', 'muted', 'loop'],
+          ['src', 'muted', 'loop'],
           this.video_);
 
       if (this.element.hasAttribute('preload')) {
@@ -89,7 +94,9 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
-      return loadPromise(this.video_);
+      return loadPromise(this.video_).then(() => {
+        this.dispatchCustomEvent('amp:video:loaded');
+      });
     }
 
     /** @override */
@@ -102,6 +109,44 @@ export function installVideo(win) {
     /** @private */
     isVideoSupported_() {
       return !!this.video_.play;
+    }
+
+    /* VideoInterface Implementation */
+
+    supportsPlatform() {
+      return this.isVideoSupported_();
+    }
+
+    canAutoplay() {
+      return this.element.hasAttribute('autoplay');
+    }
+
+    play(isAutoplay) {
+      this.video_.play();
+    }
+
+    pause() {
+      this.video_.pause();
+    }
+
+    mute() {
+      this.video_.setAttribute('muted', '');
+    }
+
+    unmute() {
+      this.video_.removeAttribute('muted');
+    }
+
+    canHaveControls() {
+      return this.element.hasAttribute('controls');
+    }
+
+    showControls() {
+      this.video_.setAttribute('controls', '');
+    }
+
+    hideControls() {
+      this.video_.removeAttribute('controls');
     }
   }
 
