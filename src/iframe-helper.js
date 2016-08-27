@@ -298,7 +298,7 @@ export function listenFor(
  * @param {!Element} iframe
  * @param {!string|!Array<string>} typeOfMessage
  * @param {boolean=} opt_is3P
- * @return {!Promise<Object{data, source, origin}>}
+ * @return {!Promise<{data, source, origin}>}
  */
 export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
   const unlistenList = [];

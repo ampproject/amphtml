@@ -168,7 +168,8 @@ describe('amp-ad-api-handler', () => {
                 const timeoutPromise =
                     timerFor(window).timeoutPromise(2000, startUpPromise);
                 clock.tick(2001);
-                return timeoutPromise.should.be.rejectedWith(/timeout/);
+                return expect(timeoutPromise).to.eventually
+                    .be.rejectedWith(/timeout/);
               });
             });
       });
