@@ -79,14 +79,13 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideHeight || data.height, 10),
   ]];
 
-  // If the ad layout is responsive, center the fixed size ad in the container.
-  if (global.context.layout == 'responsive') {
-    const container = global.document.querySelector('#c');
-    container.style.top = '50%';
-    container.style.left = '50%';
-    container.style.margin = dimensions[0][1]/-2 + 'px 0 0 ' +
-      dimensions[0][0]/-2 + 'px';
-  }
+  // Center the ad in the container.
+  const container = global.document.querySelector('#c');
+  container.style.top = '50%';
+  container.style.left = '50%';
+  container.style.bottom = '';
+  container.style.right = '';
+  container.style.transform = 'translate(-50%, -50%)';
 
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(() => {
@@ -198,26 +197,14 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
   slot.setAttribute('data-page-url', global.context.canonicalUrl);
 
-  // Size setup.
-  if (global.context.layout == 'responsive') {
-    // If the slot is responsive, we can have a different size ad come back
-    // than the container size, so explicitly set height and width, then center
-    // in the container.
-    slot.setAttribute('height', requestHeight);
-    slot.setAttribute('width', requestWidth);
-    slot.style.top = '50%';
-    slot.style.left = '50%';
-    slot.style.margin = requestHeight/-2 + 'px 0 0 ' + requestWidth/-2 + 'px';
-  } else {
-    // Otherwise, ad container should simply fill the amp-ad iframe, but we
-    // still need to request a specific size from the ad server.
-    // The ad container size will be relative to the amp-iframe, so if the
-    // latter changes the ad container will match it.
-    slot.setAttribute('height', 'fill');
-    slot.setAttribute('width', 'fill');
-    slot.setAttribute('data-request-height', requestHeight);
-    slot.setAttribute('data-request-width', requestWidth);
-  }
+  // Center the ad in the container.
+  slot.setAttribute('height', requestHeight);
+  slot.setAttribute('width', requestWidth);
+  slot.style.top = '50%';
+  slot.style.left = '50%';
+  slot.style.bottom = '';
+  slot.style.right = '';
+  slot.style.transform = 'translate(-50%, -50%)';
 
   slot.addEventListener('gladeAdFetched', event => {
     global.context.renderStart();

@@ -81,7 +81,6 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     location: {
       href: locationHref,
     },
-    layout: element.getAttribute('layout'),
     tagName: element.tagName,
     mode: getModeObject(),
     hidden: !viewer.isVisible(),
