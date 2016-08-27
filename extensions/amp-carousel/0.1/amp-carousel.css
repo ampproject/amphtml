@@ -82,7 +82,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
   flex-wrap: nowrap;
   height: 100% !important;
   left: 0;
-  overflow-x: auto !important;
+  overflow-x: scroll !important;
   overflow-y: hidden !important;
   position: absolute !important;
   top: 0;
@@ -103,7 +103,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 }
 
 .-amp-slides-container.-amp-no-scroll {
-  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: auto !important;
 }
 
 .-amp-slide-item {
