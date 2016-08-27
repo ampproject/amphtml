@@ -21,17 +21,19 @@ import {Xhr} from '../../../../src/service/xhr-impl';
 import {shareTrackingForOrNull} from '../../../../src/share-tracking-service';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
+import * as bytes from '../../../../src/utils/bytes';
 
 describe('amp-share-tracking', () => {
   let sandbox;
   let viewerForMock;
   let xhrMock;
+  let randomBytesMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     viewerForMock = sandbox.stub(Viewer.prototype, 'getFragment');
     xhrMock = sandbox.stub(Xhr.prototype, 'fetchJson');
-    sandbox.stub(Math, 'random').returns(0.1111111111111111234);
+    randomBytesMock = sandbox.stub(bytes, 'getCryptoRandomBytesArray');
   });
 
   afterEach(() => {
@@ -89,11 +91,25 @@ describe('amp-share-tracking', () => {
   });
 
   it('should get outgoing fragment randomly if no vendor url ' +
-      'is provided', () => {
+      'is provided and win.crypto is availble', () => {
+    viewerForMock.onFirstCall().returns(Promise.resolve(''));
+    randomBytesMock.onFirstCall().returns(new Uint8Array([1, 2, 3, 4, 5, 6]));
+    return getAmpShareTracking().then(ampShareTracking => {
+      return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
+        // the base64url of byte array [1, 2, 3, 4, 5, 6]
+        expect(fragments.outgoingFragment).to.equal('AQIDBAUG');
+      });
+    });
+  });
+
+  it('should get outgoing fragment randomly if no vendor url ' +
+      'is provided and fallback to Math.random generation', () => {
+    sandbox.stub(Math, 'random').returns(0.123456789123456789);
+    randomBytesMock.onFirstCall().returns(null);
     viewerForMock.onFirstCall().returns(Promise.resolve(''));
     return getAmpShareTracking().then(ampShareTracking => {
       return shareTrackingForOrNull(ampShareTracking.win).then(fragments => {
-        expect(fragments.outgoingFragment).to.equal('HHHHHHHH');
+        expect(fragments.outgoingFragment).to.equal('H5rdN8Eh');
       });
     });
   });

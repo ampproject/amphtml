@@ -20,11 +20,14 @@ import {viewerFor} from '../../../src/viewer';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
 import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
-import {getRandomBytesArray} from '../../../src/utils/bytes';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
+
+/** @private @const {number} */
+const SHARE_TRACKING_NUMBER_OF_BYTES = 6;
 
 /**
  * @visibleForTesting
@@ -93,7 +96,8 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return this.getRandomBase64_();
+    return Promise.resolve(base64UrlEncodeFromBytes(
+        this.getShareTrackingRandomBytes_()));
   }
 
   /**
@@ -124,12 +128,28 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 
   /**
-   * Get a random base64url string using 48 bits (6 bytes) random number
+   * Get a random bytes array that has 48 bits (6 bytes).
+   * Use win.crypto.getRandomValues if it is available.
+   * Otherwise, use Math.random as fallback.
    * @return {!Promise<string>}
    * @private
    */
-  getRandomBase64_() {
-    return Promise.resolve(base64UrlEncodeFromBytes(getRandomBytesArray(6)));
+  getShareTrackingRandomBytes_() {
+    // Use win.crypto.getRandomValues to get 48 bits of random value
+    let bytes = getCryptoRandomBytesArray(this.win,
+        SHARE_TRACKING_NUMBER_OF_BYTES); // 48 bit
+
+    // Support for legacy browsers
+    if (!bytes) {
+      bytes = new Uint8Array(SHARE_TRACKING_NUMBER_OF_BYTES);
+      let random = Math.random();
+      for (let i = 0; i < SHARE_TRACKING_NUMBER_OF_BYTES; i++) {
+        random *= 256;
+        bytes[i] = Math.floor(random);
+        random -= bytes[i];
+      }
+    }
+    return bytes;
   }
 }
 
