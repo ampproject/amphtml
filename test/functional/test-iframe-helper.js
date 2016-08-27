@@ -138,7 +138,7 @@ describe('iframe-helper', function() {
     let calls = 0;
     return new Promise(resolve => {
       IframeHelper.listenForOncePromise(testIframe,
-          ['no-msg', 'send-intersections', 'send-intersections'])
+          ['no-msg', 'send-intersections'])
           .then(obj => {
             expect(obj.message = 'send-intersections');
             calls++;
