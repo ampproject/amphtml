@@ -15,9 +15,7 @@
  */
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Gestures} from '../../../src/gesture';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timerFor} from '../../../src/timer';
