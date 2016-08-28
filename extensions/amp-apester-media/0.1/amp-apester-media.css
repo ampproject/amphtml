@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-/* apester-iframe */
+/* iframe */
 
-.apester-iframe {
+.iframe {
   transition: 0.4s opacity;
   opacity: 0;
 }
 
-.apester-iframe-ready {
+.iframe-ready {
   opacity: 1 !important;
 }
 
-.apester-loader {
+.loader {
   height: 100px;
   width: 100px;
   top: 50%;
@@ -35,11 +35,11 @@
   margin-top: -22px;
 }
 
-.apester-loader-container {
+.loader-container {
   background-color: white;
 }
 
-.apester-container {
+.container {
   max-width: 700px;
   margin: 0 auto;
   display: block;
@@ -47,7 +47,7 @@
   width: 100%;
 }
 
-.apester-overflow-container {
+.overflow-container {
   position: absolute;
   margin: auto;
   top: 50%;
@@ -55,7 +55,7 @@
   transform: translate(-50%, -50%);
 }
 
-.apester-overflow-button {
+.overflow-button {
   border: none;
   z-index: 10000;
   background: white;

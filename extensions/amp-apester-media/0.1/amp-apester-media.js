@@ -125,17 +125,18 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    **/
   buildUrl_() {
+    const encodedMediaAttribute = encodeURIComponent(this.mediaAttribute_);
     const suffix = (this.random_) ?
-        `/tokens/${this.mediaAttribute_}/interactions/random` :
-        `/interactions/${this.mediaAttribute_}/display`;
-    return encodeURIComponent(`${this.displayBaseUrl_}${suffix}`);
+        `/tokens/${encodedMediaAttribute}/interactions/random` :
+        `/interactions/${encodedMediaAttribute}/display`;
+    return `${this.displayBaseUrl_}${suffix}`;
   }
 
   /**
    * @return {!Promise<!JSONType>}
    **/
   queryMedia_() {
-    const url = decodeURIComponent(this.buildUrl_());
+    const url = this.buildUrl_();
     return xhrFor(this.win).fetchJson(url);
   }
 
@@ -143,7 +144,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    * */
   constructUrlFromMedia_(id) {
-    return encodeURIComponent(this.rendererBaseUrl_ + '/interaction/' + id);
+    return `${this.rendererBaseUrl_}/interaction/${encodeURIComponent(id)}`;
   }
 
   /** @param {string} src
@@ -204,15 +205,8 @@ class AmpApesterMedia extends AMP.BaseElement {
           return undefined;
         }).then(media => {
           this.togglePlaceholder(false);
-          let height = 0 || media.data.size.height;
-          const width = 0 || media.data.size.width;
-          height += (media.layout.directive === 'contest-poll') ? 40 : 0;
-          const amp = this.element;
-          this.iframe_.height = height;
-          this.iframe_.width = width;
-          amp.setAttribute('height', height);
-          amp.setAttribute('width', width);
-          this./*OK*/attemptChangeHeight(height, width);
+          const height = 0 || media.data.size.height;
+          this./*OK*/attemptChangeHeight(height);
         });
   }
 

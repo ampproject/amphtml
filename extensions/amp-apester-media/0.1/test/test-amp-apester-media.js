@@ -81,11 +81,14 @@ describe('amp-apester-media', () => {
     return getApester({
       'data-apester-media-id': '57a336dba187a2ca3005e826',
     }).then(ape => {
+      console.log(ape);
       const iframe = ape.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(iframe.getAttribute('height')).to.equal('444');
+      setTimeout(() => { // need to wait for attemptChangeHeight to update
+        expect(iframe.getAttribute('height')).to.equal('444');
+      }, 0);
     });
   });
 
@@ -97,7 +100,9 @@ describe('amp-apester-media', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.equal(
           'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
-      expect(iframe.getAttribute('height')).to.equal('444');
+      setTimeout(() => {  // need to wait for attemptChangeHeight to update
+        expect(iframe.getAttribute('height')).to.equal('444');
+      }, 0);
     });
   });
 
@@ -131,5 +136,4 @@ describe('amp-apester-media', () => {
     expect(getApester()).to.be.rejectedWith(
         /The media-id attribute is required for/);
   });
-})
-;
+});
