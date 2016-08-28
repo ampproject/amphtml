@@ -29,6 +29,7 @@ import {
   isProxyOrigin,
   parseUrl,
 } from '../../../src/url';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {viewerFor} from '../../../src/viewer';
 import {cryptoFor} from '../../../src/crypto';
 import {user} from '../../../src/log';
@@ -372,13 +373,12 @@ function shouldUpdateStoredTime(storedCidInfo) {
  * @return {!Uint8Array|string} Entropy.
  */
 function getEntropy(win) {
-  // Widely available in browsers we support:
-  // http://caniuse.com/#search=getRandomValues
-  if (win.crypto && win.crypto.getRandomValues) {
-    const uint8array = new Uint8Array(16);  // 128 bit
-    win.crypto.getRandomValues(uint8array);
+  // Use win.crypto.getRandomValues to get 128 bits of random value
+  const uint8array = getCryptoRandomBytesArray(win, 16); // 128 bit
+  if (uint8array) {
     return uint8array;
   }
+
   // Support for legacy browsers.
   return String(win.location.href + Date.now() +
       win.Math.random() + win.screen.width + win.screen.height);

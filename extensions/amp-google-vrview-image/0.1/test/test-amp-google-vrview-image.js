@@ -64,8 +64,6 @@ describe('amp-google-vrview-image', function() {
       expect(iframe.getAttribute('src')).to.equal(
           'https://storage.googleapis.com/vrview/index.html' +
           '?image=' + encodeURIComponent('https://example.com/image1'));
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 
@@ -81,8 +79,6 @@ describe('amp-google-vrview-image', function() {
           'https://storage.googleapis.com/vrview/index.html' +
           '?image=' + encodeURIComponent('https://example.com/image1') +
           '&is_stereo=true');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 

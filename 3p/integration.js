@@ -37,6 +37,7 @@ import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
 import {a9} from '../ads/a9';
+import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
@@ -77,6 +78,7 @@ import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
+import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
@@ -114,6 +116,7 @@ const IS_DEV = true;
 
 // Keep the list in alphabetic order
 register('a9', a9);
+register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adform', adform);
 register('adgeneration', adgeneration);
@@ -156,6 +159,7 @@ register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
 register('pubmatic', pubmatic);
+register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('revcontent', revcontent);
 register('rubicon', rubicon);

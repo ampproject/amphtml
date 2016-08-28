@@ -51,8 +51,6 @@ describe('amp-reach-player', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=default');
-      expect(iframe.getAttribute('width')).to.equal('560');
-      expect(iframe.getAttribute('height')).to.equal('315');
     });
   });
 

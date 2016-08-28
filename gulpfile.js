@@ -80,6 +80,7 @@ function buildExtensions(options) {
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
+  buildExtension('amp-lightbox-viewer', '0.1', true, options);
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-live-list', '0.1', true, options);
   buildExtension('amp-mustache', '0.1', false, options);
@@ -126,7 +127,8 @@ function polyfillsForTests() {
 function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     opt_checkTypes) {
   compileCss();
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
+  compileJs('./3p/', 'integration.js',
+      './dist.3p/' + (shouldMinify ? internalRuntimeVersion : 'current'), {
     minifiedName: 'f.js',
     checkTypes: opt_checkTypes,
     watch: watch,
@@ -170,7 +172,14 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     wrapper: '<%= contents %>'
   });
-  thirdPartyBootstrap(watch, shouldMinify);
+
+  var frameHtml = '3p/frame.max.html';
+  thirdPartyBootstrap(frameHtml, shouldMinify);
+  if (watch) {
+    $$.watch(frameHtml, function() {
+      thirdPartyBootstrap(frameHtml, shouldMinify);
+    });
+  }
 }
 
 /**
@@ -352,37 +361,32 @@ function checkTypes() {
  * Copies frame.html to output folder, replaces js references to minified
  * copies, and generates symlink to it.
  *
- * @param {boolean} watch
+ * @param {string} input
  * @param {boolean} shouldMinify
  */
-function thirdPartyBootstrap(watch, shouldMinify) {
-  var input = '3p/frame.max.html';
-  if (watch) {
-    $$.watch(input, function() {
-      thirdPartyBootstrap(false);
-    });
-  }
+function thirdPartyBootstrap(input, shouldMinify) {
   $$.util.log('Processing ' + input);
-  var html = fs.readFileSync(input, 'utf8');
-  var min = html;
+
+  if (!shouldMinify) {
+    gulp.src(input)
+        .pipe(gulp.dest('dist.3p/current'));
+    return;
+  }
+
   // By default we use an absolute URL, that is independent of the
   // actual frame host for the JS inside the frame.
-  var jsPrefix = 'https://3p.ampproject.net/' + internalRuntimeVersion;
   // But during testing we need a relative reference because the
   // version is not available on the absolute path.
-  if (argv.fortesting) {
-    jsPrefix = '.';
-  }
+  var integrationJs = argv.fortesting
+      ? './f.js'
+      : `https://3p.ampproject.net/${internalRuntimeVersion}/f.js`;
   // Convert default relative URL to absolute min URL.
-  min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
-  gulp.src(input)
-      .pipe($$.file('frame.html', min))
+  var html = fs.readFileSync(input, 'utf8')
+      .replace(/\.\/integration\.js/g, integrationJs);
+  $$.file('frame.html', html, {src: true})
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
-        var aliasToLatestBuild = 'dist.3p/current';
-        if (shouldMinify) {
-          aliasToLatestBuild += '-min';
-        }
+        var aliasToLatestBuild = 'dist.3p/current-min';
         if (fs.existsSync(aliasToLatestBuild)) {
           fs.unlinkSync(aliasToLatestBuild);
         }

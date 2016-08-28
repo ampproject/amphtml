@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
+import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
@@ -66,9 +66,6 @@ export class AmpImg extends BaseElement {
     }
     this.propagateAttributes(['alt', 'referrerpolicy'], this.img_);
     this.applyFillContent(this.img_, true);
-
-    this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
-    this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
     this.element.appendChild(this.img_);
 

@@ -16,7 +16,7 @@
 
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -38,15 +38,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
       dev().warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
-
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
 
     /** @private @const {string} */
     this.imageSrc_ = assertHttpsUrl(this.element.getAttribute('src'),
@@ -101,8 +92,6 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     this.applyFillContent(iframe);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     iframe.setAttribute('src', this.src_);
     this.element.appendChild(iframe);
 
