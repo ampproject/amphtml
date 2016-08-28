@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, validateExactlyOne} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -27,9 +27,8 @@ export function taboola(global, data) {
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateDataExists(data, ['publisher', 'placement', 'mode']);
-  validateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category',
-    'homepage', 'others']);
+  validateData(data, ['publisher', 'placement', 'mode',
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']]);
 
   // setup default values for referrer and url
   const params = {

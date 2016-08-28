@@ -198,7 +198,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
-  url += '&r=' + encodeURIComponent(document.referrer);
+  url += '&r=' + encodeURIComponent(self.document.referrer);
 
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);

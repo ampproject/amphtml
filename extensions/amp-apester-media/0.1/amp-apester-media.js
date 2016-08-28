@@ -85,14 +85,14 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @private {boolean}
      */
-    this.random = false;
+    this.random_ = false;
 
     /**
      * @const @private {?string}
      */
     this.mediaAttribute_ = user().assert(
         (this.element.getAttribute('data-apester-media-id') ||
-         (this.random =
+         (this.random_ =
              this.element.getAttribute('data-apester-channel-token'))),
         'Either the data-apester-media-id or the data-apester-channel-token ' +
         'attributes must be specified for <amp-apester-media> %s',
@@ -125,7 +125,7 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @return {string}
    **/
   buildUrl_() {
-    const suffix = (this.random) ?
+    const suffix = (this.random_) ?
         `/tokens/${this.mediaAttribute_}/interactions/random` :
         `/interactions/${this.mediaAttribute_}/display`;
     return encodeURIComponent(`${this.displayBaseUrl_}${suffix}`);
@@ -139,14 +139,14 @@ class AmpApesterMedia extends AMP.BaseElement {
     return xhrFor(this.win).fetchJson(url);
   }
 
-  /** @param {string}
+  /** @param {string} id
    * @return {string}
    * */
   constructUrlFromMedia_(id) {
     return encodeURIComponent(this.rendererBaseUrl_ + '/interaction/' + id);
   }
 
-  /** @param {string}
+  /** @param {string} src
    * @return {!Element}
    */
   constructIframe_(src) {

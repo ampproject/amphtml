@@ -271,7 +271,7 @@ export const ANALYTICS_CONFIG = {
     },
     'transport': {
       'beacon': false,
-      'xhrpost': true,
+      'xhrpost': false,
       'image': true,
     },
   },

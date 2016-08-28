@@ -21,20 +21,52 @@ import {
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
 import {toggleExperiment} from '../../../../src/experiments';
+import {xhrFor} from '../../../../src/xhr';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-apester-media', () => {
+  let sandbox;
+  let xhrMock;
+
   beforeEach(() => {
     toggleExperiment(window, 'amp-apester-media', true);
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    if (xhrMock) {
+      xhrMock.verify();
+    }
+    sandbox.restore();
   });
 
   function getApester(attributes, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
+      xhrMock = sandbox.mock(xhrFor(iframe.win));
+      const response = {
+        'code': 200,
+        'message': 'ok',
+        'payload': {
+          'interactionId': '57a336dba187a2ca3005e826',
+          'data': {
+            'size': {'width': 600, 'height': 444},
+          },
+          'layout': {
+            'id': '557d52c059081084b94845c3',
+            'name': 'multi poll two',
+            'directive': 'multi-poll-two',
+          },
+          'language': 'en',
+        },
+      };
+      xhrMock.expects('fetchJson').returns(Promise.resolve(response));
       for (const key in attributes) {
         media.setAttribute(key, attributes[key]);
+
       }
       media.setAttribute('height', '390');
       //todo test width?

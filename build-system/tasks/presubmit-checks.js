@@ -93,6 +93,7 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
+      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -330,6 +331,7 @@ var forbiddenTerms = {
     whitelist: [
       // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
       'src/service-worker/core.js',
+      'src/service-worker/kill.js',
     ]
   },
   'openDatabase': requiresReviewPrivacy,
@@ -391,19 +393,6 @@ var forbiddenTerms = {
     message: 'Use dom.documentContains API.',
     whitelist: [
       'src/dom.js',
-    ],
-  },
-  '\\sdocument(?![a-zA-Z0-9_:])': {
-    message: 'Use `window.document` or similar to access document, the global' +
-      '`document` is forbidden',
-    whitelist: [
-      'build-system/server.js',
-      'examples/pwa/pwa.js',
-      'examples/viewer-integr.js',
-      'testing/iframe.js',
-      'testing/screenshots/make-screenshot.js',
-      'tools/experiments/experiments.js',
-      'validator/engine/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
