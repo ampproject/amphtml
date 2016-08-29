@@ -16,6 +16,7 @@
 
 import {dev} from './log';
 import {parseUrl} from './url';
+import {filterSplice} from './utils/array';
 
 /**
  * Sentinel used to force unlistening after a iframe is detached.
@@ -443,6 +444,8 @@ export class SubscriptionApi {
    * @param {!Object} data Message payload.
    */
   send(type, data) {
+    // Remove clients that have been removed from the DOM.
+    filterSplice(this.clientWindows_, client => !!client.win.parent);
     postMessageToWindows(
         this.iframe_,
         this.clientWindows_,
