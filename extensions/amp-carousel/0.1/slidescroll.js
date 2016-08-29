@@ -15,9 +15,7 @@
  */
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Gestures} from '../../../src/gesture';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timerFor} from '../../../src/timer';
@@ -107,10 +105,7 @@ export class AmpSlideScroll extends BaseSlides {
      */
     this.elasticScrollState_ = 0;
 
-
-    const gestures =
-        Gestures.get(this.element, /* shouldNotPreventDefault */true);
-    gestures.onGesture(SwipeXRecognizer, () => {});
+    this.cancelTouchEvents_();
 
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
@@ -478,5 +473,20 @@ export class AmpSlideScroll extends BaseSlides {
     return Animation.animate(this.slidesContainer_, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
     }, 80, 'ease-out').thenAlways();
+  }
+
+  /**
+   * Cancels the touchmove events for the element so that viewer does not
+   * consider the swipes in the carousel as swipes for changing AMP documents.
+   * @private
+   */
+  cancelTouchEvents_() {
+    // TODO(aghassemi): https://github.com/ampproject/amphtml/issues/4742
+    // prevents us from using SwipeXRecognizer with an empty handler to
+    // cancel the events. This work around is not great and temporary until
+    // #4742 is fixed.
+    this.element.addEventListener('touchmove', evt => {
+      evt.stopPropagation();
+    });
   }
 }
