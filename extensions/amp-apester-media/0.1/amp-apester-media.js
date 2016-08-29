@@ -183,8 +183,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     return this.queryMedia_()
         .then(response => {
           const media = response.payload;
-          const src = decodeURIComponent(this.constructUrlFromMedia_(
-              media.interactionId));
+          const src = this.constructUrlFromMedia_(
+              media.interactionId);
           const iframe = this.constructIframe_(src);
           const overflow = this.constructOverflow_();
           const mutate = state => {
