@@ -208,8 +208,12 @@ export class AmpAdApiHandler {
    * @param {string} origin
    * @private
    */
-  sendEmbedSizeResponse_(
-      success, requestedWidth, requestedHeight, source, origin) {
+  sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
+      origin) {
+    // The iframe may have been removed by the time we resize.
+    if (!this.iframe_) {
+      return;
+    }
     postMessageToWindows(
         this.iframe_,
         [{win: source, origin}],
