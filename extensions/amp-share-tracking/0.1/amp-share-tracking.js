@@ -72,12 +72,13 @@ export class AmpShareTracking extends AMP.BaseElement {
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_()]).then(results => {
-        dev().fine(TAG, 'incomingFragment: ', results[0]);
-        dev().fine(TAG, 'outgoingFragment: ', results[1]);
-        return {
-          incomingFragment: results[0],
-          outgoingFragment: results[1],
-        };
+        const incomingFragment = results[0];
+        const outgoingFragment = results[1];
+        dev().fine(TAG, 'incomingFragment: ', incomingFragment);
+        dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
+        viewerFor(this.win).replaceShareTrackingFragment(incomingFragment,
+            outgoingFragment);
+        return {incomingFragment, outgoingFragment};
       });
 
     getService(this.win, 'share-tracking', () => this.shareTrackingFragments_);

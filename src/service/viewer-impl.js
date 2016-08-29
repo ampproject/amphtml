@@ -890,6 +890,34 @@ export class Viewer {
   }
 
   /**
+   *
+   * @return {!Promise}
+   */
+  replaceShareTrackingFragment(incomingFragment, outgoingFragment) {
+    if (!this.isEmbedded_) {
+      if (this.win.history.replaceState) {
+        let newUrl = this.win.location.href;
+        if (incomingFragment == '') {
+          if (newUrl.indexOf('#') == -1) {
+            newUrl = newUrl + '#.' + outgoingFragment;
+          } else {
+            newUrl = newUrl.replace('#', '#.' + outgoingFragment + '&');
+          }
+        } else {
+          newUrl = newUrl.replace(incomingFragment, outgoingFragment);
+        }
+        this.win.history.replaceState({}, '', newUrl);
+      }
+      return Promise.resolve();
+    }
+    if (!this.hasCapability('fragment')) {
+      return Promise.resolve();
+    }
+    return this.sendMessageUnreliable_('updateShareTracking',
+      {incomingFragment, outgoingFragment}, true);
+  }
+
+  /**
    * Triggers "tick" event for the viewer.
    * @param {!Object} message
    */
