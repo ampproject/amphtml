@@ -28,6 +28,10 @@ import {viewerFor} from '../../../src/viewer';
 import {performanceFor} from '../../../src/performance';
 import {user} from '../../../src/log';
 
+const adTypeAbbrevTable = {
+  'doubleclick': 'dc',
+};
+
 export class AmpAdApiHandler {
 
   /**
@@ -64,9 +68,6 @@ export class AmpAdApiHandler {
 
     /** @private {?Promise} */
     this.adResponsePromise_ = null;
-
-    /** @private {?number} */
-    this.initTime_ = null;
   }
 
   /**
@@ -120,20 +121,24 @@ export class AmpAdApiHandler {
         (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0);
 
     if (renderStartImplemented) {
-      const performance = performanceFor(this.baseInstance_.win);
-      this.initTime_ = Date.now();
+      const perf = performanceFor(this.baseInstance_.win);
+      const initTime = Date.now();
+      const adTag = adTypeAbbrevTable[this.baseInstance_.adType];
       // Report performance for all renderStartImplemented cases.
       // This is needed to calculate the perc of receiving nothing from ad.
-      reportPerformance(performance, 'all', 0);
+      perf.tickDelta(adTag, 0);
+      perf.flush();
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
           if (info.data.type == 'render-start') {
             //report performance for render-start received cases
-            reportPerformance(performance, 'rs', (Date.now() - this.initTime_));
+            perf.tickDelta(adTag + '_rs', Date.now() - initTime);
+            perf.flush();
           } else {
             //report performance for no-content received cases
-            reportPerformance(performance, 'nc', (Date.now() - this.initTime_));
+            perf.tickDelta(adTag + '_nc', Date.now() - initTime);
+            perf.flush();
             //TODO: make noContentCallback_ default
             if (this.noContentCallback_) {
               this.noContentCallback_();
@@ -259,15 +264,4 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.fire();
     }
   }
-}
-
-/**
- * Report performance
- * @param {!Performance} performance
- * @param {string} label
- * @param {number} value
- */
-function reportPerformance(performance, label, value) {
-  performance.tickDelta(label, value);
-  performance.flush();
 }
