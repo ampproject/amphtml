@@ -19,10 +19,10 @@ import {loadPromise} from '../../../src/event-helper';
 import {
   SubscriptionApi,
   listenFor,
-  listenForOnce,
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
+import {waitForRenderStart} from '../../../3p/integration';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -61,8 +61,8 @@ export class AmpAdApiHandler {
     /** @private @const */
     this.viewer_ = viewerFor(this.baseInstance_.win);
 
-    /** @private {!Promise|null} */
-    this.renderStartPromise_ = null;
+    /** @private {?Promise} */
+    this.adResponsePromise_ = null;
   }
 
   /**
@@ -85,19 +85,12 @@ export class AmpAdApiHandler {
     this.embedStateApi_ = new SubscriptionApi(
         this.iframe_, 'send-embed-state', is3p,
         () => this.sendEmbedInfo_(this.baseInstance_.isInViewport()));
-    // Triggered by context.noContentAvailable() inside the ad iframe.
-    listenForOnce(this.iframe_, 'no-content', () => {
-      if (this.noContentCallback_) {
-        this.noContentCallback_();
-      } else {
-        user().info('no content callback was specified');
-      }
-    }, this.is3p_);
     // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
     // iframe.
-    listenForOnce(this.iframe_, 'entity-id', info => {
-      this.element_.creativeId = info.id;
-    }, this.is3p_);
+    listenForOncePromise(this.iframe_, 'entity-id', this.is3p_)
+        .then(info => {
+          this.element_.creativeId = info.data.id;
+        });
 
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
@@ -118,21 +111,54 @@ export class AmpAdApiHandler {
           }
         }, this.is3p_, this.is3p_));
 
+    // Install API that listen to ad response
+    const renderStartImplemented =
+        (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0);
+
+    if (renderStartImplemented) {
+      // If support render-start, create a race between render-start no-content
+      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+        ['render-start', 'no-content'], this.is3p_).then(info => {
+          if (info.data.type == 'render-start') {
+              //report performance
+          } else {
+            //TODO: make noContentCallback_ default
+            if (this.noContentCallback_) {
+              this.noContentCallback_();
+            } else {
+              user().info('no content callback was specified');
+            }
+          }
+        });
+    } else {
+      // If NOT support render-start, listen to bootstrap-loaded no-content
+      // respectively
+      this.adResponsePromise_ = listenForOncePromise(this.iframe_,
+        'bootstrap-loaded', this.is3p_);
+      listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
+          .then(() => {
+            //TODO: make noContentCallback_ default
+            if (this.noContentCallback_) {
+              this.noContentCallback_();
+            } else {
+              user().info('no content callback was specified');
+            }
+          });
+    }
+
     if (!opt_defaultVisible) {
       // NOTE(tdrl,keithwrightbos): This will not work for A4A with an AMP
       // creative as it will not expect having to send the render-start message.
       this.iframe_.style.visibility = 'hidden';
     }
 
-    this.renderStartPromise_ =
-        listenForOncePromise(this.iframe_, 'render-start', this.is3p_);
-
     this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
     });
+
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
-      return this.renderStartPromise_.then(() => {
+      return this.adResponsePromise_.then(() => {
         //TODO: add performance reporting
         if (this.iframe_) {
           this.iframe_.style.visibility = '';

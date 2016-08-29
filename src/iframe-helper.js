@@ -293,34 +293,29 @@ export function listenFor(
 }
 
 /**
- * Allows listening for a message from the iframe and then removes the listener
- *
- * @param {!Element} iframe.
- * @param {string} typeOfMessage.
- * @param {function(!Object, !Window, string)} callback Called when a message of this type
- *     arrives for this iframe.
- * @param {boolean=} opt_is3P set to true if the iframe is 3p.
- * @return {!UnlistenDef}
- */
-export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
-  const unlisten = listenFor(iframe, typeOfMessage, (data, source, origin) => {
-    unlisten();
-    return callback(data, source, origin);
-  }, opt_is3P);
-  return unlisten;
-}
-
-/**
- * Returns a promise that resolves when the given message has been observed
- * for the first time.
+ * Returns a promise that resolves when one of given messages has been observed
+ * for the first time. And remove listener for all other messages.
  * @param {!Element} iframe
- * @param {string} typeOfMessage
+ * @param {string|!Array<string>} typeOfMessage
  * @param {boolean=} opt_is3P
- * @return {!Promise}
+ * @return {!Promise<!{data, source, origin}>}
  */
-export function listenForOncePromise(iframe, typeOfMessage, opt_is3P) {
+export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
+  const unlistenList = [];
+  if (typeof typeOfMessages == 'string') {
+    typeOfMessages = [typeOfMessages];
+  }
   return new Promise(resolve => {
-    listenForOnce(iframe, typeOfMessage, resolve, opt_is3P);
+    for (let i = 0; i < typeOfMessages.length; i++) {
+      const message = typeOfMessages[i];
+      const unlisten = listenFor(iframe, message, (data, source, origin) => {
+        for (let i = 0; i < unlistenList.length; i++) {
+          unlistenList[i]();
+        }
+        resolve({data, source, origin});
+      }, opt_is3P);
+      unlistenList.push(unlisten);
+    }
   });
 }
 
