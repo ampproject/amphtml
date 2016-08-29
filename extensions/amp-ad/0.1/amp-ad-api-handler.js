@@ -47,6 +47,7 @@ export class AmpAdApiHandler {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
     /** @private {boolean} */
@@ -169,16 +170,16 @@ export class AmpAdApiHandler {
 
   /** @override  */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlistener => unlistener());
-    this.unlisteners_ = [];
     if (this.iframe_) {
+      this.unlisteners_.forEach(unlistener => unlistener());
+      this.unlisteners_.length = 0;
+      this.embedStateApi_.destroy();
+      this.embedStateApi_ = null;
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    // IntersectionObserver's listeners were cleaned up by
-    // setInViewport(false) before #unlayoutCallback
-    this.intersectionObserver_.destroy();
-    this.intersectionObserver_ = null;
   }
 
   /**

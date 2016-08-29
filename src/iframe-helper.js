@@ -407,33 +407,22 @@ export class SubscriptionApi {
    *     invoked whenever a new window subscribes.
    */
   constructor(iframe, type, is3p, requestCallback) {
-    /** @private {!Element} */
+    /** @private @const {!Element} */
     this.iframe_ = iframe;
-    /** @private {boolean} */
+    /** @private @const {boolean} */
     this.is3p_ = is3p;
-    /** @private {!Array<{win: !Window, origin: string}>} */
+    /** @private @const {!Array<{win: !Window, origin: string}>} */
     this.clientWindows_ = [];
 
-    this.init_(type, requestCallback);
-  }
-
-  /**
-   * Start listening for messages.
-   * @param {string} type Type of the subscription message.
-   * @param {function(!Object, !Window, string)} requestCallback Callback
-   *     invoked whenever a new window subscribes.
-   * @private
-   */
-  init_(type, requestCallback) {
-    listenFor(
-        this.iframe_, type, (data, source, origin) => {
-          // This message might be from any window within the iframe, we need
-          // to keep track of which windows want to be sent updates.
-          if (!this.clientWindows_.some(entry => entry.win == source)) {
-            this.clientWindows_.push({win: source, origin});
-          }
-          requestCallback(data, source, origin);
-        }, this.is3p_,
+    /** @private @const {!UnlistenDef} */
+    this.unlisten_ = listenFor(this.iframe_, type, (data, source, origin) => {
+      // This message might be from any window within the iframe, we need
+      // to keep track of which windows want to be sent updates.
+      if (!this.clientWindows_.some(entry => entry.win == source)) {
+        this.clientWindows_.push({win: source, origin});
+      }
+      requestCallback(data, source, origin);
+    }, this.is3p_,
         // For 3P frames we also allow nested frames within them to subscribe..
         this.is3p_ /* opt_includingNestedWindows */);
   }
@@ -452,5 +441,10 @@ export class SubscriptionApi {
         type,
         data,
         this.is3p_);
+  }
+
+  destroy() {
+    this.unlisten_();
+    this.clientWindows_.length = 0;
   }
 }
