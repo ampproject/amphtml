@@ -58,8 +58,6 @@ export let Location;
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
  * @param {string} url
  * @return {!Location}
  */
@@ -117,9 +115,10 @@ export function parseUrl(url) {
   } else {
     info.origin = info.protocol + '//' + info.host;
   }
-  // Freeze during testing to avoid accidental mutation.
-  cache[url] = (getMode().test && Object.freeze) ? Object.freeze(info) : info;
-  return info;
+
+  cache[url] = info;
+  // Return a copied version of the info, to prevent change to cache[url]
+  return Object.assign({}, info);
 }
 
 /**
