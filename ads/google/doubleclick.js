@@ -16,6 +16,7 @@
 
 import {makeCorrelator} from './correlator';
 import {validateData, loadScript} from '../../3p/3p';
+import {dev, user} from '../../src/log';
 
 /**
  * @enum {number}
@@ -41,7 +42,7 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
-    'experimentId',
+    'experimentId', 'multiSize', 'multiSizeValidation',
   ]);
 
   if (global.context.clientId) {
@@ -78,6 +79,60 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
   ]];
+
+    // Get multi-size ad request data, if any, and validate it in the following
+  // ways: Ensure that the data string is a comma-separated list of sizes of the
+  // form wxh; that each secondary dimension is strictly less than its primary
+  // dimension counterpart; and, if data-mutli-size-validation is not set to
+  // false, that each secondary dimension is at least 2/3rds of its primary
+  // dimension counterpart.
+  const multiSizeDataStr = data.multiSize;
+  if (multiSizeDataStr) {
+    const sizesStr = multiSizeDataStr.split(',');
+    sizesStr.forEach(sizeStr => {
+      const size = sizeStr.split('x');
+      if (Array.isArray(size) && size.length == 2) {
+
+        const w = Number(size[0]);
+        const h = Number(size[1]);
+
+        if (!Number.isNaN(w) && !Number.isNaN(h)) {
+          const primaryW = dimensions[0][0];
+          const primaryH = dimensions[0][1];
+
+          // Check secondary size strictly less than primary size.
+          if (w < primaryW && h < primaryH) {
+            // The minimum ratio of each secondary dimension to its corresponding
+            // primary dimension.
+            const minRatio = 2 / 3;
+            // Check that if multi-size-validation is on, that the secondary sizes
+            // are at least minRatio of the primary size.
+            const sizeValidation = data.multiSizeValidation;
+            if ((sizeValidation === 'false' || sizeValidation === false) ||
+                (w >= minRatio * primaryW && h >= minRatio * primaryH)) {
+              dimensions.push([w, h]);
+            } else {
+              user().error('AMP-AD',
+                  'Each secondary dimension must be at least 2/3rds of the ' +
+                  'corresponding primary dimension, or the ' +
+                  'data-multi-size-validation attribute must be set to false.',
+                  '<amp-ad>');
+            }
+          } else {
+            user().error('AMP-AD',
+                'Secondary sizes must be strictly smaller than the primary size.',
+                '<amp-ad>');
+          }
+        } else {
+          user().error('AMP-AD', 'Invalid width or height given for secondary' +
+              'size.', '<amp-ad>');
+        }
+      } else {
+        user().error('AMP-Ad', 'Invalid multi-size data format.',
+            '<amp-ad>');
+      }
+    });
+  }
 
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(() => {
@@ -137,6 +192,27 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         }
         global.context.renderStart();
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
+
+        // Handle multi-size-ad request
+        if (dimensions.length > 1) {
+
+          const primaryInvSize = dimensions[0];
+          const returnedSize = event.size;
+
+          // Is the retruned size strictly smaller than primary inventory size?
+          if (returnedSize[0] < primaryInvSize[0] && returnedSize[1] < primaryInvSize[1]) {
+            window.context.onResizeSuccess((requestedHeight, requestedWidth) => {
+              // Nothing needs to be done.
+              console.log('Success');
+            });
+            window.context.onResizeDenied((requestedHeight, requestedWidth) => {
+              // TODO(levitzky) Resize the AMP-created iframe such that the
+              // tag-created iframe is centered within it.
+              console.log('Denied');
+            });
+            window.context.requestResize(returnedSize[0], returnedSize[1]);
+          }
+        }
       });
 
       // Exported for testing.
