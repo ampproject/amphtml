@@ -201,7 +201,7 @@ const defaultAllowedTypesInCustomFrame = [
 // List of ad networks that will manually call `window.context.renderStart` to
 // emit render-start event when ad actually starts rendering. Please add
 // yourself here if you'd like to do so (which we encourage).
-const waitForRenderStart = [
+export const waitForRenderStart = [
   'doubleclick',
 ];
 
@@ -339,9 +339,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
-    if (waitForRenderStart.indexOf(data.type) < 0) {
-      triggerRenderStart();
-    }
+    nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
