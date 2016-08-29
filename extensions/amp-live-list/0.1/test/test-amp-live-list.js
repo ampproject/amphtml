@@ -18,7 +18,6 @@ import * as sinon from 'sinon';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -30,7 +29,6 @@ describe('amp-live-list', () => {
   let itemsSlot;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
     elem = document.createElement('amp-live-list');
     const updateSlot = document.createElement('button');
@@ -48,7 +46,6 @@ describe('amp-live-list', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
     sandbox.restore();
   });
 
