@@ -164,6 +164,17 @@ const EXPERIMENTS = [
     name: 'AMP Cache Service Worker',
     spec: 'https://github.com/ampproject/amphtml/issues/1199',
   },
+  {
+    id: 'amp-lightbox-viewer',
+    name: 'Enables a new lightbox experience via the `lightbox` attribute',
+    spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
+  {
+    id: 'amp-lightbox-viewer-auto',
+    name: 'Allows the new lightbox experience to automatically include some ' +
+        'elements without the need to manually add the `lightbox` attribute',
+    spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
 ];
 
 if (getMode().localDev) {

@@ -54,8 +54,6 @@ describe('amp-brid-player', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://services.brid.tv/services/iframe/video/13663/264/4144/0/1');
-      expect(iframe.getAttribute('width')).to.equal('640');
-      expect(iframe.getAttribute('height')).to.equal('360');
     });
   });
 

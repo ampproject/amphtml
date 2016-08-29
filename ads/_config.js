@@ -24,6 +24,7 @@
 export const adPrefetch = {
   // Keep the list in alphabetic order
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  accesstrade: 'https://h.accesstrade.net/js/amp/amp.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   // TODO: Remove this once we switch over to the direct request version of adsense.js.
@@ -66,6 +67,7 @@ export const adPrefetch = {
   nend: 'https://js1.nend.net/js/amp.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
+  pubmine: 'https://s.pubmine.com/showad.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',

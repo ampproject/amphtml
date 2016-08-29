@@ -141,6 +141,24 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics, 100);
   }
 
+  /**
+   * Clears the property in the config that indicates that the requests
+   * should be sent via an iframe ping. This is needed because we pass
+   * in all the vendor requests as inline config and iframePings are not
+   * allowed to be used without AMP team's approval.
+   *
+   * @param {!JSONObject} config The inline config to update.
+   * @return {!JSONObject}
+   */
+  function clearIframePing(config) {
+    for (const t in config.triggers) {
+      if (config.triggers[t].iframePing) {
+        config.triggers[t].iframePing = undefined;
+      }
+    }
+    return config;
+  }
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -162,9 +180,7 @@ describe('amp-analytics', function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag({
-              requests: config.requests,
-            });
+            const analytics = getAnalyticsTag(clearIframePing(config));
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
