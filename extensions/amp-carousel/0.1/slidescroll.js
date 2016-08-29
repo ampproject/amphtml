@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -481,10 +482,8 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   cancelTouchEvents_() {
-    // TODO(aghassemi): https://github.com/ampproject/amphtml/issues/4742
-    // prevents us from using SwipeXRecognizer with an empty handler to
-    // cancel the events. This work around is not great and temporary until
-    // #4742 is fixed.
+    // TODO(aghassemi): Ideally we only stop propagation of horizontal
+    // touchmove events. See https://github.com/ampproject/amphtml/issues/4754
     this.element.addEventListener('touchmove', evt => {
       evt.stopPropagation();
     });
