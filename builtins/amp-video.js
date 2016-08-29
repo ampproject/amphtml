@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {ampdocFor} from '../src/ampdoc';
 import {BaseElement} from '../src/base-element';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {videoManagerForDoc} from '../src/video-manager';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -49,12 +51,16 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
+      const ampDoc = ampdocFor(this.win).getAmpDoc(this.element);
+      const videoManager = videoManagerForDoc(ampDoc);
+      videoManager.register(this);
+
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
-      this.dispatchCustomEvent('amp:video:built');
+      this.element.dispatchCustomEvent('amp:video:built');
     }
 
     /** @override */
@@ -90,7 +96,7 @@ export function installVideo(win) {
       });
 
       return loadPromise(this.video_).then(() => {
-        this.dispatchCustomEvent('amp:video:loaded');
+        this.element.dispatchCustomEvent('amp:video:loaded');
       });
     }
 
