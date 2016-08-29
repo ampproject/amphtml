@@ -38,6 +38,7 @@ export const adPrefetch = {
     'https://j.amoad.com/js/n.js',
   ],
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
+  atomx: 'https://s.ato.mx/p.js',
   caprofitx: [
     'https://cdn.caprofitx.com/pfx.min.js',
     'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
