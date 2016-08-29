@@ -482,10 +482,10 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   cancelTouchEvents_() {
-    // TODO(aghassemi): Ideally we only stop propagation of horizontal
-    // touchmove events. See https://github.com/ampproject/amphtml/issues/4754
-    this.element.addEventListener('touchmove', evt => {
-      evt.stopPropagation();
+    // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
+    // touchmove events.
+    this.element.addEventListener('touchmove', event => {
+      event.stopPropagation();
     });
   }
 }
