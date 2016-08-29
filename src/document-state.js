@@ -123,7 +123,7 @@ export class DocumentState {
    */
   onBodyAvailable(handler) {
     const doc = this.document_;
-    if (!!doc.body) {
+    if (doc.body) {
       handler();
       return null;
     }
@@ -139,6 +139,7 @@ export class DocumentState {
   /** @private */
   onBodyAvailable_() {
     this.bodyAvailableObservable_.fire();
+    this.bodyAvailableObservable_.removeAll();
     this.bodyAvailableObservable_ = null;
   }
 }
