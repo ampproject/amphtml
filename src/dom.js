@@ -58,8 +58,14 @@ export function waitForChild(parent, checkFunc, callback) {
  * @param {function()} callback
  */
 export function waitForBody(doc, callback) {
-  const docState = documentStateFor(doc.defaultView);
-  docState.onBodyAvailable(callback);
+  // Prefer DocumentState.onBodyAvailable() to minimize creation of
+  // MutationObserver by waitForChild().
+  if (doc.defaultView) {
+    const docState = documentStateFor(doc.defaultView);
+    docState.onBodyAvailable(callback);
+  } else {
+    waitForChild(doc.documentElement, () => !!doc.body, callback);
+  }
 }
 
 
