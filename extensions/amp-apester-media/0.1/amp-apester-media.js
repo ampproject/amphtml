@@ -206,7 +206,7 @@ class AmpApesterMedia extends AMP.BaseElement {
         }).then(media => {
           this.togglePlaceholder(false);
           const height = 0 || media.data.size.height;
-          this./*OK*/attemptChangeHeight(height);
+          this./*OK*/changeHeight(height);
         });
   }
 
