@@ -117,6 +117,42 @@ describe('amp-ad-api-handler', () => {
             });
       });
 
+      it('should resolve and resize on message "render-start" w/ size if '
+          + 'render-start is implemented by 3P', () => {
+        adImpl.adType = 'doubleclick';
+        sandbox.stub(adImpl, 'attemptChangeSize', () => {
+          return Promise.resolve();
+        });
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
+        const beforeAttachedToDom = element => {
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                sentinel: 'amp3ptest' + testIndex,
+                type: 'render-start',
+                height: 217,
+                width: 114,
+              });
+              return startUpPromise.then(() => {
+                expect(iframe.style.visibility).to.equal('');
+                return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+                  requestedWidth: 114,
+                  requestedHeight: 217,
+                  type: 'embed-size-changed',
+                  sentinel: 'amp3ptest' + testIndex,
+                })).then(() => {
+                  expect(iframe.height).to.equal('217');
+                  expect(iframe.width).to.equal('114');
+                });
+              });
+            });
+      });
+
       it('should resolve on message "no-content" if render-start is'
           + 'implemented by 3P', () => {
         adImpl.adType = 'doubleclick';

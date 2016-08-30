@@ -205,6 +205,7 @@ const defaultAllowedTypesInCustomFrame = [
 // yourself here if you'd like to do so (which we encourage).
 export const waitForRenderStart = [
   'doubleclick',
+  'fakead3p',
 ];
 
 /**
@@ -360,8 +361,8 @@ function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
-function triggerRenderStart() {
-  nonSensitiveDataPostMessage('render-start');
+function triggerRenderStart(width, height) {
+  nonSensitiveDataPostMessage('render-start', {width, height});
 }
 
 /**
