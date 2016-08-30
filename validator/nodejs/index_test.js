@@ -117,10 +117,9 @@ it('handles syntax errors in validator file', function(done) {
         done();
       })
       .catch(function(error) {
-        const expectedMsg = process.version <= 6.4 ?
-            'Could not instantiate validator.js - Unexpected token ILLEGAL' :
-            'Could not instantiate validator.js - Invalid or unexpected token';
-        expect(error.message).toBe(expectedMsg);
+        expect(error.message)
+            .toMatch(
+                /^Could not instantiate validator\.js -.*[Uu]nexpected token/);
         done();
       });
 });
