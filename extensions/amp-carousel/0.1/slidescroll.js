@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
-import {Gestures} from '../../../src/gesture';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timerFor} from '../../../src/timer';
@@ -107,10 +106,7 @@ export class AmpSlideScroll extends BaseSlides {
      */
     this.elasticScrollState_ = 0;
 
-
-    const gestures =
-        Gestures.get(this.element, /* shouldNotPreventDefault */true);
-    gestures.onGesture(SwipeXRecognizer, () => {});
+    this.cancelTouchEvents_();
 
     this.slidesContainer_.addEventListener(
         'scroll', this.scrollHandler_.bind(this));
@@ -478,5 +474,18 @@ export class AmpSlideScroll extends BaseSlides {
     return Animation.animate(this.slidesContainer_, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
     }, 80, 'ease-out').thenAlways();
+  }
+
+  /**
+   * Cancels the touchmove events for the element so that viewer does not
+   * consider the swipes in the carousel as swipes for changing AMP documents.
+   * @private
+   */
+  cancelTouchEvents_() {
+    // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
+    // touchmove events.
+    this.element.addEventListener('touchmove', event => {
+      event.stopPropagation();
+    });
   }
 }

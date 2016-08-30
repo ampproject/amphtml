@@ -158,6 +158,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
+    /** {!string} */
+    this.adType = this.element.getAttribute('type');
+
     setupA2AListener(this.win);
 
     /** @private {string|undefined} */
@@ -171,9 +174,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const type = this.element.getAttribute('type');
-    const prefetch = adPrefetch[type];
-    const preconnect = adPreconnect[type];
+    const prefetch = adPrefetch[this.adType];
+    const preconnect = adPreconnect[this.adType];
     if (typeof prefetch == 'string') {
       this.preconnect.preload(prefetch, 'script');
     } else if (prefetch) {
