@@ -118,8 +118,8 @@ it('handles syntax errors in validator file', function(done) {
       })
       .catch(function(error) {
         expect(error.message)
-            .toBe(
-                'Could not instantiate validator.js - Unexpected token ILLEGAL');
+            .toMatch(
+                /^Could not instantiate validator\.js -.*[Uu]nexpected token/);
         done();
       });
 });
