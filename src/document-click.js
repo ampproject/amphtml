@@ -23,7 +23,12 @@ import {parseUrl} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {platformFor} from './platform';
+import {urlReplacementsFor} from './url-replacements';
+import {isShadowRoot} from './types';
+import {closestNode} from './dom';
 
+/** @private @const {string} */
+const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
 
 /**
  * @param {!Window} window
@@ -49,7 +54,7 @@ function clickHandlerFor(window) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * visibleForTesting
+ * @visibleForTesting
  */
 export class ClickHandler {
   /**
@@ -68,27 +73,37 @@ export class ClickHandler {
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
+    /** @private @const {!./service/url-replacements.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsFor(this.win);
+
     const platform = platformFor(this.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
+    /** @private {!Array<!function(!Event)|undefined>} */
+    this.boundHandlers_ = [];
+
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
-      /** @private @const {!function(!Event)|undefined} */
-      this.boundHandle_ = this.handle_.bind(this);
+      this.boundHandlers_.push(this.handle_.bind(this));
       this.win.document.documentElement.addEventListener(
-          'click', this.boundHandle_);
+          'click', this.boundHandlers_[this.boundHandlers_.length - 1]);
     }
+    // Add capture phase click handler for anchor target href expansion.
+    this.boundHandlers_.push(this.handle_.bind(this, true));
+    this.win.document.documentElement.addEventListener(
+        'click', this.boundHandlers_[this.boundHandlers_.length - 1]);
   }
 
   /**
    * Removes all event listeners.
    */
   cleanup() {
-    if (this.boundHandle_) {
+    this.boundHandlers_.forEach(handler => {
       this.win.document.documentElement.removeEventListener(
-          'click', this.boundHandle_);
-    }
+          'click', handler);
+    });
+    this.boundHandlers_ = [];
   }
 
   /**
@@ -96,9 +111,9 @@ export class ClickHandler {
    * linking to an identifier from pushing into the history stack.
    * @param {!Event} e
    */
-  handle_(e) {
+  handle_(e, isCapture) {
     onDocumentElementClick_(e, this.viewport_, this.history_,
-        this.isIosSafari_);
+        this.urlReplacements_, this.isIosSafari_, isCapture);
   }
 }
 
@@ -113,15 +128,29 @@ export class ClickHandler {
  * @param {!Event} e
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
+ * @param {!./service/url-replacements.UrlReplacements} urlReplacements
  * @param {boolean} isIosSafari
+ * @param {boolean} isIframed
+ * @param {boolean} isCapture whether event was caught during capture
+ *                  propagation.
  */
-export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
+export function onDocumentElementClick_(e, viewport, history, urlReplacements,
+                                        isIosSafari, isCapture) {
   if (e.defaultPrevented) {
     return;
   }
 
   const target = closestByTag(e.target, 'A');
   if (!target) {
+    return;
+  }
+
+  // Capture event listener only interested in anchor target href expansion.
+  if (isCapture) {
+    // Expand URL where valid.
+    if (target.href) {
+      target.href = expandTargetHref_(e, target, urlReplacements);
+    }
     return;
   }
 
@@ -207,4 +236,75 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   history.push(() => {
     win.location.replace(`${curLoc.hash || '#'}`);
   });
+};
+
+/**
+ * Determines the offset of an element's shadowRoot host if it has one,
+ * otherwise return top/left 0.
+ * @param {EventTarget} element
+ * @return {!{top: number, left: number}}
+ * @private
+ */
+function getShadowHostOffset_(element) {
+  if (element) {
+    const shadowRoot = closestNode(element, parent => {
+      return isShadowRoot(parent);
+    });
+    if (shadowRoot && shadowRoot.host) {
+      // Can we guarantee offsetTop/Left are correct values without
+      // forcing a promise measure?  Given we cannot wait, what values would
+      // we expect here?
+      return {top: shadowRoot.host./*REVIEW*/offsetTop,
+        left: shadowRoot.host./*REVIEW*/offsetLeft};
+    }
+  }
+  return {top: 0, left: 0};
+};
+
+/**
+ * Expand click target href synchronously using UrlReplacements service
+ * including CLICK_X/CLICK_Y page offsets (if within shadowRoot will reference
+ * from host).
+ *
+ * @param {!Event} e click event.
+ * @param {!Element} target nearest anchor to event target.
+ * @param {!./service/url-replacements.UrlReplacements} urlReplacements
+ * @return {string|undefined} expanded href
+ * @visibleForTesting
+ */
+export function expandTargetHref_(e, target, urlReplacements) {
+  const hrefToExpand =
+    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute("href");
+  if (!hrefToExpand) {
+    return;
+  }
+  let shadowHostOffset;
+  const vars = {
+    'CLICK_X': () => {
+      if (e.clientX === undefined) {
+        return '';
+      }
+      shadowHostOffset =
+        shadowHostOffset || getShadowHostOffset_(e.target);
+      return String(e.clientX - shadowHostOffset.left);
+    },
+    'CLICK_Y': () => {
+      if (e.clientY === undefined) {
+        return '';
+      }
+      shadowHostOffset =
+        shadowHostOffset || getShadowHostOffset_(e.target);
+      return String(e.clientY - shadowHostOffset.top);
+    },
+  };
+  let newHref = urlReplacements.expandSync(hrefToExpand, vars);
+  if (newHref != hrefToExpand) {
+    // Store original value so that later clicks can be processed with
+    // freshest values.
+    if (!target.getAttribute(ORIGINAL_HREF_ATTRIBUTE)) {
+      target.setAttribute(ORIGINAL_HREF_ATTRIBUTE, hrefToExpand);
+    }
+    target.setAttribute('href', newHref);
+  }
+  return newHref;
 };
