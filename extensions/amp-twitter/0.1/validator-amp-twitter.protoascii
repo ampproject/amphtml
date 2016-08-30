@@ -63,6 +63,7 @@ tags: {  # <amp-twitter>
       allowed_protocol: "https"
       allow_relative: true
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
