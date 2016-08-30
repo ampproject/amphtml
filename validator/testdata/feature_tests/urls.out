@@ -32,4 +32,5 @@ feature_tests/urls.html:88:2 The attribute 'src' in tag 'amp-iframe' is set to t
 feature_tests/urls.html:89:2 The attribute 'src' in tag 'amp-img' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:90:2 The attribute 'src' in tag 'amp-pixel' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/amp-pixel.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:91:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '__amp_source_origin'. (see https://www.ampproject.org/docs/reference/amp-video.html) [AMP_TAG_PROBLEM]
-feature_tests/urls.html:93:7 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/urls.html:92:2 The attribute 'src' in tag 'amp-video' is set to the invalid value '%5f_amp_source%5forigin'. (see https://www.ampproject.org/docs/reference/amp-video.html) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:94:7 The mandatory tag 'link rel=canonical' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
