@@ -37,6 +37,7 @@ import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
 import {a9} from '../ads/a9';
+import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
 import {adgeneration} from '../ads/adgeneration';
@@ -51,6 +52,7 @@ import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {atomx} from '../ads/atomx';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
@@ -60,6 +62,7 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
+import {fakead3p} from '../ads/fakead3p';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
@@ -76,6 +79,7 @@ import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
 import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
+import {pubmine} from '../ads/pubmine';
 import {pulsepoint} from '../ads/pulsepoint';
 import {revcontent} from '../ads/revcontent';
 import {rubicon} from '../ads/rubicon';
@@ -108,8 +112,12 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
+// used for extracting fakead3p from production code.
+const IS_DEV = true;
+
 // Keep the list in alphabetic order
 register('a9', a9);
+register('accesstrade', accesstrade);
 register('adblade', adblade);
 register('adform', adform);
 register('adgeneration', adgeneration);
@@ -124,6 +132,7 @@ register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('atomx', atomx);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
@@ -152,6 +161,7 @@ register('openadstream', openadstream);
 register('openx', openx);
 register('plista', plista);
 register('pubmatic', pubmatic);
+register('pubmine', pubmine);
 register('pulsepoint', pulsepoint);
 register('revcontent', revcontent);
 register('rubicon', rubicon);
@@ -193,7 +203,7 @@ const defaultAllowedTypesInCustomFrame = [
 // List of ad networks that will manually call `window.context.renderStart` to
 // emit render-start event when ad actually starts rendering. Please add
 // yourself here if you'd like to do so (which we encourage).
-const waitForRenderStart = [
+export const waitForRenderStart = [
   'doubleclick',
 ];
 
@@ -298,6 +308,10 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
 
+    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
+      register('fakead3p', fakead3p);
+    }
+
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
       // generic solution is available.
@@ -327,9 +341,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
-    if (waitForRenderStart.indexOf(data.type) < 0) {
-      triggerRenderStart();
-    }
+    nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);

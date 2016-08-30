@@ -16,7 +16,7 @@
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
@@ -148,6 +148,9 @@ export class AmpIframe extends AMP.BaseElement {
     this.isClickToPlay_ = !!this.placeholder_;
 
     /** @private {boolean} */
+    this.isAdLike_ = false;
+
+    /** @private {boolean} */
     this.isDisallowedAsAd_ = false;
 
     /**
@@ -181,12 +184,14 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   onLayoutMeasure() {
-    this.isDisallowedAsAd_ = isAdLike(this.element) &&
-        !isAdPositionAllowed(this.element, this.win);
-
     // We remeasured this tag, lets also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
+
+    this.isAdLike_ = isAdLike(this);
+    this.isDisallowedAsAd_ = this.isAdLike_ &&
+        !isAdPositionAllowed(this.element, this.win);
+
     // When the framework has the need to remeasure us, our position might
     // have changed. Send an intersection record if needed. This does nothing
     // if we aren't currently in view.
@@ -210,6 +215,9 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    */
   getIntersectionElementLayoutBox() {
+    if (!this.iframe_) {
+      return super.getIntersectionElementLayoutBox();
+    }
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
@@ -248,15 +256,11 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
 
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
     const iframe = this.element.ownerDocument.createElement('iframe');
 
     this.iframe_ = iframe;
 
     this.applyFillContent(iframe);
-    iframe.width = getLengthNumeral(width);
-    iframe.height = getLengthNumeral(height);
     iframe.name = 'amp_iframe' + count++;
 
     if (this.isClickToPlay_) {
@@ -354,7 +358,7 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override  */
   getPriority() {
-    if (isAdLike(this.element)) {
+    if (this.isAdLike_) {
       return 2; // See AmpAd3PImpl.
     }
     return super.getPriority();
@@ -486,13 +490,14 @@ const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
 
 /**
  * Guess whether this element might be an ad.
- * @param {!Element} element An amp-iframe element.
+ * @param {!BaseElement} ampElement An amp-iframe element.
  * @return {boolean}
  * @visibleForTesting
  */
-export function isAdLike(element) {
-  const height = parseInt(element.getAttribute('height'), 10);
-  const width = parseInt(element.getAttribute('width'), 10);
+export function isAdLike(ampElement) {
+  const box = ampElement.getIntersectionElementLayoutBox();
+  const height = box.height;
+  const width = box.width;
   for (let i = 0; i < adSizes.length; i++) {
     const refWidth = adSizes[i][0];
     const refHeight = adSizes[i][1];

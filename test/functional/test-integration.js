@@ -52,6 +52,9 @@ describe('3p integration.js', () => {
           expect(registrations).to.include.key(expanded[j]);
         }
       } else {
+        if (extensions[i] == 'fakead3p') {
+          continue;
+        }
         expect(registrations).to.include.key(extensions[i]);
       }
     }

@@ -38,8 +38,8 @@ export function installCacheServiceWorker(win) {
         win.location.hostname !== 'cdn.ampproject.org') {
       return;
     }
-    const base = calculateScriptBaseUrl(win.location.pathname,
-      getMode().localDev, getMode().test);
+    const base = calculateScriptBaseUrl(win.location, getMode().localDev,
+        getMode().test);
     // The kill experiment is really just a configuration that allows us to
     // quickly kill the cache service worker without cutting a new version.
     const kill = isExperimentOn(win, `${TAG}-kill`);

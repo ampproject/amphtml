@@ -32,11 +32,16 @@ import {childElementsByTag} from './dom';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
+import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesService} from './service/resources-impl';
-import {installShadowDoc} from './service/ampdoc-impl';
+import {
+  installShadowDoc,
+  shadowDocHasBody,
+  shadowDocReady,
+} from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
 import {installStyles, installStylesForShadowRoot} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
@@ -209,6 +214,16 @@ function adoptShared(global, opts, callback) {
   }
 
   /**
+   * Certain extensions can be auto-loaded by runtime based on experiments or
+   * other configurations.
+   */
+  function installAutoLoadExtensions() {
+    if (!getMode().test && isExperimentOn(global, 'amp-lightbox-viewer-auto')) {
+      extensionsFor(global).loadExtension('amp-lightbox-viewer');
+    }
+  }
+
+  /**
    * Registers a new custom element.
    * @param {function(!Object)|{n:string, f:function(!Object)}} fnOrStruct
    */
@@ -232,6 +247,9 @@ function adoptShared(global, opts, callback) {
         dev().error(TAG, 'Extension failed: ', e, fnOrStruct.n);
       }
     }
+
+    installAutoLoadExtensions();
+
     // Make sure we empty the array of preregistered extensions.
     // Technically this is only needed for testing, as everything should
     // go out of scope here, but just making sure.
@@ -453,7 +471,11 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
     body.classList.add('amp-shadow');
     body.style.position = 'relative';
     shadowRoot.appendChild(body);
+    shadowDocHasBody(ampdoc, body);
   }
+
+  // Document is ready.
+  shadowDocReady(ampdoc);
 
   // TODO(dvoytenko): find a better and more stable way to make content visible.
   // E.g. integrate with dynamic classes. In shadow case specifically, we have

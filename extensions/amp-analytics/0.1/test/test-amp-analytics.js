@@ -141,6 +141,24 @@ describe('amp-analytics', function() {
     return waitForSendRequest(analytics, 100);
   }
 
+  /**
+   * Clears the property in the config that indicates that the requests
+   * should be sent via an iframe ping. This is needed because we pass
+   * in all the vendor requests as inline config and iframePings are not
+   * allowed to be used without AMP team's approval.
+   *
+   * @param {!JSONObject} config The inline config to update.
+   * @return {!JSONObject}
+   */
+  function clearIframePing(config) {
+    for (const t in config.triggers) {
+      if (config.triggers[t].iframePing) {
+        config.triggers[t].iframePing = undefined;
+      }
+    }
+    return config;
+  }
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag(trivialConfig);
 
@@ -162,9 +180,7 @@ describe('amp-analytics', function() {
         for (const name in config.requests) {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
-            const analytics = getAnalyticsTag({
-              requests: config.requests,
-            });
+            const analytics = getAnalyticsTag(clearIframePing(config));
             analytics.createdCallback();
             analytics.buildCallback();
             const urlReplacements = installUrlReplacementsService(
@@ -186,7 +202,8 @@ describe('amp-analytics', function() {
                 request: name,
               }, {
                 vars: Object.create(null),
-              }).then(url => {
+              }).then(urls => {
+                const url = urls[0];
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {
                   throw new Error('Define ' + vendor + '.' + name +
@@ -279,7 +296,7 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('expands nested requests', function() {
+  it('expands nested requests (3 levels)', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
         'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
@@ -302,6 +319,20 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
           .to.equal('/bar&/bar&/bar&&baz&baz&baz');
+    });
+  });
+
+  it('sends multiple requests per trigger', function() {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo':
+        'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
+      'triggers': [{'on': 'visible', 'request': ['foo', 'foobar']}],
+    });
+
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledTwice).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
+      expect(sendRequestSpy.args[1][0]).to.equal('b1');
     });
   });
 

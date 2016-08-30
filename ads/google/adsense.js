@@ -55,6 +55,16 @@ export function adsense(global, data) {
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
   const initializer = {};
+  if (data['experimentId']) {
+    const experimentIdList = data['experimentId'].split(',');
+    if (experimentIdList) {
+      initializer['params'] = {
+        'google_ad_modifications': {
+          'eids': experimentIdList,
+        },
+      };
+    }
+  }
   global.document.getElementById('c').appendChild(i);
   (global.adsbygoogle = global.adsbygoogle || []).push(initializer);
 }

@@ -18,7 +18,8 @@ import {removeElement} from '../../../src/dom';
 import {getAdCid} from '../../../src/ad-cid';
 import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {isAdPositionAllowed} from '../../../src/ad-helper';
+import {isAdPositionAllowed, getAdContainer,}
+    from '../../../src/ad-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
@@ -157,7 +158,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
+    /** {!string} */
+    this.adType = this.element.getAttribute('type');
+
     setupA2AListener(this.win);
+
+    /** @private {string|undefined} */
+    this.container_ = undefined;
   }
 
   /**
@@ -167,9 +174,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const type = this.element.getAttribute('type');
-    const prefetch = adPrefetch[type];
-    const preconnect = adPreconnect[type];
+    const prefetch = adPrefetch[this.adType];
+    const preconnect = adPreconnect[this.adType];
     if (typeof prefetch == 'string') {
       this.preconnect.preload(prefetch, 'script');
     } else if (prefetch) {
@@ -198,6 +204,13 @@ export class AmpAd3PImpl extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     this.isInFixedContainer_ = !isAdPositionAllowed(this.element, this.win);
+    /** detect ad containers, add the list to element as a new attribute */
+    if (this.container_ === undefined) {
+      this.container_ = getAdContainer(this.element);
+      if (this.container_) {
+        this.element.setAttribute('amp-container-element', this.container_);
+      }
+    }
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
     this.measureIframeLayoutBox_();
