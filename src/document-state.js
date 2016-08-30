@@ -67,7 +67,7 @@ export class DocumentState {
           this.boundOnVisibilityChanged_);
     }
 
-    /** @private @const {!Observable|null} */
+    /** @private @const {?Observable} */
     this.bodyAvailableObservable_ = null;
   }
 
@@ -118,8 +118,10 @@ export class DocumentState {
   }
 
   /**
+   * If body is already available, callback is called synchronously and null
+   * is returned.
    * @param {function()} handler
-   * @return {!UnlistenDef|null}
+   * @return {?UnlistenDef}
    */
   onBodyAvailable(handler) {
     const doc = this.document_;
@@ -129,9 +131,8 @@ export class DocumentState {
     }
     if (!this.bodyAvailableObservable_) {
       this.bodyAvailableObservable_ = new Observable();
-      waitForChild(doc.documentElement,
-                   () => !!doc.body,
-                   this.onBodyAvailable_.bind(this));
+      waitForChild(doc.documentElement, () => !!doc.body,
+          this.onBodyAvailable_.bind(this));
     }
     return this.bodyAvailableObservable_.add(handler);
   }
