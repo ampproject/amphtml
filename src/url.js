@@ -123,6 +123,15 @@ export function parseUrl(url) {
 }
 
 /**
+ * Duplicate of parseUrl, but return a cloned version of the returned obj.
+ * @param {string} url
+ * @return {!Location}
+ */
+export function parseUrlAndClone(url) {
+  return Object.assign({}, parseUrl(url));
+}
+
+/**
  * Appends the string just before the fragment part (or optionally
  * to the front of the query string) of the URL.
  * @param {string} url
