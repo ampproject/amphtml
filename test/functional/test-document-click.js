@@ -15,6 +15,10 @@
  */
 
 import {onDocumentElementClick_} from '../../src/document-click';
+import {createIframePromise} from '../../testing/iframe';
+import {urlReplacementsFor} from '../../src/url-replacements';
+import {installUrlReplacementsService} from
+    '../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
@@ -288,7 +292,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should open link in _top on Safari iOS when embedded', () => {
-      onDocumentElementClick_(evt, viewport, history, true);
+      onDocumentElementClick_(evt, viewport, history, null, true);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
@@ -297,21 +301,79 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should not do anything for mailto: protocol', () => {
       tgt.href = 'mailto:hello@example.com';
-      onDocumentElementClick_(evt, viewport, history, true);
+      onDocumentElementClick_(evt, viewport, history, null, true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other non-safari iOS', () => {
-      onDocumentElementClick_(evt, viewport, history, false);
+      onDocumentElementClick_(evt, viewport, history, null, false);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other platforms', () => {
-      onDocumentElementClick_(evt, viewport, history, false);
+      onDocumentElementClick_(evt, viewport, history, null, false);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+  });
+
+  describe('when including expansion url', () => {
+
+    function getReplacements(opt_options) {
+      return createIframePromise().then(iframe => {
+        installUrlReplacementsService(iframe.win);
+        return urlReplacementsFor(iframe.win);
+      });
+    }
+
+    it ('should not expand on bubble', () => {
+      return getReplacements().then(replacements => {
+        Math.random = function() { return 135; };
+        evt.target.href = 'http://foo.com/?r=RANDOM';
+        onDocumentElementClick_(evt, viewport, history, replacements);
+        expect(evt.target.href).to.equal('http://foo.com/?r=RANDOM');
+      });
+    });
+
+    it ('should expand click_x/click_y', () => {
+      return getReplacements().then(replacements => {
+        Math.random = function() { return 135; };
+        evt.clientX = 123;
+        evt.clientY = 456;
+        evt.target.href = 'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM';
+        onDocumentElementClick_(
+            evt, viewport, history, replacements, false, true);
+        expect(evt.target.href).to.equal('http://foo.com/?nx=123&ny=456&r=135');
+        expect(evt.target.getAttribute('data-amp-orig-href')).to.equal(
+          'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM');
+        // Execute again with different event values and verify new href.
+        evt.clientX = 999;
+        onDocumentElementClick_(
+            evt, viewport, history, replacements, false, true);
+        expect(evt.target.href).to.equal('http://foo.com/?nx=999&ny=456&r=135');
+      });
+    });
+
+    it ('should expand click_x/click_y relative to shadow root', () => {
+      return createIframePromise().then(iframe => {
+        installUrlReplacementsService(iframe.win);
+        const replacements = urlReplacementsFor(iframe.win);
+        Math.random = function() { return 135; };
+        evt.clientX = 123;
+        evt.clientY = 456;
+        const containerDiv = iframe.doc.createElement('div');
+        containerDiv.style.margin = '11px 0 0 16px';
+        iframe.doc.body.appendChild(containerDiv);
+        const shadowRoot = containerDiv.createShadowRoot();
+        evt.target = iframe.doc.createElement('A');
+        evt.target.setAttribute('href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
+        shadowRoot.appendChild(evt.target);
+        onDocumentElementClick_(
+            evt, viewport, history, replacements, false, true);
+        expect(evt.target.href).to.equal('http://foo.com/?r=135&nx=107&ny=445');
+      });
     });
   });
 });
