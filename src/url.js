@@ -69,7 +69,7 @@ export function parseUrl(url) {
 
   const fromCache = cache[url];
   if (fromCache) {
-    return fromCache;
+    return Object.assign({}, fromCache);
   }
   a.href = url;
   // IE11 doesn't provide full URL components when parsing relative URLs.

@@ -60,8 +60,10 @@ describe('parseUrl', () => {
     const url = 'https://foo.com:123/abc?123#foo';
     parseUrl(url);
     const a1 = parseUrl(url);
+    const testChangeInfo = parseUrl(url);
+    testChangeInfo.pathname = '321sdd';
     const a2 = parseUrl(url);
-    expect(a1).to.equal(a2);
+    expect(JSON.stringify(a1)).to.equal(JSON.stringify(a2));
   });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
