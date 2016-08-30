@@ -18,6 +18,7 @@ import * as events from '../event-helper';
 import {dev} from '../log';
 import {fromClassForDoc} from '../service';
 import {viewportFor} from '../viewport';
+import {vsyncFor} from '../vsync';
 
 const VISIBILITY_PERCENT = 75;
 
@@ -27,47 +28,48 @@ export class VideoManager {
    */
   constructor(ampdoc) {
 
-    /** @const {!./ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
+    this.win_ = ampdoc.win;
 
     /** {?Array<!{../video-interface.VideoInterface}>} */
     this.entries_;
 
-    this.built_ = false;
-
-  }
-
-  lazyBuild_() {
-    if (this.built_) {
-      return;
-    }
-
-    this.entries_ = [];
-
-    this.boundScrollListener_ = this.scrollListener_.bind(this);
-
-    const viewport = viewportFor(this.ampdoc_.win);
-
-    viewport.onScroll(this.boundScrollListener_);
-    viewport.onChanged(this.boundScrollListener_);
-
-    this.built_ = true;
+    this.scrollListenerInstalled_ = false;
   }
 
   /**
    * @param !{../video-interface.VideoInterface} video
    */
   register(video) {
-    this.lazyBuild_();
+    if (!video.supportsPlatform()) {
+      return;
+    }
 
-    const entry = new VideoEntry(video);
+    this.entries_ = this.entries_ || [];
+    const entry = new VideoEntry(this.win_, video);
+
+    if (entry.needsVisibilityObserver()) {
+      this.maybeInstallVisibilityObserver_(entry);
+    }
+
     this.entries_.push(entry);
   }
 
-  scrollListener_() {
-    for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
+
+  maybeInstallVisibilityObserver_(entry) {
+    events.listen(entry.video.element, 'amp:video:visibility', () => {
       entry.updateVisibility_();
+    });
+
+    if (!this.scrollListenerInstalled_) {
+      const scrollListener = () => {
+        for (let i = 0; i < this.entries_.length; i++) {
+          this.entries_[i].updateVisibility_();
+        }
+      };
+      const viewport = viewportFor(this.win_);
+      viewport.onScroll(scrollListener);
+      viewport.onChanged(scrollListener);
+      this.scrollListenerInstalled_ = true;
     }
   }
 }
@@ -76,12 +78,13 @@ class VideoEntry {
   /**
    * @param !{../video-interface.VideoInterface} video
    */
-  constructor(video) {
+  constructor(win, video) {
     /** @public @const !{../video-interface.VideoInterface} */
     this.video = video;
 
     this.loaded_ = false;
     this.isVisible_ = false;
+    this.mightBecomeVisibleSoon_ = false;
 
     const element = dev().assert(video.element);
     // TODO(aghassemi): constant file and helper for events names.
@@ -90,6 +93,9 @@ class VideoEntry {
 
     events.listenOncePromise(element, 'amp:video:loaded')
       .then(() => this.videoLoaded_());
+
+    /** @const @private {!../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = vsyncFor(win);
   }
 
   videoBuilt_() {
@@ -100,26 +106,25 @@ class VideoEntry {
 
   videoLoaded_() {
     this.loaded_ = true;
-    this.updateVisibility_();
     if (this.isVisible_) {
-      this.loadedVideoVisibilityChanged_(this.isVisible_);
+      this.loadedVideoVisibilityChanged_();
     }
   }
 
-  videoVisibilityChanged(visible) {
-    this.visible_ = visible;
+  videoVisibilityChanged() {
     if (this.loaded_) {
-      this.loadedVideoVisibilityChanged_(visible);
+      this.loadedVideoVisibilityChanged_();
     }
   }
 
-  loadedVideoVisibilityChanged_(visible) {
+  loadedVideoVisibilityChanged_() {
     if (this.video.canAutoplay()) {
-      this.autoplayLoadedVideoVisibilityChanged_(visible);
+      this.autoplayLoadedVideoVisibilityChanged_();
     }
   }
 
   /* Autoplay behaviour */
+
   autoplayVideoBuilt_() {
     this.video.hideControls();
     this.video.mute();
@@ -134,8 +139,12 @@ class VideoEntry {
     }
   }
 
-  autoplayLoadedVideoVisibilityChanged_(visible) {
-    if (visible) {
+  needsVisibilityObserver() {
+    return this.video.canAutoplay();
+  }
+
+  autoplayLoadedVideoVisibilityChanged_() {
+    if (this.isVisible_) {
       this.video.play(/*autoplay*/ true);
     } else {
       this.video.pause();
@@ -143,20 +152,32 @@ class VideoEntry {
   }
 
   updateVisibility_() {
-    const change = this.video.element.getIntersectionChangeEntry();
-    const ir = change.intersectionRect;
-    const br = change.boundingClientRect;
-    const visiblePercent = br.height * br.width == 0 ? 0 :
-      ir.width * ir.height * 100 / (br.height * br.width);
-    if (visiblePercent >= VISIBILITY_PERCENT && !this.isVisible_) {
-      this.isVisible_ = true;
-      this.videoVisibilityChanged(true);
-    }
+    const wasVisible = this.isVisible_;
+    const measure = () => {
+      if (!this.video.isInViewport()) {
+        this.isVisible_ = false;
+        return;
+      }
 
-    if (visiblePercent <= VISIBILITY_PERCENT && this.isVisible_) {
-      this.isVisible_ = false;
-      this.videoVisibilityChanged(false);
-    }
+      const change = this.video.element.getIntersectionChangeEntry();
+      const ir = change.intersectionRect;
+      const br = change.boundingClientRect;
+      const visiblePercent = br.height * br.width == 0 ? 0 :
+        ir.width * ir.height * 100 / (br.height * br.width);
+
+      this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
+    };
+
+    const mutate = () => {
+      if (this.isVisible_ != wasVisible) {
+        this.videoVisibilityChanged();
+      }
+    };
+
+    this.vsync_.run({
+      measure,
+      mutate,
+    });
   }
 }
 

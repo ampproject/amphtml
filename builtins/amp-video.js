@@ -64,6 +64,11 @@ export function installVideo(win) {
     }
 
     /** @override */
+    viewportCallback() {
+      this.element.dispatchCustomEvent('amp:video:visibility');
+    }
+
+    /** @override */
     layoutCallback() {
       if (!this.isVideoSupported_()) {
         this.toggleFallback(true);
