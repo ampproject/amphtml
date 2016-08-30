@@ -48,8 +48,6 @@ tags: {  # amp-youtube
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
 }
-# amp-youtube either comes with a video-id attribute, or with
-# a data-videoid attribute.
 tags: {  # <amp-youtube>
   html_format: AMP
   html_format: A4A
