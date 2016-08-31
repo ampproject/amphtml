@@ -49,5 +49,26 @@ Example - AdSense Ad
 </amp-ad>
 ```
 
+Example - DoubleClick Ad with Multi-size Request
+```html
+<amp-ad width=728 height=90
+    type="doubleclick"
+    data-slot="/6355419/Travel"
+    data-multi-size="700x90,700x60,500x60">
+</amp-ad>
+```
+
+Example - DoubleClick Ad with Multi-size Request Ignoring Size Validation
+```html
+<amp-ad width=728 height=90
+    type="doubleclick"
+    data-slot="/6355419/Travel"
+    data-multi-size="300x25"
+    data-multi-size-validation="false">
+</amp-ad>
+```
+
 #### Attributes
-TODO: Add attributes
+Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
+- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
+- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
