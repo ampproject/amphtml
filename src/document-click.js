@@ -107,16 +107,34 @@ export class ClickHandler {
   }
 
   /**
-   * Intercept any click on the current document and prevent any
-   * linking to an identifier from pushing into the history stack.
+   * Click event handler which on bubble propagation intercepts any click on the
+   * current document and prevent any linking to an identifier from pushing into
+   * the history stack; on capture propagation expands anchor href.
+   * @param {boolean} isCapture
    * @param {!Event} e
    */
-  handle_(e, isCapture) {
+  handle_(isCapture, e) {
     onDocumentElementClick_(e, this.viewport_, this.history_,
         this.urlReplacements_, this.isIosSafari_, isCapture);
   }
 }
 
+/**
+ * Locate first element with given tag name within event path from shadowRoot.
+ * @param {!Event} e
+ * @param {!string} tagName
+ * @return {?Element}
+ * @visibleForTesting
+ */
+export function getElementByTagNameFromEventShadowDomPath(e, tagName) {
+  for (let i = 0; i < (e.path ? e.path.length : 0); i++) {
+    const element = e.path[i];
+    if (element && element.tagName.toUpperCase() == tagName) {
+      return element;
+    }
+  }
+  return null;
+}
 
 /**
  * Intercept any click on the current document and prevent any
@@ -140,7 +158,12 @@ export function onDocumentElementClick_(e, viewport, history, urlReplacements,
     return;
   }
 
-  const target = closestByTag(e.target, 'A');
+  // If within a shadowRoot, the event target will be the host element due to
+  // event target rewrite.  Given that it is possible a shadowRoot could be
+  // within an anchor tag, we need to check the event path prior to looking
+  // at the host element's closest tags.
+  const target = getElementByTagNameFromEventShadowDomPath(e, 'A') ||
+      closestByTag(e.target, 'A');
   if (!target) {
     return;
   }

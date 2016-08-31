@@ -645,10 +645,8 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      console.log('expand sync: ' + name +'/'+val);
       return this.encodeValue_(val);
     });
-    console.log('final expanded: ' + url);
     return url;
   }
 
