@@ -14,27 +14,27 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 4. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
 
-    4.1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
+    1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
 
-    4.2. This means that, should a cache decide to no longer operate, URLs should redirect to the origin URL or be served by another cache.
+    2. This means that, should a cache decide to no longer operate, URLs should redirect to the origin URL or be served by another cache.
 
 5. Uses HTTPS serving only.
 
 6. Serves a strong [Content Security Policy](https://w3c.github.io/webappsec-csp/) ([CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)) - a CSP defines a mechanism by which web developers can control the resources which a particular page can fetch or execute, as well as a number of security-relevant policy decisions.
 
-    6.1. Implements separately documented security rewrites on served content.
+    1. Implements separately documented security rewrites on served content.
 
-    6.2. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
+    2. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
 
-    6.3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
+    3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
 7. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
 
-    7.1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
+    1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
 
 8. Supports a public AMP Cache URL API:
 
-    8.1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
+    1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
 9. Provides a faithful visual and UX reproduction of source document, although visually imperceptible changes in image resolution or compression rate are acceptable.  
 
@@ -46,7 +46,7 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 13. Uses a stale-while-revalidate caching model and reasonable min cache time (such as in the order of single digit minutes) is allowed. For example, as per [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates), "[the cache] uses the origin's caching headers, such as Max-Age, as hints in deciding whether a particular document or resource is stale. When a user makes a request for something that is stale, that request causes a new copy to be fetched, so that the next user gets fresh content":
 
-    13.1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
+    1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
 ## Guidelines: Crawling 
 
