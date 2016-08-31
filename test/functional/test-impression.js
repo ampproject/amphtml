@@ -32,7 +32,9 @@ describe('impression', () => {
     sandbox.stub(viewer, 'getParam');
     xhr = xhrFor(window);
     expect(xhr.fetchJson).to.be.defined;
-    xhr.fetchJson = function() {};
+    xhr.fetchJson = () => {
+      return Promise.resolve(null);
+    };
     sandbox.spy(xhr, 'fetchJson');
     sandbox.stub(viewer, 'whenFirstVisible').returns(Promise.resolve());
   });
