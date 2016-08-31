@@ -19,7 +19,7 @@ import {getExistingServiceForDoc} from './service';
 
 /**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
- * @return {!!./service/video-manager-impl.VideoManager}
+ * @return {!./service/video-manager-impl.VideoManager}
  */
 export function videoManagerForDoc(nodeOrDoc) {
   return getExistingServiceForDoc(nodeOrDoc, 'video-manager');

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {ampdocFor} from '../src/ampdoc';
 import {BaseElement} from '../src/base-element';
+import {listenOncePromise} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {VideoEvents} from '../src/video-interface';
 import {videoManagerForDoc} from '../src/video-manager';
 
 /**
@@ -51,21 +52,20 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
-      const ampDoc = ampdocFor(this.win).getAmpDoc(this.element);
-      const videoManager = videoManagerForDoc(ampDoc);
-      videoManager.register(this);
+      videoManagerForDoc(this.win.document).register(this);
 
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
-      this.element.dispatchCustomEvent('amp:video:built');
+
+      this.element.dispatchCustomEvent(VideoEvents.BUILT);
     }
 
     /** @override */
-    viewportCallback() {
-      this.element.dispatchCustomEvent('amp:video:visibility');
+    viewportCallback(visible) {
+      this.element.dispatchCustomEvent(VideoEvents.VISIBILITY, {visible});
     }
 
     /** @override */
@@ -78,6 +78,13 @@ export function installVideo(win) {
       if (this.element.getAttribute('src')) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
+
+      listenOncePromise(this.video_, 'canplay').then(() => {
+        this.element.dispatchCustomEvent(VideoEvents.CAN_PLAY);
+      });
+
+      // Do not propagate `autoplay`. Autoplay behaviour is managed by
+      // video manager since amp-video implements the VideoInterface
       this.propagateAttributes(
           ['src', 'muted', 'loop'],
           this.video_);
@@ -100,9 +107,7 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
-      return loadPromise(this.video_).then(() => {
-        this.element.dispatchCustomEvent('amp:video:loaded');
-      });
+      return loadPromise(this.video_);
     }
 
     /** @override */
@@ -117,42 +122,79 @@ export function installVideo(win) {
       return !!this.video_.play;
     }
 
-    /* VideoInterface Implementation */
+    /**
+     * VideoInterface Implementation
+     *
+     * {@see ../src/video-interface.VideoInterface}
+     */
 
+    /**
+     * @return {boolean}
+     */
     supportsPlatform() {
       return this.isVideoSupported_();
     }
 
-    canAutoplay() {
+    /**
+     * @return {boolean}
+     */
+    hasAutoplay() {
       return this.element.hasAttribute('autoplay');
     }
 
-    play(isAutoplay) {
+    /**
+     * @return {!Promise}
+     */
+    play(unusedIsAutoplay) {
       this.video_.play();
+      return listenOncePromise(this.video_, 'play');
     }
 
+    /**
+     * @return {!Promise}
+     */
     pause() {
       this.video_.pause();
+      return listenOncePromise(this.video_, 'pause');
     }
 
+    /**
+     * @return {!Promise}
+     */
     mute() {
       this.video_.setAttribute('muted', '');
+      return Promise.resolve();
     }
 
+    /**
+     * @return {!Promise}
+     */
     unmute() {
       this.video_.removeAttribute('muted');
+      return Promise.resolve();
     }
 
-    canHaveControls() {
+    /**
+     * @return {boolean}
+     */
+    hasControls() {
       return this.element.hasAttribute('controls');
     }
 
+    /**
+     * @return {!Promise}
+     */
     showControls() {
       this.video_.setAttribute('controls', '');
+      return Promise.resolve();
     }
 
+    /**
+     * @return {!Promise}
+     */
     hideControls() {
       this.video_.removeAttribute('controls');
+      return Promise.resolve();
     }
   }
 

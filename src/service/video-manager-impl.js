@@ -14,32 +14,58 @@
  * limitations under the License.
  */
 
-import * as events from '../event-helper';
+import {listen, listenOnce, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
+import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
+import {VideoEvents} from '../video-interface';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 
+/**
+ * @const {number} Percentage of the video that should be in viewport before it
+ * is considered visible.
+ */
 const VISIBILITY_PERCENT = 75;
 
+/**
+ * VideoManager keeps track of all AMP video players that implement
+ * {@link ../video-interface.VideoInterface the common Video API}.
+ *
+ * It is responsible for providing a unified user experience and analytics for
+ * all videos withing an ampdoc.
+ */
 export class VideoManager {
+
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
+    /** @private @const {!Window} */
     this.win_ = ampdoc.win;
 
-    /** {?Array<!{../video-interface.VideoInterface}>} */
+    /** @private {?Array<!{../video-interface.VideoInterface}>} */
     this.entries_;
 
+    /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
   }
 
   /**
+   * Registers a video component that implements the VideoInterface.
    * @param !{../video-interface.VideoInterface} video
    */
   register(video) {
+    dev().assert(video);
+
+    // TODO(aghassemi): Remove this later. For now, VideoManager only matters
+    // for autoplay videos so no point in registering arbitrary videos yet.
+    if (!video.hasAutoplay() ||
+        !platformSupportsAutoplay(platformFor(this.win_))) {
+      return;
+    }
+
     if (!video.supportsPlatform()) {
       return;
     }
@@ -54,16 +80,26 @@ export class VideoManager {
     this.entries_.push(entry);
   }
 
-
+  /**
+   * Install the necessary listeners to be notified when a video becomes visible
+   * in the viewport.
+   *
+   * Visibility of a video is defined by being in the viewport AND having
+   * {@link VISIBILITY_PERCENT} of the video element visible.
+   *
+   * @param {VideoEntry} entry
+   * @private
+   */
   maybeInstallVisibilityObserver_(entry) {
-    events.listen(entry.video.element, 'amp:video:visibility', () => {
-      entry.updateVisibility_();
+    listen(entry.video.element, VideoEvents.VISIBILITY, () => {
+      entry.updateVisibility();
     });
 
+    // TODO(aghassemi, #4780): Create a new IntersectionObserver service.
     if (!this.scrollListenerInstalled_) {
       const scrollListener = () => {
         for (let i = 0; i < this.entries_.length; i++) {
-          this.entries_[i].updateVisibility_();
+          this.entries_[i].updateVisibility();
         }
       };
       const viewport = viewportFor(this.win_);
@@ -74,75 +110,109 @@ export class VideoManager {
   }
 }
 
+/**
+ * VideoEntry represents an entry in the VideoManager's cache.
+ */
 class VideoEntry {
   /**
+   * @param !{Window} win
    * @param !{../video-interface.VideoInterface} video
    */
   constructor(win, video) {
-    /** @public @const !{../video-interface.VideoInterface} */
+
+    /** @package @const !{../video-interface.VideoInterface} */
     this.video = video;
 
+    /** @private {boolean} */
     this.loaded_ = false;
+
+    /** @private {boolean} */
     this.isVisible_ = false;
-    this.mightBecomeVisibleSoon_ = false;
-
-    const element = dev().assert(video.element);
-    // TODO(aghassemi): constant file and helper for events names.
-    events.listenOncePromise(element, 'amp:video:built')
-      .then(() => this.videoBuilt_());
-
-    events.listenOncePromise(element, 'amp:video:loaded')
-      .then(() => this.videoLoaded_());
 
     /** @const @private {!../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
+
+    /** @private {boolean} */
+    this.canAutoplay_ = video.hasAutoplay() &&
+        platformSupportsAutoplay(platformFor(win));
+
+    const element = dev().assert(video.element);
+
+    listenOncePromise(element, VideoEvents.BUILT)
+      .then(() => this.videoBuilt_());
+
+    listenOncePromise(element, VideoEvents.CAN_PLAY)
+      .then(() => this.videoLoaded_());
   }
 
+  /**
+   * Called when the video element finished building.
+   * @private
+   */
   videoBuilt_() {
-    if (this.video.canAutoplay()) {
+    if (this.canAutoplay_) {
       this.autoplayVideoBuilt_();
     }
   }
 
+  /**
+   * Called when the video loaded and can play.
+   * @private
+   */
   videoLoaded_() {
     this.loaded_ = true;
     if (this.isVisible_) {
+      // Handles the case where a video becomes visible before finishing loading
       this.loadedVideoVisibilityChanged_();
     }
   }
 
-  videoVisibilityChanged() {
+  /**
+   * Called when visibility of the video changes.
+   * @private
+   */
+  videoVisibilityChanged_() {
     if (this.loaded_) {
       this.loadedVideoVisibilityChanged_();
     }
   }
 
+  /**
+   * Only called when visibility of a loaded video changes.
+   * @private
+   */
   loadedVideoVisibilityChanged_() {
-    if (this.video.canAutoplay()) {
+    if (this.canAutoplay_) {
       this.autoplayLoadedVideoVisibilityChanged_();
     }
   }
 
-  /* Autoplay behaviour */
+  /* Autoplay Behaviour */
 
+  /**
+   * Called when an autoplay video is built.
+   * @private
+   */
   autoplayVideoBuilt_() {
-    this.video.hideControls();
     this.video.mute();
-    if (this.video.canHaveControls()) {
-      events.listenOnce(this.video.element, 'click', () => {
-        dev().assert(this.video.canHaveControls());
-        dev().assert(this.video.canAutoplay());
 
+    // If autoplay video has controls, hide them and only show them on
+    // user-ineraction.
+    if (this.video.hasControls()) {
+      this.video.hideControls();
+
+      // TODO(aghassemi): This won't work for iframes, needs a transparent shim
+      listenOnce(this.video.element, 'click', () => {
         this.video.showControls();
         this.video.unmute();
       });
     }
   }
 
-  needsVisibilityObserver() {
-    return this.video.canAutoplay();
-  }
-
+  /**
+   * Called when visibility of a loaded autoplay video changes.
+   * @private
+   */
   autoplayLoadedVideoVisibilityChanged_() {
     if (this.isVisible_) {
       this.video.play(/*autoplay*/ true);
@@ -151,14 +221,31 @@ class VideoEntry {
     }
   }
 
-  updateVisibility_() {
+  /**
+   * Whether there is a need to monitor visibility for this video.
+   * @return {boolean}
+   * @package
+   */
+  needsVisibilityObserver() {
+    return this.canAutoplay_;
+  }
+
+  /**
+   * Called by all possible events that might change the visibility of the video
+   * such as scrolling or {@link ../video-interface.VideoEvents#VISIBILITY}.
+   * @package
+   */
+  updateVisibility() {
     const wasVisible = this.isVisible_;
+
+    // Measure if video is now in viewport and what percentage of it is visible
     const measure = () => {
       if (!this.video.isInViewport()) {
         this.isVisible_ = false;
         return;
       }
 
+      // Calculate what percentage of the video is in viewport
       const change = this.video.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
@@ -168,9 +255,10 @@ class VideoEntry {
       this.isVisible_ = visiblePercent >= VISIBILITY_PERCENT;
     };
 
+    // Mutate if visibility changed from previous state
     const mutate = () => {
       if (this.isVisible_ != wasVisible) {
-        this.videoVisibilityChanged();
+        this.videoVisibilityChanged_();
       }
     };
 
@@ -181,6 +269,42 @@ class VideoEntry {
   }
 }
 
+/**
+ * Detects whether the platform even supports autoplay videos.
+ * @private
+ */
+function platformSupportsAutoplay(platform) {
+  // non-mobile platform always supported autoplay
+  if (!platform.isAndroid() || !platform.isIos()) {
+    return true;
+  }
+
+  const version = platform.getMajorVersion();
+  if (platform.isAndroid()) {
+    if (platform.isFirefox() && version >= 37) {
+      return true;
+    }
+    if (platform.isChrome() && version >= 53) {
+      return true;
+    }
+  }
+
+  if (platform.isIos()) {
+    if (platform.isSafari() && version >= 10) {
+      return true;
+    }
+  }
+
+  // TODO(aghassemi): Test other combinations and add support.
+  // TODO(aghassemi): Is there a way to detect that autoplay has been disabled
+  // in the user preferences of the browser?
+  return false;
+}
+
+/**
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!VideoManager}
+ */
 export function installVideoManagerForDoc(ampdoc) {
   return fromClassForDoc(ampdoc, 'video-manager', VideoManager);
 };
