@@ -6,7 +6,7 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 ## Guidelines: Core
 
-1. An AMP Cache only serves [valid AMP documents](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
+1. An AMP Cache only serves [valid AMP input documents](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md).
 
 2. It participates in the AMP Project's [validator release cycle](https://github.com/ampproject/amphtml/tree/master/validator).
 
@@ -14,27 +14,27 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 4. Pledges to maintain URL space forever (even beyond the lifetime of the cache itself): 
 
-    1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
+    4.1. This can be achieved by donating the URL space to a trustworthy third party entity such as [archive.org](http://archive.org).
 
-    2. This means that, should a cache decide to no longer operate, URLs should redirect to the origin URL or be served by another cache.
+    4.2. This means that, should a cache decide to no longer operate, URLs should redirect to the origin URL or be served by another cache.
 
 5. Uses HTTPS serving only.
 
-6. Serves a strong [Content Security Policy](https://w3c.github.io/webappsec-csp/) ([CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)) - a CSP defines a mechanism by which web developers can control the resources which a particular page can fetch or execute, as well as a number of security-relevant policy decisions. The Content-Security-Policy meta-tag reduces the risk of XSS attacks by defining where resources can be loaded from, thus preventing browsers from fetching data via potentially risky locations:
+6. Serves a strong [Content Security Policy](https://w3c.github.io/webappsec-csp/) ([CSP](https://developer.chrome.com/extensions/contentSecurityPolicy)) - a CSP defines a mechanism by which web developers can control the resources which a particular page can fetch or execute, as well as a number of security-relevant policy decisions.
 
-    3. Implements separately documented security rewrites on served content.
+    6.1. Implements separately documented security rewrites on served content.
 
-    4. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
+    6.2. The CSP should be equivalent or stronger to what is being served on [cdn.ampproject.org](http://cdn.ampproject.org).
 
-    5. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
+    6.3. Caches must update their CSP in a timely fashion (within 7 days) at the request of the AMP Project.
 
-7. Supports a public Update ping mechanism: 
+7. Supports a public Update ping mechanism which provides a mechanism for document publishers to notify the AMP cache about new, updated or deleted documents: 
 
-    6. Equivalent to the [Google AMP Cache Update ping format](https://developers.google.com/amp/cache/update-ping#update-ping-format)
+    7.1. Equivalent to the [Google AMP Cache Update ping API](https://developers.google.com/amp/cache/update-ping#update-ping-format)
 
-8. Supports a public AMP Cache URL format:
+8. Supports a public AMP Cache URL API:
 
-    7. Equivalent to the [Google AMP Cache URL format](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
+    7.1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
 9. Provides a faithful visual and UX reproduction of source document, although visually imperceptible changes in image resolution or compression rate are acceptable.  
 
@@ -44,11 +44,9 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 12. Respects all resource deletions within a reasonable timeframe.
 
-13. Uses a stale-while-revalidate caching model and reasonable min cache time (such as in the order of single digit minutes) is allowed. For example, as per [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates), "[the cache] uses the origin's caching headers, such as Max-Age, as hints in deciding whether a particular document or resource is stale. When a user makes a request for something that is stale, that request causes a new copy to be fetched, so that the next user gets fresh content.":
+13. Uses a stale-while-revalidate caching model and reasonable min cache time (such as in the order of single digit minutes) is allowed. For example, as per [Google AMP Cache updates](https://developers.google.com/amp/cache/overview#google-amp-cache-updates), "[the cache] uses the origin's caching headers, such as Max-Age, as hints in deciding whether a particular document or resource is stale. When a user makes a request for something that is stale, that request causes a new copy to be fetched, so that the next user gets fresh content":
 
-    8. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
-
-    9. Observes the [cache-response-directive = public, max-age](http://www.freesoft.org/CIE/RFC/2068/164.htm) source caching headers.
+    13.1. The cache is allowed to serve stale content independent of HTTP caching headers. It must make reasonable efforts to keep the cache contents fresh and must revalidate content after serving stale responses.
 
 ## Guidelines: Crawling 
 
