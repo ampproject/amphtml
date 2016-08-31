@@ -34,7 +34,7 @@ Provide guidelines to external parties for implementing their own AMP Caches.
 
 8. Supports a public AMP Cache URL API:
 
-    7.1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
+    8.1. Equivalent to the [Google AMP Cache URL API](https://developers.google.com/amp/cache/overview#amp-cache-url-format)
 
 9. Provides a faithful visual and UX reproduction of source document, although visually imperceptible changes in image resolution or compression rate are acceptable.  
 
