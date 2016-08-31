@@ -544,7 +544,8 @@ export class Viewer {
       }
     } else if (!getMode(this.win).localDev) {
       // When not embedded, only VISIBLE and HIDDEN states are allowed.
-      if (state !== VisibilityState.VISIBLE || state !== VisibilityState.HIDDEN) {
+      if (state !== VisibilityState.VISIBLE ||
+          state !== VisibilityState.HIDDEN) {
         state = VisibilityState.VISIBLE;
       }
     }

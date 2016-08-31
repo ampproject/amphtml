@@ -412,7 +412,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
       });
     });
 
-    describe.only('standalone', () => {
+    describe('standalone', () => {
       beforeEach(() => {
         viewer.isEmbedded_ = false;
       });
