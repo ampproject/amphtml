@@ -714,6 +714,15 @@ describe('amp-analytics', function() {
             '&foofoo=baz&a=b');
       });
     });
+
+    it('work when the value is an array', () => {
+      config.extraUrlParams = {'foo': ['0']};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&foo=0');
+      });
+    });
   });
 
   it('fetches and merges remote config', () => {
