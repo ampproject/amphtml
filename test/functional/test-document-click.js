@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {onDocumentElementClick_} from '../../src/document-click';
+import {onDocumentElementClick_,
+    getElementByTagNameFromEventShadowDomPath_} from '../../src/document-click';
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {installUrlReplacementsService} from
@@ -319,6 +320,19 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
   });
 
+  describe('usage of getElementByTagNameFromEventShadowDomPath_', () => {
+    it('should handle absence of path', () => {
+      expect(getElementByTagNameFromEventShadowDomPath_({}, 'A')).to.be.null;
+    });
+
+    it('should find first anchor in path', () => {
+      const evt = {path: [
+          {tagName: 'FOO'}, {tagName: 'A', item: 1}, {tagName: 'A', item: 2}]};
+      expect(getElementByTagNameFromEventShadowDomPath_(evt, 'A')).to.equal(
+          evt.path[1]);
+    });
+  });
+
   describe('when including expansion url', () => {
 
     function getReplacements(opt_options) {
@@ -367,12 +381,15 @@ describe('test-document-click onDocumentElementClick_', () => {
         containerDiv.style.margin = '11px 0 0 16px';
         iframe.doc.body.appendChild(containerDiv);
         const shadowRoot = containerDiv.createShadowRoot();
-        evt.target = iframe.doc.createElement('A');
-        evt.target.setAttribute('href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
-        shadowRoot.appendChild(evt.target);
+        // Target should be containerDiv due to target rewrite for shadowRoot.
+        evt.target = containerDiv;
+        const anchorTarget = iframe.doc.createElement('A');
+        anchorTarget.setAttribute('href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
+        shadowRoot.appendChild(anchorTarget);
+        evt.path = [anchorTarget];
         onDocumentElementClick_(
             evt, viewport, history, replacements, false, true);
-        expect(evt.target.href).to.equal('http://foo.com/?r=135&nx=107&ny=445');
+        expect(anchorTarget.href).to.equal('http://foo.com/?r=135&nx=107&ny=445');
       });
     });
   });
