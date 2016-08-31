@@ -122,6 +122,10 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
+      xhrMockJson.withArgs(
+          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
+          {mode: 'cors', method: 'GET'})
+      .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
@@ -731,6 +735,3 @@ describe('amp-a4a', () => {
   // Other cases to handle for body reformatting:
   //   - All
 });
-
-
-

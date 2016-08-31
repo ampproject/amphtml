@@ -17,15 +17,15 @@ import {
   allowRenderOutsideViewport,
   decrementLoadingAds,
   incrementLoadingAds,
-<<<<<<< df18db36698f6907c051f8db1db42acb76c92aff
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-=======
 } from '../../amp-ad/0.1/amp-ad-3p-impl';
 import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
->>>>>>> Clean up dynamic key loading.
+import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
+import {adPreconnect} from '../../../ads/_config';
+import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
@@ -554,7 +554,6 @@ export class AmpA4A extends AMP.BaseElement {
    * To be overridden by network specific implementation indicating which
    * signing service(s) is to be used.
    * @return {!Array<string>} A list of signing services.
-   * @private
    */
   getSigningServiceNames() {
     // TODO(levitzky) Add dev key name once it goes live.
