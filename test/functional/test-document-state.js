@@ -111,7 +111,7 @@ describe('DocumentState', () => {
 
   it('should fire body availability change', () => {
     const callback = sandbox.spy();
-    const stub = sandbox.stub(dom, 'waitForChild');
+    sandbox.stub(dom, 'waitForChild');
 
     expect(testDoc.body).to.equal(undefined);
 
