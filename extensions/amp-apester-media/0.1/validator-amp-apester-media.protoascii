@@ -52,13 +52,13 @@ tags: {  # <amp-apester-media>
   tag_name: "AMP-APESTER-MEDIA"
   also_requires_tag: "amp-apester-media extension .js script"
   attrs: {
-    mandatory_oneof: "['data-apester-media', 'data-apester-channel-token']"
-    name: "data-apester-media"
+    name: "data-apester-media-id"
+    mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
   attrs: {
-    mandatory_oneof: "['data-apester-media', 'data-apester-channel-token']"
     name: "data-apester-channel-token"
+    mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
   attr_lists: "extended-amp-global"
