@@ -72,7 +72,7 @@ export class ClickHandler {
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
-    /** @private @const {!./service/url-replacements.UrlReplacements} */
+    /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(this.win);
 
     const platform = platformFor(this.win);
@@ -145,7 +145,7 @@ export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
  * @param {!Event} e
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
- * @param {!./service/url-replacements.UrlReplacements} urlReplacements
+ * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
  * @param {boolean} isIosSafari
  * @param {boolean} isIframed
  * @param {boolean} isCapture whether event was caught during capture
@@ -288,7 +288,7 @@ function getClickLocation_(e) {
  *
  * @param {!Event} e click event.
  * @param {!Element} target nearest anchor to event target.
- * @param {!./service/url-replacements.UrlReplacements} urlReplacements
+ * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
  * @return {string|undefined} expanded href
  * @visibleForTesting
  */
