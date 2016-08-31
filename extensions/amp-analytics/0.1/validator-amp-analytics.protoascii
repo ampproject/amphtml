@@ -109,6 +109,7 @@ tags: {  # <amp-analytics>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
 }

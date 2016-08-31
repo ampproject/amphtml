@@ -16,6 +16,7 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
@@ -471,9 +472,11 @@ export class AmpSlideScroll extends BaseSlides {
       return Promise.resolve();
     }
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
+    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const duration = 80;
     return Animation.animate(this.slidesContainer_, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
-    }, 80, 'ease-out').thenAlways();
+    }, duration, curve).thenAlways();
   }
 
   /**

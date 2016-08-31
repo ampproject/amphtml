@@ -73,14 +73,6 @@ The ID of the media, an integer.
 
 The token of the channel, an integer.
 
-
-## Optional attributes
-
-<!--**width and height**-->
-
-<!--Layout is `container` and the amp-iframe size will be determine based on the data on Apester servers. -->
-
-
 ## Validation
 
 See [amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/0.1/validator-amp-apester-media.protoascii) in the AMP validator specification.
