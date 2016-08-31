@@ -18,14 +18,16 @@
 /**
  * >>>>>>Work-In-Progress<<<<<<
  *
- * VideoInterface defines a common video API that any AMP component that plays
+ * VideoInterface defines a common video API which any AMP component that plays
  * videos is expected to implement.
  *
  * AMP runtime uses this common API to provide consistent video experience and
  * analytics across all video players.
  *
  * Components implementing this interface must also extend
- * {@link ./base-element.BaseElement}
+ * {@link ./base-element.BaseElement} and register with the
+ * Video Manager {@link ./service/video-manager-impl.VideoManager} during
+ * their `builtCallback`.
  *
  * @interface
  * @extends {./base-element.BaseElement}
@@ -44,7 +46,7 @@ export class VideoInterface {
    * This is normally done by setting `autoplay` attribute on the component.
    *
    * AMP runtime manages autoplay behaviour itself using methods such as `play`,
-   * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore Components
+   * `pause`, `showControls`, `hideControls`, `mute`, etc.. therefore components
    * should not propagate the autoplay attribute to the underlying player
    * implementation.
    *
@@ -53,48 +55,44 @@ export class VideoInterface {
    * the viewport, AMP will play the video and later pauses it when 25%
    * or more of the video exits the viewport. If an auto-playing video also has
    * controls (ie. `hasControls()` returns `true`), AMP will install a tap
-   * handler on the video and when an end-user taps a video, AMP will show the
-   * controls.
-   *
-   * Any element that implements this interface must also register with the
-   * {@link ./service/video-manager-impl.VideoManager Video Manager} during
-   * their `builtCallback`.
+   * handler on the video, and when an end-user taps the video, AMP will show
+   * the controls.
    *
    * @return {boolean}
    */
   hasAutoplay() {}
 
   /**
-   * Plays the video and returns a promise that will resolved when video is
-   * playing or rejected if video could not be played.
+   * Plays the video and returns a promise that will be resolved when the video
+   * is playing or rejected if the video could not be played.
    *
    * @param {boolean} isAutoplay Whether the call to the `play` method is
    * triggered by the autoplay functionality. Video players can use this hint
-   * to make decisions such as not playing or delaying pre-roll video ads.
+   * to make decisions such as not playing pre-roll video ads.
    * @return {!Promise}
    */
   play(unusedIsAutoplay) {}
 
 
   /**
-   * Pauses the video and returns a promise that will be resolved when video is
-   * paused or rejected if video could not be paused.
+   * Pauses the video and returns a promise that will be resolved when the video
+   * is paused or rejected if the video could not be paused.
    *
    * @return {!Promise}
    */
   pause() {}
 
   /**
-   * Mutes the video and returns a promise that will be resolved when video is
-   * muted or rejected if video could not be muted.
+   * Mutes the video and returns a promise that will be resolved when the video
+   * is muted or rejected if the video could not be muted.
    *
    * @return {!Promise}
    */
   mute() {}
 
   /**
-   * Unmutes the video and returns a promise that will be resolved when video is
-   * muted or rejected if video could not be unmuted.
+   * Unmutes the video and returns a promise that will be resolved when the
+   * video is muted or rejected if the video could not be unmuted.
    *
    * @return {!Promise}
    */
@@ -102,18 +100,18 @@ export class VideoInterface {
 
   /**
    * Whether the developer has configured the component to show UI controls such
-   * as play, pause, etc.. buttons.
+   * as play, pause, etc... buttons.
    * This is normally done by setting `controls` attribute on the component.
    *
-   * AMP runtime makes certain assumptions based on value returned from
-   * `hasControls()` such as whether to allow end-user to interact with an
+   * AMP runtime makes certain assumptions based on the value returned from
+   * `hasControls()` such as whether to allow end-users to interact with an
    * auto-playing video or not.
    */
   hasControls() {}
 
   /**
    * Makes the video UI controls visible and returns a promise that will be
-   * resolved when controls are displayed.
+   * resolved when the controls are displayed.
    *
    * AMP will not call this method if `hasControls()` returns false.
    *
@@ -122,8 +120,8 @@ export class VideoInterface {
   showControls() {}
 
   /**
-   * Hides the video UI controls  and returns a promise that will resolved when
-   * controls are hidden.
+   * Hides the video UI controls and returns a promise that will resolved when
+   * the controls are hidden.
    *
    * AMP will not call this method if `hasControls()` returns false.
    *
@@ -135,7 +133,7 @@ export class VideoInterface {
 /**
  * Events
  *
- * Component implementing the VideoInterface are expected to dispatch
+ * Components implementing the VideoInterface are expected to dispatch
  * the following DOM events.
  *
  * @constant {!Object<string, string>}
@@ -165,4 +163,3 @@ export const VideoEvents = {
    */
   VISIBILITY: 'amp:video:visibility',
 };
-

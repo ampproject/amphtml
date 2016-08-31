@@ -30,10 +30,10 @@ const VISIBILITY_PERCENT = 75;
 
 /**
  * VideoManager keeps track of all AMP video players that implement
- * {@link ../video-interface.VideoInterface the common Video API}.
+ * the common Video API {@see ../video-interface.VideoInterface}.
  *
  * It is responsible for providing a unified user experience and analytics for
- * all videos withing an ampdoc.
+ * all videos within a document.
  */
 export class VideoManager {
 
@@ -45,7 +45,7 @@ export class VideoManager {
     /** @private @const {!Window} */
     this.win_ = ampdoc.win;
 
-    /** @private {?Array<!{../video-interface.VideoInterface}>} */
+    /** @private {?Array<{!../video-interface.VideoInterface}>} */
     this.entries_;
 
     /** @private {boolean} */
@@ -54,7 +54,7 @@ export class VideoManager {
 
   /**
    * Registers a video component that implements the VideoInterface.
-   * @param !{../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoInterface} video
    */
   register(video) {
     dev().assert(video);
@@ -111,16 +111,16 @@ export class VideoManager {
 }
 
 /**
- * VideoEntry represents an entry in the VideoManager's cache.
+ * VideoEntry represents an entry in the VideoManager's list.
  */
 class VideoEntry {
   /**
-   * @param !{Window} win
-   * @param !{../video-interface.VideoInterface} video
+   * @param {!Window} win
+   * @param {!../video-interface.VideoInterface} video
    */
   constructor(win, video) {
 
-    /** @package @const !{../video-interface.VideoInterface} */
+    /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
     /** @private {boolean} */
@@ -146,7 +146,7 @@ class VideoEntry {
   }
 
   /**
-   * Called when the video element finished building.
+   * Called when the video element is built.
    * @private
    */
   videoBuilt_() {
@@ -156,19 +156,19 @@ class VideoEntry {
   }
 
   /**
-   * Called when the video loaded and can play.
+   * Called when the video is loaded and can play.
    * @private
    */
   videoLoaded_() {
     this.loaded_ = true;
     if (this.isVisible_) {
-      // Handles the case where a video becomes visible before finishing loading
+      // Handles the case when the video becomes visible before loading
       this.loadedVideoVisibilityChanged_();
     }
   }
 
   /**
-   * Called when visibility of the video changes.
+   * Called when visibility of a video changes.
    * @private
    */
   videoVisibilityChanged_() {
@@ -185,6 +185,15 @@ class VideoEntry {
     if (this.canAutoplay_) {
       this.autoplayLoadedVideoVisibilityChanged_();
     }
+  }
+
+  /**
+   * Whether there is a need to monitor visibility of this video.
+   * @return {boolean}
+   * @package
+   */
+  needsVisibilityObserver() {
+    return this.canAutoplay_;
   }
 
   /* Autoplay Behaviour */
@@ -219,15 +228,6 @@ class VideoEntry {
     } else {
       this.video.pause();
     }
-  }
-
-  /**
-   * Whether there is a need to monitor visibility for this video.
-   * @return {boolean}
-   * @package
-   */
-  needsVisibilityObserver() {
-    return this.canAutoplay_;
   }
 
   /**
@@ -274,7 +274,7 @@ class VideoEntry {
  * @private
  */
 function platformSupportsAutoplay(platform) {
-  // non-mobile platform always supported autoplay
+  // non-mobile platforms always supported autoplay
   if (!platform.isAndroid() || !platform.isIos()) {
     return true;
   }

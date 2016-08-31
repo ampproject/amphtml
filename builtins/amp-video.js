@@ -124,7 +124,6 @@ export function installVideo(win) {
 
     /**
      * VideoInterface Implementation
-     *
      * {@see ../src/video-interface.VideoInterface}
      */
 
