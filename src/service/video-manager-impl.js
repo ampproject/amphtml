@@ -275,7 +275,7 @@ class VideoEntry {
  */
 function platformSupportsAutoplay(platform) {
   // non-mobile platforms always supported autoplay
-  if (!platform.isAndroid() || !platform.isIos()) {
+  if (!platform.isAndroid() && !platform.isIos()) {
     return true;
   }
 
