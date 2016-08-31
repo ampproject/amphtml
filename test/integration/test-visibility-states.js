@@ -415,6 +415,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
     describe('standalone', () => {
       beforeEach(() => {
         viewer.isEmbedded_ = false;
+        fixture.win.AMP_MODE = {localDev: false};
       });
 
       describe.skip('from in the PRERENDER state', () => {

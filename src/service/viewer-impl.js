@@ -542,7 +542,7 @@ export class Viewer {
           VisibilityState.INACTIVE :
           VisibilityState.PRERENDER;
       }
-    } else if (!getMode(this.win).localDev) {
+    } else if (!getMode().localDev) {
       // When not embedded, only VISIBLE and HIDDEN states are allowed.
       if (state !== VisibilityState.VISIBLE ||
           state !== VisibilityState.HIDDEN) {
