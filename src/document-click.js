@@ -261,6 +261,27 @@ export function onDocumentElementClick_(e, viewport, history, urlReplacements,
 };
 
 /**
+ * Get offset location of click from event taking into account shadowRoot.
+ * @param {!Event} e
+ * @return {!{left: string, top: string}}
+ */
+function getClickLocation_(e) {
+  // Use existence of event path as indicator that event was rewritten
+  // due to shadowDom in which case the event target is the host element.
+  // NOTE(keithwrightbos) - this assumes that there is only one level
+  // of shadowRoot, not sure how this would behave otherwise (likely only
+  // offset to closest shadowRoot).
+  return {
+    left: (e.clientX === undefined ? '' :
+        String(e.clientX -
+          (e.path && e.target ? e.target./*REVIEW*/offsetLeft : 0))),
+    top: (e.clientY === undefined ? '' :
+        String(e.clientY -
+          (e.path && e.target ? e.target./*REVIEW*/offsetTop : 0)))
+  };
+}
+
+/**
  * Expand click target href synchronously using UrlReplacements service
  * including CLICK_X/CLICK_Y page offsets (if within shadowRoot will reference
  * from host).
@@ -277,25 +298,12 @@ export function expandTargetHref_(e, target, urlReplacements) {
   if (!hrefToExpand) {
     return;
   }
-  let shadowHostOffset;
   const vars = {
     'CLICK_X': () => {
-      if (e.clientX === undefined) {
-        return '';
-      }
-      // Use existence of event path as indicator that event was rewritten
-      // due to shadowDom in which case the event target is the host element.
-      return String(e.clientX -
-          (e.path && e.target ? e.target./*REVIEW*/offsetLeft : 0));
+      return getClickLocation_(e).left;
     },
     'CLICK_Y': () => {
-      if (e.clientY === undefined) {
-        return '';
-      }
-      // Use existence of event path as indicator that event was rewritten
-      // due to shadowDom in which case the event target is the host element.
-      return String(e.clientY -
-          (e.path && e.target ? e.target./*REVIEW*/offsetTop : 0));
+      return getClickLocation_(e).top;
     },
   };
   let newHref = urlReplacements.expandSync(hrefToExpand, vars);
