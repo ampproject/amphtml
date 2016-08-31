@@ -123,6 +123,7 @@ export class ClickHandler {
 }
 
 /**
+<<<<<<< 848be7f9dffbffe8922cb19af504dc939caf6a17
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
  * @visibleForTesting
@@ -217,7 +218,12 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
     return;
   }
 
-  const target = closestByTag(e.target, 'A');
+  // If within a shadowRoot, the event target will be the host element due to
+  // event target rewrite.  Given that it is possible a shadowRoot could be
+  // within an anchor tag, we need to check the event path prior to looking
+  // at the host element's closest tags.
+  const target = getElementByTagNameFromEventShadowDomPath(e, 'A') ||
+      closestByTag(e.target, 'A');
   if (!target) {
     return;
   }

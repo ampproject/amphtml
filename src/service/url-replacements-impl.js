@@ -602,7 +602,6 @@ export class UrlReplacements {
   expandSync(url, opt_bindings, opt_collectVars) {
     return this.expand_(url, opt_bindings, opt_collectVars, true);
   }
-
   /**
    * Expands the provided URL by replacing all known variables with their
    * resolved values. Optional `opt_bindings` can be used to add new variables
