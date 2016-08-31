@@ -202,7 +202,7 @@ describe('HistoryBindingNatural', () => {
     });
   });
 
-  it.skip('should pop a state from the window.history and notify', () => {
+  it('should pop a state from the window.history and notify', () => {
     return history.push().then(stackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
@@ -225,7 +225,7 @@ describe('HistoryBindingNatural', () => {
     });
   });
 
-  it.skip('should update its state and notify on history.back', () => {
+  it('should update its state and notify on history.back', () => {
     return history.push().then(unusedStackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
