@@ -313,7 +313,6 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
 };
 
 /**
-<<<<<<< b052cd1d99fd8d742ed57a272d69f7a7b08a9822
  * Get offset location of click from event taking into account shadowRoot.
  * @param {!Event} e
  * @return {!{left: string, top: string}}
