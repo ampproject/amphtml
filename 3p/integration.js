@@ -453,11 +453,12 @@ export function validateParentOrigin(window, parentLocation) {
   // Currently only webkit and blink based browsers support
   // ancestorOrigins. In that case we proceed but mark the origin
   // as non-validated.
-  if (ancestors && ancestors.length) {
-    user().assert(ancestors[0] == parentLocation.origin,
+  if (!ancestors || !ancestors.length) {
+    return;
+  }
+  user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
-  }
 }
 
 /**
