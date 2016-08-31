@@ -24,7 +24,6 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {platformFor} from './platform';
 import {urlReplacementsFor} from './url-replacements';
-import {isShadowRoot} from './types';
 import {closestNode} from './dom';
 
 /** @private @const {string} */
@@ -126,7 +125,7 @@ export class ClickHandler {
  * @return {?Element}
  * @visibleForTesting
  */
-export function getElementByTagNameFromEventShadowDomPath(e, tagName) {
+export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
   for (let i = 0; i < (e.path ? e.path.length : 0); i++) {
     const element = e.path[i];
     if (element && element.tagName.toUpperCase() == tagName) {
@@ -162,7 +161,7 @@ export function onDocumentElementClick_(e, viewport, history, urlReplacements,
   // event target rewrite.  Given that it is possible a shadowRoot could be
   // within an anchor tag, we need to check the event path prior to looking
   // at the host element's closest tags.
-  const target = getElementByTagNameFromEventShadowDomPath(e, 'A') ||
+  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
       closestByTag(e.target, 'A');
   if (!target) {
     return;
@@ -262,29 +261,6 @@ export function onDocumentElementClick_(e, viewport, history, urlReplacements,
 };
 
 /**
- * Determines the offset of an element's shadowRoot host if it has one,
- * otherwise return top/left 0.
- * @param {EventTarget} element
- * @return {!{top: number, left: number}}
- * @private
- */
-function getShadowHostOffset_(element) {
-  if (element) {
-    const shadowRoot = closestNode(element, parent => {
-      return isShadowRoot(parent);
-    });
-    if (shadowRoot && shadowRoot.host) {
-      // Can we guarantee offsetTop/Left are correct values without
-      // forcing a promise measure?  Given we cannot wait, what values would
-      // we expect here?
-      return {top: shadowRoot.host./*REVIEW*/offsetTop,
-        left: shadowRoot.host./*REVIEW*/offsetLeft};
-    }
-  }
-  return {top: 0, left: 0};
-};
-
-/**
  * Expand click target href synchronously using UrlReplacements service
  * including CLICK_X/CLICK_Y page offsets (if within shadowRoot will reference
  * from host).
@@ -307,17 +283,19 @@ export function expandTargetHref_(e, target, urlReplacements) {
       if (e.clientX === undefined) {
         return '';
       }
-      shadowHostOffset =
-        shadowHostOffset || getShadowHostOffset_(e.target);
-      return String(e.clientX - shadowHostOffset.left);
+      // Use existence of event path as indicator that event was rewritten
+      // due to shadowDom in which case the event target is the host element.
+      return String(e.clientX -
+          (e.path && e.target ? e.target./*REVIEW*/offsetLeft : 0));
     },
     'CLICK_Y': () => {
       if (e.clientY === undefined) {
         return '';
       }
-      shadowHostOffset =
-        shadowHostOffset || getShadowHostOffset_(e.target);
-      return String(e.clientY - shadowHostOffset.top);
+      // Use existence of event path as indicator that event was rewritten
+      // due to shadowDom in which case the event target is the host element.
+      return String(e.clientY -
+          (e.path && e.target ? e.target./*REVIEW*/offsetTop : 0));
     },
   };
   let newHref = urlReplacements.expandSync(hrefToExpand, vars);
