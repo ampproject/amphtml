@@ -222,7 +222,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   // event target rewrite.  Given that it is possible a shadowRoot could be
   // within an anchor tag, we need to check the event path prior to looking
   // at the host element's closest tags.
-  const target = getElementByTagNameFromEventShadowDomPath(e, 'A') ||
+  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
       closestByTag(e.target, 'A');
   if (!target) {
     return;
@@ -313,6 +313,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
 };
 
 /**
+<<<<<<< b052cd1d99fd8d742ed57a272d69f7a7b08a9822
  * Get offset location of click from event taking into account shadowRoot.
  * @param {!Event} e
  * @return {!{left: string, top: string}}
