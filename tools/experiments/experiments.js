@@ -78,12 +78,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
-    id: 'amp-live-list',
-    name: 'AMP Live List/Blog',
-    spec: 'https://github.com/ampproject/amphtml/issues/2762',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
