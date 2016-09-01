@@ -91,7 +91,7 @@ export class ClickHandler {
     // Add capture phase click handler for anchor target href expansion.
     this.boundHandlers_.push(this.handle_.bind(this, true));
     this.win.document.documentElement.addEventListener(
-        'click', this.boundHandlers_[this.boundHandlers_.length - 1]);
+        'click', this.boundHandlers_[this.boundHandlers_.length - 1], true);
   }
 
   /**
