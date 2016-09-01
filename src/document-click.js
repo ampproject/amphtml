@@ -84,7 +84,7 @@ export class ClickHandler {
 
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
-      this.boundHandlers_.push(this.handle_.bind(this));
+      this.boundHandlers_.push(this.handle_.bind(this, false));
       this.win.document.documentElement.addEventListener(
           'click', this.boundHandlers_[this.boundHandlers_.length - 1]);
     }
