@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
@@ -84,15 +83,14 @@ export function getIntersectionChangeEntry(
  * Note: The IntersectionObserver would not send any data over to the iframe if
  * it had not requested the intersection data already via a postMessage.
  */
-export class IntersectionObserver extends Observable {
+export class IntersectionObserver {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element which requested the intersection
-   *    data.
+   * @param {!HTMLIFrameElement} iframe Iframe element which requested the
+   *     intersection data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    */
   constructor(baseElement, iframe, opt_is3p) {
-    super();
     /** @private @const */
     this.baseElement_ = baseElement;
     /** @private @const {!Timer} */
@@ -123,14 +121,10 @@ export class IntersectionObserver extends Observable {
         // Each time someone subscribes we make sure that they
         // get an update.
         () => this.startSendingIntersectionChanges_());
-
-    this.init_();
   }
 
-  init_() {
-    this.add(() => {
-      this.sendElementIntersection_();
-    });
+  fire() {
+    this.sendElementIntersection_();
   }
 
   /**
