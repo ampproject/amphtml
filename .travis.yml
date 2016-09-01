@@ -24,6 +24,8 @@ before_install:
 before_script:
   - npm install -g gulp
   - pip install --user protobuf
+  - npm install -g http-server
+  - phantomjs --version
 script:
   - npm run ava
   - gulp lint
@@ -43,6 +45,9 @@ script:
   # Disabled because it regressed. Better to run the other saucelabs tests.
   # - gulp test --saucelabs --oldchrome
   - gulp validator
+  - http-server -p 8000 -c-1 &
+  - sleep 3  # Wakey wakey, http-server
+  - gulp test-screenshots -v
 branches:
   only:
     - master
