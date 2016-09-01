@@ -1,0 +1,154 @@
+<!doctype html>
+<html ⚡>
+  <head>
+    <meta charset="utf-8">
+    <title>Multi-size Ad Requests with DoubleClick Examples</title>
+    <link rel="canonical" href="http://nonblocking.io/" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+
+    <h1>Multi-size Ad Requests with DoubleClick Examples</h1>
+
+    <h2>Resize denied (above fold) - Creative should be centered</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+        >
+    </amp-ad>
+
+    <h2>Secondary sizes > primary size (above fold) - Should see 'fallback'</h2>
+    <amp-ad width=300 height=50
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+
+        >
+      <div fallback>fallback</div>
+    </amp-ad>
+
+    <h2>Secondary sizes == primary size - Should render</h2>
+    <amp-ad width=320 height=50
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+
+        >
+      <div fallback>fallback</div>
+    </amp-ad>
+
+
+    <h2>Invalid multi-size attribute (above fold) - Should see 'fallback'</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="[320,50]"
+        style="border: 2px dashed;"
+
+        >
+        <div fallback>fallback</div>
+    </amp-ad>
+
+
+    <!-- create an artificial fold -->
+    <div style="height: 900px; background: #000;"></div>
+
+    <h2>Resize granted (beneath fold) - Creative should be closely wrapped by parent div</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+    <h2>Invalid multi-size attribute (beneath fold) - Should be empty</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="[320,50]"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+    <h2>One invalid and one valid multi-size attribute - Should render</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="[320,50],320x50"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+
+    <h2>Multi-size less than 2/3rds primary size & size-validation == false - Should render</h2>
+    <amp-ad width=1000 height=500
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        data-multi-size-validation="false"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+    <h2>Multi-size less than 2/3rds primary size - Should be empty</h2>
+    <amp-ad width=1000 height=500
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+    <h2>Multiple secondary sizes (all valid) - Should render</h2>
+    <amp-ad width=480 height=75
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50,350x50,350x75,400x75"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+
+      <h2>Responsive - Should render</h2>
+    <amp-ad width=100 height=149.999999925
+        type="doubleclick"
+        data-slot= "/4119129/mobile_ad_banner"
+        data-override-width="1030"
+        data-override-height="590"
+        data-multi-size="320x50"
+        data-multi-size-validation="false"
+        layout="responsive"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+    <h2>Secondary sizes > primary size (below fold) - Should be empty</h2>
+    <amp-ad width=300 height=50
+        type="doubleclick"
+        data-slot="/4119129/mobile_ad_banner"
+        data-multi-size="320x50"
+        style="border: 2px dashed;"
+
+        >
+    </amp-ad>
+
+
+  </body>
+</html>
+
+
