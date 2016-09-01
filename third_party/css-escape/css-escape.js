@@ -1,24 +1,12 @@
 /*! https://mths.be/cssescape v1.5.1 by @mathias | MIT license */
-;(function(root, factory) {
-	// https://github.com/umdjs/umd/blob/master/returnExports.js
-	if (typeof exports == 'object') {
-		// For Node.js.
-		module.exports = factory(root);
-	} else if (typeof define == 'function' && define.amd) {
-		// For AMD. Register as an anonymous module.
-		define([], factory.bind(root, root));
-	} else {
-		// For browser globals (not exposing the function separately).
-		factory(root);
-	}
-}(typeof global != 'undefined' ? global : this, function(root) {
 
-	if (root.CSS && root.CSS.escape) {
-		return root.CSS.escape;
-	}
 
-	// https://drafts.csswg.org/cssom/#serialize-an-identifier
-	var cssEscape = function(value) {
+/**
+ * https://drafts.csswg.org/cssom/#serialize-an-identifier
+ * @param {string} value
+ * @return {string}
+ */
+export function cssEscape(value) {
 		if (arguments.length == 0) {
 			throw new TypeError('`CSS.escape` requires an argument.');
 		}
@@ -94,13 +82,4 @@
 
 		}
 		return result;
-	};
-
-	if (!root.CSS) {
-		root.CSS = {};
-	}
-
-	root.CSS.escape = cssEscape;
-	return cssEscape;
-
-}));
+}

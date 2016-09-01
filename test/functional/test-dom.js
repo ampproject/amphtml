@@ -702,4 +702,15 @@ describe('DOM', () => {
       expect(dom.isJsonScriptTag(element)).to.be.false;
     });
   });
+
+  describe('escapeCssSelectorIdent', () => {
+
+    it('should escape natively', () => {
+      expect(dom.escapeCssSelectorIdent(window, 'a b')).to.equal('a\\ b');
+    });
+
+    it('should polyfill escape', () => {
+      expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
+    });
+  });
 });
