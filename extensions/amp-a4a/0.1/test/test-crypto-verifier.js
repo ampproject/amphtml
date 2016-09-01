@@ -21,7 +21,7 @@ import {
 import {
   importPublicKey,
   verifySignature,
-  verifySignatureIsAvailable,
+  isCryptoAvailable,
 } from '../crypto-verifier';
 
 
@@ -91,7 +91,7 @@ const wrongData = stringToBytes('Hello0');
 
 describe('verifySignature', function() {
 
-  if (!verifySignatureIsAvailable()) { return; }
+  if (!isCryptoAvailable()) { return; }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
