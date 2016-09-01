@@ -169,6 +169,12 @@ const EXPERIMENTS = [
         'elements without the need to manually add the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
   },
+  {
+    id: 'amp-fresh',
+    name: 'Guaranteed minimum freshness on sections of a page',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
+  },
 ];
 
 if (getMode().localDev) {
