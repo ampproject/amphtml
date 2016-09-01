@@ -398,7 +398,8 @@ export class UrlReplacements {
             'start attribute name, is required');
         return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
             /**@type {string}*/(endAttribute));
-      },
+      });
+    this.setAsync_('NAV_TIMING',
       (startAttribute, endAttribute) => {
         user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
             'start attribute name, is required');
@@ -484,16 +485,16 @@ export class UrlReplacements {
    *    if it is not yet available, or value as string
    */
   getTimingDataSync_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance']
-      && this.win_['performance']['timing'];
+    const timingInfo = this.win_['performance'] &&
+        this.win_['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
       return;
     }
 
-    let metric = (endEvent === undefined)
-       ? timingInfo[startEvent]
-       : timingInfo[endEvent] - timingInfo[startEvent];
+    let metric = (endEvent === undefined) ?
+        timingInfo[startEvent] :
+        timingInfo[endEvent] - timingInfo[startEvent];
 
     if (!isFiniteNumber(metric)) {
       // The metric is not supported.
@@ -581,26 +582,6 @@ export class UrlReplacements {
   }
 
   /**
-   * Calling encodeURIComponent with non-string type fails type check despite
-   * browser supporting it (simply converts to string).  This allows for being
-   * explicit about the behavior.
-   * @param {*} val
-   * @return {!string}
-   * @private
-   */
-  encodeValue_(val) {
-    switch (typeof val) {
-      case 'string':
-        return encodeURIComponent(val);
-      case 'number':
-      case 'boolean':
-        return String(val);
-      default:  // null evaluates as object
-        return '';
-    }
-  }
-
-  /**
    * Synchronously expands the provided URL by replacing all known variables with
    * their resolved values. Optional `opt_bindings` can be used to add new
    * variables or override existing ones.  Any async bindings are ignored.
@@ -610,44 +591,7 @@ export class UrlReplacements {
    * @return {string}
    */
   expandSync(url, opt_bindings, opt_collectVars) {
-    if (!this.initialized_) {
-      this.initialize_();
-    }
-    const expr = this.getExpr_(opt_bindings);
-    url = url.replace(expr, (match, name, opt_strargs) => {
-      let args = [];
-      if (typeof opt_strargs == 'string') {
-        args = opt_strargs.split(',');
-      }
-      const replacement = this.getReplacement_(name);
-      let binding;
-      if (opt_bindings && (name in opt_bindings)) {
-        binding = opt_bindings[name];
-      } else if (replacement) {
-        binding = replacement.sync;
-        if (!binding) {
-          user().error('ignoring async replacement key: ' + name);
-          return '';
-        }
-      }
-      let val;
-      try {
-        val = (typeof binding == 'function' ?
-        binding.apply(null, args) : binding);
-        if (val && val.then) {
-          user().error('ignoring promise value for key: ' + name);
-          return '';
-        }
-      } catch (e) {
-        user().error('Error evaluating replacement: ' + name, e);
-        val = '';
-      }
-      if (opt_collectVars) {
-        opt_collectVars[match] = val;
-      }
-      return this.encodeValue_(val);
-    });
-    return url;
+    return this.expand_(url, opt_bindings, opt_collectVars, true);
   }
 
   /**
@@ -658,7 +602,7 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expand(url, opt_bindings) {
+  expandAsync(url, opt_bindings) {
     return this.expand_(url, opt_bindings);
   }
 
@@ -666,10 +610,11 @@ export class UrlReplacements {
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
-   * @return {!Promise<string>}
+   * @param {boolean=} opt_sync
+   * @return {!Promise<string>|string}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars) {
+  expand_(url, opt_bindings, opt_collectVars, opt_sync) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -690,7 +635,15 @@ export class UrlReplacements {
       if (opt_bindings && (name in opt_bindings)) {
         binding = opt_bindings[name];
       } else if ((binding = this.getReplacement_(name))) {
-        binding = binding.async || binding.sync;
+        if (opt_sync) {
+          binding = binding.sync;
+          if (!binding) {
+            user().error('ignoring async replacement key: ' + name);
+            return '';
+          }
+        } else {
+          binding = binding.async || binding.sync;
+        }
       }
       let val;
       try {
@@ -699,39 +652,49 @@ export class UrlReplacements {
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
-        rethrowAsync(e);
+        if (opt_sync) {
+          user().error('Error evaluating replacement: ' + name, e);
+          val = '';
+        } else {
+          rethrowAsync(e);
+        }
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
-        const p = val.catch(err => {
-          // Report error, but do not disrupt URL replacement. This will
-          // interpolate as the empty string.
-          rethrowAsync(err);
-        }).then(v => {
-          url = url.replace(match, this.encodeValue_(v));
-          if (opt_collectVars) {
-            opt_collectVars[match] = v;
-          }
-        });
-        if (replacementPromise) {
-          replacementPromise = replacementPromise.then(() => p);
+        if (opt_sync) {
+          user().error('ignoring promise value for key: ' + name);
+          return '';
         } else {
-          replacementPromise = p;
+          const p = val.catch(err => {
+            // Report error, but do not disrupt URL replacement. This will
+            // interpolate as the empty string.
+            rethrowAsync(err);
+          }).then(v => {
+            url = url.replace(match, encodeValue(v));
+            if (opt_collectVars) {
+              opt_collectVars[match] = v;
+            }
+          });
+          if (replacementPromise) {
+            replacementPromise = replacementPromise.then(() => p);
+          } else {
+            replacementPromise = p;
+          }
         }
         return match;
       }
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return this.encodeValue_(val);
+      return encodeValue(val);
     });
 
     if (replacementPromise) {
       replacementPromise = replacementPromise.then(() => url);
     }
 
-    return replacementPromise || Promise.resolve(url);
+    return opt_sync ? url : (replacementPromise || Promise.resolve(url));
   }
 
   /**
