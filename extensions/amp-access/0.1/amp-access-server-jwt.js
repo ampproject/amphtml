@@ -132,6 +132,12 @@ export class AccessServerJwtAdapter {
     if (this.keyUrl_) {
       assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
     }
+    if (this.key_ && this.keyUrl_) {
+      // TODO(dvoytenko): Remove "publicKey" option eventually.
+      user().warn(TAG,
+          'Both "publicKey" and "publicKeyUrl" specified. ' +
+          'The "publicKeyUrl" will be ignored.');
+    }
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(win);
