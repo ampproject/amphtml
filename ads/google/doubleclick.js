@@ -83,7 +83,7 @@ export function doubleclick(global, data) {
  * @param {(number|string)} height
  * @param {!function((number|string)): boolean} widthCond
  * @param {!function((number|string)): boolean} heightCond
- * @return {?{badDim: string, badVal: (string|number}}
+ * @return {?{badDim: string, badVal: (string|number)}}
  */
 function getBadParams(width, height, widthCond, heightCond) {
   if (widthCond(width) && heightCond(height)) {
@@ -123,7 +123,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
   // dimension counterpart; and, if data-mutli-size-validation is not set to
   // false, that each secondary dimension is at least 2/3rds of its primary
   // dimension counterpart.
-  const multiSizeDataStr = data.multiSize;
+  const multiSizeDataStr = data.multiSize || null;
   if (multiSizeDataStr) {
     const sizesStr = multiSizeDataStr.split(',');
     sizesStr.forEach(sizeStr => {
@@ -176,7 +176,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       // Check that if multi-size-validation is on, that the secondary sizes
       // are at least minRatio of the primary size.
-      const validate = data.multiSizeValidation;
+      const validate = data.multiSizeValidation || 'true';
       badParams = getBadParams(width, height, w => w < minWidth,
           h => h < minHeight);
       if (validate !== 'false' && validate !== false && badParams) {
