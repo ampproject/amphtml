@@ -20,46 +20,85 @@ import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
 
 /**
+ * The structure that defines the rectangle used in intersection observers.
+ *
+ * @typedef {{
+ *   top: number,
+ *   bottom: number,
+ *   left: number,
+ *   right: number,
+ *   width: number,
+ *   height: number,
+ *   x: number,
+ *   y: number,
+ * }}
+ */
+export let DOMRect;
+
+/**
+ * Transforms a LayoutRect into a DOMRect for use in intersection observers.
+ * @param {!./layout-rect.LayoutRectDef} rect
+ * @return {!DOMRect}
+ */
+function DomRectFromLayoutRect(rect) {
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    bottom: rect.bottom,
+    right: rect.right,
+    x: rect.left,
+    y: rect.top,
+  };
+}
+
+/**
+ * Returns the ratio of the smaller box's area to the larger box's area.
+ * @param {!./layout-rect.LayoutRectDef} smaller
+ * @param {!./layout-rect.LayoutRectDef} larger
+ * @return {number}
+ */
+function intersectionRatio(smaller, larger) {
+  return (smaller.width * smaller.height) / (larger.width * larger.height);
+}
+
+/**
  * Produces a change entry for that should be compatible with
  * IntersectionObserverEntry.
  *
  * Mutates passed in rootBounds to have x and y according to spec.
  *
- * @param {number} time Time when values below were measured.
- * @param {!./layout-rect.LayoutRectDef} rootBounds Equivalent to viewport.getRect()
- * @param {!./layout-rect.LayoutRectDef} elementLayoutBox Layout box of the element
- *     that may intersect with the rootBounds.
+ * @param {!./layout-rect.LayoutRectDef} element The element's layout rectangle
+ * @param {?./layout-rect.LayoutRectDef} owner The owner's layout rect, if
+ *     there is an owner.
+ * @param {!./layout-rect.LayoutRectDef} viewport The viewport's layout rect.
  * @return {!IntersectionObserverEntry} A change entry.
  * @private
  */
-export function getIntersectionChangeEntry(
-    measureTime, rootBounds, elementLayoutBox) {
+export function getIntersectionChangeEntry(element, owner, viewport) {
+  dev().assert(element.width >= 0 && element.height >= 0,
+      'Negative dimensions in ad.');
   // Building an IntersectionObserverEntry.
-  // http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry
-  // These should always be equal assuming rootBounds cannot have negative
-  // dimension.
-  rootBounds.x = rootBounds.left;
-  rootBounds.y = rootBounds.top;
 
-  const boundingClientRect =
-      moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  dev().assert(boundingClientRect.width >= 0 &&
-      boundingClientRect.height >= 0, 'Negative dimensions in ad.');
-  boundingClientRect.x = boundingClientRect.left;
-  boundingClientRect.y = boundingClientRect.top;
+  let boundingClientRect = element;
+  if (owner) {
+    boundingClientRect = rectIntersection(owner, boundingClientRect) ||
+        layoutRectLtwh(0, 0, 0, 0);
+  }
+  boundingClientRect = moveLayoutRect(boundingClientRect, -viewport.left,
+      -viewport.top);
 
-  const intersectionRect =
-      rectIntersection(rootBounds, elementLayoutBox) ||
+  const intersectionRect = rectIntersection(viewport, boundingClientRect) ||
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
-  intersectionRect.x = intersectionRect.left;
-  intersectionRect.y = intersectionRect.top;
 
   return {
-    time: measureTime,
-    rootBounds,
-    boundingClientRect,
-    intersectionRect,
+    time: Date.now(),
+    rootBounds: DomRectFromLayoutRect(viewport),
+    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
+    intersectionRect: DomRectFromLayoutRect(intersectionRect),
+    intersectionRatio: intersectionRatio(boundingClientRect, element),
   };
 }
 
