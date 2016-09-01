@@ -482,8 +482,8 @@ export class UrlReplacements {
    *    if it is not yet available, or value as string
    */
   getTimingDataSync_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance']
-      && this.win_['performance']['timing'];
+    const timingInfo = this.win_['performance'] &&
+        this.win_['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
       return;
