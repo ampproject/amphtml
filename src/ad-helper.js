@@ -52,17 +52,18 @@ export function isAdPositionAllowed(el, win) {
 }
 
 /**
+ * Returns the blessed container element, if the ad is contained by one.
+ * This is called during layout measure.
  * @param {!Element} el
  * @param {!Window} win
- * @return {?string} a string that contains container of the ad.
- * This is called during layout measure.
+ * @return {?Element}
  */
 export function getAdContainer(el) {
-  while (el && el.tagName != 'BODY') {
+  do {
     el = el.parentNode;
     if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
-      return el.tagName;
+      return el;
     }
-  }
+  } while (el && el.tagName != 'BODY')
   return null;
 }
