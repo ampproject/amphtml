@@ -650,22 +650,21 @@ export class UrlReplacements {
         if (opt_sync) {
           user().error('ignoring promise value for key: ' + name);
           return '';
-        } else {
-          const p = val.catch(err => {
-            // Report error, but do not disrupt URL replacement. This will
-            // interpolate as the empty string.
-            rethrowAsync(err);
-          }).then(v => {
-            url = url.replace(match, encodeValue(v));
-            if (opt_collectVars) {
-              opt_collectVars[match] = v;
-            }
-          });
-          if (replacementPromise) {
-            replacementPromise = replacementPromise.then(() => p);
-          } else {
-            replacementPromise = p;
+        }
+        const p = val.catch(err => {
+          // Report error, but do not disrupt URL replacement. This will
+          // interpolate as the empty string.
+          rethrowAsync(err);
+        }).then(v => {
+          url = url.replace(match, encodeValue(v));
+          if (opt_collectVars) {
+            opt_collectVars[match] = v;
           }
+        });
+        if (replacementPromise) {
+          replacementPromise = replacementPromise.then(() => p);
+        } else {
+          replacementPromise = p;
         }
         return match;
       }
