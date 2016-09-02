@@ -122,287 +122,18 @@
   declaration. This is a directive to the styling shim to use the selector
   in comments in lieu of the next selector when running under polyfill.
 */
-(function(scope) {
 
-var ShadowCSS = {
+export const ShadowCSS = {
   strictStyling: false,
-  registry: {},
-  // Shim styles for a given root associated with a name and extendsName
-  // 1. cache root styles by name
-  // 2. optionally tag root nodes with scope name
-  // 3. shim polyfill directives /* @polyfill */ and /* @polyfill-rule */
-  // 4. shim :host and scoping
-  shimStyling: function(root, name, extendsName) {
-    var scopeStyles = this.prepareRoot(root, name, extendsName);
-    var typeExtension = this.isTypeExtension(extendsName);
-    var scopeSelector = this.makeScopeSelector(name, typeExtension);
-    // use caching to make working with styles nodes easier and to facilitate
-    // lookup of extendee
-    var cssText = stylesToCssText(scopeStyles, true);
-    cssText = this.scopeCssText(cssText, scopeSelector);
-    // cache shimmed css on root for user extensibility
-    if (root) {
-      root.shimmedStyle = cssText;
-    }
-    // add style to document
-    this.addCssToDocument(cssText, name);
-  },
-  /*
-  * Shim a style element with the given selector. Returns cssText that can
-  * be included in the document via WebComponents.ShadowCSS.addCssToDocument(css).
-  */
-  shimStyle: function(style, selector) {
-    return this.shimCssText(style.textContent, selector);
-  },
-  /*
-  * Shim some cssText with the given selector. Returns cssText that can
-  * be included in the document via WebComponents.ShadowCSS.addCssToDocument(css).
-  */
-  shimCssText: function(cssText, selector) {
-    cssText = this.insertDirectives(cssText);
-    return this.scopeCssText(cssText, selector);
-  },
-  makeScopeSelector: function(name, typeExtension) {
-    if (name) {
-      return typeExtension ? '[is=' + name + ']' : name;
-    }
-    return '';
-  },
-  isTypeExtension: function(extendsName) {
-    return extendsName && extendsName.indexOf('-') < 0;
-  },
-  prepareRoot: function(root, name, extendsName) {
-    var def = this.registerRoot(root, name, extendsName);
-    this.replaceTextInStyles(def.rootStyles, this.insertDirectives);
-    // remove existing style elements
-    this.removeStyles(root, def.rootStyles);
-    // apply strict attr
-    if (this.strictStyling) {
-      this.applyScopeToContent(root, name);
-    }
-    return def.scopeStyles;
-  },
-  removeStyles: function(root, styles) {
-    for (var i=0, l=styles.length, s; (i<l) && (s=styles[i]); i++) {
-      s.parentNode.removeChild(s);
-    }
-  },
-  registerRoot: function(root, name, extendsName) {
-    var def = this.registry[name] = {
-      root: root,
-      name: name,
-      extendsName: extendsName
-    }
-    var styles = this.findStyles(root);
-    def.rootStyles = styles;
-    def.scopeStyles = def.rootStyles;
-    var extendee = this.registry[def.extendsName];
-    if (extendee) {
-      def.scopeStyles = extendee.scopeStyles.concat(def.scopeStyles);
-    }
-    return def;
-  },
-  findStyles: function(root) {
-    if (!root) {
-      return [];
-    }
-    var styles = root.querySelectorAll('style');
-    return Array.prototype.filter.call(styles, function(s) {
-      return !s.hasAttribute(NO_SHIM_ATTRIBUTE);
-    });
-  },
-  applyScopeToContent: function(root, name) {
-    if (root) {
-      // add the name attribute to each node in root.
-      Array.prototype.forEach.call(root.querySelectorAll('*'),
-          function(node) {
-            node.setAttribute(name, '');
-          });
-      // and template contents too
-      Array.prototype.forEach.call(root.querySelectorAll('template'),
-          function(template) {
-            this.applyScopeToContent(template.content, name);
-          },
-          this);
-    }
-  },
-  insertDirectives: function(cssText) {
-    cssText = this.insertPolyfillDirectivesInCssText(cssText);
-    return this.insertPolyfillRulesInCssText(cssText);
-  },
-  /*
-   * Process styles to convert native ShadowDOM rules that will trip
-   * up the css parser; we rely on decorating the stylesheet with inert rules.
-   *
-   * For example, we convert this rule:
-   *
-   * polyfill-next-selector { content: ':host menu-item'; }
-   * ::content menu-item {
-   *
-   * to this:
-   *
-   * scopeName menu-item {
-   *
-  **/
-  insertPolyfillDirectivesInCssText: function(cssText) {
-    // TODO(sorvell): remove either content or comment
-    cssText = cssText.replace(cssCommentNextSelectorRe, function(match, p1) {
-      // remove end comment delimiter and add block start
-      return p1.slice(0, -2) + '{';
-    });
-    return cssText.replace(cssContentNextSelectorRe, function(match, p1) {
-      return p1 + ' {';
-    });
-  },
-  /*
-   * Process styles to add rules which will only apply under the polyfill
-   *
-   * For example, we convert this rule:
-   *
-   * polyfill-rule {
-   *   content: ':host menu-item';
-   * ...
-   * }
-   *
-   * to this:
-   *
-   * scopeName menu-item {...}
-   *
-  **/
-  insertPolyfillRulesInCssText: function(cssText) {
-    // TODO(sorvell): remove either content or comment
-    cssText = cssText.replace(cssCommentRuleRe, function(match, p1) {
-      // remove end comment delimiter
-      return p1.slice(0, -1);
-    });
-    return cssText.replace(cssContentRuleRe, function(match, p1, p2, p3) {
-      var rule = match.replace(p1, '').replace(p2, '');
-      return p3 + rule;
-    });
-  },
-  /* Ensure styles are scoped. Pseudo-scoping takes a rule like:
-   *
-   *  .foo {... }
-   *
-   *  and converts this to
-   *
-   *  scopeName .foo { ... }
-  */
-  scopeCssText: function(cssText, scopeSelector) {
-    var unscoped = this.extractUnscopedRulesFromCssText(cssText);
-    cssText = this.insertPolyfillHostInCssText(cssText);
-    cssText = this.convertColonHost(cssText);
-    cssText = this.convertColonHostContext(cssText);
-    cssText = this.convertShadowDOMSelectors(cssText);
-    if (scopeSelector) {
-      var self = this, cssText;
-      withCssRules(cssText, function(rules) {
-        cssText = self.scopeRules(rules, scopeSelector);
-      });
-
-    }
-    cssText = cssText + '\n' + unscoped;
-    return cssText.trim();
-  },
-  /*
-   * Process styles to add rules which will only apply under the polyfill
-   * and do not process via CSSOM. (CSSOM is destructive to rules on rare
-   * occasions, e.g. -webkit-calc on Safari.)
-   * For example, we convert this rule:
-   *
-   * (comment start) @polyfill-unscoped-rule menu-item {
-   * ... } (comment end)
-   *
-   * to this:
-   *
-   * menu-item {...}
-   *
-  **/
-  extractUnscopedRulesFromCssText: function(cssText) {
-    // TODO(sorvell): remove either content or comment
-    var r = '', m;
-    while (m = cssCommentUnscopedRuleRe.exec(cssText)) {
-      r += m[1].slice(0, -1) + '\n\n';
-    }
-    while (m = cssContentUnscopedRuleRe.exec(cssText)) {
-      r += m[0].replace(m[2], '').replace(m[1], m[3]) + '\n\n';
-    }
-    return r;
-  },
-  /*
-   * convert a rule like :host(.foo) > .bar { }
-   *
-   * to
-   *
-   * scopeName.foo > .bar
-  */
-  convertColonHost: function(cssText) {
-    return this.convertColonRule(cssText, cssColonHostRe,
-        this.colonHostPartReplacer);
-  },
-  /*
-   * convert a rule like :host-context(.foo) > .bar { }
-   *
-   * to
-   *
-   * scopeName.foo > .bar, .foo scopeName > .bar { }
-   *
-   * and
-   *
-   * :host-context(.foo:host) .bar { ... }
-   *
-   * to
-   *
-   * scopeName.foo .bar { ... }
-  */
-  convertColonHostContext: function(cssText) {
-    return this.convertColonRule(cssText, cssColonHostContextRe,
-        this.colonHostContextPartReplacer);
-  },
-  convertColonRule: function(cssText, regExp, partReplacer) {
-    // p1 = :host, p2 = contents of (), p3 rest of rule
-    return cssText.replace(regExp, function(m, p1, p2, p3) {
-      p1 = polyfillHostNoCombinator;
-      if (p2) {
-        var parts = p2.split(','), r = [];
-        for (var i=0, l=parts.length, p; (i<l) && (p=parts[i]); i++) {
-          p = p.trim();
-          r.push(partReplacer(p1, p, p3));
-        }
-        return r.join(',');
-      } else {
-        return p1 + p3;
-      }
-    });
-  },
-  colonHostContextPartReplacer: function(host, part, suffix) {
-    if (part.match(polyfillHost)) {
-      return this.colonHostPartReplacer(host, part, suffix);
-    } else {
-      return host + part + suffix + ', ' + part + ' ' + host + suffix;
-    }
-  },
-  colonHostPartReplacer: function(host, part, suffix) {
-    return host + part.replace(polyfillHost, '') + suffix;
-  },
-  /*
-   * Convert combinators like ::shadow and pseudo-elements like ::content
-   * by replacing with space.
-  */
-  convertShadowDOMSelectors: function(cssText) {
-    for (var i=0; i < shadowDOMSelectorsRe.length; i++) {
-      cssText = cssText.replace(shadowDOMSelectorsRe[i], ' ');
-    }
-    return cssText;
-  },
   // change a selector like 'div' to 'name div'
-  scopeRules: function(cssRules, scopeSelector) {
+  /** @this {ShadowCSS} */
+  scopeRules: function(cssRules, scopeSelector, opt_transformer) {
     var cssText = '';
     if (cssRules) {
       Array.prototype.forEach.call(cssRules, function(rule) {
         if (rule.selectorText && (rule.style && rule.style.cssText !== undefined)) {
           cssText += this.scopeSelector(rule.selectorText, scopeSelector,
-            this.strictStyling) + ' {\n\t';
+            this.strictStyling, opt_transformer) + ' {\n\t';
           cssText += this.propertiesFromRule(rule) + '\n}\n\n';
         } else if (rule.type === CSSRule.MEDIA_RULE) {
           cssText += '@media ' + rule.media.mediaText + ' {\n';
@@ -428,6 +159,7 @@ var ShadowCSS = {
     }
     return cssText;
   },
+  /** @this {ShadowCSS} */
   ieSafeCssTextFromKeyFrameRule: function(rule) {
     var cssText = '@keyframes ' + rule.name + ' {';
     Array.prototype.forEach.call(rule.cssRules, function(rule) {
@@ -436,10 +168,14 @@ var ShadowCSS = {
     cssText += ' }';
     return cssText;
   },
-  scopeSelector: function(selector, scopeSelector, strict) {
+  /** @this {ShadowCSS} */
+  scopeSelector: function(selector, scopeSelector, strict, opt_transformer) {
     var r = [], parts = selector.split(',');
     parts.forEach(function(p) {
       p = p.trim();
+      if (opt_transformer) {
+        p = opt_transformer(p);
+      }
       if (this.selectorNeedsScoping(p, scopeSelector)) {
         p = (strict && !p.match(polyfillHostNoCombinator)) ?
             this.applyStrictSelectorScope(p, scopeSelector) :
@@ -449,6 +185,7 @@ var ShadowCSS = {
     }, this);
     return r.join(', ');
   },
+  /** @this {ShadowCSS} */
   selectorNeedsScoping: function(selector, scopeSelector) {
     if (Array.isArray(scopeSelector)) {
       return true;
@@ -456,16 +193,19 @@ var ShadowCSS = {
     var re = this.makeScopeMatcher(scopeSelector);
     return !selector.match(re);
   },
+  /** @this {ShadowCSS} */
   makeScopeMatcher: function(scopeSelector) {
     scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
     return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
   },
+  /** @this {ShadowCSS} */
   applySelectorScope: function(selector, selectorScope) {
     return Array.isArray(selectorScope) ?
         this.applySelectorScopeList(selector, selectorScope) :
         this.applySimpleSelectorScope(selector, selectorScope);
   },
   // apply an array of selectors
+  /** @this {ShadowCSS} */
   applySelectorScopeList: function(selector, scopeSelectorList) {
     var r = [];
     for (var i=0, s; (s=scopeSelectorList[i]); i++) {
@@ -474,6 +214,7 @@ var ShadowCSS = {
     return r.join(', ');
   },
   // scope via name and [is=name]
+  /** @this {ShadowCSS} */
   applySimpleSelectorScope: function(selector, scopeSelector) {
     if (selector.match(polyfillHostRe)) {
       selector = selector.replace(polyfillHostNoCombinator, scopeSelector);
@@ -484,6 +225,7 @@ var ShadowCSS = {
   },
   // return a selector with [name] suffix on each simple selector
   // e.g. .foo.bar > .zot becomes .foo[name].bar[name] > .zot[name]
+  /** @this {ShadowCSS} */
   applyStrictSelectorScope: function(selector, scopeSelector) {
     scopeSelector = scopeSelector.replace(/\[is=([^\]]*)\]/g, '$1');
     var splits = [' ', '>', '+', '~'],
@@ -502,10 +244,7 @@ var ShadowCSS = {
     });
     return scoped;
   },
-  insertPolyfillHostInCssText: function(selector) {
-    return selector.replace(colonHostContextRe, polyfillHostContext).replace(
-        colonHostRe, polyfillHost);
-  },
+  /** @this {ShadowCSS} */
   propertiesFromRule: function(rule) {
     var cssText = rule.style.cssText;
     // TODO(sorvell): Safari cssom incorrectly removes quotes from the content
@@ -528,23 +267,6 @@ var ShadowCSS = {
       }
     }
     return cssText;
-  },
-  replaceTextInStyles: function(styles, action) {
-    if (styles && action) {
-      if (!(styles instanceof Array)) {
-        styles = [styles];
-      }
-      Array.prototype.forEach.call(styles, function(s) {
-        s.textContent = action.call(this, s.textContent);
-      }, this);
-    }
-  },
-  addCssToDocument: function(cssText, name) {
-    if (cssText.match('@import')) {
-      addOwnSheet(cssText, name);
-    } else {
-      addCssToDocument(cssText);
-    }
   }
 };
 
@@ -588,196 +310,3 @@ var selectorRe = /([^{]*)({[\s\S]*?})/gim,
       /\^\^/g,     // former /shadow/
       /\^(?!=)/g   // former /shadow-deep/
     ];
-
-function stylesToCssText(styles, preserveComments) {
-  var cssText = '';
-  Array.prototype.forEach.call(styles, function(s) {
-    cssText += s.textContent + '\n\n';
-  });
-  // strip comments for easier processing
-  if (!preserveComments) {
-    cssText = cssText.replace(cssCommentRe, '');
-  }
-  return cssText;
-}
-
-function cssTextToStyle(cssText) {
-  var style = document.createElement('style');
-  style.textContent = cssText;
-  return style;
-}
-
-function cssToRules(cssText) {
-  var style = cssTextToStyle(cssText);
-  document.head.appendChild(style);
-  var rules = [];
-  if (style.sheet) {
-    // TODO(sorvell): Firefox throws when accessing the rules of a stylesheet
-    // with an @import
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=625013
-    try {
-      rules = style.sheet.cssRules;
-    } catch(e) {
-      //
-    }
-  } else {
-    console.warn('sheet not found', style);
-  }
-  style.parentNode.removeChild(style);
-  return rules;
-}
-
-var frame = document.createElement('iframe');
-frame.style.display = 'none';
-
-function initFrame() {
-  frame.initialized = true;
-  document.body.appendChild(frame);
-  var doc = frame.contentDocument;
-  var base = doc.createElement('base');
-  base.href = document.baseURI;
-  doc.head.appendChild(base);
-}
-
-function inFrame(fn) {
-  if (!frame.initialized) {
-    initFrame();
-  }
-  document.body.appendChild(frame);
-  fn(frame.contentDocument);
-  document.body.removeChild(frame);
-}
-
-// TODO(sorvell): use an iframe if the cssText contains an @import to workaround
-// https://code.google.com/p/chromium/issues/detail?id=345114
-var isChrome = navigator.userAgent.match('Chrome');
-function withCssRules(cssText, callback) {
-  if (!callback) {
-    return;
-  }
-  var rules;
-  if (cssText.match('@import') && isChrome) {
-    var style = cssTextToStyle(cssText);
-    inFrame(function(doc) {
-      doc.head.appendChild(style.impl);
-      rules = Array.prototype.slice.call(style.sheet.cssRules, 0);
-      callback(rules);
-    });
-  } else {
-    rules = cssToRules(cssText);
-    callback(rules);
-  }
-}
-
-function rulesToCss(cssRules) {
-  for (var i=0, css=[]; i < cssRules.length; i++) {
-    css.push(cssRules[i].cssText);
-  }
-  return css.join('\n\n');
-}
-
-function addCssToDocument(cssText) {
-  if (cssText) {
-    getSheet().appendChild(document.createTextNode(cssText));
-  }
-}
-
-function addOwnSheet(cssText, name) {
-  var style = cssTextToStyle(cssText);
-  style.setAttribute(name, '');
-  style.setAttribute(SHIMMED_ATTRIBUTE, '');
-  document.head.appendChild(style);
-}
-
-var SHIM_ATTRIBUTE = 'shim-shadowdom';
-var SHIMMED_ATTRIBUTE = 'shim-shadowdom-css';
-var NO_SHIM_ATTRIBUTE = 'no-shim';
-
-var sheet;
-function getSheet() {
-  if (!sheet) {
-    sheet = document.createElement("style");
-    sheet.setAttribute(SHIMMED_ATTRIBUTE, '');
-    sheet[SHIMMED_ATTRIBUTE] = true;
-  }
-  return sheet;
-}
-
-// add polyfill stylesheet to document
-if (window.ShadowDOMPolyfill) {
-  addCssToDocument('style { display: none !important; }\n');
-  var doc = ShadowDOMPolyfill.wrap(document);
-  var head = doc.querySelector('head');
-  head.insertBefore(getSheet(), head.childNodes[0]);
-
-  // TODO(sorvell): monkey-patching HTMLImports is abusive;
-  // consider a better solution.
-  document.addEventListener('DOMContentLoaded', function() {
-    var urlResolver = scope.urlResolver;
-
-    if (window.HTMLImports && !HTMLImports.useNative) {
-      var SHIM_SHEET_SELECTOR = 'link[rel=stylesheet]' +
-          '[' + SHIM_ATTRIBUTE + ']';
-      var SHIM_STYLE_SELECTOR = 'style[' + SHIM_ATTRIBUTE + ']';
-      HTMLImports.importer.documentPreloadSelectors += ',' + SHIM_SHEET_SELECTOR;
-      HTMLImports.importer.importsPreloadSelectors += ',' + SHIM_SHEET_SELECTOR;
-
-      HTMLImports.parser.documentSelectors = [
-        HTMLImports.parser.documentSelectors,
-        SHIM_SHEET_SELECTOR,
-        SHIM_STYLE_SELECTOR
-      ].join(',');
-
-      var originalParseGeneric = HTMLImports.parser.parseGeneric;
-
-      HTMLImports.parser.parseGeneric = function(elt) {
-        if (elt[SHIMMED_ATTRIBUTE]) {
-          return;
-        }
-        var style = elt.__importElement || elt;
-        if (!style.hasAttribute(SHIM_ATTRIBUTE)) {
-          originalParseGeneric.call(this, elt);
-          return;
-        }
-        if (elt.__resource) {
-          style = elt.ownerDocument.createElement('style');
-          style.textContent = elt.__resource;
-        }
-        // relay on HTMLImports for path fixup
-        HTMLImports.path.resolveUrlsInStyle(style, elt.href);
-        style.textContent = ShadowCSS.shimStyle(style);
-        style.removeAttribute(SHIM_ATTRIBUTE, '');
-        style.setAttribute(SHIMMED_ATTRIBUTE, '');
-        style[SHIMMED_ATTRIBUTE] = true;
-        // place in document
-        if (style.parentNode !== head) {
-          // replace links in head
-          if (elt.parentNode === head) {
-            head.replaceChild(style, elt);
-          } else {
-            this.addElementToDocument(style);
-          }
-        }
-        style.__importParsed = true;
-        this.markParsingComplete(elt);
-        this.parseNext();
-      }
-
-      var hasResource = HTMLImports.parser.hasResource;
-      HTMLImports.parser.hasResource = function(node) {
-        if (node.localName === 'link' && node.rel === 'stylesheet' &&
-            node.hasAttribute(SHIM_ATTRIBUTE)) {
-          return (node.__resource);
-        } else {
-          return hasResource.call(this, node);
-        }
-      }
-
-    }
-  });
-}
-
-// exports
-scope.ShadowCSS = ShadowCSS;
-
-})(window.WebComponents);
