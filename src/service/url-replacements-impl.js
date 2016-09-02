@@ -36,6 +36,18 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 
+/** @typedef {string|undefined} */
+let ResolverReturnDef;
+
+/** @typedef {function(...*):ResolverReturnDef} */
+let SyncResolverDef;
+
+/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
+let AsyncResolverDef;
+
+/** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
+let ReplacementDef;
+
 /**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
@@ -50,7 +62,7 @@ export class UrlReplacements {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private @const {!Object<string, function(*):*>} */
+    /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = this.win_.Object.create(null);
 
     /** @private @const {function():!Promise<?AccessService>} */
@@ -100,7 +112,7 @@ export class UrlReplacements {
     }));
 
     // Returns the referrer URL.
-    this.set_('DOCUMENT_REFERRER', () => {
+    this.setAsync_('DOCUMENT_REFERRER', () => {
       return viewerFor(this.win_).getReferrerUrl();
     });
 
@@ -165,7 +177,7 @@ export class UrlReplacements {
         defaultValue;
     });
 
-    this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
+    this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
       user().assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
@@ -245,25 +257,25 @@ export class UrlReplacements {
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.set_('SCROLL_TOP', () => {
+    this.setAsync_('SCROLL_TOP', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollTop());
     });
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.set_('SCROLL_LEFT', () => {
+    this.setAsync_('SCROLL_LEFT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollLeft());
     });
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.set_('SCROLL_HEIGHT', () => {
+    this.setAsync_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollHeight());
     });
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.set_('SCROLL_WIDTH', () => {
+    this.setAsync_('SCROLL_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollWidth());
     });
@@ -294,13 +306,13 @@ export class UrlReplacements {
     });
 
     // Returns the viewport height.
-    this.set_('VIEWPORT_HEIGHT', () => {
+    this.setAsync_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().height);
     });
 
     // Returns the viewport width.
-    this.set_('VIEWPORT_WIDTH', () => {
+    this.setAsync_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().width);
     });
@@ -320,46 +332,37 @@ export class UrlReplacements {
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
-    this.set_('PAGE_LOAD_TIME', () => {
-      return this.getTimingData_('navigationStart', 'loadEventStart');
-    });
+    this.setTimingResolver_(
+      'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
 
     // Returns the time it took to perform DNS lookup for the domain.
-    this.set_('DOMAIN_LOOKUP_TIME', () => {
-      return this.getTimingData_('domainLookupStart', 'domainLookupEnd');
-    });
+    this.setTimingResolver_(
+      'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
 
     // Returns the time it took to connet to the server.
-    this.set_('TCP_CONNECT_TIME', () => {
-      return this.getTimingData_('connectStart', 'connectEnd');
-    });
+    this.setTimingResolver_(
+      'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
 
     // Returns the time it took for server to start sending a response to the
     // request.
-    this.set_('SERVER_RESPONSE_TIME', () => {
-      return this.getTimingData_('requestStart', 'responseStart');
-    });
+    this.setTimingResolver_(
+      'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
 
     // Returns the time it took to download the page.
-    this.set_('PAGE_DOWNLOAD_TIME', () => {
-      return this.getTimingData_('responseStart', 'responseEnd');
-    });
+    this.setTimingResolver_(
+      'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
 
     // Returns the time it took for redirects to complete.
-    this.set_('REDIRECT_TIME', () => {
-      return this.getTimingData_('navigationStart', 'fetchStart');
-    });
+    this.setTimingResolver_(
+      'REDIRECT_TIME', 'navigationStart', 'fetchStart');
 
     // Returns the time it took for DOM to become interactive.
-    this.set_('DOM_INTERACTIVE_TIME', () => {
-      return this.getTimingData_('navigationStart', 'domInteractive');
-    });
+    this.setTimingResolver_(
+      'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
 
     // Returns the time it took for content to load.
-    this.set_('CONTENT_LOAD_TIME', () => {
-      return this.getTimingData_('navigationStart',
-          'domContentLoadedEventStart');
-    });
+    this.setTimingResolver_(
+      'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
     this.set_('ACCESS_READER_ID', () => {
@@ -369,7 +372,7 @@ export class UrlReplacements {
     });
 
     // Access: data from the authorization response.
-    this.set_('AUTHDATA', field => {
+    this.setAsync_('AUTHDATA', field => {
       user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
@@ -378,22 +381,30 @@ export class UrlReplacements {
     });
 
     // Returns an identifier for the viewer.
-    this.set_('VIEWER', () => {
+    this.setAsync_('VIEWER', () => {
       return viewerFor(this.win_).getViewerOrigin();
     });
 
     // Returns the total engaged time since the content became viewable.
-    this.set_('TOTAL_ENGAGED_TIME', () => {
+    this.setAsync_('TOTAL_ENGAGED_TIME', () => {
       return activityFor(this.win_).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
 
-    this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-          'start attribute name, is required');
-      return this.getTimingData_(startAttribute, endAttribute);
-    });
+    this.set_('NAV_TIMING',
+      (startAttribute, endAttribute) => {
+        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+            'start attribute name, is required');
+        return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
+            /**@type {string}*/(endAttribute));
+      },
+      (startAttribute, endAttribute) => {
+        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+            'start attribute name, is required');
+        return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
+            /**@type {string}*/(endAttribute));
+      });
 
     this.set_('NAV_TYPE', () => {
       return this.getNavigationData_('type');
@@ -422,7 +433,7 @@ export class UrlReplacements {
    * the resulting value is `null`.
    * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {T|null}
+   * @return {Promise<T>|null}
    * @template T
    */
   getAccessValue_(getter, expr) {
@@ -446,22 +457,9 @@ export class UrlReplacements {
    * @return {!Promise<string|undefined>}
    * @private
    */
-  getTimingData_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance']
-        && this.win_['performance']['timing'];
-    if (!timingInfo || timingInfo['navigationStart'] == 0) {
-      // Navigation timing API is not supported.
-      return Promise.resolve();
-    }
-
-    let metric = (endEvent === undefined)
-        ? timingInfo[startEvent]
-        : timingInfo[endEvent] - timingInfo[startEvent];
-
-    if (!isFiniteNumber(metric)) {
-      // The metric is not supported.
-      return Promise.resolve();
-    } else if (metric < 0) {
+  getTimingDataAsync_(startEvent, endEvent) {
+    let metric = this.getTimingDataSync_(startEvent, endEvent);
+    if (metric === '') {
       // Metric is not yet available. Retry after a delay.
       return loadPromise(this.win_).then(() => {
         metric = (endEvent === undefined)
@@ -470,16 +468,47 @@ export class UrlReplacements {
         return (!isFiniteNumber(metric) || metric < 0)
             ? undefined
             : String(metric);
-      });
+    }
+    return Promise.resolve(metric);
+  }
+
+  /**
+   * Returns navigation timing information based on the start and end events.
+   * The data for the timing events is retrieved from performance.timing API.
+   * If start and end events are both given, the result is the difference between the two.
+   * If only start event is given, the result is the timing value at start event.
+   * Enforces synchronous evaluation.
+   * @param {string} startEvent
+   * @param {string=} endEvent
+   * @return {string|undefined} undefined if API is not available, empty string
+   *    if it is not yet available, or value as string
+   */
+  getTimingDataSync_(startEvent, endEvent) {
+    const timingInfo = this.win_['performance']
+      && this.win_['performance']['timing'];
+    if (!timingInfo || timingInfo['navigationStart'] == 0) {
+      // Navigation timing API is not supported.
+      return;
+    }
+
+    let metric = (endEvent === undefined)
+       ? timingInfo[startEvent]
+       : timingInfo[endEvent] - timingInfo[startEvent];
+
+    if (!isFiniteNumber(metric)) {
+      // The metric is not supported.
+      return;
+    } else if (metric < 0) {
+      return '';
     } else {
-      return Promise.resolve(String(metric));
+      return String(metric);
     }
   }
 
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {!Promise<string|undefined>}
+   * @return {string|undefined}
    * @private
    */
   getNavigationData_(attribute) {
@@ -487,25 +516,140 @@ export class UrlReplacements {
         && this.win_['performance']['navigation'];
     if (!navigationInfo || navigationInfo[attribute] === undefined) {
       // PerformanceNavigation interface is not supported or attribute is not implemented.
-      return Promise.resolve();
+      return ;
     }
 
     return String(navigationInfo[attribute]);
   }
 
   /**
-   * Sets the value resolver for the variable with the specified name. The
-   * value resolver may optionally take an extra parameter.
+   *
+   * Sets a synchronous value resolver for the variable with the specified name.
+   * The value resolver may optionally take an extra parameter.
+   * Can be called in conjuction with setAsync to allow for additional
+   * asynchronous resolver where expand will use async and expandSync the sync
+   * version.
    * @param {string} varName
-   * @param {function(*):*} resolver
+   * @param {!SyncResolverDef} syncResolver
    * @return {!UrlReplacements}
    * @private
    */
-  set_(varName, resolver) {
+  set_(varName, syncResolver) {
     dev().assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] = resolver;
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName].sync = syncResolver;
     this.replacementExpr_ = undefined;
     return this;
+  }
+
+  /**
+   * Sets an async value resolver for the variable with the specified name.
+   * The value resolver may optionally take an extra parameter.
+   * Can be called in conjuction with setAsync to allow for additional
+   * asynchronous resolver where expand will use async and expandSync the sync
+   * version.
+   * @param {string} varName
+   * @param {!AsyncResolverDef} asyncResolver
+   * @return {!UrlReplacements}
+   * @private
+   */
+  setAsync_(varName, asyncResolver) {
+    dev().assert(varName.indexOf('RETURN') == -1);
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName].async = asyncResolver;
+    this.replacementExpr_ = undefined;
+    return this;
+  }
+
+  /**
+   * Utility function for setting resolver for timing data that supports
+   * sync and async.
+   * @param {string} varName
+   * @param {string} startEvent
+   * @param {string=} endEvent
+   * @return {!UrlReplacements}
+   * @private
+   */
+  setTimingResolver_(varName, startEvent, endEvent) {
+    return this.set_(varName, () => {
+      return this.getTimingDataSync_(startEvent, endEvent);
+    }).setAsync_(varName, () => {
+      return this.getTimingDataAsync_(startEvent, endEvent);
+    });
+  }
+
+  /**
+   * Calling encodeURIComponent with non-string type fails type check despite
+   * browser supporting it (simply converts to string).  This allows for being
+   * explicit about the behavior.
+   * @param {*} val
+   * @return {!string}
+   * @private
+   */
+  encodeValue_(val) {
+    switch (typeof val) {
+      case 'string':
+        return encodeURIComponent(val);
+      case 'number':
+      case 'boolean':
+        return String(val);
+      default:  // null evaluates as object
+        return '';
+    }
+  }
+
+  /**
+   * Synchronously expands the provided URL by replacing all known variables with
+   * their resolved values. Optional `opt_bindings` can be used to add new
+   * variables or override existing ones.  Any async bindings are ignored.
+   * @param {string} url
+   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
+   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
+   * @return {string}
+   */
+  expandSync(url, opt_bindings, opt_collectVars) {
+    if (!this.initialized_) {
+      this.initialize_();
+    }
+    const expr = this.getExpr_(opt_bindings);
+    url = url.replace(expr, (match, name, opt_strargs) => {
+      let args = [];
+      if (typeof opt_strargs == 'string') {
+        args = opt_strargs.split(',');
+      }
+      const replacement = this.getReplacement_(name);
+      let binding;
+      if (opt_bindings && (name in opt_bindings)) {
+        binding = opt_bindings[name];
+      } else if (replacement) {
+        binding = replacement.sync;
+        if (!binding) {
+          user().error('ignoring async replacement key: ' + name);
+          return '';
+        }
+      }
+      let val;
+      try {
+        val = (typeof binding == 'function' ?
+        binding.apply(null, args) : binding);
+        if (val && val.then) {
+          user().error('ignoring promise value for key: ' + name);
+          return '';
+        }
+      } catch (e) {
+        user().error('Error evaluating replacement: ' + name, e);
+        val = '';
+      }
+      if (opt_collectVars) {
+        opt_collectVars[match] = val;
+      }
+      console.log('expand sync: ' + name +'/'+val);
+      return this.encodeValue_(val);
+    });
+    console.log('final expanded: ' + url);
+    return url;
   }
 
   /**
@@ -544,8 +688,12 @@ export class UrlReplacements {
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
       }
-      const binding = (opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] : this.getReplacement_(name);
+      let binding;
+      if (opt_bindings && (name in opt_bindings)) {
+        binding = opt_bindings[name];
+      } else if ((binding = this.getReplacement_(name))) {
+        binding = binding.async || binding.sync;
+      }
       let val;
       try {
         val = (typeof binding == 'function') ?
@@ -563,7 +711,7 @@ export class UrlReplacements {
           // interpolate as the empty string.
           rethrowAsync(err);
         }).then(v => {
-          url = url.replace(match, encodeValue(v));
+          url = url.replace(match, this.encodeValue_(v));
           if (opt_collectVars) {
             opt_collectVars[match] = v;
           }
@@ -578,7 +726,7 @@ export class UrlReplacements {
       if (opt_collectVars) {
         opt_collectVars[match] = val;
       }
-      return encodeValue(val);
+      return this.encodeValue_(val);
     });
 
     if (replacementPromise) {
