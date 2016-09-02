@@ -98,7 +98,7 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
     rootBounds: DomRectFromLayoutRect(viewport),
     boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
     intersectionRect: DomRectFromLayoutRect(intersectionRect),
-    intersectionRatio: intersectionRatio(boundingClientRect, element),
+    intersectionRatio: intersectionRatio(intersectionRect, element),
   };
 }
 
