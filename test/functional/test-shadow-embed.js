@@ -16,7 +16,7 @@
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {ampdocFor} from '../../src/ampdoc';
-import {createShadowEmbedRoot} from '../../src/shadow-embed';
+import {createShadowEmbedRoot, scopeShadowCss} from '../../src/shadow-embed';
 import {extensionsFor} from '../../src/extensions';
 import * as sinon from 'sinon';
 
@@ -32,6 +32,7 @@ describe('createShadowEmbedRoot', () => {
     extensionsMock = sandbox.mock(extensions);
 
     hostElement = document.createElement('div');
+    hostElement.id = 'h';
     if (!hostElement.createShadowRoot) {
       hostElement.createShadowRoot = () => {
         const shadowRoot = document.createElement('shadow');
@@ -92,5 +93,31 @@ describe('createShadowEmbedRoot', () => {
         .once();
     const shadowRoot = createShadowEmbedRoot(hostElement, ['amp-ext1']);
     expect(savedShadowRoot).to.equal(shadowRoot);
+  });
+
+  describe('scopeShadowCss', () => {
+
+    function scope(css) {
+      return scopeShadowCss(hostElement, css).replace(/[\n\t\n]/g, '');
+    }
+
+    it('should replace root selectors', () => {
+      expect(scope('html {}')).to.equal('#h amp-html {}');
+      expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {} body {}')).to.equal(
+          '#h amp-html {}#h amp-body {}');
+      expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
+      expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
+      expect(scope('body::after {}')).to.equal('#h amp-body::after {}');
+      expect(scope('body[x] {}')).to.equal('#h amp-body[x] {}');
+    });
+
+    it('should avoid false positives for root selectors', () => {
+      expect(scope('.body {}')).to.equal('#h .body {}');
+      expect(scope('x-body {}')).to.equal('#h x-body {}');
+      expect(scope('body-x {}')).to.equal('#h body-x {}');
+      expect(scope('body_x {}')).to.equal('#h body_x {}');
+      expect(scope('body1 {}')).to.equal('#h body1 {}');
+    });
   });
 });

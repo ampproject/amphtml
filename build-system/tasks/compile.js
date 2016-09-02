@@ -129,6 +129,7 @@ function compile(entryModuleFilename, outputDir,
       'third_party/mustache/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
+      'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
