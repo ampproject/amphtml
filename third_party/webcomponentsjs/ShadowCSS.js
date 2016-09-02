@@ -126,6 +126,7 @@
 export const ShadowCSS = {
   strictStyling: false,
   // change a selector like 'div' to 'name div'
+  /** @this {ShadowCSS} */
   scopeRules: function(cssRules, scopeSelector, opt_transformer) {
     var cssText = '';
     if (cssRules) {
@@ -158,6 +159,7 @@ export const ShadowCSS = {
     }
     return cssText;
   },
+  /** @this {ShadowCSS} */
   ieSafeCssTextFromKeyFrameRule: function(rule) {
     var cssText = '@keyframes ' + rule.name + ' {';
     Array.prototype.forEach.call(rule.cssRules, function(rule) {
@@ -166,6 +168,7 @@ export const ShadowCSS = {
     cssText += ' }';
     return cssText;
   },
+  /** @this {ShadowCSS} */
   scopeSelector: function(selector, scopeSelector, strict, opt_transformer) {
     var r = [], parts = selector.split(',');
     parts.forEach(function(p) {
@@ -182,6 +185,7 @@ export const ShadowCSS = {
     }, this);
     return r.join(', ');
   },
+  /** @this {ShadowCSS} */
   selectorNeedsScoping: function(selector, scopeSelector) {
     if (Array.isArray(scopeSelector)) {
       return true;
@@ -189,16 +193,19 @@ export const ShadowCSS = {
     var re = this.makeScopeMatcher(scopeSelector);
     return !selector.match(re);
   },
+  /** @this {ShadowCSS} */
   makeScopeMatcher: function(scopeSelector) {
     scopeSelector = scopeSelector.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
     return new RegExp('^(' + scopeSelector + ')' + selectorReSuffix, 'm');
   },
+  /** @this {ShadowCSS} */
   applySelectorScope: function(selector, selectorScope) {
     return Array.isArray(selectorScope) ?
         this.applySelectorScopeList(selector, selectorScope) :
         this.applySimpleSelectorScope(selector, selectorScope);
   },
   // apply an array of selectors
+  /** @this {ShadowCSS} */
   applySelectorScopeList: function(selector, scopeSelectorList) {
     var r = [];
     for (var i=0, s; (s=scopeSelectorList[i]); i++) {
@@ -207,6 +214,7 @@ export const ShadowCSS = {
     return r.join(', ');
   },
   // scope via name and [is=name]
+  /** @this {ShadowCSS} */
   applySimpleSelectorScope: function(selector, scopeSelector) {
     if (selector.match(polyfillHostRe)) {
       selector = selector.replace(polyfillHostNoCombinator, scopeSelector);
@@ -217,6 +225,7 @@ export const ShadowCSS = {
   },
   // return a selector with [name] suffix on each simple selector
   // e.g. .foo.bar > .zot becomes .foo[name].bar[name] > .zot[name]
+  /** @this {ShadowCSS} */
   applyStrictSelectorScope: function(selector, scopeSelector) {
     scopeSelector = scopeSelector.replace(/\[is=([^\]]*)\]/g, '$1');
     var splits = [' ', '>', '+', '~'],
@@ -235,6 +244,7 @@ export const ShadowCSS = {
     });
     return scoped;
   },
+  /** @this {ShadowCSS} */
   propertiesFromRule: function(rule) {
     var cssText = rule.style.cssText;
     // TODO(sorvell): Safari cssom incorrectly removes quotes from the content
