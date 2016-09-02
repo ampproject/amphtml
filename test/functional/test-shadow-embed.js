@@ -104,6 +104,8 @@ describe('createShadowEmbedRoot', () => {
     it('should replace root selectors', () => {
       expect(scope('html {}')).to.equal('#h amp-html {}');
       expect(scope('body {}')).to.equal('#h amp-body {}');
+      expect(scope('html {} body {}')).to.equal(
+          '#h amp-html {}#h amp-body {}');
       expect(scope('html, body {}')).to.equal('#h amp-html, #h amp-body {}');
       expect(scope('body.x {}')).to.equal('#h amp-body.x {}');
       expect(scope('body::after {}')).to.equal('#h amp-body::after {}');

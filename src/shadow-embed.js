@@ -106,7 +106,7 @@ export function scopeShadowCss(shadowRoot, css) {
  */
 function transformRootSelectors(selector) {
   return selector.replace(/(html|body)/g, function(match, name, pos) {
-    const prev = pos - 1 >= 0 ? selector.charAt(pos - 1) : '';
+    const prev = pos > 0 ? selector.charAt(pos - 1) : '';
     const next = pos + match.length < selector.length ?
         selector.charAt(pos + match.length) : '';
     if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
