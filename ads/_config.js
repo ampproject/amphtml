@@ -59,6 +59,7 @@ export const adPrefetch = {
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
+  loka: 'https://loka-cdn.akamaized.net/scene/amp.js',
   mads: 'https://eu2.madsone.com/js/tags.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
@@ -143,6 +144,10 @@ export const adPreconnect = {
     'https://storage.cloud.kargo.com',
     'https://pubads.g.doubleclick.net',
     'https://prg.kargo.com',
+  ],
+  loka: [
+    'https://scene-front.lokaplatform.com',
+    'https://loka-materials.akamaized.net',
   ],
   'mantis-display': [
     'https://mantodea.mantisadnetwork.com',
