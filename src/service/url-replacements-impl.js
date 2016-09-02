@@ -469,6 +469,7 @@ export class UrlReplacements {
         return (!isFiniteNumber(metric) || metric < 0)
             ? undefined
             : String(metric);
+      });
     }
     return Promise.resolve(metric);
   }
