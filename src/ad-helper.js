@@ -77,6 +77,6 @@ export function getAdContainer(el) {
     if (CONTAINERS[el.tagName]) {
       return el;
     }
-  } while (el && el.tagName != 'BODY')
+  } while (el && el.tagName != 'BODY');
   return null;
 }
