@@ -482,8 +482,8 @@ export class UrlReplacements {
    *    if it is not yet available, or value as string
    */
   getTimingDataSync_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance'] &&
-        this.win_['performance']['timing'];
+    const timingInfo = this.win_['performance']
+      && this.win_['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
       return;
@@ -527,6 +527,18 @@ export class UrlReplacements {
    * Can be called in conjuction with setAsync to allow for additional
    * asynchronous resolver where expand will use async and expandSync the sync
    * version.
+<<<<<<< 8e3b93c0014b5068350ae95abf3f186fedab4e8d
+   * @param {string} varName
+   * @param {!SyncResolverDef} syncResolver
+   * @return {!UrlReplacements}
+   * @private
+   */
+  set_(varName, syncResolver) {
+    dev().assert(varName.indexOf('RETURN') == -1);
+    this.replacements_[varName] =
+        this.replacements_[varName] || {sync: undefined, async: undefined};
+    this.replacements_[varName].sync = syncResolver;
+=======
    * @param {string} varName
    * @param {!SyncResolverDef} syncResolver
    * @return {!UrlReplacements}

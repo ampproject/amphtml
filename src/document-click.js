@@ -34,6 +34,7 @@ const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
  */
 export function installGlobalClickListener(window) {
   clickHandlerFor(window);
+  captureClickHandlerFor(window);
 }
 
 /**
@@ -41,13 +42,23 @@ export function installGlobalClickListener(window) {
  */
 export function uninstallGlobalClickListener(window) {
   clickHandlerFor(window).cleanup();
+  captureClickHandlerFor(window).cleanup();
 }
 
 /**
  * @param {!Window} window
+ * @return {!ClickHandler} bubble document click handler.
  */
 function clickHandlerFor(window) {
   return fromClass(window, 'clickhandler', ClickHandler);
+}
+
+/**
+ * @param {!Window} window
+ * @return {!CaptureClickHandler} capture document click handler.
+ */
+function captureClickHandlerFor(window) {
+  return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
 }
 
 /**
@@ -72,37 +83,30 @@ export class ClickHandler {
     /** @private @const {!./service/history-impl.History} */
     this.history_ = historyFor(this.win);
 
-    /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
-
     const platform = platformFor(this.win);
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
-    /** @private {!Array<!function(!Event)|undefined>} */
-    this.boundHandlers_ = [];
+    /** @private {!function(!Event)|undefined} */
+    this.boundHandler_ = undefined;
 
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
-      this.boundHandlers_.push(this.handle_.bind(this, false));
+      this.boundHandler_ = this.handle_.bind(this);
       this.win.document.documentElement.addEventListener(
-          'click', this.boundHandlers_[this.boundHandlers_.length - 1]);
+          'click', this.boundHandler_);
     }
-    // Add capture phase click handler for anchor target href expansion.
-    this.boundHandlers_.push(this.handle_.bind(this, true));
-    this.win.document.documentElement.addEventListener(
-        'click', this.boundHandlers_[this.boundHandlers_.length - 1], true);
   }
 
   /**
    * Removes all event listeners.
    */
   cleanup() {
-    this.boundHandlers_.forEach(handler => {
+    if (this.boundHandler_) {
       this.win.document.documentElement.removeEventListener(
-          'click', handler);
-    });
-    this.boundHandlers_ = [];
+          'click', this.boundHandler_);
+      this.boundHandler_ = undefined;
+    }
   }
 
   /**
@@ -115,6 +119,46 @@ export class ClickHandler {
   handle_(isCapture, e) {
     onDocumentElementClick_(e, this.viewport_, this.history_,
         this.urlReplacements_, this.isIosSafari_, isCapture);
+  }
+}
+
+/**
+ * Intercept any click on the current document and prevent any
+ * linking to an identifier from pushing into the history stack.
+ * @visibleForTesting
+ */
+export class CaptureClickHandler {
+  /**
+   * @param {!Window} window
+   */
+  constructor(window) {
+    /** @const {!Window} */
+    this.win = window;
+
+    /** @private @const {!./service/url-replacements-impl.UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsFor(this.win);
+
+    /** @private {!function(!Event)} */
+    this.boundHandler_ = this.handle_.bind(this);
+
+    this.win.document.documentElement.addEventListener(
+        'click', this.boundHandler_, true);
+  }
+
+  /**
+   * Removes all event listeners.
+   */
+  cleanup() {
+    this.win.document.documentElement.removeEventListener(
+          'click', this.boundHandler_);
+  }
+
+  /**
+   * Register clicks listener.
+   * @param {!Event} e
+   */
+  handle_(e) {
+    onDocumentElementCapturedClick_(e, this.urlReplacements_);
   }
 }
 
@@ -136,6 +180,26 @@ export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
 }
 
 /**
+ * Expands target anchor href on capture click event.  If within shadow DOM,
+ * will offset from host element.
+ * @param {!Event} e
+ * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
+ */
+export function onDocumentElementCapturedClick_(e, urlReplacements) {
+  // If within a shadowRoot, the event target will be the host element due to
+  // event target rewrite.  Given that it is possible a shadowRoot could be
+  // within an anchor tag, we need to check the event path prior to looking
+  // at the host element's closest tags.
+  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
+      closestByTag(e.target, 'A');
+
+  // Expand URL where valid.
+  if (target && target.href) {
+    target.href = expandTargetHref_(e, target, urlReplacements);
+  }
+}
+
+/**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
  *
@@ -145,34 +209,16 @@ export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
  * @param {!Event} e
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
- * @param {!./service/url-replacements-impl.UrlReplacements} urlReplacements
  * @param {boolean} isIosSafari
  * @param {boolean} isIframed
- * @param {boolean} isCapture whether event was caught during capture
- *                  propagation.
  */
-export function onDocumentElementClick_(e, viewport, history, urlReplacements,
-                                        isIosSafari, isCapture) {
+export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {
     return;
   }
 
-  // If within a shadowRoot, the event target will be the host element due to
-  // event target rewrite.  Given that it is possible a shadowRoot could be
-  // within an anchor tag, we need to check the event path prior to looking
-  // at the host element's closest tags.
-  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
-      closestByTag(e.target, 'A');
+  const target = closestByTag(e.target, 'A');
   if (!target) {
-    return;
-  }
-
-  // Capture event listener only interested in anchor target href expansion.
-  if (isCapture) {
-    // Expand URL where valid.
-    if (target.href) {
-      target.href = expandTargetHref_(e, target, urlReplacements);
-    }
     return;
   }
 
@@ -274,10 +320,10 @@ function getClickLocation_(e) {
   return {
     left: (e.clientX === undefined ? '' :
         String(e.clientX -
-          (e.path && e.target ? e.target./*REVIEW*/offsetLeft : 0))),
+          (e.path && e.target ? e.target./*OK*/offsetLeft : 0))),
     top: (e.clientY === undefined ? '' :
         String(e.clientY -
-          (e.path && e.target ? e.target./*REVIEW*/offsetTop : 0)))
+          (e.path && e.target ? e.target./*OK*/offsetTop : 0)))
   };
 }
 
