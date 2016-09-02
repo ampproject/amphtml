@@ -296,7 +296,7 @@ describe('Viewer', () => {
 
   describe('should receive the visibilitychange event', () => {
     beforeEach(() => {
-        viewer.isEmbedded_ = true;
+      viewer.isEmbedded_ = true;
     });
 
     it('should change prerenderSize', () => {
