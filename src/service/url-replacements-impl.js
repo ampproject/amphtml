@@ -463,6 +463,8 @@ export class UrlReplacements {
     if (metric === '') {
       // Metric is not yet available. Retry after a delay.
       return loadPromise(this.win_).then(() => {
+        const timingInfo = this.win_['performance'] &&
+            this.win_['performance']['timing'];
         metric = (endEvent === undefined)
             ? timingInfo[startEvent]
             : timingInfo[endEvent] - timingInfo[startEvent];
@@ -493,9 +495,9 @@ export class UrlReplacements {
       return;
     }
 
-    let metric = (endEvent === undefined) ?
-        timingInfo[startEvent] :
-        timingInfo[endEvent] - timingInfo[startEvent];
+    let metric = (endEvent === undefined)
+        ? timingInfo[startEvent]
+        : timingInfo[endEvent] - timingInfo[startEvent];
 
     if (!isFiniteNumber(metric)) {
       // The metric is not supported.
