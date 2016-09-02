@@ -489,9 +489,9 @@ export class UrlReplacements {
       return;
     }
 
-    let metric = (endEvent === undefined) ?
-        timingInfo[startEvent] :
-        timingInfo[endEvent] - timingInfo[startEvent];
+    let metric = (endEvent === undefined)
+        ? timingInfo[startEvent]
+        : timingInfo[endEvent] - timingInfo[startEvent];
 
     if (!isFiniteNumber(metric)) {
       // The metric is not supported.
