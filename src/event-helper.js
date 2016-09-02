@@ -142,7 +142,11 @@ function getTarget(event) {
 function failedToLoad(event) {
   // Report failed loads as user errors so that they automatically go
   // into the "document error" bucket.
-  throw user().createError('Failed HTTP request for %s.', event.target);
+  let target = event.target;
+  if (target && target.src) {
+    target = target.src;
+  }
+  throw user().createError('Failed to load:', target);
 }
 
 /**
