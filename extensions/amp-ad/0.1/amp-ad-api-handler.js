@@ -141,9 +141,9 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = 'hidden';
     }
 
-    this.viewer_.onVisibilityChanged(() => {
+    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
-    });
+    }));
 
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
