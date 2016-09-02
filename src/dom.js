@@ -15,7 +15,9 @@
  */
 
 import {dev} from './log';
+import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -526,4 +528,22 @@ export function openWindowDialog(win, url, target, opt_features) {
 export function isJsonScriptTag(element) {
   return element.tagName == 'SCRIPT' &&
             element.getAttribute('type').toUpperCase() == 'APPLICATION/JSON';
+}
+
+
+/**
+ * Escapes an ident (ID or a class name) to be used as a CSS selector.
+ *
+ * See https://drafts.csswg.org/cssom/#serialize-an-identifier.
+ *
+ * @param {!Window} win
+ * @param {string} ident
+ * @return {string}
+ */
+export function escapeCssSelectorIdent(win, ident) {
+  if (win.CSS && win.CSS.escape) {
+    return win.CSS.escape(ident);
+  }
+  // Polyfill.
+  return cssEscape(ident);
 }

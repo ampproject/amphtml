@@ -52,6 +52,7 @@ exports.rules = [
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'extensions/amp-viz-vega/**->third_party/d3/d3.js',
+      'src/dom.js->third_party/css-escape/css-escape.js',
     ]
   },
   // Rules for 3p
