@@ -16,7 +16,6 @@
 
 import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
-import {documentStateFor} from './document-state';
 import {toArray} from './types';
 
 
@@ -56,10 +55,11 @@ export function waitForChild(parent, checkFunc, callback) {
  * Waits for document's body to be available.
  * @param {!Document} doc
  * @param {function()} callback
+ * @deprecated Use {@link AmpDoc#whenBodyAvailable} or
+ *    @{link DocumentState#onBodyAvailable} instead.
  */
 export function waitForBody(doc, callback) {
-  const docState = documentStateFor(doc.defaultView);
-  docState.onBodyAvailable(callback);
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
 }
 
 

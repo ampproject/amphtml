@@ -15,6 +15,7 @@
  */
 
 import {DocumentState} from '../../src/document-state';
+import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
@@ -42,10 +43,7 @@ describe('DocumentState', () => {
         }
       },
     };
-    windowApi = {
-      document: testDoc,
-      setInterval: () => {}, // No-op for testing.
-    };
+    windowApi = {document: testDoc};
     docState = new DocumentState(windowApi);
   });
 
@@ -113,6 +111,7 @@ describe('DocumentState', () => {
 
   it('should fire body availability change', () => {
     const callback = sandbox.spy();
+    sandbox.stub(dom, 'waitForChild');
 
     expect(testDoc.body).to.equal(undefined);
 

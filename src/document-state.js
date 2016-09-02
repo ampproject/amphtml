@@ -17,6 +17,7 @@
 import {Observable} from './observable';
 import {fromClass} from './service';
 import {getVendorJsPropertyName} from './style';
+import {waitForChild} from './dom';
 
 
 /**
@@ -130,25 +131,8 @@ export class DocumentState {
     }
     if (!this.bodyAvailableObservable_) {
       this.bodyAvailableObservable_ = new Observable();
-
-      // Listen for body to be created, then call onBodyAvailable_.
-      const win = this.win;
-      if (win.MutationObserver) {
-        const observer = new win.MutationObserver(() => {
-          if (doc.body) {
-            observer.disconnect();
-            this.onBodyAvailable_();
-          }
-        });
-        observer.observe(doc.documentElement, {childList: true});
-      } else {
-        const interval = win.setInterval(() => {
-          if (doc.body) {
-            win.clearInterval(interval);
-            this.onBodyAvailable_();
-          }
-        }, /* milliseconds */ 5);
-      }
+      waitForChild(doc.documentElement, () => !!doc.body,
+          this.onBodyAvailable_.bind(this));
     }
     return this.bodyAvailableObservable_.add(handler);
   }

@@ -15,11 +15,11 @@
  */
 
 import {dev} from './log';
+import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
-import {waitForBody} from './dom';
-import {waitForServices} from './render-delaying-services';
+import {waitForExtensions} from './render-delaying-extensions';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
@@ -127,7 +127,9 @@ export function makeBodyVisible(doc, opt_waitForServices) {
       }
     }
   };
-  waitForBody(doc, () => {
+  const win = doc.defaultView;
+  const docState = documentStateFor(win);
+  docState.onBodyAvailable(() => {
     if (doc.defaultView[bodyVisibleSentinel]) {
       return;
     }
