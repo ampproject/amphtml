@@ -26,16 +26,22 @@ describe('filterSplice', function() {
 
   it('should splice elements that filter true', () => {
     filterSplice(array, i => i > 2);
-    expect(array).to.deep.equal([1, 2]);
+    expect(array).to.deep.equal([3, 4, 5]);
   });
 
   it('should return filtered elements', () => {
     const filtered = filterSplice(array, i => i > 2);
-    expect(filtered).to.deep.equal([3, 4, 5]);
+    expect(filtered).to.deep.equal([1, 2]);
   });
 
-  it('handle consecutive removals', () => {
+  it('handles no removals', () => {
     const filtered = filterSplice(array, () => true);
+    expect(array).to.deep.equal([1, 2, 3, 4, 5]);
+    expect(filtered).to.deep.equal([]);
+  });
+
+  it('handles consecutive removals', () => {
+    const filtered = filterSplice(array, () => false);
     expect(array).to.deep.equal([]);
     expect(filtered).to.deep.equal([1, 2, 3, 4, 5]);
   });

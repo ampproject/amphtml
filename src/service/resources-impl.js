@@ -1581,7 +1581,7 @@ export class Resources {
         return task.resource == resource;
       });
       filterSplice(this.requestsChangeSize_, request => {
-        return request.resource == resource
+        return request.resource != resource;
       });
     }
 

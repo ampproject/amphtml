@@ -15,7 +15,7 @@
  */
 
 /**
- * A bit like Array#filter, but removes elements that filter true from the
+ * A bit like Array#filter, but removes elements that filter false from the
  * array. Returns the filtered items.
  *
  * @param {!Array<T>} array
@@ -27,7 +27,7 @@ export function filterSplice(array, filter) {
   const splice = [];
   for (let i = 0; i < array.length; i++) {
     const item = array[i];
-    if (filter(item, i, array)) {
+    if (!filter(item, i, array)) {
       splice.push(item);
       array.splice(i, 1);
       i--;
