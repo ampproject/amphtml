@@ -59,8 +59,11 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
 
 
 /**
- * Transforms CSS to isolate AMP CSS within the shaodw root and reduce the
- * possibility of high-level conflicts.
+ * Transforms CSS to isolate AMP CSS within the shadow root and reduce the
+ * possibility of high-level conflicts. There are two types of transformations:
+ * 1. Root transformation: `body` -> `amp-body`, etc.
+ * 2. Scoping: `a {}` -> `#i-amp-sd-123 a {}`.
+ *
  * @param {!ShadowRoot} shadowRoot
  * @param {string} css
  * @return {string}
@@ -96,6 +99,8 @@ export function scopeShadowCss(shadowRoot, css) {
 
 
 /**
+ * Replaces top-level selectors such as `html` and `body` with their polyfill
+ * counterparts: `amp-html` and `amp-body`.
  * @param {string} selector
  * @return {string}
  */
