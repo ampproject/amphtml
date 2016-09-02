@@ -85,10 +85,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     mode: getModeObject(),
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
-    initialIntersection: getIntersectionChangeEntry(
-        Date.now(),
-        viewportFor(parentWindow).getRect(),
-        element.getLayoutBox()),
+    initialIntersection: element.getIntersectionChangeEntry(),
     startTime,
   };
   const adSrc = element.getAttribute('src');
