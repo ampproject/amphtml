@@ -135,7 +135,7 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
 
 
 /**
- * Imports a body into a shadow root with the workaround for a unpolyfilled.
+ * Imports a body into a shadow root with the workaround for a polyfill case.
  * @param {!ShadowRoot} shadowRoot
  * @param {!Element} body
  * @return {!Element}
