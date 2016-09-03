@@ -138,7 +138,7 @@ export class AccessClientAdapter {
 
   /** @override */
   pingback() {
-    const promise = this.context_.buildUrl(this.pingbackUrl_,
+    const promise = this.context_.buildUrl(dev().assert(this.pingbackUrl_),
         /* useAuthData */ true);
     return promise.then(url => {
       dev().fine(TAG, 'Pingback URL: ', url);
