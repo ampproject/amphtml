@@ -47,10 +47,15 @@ export class AccessClientAdapter {
         '"authorization" URL must be specified');
     assertHttpsUrl(this.authorizationUrl_, '"authorization"');
 
+    /** @const @private {boolean} */
+    this.isPingbackEnabled_ = !configJson['noPingback'];
+
     /** @const @private {string} */
-    this.pingbackUrl_ = user().assert(configJson['pingback'],
-        '"pingback" URL must be specified');
-    assertHttpsUrl(this.pingbackUrl_, '"pingback"');
+    this.pingbackUrl_ = configJson['pingback'];
+    if (this.isPingbackEnabled_) {
+      user().assert(this.pingbackUrl_, '"pingback" URL must be specified');
+      assertHttpsUrl(this.pingbackUrl_, '"pingback"');
+    }
 
     /** @const @private {number} */
     this.authorizationTimeout_ = this.buildConfigAuthorizationTimeout_(
@@ -85,6 +90,7 @@ export class AccessClientAdapter {
   getConfig() {
     return {
       'authorizationUrl': this.authorizationUrl_,
+      'pingbackEnabled': this.isPingbackEnabled_,
       'pingbackUrl': this.pingbackUrl_,
       'authorizationTimeout': this.authorizationTimeout_,
     };
@@ -123,6 +129,11 @@ export class AccessClientAdapter {
             requireAmpResponseSourceOrigin: true,
           }));
     });
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    return this.isPingbackEnabled_;
   }
 
   /** @override */
