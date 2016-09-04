@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-apester-media
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-apester-media extension .js script"
   mandatory_parent: "HEAD"
@@ -47,22 +48,27 @@ tags: {  # amp-apester-media
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-apester-media.html"
 }
 tags: {  # <amp-apester-media>
+  html_format: AMP
   tag_name: "AMP-APESTER-MEDIA"
   also_requires_tag: "amp-apester-media extension .js script"
   attrs: {
-    name: "data-apester-media"
-    mandatory: false
+    name: "data-apester-media-id"
+    mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
     value_regex: "[0-9a-zA-Z]+"
   }
   attrs: {
-      name: "data-apester-channel-token"
-      mandatory: false
-      value_regex: "[0-9a-zA-Z]+"
-    }
-
+    name: "data-apester-channel-token"
+    mandatory_oneof: "['data-apester-media-id', 'data-apester-channel-token']"
+    value_regex: "[0-9a-zA-Z]+"
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-apester-media.html"
   amp_layout: {
-    supported_layouts: FIXED_HEIGHT
+      supported_layouts: FILL
+      supported_layouts: FIXED
+      supported_layouts: FIXED_HEIGHT
+      supported_layouts: FLEX_ITEM
+      supported_layouts: NODISPLAY
+      supported_layouts: RESPONSIVE
   }
 }

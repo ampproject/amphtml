@@ -14,57 +14,54 @@
  * limitations under the License.
  */
 
-/* apester-iframe */
+/* amp-apester-iframe */
 
-.-amp-apester-iframe {
-	transition: 0.4s opacity;
-	opacity: 0;
+.amp-apester-iframe {
+  transition: 0.4s opacity;
+  opacity: 0;
 }
 
 .-amp-apester-iframe-ready {
-	opacity: 1 !important;
+  opacity: 1 !important;
 }
 
-.-amp-apester-loader {
-	height: 100px;
-	width: 100px;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	webkit-transform: translate(-50%, -50%);
-	margin-top: -22px;
+.amp-apester-loader {
+  height: 100px;
+  width: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-top: -22px;
 }
 
-.-amp-apester-loader-container {
-	background-color: white;
+.amp-apester-loader-container {
+  background-color: white;
 }
 
-.-amp-apester-container {
-	max-width: 700px;
-	margin: 0 auto;
-	display: block;
-	position: relative;
-	/*min-height: 350px;*/
-	width: 100%;
+.amp-apester-container {
+  max-width: 700px;
+  margin: 0 auto;
+  display: block;
+  position: relative;
+  width: 100%;
 }
 
-.-amp-apester-overflow-container {
-	position: absolute;
-	margin: auto;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+.amp-apester-overflow {
+  position: absolute;
+  margin: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-.-amp-apester-overflow-button {
-	border: none;
-	z-index: 10000;
-	background: white;
-	cursor: pointer;
-	padding: 25px 80px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	font-weight: 700;
-	outline: none;
-	position: relative;
+.amp-apester-overflow button {
+  border: none;
+  background: white;
+  cursor: pointer;
+  padding: 25px 80px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  outline: none;
+  position: relative;
 }

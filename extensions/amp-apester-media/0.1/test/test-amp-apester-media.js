@@ -15,22 +15,65 @@
  */
 
 import {
-  createIframePromise,
-  doNotLoadExternalResourcesInTest,
+    createIframePromise,
+    doNotLoadExternalResourcesInTest,
 } from '../../../../testing/iframe';
 import '../amp-apester-media';
 import {adopt} from '../../../../src/runtime';
+import {toggleExperiment} from '../../../../src/experiments';
+import {xhrFor} from '../../../../src/xhr';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-apester-media', () => {
-  function getApester(mediaId, opt_responsive, opt_beforeLayoutCallback) {
+  let sandbox;
+  let xhrMock;
+  let changeSizeSpy;
+
+  beforeEach(() => {
+    toggleExperiment(window, 'amp-apester-media', true);
+    sandbox = sinon.sandbox.create();
+
+  });
+
+  afterEach(() => {
+    if (xhrMock) {
+      xhrMock.verify();
+    }
+    sandbox.restore();
+  });
+
+  function getApester(attributes, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(true, opt_beforeLayoutCallback).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const media = iframe.doc.createElement('amp-apester-media');
-      media.setAttribute('data-apester-media-id', mediaId);
+      const response = {
+        'code': 200,
+        'message': 'ok',
+        'payload': {
+          'interactionId': '57a336dba187a2ca3005e826',
+          'data': {
+            'size': {'width': '600', 'height': '444'},
+          },
+          'layout': {
+            'id': '557d52c059081084b94845c3',
+            'name': 'multi poll two',
+            'directive': 'multi-poll-two',
+          },
+          'language': 'en',
+        },
+      };
+      changeSizeSpy = sandbox.spy(
+          media.implementation_, 'attemptChangeHeight');
+      xhrMock = sandbox.mock(xhrFor(iframe.win));
+      xhrMock.expects('fetchJson').returns(Promise.resolve(response));
+      for (const key in attributes) {
+        media.setAttribute(key, attributes[key]);
+
+      }
       media.setAttribute('height', '390');
-      media.setAttribute('alt', 'Testing');
+      //todo test width?
       if (opt_responsive) {
         media.setAttribute('layout', 'responsive');
       }
@@ -38,34 +81,61 @@ describe('amp-apester-media', () => {
     });
   }
 
-  function testLoader(image) {
-    expect(image).to.not.be.null;
-    expect(image.getAttribute('src')).to.equal(
-      'http://images.apester.com/images%2Floader.gif');
-    expect(image.getAttribute('layout')).to.equal('fill');
-    // expect(image.getAttribute('alt')).to.equal('Testing');
-  }
-
-  function testIframe(iframe) {
-    expect(iframe).to.not.be.null;
-    expect(iframe.src).to.equal('http://stage3-renderer.qmerce.com/interaction/578b4d6d2d9fb72943ce465c');
-    expect(iframe.getAttribute('height')).to.equal('390');
-    //  expect(iframe.getAttribute('title')).to.equal('Apester: Testing');
-  }
-
   it('renders', () => {
-    return getApester('578b4d6d2d9fb72943ce465c').then(ins => {
-      testIframe(ins.querySelector('iframe'));
-      testLoader(ins.querySelector('amp-img'));
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(changeSizeSpy.callCount).to.equal(1);
+      expect(changeSizeSpy.args[0][0]).to.equal('444');
     });
   });
+
+  it('render playlist', () => {
+    return getApester({
+      'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      expect(changeSizeSpy.callCount).to.equal(1);
+      expect(changeSizeSpy.args[0][0]).to.equal('444');
+    });
+  });
+
+//todo responsive layout isn't fully supported yet, just a stub
   it('renders responsively', () => {
-    return getApester('media', true).then(ins => {
-      expect(ins.className).to.match(/amp-layout-responsive/);
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+      'width': '500',
+    }, true).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe.className).to.match(/-amp-fill-content/);
     });
   });
-  it('requires  media-id', () => {
-    expect(getApester('')).to.be.rejectedWith(
-      /The media-id attribute is required for/);
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getApester({
+      'data-apester-media-id': '57a336dba187a2ca3005e826',
+    }).then(ape => {
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.equal(
+          'https://renderer.qmerce.com/interaction/57a336dba187a2ca3005e826');
+      const tag = ape.implementation_;
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
+    });
+  });
+
+  it('requires media-id or channel-token', () => {
+    expect(getApester()).to.be.rejectedWith(
+        /The media-id attribute is required for/);
   });
 });
+
