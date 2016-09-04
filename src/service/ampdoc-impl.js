@@ -18,6 +18,8 @@ import {closestNode} from '../dom';
 import {dev} from '../log';
 import {getService} from '../service';
 import {isShadowRoot} from '../types';
+import {isDocumentReady, whenDocumentReady} from '../document-ready';
+import {waitForBodyPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -26,12 +28,34 @@ const AMPDOC_PROP = '__AMPDOC';
 /**
  * Creates and installs the ampdoc for the shadow root.
  * @param {!AmpDocService} ampdocService
- * param {!ShadowRoot} shadowRoot
- * @return {!AmpDoc}
+ * @param {string} url
+ * @param {!ShadowRoot} shadowRoot
+ * @return {!AmpDocShadow}
  * @restricted
  */
-export function installShadowDoc(ampdocService, shadowRoot) {
-  return ampdocService.installShadowDoc_(shadowRoot);
+export function installShadowDoc(ampdocService, url, shadowRoot) {
+  return ampdocService.installShadowDoc_(url, shadowRoot);
+}
+
+
+/**
+ * Signals that the shadow doc is ready.
+ * @param {!AmpDocShadow} ampdoc
+ * @restricted
+ */
+export function shadowDocReady(ampdoc) {
+  ampdoc.setReady_();
+}
+
+
+/**
+ * Signals that the shadow doc has a body.
+ * @param {!AmpDocShadow} ampdoc
+ * @param {!Element} body
+ * @restricted
+ */
+export function shadowDocHasBody(ampdoc, body) {
+  ampdoc.setBody_(body);
 }
 
 
@@ -114,14 +138,15 @@ export class AmpDocService {
 
   /**
    * Creates and installs the ampdoc for the shadow root.
+   * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    * @return {!AmpDoc}
    * @private
    */
-  installShadowDoc_(shadowRoot) {
+  installShadowDoc_(url, shadowRoot) {
     dev().assert(!shadowRoot[AMPDOC_PROP],
         'The shadow root already contains ampdoc');
-    const ampdoc = new AmpDocShadow(this.win, shadowRoot);
+    const ampdoc = new AmpDocShadow(this.win, url, shadowRoot);
     shadowRoot[AMPDOC_PROP] = ampdoc;
     return ampdoc;
   }
@@ -136,6 +161,13 @@ export class AmpDocService {
  * @package
  */
 export class AmpDoc {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @public @const {!Window} */
+    this.win = win;
+  }
 
   /**
    * Whether the runtime in the single-doc mode. Alternative is the shadow-doc
@@ -144,6 +176,15 @@ export class AmpDoc {
    */
   isSingleDoc() {
     return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * DO NOT CALL. Retained for backward compat during rollout.
+   * @return {!Window}
+   * @deprecated. Use `ampdoc.win` instead.
+   */
+  getWin() {
+    return this.win;
   }
 
   /**
@@ -158,10 +199,59 @@ export class AmpDoc {
   }
 
   /**
-   * DO NOT CALL. Retained for backward compat during rollout.
-   * @return {!Window}
+   * Returns `true` if the ampdoc's body is available.
+   *
+   * @return {boolean}
    */
-  getWin() {
+  isBodyAvailable() {
+    return dev().assert(false, 'not implemented');
+  }
+
+  /**
+   * Returns the ampdoc's body. Requires the body to already be available.
+   *
+   * See `isBodyAvailable` and `whenBodyAvailable`.
+   *
+   * @return {!Element}
+   */
+  getBody() {
+    return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * Returns a promise that will be resolved when the ampdoc's body is
+   * available.
+   * @return {!Promise<!Element>}
+   */
+  whenBodyAvailable() {
+    return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * Returns `true` if document is ready.
+   *
+   * See `whenReady`.
+   *
+   * @return {boolean}
+   */
+  isReady() {
+    return dev().assert(null, 'not implemented');;
+  }
+
+  /**
+   * Returns a promise that will be resolved when the ampdoc's DOM is fully
+   * ready.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return dev().assert(null, 'not implemented');
+  }
+
+  /**
+   * Returns the URL from which the document was loaded.
+   * @return {string}
+   */
+  getUrl() {
     return dev().assert(null, 'not implemented');
   }
 
@@ -189,14 +279,17 @@ export class AmpDocSingle extends AmpDoc {
    * @param {!Window} win
    */
   constructor(win) {
-    super();
-    /** @public @const {!Window} */
-    this.win = win;
-  }
+    super(win);
 
-  /** @override */
-  getWin() {
-    return this.win;
+    /** @private @const {!Promise<!Element>} */
+    this.bodyPromise_ = this.win.document.body ?
+        Promise.resolve(this.win.document.body) :
+        waitForBodyPromise(this.win.document).then(() => this.getBody());
+
+    /** @private @const {!Promise} */
+    this.readyPromise_ = isDocumentReady(this.win.document) ?
+        Promise.resolve() :
+        whenDocumentReady(this.win.document);
   }
 
   /** @override */
@@ -207,6 +300,36 @@ export class AmpDocSingle extends AmpDoc {
   /** @override */
   getRootNode() {
     return this.win.document;
+  }
+
+  /** @override */
+  getUrl() {
+    return this.win.location.href;
+  }
+
+  /** @override */
+  isBodyAvailable() {
+    return !!this.win.document.body;
+  }
+
+  /** @override */
+  getBody() {
+    return dev().assert(this.win.document.body, 'body not available');
+  }
+
+  /** @override */
+  whenBodyAvailable() {
+    return this.bodyPromise_;
+  }
+
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.win.document);
+  }
+
+  /** @override */
+  whenReady() {
+    return this.readyPromise_;
   }
 }
 
@@ -219,19 +342,37 @@ export class AmpDocSingle extends AmpDoc {
 export class AmpDocShadow extends AmpDoc {
   /**
    * @param {!Window} win
+   * @param {string} url
    * @param {!ShadowRoot} shadowRoot
    */
-  constructor(win, shadowRoot) {
-    super();
-    /** @const {!Window} */
-    this.win = win;
+  constructor(win, url, shadowRoot) {
+    super(win);
+    /** @private @const {string} */
+    this.url_ = url;
     /** @private @const {!ShadowRoot} */
     this.shadowRoot_ = shadowRoot;
-  }
 
-  /** @override */
-  getWin() {
-    return this.win;
+    /** @private {?Element} */
+    this.body_ = null;
+
+    /** @private {function(!Element)|undefined} */
+    this.bodyResolver_ = undefined;
+
+    /** @private {!Promise<!Element>} */
+    this.bodyPromise_ = new Promise(resolve => {
+      this.bodyResolver_ = resolve;
+    });
+
+    /** @private {boolean} */
+    this.ready_ = false;
+
+    /** @private {function()|undefined} */
+    this.readyResolver_ = undefined;
+
+    /** @private {!Promise} */
+    this.readyPromise_ = new Promise(resolve => {
+      this.readyResolver_ = resolve;
+    });
   }
 
   /** @override */
@@ -242,6 +383,55 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   getRootNode() {
     return this.shadowRoot_;
+  }
+
+  /** @override */
+  getUrl() {
+    return this.url_;
+  }
+
+  /** @override */
+  isBodyAvailable() {
+    return !!this.body_;
+  }
+
+  /** @override */
+  getBody() {
+    return dev().assert(this.body_, 'body not available');
+  }
+
+  /**
+   * @param {!Element} body
+   * @private
+   */
+  setBody_(body) {
+    dev().assert(!this.body_, 'Duplicate body');
+    this.body_ = body;
+    this.bodyResolver_(body);
+    this.bodyResolver_ = undefined;
+  }
+
+  /** @override */
+  whenBodyAvailable() {
+    return this.bodyPromise_;
+  }
+
+  /** @override */
+  isReady() {
+    return this.ready_;
+  }
+
+  /** @private */
+  setReady_() {
+    dev().assert(!this.ready_, 'Duplicate ready state');
+    this.ready_ = true;
+    this.readyResolver_();
+    this.readyResolver_ = undefined;
+  }
+
+  /** @override */
+  whenReady() {
+    return this.readyPromise_;
   }
 }
 

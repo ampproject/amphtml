@@ -32,3 +32,30 @@ export function stringToBytes(str) {
   }
   return bytes;
 };
+
+/**
+ * Converts a 8-bit bytes array into a string
+ * @param {!Uint8Array} bytes
+ * @return {string}
+ */
+export function bytesToString(bytes) {
+  return String.fromCharCode.apply(String, bytes);
+};
+
+/**
+ * Generate a random bytes array with specific length using
+ * win.crypto.getRandomValues. Return null if it is not available.
+ * @param {!number} length
+ * @return {?Uint8Array}
+ */
+export function getCryptoRandomBytesArray(win, length) {
+  if (!win.crypto || !win.crypto.getRandomValues) {
+    return null;
+  }
+
+  // Widely available in browsers we support:
+  // http://caniuse.com/#search=getRandomValues
+  const uint8array = new Uint8Array(length);
+  win.crypto.getRandomValues(uint8array);
+  return uint8array;
+}

@@ -20,6 +20,7 @@ import {
   isProxyOrigin,
   parseUrl,
   resolveRelativeUrl,
+  checkCorsUrl,
 } from './url';
 import {parseSrcset} from './srcset';
 import {user} from './log';
@@ -286,6 +287,7 @@ function resolveAttrValue(tagName, attrName, attrValue) {
  * @private Visible for testing.
  */
 export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  checkCorsUrl(attrValue);
   const isProxyHost = isProxyOrigin(windowLocation);
   const baseUrl = parseUrl(getSourceUrl(windowLocation));
 

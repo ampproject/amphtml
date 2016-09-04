@@ -75,8 +75,6 @@ describe('amp-youtube', function() {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
     });
   });
 

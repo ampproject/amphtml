@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, writeScript, checkData} from '../3p/3p';
+import {loadScript, writeScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
 /* global OX: false */
@@ -26,7 +26,8 @@ import {doubleclick} from '../ads/google/doubleclick';
 export function openx(global, data) {
   const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp'];
   const dfpData = Object.assign({}, data); // Make a copy for dfp.
-  checkData(data, openxData);
+  // TODO: check mandatory fields
+  validateData(data, [], openxData);
 
   // Consolidate Doubleclick inputs for forwarding -
   // conversion rules are explained in openx.md.

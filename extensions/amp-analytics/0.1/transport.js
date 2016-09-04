@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  parseUrl,
+  checkCorsUrl,
+} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {timerFor} from '../../../src/timer';
@@ -30,6 +34,7 @@ const TAG_ = 'amp-analytics.Transport';
  */
 export function sendRequest(win, request, transportOptions) {
   assertHttpsUrl(request);
+  checkCorsUrl(request);
   if (transportOptions['beacon'] &&
       Transport.sendRequestUsingBeacon(win, request)) {
     return;

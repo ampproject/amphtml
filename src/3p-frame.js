@@ -17,7 +17,7 @@
 
 import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
-import {documentInfoFor} from './document-info';
+import {documentInfoForDoc} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
@@ -53,6 +53,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
+  const container = element.getAttribute('amp-container-element');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
@@ -60,7 +61,10 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
-  const docInfo = documentInfoFor(parentWindow);
+  const docInfo = documentInfoForDoc(element);
+  if (container) {
+    attributes.container = container;
+  }
   const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children

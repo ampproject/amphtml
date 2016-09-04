@@ -17,7 +17,7 @@
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
@@ -50,23 +50,12 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
     /** @private {number} */
     this.playerState_ = 0;
 
-    // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
     this.videoid_ = user().assert(
-        (this.element.getAttribute('data-videoid') ||
-        this.element.getAttribute('video-id')),
+        this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
@@ -94,8 +83,6 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
 
     /** @private {!Element} */
@@ -193,12 +180,10 @@ class AmpYoutube extends AMP.BaseElement {
     imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
         encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.

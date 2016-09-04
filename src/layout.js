@@ -20,6 +20,7 @@
  */
 
 import {dev, user} from './log';
+import {isFiniteNumber} from './types';
 
 
 /**
@@ -212,7 +213,7 @@ export function getLengthUnits(length) {
  */
 export function getLengthNumeral(length) {
   const res = parseFloat(length);
-  return isNaN(res) ? undefined : res;
+  return !isFiniteNumber(res) ? undefined : res;
 }
 
 

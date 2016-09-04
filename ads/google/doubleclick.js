@@ -15,7 +15,7 @@
  */
 
 import {makeCorrelator} from './correlator';
-import {checkData, loadScript} from '../../3p/3p';
+import {validateData, loadScript} from '../../3p/3p';
 
 /**
  * @enum {number}
@@ -35,11 +35,13 @@ const GladeExperiment = {
 export function doubleclick(global, data) {
   const experimentFraction = 0.1;
 
-  checkData(data, [
+  // TODO: check mandatory fields
+  validateData(data, [], [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+    'experimentId',
   ]);
 
   if (global.context.clientId) {
@@ -77,6 +79,14 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
     parseInt(data.overrideHeight || data.height, 10),
   ]];
 
+  // Center the ad in the container.
+  const container = global.document.querySelector('#c');
+  container.style.top = '50%';
+  container.style.left = '50%';
+  container.style.bottom = '';
+  container.style.right = '';
+  container.style.transform = 'translate(-50%, -50%)';
+
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(() => {
       const googletag = global.googletag;
@@ -88,6 +98,13 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         pubads.markAsGladeControl();
       } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
         pubads.markAsGladeOptOut();
+      }
+
+      if (data['experimentId']) {
+        const experimentIdList = data['experimentId'].split(',');
+        pubads.forceExperiment = pubads.forceExperiment || function() {};
+        experimentIdList &&
+            experimentIdList.forEach(eid => pubads.forceExperiment(eid));
       }
 
       pubads.markAsAmp();
@@ -122,11 +139,11 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
 
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
-        global.context.renderStart();
         if (event.isEmpty) {
           global.context.noContentAvailable();
           creativeId = '_empty_';
         }
+        global.context.renderStart();
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
 
@@ -162,7 +179,14 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
   if (gladeExperiment === GladeExperiment.GLADE_EXPERIMENT) {
     jsonParameters.gladeExp = '1';
+    jsonParameters.gladeEids = '108809102';
   }
+  const expIds = data['experimentId'];
+  if (expIds) {
+    jsonParameters.gladeEids = jsonParameters.gladeEids ?
+        jsonParameters.gladeEids + ',' + expIds : expIds;
+  }
+
 
   const slot = global.document.querySelector('#c');
   slot.setAttribute('data-glade', '');
@@ -173,21 +197,20 @@ function doubleClickWithGlade(global, data, gladeExperiment) {
   }
   slot.setAttribute('data-page-url', global.context.canonicalUrl);
 
-  // Size setup.
-  // The ad container should simply fill the amp-ad iframe, but we still
-  // need to request a specific size from the ad server.
-  // The ad container size will be relative to the amp-iframe, so if the
-  // latter changes the ad container will match it.
-  slot.setAttribute('width', 'fill');
-  slot.setAttribute('height', 'fill');
-  slot.setAttribute('data-request-height', requestHeight);
-  slot.setAttribute('data-request-width', requestWidth);
+  // Center the ad in the container.
+  slot.setAttribute('height', requestHeight);
+  slot.setAttribute('width', requestWidth);
+  slot.style.top = '50%';
+  slot.style.left = '50%';
+  slot.style.bottom = '';
+  slot.style.right = '';
+  slot.style.transform = 'translate(-50%, -50%)';
 
   slot.addEventListener('gladeAdFetched', event => {
-    global.context.renderStart();
     if (event.detail.empty) {
       global.context.noContentAvailable();
     }
+    global.context.renderStart();
   });
 
   window.glade = {correlator: getCorrelator(global)};

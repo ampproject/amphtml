@@ -26,7 +26,7 @@ import {
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
-import * as styles from '../../src/styles';
+import * as styles from '../../src/style-installer';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -499,7 +499,7 @@ describe('runtime', () => {
       expect(extHolder.docFactories).to.have.length(1);
 
       const shadowRoot = document.createDocumentFragment();
-      const ampdoc = new AmpDocShadow(win, shadowRoot);
+      const ampdoc = new AmpDocShadow(win, 'https://a.org/', shadowRoot);
 
       // Not installed.
       expect(getServicePromiseOrNullForDoc(ampdoc, 'service1')).to.be.null;
@@ -531,10 +531,12 @@ describe('runtime', () => {
       importDoc.head = document.createElement('dochead');
       importDoc.body = document.createElement('docbody');
       importDoc.body.appendChild(document.createElement('child'));
-      ampdoc = new AmpDocShadow(win, document.createElement('div'));
+      ampdoc = new AmpDocShadow(win, docUrl, document.createElement('div'));
 
       ampdocServiceMock.expects('installShadowDoc_')
-          .withExactArgs(sinon.match(arg => arg == hostElement.shadowRoot))
+          .withExactArgs(
+              docUrl,
+              sinon.match(arg => arg == hostElement.shadowRoot))
           .returns(ampdoc)
           .atLeast(0);
       ampdocServiceMock.expects('getAmpDoc')
@@ -611,6 +613,10 @@ describe('runtime', () => {
       // After timeout, it becomes visible again.
       clock.tick(3000);
       expect(hostElement.style.visibility).to.equal('visible');
+
+      return ampdoc.whenReady().then(() => {
+        expect(ampdoc.isReady()).to.be.true;
+      });
     });
 
     it('should import body', () => {
@@ -624,6 +630,7 @@ describe('runtime', () => {
       expect(body).to.have.class('amp-shadow');
       expect(body.style.position).to.equal('relative');
       expect(body.querySelector('child')).to.exist;
+      expect(ampdoc.getBody()).to.exist;
     });
 
     it('should read title element', () => {

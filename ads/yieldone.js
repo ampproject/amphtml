@@ -14,18 +14,16 @@
   * limitations under the License.
   */
 
- import {writeScript, checkData, validateDataExists} from '../3p/3p';
+ import {writeScript, validateData} from '../3p/3p';
 
- const yieldoneFields = ['pubid', 'pid','width', 'height'];
-
- /**
+/**
   * @param {!Window} global
   * @param {!Object} data
   */
  export function yieldone(global, data) {
-   checkData(data, yieldoneFields);
-   validateDataExists(data, yieldoneFields);
+   validateData(data, ['pubid', 'pid','width', 'height'], []);
 
    global.yieldoneParam = data;
-   writeScript(global, 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js');
+   writeScript(global,
+       'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js');
  }

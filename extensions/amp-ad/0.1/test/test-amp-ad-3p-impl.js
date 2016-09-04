@@ -16,6 +16,9 @@
 
 import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
+import {createIframePromise} from '../../../../testing/iframe';
+import {createElementWithAttributes} from '../../../../src/dom';
+import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
@@ -26,6 +29,26 @@ function tests(name) {
       opt_beforeLayoutCallback) {
     return createAdPromise(name, attributes, canonical,
         opt_handleElement, opt_beforeLayoutCallback);
+  }
+
+  function getAdInAdContainer() {
+    return createIframePromise().then(iframe => {
+      const adContainer = createElementWithAttributes(iframe.doc,
+          'amp-sticky-ad', {layout: 'nodisplay'});
+      const ampAd = createElementWithAttributes(iframe.doc, 'amp-ad', {
+        width: 300,
+        height: 50,
+        type: '_ping_',
+        src: 'testsrc',
+      });
+      adContainer.appendChild(ampAd);
+      return iframe.addElement(adContainer).then(() => {
+        return Promise.resolve({
+          iframe,
+          ampAd,
+        });
+      });
+    });
   }
 
   return () => {
@@ -91,115 +114,6 @@ function tests(name) {
     });
 
     describe('ad resize', () => {
-      it('should listen for resize events', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.equal(114);
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                width: 114,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
-        });
-      });
-
-      it('should listen for resize events from nested frames', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe-resize-outer.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.equal(114);
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.frames[0].postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                width: 114,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-          expect(impl.iframe_.width).to.equal('114');
-        });
-      });
-
-      it('should resize height only', () => {
-        const iframeSrc = 'http://ads.localhost:' + location.port +
-            '/test/fixtures/served/iframe.html';
-        return getAd({
-          width: 100,
-          height: 100,
-          type: '_ping_',
-          src: 'testsrc',
-          resizable: '',
-        }, 'https://schema.org').then(element => {
-          return new Promise((resolve, unusedReject) => {
-            const impl = element.implementation_;
-            impl.layoutCallback();
-            impl.apiHandler_.updateSize_ = (newHeight, newWidth) => {
-              expect(newHeight).to.equal(217);
-              expect(newWidth).to.be.undefined;
-              resolve(impl);
-            };
-            impl.iframe_.onload = function() {
-              impl.iframe_.contentWindow.postMessage({
-                sentinel: 'amp-test',
-                type: 'requestHeight',
-                is3p: true,
-                height: 217,
-                amp3pSentinel:
-                    impl.iframe_.getAttribute('data-amp-3p-sentinel'),
-              }, '*');
-            };
-            impl.iframe_.src = iframeSrc;
-          });
-        }).then(impl => {
-          expect(impl.iframe_.height).to.equal('217');
-        });
-      });
-
       it('should fallback for resize with overflow', () => {
         return getAd({
           width: 100,
@@ -502,6 +416,16 @@ function tests(name) {
           clock.tick(100);
           expect(ad.renderOutsideViewport()).to.equal(1.25);
         });
+      });
+    });
+
+    it('should add container info when ad has a container', () => {
+      return getAdInAdContainer().then(obj => {
+        const ampAd = obj.ampAd;
+        expect(ampAd.getAttribute('amp-container-element')).to.be.null;
+        ampAd.implementation_.onLayoutMeasure();
+        expect(ampAd.getAttribute('amp-container-element'))
+            .to.equal('AMP-STICKY-AD');
       });
     });
   };

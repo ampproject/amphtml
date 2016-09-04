@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function zergnet(global, data) {
-  checkData(data, ['zergid']);
-  validateDataExists(data, ['zergid']);
+  validateData(data, ['zergid'], []);
   global.zergnetWidgetId = data.zergid;
   writeScript(global, 'https://www.zergnet.com/zerg-amp.js');
 }

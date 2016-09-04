@@ -93,6 +93,7 @@ var forbiddenTerms = {
         'dist.3p/current/integration.js',
     whitelist: [
       'src/mode.js',
+      '3p/integration.js',
       'dist.3p/current/integration.js',
     ],
   },
@@ -150,6 +151,7 @@ var forbiddenTerms = {
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/iframe.js',
     ],
   },
   'installPerformanceService': {
@@ -324,7 +326,14 @@ var forbiddenTerms = {
       'extensions/amp-accordion/0.1/amp-accordion.js',
     ],
   },
-  'indexedDB': requiresReviewPrivacy,
+  'indexedDB': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
+      'src/service-worker/core.js',
+      'src/service-worker/kill.js',
+    ]
+  },
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
@@ -353,6 +362,8 @@ var forbiddenTerms = {
     whitelist: [
       'validator/engine/tokenize-css.js',
       'validator/engine/validator.js',
+      // Service workers are only available in ES6 environments
+      'src/service-worker/core.js',
       // exports.startsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ]
@@ -361,6 +372,8 @@ var forbiddenTerms = {
     message: es6polyfill,
     whitelist: [
       'build-system/tasks/csvify-size/index.js',
+      // Service workers are only available in ES6 environments
+      'src/service-worker/core.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],
@@ -380,19 +393,6 @@ var forbiddenTerms = {
     message: 'Use dom.documentContains API.',
     whitelist: [
       'src/dom.js',
-    ],
-  },
-  '\\sdocument(?![a-zA-Z0-9_:])': {
-    message: 'Use `window.document` or similar to access document, the global' +
-      '`document` is forbidden',
-    whitelist: [
-      'build-system/server.js',
-      'examples/pwa/pwa.js',
-      'examples/viewer-integr.js',
-      'testing/iframe.js',
-      'testing/screenshots/make-screenshot.js',
-      'tools/experiments/experiments.js',
-      'validator/engine/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -499,6 +499,7 @@ var forbiddenTermsSrcInclusive = {
       'src/element-stub.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
+      'src/service/lightbox-manager-discovery.js',
       'src/shadow-embed.js',
       'extensions/amp-ad/0.1/amp-ad.js',
       'extensions/amp-a4a/0.1/amp-a4a.js',
