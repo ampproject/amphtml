@@ -83,6 +83,11 @@ class AmpApesterMedia extends AMP.BaseElement {
     this.displayBaseUrl_ = 'https://display.apester.com';
 
     /**
+     * @const @private {string}
+     */
+    this.loaderUrl_ = 'https://images.apester.com/images%2Floader.gif';
+
+    /**
      * @private {boolean}
      */
     this.random_ = false;
@@ -217,11 +222,8 @@ class AmpApesterMedia extends AMP.BaseElement {
     const img = this.element.ownerDocument.createElement('amp-img');
     const placeholder = this.element.ownerDocument.createElement('div');
     placeholder.setAttribute('placeholder', '');
-    placeholder.height = this.element.getAttribute('height');
-    placeholder.className = '-amp-apester-loader-container';
-    img.className = '-amp-apester-loader';
-    img.setAttribute('src',
-                     'https://images.apester.com/images%2Floader.gif');
+    placeholder.className = 'amp-apester-loader';
+    img.setAttribute('src', this.loaderUrl_);
     img.setAttribute('layout', 'fill');
     img.setAttribute('noloading', '');
     placeholder.appendChild(img);
