@@ -379,8 +379,20 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /**
+   * on bind event change slide attribute of the carousel,
+   * display the corresponding slide.
+   * @param {number} newIndex Index of the slide to be displayed.
+   */
+  slideChanged(newIndex) {
+    if (typeof newIndex !== 'number') {
+      return;
+    }
+    this.showSlide_(Number(newIndex));
+  }
+
+  /**
    * Makes the slide corresponding to the given index and the slides surrounding
-   *    it available for display.
+   * it available for display.
    * @param {number} newIndex Index of the slide to be displayed.
    * @private
    */
@@ -433,6 +445,11 @@ export class AmpSlideScroll extends BaseSlides {
     this.slideIndex_ = newIndex;
     this.hideRestOfTheSlides_(showIndexArr);
     this.setControlsState();
+    //TODO: merge this with dispatchCustomEvent in custom-element
+    // dispatch custom event of slidechange
+    const slideChangeEvent = new CustomEvent
+        ('slidechange', {'detail': this.slideIndex_});
+    this.element.dispatchEvent(slideChangeEvent);
   }
 
   /**

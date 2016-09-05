@@ -61,6 +61,7 @@ function buildExtensions(options) {
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-app-banner', '0.1', true, options);
   buildExtension('amp-audio', '0.1', false, options);
+  buildExtension('amp-bind', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-kaltura-player', '0.1', false, options);

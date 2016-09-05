@@ -39,6 +39,15 @@ export class AmpImg extends BaseElement {
     this.srcset_ = null;
   }
 
+  srcChanged(newSrc) {
+    if (!this.img_) {
+      return;
+    }
+    this.getVsync().mutate(() => {
+      this.img_.setAttribute('src', newSrc);
+    });
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);

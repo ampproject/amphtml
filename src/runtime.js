@@ -31,6 +31,7 @@ import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {childElementsByTag} from './dom';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
+import {installBindServiceForDoc} from './service/bind-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
@@ -97,6 +98,7 @@ export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installBindServiceForDoc(ampdoc);
 }
 
 
