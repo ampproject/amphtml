@@ -42,10 +42,14 @@ Supported parameters:
 
 * data-unit-params - JSON value
 
-Required the JSON fields:
+Required JSON fields:
 
 * unit - Ad type
 * id - Delivery ID for Ad
+
+Optional JSON fields:
+
+* tag - User specified value
 
 ## For more design information
 
