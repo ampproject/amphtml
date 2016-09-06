@@ -66,12 +66,11 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('_ping_');
   });
 
-  it('should validateParentOrigin without ancestorOrigins', () => {
+  it('should not throw validateParentOrigin without ancestorOrigins', () => {
     let parent = {};
     validateParentOrigin({
       location: {},
     }, parent);
-    expect(parent.originValidated).to.be.false;
 
     parent = {};
     validateParentOrigin({
@@ -79,7 +78,6 @@ describe('3p integration.js', () => {
         ancestorOrigins: [],
       },
     }, parent);
-    expect(parent.originValidated).to.be.false;
   });
 
   it('should validateParentOrigin with correct ancestorOrigins', () => {
@@ -91,8 +89,6 @@ describe('3p integration.js', () => {
         ancestorOrigins: ['abc', 'xyz'],
       },
     }, parent);
-
-    expect(parent.originValidated).to.be.true;
   });
 
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
@@ -200,21 +196,6 @@ describe('3p integration.js', () => {
     expect(called).to.be.false;
     finish();
     expect(called).to.be.true;
-  });
-
-  it('should throw if origin was never validated', () => {
-    const data = {
-      type: 'testAction',
-    };
-    const win = {
-      context: {
-        location: {},
-        data,
-      },
-    };
-    expect(() => {
-      draw3p(win, data);
-    }).to.throw(/Origin should have been validated/);
   });
 
   it('should throw if origin was never validated', () => {

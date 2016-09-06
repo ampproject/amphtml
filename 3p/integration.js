@@ -220,8 +220,6 @@ export const waitForRenderStart = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user().assert(win.context.location.originValidated != null,
-      'Origin should have been validated');
 
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
@@ -445,8 +443,7 @@ function reportRenderedEntityIdentifier(entityId) {
 /**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
- * For browsers that don't support ancestorOrigins it adds
- * `originValidated = false` to the location object.
+ * Only check for browsers that support ancestorOrigins
  * @param {!Window} window
  * @param {!Location} parentLocation
  * @visibleForTesting
@@ -457,13 +454,11 @@ export function validateParentOrigin(window, parentLocation) {
   // ancestorOrigins. In that case we proceed but mark the origin
   // as non-validated.
   if (!ancestors || !ancestors.length) {
-    parentLocation.originValidated = false;
     return;
   }
   user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
-  parentLocation.originValidated = true;
 }
 
 /**
