@@ -17,6 +17,21 @@
 amp-carousel {
 }
 
+/**
+ * `amp-carousel-slide` class is added to every item in the carousel to
+ * allow page authors to target items for user-defined styling.
+ * Every component’s immediate children is considered an item in the carousel.
+ */
+amp-carousel-slide {
+}
+
+.amp-carousel-slide .-amp-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
+}
+
 .amp-carousel-button {
   position: absolute;
   box-sizing: border-box;
