@@ -15,7 +15,7 @@
  */
 
 import {timerFor} from './timer';
-import {dev, user} from './log';
+import {user} from './log';
 
 
 /**
@@ -121,18 +121,9 @@ export function loadPromise(element, opt_timeout) {
     }
     unlistenError = listenOnce(element, 'error', reject);
   });
-  loadingPromise = loadingPromise.then(getTarget, failedToLoad);
+  loadingPromise = loadingPromise.then(() => element, failedToLoad);
   return racePromise_(loadingPromise, unlistenLoad, unlistenError,
       opt_timeout);
-}
-
-/**
- * @param {!Event} event
- * @return {!Element} The target of the event.
- */
-function getTarget(event) {
-  return dev().assert(event.target || event.testTarget,
-      'No target present %s', event);
 }
 
 /**
