@@ -83,7 +83,7 @@ describe('shadow-embed', () => {
         expect(shadowRoot.contains(style)).to.be.true;
         const css = style.textContent.replace(/\s/g, '');
         if (scenario == 'polyfill') {
-          expect(css).to.equal('amp-body{}');
+          expect(css).to.match(/amp-body/);
         } else {
           expect(css).to.equal('body{}');
         }
@@ -214,9 +214,15 @@ describe('shadow-embed', () => {
   });
 
   describe('scopeShadowCss', () => {
+    let shadowRoot;
+
+    beforeEach(() => {
+      shadowRoot = document.createElement('div');
+      shadowRoot.id = 'h';
+    });
 
     function scope(css) {
-      return scopeShadowCss(hostElement, css).replace(/[\n\t\n]/g, '');
+      return scopeShadowCss(shadowRoot, css).replace(/[\n\t\n]/g, '');
     }
 
     it('should replace root selectors', () => {
