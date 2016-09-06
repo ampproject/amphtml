@@ -91,6 +91,11 @@ describe('Types', () => {
       const fragment = document.createDocumentFragment();
       expect(types.isShadowRoot(fragment)).to.be.false;
     });
+
+    it('should yield true for polyfill', () => {
+      expect(types.isShadowRoot(document.createElement(
+          'i-amp-shadow-root'))).to.be.true;
+    });
   });
 
   describe('isFiniteNumber', () => {

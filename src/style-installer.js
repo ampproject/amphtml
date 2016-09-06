@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {setStyles} from './style';
-import {waitForBody} from './dom';
+import {dev} from './log';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
+import {setStyles} from './style';
+import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
-import {dev} from './log';
 
 
 /**
@@ -38,6 +38,7 @@ import {dev} from './log';
  *     as the first element in head and all style elements will be positioned
  *     after.
  * @param {string=} opt_ext
+ * @return {!HTMLStyleElement}
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
@@ -54,7 +55,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   // Sync case.
   if (styleLoaded(doc, style)) {
     cb();
-    return;
+    return style;
   }
   // Poll until styles are available.
   const interval = setInterval(() => {
@@ -63,31 +64,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
       cb();
     }
   }, 4);
-}
-
-
-/**
- * Adds the given css text to the given shadow root.
- *
- * The style tags will be at the beginning of the shadow root before all author
- * styles. One element can be the main runtime CSS. This is guaranteed
- * to always be the first stylesheet in the doc.
- *
- * @param {!ShadowRoot} shadowRoot
- * @param {string} cssText
- * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
- *     as the first element in head and all style elements will be positioned
- *     after.
- * @param {string=} opt_ext
- */
-export function installStylesForShadowRoot(shadowRoot, cssText,
-    opt_isRuntimeCss, opt_ext) {
-  insertStyleElement(
-      shadowRoot.ownerDocument,
-      shadowRoot,
-      cssText,
-      opt_isRuntimeCss || false,
-      opt_ext || null);
+  return style;
 }
 
 
@@ -100,7 +77,7 @@ export function installStylesForShadowRoot(shadowRoot, cssText,
  * @param {?string} ext
  * @return {!Element}
  */
-function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
+export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   const style = doc.createElement('style');
   style.textContent = cssText;
   let afterElement = null;
@@ -109,26 +86,15 @@ function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
   if (isRuntimeCss) {
     style.setAttribute('amp-runtime', '');
     cssRoot.runtimeStyleElement = style;
+  } else if (ext == 'amp-custom') {
+    style.setAttribute('amp-custom', '');
+    afterElement = cssRoot.lastChild;
   } else {
     style.setAttribute('amp-extension', ext || '');
     afterElement = cssRoot.runtimeStyleElement;
   }
   insertAfterOrAtStart(cssRoot, style, afterElement);
   return style;
-}
-
-
-/**
- * Copies runtime styles from the ampdoc context into a shadow root.
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!ShadowRoot} shadowRoot
- */
-export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
-  const style = dev().assert(
-      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
-      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
-  const cssText = style.textContent;
-  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
 }
 
 

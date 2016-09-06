@@ -27,6 +27,7 @@ import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
+import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -410,7 +411,7 @@ describe('runtime', () => {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -444,7 +445,7 @@ describe('runtime', () => {
 
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
