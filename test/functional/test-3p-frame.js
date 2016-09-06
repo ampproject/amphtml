@@ -107,29 +107,29 @@ describe('3p-frame', () => {
     div.getIntersectionChangeEntry = function() {
       return {
         time: 1234567888,
-        rootBounds:{
-          left:0,
-          top:0,
-          width:width,
-          height:height,
-          bottom:height,
-          right:width,
-          x:0,
-          y:0,
+        rootBounds: {
+          left: 0,
+          top: 0,
+          width,
+          height,
+          bottom: height,
+          right: width,
+          x: 0,
+          y: 0,
         },
-        boundingClientRect:{
-          width:100,
-          height:200,
+        boundingClientRect: {
+          width: 100,
+          height: 200,
         },
-        intersectionRect:{
-          left:0,
-          top:0,
-          width:0,
-          height:0,
-          bottom:0,
-          right:0,
-          x:0,
-          y:0,
+        intersectionRect: {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          bottom: 0,
+          right: 0,
+          x: 0,
+          y: 0,
         },
       };
     };
@@ -303,14 +303,14 @@ describe('3p-frame', () => {
     div.setAttribute('type', '_ping_');
     div.getIntersectionChangeEntry = function() {
       return {
-        left:0,
-        top:0,
-        width:0,
-        height:0,
-        bottom:0,
-        right:0,
-        x:0,
-        y:0,
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        bottom: 0,
+        right: 0,
+        x: 0,
+        y: 0,
       };
     };
 

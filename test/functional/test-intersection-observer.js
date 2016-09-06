@@ -27,7 +27,6 @@ import * as sinon from 'sinon';
 describe('getIntersectionChangeEntry', () => {
 
   it('intersect correctly base', () => {
-    const time = 123;
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, rootBounds);
@@ -62,7 +61,6 @@ describe('getIntersectionChangeEntry', () => {
   });
 
   it('intersect correctly 2', () => {
-    const time = 111;
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, rootBounds);
