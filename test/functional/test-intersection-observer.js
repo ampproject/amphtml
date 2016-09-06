@@ -39,7 +39,7 @@ describe('getIntersectionChangeEntry', () => {
   it('intersect correctly base', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
-    const change = getIntersectionChangeEntry(layoutBox, rootBounds);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change).to.be.object;
     expect(change.time).to.equal(Date.now());
@@ -73,7 +73,7 @@ describe('getIntersectionChangeEntry', () => {
   it('intersect correctly 2', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
-    const change = getIntersectionChangeEntry(layoutBox, rootBounds);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(1);
     expect(change.intersectionRect).to.jsonEqual({
@@ -91,7 +91,7 @@ describe('getIntersectionChangeEntry', () => {
   it('intersect correctly 3', () => {
     const rootBounds = layoutRectLtwh(198, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    const change = getIntersectionChangeEntry(layoutBox, rootBounds);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(1);
     expect(change.intersectionRect.width).to.equal(2);
@@ -100,7 +100,7 @@ describe('getIntersectionChangeEntry', () => {
   it('intersect correctly 3', () => {
     const rootBounds = layoutRectLtwh(202, 299, 100, 100);
     const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-    const change = getIntersectionChangeEntry(layoutBox, rootBounds);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
     expect(change.intersectionRect.height).to.equal(0);
     expect(change.intersectionRect.width).to.equal(0);
@@ -216,7 +216,7 @@ describe('IntersectionObserver', () => {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(layoutBox, rootBounds);
+        return getIntersectionChangeEntry(layoutBox, null, rootBounds);
       },
     };
     element.isInViewport = () => false;
