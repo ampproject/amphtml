@@ -72,6 +72,8 @@ describe('AccessServerJwtAdapter', () => {
       expect(adapter.key_).to.be.null;
       expect(adapter.serverState_).to.equal('STATE1');
       expect(adapter.isProxyOrigin_).to.be.false;
+      expect(adapter.isAuthorizationEnabled()).to.be.true;
+      expect(adapter.isPingbackEnabled()).to.be.true;
     });
 
     it('should fail if config is invalid: authorization', () => {
@@ -128,6 +130,7 @@ describe('AccessServerJwtAdapter', () => {
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         isAuthorizationEnabled: () => true,
+        isPingbackEnabled: () => true,
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };

@@ -172,6 +172,11 @@ export class AccessServerJwtAdapter {
   }
 
   /** @override */
+  isPingbackEnabled() {
+    return this.clientAdapter_.isPingbackEnabled();
+  }
+
+  /** @override */
   pingback() {
     return this.clientAdapter_.pingback();
   }

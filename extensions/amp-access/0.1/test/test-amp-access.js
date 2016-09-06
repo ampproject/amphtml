@@ -462,6 +462,7 @@ describe('AccessService authorization', () => {
     const adapter = {
       getConfig: () => {},
       isAuthorizationEnabled: () => true,
+      isPingbackEnabled: () => true,
       authorize: () => {},
     };
     service.adapter_ = adapter;
@@ -905,6 +906,7 @@ describe('AccessService pingback', () => {
     service = new AccessService(window);
 
     const adapter = {
+      isPingbackEnabled: () => true,
       pingback: () => {},
     };
     service.adapter_ = adapter;
@@ -1100,6 +1102,19 @@ describe('AccessService pingback', () => {
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
     });
+  });
+
+  it('should ignore "viewed" monitoring when pingback is disabled', () => {
+    adapterMock.expects('isPingbackEnabled').returns(false);
+
+    service.reportWhenViewed_ = sandbox.spy();
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+
+    service.scheduleView_(/* timeToView */ 2000);
+
+    expect(service.reportWhenViewed_.callCount).to.equal(0);
+    expect(service.reportViewPromise_).to.be.null;
+    expect(broadcastStub.callCount).to.equal(0);
   });
 
   it('should re-schedule "viewed" monitoring after visibility change', () => {

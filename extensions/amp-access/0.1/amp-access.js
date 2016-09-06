@@ -622,6 +622,9 @@ export class AccessService {
    * @private
    */
   scheduleView_(timeToView) {
+    if (!this.adapter_.isPingbackEnabled()) {
+      return;
+    }
     this.reportViewPromise_ = null;
     onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
@@ -885,6 +888,11 @@ class AccessTypeAdapterDef {
    * @return {!Promise<!JSONType>}
    */
   authorize() {}
+
+  /**
+   * @return {boolean}
+   */
+  isPingbackEnabled() {}
 
   /**
    * @return {!Promise}

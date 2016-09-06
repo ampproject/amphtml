@@ -67,6 +67,11 @@ export class AccessOtherAdapter {
   }
 
   /** @override */
+  isPingbackEnabled() {
+    return false;
+  }
+
+  /** @override */
   pingback() {
     dev().fine(TAG, 'Ignore pingback');
     return Promise.resolve();
