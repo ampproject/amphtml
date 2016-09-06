@@ -274,9 +274,8 @@ function transformRootSelectors(selector) {
  * @private
  */
 function rootSelectorPrefixer(match, name, pos, selector) {
-  const prev = pos > 0 ? selector.charAt(pos - 1) : '';
-  const next = pos + match.length < selector.length ?
-      selector.charAt(pos + match.length) : '';
+  const prev = selector.charAt(pos - 1);
+  const next = selector.charAt(pos + match.length);
   if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
       (!next || CSS_SELECTOR_END_REGEX.test(next))) {
     return 'amp-' + match;
