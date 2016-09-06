@@ -107,6 +107,13 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'parseUrlAndClone': {
+    message: 'Do not use parseUrlAndClone, use parseUrl instead.',
+    whitelist: [
+      'src/url.js',
+      '3p/integration.js',
+    ],
+  },
   // Service factories that should only be installed once.
   'installActionServiceForDoc': {
     message: privateServiceFactory,

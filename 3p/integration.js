@@ -28,7 +28,7 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {parseUrl, parseUrlAndClone, getSourceUrl} from '../src/url';
 import {user} from '../src/log';
 
 // 3P - please keep in alphabetic order
@@ -286,7 +286,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     ensureFramed(window);
     const data = parseFragment(location.hash);
     window.context = data._context;
-    window.context.location = parseUrl(data._context.location.href);
+    window.context.location = parseUrlAndClone(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
     if (opt_allowedEmbeddingOrigins) {
