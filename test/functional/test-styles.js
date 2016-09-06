@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
@@ -76,21 +75,5 @@ describe('Styles', () => {
       document.head.removeChild(styleEls[0]);
       document.head.removeChild(styleEls[1]);
     });
-  });
-
-  it('should copy runtime styles from ampdoc', () => {
-    const parentRoot = document.createElement('div');
-    const style = document.createElement('style');
-    style.setAttribute('amp-runtime', '');
-    style.textContent = '/*runtime*/';
-    parentRoot.appendChild(style);
-    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
-    const shadowRoot = document.createElement('div');
-    styles.copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-    const copy = shadowRoot.querySelector('style[amp-runtime]');
-    expect(copy).to.exist;
-    expect(copy.textContent).to.equal('/*runtime*/');
-    expect(copy).to.not.equal(style);
   });
 });

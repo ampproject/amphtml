@@ -207,7 +207,7 @@ describe('EventHelper', () => {
     }).then(() => {
       throw new Error('Should not be reached.');
     }, reason => {
-      expect(reason.message).to.include('Failed HTTP request for');
+      expect(reason.message).to.include('Failed to load');
     });
     errorObservable.fire(getEvent('error', element));
     return promise;

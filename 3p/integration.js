@@ -52,6 +52,7 @@ import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
 import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
+import {atomx} from '../ads/atomx';
 import {caprofitx} from '../ads/caprofitx';
 import {chargeads} from '../ads/chargeads';
 import {colombia} from '../ads/colombia';
@@ -131,6 +132,7 @@ register('adtech', adtech);
 register('aduptech', aduptech);
 register('amoad', amoad);
 register('appnexus', appnexus);
+register('atomx', atomx);
 register('caprofitx', caprofitx);
 register('chargeads', chargeads);
 register('colombia', colombia);
@@ -201,7 +203,7 @@ const defaultAllowedTypesInCustomFrame = [
 // List of ad networks that will manually call `window.context.renderStart` to
 // emit render-start event when ad actually starts rendering. Please add
 // yourself here if you'd like to do so (which we encourage).
-const waitForRenderStart = [
+export const waitForRenderStart = [
   'doubleclick',
 ];
 
@@ -218,8 +220,6 @@ const waitForRenderStart = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user().assert(win.context.location.originValidated != null,
-      'Origin should have been validated');
 
   user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
@@ -339,9 +339,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     updateVisibilityState(window);
     // Subscribe to page visibility updates.
     nonSensitiveDataPostMessage('send-embed-state');
-    if (waitForRenderStart.indexOf(data.type) < 0) {
-      triggerRenderStart();
-    }
+    nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
     if (!window.context.mode.test) {
       lightweightErrorReport(e);
@@ -445,8 +443,7 @@ function reportRenderedEntityIdentifier(entityId) {
 /**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
- * For browsers that don't support ancestorOrigins it adds
- * `originValidated = false` to the location object.
+ * Only check for browsers that support ancestorOrigins
  * @param {!Window} window
  * @param {!Location} parentLocation
  * @visibleForTesting
@@ -457,13 +454,11 @@ export function validateParentOrigin(window, parentLocation) {
   // ancestorOrigins. In that case we proceed but mark the origin
   // as non-validated.
   if (!ancestors || !ancestors.length) {
-    parentLocation.originValidated = false;
     return;
   }
   user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
-  parentLocation.originValidated = true;
 }
 
 /**

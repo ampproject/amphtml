@@ -75,6 +75,7 @@ tags: {  # <amp-social-share>
       allowed_protocol: "whatsapp"
       allow_relative: false
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
