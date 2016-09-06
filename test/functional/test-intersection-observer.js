@@ -44,21 +44,27 @@ describe('getIntersectionChangeEntry', () => {
     expect(change).to.be.object;
     expect(change.time).to.equal(Date.now());
 
-    expect(change.rootBounds).to.equal(rootBounds);
-    expect(change.rootBounds.x).to.equal(0);
-    expect(change.rootBounds.y).to.equal(100);
-    expect(change.boundingClientRect).to.jsonEqual({
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 100,
+      'width': 100,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 0,
+      'y': 100,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
       'left': 50,
-      'top': -50,
+      'top': 50,
       'width': 150,
       'height': 200,
-      'bottom': 150,
+      'bottom': 250,
       'right': 200,
       'x': 50,
-      'y': -50,
+      'y': 50,
     });
-    expect(change.intersectionRect.height).to.equal(100);
-    expect(change.intersectionRect).to.jsonEqual({
+    expect(change.intersectionRect).to.deep.equal({
       'left': 50,
       'top': 100,
       'width': 50,
@@ -68,6 +74,7 @@ describe('getIntersectionChangeEntry', () => {
       'x': 50,
       'y': 100,
     });
+    expect(change.intersectionRatio).to.be.closeTo(0.1666666, .0001);
   });
 
   it('intersect correctly 2', () => {
@@ -75,8 +82,7 @@ describe('getIntersectionChangeEntry', () => {
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
 
-    expect(change.intersectionRect.height).to.equal(1);
-    expect(change.intersectionRect).to.jsonEqual({
+    expect(change.intersectionRect).to.deep.equal({
       'left': 50,
       'top': 199,
       'width': 50,

@@ -81,22 +81,20 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
       'Negative dimensions in ad.');
   // Building an IntersectionObserverEntry.
 
-  let boundingClientRect = element;
+  let intersectionRect = element;
   if (owner) {
-    boundingClientRect = rectIntersection(owner, boundingClientRect) ||
+    intersectionRect = rectIntersection(owner, intersectionRect) ||
+        // No intersection.
         layoutRectLtwh(0, 0, 0, 0);
   }
-  boundingClientRect = moveLayoutRect(boundingClientRect, -viewport.left,
-      -viewport.top);
-
-  const intersectionRect = rectIntersection(viewport, boundingClientRect) ||
+  intersectionRect = rectIntersection(viewport, intersectionRect) ||
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
 
   return {
     time: Date.now(),
     rootBounds: DomRectFromLayoutRect(viewport),
-    boundingClientRect: DomRectFromLayoutRect(boundingClientRect),
+    boundingClientRect: DomRectFromLayoutRect(element),
     intersectionRect: DomRectFromLayoutRect(intersectionRect),
     intersectionRatio: intersectionRatio(intersectionRect, element),
   };
