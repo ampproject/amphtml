@@ -78,12 +78,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
-    id: 'amp-live-list',
-    name: 'AMP Live List/Blog',
-    spec: 'https://github.com/ampproject/amphtml/issues/2762',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -150,6 +144,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
+    id: 'amp-apester-media',
+    name: 'AMP extension for Apester media',
+    spec: 'https://github.com/ampproject/amphtml/issues/3233',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
+  },
+  {
     id: 'amp-ios-overflow-x',
     name: 'Fixes a horizontal scroll issue on iOS browsers.',
     spec: 'https://github.com/ampproject/amphtml/issues/3712',
@@ -174,6 +174,12 @@ const EXPERIMENTS = [
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
+  {
+    id: 'amp-fresh',
+    name: 'Guaranteed minimum freshness on sections of a page',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
 ];
 

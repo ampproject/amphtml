@@ -121,10 +121,23 @@ export class AccessServerJwtAdapter {
     /** @private @const {string} */
     this.serviceUrl_ = serviceUrlOverride || removeFragment(win.location.href);
 
-    /** @const @private {string} */
-    this.keyUrl_ = user().assert(configJson['publicKeyUrl'],
-        '"publicKeyUrl" URL must be specified');
-    assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
+    /** @const @private {?string} */
+    this.key_ = configJson['publicKey'] || null;
+
+    /** @const @private {?string} */
+    this.keyUrl_ = configJson['publicKeyUrl'] || null;
+
+    user().assert(this.key_ || this.keyUrl_,
+        '"publicKey" or "publicKeyUrl" must be specified');
+    if (this.keyUrl_) {
+      assertHttpsUrl(this.keyUrl_, '"publicKeyUrl"');
+    }
+    if (this.key_ && this.keyUrl_) {
+      // TODO(dvoytenko): Remove "publicKey" option eventually.
+      user().warn(TAG,
+          'Both "publicKey" and "publicKeyUrl" specified. ' +
+          'The "publicKeyUrl" will be ignored.');
+    }
 
     /** @private @const {!JwtHelper} */
     this.jwtHelper_ = new JwtHelper(win);
@@ -136,6 +149,7 @@ export class AccessServerJwtAdapter {
       'client': this.clientAdapter_.getConfig(),
       'proxy': this.isProxyOrigin_,
       'serverState': this.serverState_,
+      'publicKey': this.key_,
       'publicKeyUrl': this.keyUrl_,
     };
   }
@@ -155,6 +169,11 @@ export class AccessServerJwtAdapter {
       return this.authorizeOnClient_();
     }
     return this.authorizeOnServer_();
+  }
+
+  /** @override */
+  isPingbackEnabled() {
+    return this.clientAdapter_.isPingbackEnabled();
   }
 
   /** @override */
@@ -188,7 +207,8 @@ export class AccessServerJwtAdapter {
       // Validate JWT in the development mode.
       if (this.jwtHelper_.isVerificationSupported()) {
         jwtPromise = jwtPromise.then(resp => {
-          return this.jwtHelper_.decodeAndVerify(resp.encoded, this.keyUrl_)
+          return this.jwtHelper_
+              .decodeAndVerify(resp.encoded, this.loadKeyPem_())
               .then(() => resp);
         });
       } else {
@@ -203,6 +223,17 @@ export class AccessServerJwtAdapter {
     return jwtPromise.catch(reason => {
       throw user().createError('JWT fetch or validation failed: ', reason);
     });
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  loadKeyPem_() {
+    if (this.key_) {
+      return Promise.resolve(this.key_);
+    }
+    return this.xhr_.fetchText(this.keyUrl_);
   }
 
   /**

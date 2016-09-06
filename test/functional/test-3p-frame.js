@@ -157,11 +157,6 @@ describe('3p-frame', () => {
       expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');
-      if (location.ancestorOrigins) {
-        expect(win.context.location.originValidated).to.be.true;
-      } else {
-        expect(win.context.location.originValidated).to.be.false;
-      }
       expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
       expect(win.context.referrer).to.equal('http://acme.org/');
       expect(win.context.data.testAttr).to.equal('value');
