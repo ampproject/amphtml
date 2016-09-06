@@ -21,7 +21,7 @@ limitations under the License.
   <tr>
     <td width="40%"><strong>Description</strong></td>
     <td>
-    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="https://platform.beachfrontreach.com">Beachfront Reach</a> platform.
+    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="https://beachfrontreach.com">Beachfront Reach</a> platform.
     </td>
   </tr>
   <tr>
