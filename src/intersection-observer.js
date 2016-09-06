@@ -15,7 +15,7 @@
  */
 
 import {dev} from './log';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
+import {layoutRectLtwh, rectIntersection} from './layout-rect';
 import {SubscriptionApi} from './iframe-helper';
 import {timerFor} from './timer';
 

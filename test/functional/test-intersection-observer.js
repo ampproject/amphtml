@@ -26,10 +26,9 @@ import * as sinon from 'sinon';
 
 describe('getIntersectionChangeEntry', () => {
   let sandbox;
-  let clock;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
+    sandbox.useFakeTimers();
   });
 
   afterEach(() => {
