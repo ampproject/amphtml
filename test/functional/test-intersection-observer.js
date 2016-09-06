@@ -110,6 +110,48 @@ describe('getIntersectionChangeEntry', () => {
     expect(change.intersectionRect.height).to.equal(0);
     expect(change.intersectionRect.width).to.equal(0);
   });
+
+  it.only('intersects with an owner element', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(40, 110, 20, 20);
+    const layoutBox = layoutRectLtwh(50, 50, 150, 200);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds, rootBounds);
+
+    expect(change).to.be.object;
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 100,
+      'width': 100,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 0,
+      'y': 100,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 50,
+      'width': 150,
+      'height': 200,
+      'bottom': 250,
+      'right': 200,
+      'x': 50,
+      'y': 50,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 50,
+      'top': 110,
+      'width': 10,
+      'height': 20,
+      'bottom': 130,
+      'right': 60,
+      'x': 50,
+      'y': 110,
+    });
+    expect(change.intersectionRatio).to.be.closeTo(0.0066666, .0001);
+  });
 });
 
 
