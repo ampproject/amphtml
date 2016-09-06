@@ -25,6 +25,16 @@ import * as sinon from 'sinon';
 
 
 describe('getIntersectionChangeEntry', () => {
+  let sandbox;
+  let clock;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   it('intersect correctly base', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
@@ -32,7 +42,7 @@ describe('getIntersectionChangeEntry', () => {
     const change = getIntersectionChangeEntry(layoutBox, rootBounds);
 
     expect(change).to.be.object;
-    expect(change.time).to.equal(123);
+    expect(change.time).to.equal(Date.now());
 
     expect(change.rootBounds).to.equal(rootBounds);
     expect(change.rootBounds.x).to.equal(0);
@@ -64,7 +74,6 @@ describe('getIntersectionChangeEntry', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
     const change = getIntersectionChangeEntry(layoutBox, rootBounds);
-    expect(change.time).to.equal(111);
 
     expect(change.intersectionRect.height).to.equal(1);
     expect(change.intersectionRect).to.jsonEqual({
