@@ -15,7 +15,7 @@
  */
 
 import {timerFor} from './timer';
-import {dev, user} from './log';
+import {user} from './log';
 
 
 /**
