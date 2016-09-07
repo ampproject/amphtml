@@ -22,6 +22,8 @@ import {waitForBody} from './dom';
 import {waitForExtensions} from './render-delaying-extensions';
 
 
+const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
+
 /**
  * Adds the given css text to the given document.
  *
@@ -124,11 +126,20 @@ export function makeBodyVisible(doc, opt_waitForExtensions) {
         doc.body.style['WebkitAnimation'] = 'none';
       }
     }
+
+    if (opt_waitForExtensions) {
+      try {
+        const perf = performanceFor(doc.defaultView);
+        perf.tick('mbv');
+        perf.flush();
+      } catch (e) {}
+    }
   };
   waitForBody(doc, () => {
-    const perf = performanceFor(doc.defaultView);
-    perf.tick('mvb');
-    perf.flush();
+    if (doc.defaultView[bodyVisibleSentinel]) {
+      return;
+    }
+    doc.defaultView[bodyVisibleSentinel] = true;
     const extensionsPromise = opt_waitForExtensions ?
         waitForExtensions(doc.defaultView) : null;
     if (extensionsPromise) {
