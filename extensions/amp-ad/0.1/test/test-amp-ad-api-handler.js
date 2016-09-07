@@ -135,8 +135,7 @@ describe('amp-ad-api-handler', () => {
               iframe.postMessageToParent({
                 sentinel: 'amp3ptest' + testIndex,
                 type: 'render-start',
-                height: 217,
-                width: 114,
+                opt_data: {width: 114, height: 217},
               });
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');

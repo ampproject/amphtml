@@ -39,7 +39,7 @@ export function fakead3p(global, data) {
       width = Number(data.iframewidth);
     }
     document.body.appendChild(img);
-    context.renderStart(width, height);
+    context.renderStart({width, height});
   } else {
     context.noContentAvailable();
   }
