@@ -128,6 +128,27 @@ export class FixedLayer {
   }
 
   /**
+   * Apply translateY transform to adjust the top-anchored position fixed
+   * elements temporarily.
+   * @param {number} p
+   */
+  transitPaddingMutate(p) {
+    this.fixedElements_.forEach(e => {
+      if (e.fixedNow && e.top) {
+        e.element.style.transform = (e.transform || '') + ` translateY(${p}px)`;
+      }
+    });
+  }
+
+  resetTransitPaddingMutate() {
+    this.fixedElements_.forEach(e => {
+      if (e.fixedNow && e.top) {
+        e.element.style.transform = ``;
+      }
+    });
+  }
+
+  /**
    * Adds the element directly into the fixed layer, bypassing discovery.
    * @param {!Element} element
    */
@@ -278,6 +299,7 @@ export class FixedLayer {
             transferrable: isTransferrable,
             top,
             zIndex: styles.getPropertyValue('z-index'),
+            transform: styles.transform,
           };
         });
       },
@@ -429,6 +451,8 @@ export class FixedLayer {
     const oldFixed = fe.fixedNow;
 
     fe.fixedNow = state.fixed;
+    fe.top = state.fixed ? state.top : '';
+    fe.transform = state.transform;
     if (state.fixed) {
       // Update `top`. This is necessary to adjust position to the viewer's
       // paddingTop.
@@ -615,6 +639,7 @@ export class FixedLayer {
  *   element: !Element,
  *   placeholder: ?Element,
  *   fixedNow: boolean,
+ *   top: string,
  * }}
  */
 let FixedElementDef;
