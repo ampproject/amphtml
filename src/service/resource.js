@@ -154,10 +154,15 @@ export class Resource {
     */
     this.pendingChangeSize_ = undefined;
 
+    /** @private {boolean} */
+    this.loadedOnce_ = false;
+
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
       /** @const  */
       this.loadPromiseResolve_ = resolve;
+    }).then(() => {
+      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -573,11 +578,20 @@ export class Resource {
 
   /**
    * Returns a promise that is resolved when this resource is laid out
-   * for the first time and the resource was loaded.
+   * for the first time and the resource was loaded. Note that the resource
+   * could be unloaded subsequently. This method returns resolved promise for
+   * sunch unloaded elements.
    * @return {!Promise}
    */
-  loaded() {
+  loadedOnce() {
     return this.loadPromise_;
+  }
+
+  /**
+   * @return {boolean} true if the resource has been loaded at least once.
+   */
+  hasLoadedOnce() {
+    return this.loadedOnce_;
   }
 
   /**
