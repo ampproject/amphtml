@@ -25,7 +25,12 @@ import {
 import {waitForRenderStart} from '../../../3p/integration';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
+import {performanceFor} from '../../../src/performance';
 import {user} from '../../../src/log';
+
+const adTypeAbbrevTable = {
+  'doubleclick': 'dc',
+};
 
 export class AmpAdApiHandler {
 
@@ -116,12 +121,24 @@ export class AmpAdApiHandler {
         (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0);
 
     if (renderStartImplemented) {
+      const perf = performanceFor(this.baseInstance_.win);
+      const initTime = Date.now();
+      const adTag = adTypeAbbrevTable[this.baseInstance_.adType];
+      // Report performance for all renderStartImplemented cases.
+      // This is needed to calculate the perc of receiving nothing from ad.
+      perf.tickDelta(adTag, 0);
+      perf.flush();
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
           if (info.data.type == 'render-start') {
-              //report performance
+            //report performance for render-start received cases
+            perf.tickDelta(adTag + '_rs', Date.now() - initTime);
+            perf.flush();
           } else {
+            //report performance for no-content received cases
+            perf.tickDelta(adTag + '_nc', Date.now() - initTime);
+            perf.flush();
             //TODO: make noContentCallback_ default
             if (this.noContentCallback_) {
               this.noContentCallback_();
