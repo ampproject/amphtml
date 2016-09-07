@@ -20,7 +20,7 @@ amp-carousel {
 /**
  * `amp-carousel-slide` class is added to every item in the carousel to
  * allow page authors to target items for user-defined styling.
- * Every `<amp-carousel>'s` immediate children is considered an item in
+ * Every `<amp-carousel>'s` immediate child is considered a slide in
  * the carousel.
  */
 amp-carousel-slide {
