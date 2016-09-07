@@ -269,6 +269,7 @@ describe('CustomElement', () => {
 
   it('Element - getIntersectionChangeEntry', () => {
     const element = new ElementClass();
+    element.attachedCallback();
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     element.getIntersectionChangeEntry();
     expect(testElementGetInsersectionElementLayoutBox.callCount).to.equal(1);
