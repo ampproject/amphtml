@@ -24,7 +24,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 
-describe('getIntersectionChangeEntry', () => {
+describe.only('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -76,6 +76,47 @@ describe('getIntersectionChangeEntry', () => {
     expect(change.intersectionRatio).to.be.closeTo(0.1666666, .0001);
   });
 
+  it('intersects on the edge', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 200, 150, 200);
+    const change = getIntersectionChangeEntry(layoutBox, null, rootBounds);
+
+    expect(change).to.be.object;
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 100,
+      'width': 100,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 0,
+      'y': 100,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 200,
+      'width': 150,
+      'height': 200,
+      'bottom': 400,
+      'right': 200,
+      'x': 50,
+      'y': 200,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 50,
+      'top': 200,
+      'width': 50,
+      'height': 0,
+      'bottom': 200,
+      'right': 100,
+      'x': 50,
+      'y': 200,
+    });
+    expect(change.intersectionRatio).to.equal(0);
+  });
+
   it('intersect correctly 2', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const layoutBox = layoutRectLtwh(50, 199, 150, 200);
@@ -111,11 +152,12 @@ describe('getIntersectionChangeEntry', () => {
     expect(change.intersectionRect.width).to.equal(0);
   });
 
-  it.only('intersects with an owner element', () => {
+  it('intersects with an owner element', () => {
     const rootBounds = layoutRectLtwh(0, 100, 100, 100);
     const ownerBounds = layoutRectLtwh(40, 110, 20, 20);
     const layoutBox = layoutRectLtwh(50, 50, 150, 200);
-    const change = getIntersectionChangeEntry(layoutBox, ownerBounds, rootBounds);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
 
     expect(change).to.be.object;
     expect(change.time).to.equal(Date.now());
@@ -151,6 +193,92 @@ describe('getIntersectionChangeEntry', () => {
       'y': 110,
     });
     expect(change.intersectionRatio).to.be.closeTo(0.0066666, .0001);
+  });
+
+  it('does not intersect with an elements out of viewport', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(0, 200, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
+
+    expect(change).to.be.object;
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 100,
+      'width': 100,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 0,
+      'y': 100,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 225,
+      'width': 100,
+      'height': 100,
+      'bottom': 325,
+      'right': 150,
+      'x': 50,
+      'y': 225,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 0,
+      'height': 0,
+      'bottom': 0,
+      'right': 0,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.intersectionRatio).to.equal(0);
+  });
+
+  it('does not intersect with an element out of viewport', () => {
+    const rootBounds = layoutRectLtwh(0, 100, 100, 100);
+    const ownerBounds = layoutRectLtwh(0, 100, 100, 100);
+    const layoutBox = layoutRectLtwh(50, 225, 100, 100);
+    const change = getIntersectionChangeEntry(layoutBox, ownerBounds,
+        rootBounds);
+
+    expect(change).to.be.object;
+    expect(change.time).to.equal(Date.now());
+
+    expect(change.rootBounds).to.deep.equal({
+      'left': 0,
+      'top': 100,
+      'width': 100,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 0,
+      'y': 100,
+    });
+    expect(change.boundingClientRect).to.deep.equal({
+      'left': 50,
+      'top': 225,
+      'width': 100,
+      'height': 100,
+      'bottom': 325,
+      'right': 150,
+      'x': 50,
+      'y': 225,
+    });
+    expect(change.intersectionRect).to.deep.equal({
+      'left': 0,
+      'top': 0,
+      'width': 0,
+      'height': 0,
+      'bottom': 0,
+      'right': 0,
+      'x': 0,
+      'y': 0,
+    });
+    expect(change.intersectionRatio).to.equal(0);
   });
 });
 
