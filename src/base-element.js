@@ -486,6 +486,22 @@ export class BaseElement {
   }
 
   /**
+   * Utility method that bubbles events from the given element
+   * to this element.
+   * @param  {!Array<string>} events
+   * @param  {!Element} element
+   * @protected @final
+   */
+  bubbleEvents(events, element) {
+    for (let i = 0; i < events.length; i++) {
+      const name = events[i];
+      element.addEventListener(name, event => {
+        this.element.dispatchCustomEvent(name, event.data || {});
+      });
+    }
+  }
+
+  /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
    * @protected @final

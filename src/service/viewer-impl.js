@@ -152,7 +152,7 @@ export class Viewer {
     /** @private {?string} */
     this.messagingOrigin_ = null;
 
-    /** @private {!Array<{!eventType: string, data: *}>} */
+    /** @private {!Array<!{eventType: string, data: *}>} */
     this.messageQueue_ = [];
 
     /** @const @private {!Object<string, string>} */

@@ -18,7 +18,7 @@ import {listen, listenOnce, listenOncePromise} from '../event-helper';
 import {dev} from '../log';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
-import {VideoEvents} from '../video-interface';
+import {VideoEvents, VideoAttributes} from '../video-interface';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 
@@ -45,7 +45,7 @@ export class VideoManager {
     /** @private @const {!Window} */
     this.win_ = ampdoc.win;
 
-    /** @private {?Array<{!../video-interface.VideoInterface}>} */
+    /** @private {?Array<!../video-interface.VideoInterface>} */
     this.entries_ = null;
 
     /** @private {boolean} */
@@ -61,7 +61,7 @@ export class VideoManager {
 
     // TODO(aghassemi): Remove this later. For now, VideoManager only matters
     // for autoplay videos so no point in registering arbitrary videos yet.
-    if (!video.hasAutoplay() ||
+    if (!video.element.hasAttribute(VideoAttributes.AUTOPLAY) ||
         !platformSupportsAutoplay(platformFor(this.win_))) {
       return;
     }
@@ -133,16 +133,16 @@ class VideoEntry {
     this.vsync_ = vsyncFor(win);
 
     /** @private {boolean} */
-    this.canAutoplay_ = video.hasAutoplay() &&
+    this.canAutoplay_ = video.element.hasAttribute(VideoAttributes.AUTOPLAY) &&
         platformSupportsAutoplay(platformFor(win));
 
     const element = dev().assert(video.element);
 
-    listenOncePromise(element, VideoEvents.BUILT)
-      .then(() => this.videoBuilt_());
-
-    listenOncePromise(element, VideoEvents.CAN_PLAY)
+    listenOncePromise(element, VideoEvents.CANPLAY)
       .then(() => this.videoLoaded_());
+
+    // Currently we only register after video player is build.
+    this.videoBuilt_();
   }
 
   /**
@@ -207,7 +207,7 @@ class VideoEntry {
 
     // If autoplay video has controls, hide them and only show them on
     // user-ineraction.
-    if (this.video.hasControls()) {
+    if (this.video.element.hasAttribute(VideoAttributes.CONTROLS)) {
       this.video.hideControls();
 
       // TODO(aghassemi): This won't work for iframes, needs a transparent shim

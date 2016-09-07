@@ -52,15 +52,14 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
-      videoManagerForDoc(this.win.document).register(this);
-
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
+      this.bubbleEvents([VideoEvents.CANPLAY], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
-      this.element.dispatchCustomEvent(VideoEvents.BUILT);
+      videoManagerForDoc(this.win.document).register(this);
     }
 
     /** @override */
@@ -78,10 +77,6 @@ export function installVideo(win) {
       if (this.element.getAttribute('src')) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
-
-      listenOncePromise(this.video_, 'canplay').then(() => {
-        this.element.dispatchCustomEvent(VideoEvents.CAN_PLAY);
-      });
 
       // Do not propagate `autoplay`. Autoplay behaviour is managed by
       // video manager since amp-video implements the VideoInterface
@@ -134,61 +129,49 @@ export function installVideo(win) {
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     play(unusedIsAutoplay) {
       this.video_.play();
-      return listenOncePromise(this.video_, 'play');
     }
 
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     pause() {
       this.video_.pause();
-      return listenOncePromise(this.video_, 'pause');
     }
 
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     mute() {
-      this.video_.setAttribute('muted', '');
-      return Promise.resolve();
+      this.video_.muted = true;
     }
 
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     unmute() {
-      this.video_.removeAttribute('muted');
-      return Promise.resolve();
+      this.video_.muted = false;
     }
 
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     showControls() {
-      this.video_.setAttribute('controls', '');
-      return Promise.resolve();
+      this.video_.controls = true;
     }
 
     /**
      * @override
      * {@see ../src/video-interface.VideoInterface}
-     * @return {!Promise}
      */
     hideControls() {
-      this.video_.removeAttribute('controls');
-      return Promise.resolve();
+      this.video_.controls = false;
     }
   }
 
