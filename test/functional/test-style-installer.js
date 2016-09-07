@@ -24,15 +24,18 @@ import * as styles from '../../src/style-installer';
 describe('Styles', () => {
   let sandbox;
   let clock;
+  let perf;
+  const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    installPerformanceService(document.defaultView);
+    perf = installPerformanceService(document.defaultView);
   });
 
   afterEach(() => {
     resetServiceForTesting(document.defaultView, 'performance');
+    delete document.defaultView[bodyVisibleSentinel];
     sandbox.restore();
   });
 
@@ -75,5 +78,19 @@ describe('Styles', () => {
       document.head.removeChild(styleEls[0]);
       document.head.removeChild(styleEls[1]);
     });
+  });
+
+  it('should only set body to be visible only once per document', () => {
+    const tickSpy = sandbox.spy(perf, 'tick');
+    expect(tickSpy.callCount).to.equal(0);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.undefined;
+    styles.makeBodyVisible(document, true);
+    // mbv = make body visible
+    expect(tickSpy.lastCall.args[0]).to.equal('mbv');
+    expect(tickSpy.callCount).to.equal(1);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
+    styles.makeBodyVisible(document, true);
+    expect(tickSpy.callCount).to.equal(1);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
   });
 });
