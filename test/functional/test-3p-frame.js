@@ -102,10 +102,35 @@ describe('3p-frame', () => {
     div.setAttribute('height', '100');
     div.setAttribute('ampcid', 'cidValue');
 
-    div.getLayoutBox = function() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    div.getIntersectionChangeEntry = function() {
       return {
-        width: 100,
-        height: 200,
+        time: 1234567888,
+        rootBounds: {
+          left: 0,
+          top: 0,
+          width,
+          height,
+          bottom: height,
+          right: width,
+          x: 0,
+          y: 0,
+        },
+        boundingClientRect: {
+          width: 100,
+          height: 200,
+        },
+        intersectionRect: {
+          left: 0,
+          top: 0,
+          width: 0,
+          height: 0,
+          bottom: 0,
+          right: 0,
+          x: 0,
+          y: 0,
+        },
       };
     };
 
@@ -121,8 +146,6 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoForDoc(window.document);
     expect(docInfo.pageViewId).to.not.be.empty;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
     const amp3pSentinel = iframe.getAttribute('data-amp-3p-sentinel');
     const fragment =
         '{"testAttr":"value","ping":"pong","width":50,"height":100,' +
@@ -273,10 +296,16 @@ describe('3p-frame', () => {
 
     const div = document.createElement('div');
     div.setAttribute('type', '_ping_');
-    div.getLayoutBox = function() {
+    div.getIntersectionChangeEntry = function() {
       return {
-        width: 100,
-        height: 200,
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        bottom: 0,
+        right: 0,
+        x: 0,
+        y: 0,
       };
     };
 

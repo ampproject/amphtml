@@ -874,11 +874,11 @@ function createBaseAmpElementProto(win) {
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
-    const rootBounds = this.implementation_.getViewport().getRect();
-    return getIntersectionChangeEntry(
-        Date.now(),
-        rootBounds,
-        box);
+    const owner = this.resources_.getResourceForElement(this).getOwner();
+    const viewportBox = this.implementation_.getViewport().getRect();
+    // TODO(jridgewell, #4826): We may need to make this recursive.
+    const ownerBox = owner && owner.getLayoutBox();
+    return getIntersectionChangeEntry(box, ownerBox, viewportBox);
   };
 
   /**
