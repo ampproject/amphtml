@@ -28,6 +28,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
+    this.iframe_ = iframe;
 
     const embedCode = user().assert(
         encodeURIComponent(this.element.getAttribute('data-embedcode')),
@@ -66,6 +67,19 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     return loadPromise(iframe);
   }
 
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+      return true;
+  }
 };
 
 AMP.registerElement('amp-ooyala-player', AmpOoyalaPlayer);
