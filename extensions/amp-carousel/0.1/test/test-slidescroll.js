@@ -66,7 +66,7 @@ describe('SlideScroll', () => {
     });
   }
 
-  it('should create container and wrappers and show intial slides', () => {
+  it('should create container and wrappers and show initial slides', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
       expect(
@@ -75,6 +75,9 @@ describe('SlideScroll', () => {
       expect(
           ampSlideScroll.querySelectorAll(
             '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
+      expect(
+          ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
+              .to.equal(5);
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
