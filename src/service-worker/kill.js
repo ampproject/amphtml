@@ -20,7 +20,11 @@ self.addEventListener('install', function(event) {
   // Usually when you register a new service worker, it has to wait for a
   // navigation (refreshing the page) before it really starts. Well, we can't
   // wait to kill it, so skip the wait.
-  event.waitUntil(self.skipWaiting());
+  // NOTE(erwinm): add type hint that self is ServiceWorkerGlobalScope until
+  // we can cleanly denote that the global object is ServiceWorkerGlobalScope
+  // and not Window.
+  event.waitUntil(/** @type {!ServiceWorkerGlobalScope} */ (
+      self).skipWaiting());
 });
 
 self.addEventListener('activate', function(event) {

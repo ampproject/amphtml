@@ -15,7 +15,7 @@
  */
 
 import '../../third_party/babel/custom-babel-helpers';
-import urls from '../config';
+import {urls} from '../config';
 
 /**
  * The SW's current version.
