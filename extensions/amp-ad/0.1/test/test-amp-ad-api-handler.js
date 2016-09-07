@@ -120,7 +120,9 @@ describe('amp-ad-api-handler', () => {
       it('should resolve and resize on message "render-start" w/ size if '
           + 'render-start is implemented by 3P', () => {
         adImpl.adType = 'doubleclick';
-        sandbox.stub(adImpl, 'attemptChangeSize', () => {
+        sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+          expect(height).to.equal(217);
+          expect(width).to.equal(114);
           return Promise.resolve();
         });
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
@@ -135,7 +137,8 @@ describe('amp-ad-api-handler', () => {
               iframe.postMessageToParent({
                 sentinel: 'amp3ptest' + testIndex,
                 type: 'render-start',
-                opt_data: {width: 114, height: 217},
+                width: 114,
+                height: 217,
               });
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
@@ -209,7 +212,9 @@ describe('amp-ad-api-handler', () => {
 
 
     it('should be able to use embed-size API, change size deny', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.equal(114);
         return Promise.reject(new Error('for testing'));
       });
       iframe.postMessageToParent({
@@ -227,7 +232,9 @@ describe('amp-ad-api-handler', () => {
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.equal(114);
         return Promise.resolve();
       });
       iframe.postMessageToParent({
@@ -245,7 +252,9 @@ describe('amp-ad-api-handler', () => {
     });
 
     it('should be able to use embed-size API to resize height only', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.be.undefined;
         return Promise.resolve();
       });
       iframe.postMessageToParent({
