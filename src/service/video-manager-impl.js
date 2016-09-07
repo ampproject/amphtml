@@ -46,7 +46,7 @@ export class VideoManager {
     this.win_ = ampdoc.win;
 
     /** @private {?Array<{!../video-interface.VideoInterface}>} */
-    this.entries_;
+    this.entries_ = null;
 
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;

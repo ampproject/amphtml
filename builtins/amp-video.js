@@ -86,7 +86,7 @@ export function installVideo(win) {
       // Do not propagate `autoplay`. Autoplay behaviour is managed by
       // video manager since amp-video implements the VideoInterface
       this.propagateAttributes(
-          ['src', 'muted', 'loop'],
+          ['src', 'loop'],
           this.video_);
 
       if (this.element.hasAttribute('preload')) {
@@ -123,11 +123,8 @@ export function installVideo(win) {
     }
 
     /**
-     * VideoInterface Implementation
+     * @override
      * {@see ../src/video-interface.VideoInterface}
-     */
-
-    /**
      * @return {boolean}
      */
     supportsPlatform() {
@@ -135,13 +132,8 @@ export function installVideo(win) {
     }
 
     /**
-     * @return {boolean}
-     */
-    hasAutoplay() {
-      return this.element.hasAttribute('autoplay');
-    }
-
-    /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     play(unusedIsAutoplay) {
@@ -150,6 +142,8 @@ export function installVideo(win) {
     }
 
     /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     pause() {
@@ -158,6 +152,8 @@ export function installVideo(win) {
     }
 
     /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     mute() {
@@ -166,6 +162,8 @@ export function installVideo(win) {
     }
 
     /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     unmute() {
@@ -174,13 +172,8 @@ export function installVideo(win) {
     }
 
     /**
-     * @return {boolean}
-     */
-    hasControls() {
-      return this.element.hasAttribute('controls');
-    }
-
-    /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     showControls() {
@@ -189,6 +182,8 @@ export function installVideo(win) {
     }
 
     /**
+     * @override
+     * {@see ../src/video-interface.VideoInterface}
      * @return {!Promise}
      */
     hideControls() {

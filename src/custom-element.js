@@ -511,7 +511,7 @@ function createBaseAmpElementProto(win) {
     this.implementation_.layoutWidth_ = this.layoutWidth_;
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEventForTest('amp:attached');
+      this.dispatchCustomEventForTesting('amp:attached');
       // For a never-added resource, the build will be done automatically
       // via `resources.add` on the first attach.
       this.resources_.upgraded(this);
@@ -747,9 +747,9 @@ function createBaseAmpElementProto(win) {
         if (!this.isUpgraded()) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEventForTest('amp:stubbed');
+          this.dispatchCustomEventForTesting('amp:stubbed');
         } else {
-          this.dispatchCustomEventForTest('amp:attached');
+          this.dispatchCustomEventForTesting('amp:attached');
         }
       } catch (e) {
         reportError(e, this);
@@ -832,7 +832,7 @@ function createBaseAmpElementProto(win) {
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
-  ElementProto.dispatchCustomEventForTest = function(name, opt_data) {
+  ElementProto.dispatchCustomEventForTesting = function(name, opt_data) {
     if (!getMode().test) {
       return;
     }
@@ -917,7 +917,7 @@ function createBaseAmpElementProto(win) {
     assertNotTemplate(this);
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
-    this.dispatchCustomEventForTest('amp:load:start');
+    this.dispatchCustomEventForTesting('amp:load:start');
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');

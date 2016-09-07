@@ -78,8 +78,8 @@ export function reportError(error, opt_associatedElement) {
       (console.error || console.log).call(console, error.stack);
     }
   }
-  if (element && element.dispatchCustomEventForTest) {
-    element.dispatchCustomEventForTest('amp:error', error.message);
+  if (element && element.dispatchCustomEventForTesting) {
+    element.dispatchCustomEventForTesting('amp:error', error.message);
   }
   reportErrorToServer(undefined, undefined, undefined, undefined, error);
 }
