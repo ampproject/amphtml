@@ -267,6 +267,10 @@ their
 [a4aRegistry](https://github.com/ampproject/amphtml/blob/master/ads/_a4a-config.js#L40)
 entry and use the existing '3p iframe' ad rendering mechanism.
 
+_Example:_ `<amp-facebook>`, `<amp-instagram>`, `<amp-twitter>`, and 
+`<amp-youtube>` are all omitted for the same reason as `<amp-iframe>`: They 
+all create iframes and can potentially consume unbounded resources in them.
+
 _Example:_ `<amp-ad-network-*-impl>` are omitted from this list.  The 
 `<amp-ad>` tag handles delegation to these implementation tags; creatives 
 should not attempt to include them directly.
@@ -276,12 +280,10 @@ should not attempt to include them directly.
   <tr><td>amp-analytics</td></tr>
   <tr><td>amp-anim</td></tr>
   <tr><td>amp-audio</td></tr>
-  <tr><td>amp-brid-player</td></tr>
   <tr><td>amp-brightcove</td></tr>
   <tr><td>amp-carousel</td></tr>
   <tr><td>amp-dailymotion</td></tr>
   <tr><td>amp-experiment</td></tr>
-  <tr><td>amp-facebook</td></tr>
   <tr><td>amp-fit-text</td></tr>
   <tr><td>amp-font</td></tr>
   <tr><td>amp-form</td></tr>
@@ -289,24 +291,16 @@ should not attempt to include them directly.
   <tr><td>amp-google-vrview-image</td></tr>
   <tr><td>amp-img</td></tr>
   <tr><td>amp-image-lightbox</td></tr>
-  <tr><td>amp-instagram</td></tr>
-  <tr><td>amp-jwplayer</td></tr>
-  <tr><td>amp-kaltura-player</td></tr>
   <tr><td>amp-lightbox</td></tr>
   <tr><td>amp-list</td></tr>
-  <tr><td>amp-o2-player</td></tr>
   <tr><td>amp-pinterest</td></tr>
   <tr><td>amp-pixel</td></tr>
-  <tr><td>amp-reach-player</td></tr>
-  <tr><td>amp-share-tracking</td></tr>
   <tr><td>amp-social-share</td></tr>
   <tr><td>amp-soundcloud</td></tr>
   <tr><td>amp-springboard-player</td></tr>
-  <tr><td>amp-twitter</td></tr>
   <tr><td>amp-video</td></tr>
   <tr><td>amp-vimeo</td></tr>
   <tr><td>amp-vine</td></tr>
-  <tr><td>amp-youtube</td></tr>
 </table>
 
 ### HTML Tags
