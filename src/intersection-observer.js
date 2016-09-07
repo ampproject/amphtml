@@ -78,7 +78,7 @@ function intersectionRatio(smaller, larger) {
  */
 export function getIntersectionChangeEntry(element, owner, viewport) {
   dev().assert(element.width >= 0 && element.height >= 0,
-      'Negative dimensions in ad.');
+      'Negative dimensions in element.');
   // Building an IntersectionObserverEntry.
 
   let intersectionRect = element;
