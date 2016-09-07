@@ -322,8 +322,8 @@ export class Visibility {
 
     for (let r = this.resources_.length - 1; r >= 0; r--) {
       const res = this.resources_[r];
-      if (res.isLayoutPending()) {
-        loadedPromises.push(res.loaded());
+      if (!res.hasLoadedOnce()) {
+        loadedPromises.push(res.loadedOnce());
         continue;
       }
 
