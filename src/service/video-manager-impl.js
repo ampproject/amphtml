@@ -289,11 +289,12 @@ function platformSupportsAutoplay(platform) {
     }
   }
 
-  if (platform.isIos()) {
-    if (platform.isSafari() && version >= 10) {
-      return true;
-    }
-  }
+  // TODO(aghassemi): Enable iOS after testing.
+  // if (platform.isIos()) {
+  //   if (platform.isSafari() && version >= 10) {
+  //     return true;
+  //   }
+  // }
 
   // TODO(aghassemi): Test other combinations and add support.
   // TODO(aghassemi): Is there a way to detect that autoplay has been disabled
