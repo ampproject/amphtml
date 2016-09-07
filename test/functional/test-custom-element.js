@@ -18,7 +18,7 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {resourcesForDoc} from '../../src/resources';
+import {installResourcesServiceForDoc} from '../../src/service/resources-impl';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
@@ -123,7 +123,7 @@ describe('CustomElement register', () => {
 
 describe('CustomElement', () => {
 
-  const resources = resourcesForDoc(window.document);
+  const resources = installResourcesServiceForDoc(window.document);
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
@@ -1230,7 +1230,7 @@ describe('CustomElement Loading Indicator', () => {
     prototype: createAmpElementProto(window, 'amp-test-loader', TestElement),
   });
 
-  const resources = resourcesForDoc(window.document);
+  const resources = installResourcesServiceForDoc(window.document);
   let sandbox;
   let clock;
   let element;
@@ -1506,7 +1506,7 @@ describe('CustomElement Overflow Element', () => {
     prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement),
   });
 
-  const resources = resourcesForDoc(window.document);
+  const resources = installResourcesServiceForDoc(window.document);
   let sandbox;
   let element;
   let overflowElement;
