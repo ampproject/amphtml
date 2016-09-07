@@ -163,7 +163,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     setupA2AListener(this.win);
 
-    /** @private {string|undefined} */
+    /** @private {?Element|undefined} */
     this.container_ = undefined;
   }
 
@@ -208,7 +208,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     if (this.container_ === undefined) {
       this.container_ = getAdContainer(this.element);
       if (this.container_) {
-        this.element.setAttribute('amp-container-element', this.container_);
+        this.element.setAttribute('amp-container-element',
+            this.container_.tagName);
       }
     }
     // We remeasured this tag, let's also remeasure the iframe. Should be
