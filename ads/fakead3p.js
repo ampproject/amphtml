@@ -30,13 +30,13 @@ export function fakead3p(global, data) {
       img.setAttribute('src', data.url);
     }
     let width, height;
-    if (data.iframeheight) {
-      img.setAttribute('height', data.iframeheight);
-      height = Number(data.iframeheight);
+    if (data.adHeight) {
+      img.setAttribute('height', data.adHeight);
+      height = Number(data.adHeight);
     }
-    if (data.iframewidth) {
-      img.setAttribute('width', data.iframewidth);
-      width = Number(data.iframewidth);
+    if (data.adWidth) {
+      img.setAttribute('width', data.adWidth);
+      width = Number(data.adWidth);
     }
     document.body.appendChild(img);
     context.renderStart({width, height});

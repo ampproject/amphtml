@@ -109,11 +109,8 @@ export class AmpAdApiHandler {
         ['render-start', 'no-content'], this.is3p_).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
-            const opt_data = data.opt_data;
-            if (opt_data) {
-              this.updateSize_(opt_data.height, opt_data.width,
-                  info.source, info.origin);
-            }
+            this.updateSize_(data.height, data.width,
+                info.source, info.origin);
             //report performance
           } else {
             this.noContent_();

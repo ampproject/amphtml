@@ -362,10 +362,10 @@ function triggerResizeRequest(width, height) {
 }
 
 /**
- * {{width, height}=} opt_data
+ * @param {{width, height}=} opt_data
  */
 function triggerRenderStart(opt_data) {
-  nonSensitiveDataPostMessage('render-start', {opt_data});
+  nonSensitiveDataPostMessage('render-start', opt_data);
 }
 
 /**
