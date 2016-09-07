@@ -18,14 +18,10 @@
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {childElementByAttr} from '../../../src/dom';
 import {installLiveListManager, LiveListManager} from './live-list-manager';
-import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
 
-
-/** @const */
-const TAG = 'amp-live-list';
 
 /**
  * @enum {!Object<string, string>}
@@ -119,14 +115,6 @@ export class AmpLiveList extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, TAG);
-
-    if (!this.isExperimentOn_) {
-      user().warn(TAG, `Experiment ${TAG} disabled`);
-      return;
-    }
-
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
 
