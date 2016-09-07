@@ -275,32 +275,24 @@ _Example:_ `<amp-ad-network-*-impl>` are omitted from this list.  The
 `<amp-ad>` tag handles delegation to these implementation tags; creatives 
 should not attempt to include them directly.
 
+_Example:_ `<amp-lightbox>` is not yet included because even some A4A creatives
+may be rendered in an iframe and there is currently no mechanism for an ad to
+expand beyond an iframe.  Support may be added for this in the future, if there
+is demonstrated desire for it.
+
 <table>
   <tr><td>amp-accordion</td></tr>
   <tr><td>amp-analytics</td></tr>
   <tr><td>amp-anim</td></tr>
   <tr><td>amp-audio</td></tr>
-  <tr><td>amp-brightcove</td></tr>
   <tr><td>amp-carousel</td></tr>
-  <tr><td>amp-dailymotion</td></tr>
-  <tr><td>amp-experiment</td></tr>
   <tr><td>amp-fit-text</td></tr>
   <tr><td>amp-font</td></tr>
   <tr><td>amp-form</td></tr>
-  <tr><td>amp-fx-flying-carpet</td></tr>
-  <tr><td>amp-google-vrview-image</td></tr>
   <tr><td>amp-img</td></tr>
-  <tr><td>amp-image-lightbox</td></tr>
-  <tr><td>amp-lightbox</td></tr>
-  <tr><td>amp-list</td></tr>
-  <tr><td>amp-pinterest</td></tr>
   <tr><td>amp-pixel</td></tr>
   <tr><td>amp-social-share</td></tr>
-  <tr><td>amp-soundcloud</td></tr>
-  <tr><td>amp-springboard-player</td></tr>
   <tr><td>amp-video</td></tr>
-  <tr><td>amp-vimeo</td></tr>
-  <tr><td>amp-vine</td></tr>
 </table>
 
 ### HTML Tags
