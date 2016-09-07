@@ -24,7 +24,7 @@ import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
 
-describe.only('getIntersectionChangeEntry', () => {
+describe('getIntersectionChangeEntry', () => {
   let sandbox;
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
