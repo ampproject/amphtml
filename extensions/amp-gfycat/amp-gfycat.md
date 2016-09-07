@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -73,9 +73,9 @@ Click on the embed link </>. Copy the width and height specified in the fixed IF
 ```html
 <iframe src='https://gfycat.com/ifr/TautWhoppingCougar' frameborder='0' scrolling='no' width='640' height='360' allowfullscreen></iframe>
 ```
-**data-autoplay**
+**noautoplay**
 
-By default video is autoplaying. It's possible to turn it off by setting `data-autoplay=0`
+By default video is autoplaying. It's possible to turn it off by setting `noautoplay` attribute.
 
 **Example:**
 
@@ -84,6 +84,6 @@ By default video is autoplaying. It's possible to turn it off by setting `data-a
           data-gfyid="TautWhoppingCougar"
           width="640"
           height="360"
-          data-autoplay="0">
+          noautoplay>
   </amp-gfycat>
 ```

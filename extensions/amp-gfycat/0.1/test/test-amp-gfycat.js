@@ -35,8 +35,8 @@ describe('amp-gfycat', () => {
       if (opt_params && opt_params.responsive) {
         gfycat.setAttribute('layout', 'responsive');
       }
-      if (opt_params && opt_params.autoplayPaused) {
-        gfycat.setAttribute('data-autoplay', '0');
+      if (opt_params && opt_params.noautoplay) {
+        gfycat.setAttribute('noautoplay', '');
       }
       iframe.doc.body.appendChild(gfycat);
       gfycat.implementation_.layoutCallback();
@@ -63,12 +63,11 @@ describe('amp-gfycat', () => {
     });
   });
 
-  it('autoplay paused', () => {
+  it('noautoplay', () => {
     return getGfycat('LeanMediocreBeardeddragon', {
-      autoplayPaused: true,
+      noautoplay: true,
     }).then(gfycat => {
       const iframe = gfycat.querySelector('iframe');
-      gfycat.setAttribute('data-autoplay', '0');
       expect(iframe).to.not.be.null;
       expect(iframe.src)
         .to.equal('https://gfycat.com/ifr/LeanMediocreBeardeddragon?autoplay=0');

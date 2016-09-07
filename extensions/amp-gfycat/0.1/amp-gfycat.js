@@ -49,14 +49,13 @@ class AmpGfycat extends AMP.BaseElement {
       this.element.getAttribute('data-gfyid'),
       'The data-gfyid attribute is required for <amp-gfycat> %s',
       this.element);
-    const autoplay = parseInt(this.element.getAttribute('data-autoplay') ||
-        this.element.getAttribute('autoplay'), 10);
+    const noautoplay = this.element.hasAttribute('noautoplay');
 
     const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
 
     let src = 'https://gfycat.com/ifr/' + encodeURIComponent(gfyid);
-    if (autoplay === 0) {
+    if (noautoplay) {
       src += '?autoplay=0';
     }
 
