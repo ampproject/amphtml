@@ -43,7 +43,8 @@ access to a limited set of allowed tags, capabilities, and extensions.
 
    _*In addition*_:
 
-1. The creative must use `<html a4⚡>` or `<html a4amp>` as its enclosing tags.
+1. The creative must use `<html ⚡4ads>` or `<html amp4ads>` as its enclosing
+   tags.
 
    _Rationale_: Allows validators to identify a creative document as either a 
    general AMP doc or a restricted A4A doc and to dispatch appropriately.
