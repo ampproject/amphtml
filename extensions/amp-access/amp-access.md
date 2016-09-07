@@ -69,7 +69,7 @@ The solution also allows the Publisher to place in the AMP document  a Login Lin
 
 In its basic form, this solution sends the complete (though obscured) document to the Reader and simply shows/hides restricted sections based on the Authorization response. However, the solution also provides the “server” option, where the restricted sections can be excluded from the initial document delivery and downloaded only after the authorization has been confirmed.
 
-Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup, Authorization endpoint, Pingback endpoint and Login Page are required.
+Supporting AMP Access requires Publisher to implement the components described above. Access Content Markup and Authorization endpoint are required. Pingback endpoint and Login Page are optional.
 
 ### AMP Reader ID
 
@@ -99,6 +99,8 @@ Authorization is an endpoint provided by the publisher and called by AMP Runtime
 
 Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
 
+Pingback optional. It can be disabled by setting `noPingback` configuration property to `true`.
+
 ### Login Page and Login Link
 
 Login Page is implemented and served by the Publisher and called by the AMP Runtime. It is normally shown as a browser dialog.
@@ -126,6 +128,7 @@ The following properties are defined in this configuration:
 --------------  | -------------------- | --------------------------------- |
 | authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint. |
 | pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
+| noPingback    | true/false           | When true, disables pingback. |
 | login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
 | authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
 | authorizationTimeout          | &lt;number&gt;          | Timeout (in milliseconds) after which authorization request is considered as failed. Default is 3000. Values greater than 3000 are allowed only in dev environment. |
@@ -306,11 +309,13 @@ In the *server* option, the call to Authorization endpoint is done by Google AMP
 
 Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS POST endpoint. See [CORS Origin Security][9]” for how this request should be secured.
 
+Pingback URL is optional. It can be disabled with `"noPingback": true` configuration.
+
 Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. The inclusion of the `READER_ID` is required.
 
 Pingback does not produce a response - any response is ignored by AMP runtime.
 
-Pingback endpoint is called when the reader has started viewing the document and after the Rser has successfully completed the Login Flow.
+Pingback endpoint is called when the reader has started viewing the document and after the Reader has successfully completed the Login Flow.
 
 The publisher may choose to use the pingback as:
  - One of the main purposes for pingback is to count down meter when it is used.
@@ -430,6 +435,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
 - Feb 19: Corrected samples to remove `{}` from URL var substitutions.
 - Mar 3: Resend pingback after login (v0.5).
+- Sept 2: "noPingback" configuration property and optional pingback.
 
 ## Appendix A: “amp-access” expression grammar
 

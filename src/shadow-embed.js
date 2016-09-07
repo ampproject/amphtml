@@ -260,17 +260,29 @@ export function scopeShadowCss(shadowRoot, css) {
  * @return {string}
  */
 function transformRootSelectors(selector) {
-  return selector.replace(/(html|body)/g, function(match, name, pos) {
-    const prev = pos > 0 ? selector.charAt(pos - 1) : '';
-    const next = pos + match.length < selector.length ?
-        selector.charAt(pos + match.length) : '';
-    if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
-        (!next || CSS_SELECTOR_END_REGEX.test(next))) {
-      return 'amp-' + match;
-    }
-    return match;
-  });
+  return selector.replace(/(html|body)/g, rootSelectorPrefixer);
 }
+
+
+/**
+ * See `transformRootSelectors`.
+ * @param {string} match
+ * @param {string} name
+ * @param {number} pos
+ * @param {string} selector
+ * @return {string}
+ * @private
+ */
+function rootSelectorPrefixer(match, name, pos, selector) {
+  const prev = selector.charAt(pos - 1);
+  const next = selector.charAt(pos + match.length);
+  if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
+      (!next || CSS_SELECTOR_END_REGEX.test(next))) {
+    return 'amp-' + match;
+  }
+  return match;
+}
+
 
 
 /**
