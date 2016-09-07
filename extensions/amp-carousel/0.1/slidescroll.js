@@ -79,6 +79,7 @@ export class AmpSlideScroll extends BaseSlides {
     this.slides_.forEach(slide => {
       this.setAsOwner(slide);
       const slideWrapper = this.win_.document.createElement('div');
+      slide.classList.add('amp-carousel-slide');
       slideWrapper.appendChild(slide);
       slideWrapper.classList.add('-amp-slide-item');
       this.slidesContainer_.appendChild(slideWrapper);
