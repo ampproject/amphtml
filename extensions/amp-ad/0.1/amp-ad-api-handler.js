@@ -96,20 +96,7 @@ export class AmpAdApiHandler {
     // Install iframe resize API.
     this.unlisteners_.push(listenFor(this.iframe_, 'embed-size',
         (data, source, origin) => {
-          let newHeight, newWidth;
-          if (data.width !== undefined) {
-            newWidth = Math.max(this.element_./*OK*/offsetWidth +
-                data.width - this.iframe_./*OK*/offsetWidth, data.width);
-            this.iframe_.width = newWidth;
-          }
-          if (data.height !== undefined) {
-            newHeight = Math.max(this.element_./*OK*/offsetHeight +
-                data.height - this.iframe_./*OK*/offsetHeight, data.height);
-            this.iframe_.height = newHeight;
-          }
-          if (newHeight !== undefined || newWidth !== undefined) {
-            this.updateSize_(newHeight, newWidth, source, origin);
-          }
+          this.updateSize_(data.height, data.width, source, origin);
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
@@ -208,11 +195,25 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width, source, origin) {
-    this.baseInstance_.attemptChangeSize(height, width).then(() => {
-      this.sendEmbedSizeResponse_(
-        true /* success */, width, height, source, origin);
-    }, () => this.sendEmbedSizeResponse_(
-        false /* success */, width, height, source, origin));
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
+    let newHeight, newWidth;
+    if (height !== undefined) {
+      newHeight = Math.max(this.element_./*OK*/offsetHeight +
+          height - this.iframe_./*OK*/offsetHeight, height);
+    }
+    if (width !== undefined) {
+      newWidth = Math.max(this.element_./*OK*/offsetWidth +
+          width - this.iframe_./*OK*/offsetWidth, width);
+    }
+
+    if (newHeight !== undefined || newWidth !== undefined) {
+      this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
+        this.sendEmbedSizeResponse_(
+          true /* success */, newWidth, newHeight, source, origin);
+      }, () => this.sendEmbedSizeResponse_(
+          false /* success */, newWidth, newHeight, source, origin));
+    }
   }
 
   /**

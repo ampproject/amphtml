@@ -409,6 +409,8 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
     if (height !== undefined) {
       newHeight = Math.max(
