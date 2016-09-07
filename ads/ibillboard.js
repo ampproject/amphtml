@@ -25,12 +25,7 @@ export function ibillboard(global, data) {
 
   validateDataExists(data, 'src');
   const src = data.src;
-  let url;
+  validateSrcPrefix(validHosts, src);
 
-  if (src) {
-    validateSrcPrefix(validHosts, src);
-    url = src;
-  }
-
-  writeScript(global, url);
+  writeScript(global, src);
 }
