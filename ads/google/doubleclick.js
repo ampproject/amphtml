@@ -74,16 +74,19 @@ export function doubleclick(global, data) {
  * A helper function for determining whether a given width or height violates
  * some condition.
  *
- * Checks the width and height against their corresponding conditions and
- * returns which evaluated to true and the corresponding value. Returns null if
- * neither condition evaluates to true.
+ * Checks the width and height against their corresponding conditions. If
+ * either of the conditions fail, the errorBuilder function will be called with
+ * the appropriate arguments, its result will be logged to user().error, and
+ * validateDimensions will return false. Otherwise, validateDimensions will
+ * only return true.
+ * 
  * @param {(number|string)} width
  * @param {(number|string)} height
  * @param {!function((number|string)): boolean} widthCond
  * @param {!function((number|string)): boolean} heightCond
  * @param {!function(!{badDim: string, badVal: (string|number)}): string}
  *    errorBuilder A function that will produce an informative error message.
- * @return {?{badDim: string, badVal: (string|number)}}
+ * @return {boolean}
  */
 function validateDimensions(width, height, widthCond, heightCond,
     errorBuilder) {
