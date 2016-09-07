@@ -32,6 +32,7 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
+import {filterSplice} from '../utils/array';
 
 
 const TAG_ = 'Resources';
@@ -414,7 +415,7 @@ export class Resources {
     if (!resource) {
       return;
     }
-    const index = resource ? this.resources_.indexOf(resource) : -1;
+    const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
@@ -1579,8 +1580,9 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
-          request => request.resource != resource);
+      filterSplice(this.requestsChangeSize_, request => {
+        return request.resource != resource;
+      });
     }
 
     if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&

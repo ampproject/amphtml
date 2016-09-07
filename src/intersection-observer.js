@@ -236,7 +236,7 @@ export class IntersectionObserver extends Observable {
    */
   destroy() {
     this.timer_.cancel(this.flushTimeout_);
-    this.flushTimeout_ = 0;
     this.unlistenOnOutViewport_();
+    this.postMessageApi_.destroy();
   }
 }

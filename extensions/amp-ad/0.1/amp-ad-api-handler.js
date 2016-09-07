@@ -47,6 +47,7 @@ export class AmpAdApiHandler {
     /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
+    /** @private {SubscriptionApi} */
     this.embedStateApi_ = null;
 
     /** @private {boolean} */
@@ -122,12 +123,7 @@ export class AmpAdApiHandler {
           if (info.data.type == 'render-start') {
               //report performance
           } else {
-            //TODO: make noContentCallback_ default
-            if (this.noContentCallback_) {
-              this.noContentCallback_();
-            } else {
-              user().info('no content callback was specified');
-            }
+            this.noContent_();
           }
         });
     } else {
@@ -136,14 +132,7 @@ export class AmpAdApiHandler {
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         'bootstrap-loaded', this.is3p_);
       listenForOncePromise(this.iframe_, 'no-content', this.is3p_)
-          .then(() => {
-            //TODO: make noContentCallback_ default
-            if (this.noContentCallback_) {
-              this.noContentCallback_();
-            } else {
-              user().info('no content callback was specified');
-            }
-          });
+          .then(() => this.noContent_());
     }
 
     if (!opt_defaultVisible) {
@@ -152,9 +141,9 @@ export class AmpAdApiHandler {
       this.iframe_.style.visibility = 'hidden';
     }
 
-    this.viewer_.onVisibilityChanged(() => {
+    this.unlisteners_.push(this.viewer_.onVisibilityChanged(() => {
       this.sendEmbedInfo_(this.baseInstance_.isInViewport());
-    });
+    }));
 
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
@@ -169,16 +158,43 @@ export class AmpAdApiHandler {
 
   /** @override  */
   unlayoutCallback() {
-    this.unlisteners_.forEach(unlistener => unlistener());
-    this.unlisteners_ = [];
+    this.cleanup_();
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
-    // IntersectionObserver's listeners were cleaned up by
-    // setInViewport(false) before #unlayoutCallback
-    this.intersectionObserver_.destroy();
-    this.intersectionObserver_ = null;
+  }
+
+  /**
+   * Cleans up listeners on the ad, and calls the no content callback, if one
+   * was provided.
+   * @private
+   */
+  noContent_() {
+    this.cleanup_();
+    //TODO: make noContentCallback_ default
+    if (this.noContentCallback_) {
+      this.noContentCallback_();
+    } else {
+      user().info('no content callback was specified');
+    }
+  }
+
+  /**
+   * Cleans up listeners on the ad iframe.
+   * @private
+   */
+  cleanup_() {
+    this.unlisteners_.forEach(unlistener => unlistener());
+    this.unlisteners_.length = 0;
+    if (this.embedStateApi_) {
+      this.embedStateApi_.destroy();
+      this.embedStateApi_ = null;
+    }
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.destroy();
+      this.intersectionObserver_ = null;
+    }
   }
 
   /**
@@ -208,8 +224,12 @@ export class AmpAdApiHandler {
    * @param {string} origin
    * @private
    */
-  sendEmbedSizeResponse_(
-      success, requestedWidth, requestedHeight, source, origin) {
+  sendEmbedSizeResponse_(success, requestedWidth, requestedHeight, source,
+      origin) {
+    // The iframe may have been removed by the time we resize.
+    if (!this.iframe_) {
+      return;
+    }
     postMessageToWindows(
         this.iframe_,
         [{win: source, origin}],
