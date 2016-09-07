@@ -109,7 +109,7 @@ export class AmpAdApiHandler {
         ['render-start', 'no-content'], this.is3p_).then(info => {
           const data = info.data;
           if (data.type == 'render-start') {
-            this.resizeIframe_(data.height, data.width, info.source,
+            this.updateSize_(data.height, data.width, info.source,
                 info.origin);
             //report performance
           } else {
@@ -209,7 +209,6 @@ export class AmpAdApiHandler {
       newWidth = Math.max(this.element_./*OK*/offsetWidth +
           width - this.iframe_./*OK*/offsetWidth, width);
     }
-
     if (newHeight !== undefined || newWidth !== undefined) {
       this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
         this.sendEmbedSizeResponse_(
@@ -269,30 +268,6 @@ export class AmpAdApiHandler {
     // if we aren't currently in view.
     if (this.intersectionObserver_) {
       this.intersectionObserver_.fire();
-    }
-  }
-
-  /**
-   * Function that attempt to change the iframe and element to new size,
-   * and send response back to iframe
-   * @param {number} newHeight
-   * @param {number} newWidth
-   * @param {!Window} source
-   * @param {string} origin
-   */
-  resizeIframe_(newHeight, newWidth, source, origin) {
-    if (newHeight !== undefined) {
-      newHeight = Math.max(this.element_./*OK*/offsetHeight +
-          newHeight - this.iframe_./*OK*/offsetHeight, newHeight);
-      this.iframe_.height = newHeight;
-    }
-    if (newWidth !== undefined) {
-      newWidth = Math.max(this.element_./*OK*/offsetWidth +
-          newWidth - this.iframe_./*OK*/offsetWidth, newWidth);
-      this.iframe_.width = newWidth;
-    }
-    if (newHeight !== undefined || newWidth !== undefined) {
-      this.updateSize_(newHeight, newWidth, source, origin);
     }
   }
 }

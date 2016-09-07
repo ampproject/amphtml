@@ -29,14 +29,17 @@ export function fakead3p(global, data) {
     if (data.url) {
       img.setAttribute('src', data.url);
     }
+    let width, height;
     if (data.iframeheight) {
       img.setAttribute('height', data.iframeheight);
+      height = Number(data.iframeheight);
     }
     if (data.iframewidth) {
       img.setAttribute('width', data.iframewidth);
+      width = Number(data.iframewidth);
     }
     document.body.appendChild(img);
-    context.renderStart(data.iframewidth, data.iframeheight);
+    context.renderStart(width, height);
   } else {
     context.noContentAvailable();
   }

@@ -145,10 +145,7 @@ describe('amp-ad-api-handler', () => {
                   requestedHeight: 217,
                   type: 'embed-size-changed',
                   sentinel: 'amp3ptest' + testIndex,
-                })).then(() => {
-                  expect(iframe.height).to.equal('217');
-                  expect(iframe.width).to.equal('114');
-                });
+                }));
               });
             });
       });
