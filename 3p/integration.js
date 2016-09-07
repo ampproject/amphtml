@@ -361,6 +361,9 @@ function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
 }
 
+/**
+ * {{width, height}=} opt_data
+ */
 function triggerRenderStart(opt_data) {
   nonSensitiveDataPostMessage('render-start', {opt_data});
 }
