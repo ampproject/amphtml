@@ -58,8 +58,8 @@ describe('amp-ad-api-handler', () => {
 
     it('should be able to use embed-state API', () => {
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
         type: 'send-embed-state',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         inViewport: false,
@@ -135,10 +135,10 @@ describe('amp-ad-api-handler', () => {
               iframe = newIframe;
               expect(iframe.style.visibility).to.equal('hidden');
               iframe.postMessageToParent({
-                sentinel: 'amp3ptest' + testIndex,
-                type: 'render-start',
                 width: 114,
                 height: 217,
+                type: 'render-start',
+                sentinel: 'amp3ptest' + testIndex,
               });
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
@@ -218,10 +218,10 @@ describe('amp-ad-api-handler', () => {
         return Promise.reject(new Error('for testing'));
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
-        height: 217,
         width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: 114,
@@ -238,10 +238,10 @@ describe('amp-ad-api-handler', () => {
         return Promise.resolve();
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
-        height: 217,
         width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: 114,
@@ -258,9 +258,9 @@ describe('amp-ad-api-handler', () => {
         return Promise.resolve();
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
         height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: undefined,
