@@ -135,7 +135,7 @@ export function parseUrl(url, opt_nocache) {
  * @param {boolean=} opt_addToFront
  * @return {string}
  */
-function appendParamStringToUrl(url, paramString, opt_addToFront) {
+export function appendParamStringToUrl(url, paramString, opt_addToFront) {
   if (!paramString) {
     return url;
   }

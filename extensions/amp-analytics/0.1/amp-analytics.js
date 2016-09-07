@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
 import {isJsonScriptTag} from '../../../src/dom';
-import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
+import {assertHttpsUrl, appendParamStringToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
@@ -412,12 +412,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           params[k] = this.expandTemplate_(params[k], trigger, event);
         }
       }
-      if (request.indexOf('${extraUrlParams}') >= 0) {
-        const extraUrlParams = addParamsToUrl('', params).substr(1);
-        request = request.replace('${extraUrlParams}', extraUrlParams);
-      } else {
-        request = addParamsToUrl(request, params);
-      }
+      request = this.addParamsToUrl_(request, params);
     }
 
     this.config_['vars']['requestCount']++;
@@ -485,31 +480,81 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Precedence is opt_event.vars > trigger.vars > config.vars.
     // Nested expansion not supported.
     return expandTemplate(template, key => {
-      const match = key.match(/([^(]*)(\([^)]*\))?/);
-      const name = match[1];
-      const argList = match[2] || '';
+      const {name, argList} = this.getNameArgs_(key);
       let raw = (opt_event && opt_event['vars'] && opt_event['vars'][name]) ||
           (trigger['vars'] && trigger['vars'][name]) ||
           (this.config_['vars'] && this.config_['vars'][name]) ||
           '';
+
+      // Values can also be arrays and objects. Don't expand them.
       if (typeof raw == 'string') {
         raw = this.expandTemplate_(raw, trigger, opt_event, opt_iterations - 1);
       }
       const val = opt_encode ? this.encodeVars_(raw, name) : raw;
-      return val + argList;
+      return val ? val + argList : val;
     });
   }
 
   /**
-   * @param {string|!Array<string>} raw The values to URI encode.
+   * Returns an array containing two values: name and args parsed from the key.
+   *
+   * @param {string} key The key to be parsed.
+   * @return {Object<string>}
+   * @private
+   */
+  getNameArgs_(key) {
+    if (!key) {
+      return ['', ''];
+    }
+    const match = key.match(/([^(]*)(\([^)]*\))?/);
+    return {name: match[1], argList: match[2] || ''};
+  }
+
+  /**
+   * @param {string} raw The values to URI encode.
    * @param {string} unusedName Name of the variable.
+   * @return {string} The encoded value.
    * @private
    */
   encodeVars_(raw, unusedName) {
+    if (!raw) {
+      return '';
+    }
+
     if (isArray(raw)) {
       return raw.map(encodeURIComponent).join(',');
     }
-    return encodeURIComponent(/** @type {string} */ (raw));
+    // Separate out names and arguments from the value and encode the value.
+    const {name, argList} = this.getNameArgs_(String(raw));
+    return encodeURIComponent(name) + argList;
+  }
+
+  /**
+   * Adds parameters to URL. Similar to the function defined in url.js but with
+   * a different encoding method.
+   * @param {string} request
+   * @param {!Object<string, string>} params
+   * @return {string}
+   * @private
+   */
+  addParamsToUrl_(request, params) {
+    const s = [];
+    for (const k in params) {
+      const v = params[k];
+      if (v == null) {
+        continue;
+      } else {
+        const sv = /** @type {string} */ this.encodeVars_(v);
+        s.push(`${encodeURIComponent(k)}=${sv}`);
+      }
+    }
+
+    const paramString = s.join('&');
+    if (request.indexOf('${extraUrlParams}') >= 0) {
+      return request.replace('${extraUrlParams}', paramString);
+    } else {
+      return appendParamStringToUrl(request, paramString);
+    }
   }
 
   /**

@@ -892,20 +892,29 @@ describe('amp-analytics', function() {
   describe('expandTemplate_', () => {
     const vars = {
       'vars': {'1': '1${2}', '2': '2${3}', '3': '3${4}', '4': '4${1}'}};
+    let analytics;
+
+    beforeEach(() => {
+      analytics = getAnalyticsTag(trivialConfig);
+    });
 
     it('expands nested vars', () => {
-      const analytics = getAnalyticsTag(trivialConfig);
       const actual = analytics.expandTemplate_('${1}', vars);
       expect(actual).to.equal('123%252524%25257B4%25257D');
     });
 
     it('limits the recursion to n', () => {
-      const analytics = getAnalyticsTag(trivialConfig);
       let actual = analytics.expandTemplate_('${1}', vars, {}, 3);
       expect(actual).to.equal('1234%25252524%2525257B1%2525257D');
 
       actual = analytics.expandTemplate_('${1}', vars, {}, 5);
       expect(actual).to.equal('123412%252525252524%25252525257B3%25252525257D');
+    });
+
+    it('works with params', () => {
+      const vars = {'vars': {'fooParam': 'QUERY_PARAM(foo,bar)'}};
+      const actual = analytics.expandTemplate_('${fooParam}', vars);
+      expect(actual).to.equal('QUERY_PARAM(foo,bar)');
     });
   });
 
