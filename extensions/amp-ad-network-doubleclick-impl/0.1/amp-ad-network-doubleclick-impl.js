@@ -46,7 +46,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
 
   /** @override */
   isValidElement() {
-    return isGoogleAdsA4AValidEnvironment(this.win) &&
+    return isGoogleAdsA4AValidEnvironment(this.win, this.element) &&
         this.isAmpAdElement() &&
         // Ensure not within remote.html iframe.
         !document.querySelector('meta[name=amp-3p-iframe-src]');
