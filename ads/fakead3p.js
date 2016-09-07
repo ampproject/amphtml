@@ -24,13 +24,19 @@ export function fakead3p(global, data) {
   if (data.ad_container) {
     dev().assert(data.container == data.ad_container, 'wrong container');
   }
-  if (data.valid == 'true') {
+  if (data.valid && data.valid == 'true') {
     const img = document.createElement('img');
-    img.setAttribute('src', data.url);
-    img.setAttribute('height', data.iframeheight);
-    img.setAttribute('width', data.iframewidth);
+    if (data.url) {
+      img.setAttribute('src', data.url);
+    }
+    if (data.iframeheight) {
+      img.setAttribute('height', data.iframeheight);
+    }
+    if (data.iframewidth) {
+      img.setAttribute('width', data.iframewidth);
+    }
     document.body.appendChild(img);
-    context.renderStart(Number(data.iframewidth), Number(data.iframeheight));
+    context.renderStart(data.iframewidth, data.iframeheight);
   } else {
     context.noContentAvailable();
   }
