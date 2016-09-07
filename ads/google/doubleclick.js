@@ -79,7 +79,7 @@ export function doubleclick(global, data) {
  * the appropriate arguments, its result will be logged to user().error, and
  * validateDimensions will return false. Otherwise, validateDimensions will
  * only return true.
- * 
+ *
  * @param {(number|string)} width
  * @param {(number|string)} height
  * @param {!function((number|string)): boolean} widthCond
