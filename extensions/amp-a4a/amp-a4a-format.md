@@ -25,7 +25,7 @@ _This set of standards is still in development and is likely to be revised.
 Feedback from the community is welcome.  Please comment here or on the [Intent
 to Implement](https://github.com/ampproject/amphtml/issues/4264)_.
 
-A4A (AMP Ads for AMPHTML Pages) is a mechanism for rendering fast,
+A4A (AMP for Ads) is a mechanism for rendering fast,
 performant ads in AMP pages.  To ensure that A4A ad documents ("A4A
 creatives") can be rendered quickly and smoothly in the browser and do
 not degrade user experience, A4A creatives must obey a set of validation
