@@ -140,9 +140,23 @@ export class Viewport {
       this.binding_.updateViewerViewport(this.viewer_);
       const paddingTop = this.viewer_.getPaddingTop();
       if (paddingTop != this.paddingTop_) {
+        this.lastPaddingTop_ = this.paddingTop_;
         this.paddingTop_ = paddingTop;
         this.binding_.updatePaddingTop(this.paddingTop_);
         this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+        // update scroll position
+        const oldScrollTop = this.getScrollTop();
+        this.setScrollTop(oldScrollTop + this.paddingTop_ - this.lastPaddingTop_);
+        // add transit effect on position fixed element
+        const duration = 200;
+        const curve = 'cubic-bezier(0.4, 0, 0.2, 1)';
+        const tr = numeric(this.lastPaddingTop_ - this.paddingTop_, 0);
+        Animation.animate(this.win_.document.documentElement, time => {
+          const p = tr(time);
+          this.fixedLayer_.transitPaddingMutate(p);
+        }, duration, curve).thenAlways(() => {
+          this.fixedLayer_.resetTransitPaddingMutate();
+        });
       }
     });
     this.binding_.updateViewerViewport(this.viewer_);
