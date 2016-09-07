@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {listenOncePromise} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
