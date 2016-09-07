@@ -78,8 +78,11 @@ describe('amp-video', () => {
       const video = v.querySelector('video');
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
-      expect(video.hasAttribute('muted')).to.be.true;
       expect(video.hasAttribute('loop')).to.be.true;
+      // autoplay is never propagated to the video element
+      expect(video.hasAttribute('autoplay')).to.be.false;
+      // muted is a deprecated attribute
+      expect(video.hasAttribute('muted')).to.be.false;
     });
   });
 
