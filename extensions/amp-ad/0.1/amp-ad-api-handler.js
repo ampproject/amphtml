@@ -179,10 +179,8 @@ export class AmpAdApiHandler {
    * @private
    */
   updateSize_(height, width, source, origin) {
-    // Calculate new width and new height based on the requested size.
-    // This is to get correct size if padding exists.
-    // If padding > 0,  new size will be requested size plus padding.
-    // If padding <= 0, new size will be requested size.
+    // Calculate new width and height of the container to include the padding.
+    // If padding is negative, just use the requested width and height directly.
     let newHeight, newWidth;
     if (height !== undefined) {
       newHeight = Math.max(this.element_./*OK*/offsetHeight +
