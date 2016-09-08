@@ -808,7 +808,7 @@ export class Viewer {
       if (!trusted) {
         return undefined;
       }
-      return this.sendMessage('cid', opt_data, true)
+      const cidPromise = this.sendMessage('cid', opt_data, true)
           .then(data => {
             // For backward compatibility: #4029
             if (data && !tryParseJson(data)) {
@@ -818,6 +818,14 @@ export class Viewer {
               });
             }
             return data;
+          });
+      // Getting the CID may take some time (waits for JS file to
+      // load, might hit GC), but we do not wait indefinitely. Typically
+      // it should resolve in milli seconds.
+      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
+          .catch(error => {
+            dev().error(error);
+            return undefined;
           });
     });
   }
