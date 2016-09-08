@@ -16,7 +16,8 @@
 
 import {writeScript, validateDataExists, validateSrcPrefix} from '../3p/3p';
 
-const validHosts = ['https://go.eu.bbelements.com'];
+const validHosts = ['https://go.eu.bbelements.com', 'https://go.idnes.bbelements.com', 'https://go.goldbachpoland.bbelements.com', 'https://go.pol.bbelements.com', 'https://go.idmnet.bbelements.com'];
+
 /**
  * @param {!Window} global
  * @param {!Object} data
