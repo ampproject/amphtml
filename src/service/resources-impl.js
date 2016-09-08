@@ -872,6 +872,8 @@ export class Resources {
 
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth);
+              request.resource.overflowCallback(/* overflown */ false,
+                  request.newHeight, request.newWidth);
               if (request.callback) {
                 request.callback(/* hasSizeChanged */true);
               }
