@@ -15,8 +15,9 @@
  */
 
 
+import {AmpAd} from '../extensions/amp-ad/0.1/amp-ad';
 import {createIframePromise} from './iframe';
-import {markElementScheduledForTesting} from '../src/custom-element';
+import {markElementScheduledForTesting, registerElement} from '../src/custom-element';
 
 
 /**
