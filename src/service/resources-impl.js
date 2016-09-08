@@ -826,13 +826,16 @@ export class Resources {
           // 6. Elements close to the bottom of the document (not viewport)
           // are resized immediately.
           resize = true;
-        } else if (diff < 0) {
-          // 7. The new height is smaller than the current one.
         } else {
-          // 8. Element is in viewport don't resize and try overflow callback
-          // instead.
-          request.resource.overflowCallback(/* overflown */ true,
-              request.newHeight, request.newWidth);
+          // 7. Element is in viewport don't resize.
+          if (diff < 0) {
+            // The new height is smaller than the current one, and there's
+            // not an underflow callback.
+          } else  {
+            // try overflow callback instead.
+            request.resource.overflowCallback(/* overflown */ true,
+                request.newHeight, request.newWidth);
+          }
         }
 
         if (resize) {
