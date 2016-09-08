@@ -136,15 +136,7 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(() => {
-      this.binding_.updateViewerViewport(this.viewer_);
-      const paddingTop = this.viewer_.getPaddingTop();
-      if (paddingTop != this.paddingTop_) {
-        this.paddingTop_ = paddingTop;
-        this.binding_.updatePaddingTop(this.paddingTop_);
-        this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-      }
-    });
+    this.viewer_.onViewportEvent(event => this.updateOnViewportEvent_(event));
     this.binding_.updateViewerViewport(this.viewer_);
     this.binding_.updatePaddingTop(this.paddingTop_);
 
@@ -510,6 +502,32 @@ export class Viewport {
   }
 
   /**
+   * @param {Event} event
+   * @private
+   */
+  updateOnViewportEvent_(event) {
+    this.binding_.updateViewerViewport(this.viewer_);
+    const paddingTop = this.viewer_.getPaddingTop();
+    if (paddingTop != this.paddingTop_) {
+      const lastPaddingTop = this.paddingTop_;
+      this.paddingTop_ = paddingTop;
+      this.binding_.updatePaddingTop(this.paddingTop_, true, lastPaddingTop);
+      this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+
+      if (event.duration && event.duration > 0) {
+        // Add transit effect on position fixed element
+        const tr = numeric(lastPaddingTop - this.paddingTop_, 0);
+        Animation.animate(this.win_.document.documentElement, time => {
+          const p = tr(time);
+          this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+        }, event.duration, event.curve).thenAlways(() => {
+          this.fixedLayer_.transformMutate();
+        });
+      }
+    }
+  }
+
+  /**
    * @param {boolean} relayoutAll
    * @param {number} velocity
    * @private
@@ -652,8 +670,11 @@ export class ViewportBindingDef {
   /**
    * Updates binding with the new padding.
    * @param {number} unusedPaddingTop
+   * @param {boolean|undefined} unusedOptUpdateScrollPos
+   * @param {number}undefined} unusedLastPaddingTop
    */
-  updatePaddingTop(unusedPaddingTop) {}
+  updatePaddingTop(unusedPaddingTop, unusedOptUpdateScrollPos,
+      unusedLastPaddingTop) {}
 
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
@@ -794,8 +815,12 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    if (opt_updateScrollPos) {
+      const oldScrollTop = this.getScrollTop();
+      this.setScrollTop(oldScrollTop + paddingTop - opt_lastPaddingTop);
+    }
   }
 
   /** @override */
@@ -1022,12 +1047,17 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
     onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
       // Also tried `paddingTop` but it didn't work for `position:absolute`
       // on iOS.
       doc.body.style.borderTop = `${paddingTop}px solid transparent`;
+      if (opt_updateScrollPos) {
+        const adjScrollTop = this.getScrollTop() + 3 * paddingTop
+            - opt_lastPaddingTop;
+        this.setScrollTop(adjScrollTop);
+      }
     });
   }
 
