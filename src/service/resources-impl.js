@@ -782,7 +782,7 @@ export class Resources {
       this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
-      let minTop = -1;
+      let minTop = Infinity;
       const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeSize.length; i++) {
         const request = requestsChangeSize[i];
@@ -837,7 +837,7 @@ export class Resources {
 
         if (resize) {
           if (box.top >= 0) {
-            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+            minTop = Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeSize(
               request.newHeight, request.newWidth);
@@ -850,7 +850,7 @@ export class Resources {
         }
       }
 
-      if (minTop != -1) {
+      if (minTop < Infinity) {
         this.setRelayoutTop_(minTop);
       }
 
@@ -862,17 +862,19 @@ export class Resources {
             state./*OK*/scrollTop = this.viewport_./*OK*/getScrollTop();
           },
           mutate: state => {
-            let minTop = -1;
+            let minTop = Infinity;
             scrollAdjSet.forEach(request => {
               const box = request.resource.getLayoutBox();
-              minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+              minTop = Math.min(minTop, box.top);
+
               request.resource./*OK*/changeSize(
                   request.newHeight, request.newWidth);
               if (request.callback) {
                 request.callback(/* hasSizeChanged */true);
               }
             });
-            if (minTop != -1) {
+
+            if (minTop < Infinity) {
               this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
