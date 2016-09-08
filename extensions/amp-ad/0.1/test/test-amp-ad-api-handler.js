@@ -188,7 +188,7 @@ describe('amp-ad-api-handler', () => {
             .then(newIframe => {
               iframe = newIframe;
               expect(noContentCallbackSpy).to.not.be.called;
-              clock.tick(8001);
+              clock.tick(10001);
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
                 expect(noContentCallbackSpy).to.be.calledOnce;

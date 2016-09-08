@@ -28,7 +28,7 @@ import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
 import {timerFor} from '../../../src/timer';
 
-const TIMEOUT_VALUE = 8000;
+const TIMEOUT_VALUE = 10000;
 
 export class AmpAdApiHandler {
 
@@ -166,14 +166,13 @@ export class AmpAdApiHandler {
    * @private
    */
   noContent_() {
-    this.cleanup_();
     //TODO: make noContentCallback_ default
     if (this.noContentCallback_) {
       this.noContentCallback_();
-      this.noContentCallback_ = null;
     } else {
       user().info('no content callback was specified');
     }
+    this.cleanup_();
   }
 
   /**
@@ -191,6 +190,7 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.destroy();
       this.intersectionObserver_ = null;
     }
+    this.noContentCallback_ = null;
   }
 
   /**
