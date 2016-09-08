@@ -23,6 +23,7 @@ amp-sticky-ad {
   z-index: 2;
   /* TODO(zhouyx, #3250): discuss on what the max-height should be? */
   max-height: 100px !important;
+  margin-bottom: 0 !important;
   box-sizing: border-box;
   background-color: rgba(0, 0, 0, 0.5);
 }
