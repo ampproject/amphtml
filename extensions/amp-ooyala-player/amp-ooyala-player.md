@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, RESPONSIVE</td>
+    <td>FILL, FIXED, FLEX_ITEM, RESPONSIVE</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -62,10 +62,6 @@ The ID of the player to load from [Backlot](https://backlot.ooyala.com).
 **data-pcode**
 
 The provider code for the account owning the embed code and player.
-
-**data-placeholder**
-
-An optional attribute to specify the URL to an image to use as a placeholder while the player loads.
 
 **data-playerversion**
 

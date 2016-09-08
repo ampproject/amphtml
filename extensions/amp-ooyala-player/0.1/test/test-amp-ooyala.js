@@ -89,18 +89,6 @@ describe('amp-ooyala-player', function() {
       });
   });
 
-  it('renders a placeholder', () => {
-    return getOoyalaElement('Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ',
-      '6440813504804d76ba35c8c787a4b33c',
-      '5zb2wxOlZcNCe_HVT3a6cawW298X', null, null,
-      'http://example.com/placeholder.jpg').then(player => {
-        const placeholder = player.querySelector('div[placeholder]');
-        expect(placeholder).to.not.be.null;
-        const image = player.querySelector('div[placeholder] amp-img');
-        expect(image.getAttribute('src')).to.be.equal('http://example.com/placeholder.jpg');
-      });
-  });
-
   it('fails without an embed code', () => {
     return getOoyalaElement(null,
       '6440813504804d76ba35c8c787a4b33c',
