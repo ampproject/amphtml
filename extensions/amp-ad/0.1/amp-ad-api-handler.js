@@ -26,6 +26,9 @@ import {waitForRenderStart} from '../../../3p/integration';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
+import {timerFor} from '../../../src/timer';
+
+const TIMEOUT_VALUE = 10000;
 
 export class AmpAdApiHandler {
 
@@ -137,12 +140,17 @@ export class AmpAdApiHandler {
 
     this.element_.appendChild(this.iframe_);
     return loadPromise(this.iframe_).then(() => {
-      return this.adResponsePromise_.then(() => {
-        //TODO: add performance reporting
-        if (this.iframe_) {
-          this.iframe_.style.visibility = '';
-        }
-      });
+      return timerFor(this.baseInstance_.win).timeoutPromise(TIMEOUT_VALUE,
+          this.adResponsePromise_,
+          'timeout waiting for ad response').catch(e => {
+            this.noContent_();
+            user().warn(e);
+          }).then(() => {
+            //TODO: add performance reporting;
+            if (this.iframe_) {
+              this.iframe_.style.visibility = '';
+            }
+          });
     });
   }
 
@@ -161,13 +169,13 @@ export class AmpAdApiHandler {
    * @private
    */
   noContent_() {
-    this.cleanup_();
     //TODO: make noContentCallback_ default
     if (this.noContentCallback_) {
       this.noContentCallback_();
     } else {
       user().info('no content callback was specified');
     }
+    this.cleanup_();
   }
 
   /**
@@ -185,6 +193,7 @@ export class AmpAdApiHandler {
       this.intersectionObserver_.destroy();
       this.intersectionObserver_ = null;
     }
+    this.noContentCallback_ = null;
   }
 
   /**
