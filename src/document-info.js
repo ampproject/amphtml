@@ -34,7 +34,7 @@ import {user} from './log';
  *   pageViewId: string,
  * }}
  */
-let DocumentInfoDef;
+export let DocumentInfoDef;
 
 
 /**
