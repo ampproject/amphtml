@@ -207,7 +207,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
       installAmpdocServices(ampdoc);
-      debugger;
       registerForUnitTest(iframe.contentWindow);
       // Act like no other elements were loaded by default.
       iframe.contentWindow.ampExtendedElements = {};
