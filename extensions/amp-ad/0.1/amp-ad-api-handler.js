@@ -38,7 +38,7 @@ export class AmpAdApiHandler {
     /** @private {!BaseElement} */
     this.baseInstance_ = baseInstance;
 
-    /** @privat {!Element} */
+    /** @private {!Element} */
     this.element_ = element;
 
     /** @private {?Element} iframe instance */
@@ -107,8 +107,11 @@ export class AmpAdApiHandler {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
-          if (info.data.type == 'render-start') {
-              //report performance
+          const data = info.data;
+          if (data.type == 'render-start') {
+            this.updateSize_(data.height, data.width,
+                info.source, info.origin);
+            //report performance
           } else {
             this.noContent_();
           }
@@ -206,7 +209,6 @@ export class AmpAdApiHandler {
       newWidth = Math.max(this.element_./*OK*/offsetWidth +
           width - this.iframe_./*OK*/offsetWidth, width);
     }
-
     if (newHeight !== undefined || newWidth !== undefined) {
       this.baseInstance_.attemptChangeSize(newHeight, newWidth).then(() => {
         this.sendEmbedSizeResponse_(
@@ -244,6 +246,9 @@ export class AmpAdApiHandler {
    * @private
    */
   sendEmbedInfo_(inViewport) {
+    if (!this.embedStateApi_) {
+      return;
+    }
     this.embedStateApi_.send('embed-state', {
       inViewport,
       pageHidden: !this.viewer_.isVisible(),
