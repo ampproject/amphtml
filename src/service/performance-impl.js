@@ -18,7 +18,7 @@ import {documentInfoForDoc} from '../document-info';
 import {whenDocumentReady} from '../document-ready';
 import {fromClass} from '../service';
 import {loadPromise} from '../event-helper';
-import {resourcesFor} from '../resources';
+import {resourcesForDoc} from '../resources';
 import {viewerFor} from '../viewer';
 
 
@@ -109,7 +109,7 @@ export class Performance {
    */
   coreServicesAvailable() {
     this.viewer_ = viewerFor(this.win);
-    this.resources_ = resourcesFor(this.win);
+    this.resources_ = resourcesForDoc(this.win.document);
 
     // This is for redundancy. Call flush on any visibility change.
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
