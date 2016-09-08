@@ -141,7 +141,7 @@ export class AmpAdApiHandler {
           this.adResponsePromise_,
           'timeout waiting for ad response').catch(e => {
             this.noContent_();
-            user().error(e);
+            user().warn(e);
           }).then(() => {
             //TODO: add performance reporting;
             if (this.iframe_) {

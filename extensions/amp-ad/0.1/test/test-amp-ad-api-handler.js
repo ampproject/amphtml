@@ -178,15 +178,16 @@ describe('amp-ad-api-handler', () => {
         const noContentCallbackSpy = sandbox.spy();
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
              noContentCallbackSpy);
-        let clock;
+        const clock = sandbox.useFakeTimers();
+        clock.tick(0);
         const beforeAttachedToDom = element => {
-          clock = sandbox.useFakeTimers();
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
           startUpPromise = apiHandler.startUp(element, true);
         };
         return createIframeWithMessageStub(window, beforeAttachedToDom)
             .then(newIframe => {
               iframe = newIframe;
+              expect(noContentCallbackSpy).to.not.be.called;
               clock.tick(8001);
               return startUpPromise.then(() => {
                 expect(iframe.style.visibility).to.equal('');
