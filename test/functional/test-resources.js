@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {VisibilityState} from '../../src/visibility-state';
@@ -30,7 +31,7 @@ describe('Resources', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
   });
 
   afterEach(() => {
@@ -331,7 +332,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     child0 = document.createElement('div');
@@ -519,7 +520,7 @@ describe('Resources schedulePreload', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     const parentTuple = createElementWithResource(1);
     parent = parentTuple[0];
     placeholder = document.createElement('div');
@@ -631,7 +632,7 @@ describe('Resources discoverWork', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     viewportMock = sandbox.mock(resources.viewport_);
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
@@ -901,7 +902,7 @@ describe('Resources changeSize', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -1261,7 +1262,7 @@ describe('Resources mutateElement and collapse', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
       mutate: callback => callback(),
@@ -1436,7 +1437,7 @@ describe('Resources.add', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resources.pendingBuildResources_ = [];
     parent = createElementWithResource(1)[0];
     parentResource = parent['__AMP__RESOURCE'];

@@ -55,9 +55,8 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
   const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
   const exists = serviceHolder && serviceHolder.services &&
       serviceHolder.services[id] && serviceHolder.services[id].obj;
-  // XXX: remove stack
   return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
-      `installed.` + new Error().stack);
+      `installed.`);
 }
 
 /**
