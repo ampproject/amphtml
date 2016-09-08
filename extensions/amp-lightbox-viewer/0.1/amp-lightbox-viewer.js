@@ -21,7 +21,7 @@ import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {toggle} from '../../../src/style';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
@@ -263,7 +263,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // not belong to the element requesting the layout.
     if (newElement.__AMP__RESOURCE) {
       newElement.__AMP__RESOURCE.setInViewport(true);
-      resourcesFor(this.win).scheduleLayout(newElement, newElement);
+      resourcesForDoc(this.element).scheduleLayout(newElement, newElement);
     }
 
     return updateControlsPromise;

@@ -21,7 +21,7 @@ import {
 import {BaseElement} from '../../src/base-element';
 import {createAmpElementProto} from '../../src/custom-element';
 import {viewerFor} from '../../src/viewer';
-import {resourcesFor} from '../../src/resources';
+import {resourcesForDoc} from '../../src/resources';
 import {VisibilityState} from '../../src/visibility-state';
 import * as sinon from 'sinon';
 
@@ -136,7 +136,7 @@ describe.configure().retryOnSaucelabs().run('Viewer Visibility State', () => {
         fixture.doc.registerElement('amp-test', {
           prototype: protoElement,
         });
-        resources = resourcesFor(fixture.win);
+        resources = resourcesForDoc(fixture.win.document);
         doPass_ = resources.doPass_;
         sandbox.stub(resources, 'doPass_', doPass);
       });

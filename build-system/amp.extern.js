@@ -77,8 +77,6 @@ window.AMP.BaseElement.prototype.inViewport_;
 
 window.AMP.BaseElement.prototype.actionMap_;
 
-window.AMP.BaseElement.prototype.resources_;
-
 window.AMP.BaseTemplate;
 
 // Externed explicitly because this private property is read across

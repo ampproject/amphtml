@@ -210,7 +210,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesService': {
+  'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',

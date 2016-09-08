@@ -41,7 +41,7 @@ import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
-import {installResourcesService} from './service/resources-impl';
+import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
   shadowDocHasBody,
@@ -60,7 +60,7 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -84,7 +84,6 @@ export function installRuntimeServices(global) {
   installViewportService(global);
   installHistoryService(global);
   installVsyncService(global);
-  installResourcesService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
@@ -100,6 +99,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
 }
@@ -288,7 +288,7 @@ export function adopt(global) {
       /** @const */
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
       /** @const */
-      global.AMP.resources = resourcesFor(global);
+      global.AMP.resources = resourcesForDoc(global.document);
     }
 
     const viewport = viewportFor(global);

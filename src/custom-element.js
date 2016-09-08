@@ -25,7 +25,7 @@ import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
@@ -387,7 +387,7 @@ function createBaseAmpElementProto(win) {
     this.everAttached = false;
 
     /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(this.ownerDocument.defaultView);
+    this.resources_ = resourcesForDoc(this);
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -464,6 +464,16 @@ function createBaseAmpElementProto(win) {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
+  };
+
+  /**
+   * Returns Resources manager.
+   * @return {!./service/resources-impl.Resources}
+   * @final @this {!Element}
+   * @package
+   */
+  ElementProto.getResources = function() {
+    return this.resources_;
   };
 
   /**
