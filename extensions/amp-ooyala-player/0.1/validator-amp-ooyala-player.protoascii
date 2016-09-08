@@ -48,6 +48,8 @@ tags: {  # amp-ooyala-player
 }
 tags: {  # <amp-ooyala-player>
   tag_name: "AMP-OOYALA-PLAYER"
+  html_format: AMP
+  html_format: A4A
   also_requires_tag: "amp-ooyala-player extension .js script"
   attrs: {
     name: "data-embedcode"
@@ -62,9 +64,6 @@ tags: {  # <amp-ooyala-player>
     mandatory: true
   }
   attrs: {
-    name: "data-placeholder"
-  }
-  attrs: {
     name: "data-playerversion"
   }
   attrs: {
@@ -75,9 +74,7 @@ tags: {  # <amp-ooyala-player>
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
     supported_layouts: FLEX_ITEM
-    supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
 }
