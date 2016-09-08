@@ -58,6 +58,10 @@ tags: {  # <amp-gfycat>
     name: "data-gfyid"
     mandatory: true
   }
+  attrs: {
+    name: "noautoplay"
+    value: ""
+  }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-gfycat.html"
   amp_layout: {
