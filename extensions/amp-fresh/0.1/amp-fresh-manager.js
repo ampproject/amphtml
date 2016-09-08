@@ -88,16 +88,13 @@ export class AmpFreshManager {
    * @param {!Document} docFromServer
    */
   update_(docFromServer) {
-    const elements = docFromServer.getElementsByTagName('amp-fresh');
-    for (let i = 0; i < elements.length; i++) {
-      const ampFreshFromServer = elements[i];
-      const id = ampFreshFromServer.getAttribute('id');
-      // the amp-fresh instance live in client DOM.
+    Object.keys(this.ampFreshInstances_).forEach(id => {
       const ampFresh = this.ampFreshInstances_[id];
-      if (ampFresh) {
-        ampFresh.update(ampFreshFromServer);
+      const counterpart = docFromServer.querySelector(`#${id}`);
+      if (counterpart) {
+        ampFresh.update(counterpart);
       }
-    }
+    });
   }
 
   onFetchDocumentFailure_() {

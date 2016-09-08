@@ -16,11 +16,11 @@
 
 import * as sinon from 'sinon';
 import {AmpFresh} from '../amp-fresh';
-import {installAmpFreshManager} from '../amp-fresh-manager';
+import {getOrInsallAmpFreshManager} from '../amp-fresh-manager';
 import {installXhrService} from '../../../../src/service/xhr-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
-import {whenDocumentReady} from '../../../../src/document-ready';
+import {AmpDoc} from '../../../../src/service/ampdoc-impl';
 
 describe('amp-fresh-manager', () => {
   let sandbox;
@@ -31,6 +31,7 @@ describe('amp-fresh-manager', () => {
     const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
     requests = [];
     toggleExperiment(window, 'amp-fresh', true);
+    installXhrService(window);
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
     };
@@ -39,38 +40,20 @@ describe('amp-fresh-manager', () => {
   afterEach(() => {
     toggleExperiment(window, 'amp-fresh', false);
     resetServiceForTesting(window, 'ampFreshManager');
+    resetServiceForTesting(window, 'xhr');
     sandbox.restore();
   });
 
   it('should fetch document on install', () => {
     expect(requests).to.have.lengthOf(0);
-    installAmpFreshManager(window);
+    getOrInsallAmpFreshManager(window.document);
     expect(requests).to.have.lengthOf(1);
   });
 
   it('only update when doc is ready', () => {
-    const eventListeners = {};
-    const testDoc = {
-      readyState: 'loading',
-      addEventListener: (eventType, handler) => {
-        eventListeners[eventType] = handler;
-      },
-      removeEventListener: (eventType, handler) => {
-        if (eventListeners[eventType] == handler) {
-          delete eventListeners[eventType];
-        }
-      },
-    };
-    const loc = {href: 'https://www.ampproject.org'};
-    const win = {
-      document: testDoc,
-      location: loc,
-      setTimeout: window.setTimeout.bind(window),
-    };
-    installXhrService(win);
-    const service = installAmpFreshManager(win);
-    testDoc.readyState = 'complete';
-    eventListeners['readystatechange']();
+    sandbox.stub(AmpDoc.prototype, 'whenReady')
+        .returns(Promise.resolve());
+    const service = getOrInsallAmpFreshManager(window.document);
     const updateSpy = sandbox.spy(service, 'update_');
     expect(updateSpy.callCount).to.equal(0);
     requests[0].respond(200, {
@@ -82,7 +65,7 @@ describe('amp-fresh-manager', () => {
   });
 
   it('adds amp-fresh=1 query param to request', () => {
-    installAmpFreshManager(window);
+    getOrInsallAmpFreshManager(window.document);
     expect(requests[0].url).to.match(/amp-fresh=1/);
   });
 
@@ -95,7 +78,7 @@ describe('amp-fresh-manager', () => {
     const fresh2 = new AmpFresh(elem2);
     const showSpy = sandbox.spy(fresh, 'show');
     const showSpy2 = sandbox.spy(fresh2, 'show');
-    const service = installAmpFreshManager(window);
+    const service = getOrInsallAmpFreshManager(window.document);
     requests[0].respond(404, {
       'Content-Type': 'text/xml',
     }, '<html></html>');
@@ -104,10 +87,8 @@ describe('amp-fresh-manager', () => {
     expect(showSpy.callCount).to.equal(0);
     expect(showSpy2.callCount).to.equal(0);
     return service.docPromise_.catch(() => {
-      return whenDocumentReady(window).then(() => {
-        expect(showSpy.callCount).to.equal(1);
-        expect(showSpy2.callCount).to.equal(1);
-      });
+      expect(showSpy.callCount).to.equal(1);
+      expect(showSpy2.callCount).to.equal(1);
     });
   });
 
@@ -118,7 +99,7 @@ describe('amp-fresh-manager', () => {
     elem2.setAttribute('id', 'amp-fresh-1');
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
-    installAmpFreshManager(window);
+    getOrInsallAmpFreshManager(window.document);
     fresh.buildCallback();
     expect(function() {
       fresh2.buildCallback();
