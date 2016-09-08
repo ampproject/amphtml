@@ -31,7 +31,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     this.iframe_ = iframe;
 
     const embedCode = user().assert(
-        encodeURIComponent(this.element.getAttribute('data-embedcode')),
+        this.element.getAttribute('data-embedcode'),
         'The data-embedcode attribute is required for <amp-ooyala-player> %s',
         this.element);
     const pCode = user().assert(
