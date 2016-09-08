@@ -18,6 +18,16 @@ import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -543,4 +553,40 @@ export function escapeCssSelectorIdent(win, ident) {
   }
   // Polyfill.
   return cssEscape(ident);
+}
+
+
+/**
+ * Returns a frame element if available.
+ * @param {!Window} win
+ * @return {?HTMLIFrameElement}
+ */
+export function getFrameElement(win) {
+  try {
+    return /** @type {?HTMLIFrameElement} */ (win.frameElement);
+  } catch (e) {
+    // Ignore the error.
+    return null;
+  }
+}
+
+
+/**
+ * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml(text) {
+  if (!text) {
+    return text;
+  }
+  return text.replace(HTML_ESCAPE_REGEX, escapeHtmlChar);
+}
+
+/**
+ * @param {string} c
+ * @return string
+ */
+function escapeHtmlChar(c) {
+  return HTML_ESCAPE_CHARS[c];
 }

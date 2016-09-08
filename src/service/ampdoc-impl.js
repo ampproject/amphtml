@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {closestNode} from '../dom';
+import {closestNode, getFrameElement} from '../dom';
 import {dev} from '../log';
-import {getService} from '../service';
+import {getService, getTopWindow} from '../service';
 import {isShadowRoot} from '../types';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {waitForBodyPromise} from '../dom';
@@ -120,6 +120,17 @@ export class AmpDocService {
         }
       }
 
+      // Traverse the boundary of a friendly iframe.
+      const win = (n.ownerDocument || n).defaultView;
+      if (win && win != this.win && getTopWindow(win) == this.win) {
+        const frameElement = getFrameElement(win);
+        if (frameElement) {
+          n = frameElement;
+          continue;
+        }
+      }
+
+      // Shadow doc.
       // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
       const shadowRoot = closestNode(n, n => isShadowRoot(n));
       if (!shadowRoot) {

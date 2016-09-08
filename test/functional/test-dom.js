@@ -713,4 +713,65 @@ describe('DOM', () => {
       expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
     });
   });
+
+  describe('getFrameElement', () => {
+
+    let iframe;
+
+    beforeEach(() => {
+      iframe = document.createElement('iframe');
+      document.body.appendChild(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+      } else {
+        iframe.src = 'about:blank';
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      return new Promise(resolve => {
+        const interval = setInterval(() => {
+          if (iframe.contentWindow) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 4);
+      });
+    });
+
+    afterEach(() => {
+      dom.removeElement(iframe);
+    });
+
+    it('should return frameElement', () => {
+      expect(dom.getFrameElement(iframe.contentWindow)).to.equal(iframe);
+    });
+
+    it('should survive exceptions', () => {
+      const childWin = {};
+      Object.defineProperties(childWin, {
+        frameElement: {
+          get: () => {throw new Error('intentional');},
+        },
+      });
+      expect(dom.getFrameElement(childWin)).to.equal(null);
+    });
+  });
+
+  describe('escapeHtml', () => {
+    it('should tolerate empty string', () => {
+      expect(dom.escapeHtml('')).to.equal('');
+    });
+
+    it('should ignore non-escapes', () => {
+      expect(dom.escapeHtml('abc')).to.equal('abc');
+    });
+
+    it('should subsctitute escapes', () => {
+      expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
+          'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
+    });
+  });
 });

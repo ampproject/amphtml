@@ -39,6 +39,7 @@ let ServiceHolderDef;
  * @return {!Object} The service.
  */
 export function getExistingServiceForWindow(win, id) {
+  win = getTopWindow(win);
   const exists = win.services && win.services[id] && win.services[id].obj;
   return dev().assert(exists, `${id} service not found. Make sure it is ` +
       `installed.`);
@@ -75,6 +76,7 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * @return {T}
  */
 export function getService(win, id, opt_factory) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id,
       opt_factory ? opt_factory : undefined);
 }
@@ -89,6 +91,7 @@ export function getService(win, id, opt_factory) {
  * @template T
  */
 export function fromClass(win, id, constructor) {
+  win = getTopWindow(win);
   return getServiceInternal(win, win, id, undefined, constructor);
 }
 
@@ -181,6 +184,35 @@ export function getServicePromiseOrNullForDoc(nodeOrDoc, id) {
   return getServicePromiseOrNullInternal(
       getAmpdocServiceHolder(nodeOrDoc),
       id);
+}
+
+/**
+ * Set the parent and top windows on a child window (friendly iframe).
+ * @param {!Window} win
+ * @param {!Window} parentWin
+ */
+export function setParentWindow(win, parentWin) {
+  win.__AMP_PARENT = parentWin;
+  win.__AMP_TOP = getTopWindow(parentWin);
+}
+
+/**
+ * Returns the parent window for a child window (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getParentWindow(win) {
+  return win.__AMP_PARENT || win;
+}
+
+/**
+ * Returns the top window where AMP Runtime is installed for a child window
+ * (friendly iframe).
+ * @param {!Window} win
+ * @return {!Window}
+ */
+export function getTopWindow(win) {
+  return win.__AMP_TOP || win;
 }
 
 /**
