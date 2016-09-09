@@ -146,10 +146,10 @@ export class Viewport {
     this.onScroll(this.sendScrollMessage_.bind(this));
 
     // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
-    // `html {touch-action: pan-y}`.
+    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
     // The enables passive touch handlers, e.g. for document swipe, since they
     // no will longer need to try to cancel vertical scrolls during swipes.
-    if (isExperimentOn(this.win_, 'pan-y')) {
+    if (viewer.isEmbedded() && isExperimentOn(this.win_, 'pan-y')) {
       setStyle(this.win_.document.documentElement, 'touch-action', 'pan-y');
     }
   }
