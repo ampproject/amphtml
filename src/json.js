@@ -112,7 +112,7 @@ export function getValueForExpr(obj, expr) {
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
-    return JSON.parse(json);
+    return JSON.parse(/** @type {string} */ (json));
   } catch (e) {
     if (opt_onFailed) {
       opt_onFailed(e);

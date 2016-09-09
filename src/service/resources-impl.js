@@ -301,7 +301,6 @@ export class Resources {
    * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
    * @return {!Resource}
-   * @package
    */
   getResourceForElement(element) {
     return Resource.forElement(element);
@@ -330,7 +329,6 @@ export class Resources {
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   add(element) {
     const resource = new Resource((++this.resourceIdCounter_), element, this);
@@ -410,7 +408,6 @@ export class Resources {
    * Signals that an element has been removed to the DOM. Resources manager
    * will stop tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   remove(element) {
     const resource = Resource.forElementOptional(element);
@@ -430,7 +427,6 @@ export class Resources {
    * Signals that an element has been upgraded to the DOM. Resources manager
    * will perform build and enable layout/viewport signals for this element.
    * @param {!AmpElement} element
-   * @package
    */
   upgraded(element) {
     const resource = Resource.forElement(element);

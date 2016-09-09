@@ -267,8 +267,9 @@ export class BaseElement {
    * Called by the framework to give the element a chance to preconnect to
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
+   * @param {boolean=} opt_onLayout
    */
-  preconnectCallback() {
+  preconnectCallback(opt_onLayout) {
     // Subclasses may override.
   }
 
