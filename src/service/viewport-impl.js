@@ -119,7 +119,7 @@ export class Viewport {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private {?HTMLMetaElement|undefined} */
+    /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -483,7 +483,7 @@ export class Viewport {
   }
 
   /**
-   * @return {?HTMLMetaElement}
+   * @return {?Element}
    * @private
    */
   getViewportMeta_() {
@@ -646,9 +646,7 @@ export class ViewportBindingDef {
    * independent fixed layer.
    * @return {boolean}
    */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
+  requiresFixedLayerTransfer() {}
 
   /**
    * Register a callback for scroll events.
@@ -934,6 +932,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
 
+    /** @private {?Element} */
+    this.endPosEl_ = null;
+
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
 
@@ -962,7 +963,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @private */
   setup_() {
     const documentElement = this.win.document.documentElement;
-    const documentBody = this.win.document.body;
+    const documentBody = /** @type {!Element} */ (
+        this.win.document.body);
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -1221,7 +1223,7 @@ export class ViewportBindingNaturalIosEmbed_ {
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
  * @param {string} content
- * @return {!Object<string, string>}
+ * @return {!Object<string, (string|undefined)>}
  * @private Visible for testing only.
  */
 export function parseViewportMeta(content) {
@@ -1324,7 +1326,7 @@ function createViewport_(window) {
  * @return {!Viewport}
  */
 export function installViewportService(window) {
-  return getService(window, 'viewport', () => {
+  return /** @type !Viewport} */ (getService(window, 'viewport', () => {
     return createViewport_(window);
-  });
+  }));
 };

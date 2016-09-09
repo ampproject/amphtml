@@ -414,6 +414,25 @@ describe('Logging', () => {
       expect(isUserErrorMessage(error.message)).to.be.false;
       expect(error.message).to.contain('test-other');
     });
+
+    it('should pass for elements', () => {
+      log.assertElement(document.documentElement);
+      const element = document.createElement('element');
+      const ret = log.assertElement(element);
+      expect(ret).to.equal(element);
+    });
+
+    it('should should identify non-elements', () => {
+      expect(() => {
+        log.assertElement(document);
+      }).to.throw(/Element expected: /);
+      expect(() => {
+        log.assertElement(null);
+      }).to.throw(/Element expected: null/);
+      expect(() => {
+        log.assertElement(null, 'custom error');
+      }).to.throw(/custom error: null/);
+    });
   });
 
 

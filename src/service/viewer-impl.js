@@ -116,7 +116,7 @@ export class Viewer {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {string} */
+    /** @private {!VisibilityState} */
     this.visibilityState_ = VisibilityState.VISIBLE;
 
     /** @private {string} */
@@ -164,6 +164,15 @@ export class Viewer {
     /** @private {?time} */
     this.firstVisibleTime_ = null;
 
+    /** @private {?Function} */
+    this.messagingReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.viewerOriginResolver_ = null;
+
+    /** @private {?Function} */
+    this.trustedViewerResolver_ = null;
+
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
@@ -188,8 +197,8 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10)) ||
-        this.overtakeHistory_;
+    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10) ||
+        this.overtakeHistory_);
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
@@ -236,9 +245,6 @@ export class Viewer {
 
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
-
-    /** @private {function()|undefined} */
-    this.messagingReadyResolver_ = undefined;
 
     /**
      * This promise will resolve when communications channel has been
@@ -287,9 +293,6 @@ export class Viewer {
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
-
-      /** @private {!function(boolean)|undefined} */
-      this.trustedViewerResolver_ = undefined;
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
       trustedViewerPromise = new Promise(resolve => {
@@ -299,9 +302,6 @@ export class Viewer {
 
     /** @const @private {!Promise<boolean>} */
     this.isTrustedViewer_ = trustedViewerPromise;
-
-    /** @private {!function(string)|undefined} */
-    this.viewerOriginResolver_ = undefined;
 
     /** @const @private {!Promise<string>} */
     this.viewerOrigin_ = new Promise(resolve => {
@@ -775,7 +775,8 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('requestFullOverlay', {}, true));
   }
 
   /**
@@ -784,7 +785,8 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('cancelFullOverlay', {}, true));
   }
 
   /**
@@ -793,8 +795,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'pushHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex}, true));
   }
 
   /**
@@ -803,8 +805,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'popHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'popHistory', {stackIndex}, true));
   }
 
   /**
@@ -833,7 +835,7 @@ export class Viewer {
       // it should resolve in milli seconds.
       return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
           .catch(error => {
-            dev().error(error);
+            dev().error(TAG_, error);
             return undefined;
           });
     });
@@ -925,7 +927,8 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.broadcastObservable_.fire(data);
+      this.broadcastObservable_.fire(
+          /** @type {!JSONType|undefined} */ (data));
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -1018,7 +1021,7 @@ export class Viewer {
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined}
+   * @return {?Promise<*>|undefined}
    * @private
    */
   sendMessageUnreliable_(eventType, data, awaitResponse) {
@@ -1094,7 +1097,7 @@ function parseParams_(str, allParams) {
 
 /**
  * Creates an error for the case where a channel cannot be established.
- * @param {!Error|string=} opt_reason
+ * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
