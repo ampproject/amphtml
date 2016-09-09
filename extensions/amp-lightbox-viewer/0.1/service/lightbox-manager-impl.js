@@ -159,4 +159,23 @@ export class LightboxManager {
       }
     });
   }
+
+  /**
+   * Find or create thumbnails for lightboxed element.
+   * Return a list of thumbnails obj for lightbox gallery view
+   * The function is not implemented yet. Fake it for testing
+   * @return {!Array{string, !Element}}
+   * @private
+   */
+  getThumbnails() {
+    const thumbnailList = [];
+    for (let i = 0; i < this.elements_.length; i++) {
+      const thumbnail = {
+        url: 'https://placehold.it/100x100?text=' + i,
+        element: this.elements_[i],
+      };
+      thumbnailList.push(thumbnail);
+    }
+    return thumbnailList;
+  }
 }
