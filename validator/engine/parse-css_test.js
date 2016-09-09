@@ -25,6 +25,7 @@ goog.provide('parse_css.ParseCssTest');
 goog.require('goog.asserts');
 goog.require('json_testutil.defaultCmpFn');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractUrls');
@@ -243,6 +244,63 @@ describe('tokenize', () => {
   });
 });
 
+/**
+ * @param {parse_css.Rule} rule
+ * @return {string}
+ */
+function getPos(rule) {
+  return '(' + rule.line + ',' + rule.col + ')';
+}
+
+/** @private */
+class LogRulePositions extends parse_css.RuleVisitor {
+  constructor() {
+    super();
+    /** @type {!Array<string>} */
+    this.out = [];
+  }
+
+  /** @inheritDoc */
+  visitStylesheet(stylesheet) {
+    this.out.push('Stylesheet ', getPos(stylesheet), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveStylesheet(stylesheet) {
+    this.out.push('Leaving Stylesheet ', getPos(stylesheet), '\n');
+  }
+
+  /** @inheritDoc */
+  visitAtRule(atRule) {
+    this.out.push('AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveAtRule(atRule) {
+    this.out.push('Leaving AtRule name=', atRule.name, ' ', getPos(atRule), '\n');
+  }
+
+  /** @inheritDoc */
+  visitQualifiedRule(qualifiedRule) {
+    this.out.push('QualifiedRule ', getPos(qualifiedRule), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveQualifiedRule(qualifiedRule) {
+    this.out.push('Leaving QualifiedRule ', getPos(qualifiedRule), '\n');
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    this.out.push('Declaration ', getPos(declaration), '\n');
+  }
+
+  /** @inheritDoc */
+  leaveDeclaration(declaration) {
+    this.out.push('Leaving Declaration ', getPos(declaration), '\n');
+  }
+}
+
 describe('parseAStylesheet', () => {
   it('parses rgb values', () => {
     const css = 'foo { bar: rgb(255, 0, 127); }';
@@ -312,6 +370,17 @@ describe('parseAStylesheet', () => {
           'eof': {'line': 1, 'col': 30, 'tokenType': 'EOF_TOKEN'}
         },
         sheet);
+    // Some assertions about the line/cols of nodes, which we use to test the
+    // visitor pattern implementation.
+    const visitor = new LogRulePositions();
+    sheet.accept(visitor);
+    assertStrictEqual(
+        'Stylesheet (1,0)\n' +
+        'QualifiedRule (1,0)\n' +
+        'Declaration (1,6)\n' +
+        'Leaving Declaration (1,6)\n' +
+        'Leaving QualifiedRule (1,0)\n' +
+        'Leaving Stylesheet (1,0)\n', visitor.out.join(''));
   });
 
   it('parses a hash reference', () => {
