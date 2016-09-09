@@ -353,7 +353,7 @@ The URL can take any parameters as defined in the [Access URL Variables][7] sect
 required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
 "return".
 
-Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the “Login Flow” section for more details.
+Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the [Login Flow][14] section for more details.
 
 The request format is:
 ```
@@ -414,6 +414,21 @@ Google's First-click-free (or FCF) policy is described [here](https://support.go
 To implement FCF, the Publisher must (1) be able to determine the referring service for each view, and (2) be able to count number of views per day for each reader.
 
 Both steps are covered by the AMP Access spec. The referrer can be injected into the Authorization and Pingback URLs using `DOCUMENT_REFERRER` URL substitution as described in [Access URL Variables][7]. The view counting can be done using Pingback endpoint on the server-side. This is very similar to the metering implementation described in [Metering][12].
+
+## Login Flow
+AMP launches a Login Dialog as a 1st party window or a popup or a tab. Whenever possible, AMP Viewers should attempt to launch Login Dialog in the browser context so that it can take advantage of the top-level browser APIs.
+
+The login flow is started by the AMP Runtime when the Reader activates the Login Link and, descriptively, it follows the following steps:
+ 1. The Login Dialog (1st party window) is opened by AMP Runtime or Viewer for the specified Login URL. The URL contains an extra "Return URL" URL query parameter (`&return=RETURN_URL`). A number of other parameters can be also expanded into the URL, such as the Reader ID. For more details see [Login Page][15] section.
+ 2. Publisher displays a free-form Login page.
+ 3. The Reader follows login steps, such as entering username/password or using a social login.
+ 4. The Reader submits login. The publisher completes authentication, set cookies and finally redirects the Reader to the previously requested "Return URL". The redirect contains a URL hash parameter `success` that can be either `true` or `false`.
+ 5. The Login Dialog follows redirect to the "Return URL".
+ 6. AMP Runtime re-authorizes the document.
+
+Only steps 2-5 require handling by the Publisher: the Publisher only provides their own Login Page and ensures correct redirect once it completes. There are no special constraints imposed on the login page, other than it should function well as a dialog.
+
+As usual, the Reader ID should be included in the call to Login Page and can be used by the Publisher for identity mapping. As a 1st party window, the Publisher will also receive their cookies and will be able to set them. If it turns out that the Reader is already signed-in on the Publisher's side, it is recommended that the publisher immediately redirect back to the "Return URL" with the `success=true` response.
 
 ## AMP Glossary
  - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
@@ -489,6 +504,8 @@ This section will cover a detailed explanation of the design underlying the amp-
 [11]: #amp-access-and-cookies
 [12]: #metering
 [13]: #first-click-free
+[14]: #login-flow
+[15]: #login-page
 
 ## Validation
 
