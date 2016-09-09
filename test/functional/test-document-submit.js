@@ -95,7 +95,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   it('should fail when POST and action-xhr is not set', () => {
     evt.target.setAttribute('method', 'post');
     expect(() => onDocumentFormSubmit_(evt))
-        .to.throw(/action-xhr attribute is required for non-GET/);
+        .to.throw(/Only XHR based \(via action-xhr attribute\) submissions/);
     expect(preventDefaultSpy.callCount).to.equal(1);
 
     evt.target.setAttribute('method', 'post');
