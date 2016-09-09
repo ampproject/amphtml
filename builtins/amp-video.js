@@ -51,6 +51,9 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
+      // Enable inline play for iOS.
+      this.video_.setAttribute('playsinline', '');
+      this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
@@ -116,10 +119,10 @@ export function installVideo(win) {
       return !!this.video_.play;
     }
 
+    // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
-     * @return {boolean}
      */
     supportsPlatform() {
       return this.isVideoSupported_();
@@ -127,7 +130,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     play(unusedIsAutoplay) {
       this.video_.play();
@@ -135,7 +137,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     pause() {
       this.video_.pause();
@@ -143,7 +144,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     mute() {
       this.video_.muted = true;
@@ -151,7 +151,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     unmute() {
       this.video_.muted = false;
@@ -159,7 +158,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     showControls() {
       this.video_.controls = true;
@@ -167,7 +165,6 @@ export function installVideo(win) {
 
     /**
      * @override
-     * {@see ../src/video-interface.VideoInterface}
      */
     hideControls() {
       this.video_.controls = false;

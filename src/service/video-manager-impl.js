@@ -129,6 +129,9 @@ class VideoEntry {
     /** @private {boolean} */
     this.isVisible_ = false;
 
+    /** @private {boolean} */
+    this.userInteracted_ = false;
+
     /** @const @private {!../../src/service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
 
@@ -212,6 +215,7 @@ class VideoEntry {
 
       // TODO(aghassemi): This won't work for iframes, needs a transparent shim
       listenOnce(this.video.element, 'click', () => {
+        this.userInteracted_ = true;
         this.video.showControls();
         this.video.unmute();
       });
@@ -223,6 +227,10 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
+    if (this.userInteracted_) {
+      return;
+    }
+
     if (this.isVisible_) {
       this.video.play(/*autoplay*/ true);
     } else {
@@ -289,12 +297,11 @@ function platformSupportsAutoplay(platform) {
     }
   }
 
-  // TODO(aghassemi): Enable iOS after testing.
-  // if (platform.isIos()) {
-  //   if (platform.isSafari() && version >= 10) {
-  //     return true;
-  //   }
-  // }
+  if (platform.isIos()) {
+    if (platform.isSafari() && version >= 10) {
+      return true;
+    }
+  }
 
   // TODO(aghassemi): Test other combinations and add support.
   // TODO(aghassemi): Is there a way to detect that autoplay has been disabled
