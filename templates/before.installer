@@ -1,1 +1,1 @@
-self.installRegisterFunction = function(window, document) {
+self.installDocumentRegisterElement = function(window, document) {

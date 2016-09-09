@@ -91,8 +91,9 @@ try {
 
 const iframe = self.document.createElement('iframe');
 iframe.setAttribute('id', 'my-iframe');
-//iframe.srcdoc = '<script src="https://cdn.ampproject.org/v0.js"></script><amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>';
 self.document.body.appendChild(iframe);
+self.installDocumentRegisterElement(iframe.contentWindow,
+    iframe.contentWindow.document);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
