@@ -216,8 +216,13 @@ class VideoEntry {
       // TODO(aghassemi): This won't work for iframes, needs a transparent shim
       listenOnce(this.video.element, 'click', () => {
         this.userInteracted_ = true;
+        // NOTE(aghassemi): If we just show controls without pausing first and
+        // playing again after, Safari will show the wrong icon for the play
+        // button (i.e. shows play icon despite video actually playing).
+        this.video.pause();
         this.video.showControls();
         this.video.unmute();
+        this.video.play();
       });
     }
   }

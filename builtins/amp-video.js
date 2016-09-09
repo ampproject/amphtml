@@ -20,6 +20,7 @@ import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {platformFor} from '../src/platform';
 import {VideoEvents} from '../src/video-interface';
 import {videoManagerForDoc} from '../src/video-manager';
 
@@ -45,6 +46,9 @@ export function installVideo(win) {
       /** @private @const {!HTMLVideoElement} */
       this.video_ = this.element.ownerDocument.createElement('video');
 
+      /** @private @const {!../src/platform.Platform} */
+      this.platform_ = platformFor(this.win);
+
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr && getMode().development) {
         console/*OK*/.error(
@@ -58,6 +62,7 @@ export function installVideo(win) {
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.bubbleEvents([VideoEvents.CANPLAY], this.video_);
+      this.fixIOSCanplayEvent_();
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
@@ -117,6 +122,17 @@ export function installVideo(win) {
     /** @private */
     isVideoSupported_() {
       return !!this.video_.play;
+    }
+
+    fixIOSCanplayEvent_() {
+      if (!this.element.hasAttribute('autoplay') || !this.platform_.isIos()) {
+        return;
+      }
+
+      this.propagateAttributes(['autoplay'], this.video_);
+      this.video_.addEventListener(VideoEvents.CANPLAY, () => {
+        this.video_.removeAttribute('autoplay');
+      });
     }
 
     // VideoInterface Implementation. See ../src/video-interface.VideoInterface
