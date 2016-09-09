@@ -190,28 +190,25 @@ describe('Viewport', () => {
   it('should update padding when changed only', () => {
     // Shouldn't call updatePaddingTop since it hasn't changed.
     let bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updatePaddingTop').never();
-    viewerViewportHandler();
+    viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_.updatePaddingTop = () => {};
-    viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
-    bindingMock.expects('updatePaddingTop').withArgs(21).once();
-    viewerViewportHandler();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
+    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
   });
 
   it('should update padding for fixed layer', () => {
     // Should call updatePaddingTop.
     const bindingMock = sandbox.mock(binding);
-    viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
-    bindingMock.expects('updatePaddingTop').withArgs(21).once();
+    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
-    fixedLayerMock.expects('updatePaddingTop').withArgs(21).once();
-    viewerViewportHandler();
+    fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
+    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -250,7 +247,7 @@ describe('Viewport', () => {
   it('should call binding.updateViewerViewport', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateViewerViewport').once();
-    viewerViewportHandler();
+    viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
   });
 
