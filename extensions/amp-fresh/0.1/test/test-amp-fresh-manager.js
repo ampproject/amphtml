@@ -69,26 +69,27 @@ describe('amp-fresh-manager', () => {
     expect(requests[0].url).to.match(/amp-fresh=1/);
   });
 
-  it('calls show on all registered amp-fresh elements on failure', () => {
+  it('calls setFreshReady on all registered amp-fresh elements ' +
+     'on failure', () => {
     const elem = document.createElement('div');
     elem.setAttribute('id', 'amp-fresh-1');
     const elem2 = document.createElement('div');
     elem2.setAttribute('id', 'amp-fresh-2');
     const fresh = new AmpFresh(elem);
     const fresh2 = new AmpFresh(elem2);
-    const showSpy = sandbox.spy(fresh, 'show');
-    const showSpy2 = sandbox.spy(fresh2, 'show');
+    const setFreshReadySpy = sandbox.spy(fresh, 'setFreshReady');
+    const setFreshReadySpy2 = sandbox.spy(fresh2, 'setFreshReady');
     const service = getOrInsallAmpFreshManager(window.document);
     requests[0].respond(404, {
       'Content-Type': 'text/xml',
     }, '<html></html>');
     fresh.buildCallback();
     fresh2.buildCallback();
-    expect(showSpy.callCount).to.equal(0);
-    expect(showSpy2.callCount).to.equal(0);
-    return service.docPromise_.catch(() => {
-      expect(showSpy.callCount).to.equal(1);
-      expect(showSpy2.callCount).to.equal(1);
+    expect(setFreshReadySpy.callCount).to.equal(0);
+    expect(setFreshReadySpy2.callCount).to.equal(0);
+    return service.docPromise_.then(() => {
+      expect(setFreshReadySpy.callCount).to.equal(1);
+      expect(setFreshReadySpy2.callCount).to.equal(1);
     });
   });
 

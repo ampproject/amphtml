@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-fresh-0.1.css';
 import {copyChildren} from '../../../src/dom';
 import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
@@ -46,8 +47,6 @@ export class AmpFresh extends AMP.BaseElement {
     this.manager_ = getOrInsallAmpFreshManager(this.element);
 
     this.manager_.register(this.ampFreshId_, this);
-
-    this.hide();
   }
 
   /**
@@ -61,24 +60,16 @@ export class AmpFresh extends AMP.BaseElement {
     this.mutateElement(() => {
       this.element.textContent = '';
       copyChildren(surrogateAmpFresh, this.element);
-      this.show();
+      this.setFreshReady();
     });
   }
 
   /**
    * Toggles the element to be visible and active.
    */
-  show() {
-    this.element.classList.remove('amp-hidden');
-    this.element.classList.add('amp-active');
-  }
-
-  /**
-   * Toggles the element to be hidden.
-   */
-  hide() {
-    this.element.classList.add('amp-hidden');
+  setFreshReady() {
+    this.element.classList.add('amp-fresh-ready');
   }
 }
 
-AMP.registerElement('amp-fresh', AmpFresh);
+AMP.registerElement('amp-fresh', AmpFresh, CSS);

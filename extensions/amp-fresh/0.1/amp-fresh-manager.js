@@ -32,11 +32,11 @@ const TAG = 'amp-fresh';
 export class AmpFreshManager {
 
   /**
-   * @param {!./ampdoc-impl.AmpDoc} ampdoc
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
 
-    /** @type {!./ampdoc-impl.AmpDoc} */
+    /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
     if (!isExperimentOn(this.win, TAG)) {
@@ -46,11 +46,14 @@ export class AmpFreshManager {
     /** @private @const {!Object<string, !./amp-fresh.AmpFresh>} */
     this.ampFreshInstances_ = Object.create(null);
 
-    /** @private {?Document} */
-    this.docPromise_ = null;
-
-    this.fetchDocument_().then(doc => {
+    /**
+     * Used only for testing.
+     * @private @const {Promise<!Document>}
+     */
+    this.docPromise_ = this.fetchDocument_().then(doc => {
       this.update_(doc);
+    }).catch(() => {
+      this.onFetchDocumentFailure_();
     });
   }
 
@@ -68,24 +71,20 @@ export class AmpFreshManager {
 
   /**
    * @return {!Promise<!Document>}
+   * @private
    */
   fetchDocument_() {
-    if (this.docPromise_) {
-      return this.docPromise_;
-    }
     const url = addParamToUrl(this.ampdoc.win.location.href,
         'amp-fresh', '1');
-    return this.docPromise_ = Promise.all([
+    return Promise.all([
       xhrFor(this.ampdoc.win).fetchDocument(url),
       this.ampdoc.whenReady(),
-    ]).then(args => args[0])
-    .catch(() => {
-      this.onFetchDocumentFailure_();
-    });
+    ]).then(args => args[0]);
   }
 
   /**
    * @param {!Document} docFromServer
+   * @private
    */
   update_(docFromServer) {
     Object.keys(this.ampFreshInstances_).forEach(id => {
@@ -97,17 +96,23 @@ export class AmpFreshManager {
     });
   }
 
+  /**
+   * Make sure to mark all amp-fresh instances to visible
+   * even on failures.
+   * @private
+   */
   onFetchDocumentFailure_() {
-    whenDocumentReady(this.win.document).then(() => {
+    user().error('Failed fetching fresh document through amp-fresh');
+    return this.ampdoc.whenReady().then(() => {
       Object.keys(this.ampFreshInstances_).forEach(id => {
-        this.ampFreshInstances_[id].show();
+        this.ampFreshInstances_[id].setFreshReady();
       });
     });
   }
 }
 
 /**
- * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
+ * @param {!Node|!../../../src/service/ampdoc-impl.AmpDoc} nodeOrDoc
  */
 export function getOrInsallAmpFreshManager(nodeOrDoc) {
   return /** @type {!AmpFreshManager} */ (
