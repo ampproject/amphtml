@@ -20,7 +20,9 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {
   installUserNotificationManager,
 } from '../../extensions/amp-user-notification/0.1/amp-user-notification';
+import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
+import {timerFor} from '../../src/timer';
 import * as sinon from 'sinon';
 
 
@@ -54,6 +56,52 @@ function tests(name) {
         sandbox.restore();
         delete clientIdScope['_ping_'];
         setCookie(window, cidScope, '', Date.now() - 5000);
+      });
+
+      describe('unit test', () => {
+        let clock;
+        let element;
+        let adElement;
+        beforeEach(() => {
+          clock = sandbox.useFakeTimers();
+          element = document.createElement('amp-ad');
+          element.setAttribute('type', '_ping_');
+          adElement = {
+            element,
+            win: window,
+          };
+        });
+
+        it('provides cid to ad', () => {
+          clientIdScope['_ping_'] = cidScope;
+          const s = installCidService(window);
+          sandbox.stub(s, 'get', scope => {
+            expect(scope).to.be.equal(cidScope);
+            return Promise.resolve('test123');
+          });
+          return getAdCid(adElement).then(cid => {
+            expect(cid).to.equal('test123');
+          });
+        });
+
+        it('times out', () => {
+          clientIdScope['_ping_'] = cidScope;
+          const s = installCidService(window);
+          sandbox.stub(s, 'get', scope => {
+            expect(scope).to.be.equal(cidScope);
+            return timerFor(window).promise(2000);
+          });
+          const p = getAdCid(adElement).then(cid => {
+            expect(cid).to.be.undefined;
+            expect(Date.now()).to.equal(1000);
+          });
+          clock.tick(999);
+          // Let promises resolve before ticking 1 more ms.
+          Promise.resolve().then(() => {
+            clock.tick(1);
+          });
+          return p;
+        });
       });
 
       it('provides cid to ad', () => {
