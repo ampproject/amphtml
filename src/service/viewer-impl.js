@@ -246,9 +246,6 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
-    /** @private {function()|undefined} */
-    this.messagingReadyResolver_ = undefined;
-
     /**
      * This promise will resolve when communications channel has been
      * established or timeout in 20 seconds. The timeout is needed to avoid
@@ -296,9 +293,6 @@ export class Viewer {
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
-
-      /** @private {!function(boolean)|undefined} */
-      this.trustedViewerResolver_ = undefined;
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
       trustedViewerPromise = new Promise(resolve => {
@@ -308,9 +302,6 @@ export class Viewer {
 
     /** @const @private {!Promise<boolean>} */
     this.isTrustedViewer_ = trustedViewerPromise;
-
-    /** @private {!function(string)|undefined} */
-    this.viewerOriginResolver_ = undefined;
 
     /** @const @private {!Promise<string>} */
     this.viewerOrigin_ = new Promise(resolve => {
