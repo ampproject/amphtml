@@ -47,10 +47,12 @@ describe('amp-lightbox-viewer', () => {
         expect(mask).to.exist;
 
         const btns = viewer.querySelectorAll('[role=button]');
-        expect(btns.length).to.equal(3);
+        expect(btns.length).to.equal(4);
         expect(btns[0].className).to.equal('amp-lightbox-viewer-button-next');
         expect(btns[1].className).to.equal('amp-lightbox-viewer-button-prev');
         expect(btns[2].className).to.equal('amp-lightbox-viewer-button-close');
+        expect(btns[3].className).to.equal(
+            'amp-lightbox-viewer-button-gallery');
       });
     });
 
@@ -152,6 +154,25 @@ describe('amp-lightbox-viewer', () => {
           assertLightboxed(item3, impl, false, /*closed*/ true);
           assertLightboxed(item4, impl, false, /*closed*/ true);
           assertControls(viewer, /*hasPrevious*/ false, /*hasNext*/ false);
+        });
+      });
+    });
+
+    it('should create gallery with thumbnails', () => {
+      return getAmpLightboxViewer(autoLightbox).then(viewer => {
+        const impl = viewer.implementation_;
+        return impl.activate({source: item1}).then(() => {
+          expect(impl.activeElement_).to.equal(item1);
+          assertLightboxed(item1, impl, true, /*closed*/ false);
+          impl.showGallery_();
+          const container = viewer.querySelector('.-amp-lightbox-viewer');
+          expect(container.getAttribute('gallery-view')).to.equal('');
+          const gallery = viewer.querySelector(
+              '.-amp-lightbox-viewer-gallery-grid ');
+          expect(gallery.childNodes).to.have.length(3);
+          gallery.childNodes[1].dispatchEvent(new Event('click'));
+          expect(container.getAttribute('gallery-view')).to.be.null;
+          expect(impl.activeElement_).to.equal(item2);
         });
       });
     });
