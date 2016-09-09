@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the license.
- *
- * Credits:
- *   This original version of this file was derived from
- *   https://github.com/tabatkins/parse-css by Tab Atkins,
- *   licensed under the CC0 license
- *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
 goog.provide('parse_css.A4aParseCssTest');
 
@@ -51,15 +45,13 @@ describe('stripVendorPrefix', () => {
 });
 
 /**
- * For emitting json output with keys in logical order for the CSS parser's AST.
+ * For emitting json output with keys in logical order for ErrorToken.
  * @param {string} a
  * @param {string} b
  * @return {number}
  */
-const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn([
-  'line', 'col', 'tokenType', 'name', 'prelude', 'declarations', 'rules',
-  'errorType', 'msg', 'type', 'value', 'repr', 'unit', 'eof'
-]);
+const jsonKeyCmp = json_testutil.makeJsonKeyCmpFn(
+    ['line', 'col', 'tokenType', 'code', 'params']);
 
 /**
  * @param {!Object} left
@@ -91,8 +83,300 @@ describe('validateA4aCss', () => {
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
-    assertStrictEqual(0, errors.length);
+    assertJSONEquals([], errors);
     parse_css.validateA4aCss(sheet, errors);
-    assertStrictEqual(0, errors.length);
+    assertJSONEquals([], errors);
   });
+
+  it('validates good amp-animate example with vendor prefixes', () => {
+    const css = '.amp-animate .box { ' +
+        '  -moz-transform: rotate(180deg); ' +
+        '  -webkit-transition: -o-transform 2s; ' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals([], errors);
+  });
+
+  it('reports that position fixed and position sticky are disallowed', () => {
+    const css = '.box { position: fixed; position:sticky; }';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals(
+        [
+          {
+            'line': 1,
+            'col': 7,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE',
+            'params': ['style', 'position', 'fixed']
+          },
+          {
+            'line': 1,
+            'col': 24,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE',
+            'params': ['style', 'position', 'sticky']
+          }
+        ],
+        errors);
+  });
+
+  it('reports non-animation properties in animation selectors', () => {
+    // The non-animation property (in this case color) is not allowed in an
+    // animation selector.
+    const css = '.amp-animate .box { ' +
+        '    color: red; ' +
+        '    transform: rotate(180deg);' +
+        '    transition: transform 2s;' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals(
+        [{
+          'line': 1,
+          'col': 24,
+          'tokenType': 'ERROR',
+          'params': [
+            'style', 'color', 'transition',
+            '[\'animation\', \'opacity\', \'transform\', \'transition\', ' +
+                '\'visibility\']'
+          ],
+          'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH'
+        }],
+        errors);
+  });
+
+  it('reports non-animation properties in animation selectors (vendor prefixed)',
+     () => {
+       // The non-animation property (in this case color) is not allowed in an
+       // animation selector.
+       const css = '.amp-animate .box { ' +
+           '    color: red; ' +
+           '    -o-transform: rotate(180deg);' +
+           '    -ms-transition: -webkit-transform 2s;' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateA4aCss(sheet, errors);
+       assertJSONEquals(
+           [{
+             'line': 1,
+             'col': 24,
+             'tokenType': 'ERROR',
+             'params': [
+               'style', 'color', '-ms-transition',
+               '[\'animation\', \'opacity\', \'transform\', \'transition\', ' +
+                   '\'visibility\']'
+             ],
+             'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH'
+           }],
+           errors);
+     });
+
+  it('reports when .amp-animate is missing', () => {
+    const css = '.box { ' +
+        '    transform: rotate(180deg); ' +
+        '    transition: transform 2s; ' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals(
+        [{
+          'line': 1,
+          'col': 0,
+          'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION',
+          'params': ['style', 'transition', '.amp-animate']
+        }],
+        errors);
+  });
+
+  it('allows only opacity and transform to be transitioned', () => {
+    const css = '.amp-animate .box { ' +
+        '    transition: background-color 2s; ' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals(
+        [{
+          'line': 1,
+          'col': 24,
+          'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT',
+          'params': [
+            'style', 'transition', 'background-color',
+            '[\'opacity\', \'transform\']'
+          ]
+        }],
+        errors);
+  });
+
+  it('allows keyframes as a mechanism for transitions', () => {
+    const css = '@keyframes turn { ' +
+        '  from { transform: rotate(180deg); } ' +
+        '  to { transform: rotate(90deg); } ' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals([], errors);
+  });
+
+  it('allows keyframes as a mechanism for transitions (vendor prefixed)',
+     () => {
+       const css = '@-moz-keyframes turn { ' +
+           '  from { -webkit-transform: rotate(180deg); } ' +
+           '  to { -o-transform: rotate(90deg); } ' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateA4aCss(sheet, errors);
+       assertJSONEquals([], errors);
+     });
+
+  it('allows only opacity, transform in keyframe transitions', () => {
+    const css = '@keyframes slidein { ' +
+        '  from { margin-left:100%; width:300%; } ' +
+        '  to { margin-left:0%; width:100%; } ' +
+        '}';
+    const errors = [];
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+    assertJSONEquals([], errors);
+    parse_css.validateA4aCss(sheet, errors);
+    assertJSONEquals(
+        [
+          {
+            'line': 1,
+            'col': 30,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+            'params': [
+              'style', 'margin-left', 'keyframes',
+              '[\'opacity\', \'transform\']'
+            ]
+          },
+          {
+            'line': 1,
+            'col': 48,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+            'params': [
+              'style', 'width', 'keyframes', '[\'opacity\', \'transform\']'
+            ]
+          },
+          {
+            'line': 1,
+            'col': 69,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+            'params': [
+              'style', 'margin-left', 'keyframes',
+              '[\'opacity\', \'transform\']'
+            ]
+          },
+          {
+            'line': 1,
+            'col': 85,
+            'tokenType': 'ERROR',
+            'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+            'params': [
+              'style', 'width', 'keyframes', '[\'opacity\', \'transform\']'
+            ]
+          }
+        ],
+        errors);
+  });
+
+  it('allows only opacity, transform in keyframe transitions (vendor prefixed)',
+     () => {
+       const css = '@-moz-keyframes slidein { ' +
+           '  from { margin-left:100%; width:300%; } ' +
+           '  to { margin-left:0%; width:100%; } ' +
+           '}';
+       const errors = [];
+       const tokens = parse_css.tokenize(css, 1, 0, errors);
+       const sheet = parse_css.parseAStylesheet(
+           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           errors);
+       assertJSONEquals([], errors);
+       parse_css.validateA4aCss(sheet, errors);
+       assertJSONEquals(
+           [
+             {
+               'line': 1,
+               'col': 35,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'margin-left', '-moz-keyframes',
+                 '[\'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 53,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'width', '-moz-keyframes',
+                 '[\'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 74,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'margin-left', '-moz-keyframes',
+                 '[\'opacity\', \'transform\']'
+               ]
+             },
+             {
+               'line': 1,
+               'col': 90,
+               'tokenType': 'ERROR',
+               'code': 'CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE',
+               'params': [
+                 'style', 'width', '-moz-keyframes',
+                 '[\'opacity\', \'transform\']'
+               ]
+             }
+           ],
+           errors);
+     });
 });
