@@ -937,7 +937,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @private */
   setup_() {
     const documentElement = this.win.document.documentElement;
-    const documentBody = this.win.document.body;
+    const documentBody = /** @type {!Element} */ (
+        this.win.document.body);
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -957,7 +958,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
     });
-    setStyles(dev().assertElement(documentBody), {
+    setStyles(documentBody, {
       overflowX: 'hidden',
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',

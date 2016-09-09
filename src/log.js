@@ -257,16 +257,15 @@ export class Log {
    *
    * @param {*} shouldBeElement
    * @param {string=} opt_message The assertion message
-   * @param {...*} var_args Arguments substituted into %s in the message.
    * @return {!Element} The value of shouldBeTrueish.
    * @template T
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertElement(shouldBeElement, opt_message, var_args) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
-    return /** @type {!Element} */ (
-        this.assert(shouldBeTrueish, opt_message || 'Element expected',
-            var_args));
+    this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
+        shouldBeElement);
+    return /** @type {!Element} */ (shouldBeElement);
   }
 
   /**
