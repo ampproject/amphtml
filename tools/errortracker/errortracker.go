@@ -112,11 +112,13 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	level := logging.Info
 	// But if the request comes from the cache (and thus only from valid AMP
 	// docs) we log as "ERROR".
+	isCdn := false
 	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
 			strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
+		isCdn = true
 	} else {
 		errorType += "-origin"
 	}
@@ -132,7 +134,21 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		errorType += "-canary"
 		isCanary = true;
 	}
-	if !isCanary && !is3p && level != logging.Error && rand.Float32() > 0.01 {
+	sample := rand.Float64()
+	throttleRate := 1.0
+
+	if isCanary {
+		throttleRate = 1.0  // Explicitly log all canary errors.
+	} else if is3p {
+		throttleRate = 0.01
+	} else if isCdn {
+		throttleRate = 0.01
+	} else {
+		// Non-CDN requests.
+		throttleRate = 0.001
+	}
+
+	if sample <= throttleRate {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")

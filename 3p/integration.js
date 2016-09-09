@@ -333,7 +333,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
     delete data._context;
-
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
@@ -342,8 +341,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     nonSensitiveDataPostMessage('send-embed-state');
     nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
-    if (!window.context.mode.test) {
-      lightweightErrorReport(e);
+    const c = window.context || {mode: {test: false}};
+    if (!c.mode.test) {
+      lightweightErrorReport(e, c.canary);
       throw e;
     }
   }
@@ -580,10 +580,13 @@ export function isTagNameAllowed(type, tagName) {
  * too many deps for this small JS binary.
  *
  * @param {!Error} e
+ * @param {boolean} isCanary
  */
-function lightweightErrorReport(e) {
+function lightweightErrorReport(e, isCanary) {
   new Image().src = urls.errorReporting +
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
-      '&r=' + encodeURIComponent(document.referrer);
+      '&ca=' + (isCanary ? 1 : 0) +
+      '&r=' + encodeURIComponent(document.referrer) +
+      '&s=' + encodeURIComponent(e.stack || '');
 }
