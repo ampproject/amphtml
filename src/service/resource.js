@@ -74,8 +74,9 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return dev().assert(Resource.forElementOptional(element),
-        'Missing resource prop on %s', element);
+    return /** @type {!Resource} */ (
+        dev().assert(Resource.forElementOptional(element),
+            'Missing resource prop on %s', element));
   }
 
   /**
@@ -157,9 +158,11 @@ export class Resource {
     /** @private {boolean} */
     this.loadedOnce_ = false;
 
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = null;
+
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
-      /** @const  */
       this.loadPromiseResolve_ = resolve;
     }).then(() => {
       this.loadedOnce_ = true;

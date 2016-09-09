@@ -47,7 +47,8 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
         new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
         new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
         new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY),
-        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element")
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string")
     );
   }
 

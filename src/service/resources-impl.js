@@ -54,7 +54,7 @@ const FOUR_FRAME_DELAY_ = 70;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   force: boolean,
- *   callback: (function()|undefined)
+ *   callback: (function(boolean)|undefined)
  * }}
  */
 let ChangeSizeRequestDef;
@@ -1110,13 +1110,13 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility);
+        task.promise = task.callback(visibility == 'visible');
         task.startTime = now;
         dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
         this.exec_.enqueue(task);
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
-            .catch(reportError);
+            .catch(/** @type {function (*)} */ (reportError));
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
@@ -1255,7 +1255,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_callback A callback function
+   * @param {function(boolean)=} opt_callback A callback function
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
@@ -1383,7 +1383,7 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function():!Promise} callback
+   * @param {function(boolean):!Promise} callback
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
@@ -1565,8 +1565,9 @@ export class Resources {
 
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
-   * @param resource
-   * @param opt_removePending Whether to remove from pending build resources.
+   * @param {Resource} resource
+   * @param {boolean=} opt_removePending Whether to remove from pending
+   *     build resources.
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
@@ -1603,7 +1604,8 @@ export class Resources {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  return isArray(elements) ? elements : [elements];
+  return /** @type {!Array<!Element>} */ (
+      isArray(elements) ? elements : [elements]);
 }
 
 

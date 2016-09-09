@@ -213,7 +213,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONType} params
+   * @param {!Object} params
    * @private
    */
   setFlushParams_(params) {

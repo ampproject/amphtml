@@ -104,6 +104,7 @@ var AmpElement;
 var AccessService = function() {};
 /** @constructor */
 var UserNotificationManager = function() {};
+UserNotificationManager.prototype.get;
 /** @constructor */
 var Cid = function() {};
 /** @constructor */
@@ -136,3 +137,48 @@ FB.init;
 var amp;
 amp.validator;
 amp.validator.validateUrlAndLog = function(string, doc, filter) {}
+
+// Temporary Access types (delete when amp-access is compiled
+// for type checking).
+var Activity;
+Activity.prototype.getTotalEngagedTime = function() {};
+var AccessService;
+AccessService.prototype.getAccessReaderId = function() {};
+AccessService.prototype.getAuthdataField = function(field) {};
+// Same for amp-analytics
+/**
+ * The "get CID" parameters.
+ * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
+ *   Default value is `false`.
+ * @typedef {{
+ *   scope: string,
+ *   createCookieIfNotPresent: (boolean|undefined),
+ * }}
+ */
+var GetCidDef;
+var Cid;
+/**
+ * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
+ *     for the case where this doc is not served by an AMP proxy. GetCidDef
+ *     structure can also instruct CID to create a cookie if one doesn't yet
+ *     exist in a non-proxy case.
+ * @param {!Promise} consent Promise for when the user has given consent
+ *     (if deemed necessary by the publisher) for use of the client
+ *     identifier.
+ * @param {!Promise=} opt_persistenceConsent Dedicated promise for when
+ *     it is OK to persist a new tracking identifier. This could be
+ *     supplied ONLY by the code that supplies the actual consent
+ *     cookie.
+ *     If this is given, the consent param should be a resolved promise
+ *     because this call should be only made in order to get consent.
+ *     The consent promise passed to other calls should then itself
+ *     depend on the opt_persistenceConsent promise (and the actual
+ *     consent, of course).
+ * @return {!Promise<?string>} A client identifier that should be used
+ *      within the current source origin and externalCidScope. Might be
+ *      null if no identifier was found or could be made.
+ *      This promise may take a long time to resolve if consent isn't
+ *      given.
+ */
+Cid.prototype.get = function(
+    externalCidScope, consent, opt_persistenceConsent) {}
