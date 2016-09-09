@@ -104,8 +104,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
 	errorType := "default"
+	isUserError := false;
 	if r.URL.Query().Get("a") == "1" {
 		errorType = "assert"
+		isUserError = true
 	}
 	// By default we log as "INFO" severity, because reports are very spammy
 	severity := "INFO"
@@ -135,20 +137,21 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		isCanary = true;
 	}
 	sample := rand.Float64()
-	throttleRate := 1.0
+	throttleRate := 0.01
 
 	if isCanary {
 		throttleRate = 1.0  // Explicitly log all canary errors.
 	} else if is3p {
-		throttleRate = 0.01
+		throttleRate = 0.1
 	} else if isCdn {
-		throttleRate = 0.01
-	} else {
-		// Non-CDN requests.
-		throttleRate = 0.001
+		throttleRate = 0.1
 	}
 
-	if sample <= throttleRate {
+	if isUserError {
+		throttleRate = throttleRate / 10;
+	}
+
+	if !(sample <= throttleRate) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")
