@@ -17,6 +17,24 @@
 import {loadScript, writeScript, validateData} from '../3p/3p';
 import {doubleclick} from '../ads/google/doubleclick';
 
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+/**
+ * Sort of like Object.assign.
+ * @param {!Object} target
+ * @param {!Object} source
+ * @return {!Object}
+ */
+function assign(target, source) {
+  for (const prop in source) {
+    if (hasOwnProperty.call(source, prop)) {
+      target[prop] = source[prop];
+    }
+  }
+
+  return target;
+}
+
 /* global OX: false */
 
 /**
@@ -25,7 +43,7 @@ import {doubleclick} from '../ads/google/doubleclick';
  */
 export function openx(global, data) {
   const openxData = ['host', 'nc', 'auid', 'dfpSlot', 'dfp'];
-  const dfpData = Object.assign({}, data); // Make a copy for dfp.
+  const dfpData = assign({}, data); // Make a copy for dfp.
   // TODO: check mandatory fields
   validateData(data, [], openxData);
 
@@ -47,7 +65,7 @@ export function openx(global, data) {
 
     // Promote the whole 'dfp' object.
     if ('dfp' in data) {
-      Object.assign(dfpData, dfpData.dfp);
+      assign(dfpData, dfpData.dfp);
       delete dfpData['dfp'];
     }
   }
