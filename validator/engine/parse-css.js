@@ -921,10 +921,10 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
   }
 
   /** @inheritDoc */
-  visitStylesheet(stylesheet) { this.atRuleScope = ''; }
+  visitAtRule(atRule) { this.atRuleScope = atRule.name; }
 
   /** @inheritDoc */
-  visitAtRule(atRule) { this.atRuleScope = atRule.name; }
+  leaveAtRule(atRule) { this.atRuleScope = ''; }
 
   /** @inheritDoc */
   visitQualifiedRule(qualifiedRule) { this.atRuleScope = ''; }
