@@ -1,0 +1,1 @@
+self.installRegisterFunction = function(window, document) {
