@@ -125,7 +125,7 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {string} */
+    /** @private {!ViewportType} */
     this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
@@ -188,7 +188,7 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
+    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10)) ||
         this.overtakeHistory_;
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
@@ -237,6 +237,9 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
+    /** @private {function()|undefined} */
+    this.messagingReadyResolver_ = undefined;
+
     /**
      * This promise will resolve when communications channel has been
      * established or timeout in 20 seconds. The timeout is needed to avoid
@@ -248,10 +251,10 @@ export class Viewer {
         timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
-              /** @private @const {function()|undefined} */
               this.messagingReadyResolver_ = resolve;
             })).catch(reason => {
-              throw getChannelError(reason);
+              throw getChannelError(/** @type {!Error|string|undefined} */ (
+                  reason));
             }) : null;
 
     /**
@@ -265,7 +268,8 @@ export class Viewer {
         this.messagingReadyPromise_
             .catch(reason => {
               // Don't fail promise, but still report.
-              reportError(getChannelError(reason));
+              reportError(getChannelError(
+                  /** @type {!Error|string|undefined} */ (reason)));
             }) : null;
 
     // Trusted viewer and referrer.
@@ -283,16 +287,21 @@ export class Viewer {
           this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
       trustedViewerPromise = Promise.resolve(trustedViewerResolved);
     } else {
+
+      /** @private {!function(boolean)|undefined} */
+      this.trustedViewerResolver_ = undefined;
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
       trustedViewerPromise = new Promise(resolve => {
-        /** @const @private {!function(boolean)|undefined} */
         this.trustedViewerResolver_ = resolve;
       });
     }
 
     /** @const @private {!Promise<boolean>} */
     this.isTrustedViewer_ = trustedViewerPromise;
+
+    /** @private {!function(string)|undefined} */
+    this.viewerOriginResolver_ = undefined;
 
     /** @const @private {!Promise<string>} */
     this.viewerOrigin_ = new Promise(resolve => {
@@ -884,7 +893,7 @@ export class Viewer {
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
-   * @param {*} data
+   * @param {!JSONType} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
@@ -1081,7 +1090,7 @@ function parseParams_(str, allParams) {
 
 /**
  * Creates an error for the case where a channel cannot be established.
- * @param {!Error=} opt_reason
+ * @param {!Error|string=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
