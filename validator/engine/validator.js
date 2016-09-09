@@ -1837,7 +1837,7 @@ class ParsedAttrSpec {
    */
   validateAttrValueProperties(context, attrName, attrValue, tagSpec, result) {
     // TODO(johannes): Replace this hack with a parser.
-    const segments = attrValue.split(',');
+    const segments = attrValue.split(/[,;]/);
     /** @type {!Object<string, string>} */
     const properties = {};
     for (const segment of segments) {
