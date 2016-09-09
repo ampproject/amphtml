@@ -125,7 +125,7 @@ export class Vsync {
    * will be undefined.
    *
    * @param {!VsyncTaskSpecDef} task
-   * @param {VsyncStateDef=} opt_state
+   * @param {!VsyncStateDef=} opt_state
    */
   run(task, opt_state) {
     this.tasks_.push(task);

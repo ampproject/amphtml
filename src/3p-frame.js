@@ -21,12 +21,10 @@ import {documentInfoForDoc} from './document-info';
 import {tryParseJson} from './json';
 import {getMode} from './mode';
 import {getModeObject} from './mode-object';
-import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
 import {user} from './log';
-import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
 import {urls} from './config';
 
@@ -85,10 +83,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     mode: getModeObject(),
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
-    initialIntersection: getIntersectionChangeEntry(
-        Date.now(),
-        viewportFor(parentWindow).getRect(),
-        element.getLayoutBox()),
+    initialIntersection: element.getIntersectionChangeEntry(),
     startTime,
   };
   const adSrc = element.getAttribute('src');

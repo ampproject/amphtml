@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -55,7 +56,7 @@ describe('Resource', () => {
     };
     elementMock = sandbox.mock(element);
 
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
   });
@@ -437,7 +438,7 @@ describe('Resource', () => {
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    const loaded = resource.loaded();
+    const loaded = resource.loadedOnce();
     const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -736,7 +737,7 @@ describe('Resource renderOutsideViewport', () => {
     };
     elementMock = sandbox.mock(element);
 
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewport = resources.viewport_;
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));

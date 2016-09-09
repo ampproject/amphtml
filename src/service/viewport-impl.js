@@ -500,8 +500,8 @@ export class Viewport {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = this.win_.document.querySelector(
-          'meta[name=viewport]');
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+          this.win_.document.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -1253,7 +1253,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
     if (params[k] !== updateParams[k]) {
       changed = true;
       if (updateParams[k] !== undefined) {
-        params[k] = updateParams[k];
+        params[k] = /** @type {string} */ (updateParams[k]);
       } else {
         delete params[k];
       }
