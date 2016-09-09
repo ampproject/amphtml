@@ -149,6 +149,8 @@ describe('amp-video', () => {
       const video = element.querySelector('video');
       expect(video.getAttribute('poster')).to.equal('img.png');
       expect(video.getAttribute('controls')).to.exist;
+      expect(video.getAttribute('playsinline')).to.exist;
+      expect(video.getAttribute('webkit-playsinline')).to.exist;
     }).then(v => {
       // Same attributes should still be present in layoutCallback.
       const video = v.querySelector('video');
