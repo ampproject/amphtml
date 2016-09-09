@@ -81,6 +81,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     },
     tagName: element.tagName,
     mode: getModeObject(),
+    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),

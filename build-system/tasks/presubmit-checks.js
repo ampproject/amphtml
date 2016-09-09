@@ -431,7 +431,12 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign' : ThreePTermsMessage,
+  'Math\\.sign': ThreePTermsMessage,
+  'Object\\.assign': {
+    message: ThreePTermsMessage,
+    // See https://github.com/ampproject/amphtml/issues/4877
+    whitelist: ['ads/openx.js'],
+  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +

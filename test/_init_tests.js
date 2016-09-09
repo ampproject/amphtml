@@ -144,6 +144,9 @@ beforeEach(beforeTest);
 
 function beforeTest() {
   window.AMP_MODE = null;
+  window.AMP_CONFIG = {
+    canary: 'testSentinel',
+  };
   window.AMP_TEST = true;
   window.ampExtendedElements = {};
   const ampdocService = installDocService(window, true);
