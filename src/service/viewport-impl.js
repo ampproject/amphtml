@@ -119,7 +119,7 @@ export class Viewport {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private {?HTMLMetaElement|undefined} */
+    /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -491,7 +491,7 @@ export class Viewport {
   }
 
   /**
-   * @return {?HTMLMetaElement}
+   * @return {?Element}
    * @private
    */
   getViewportMeta_() {
@@ -627,9 +627,7 @@ export class ViewportBindingDef {
    * independent fixed layer.
    * @return {boolean}
    */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
+  requiresFixedLayerTransfer() {}
 
   /**
    * Register a callback for scroll events.
@@ -908,6 +906,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
 
+    /** @private {?Element} */
+    this.endPosEl_ = null;
+
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
 
@@ -956,7 +957,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
     });
-    setStyles(documentBody, {
+    setStyles(dev().assertElement(documentBody), {
       overflowX: 'hidden',
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
@@ -1185,7 +1186,7 @@ export class ViewportBindingNaturalIosEmbed_ {
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
  * @param {string} content
- * @return {!Object<string, string>}
+ * @return {!Object<string, (string|undefined)>}
  * @private Visible for testing only.
  */
 export function parseViewportMeta(content) {
@@ -1288,7 +1289,7 @@ function createViewport_(window) {
  * @return {!Viewport}
  */
 export function installViewportService(window) {
-  return getService(window, 'viewport', () => {
+  return /** @type !Viewport} */ (getService(window, 'viewport', () => {
     return createViewport_(window);
-  });
+  }));
 };

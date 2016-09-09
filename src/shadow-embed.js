@@ -86,7 +86,10 @@ export function createShadowRoot(hostElement) {
 function createShadowRootPolyfill(hostElement) {
   const doc = hostElement.ownerDocument;
   const win = doc.defaultView;
-  const shadowRoot = doc.createElement('i-amp-shadow-root');
+  const shadowRoot = /** @type {!ShadowRoot} */ (
+      // Cast to ShadowRoot even though it is an Element
+      // TODO(@dvoytenko) Consider to switch to a type union instead.
+      /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
   shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
   hostElement.appendChild(shadowRoot);
   hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
@@ -96,10 +99,11 @@ function createShadowRootPolyfill(hostElement) {
   /** @type {!Element} */
   shadowRoot.host = hostElement;
 
-  /** @type {function(string):?Element} */
+  /** @type {function (this:ShadowRoot, string): ?HTMLElement} */
   shadowRoot.getElementById = function(id) {
     const escapedId = escapeCssSelectorIdent(win, id);
-    return shadowRoot.querySelector(`#${escapedId}`);
+    return /** @type {HTMLElement|null} */ (
+        shadowRoot.querySelector(`#${escapedId}`));
   };
 
   return shadowRoot;
@@ -154,7 +158,7 @@ export function importShadowBody(shadowRoot, body) {
   }
   resultBody.style.position = 'relative';
   shadowRoot.appendChild(resultBody);
-  return resultBody;
+  return dev().assertElement(resultBody);
 }
 
 
@@ -171,12 +175,12 @@ export function importShadowBody(shadowRoot, body) {
  *     as the first element in head and all style elements will be positioned
  *     after.
  * @param {string=} opt_ext
- * @return {!HTMLStyleElement}
+ * @return {!Element}
  */
 export function installStylesForShadowRoot(shadowRoot, cssText,
     opt_isRuntimeCss, opt_ext) {
   return insertStyleElement(
-      shadowRoot.ownerDocument,
+      dev().assert(shadowRoot.ownerDocument),
       shadowRoot,
       transformShadowCss(shadowRoot, cssText),
       opt_isRuntimeCss || false,

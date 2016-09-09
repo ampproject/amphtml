@@ -249,7 +249,25 @@ export class Log {
     }
     return shouldBeTrueish;
   }
+
+  /**
+   * Throws an error if the first argument isn't an Element
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeElement
+   * @param {string=} opt_message The assertion message
+   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @return {!Element} The value of shouldBeTrueish.
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
+  assertElement(shouldBeElement, opt_message, var_args) {
+    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
+    return /** @type {!Element} */ (
+        this.assert(shouldBeTrueish, opt_message || 'Element expected',
+            var_args));
+  }
 
   /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
@@ -261,6 +279,7 @@ export class Log {
    * @return T
    * @template T
    */
+  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     for (const k in enumObj) {
       if (enumObj[k] == s) {

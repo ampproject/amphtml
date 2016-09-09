@@ -23,5 +23,6 @@ import {getElementServiceIfAvailable} from './element-service';
  * @return {!Promise<?Object<string, string>>}
  */
 export function variantForOrNull(win) {
-  return getElementServiceIfAvailable(win, 'variant', 'amp-experiment');
+  return /** @type {!Promise<?Object<string, string>>} */ (
+      getElementServiceIfAvailable(win, 'variant', 'amp-experiment'));
 }
