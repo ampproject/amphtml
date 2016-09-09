@@ -63,9 +63,9 @@ describe('amp-instagram', () => {
     });
   });
 
-  it('sets no-prerender on amp-img', () => {
+  it('sets noprerender on amp-img', () => {
     return getIns('fBwFP').then(ins => {
-      expect(ins.querySelector('amp-img').hasAttribute('no-prerender'))
+      expect(ins.querySelector('amp-img').hasAttribute('noprerender'))
           .to.be.true;
     });
   });
