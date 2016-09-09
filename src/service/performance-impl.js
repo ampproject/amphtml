@@ -243,6 +243,13 @@ export class Performance {
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
+    // Add browser performance timeline entries for simple ticks.
+    // These are for example exposed in WPT.
+    if (this.win.performance
+        && this.win.performance.mark
+        && arguments.length == 1) {
+      this.win.performance.mark(label);
+    }
   }
 
   /**
