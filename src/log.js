@@ -261,7 +261,7 @@ export class Log {
    * @template T
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
-  assertElement(shouldBeElement, opt_message, var_args) {
+  assertElement(shouldBeElement, opt_message) {
     const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
     this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
         shouldBeElement);
