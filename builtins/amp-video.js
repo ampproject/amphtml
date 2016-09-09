@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {listenOnce} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
@@ -62,7 +63,7 @@ export function installVideo(win) {
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
       this.bubbleEvents([VideoEvents.CANPLAY], this.video_);
-      this.fixIOSCanplayEvent_();
+      this.fixIOSCanplayEventForAutoplay_();
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
 
@@ -124,13 +125,25 @@ export function installVideo(win) {
       return !!this.video_.play;
     }
 
-    fixIOSCanplayEvent_() {
+    /**
+     * Safari on iOS does not trigger the `canplay` event for muted inline
+     * videos despite the fact that calls to `play` are allowed for muted inline
+     * videos in iOS 10.
+     * It does trigger `canplay` if `autoplay` attribute is set however.
+     * Since VideoManager handles autoplay behaviour for AMP, we do not
+     * propagate the `autoplay` attribute to the underlying video element but
+     * to get around the iOS bug, we will temporarily propagate `autoplay`
+     * attribute until we get the `canplay` event and then remove it.
+     * {@see https://bugs.webkit.org/show_bug.cgi?id=161804}
+     * @private
+     */
+    fixIOSCanplayEventForAutoplay_() {
       if (!this.element.hasAttribute('autoplay') || !this.platform_.isIos()) {
         return;
       }
 
       this.propagateAttributes(['autoplay'], this.video_);
-      this.video_.addEventListener(VideoEvents.CANPLAY, () => {
+      listenOnce(this.video_, VideoEvents.CANPLAY, () => {
         this.video_.removeAttribute('autoplay');
       });
     }
