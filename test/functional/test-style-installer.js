@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpDocShadow} from '../../src/service/ampdoc-impl';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
@@ -25,15 +24,18 @@ import * as styles from '../../src/style-installer';
 describe('Styles', () => {
   let sandbox;
   let clock;
+  let perf;
+  const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    installPerformanceService(document.defaultView);
+    perf = installPerformanceService(document.defaultView);
   });
 
   afterEach(() => {
     resetServiceForTesting(document.defaultView, 'performance');
+    delete document.defaultView[bodyVisibleSentinel];
     sandbox.restore();
   });
 
@@ -78,19 +80,17 @@ describe('Styles', () => {
     });
   });
 
-  it('should copy runtime styles from ampdoc', () => {
-    const parentRoot = document.createElement('div');
-    const style = document.createElement('style');
-    style.setAttribute('amp-runtime', '');
-    style.textContent = '/*runtime*/';
-    parentRoot.appendChild(style);
-    const ampdoc = new AmpDocShadow(window, 'https://a.org/', parentRoot);
-    const shadowRoot = document.createElement('div');
-    styles.copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot);
-
-    const copy = shadowRoot.querySelector('style[amp-runtime]');
-    expect(copy).to.exist;
-    expect(copy.textContent).to.equal('/*runtime*/');
-    expect(copy).to.not.equal(style);
+  it('should only set body to be visible only once per document', () => {
+    const tickSpy = sandbox.spy(perf, 'tick');
+    expect(tickSpy.callCount).to.equal(0);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.undefined;
+    styles.makeBodyVisible(document, true);
+    // mbv = make body visible
+    expect(tickSpy.lastCall.args[0]).to.equal('mbv');
+    expect(tickSpy.callCount).to.equal(1);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
+    styles.makeBodyVisible(document, true);
+    expect(tickSpy.callCount).to.equal(1);
+    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
   });
 });

@@ -38,6 +38,9 @@ class AmpSocialShare extends AMP.BaseElement {
   buildCallback() {
     const typeAttr = user().assert(this.element.getAttribute('type'),
         'The type attribute is required. %s', this.element);
+    user().assert(!/\s/.test(typeAttr),
+        'Space characters are not allowed in type attribute value. %s',
+        this.element);
     const typeConfig = getSocialConfig(typeAttr) || {};
 
     /** @private @const {string} */

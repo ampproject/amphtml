@@ -214,6 +214,7 @@ function compile(entryModuleFilename, outputDir,
         hide_warnings_for: [
           'third_party/d3/',
           'third_party/vega/',
+          'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
           // TODO: The following three are whitelisted only because they're

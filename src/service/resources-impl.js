@@ -21,10 +21,9 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
-import {onDocumentReady} from '../document-ready';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -32,6 +31,7 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
+import {filterSplice} from '../utils/array';
 
 
 const TAG_ = 'Resources';
@@ -61,14 +61,17 @@ let ChangeSizeRequestDef;
 
 export class Resources {
   /**
-   * @param {!Window} window
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = window;
+    this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = installViewerService(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -190,8 +193,10 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -208,8 +213,6 @@ export class Resources {
       this.schedulePass();
       this.monitorInput_();
     });
-
-    this.schedulePass();
   }
 
   /**
@@ -269,9 +272,9 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    waitForBody(this.win.document, () => {
+    this.ampdoc.whenBodyAvailable().then(body => {
       this.vsync_.mutate(() => {
-        this.win.document.body.classList.toggle(clazz, on);
+        body.classList.toggle(clazz, on);
       });
     });
   }
@@ -414,7 +417,7 @@ export class Resources {
     if (!resource) {
       return;
     }
-    const index = resource ? this.resources_.indexOf(resource) : -1;
+    const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
@@ -1579,8 +1582,9 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
-          request => request.resource != resource);
+      filterSplice(this.requestsChangeSize_, request => {
+        return request.resource != resource;
+      });
     }
 
     if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&
@@ -1614,9 +1618,9 @@ function elements_(elements) {
 export let SizeDef;
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
-export function installResourcesService(win) {
-  return fromClass(win, 'resources', Resources);
+export function installResourcesServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'resources', Resources);
 };

@@ -59,14 +59,7 @@ export function layoutRectLtwh(left, top, width, height) {
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.top + rect.height,
-    right: rect.left + rect.width,
-  };
+  return layoutRectLtwh(rect.left, rect.top, rect.width, rect.height);
 }
 
 

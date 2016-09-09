@@ -144,6 +144,12 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4171',
   },
   {
+    id: 'amp-apester-media',
+    name: 'AMP extension for Apester media',
+    spec: 'https://github.com/ampproject/amphtml/issues/3233',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
+  },
+  {
     id: 'amp-ios-overflow-x',
     name: 'Fixes a horizontal scroll issue on iOS browsers.',
     spec: 'https://github.com/ampproject/amphtml/issues/3712',

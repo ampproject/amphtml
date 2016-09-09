@@ -45,6 +45,9 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
+      // Enable inline play for iOS.
+      this.video_.setAttribute('playsinline', '');
+      this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);

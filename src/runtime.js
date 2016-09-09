@@ -29,6 +29,11 @@ import {cssText} from '../build/css';
 import {dev, user} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
 import {childElementsByTag} from './dom';
+import {
+  createShadowRoot,
+  importShadowBody,
+  installStylesForShadowRoot,
+} from './shadow-embed';
 import {getMode} from './mode';
 import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
@@ -36,14 +41,14 @@ import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
-import {installResourcesService} from './service/resources-impl';
+import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
   shadowDocHasBody,
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
-import {installStyles, installStylesForShadowRoot} from './style-installer';
+import {installStyles} from './style-installer';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
@@ -55,7 +60,7 @@ import {isExperimentOn, toggleExperiment} from './experiments';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {setStyle} from './style';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -79,7 +84,6 @@ export function installRuntimeServices(global) {
   installViewportService(global);
   installHistoryService(global);
   installVsyncService(global);
-  installResourcesService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
   installTemplatesService(global);
@@ -95,6 +99,7 @@ export function installRuntimeServices(global) {
  */
 export function installAmpdocServices(ampdoc) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
 }
@@ -283,7 +288,7 @@ export function adopt(global) {
       /** @const */
       global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
       /** @const */
-      global.AMP.resources = resourcesFor(global);
+      global.AMP.resources = resourcesForDoc(global.document);
     }
 
     const viewport = viewportFor(global);
@@ -446,7 +451,8 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   const ampdocService = ampdocFor(global);
 
   hostElement.style.visibility = 'hidden';
-  const shadowRoot = hostElement.createShadowRoot();
+  const shadowRoot = createShadowRoot(hostElement);
+
   shadowRoot.AMP = {};
   shadowRoot.AMP.url = url;
 
@@ -467,9 +473,8 @@ function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
 
   // Append body.
   if (doc.body) {
-    const body = global.document.importNode(doc.body, true);
+    const body = importShadowBody(shadowRoot, doc.body);
     body.classList.add('amp-shadow');
-    body.style.position = 'relative';
     shadowRoot.appendChild(body);
     shadowDocHasBody(ampdoc, body);
   }
@@ -544,7 +549,8 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           // Ignore.
           dev().fine(TAG, '- ignore boilerplate style: ', n);
         } else {
-          shadowRoot.appendChild(global.document.importNode(n, true));
+          installStylesForShadowRoot(shadowRoot, n.textContent,
+              /* isRuntimeCss */ false, 'amp-custom');
           dev().fine(TAG, '- import style: ', n);
         }
       } else if (n.tagName == 'SCRIPT' && n.hasAttribute('src')) {
@@ -564,7 +570,7 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
           if (customElement) {
             extensionIds.push(customElement);
           }
-        } else {
+        } else if (!n.hasAttribute('data-amp-report-test')) {
           user().error(TAG, '- unknown script: ', n, src);
         }
       } else if (n.tagName == 'SCRIPT') {

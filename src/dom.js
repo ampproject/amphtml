@@ -151,9 +151,6 @@ export function copyChildren(from, to) {
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
-  if (!doc) {
-    return;
-  }
   const element = doc.createElement(tagName);
   for (const attr in attributes) {
     element.setAttribute(attr, attributes[attr]);
@@ -427,9 +424,9 @@ export function getDataParamsFromAttributes(element, opt_computeParamNameFunc,
   const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const dataset = element.dataset;
   const params = Object.create(null);
-  opt_paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
+  const paramPattern = opt_paramPattern ? opt_paramPattern : /^param(.+)/;
   for (const key in dataset) {
-    const matches = key.match(opt_paramPattern);
+    const matches = key.match(paramPattern);
     if (matches) {
       const param = matches[1][0].toLowerCase() + matches[1].substr(1);
       params[computeParamNameFunc(param)] = dataset[key];
@@ -478,7 +475,7 @@ export function ancestorElements(child, predicate) {
 /**
  * Finds all ancestor elements that has the specified tag name.
  * @param {!Element} child
- * @param {string} attr
+ * @param {string} tagName
  * @return {!Array<!Element>}
  */
 export function ancestorElementsByTag(child, tagName) {
