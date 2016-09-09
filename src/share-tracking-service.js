@@ -23,6 +23,7 @@ import {getElementServiceIfAvailable} from './element-service';
  * @return {!Promise<?Object<string, string>>}
  */
 export function shareTrackingForOrNull(win) {
-  return getElementServiceIfAvailable(win, 'share-tracking',
-      'amp-share-tracking');
+  return /** @type {!Promise<?Object<string, string>>} */ (
+      getElementServiceIfAvailable(win, 'share-tracking',
+          'amp-share-tracking'));
 }

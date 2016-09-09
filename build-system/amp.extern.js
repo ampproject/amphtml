@@ -131,3 +131,8 @@ twttr.widgets.createTweet;
 
 var FB;
 FB.init;
+
+// Validator
+var amp;
+amp.validator;
+amp.validator.validateUrlAndLog = function(string, doc, filter) {}

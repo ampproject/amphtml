@@ -50,7 +50,7 @@ export class UrlReplacements {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private @const {!Object<string, function(*):*>} */
+    /** @private @const {!Object<string, function(*, *):*>} */
     this.replacements_ = this.win_.Object.create(null);
 
     /** @private @const {function():!Promise<?AccessService>} */
@@ -426,7 +426,7 @@ export class UrlReplacements {
    * @template T
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_(this.win_).then(accessService => {
+    return this.getAccessService_().then(accessService => {
       if (!accessService) {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);
@@ -441,8 +441,8 @@ export class UrlReplacements {
    * The data for the timing events is retrieved from performance.timing API.
    * If start and end events are both given, the result is the difference between the two.
    * If only start event is given, the result is the timing value at start event.
-   * @param {string} startEvent
-   * @param {string=} endEvent
+   * @param {*} startEvent
+   * @param {*=} endEvent
    * @return {!Promise<string|undefined>}
    * @private
    */
@@ -472,14 +472,15 @@ export class UrlReplacements {
             : String(metric);
       });
     } else {
-      return Promise.resolve(String(metric));
+      return /** @type {!Promise<(string|undefined)>} */ (
+          Promise.resolve(String(metric)));
     }
   }
 
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {!Promise<string|undefined>}
+   * @return {!Promise<undefined>|string}
    * @private
    */
   getNavigationData_(attribute) {
@@ -497,7 +498,7 @@ export class UrlReplacements {
    * Sets the value resolver for the variable with the specified name. The
    * value resolver may optionally take an extra parameter.
    * @param {string} varName
-   * @param {function(*):*} resolver
+   * @param {function(*, *):*} resolver
    * @return {!UrlReplacements}
    * @private
    */
@@ -604,7 +605,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {function(*):*}
+   * @return {function(*, *):*}
    */
   getReplacement_(name) {
     return this.replacements_[name];
@@ -620,7 +621,7 @@ export class UrlReplacements {
     if (additionalKeys && additionalKeys.length > 0) {
       const allKeys = Object.keys(this.replacements_);
       additionalKeys.forEach(key => {
-        if (allKeys[key] === undefined) {
+        if (this.replacements_[key] === undefined) {
           allKeys.push(key);
         }
       });

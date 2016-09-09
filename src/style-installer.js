@@ -40,12 +40,12 @@ const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
  *     as the first element in head and all style elements will be positioned
  *     after.
  * @param {string=} opt_ext
- * @return {!HTMLStyleElement}
+ * @return {!Element}
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   const style = insertStyleElement(
       doc,
-      dev().assert(doc.head),
+      dev().assertElement(doc.head),
       cssText,
       opt_isRuntimeCss || false,
       opt_ext || null);
@@ -72,7 +72,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
 
 /**
  * Creates the properly configured style element.
- * @param {!Document} doc
+ * @param {?Document} doc
  * @param {!Element|!ShadowRoot} cssRoot
  * @param {string} cssText
  * @param {boolean} isRuntimeCss
@@ -110,7 +110,7 @@ export function insertStyleElement(doc, cssRoot, cssText, isRuntimeCss, ext) {
  */
 export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    setStyles(dev().assert(doc.body), {
+    setStyles(dev().assertElement(doc.body), {
       opacity: 1,
       visibility: 'visible',
       animation: 'none',
