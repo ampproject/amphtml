@@ -76,12 +76,13 @@ __required__
 Action must be provided, `https` and is non-cdn link (does **NOT** link to https://cdn.ampproject.org).
 
 **action-xhr**
-__(optional)__
+__(optional)__ for `GET` __required__ for `POST` requests 
 You can also provide an action-xhr attribute, if provided, the form will be submitted in an XHR fashion.
 
 This attribute can be the same or a different endpoint than `action` and has the same action requirements above.
 
-**Important**: Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md).
+
+**Important**: See [Protecting against XSRF attacks](
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
@@ -181,3 +182,18 @@ One of the main differences between `:invalid` and `:user-invalid` is when are t
 `.user-valid` and `.user-invalid` classes are a polyfill for the pseudo classes as described above. Publishers can use these to style their inputs and fieldsets to be responsive to user actions (e.g. highlighting an invalid input with a red border after user blurs from it).
 
 See the [full example here](https://github.com/ampproject/amphtml/blob/master/examples/forms.amp.html) on using these.
+
+
+## Security Considerations
+Your XHR endpoints need to follow and implement [CORS Requests in AMP spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md). 
+
+### Protecting against XSRF
+In addition to following AMP CORS spec, please pay extra attention to [non-idempotent requests note]()
+
+In general, keep in mind the following points when accepting input from the user:
+
+* Only use POST for non-idempotent (will change state in your backend) requests.
+* Use non-XHR GET for navigational purposes only, e.g. Search.
+    * non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism.
+    * In general use XHR/non-XHR GET requests for navigational or information retrieval only. 
+* non-XHR POST requests are not allowed in AMP documents. This is due to inconsistencies of setting `Origin` header on these requests across browsers. And the complications supporting it would introduce in protecting against XSRF. This might be reconsidered and introduced later, please file an issue if you think this is needed. 

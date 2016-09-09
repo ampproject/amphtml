@@ -58,7 +58,4 @@ When making CORS requests that would change the state of your system (e.g. user 
 2. Else, check the `Origin` header. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
 3. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
 
-**Important Note**: Only use POST for non-idempotent requests. 
-**Important Note**: non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism. Use non-XHR GET for navigational purposes only, e.g. Search.
-
 It's very important that these are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.

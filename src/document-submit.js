@@ -69,7 +69,8 @@ export function onDocumentFormSubmit_(e) {
   if (!actionXhr && method != 'GET') {
     e.preventDefault();
     user().assert(false,
-        'action-xhr attribute is required for non-GET form submissions. %s',
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'for POST requests. %s',
         form);
   }
   checkCorsUrl(action);

@@ -29,24 +29,25 @@ import {platformFor} from '../../src/platform';
 describe('XHR', function() {
   let sandbox;
   let requests;
-  let platform;
+  let nativePlatform;
+  let polyfillPlatform;
   let isIe;
   let isEdge;
-  let location = {href: 'https://acme.com/path'};
-  let nativeWin = {
+  const location = {href: 'https://acme.com/path'};
+  const nativeWin = {
+    location,
     navigator: {
       userAgent: window.navigator.userAgent,
     },
     fetch: window.fetch,
-    location: location,
   };
 
-  let polyfillWin = {
+  const polyfillWin = {
+    location,
     navigator: {
       userAgent: window.navigator.userAgent,
     },
     fetch: fetchPolyfill,
-    location: location,
   };
 
   // Given XHR calls give tests more time.
