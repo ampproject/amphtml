@@ -144,6 +144,12 @@ export class Viewport {
     this.binding_.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
+
+    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
+    // `html {touch-action: pan-y}`
+    if (isExperimentOn(this.win_, 'pan-y')) {
+      setStyle(this.win_.document.documentElement, 'touch-action', 'pan-y');
+    }
   }
 
   /** For testing. */

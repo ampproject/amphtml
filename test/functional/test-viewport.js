@@ -25,6 +25,7 @@ import {
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
@@ -437,6 +438,22 @@ describe('Viewport', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('getScrollHeight').withArgs().returns(117).once();
     expect(viewport.getScrollHeight()).to.equal(117);
+  });
+
+  it('should not set pan-y w/o experiment', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    toggleExperiment(windowApi, 'pan-y', false);
+    viewport = new Viewport(windowApi, binding, viewer);
+    expect(windowApi.document.documentElement.style['touch-action'])
+        .to.not.exist;
+  });
+
+  it('should set pan-y with experiment', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    toggleExperiment(windowApi, 'pan-y', true);
+    viewport = new Viewport(windowApi, binding, viewer);
+    expect(windowApi.document.documentElement.style['touch-action'])
+        .to.equal('pan-y');
   });
 });
 

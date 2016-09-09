@@ -181,6 +181,13 @@ const EXPERIMENTS = [
     spec: '',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
   },
+  {
+    id: 'pan-y',
+    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
+        ' touch handlers',
+    spec: 'https://github.com/ampproject/amphtml/issues/4820',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
+  },
 ];
 
 if (getMode().localDev) {
