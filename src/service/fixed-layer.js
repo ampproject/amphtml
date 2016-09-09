@@ -129,7 +129,7 @@ export class FixedLayer {
 
   /**
    * Apply or reset transform style to fixed elements
-   * @param {string|undefined} transform
+   * @param {?string} transform
    */
   transformMutate(transform) {
     if (transform) {
@@ -137,9 +137,9 @@ export class FixedLayer {
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
           if (e.transform && e.transform != 'none') {
-            e.element.style.transform = e.transform + ' ' + transform;
+            setStyle(e.element, 'transform', e.transform + ' ' + transform);
           } else {
-            e.element.style.transform = transform;
+            setStyle(e.element, 'transform', transform);
           }
         }
       });
@@ -147,7 +147,7 @@ export class FixedLayer {
       // Reset transform style to all fixed elements
       this.fixedElements_.forEach(e => {
         if (e.fixedNow && e.top) {
-          e.element.style.transform = '';
+          setStyle(e.element, 'transform', '');
         }
       });
     }
@@ -304,7 +304,7 @@ export class FixedLayer {
             transferrable: isTransferrable,
             top,
             zIndex: styles.getPropertyValue('z-index'),
-            transform: styles.transform,
+            transform: styles.getPropertyValue('transform'),
           };
         });
       },

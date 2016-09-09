@@ -137,7 +137,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable<!{paddingTop:number, duration:number|undefined, curve:string|undefined}>} */
+    /** @private {!Observable<!{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}>} */
     this.viewportObservable_ = new Observable();
 
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
