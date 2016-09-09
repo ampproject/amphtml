@@ -23,28 +23,41 @@ import {
   assertSuccess,
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
+import {platformFor} from '../../src/platform';
 
 
 describe('XHR', function() {
   let sandbox;
   let requests;
+  let platform;
+  let isIe;
+  let isEdge;
+  let location = {href: 'https://acme.com/path'};
+  let nativeWin = {
+    navigator: {
+      userAgent: window.navigator.userAgent,
+    },
+    fetch: window.fetch,
+    location: location,
+  };
+
+  let polyfillWin = {
+    navigator: {
+      userAgent: window.navigator.userAgent,
+    },
+    fetch: fetchPolyfill,
+    location: location,
+  };
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
   const scenarios = [
     {
-      xhr: installXhrService({
-        fetch: window.fetch,
-        location: {href: 'https://acme.com/path'},
-      }),
+      xhr: installXhrService(nativeWin),
       desc: 'Native',
-    },
-    {
-      xhr: installXhrService({
-        fetch: fetchPolyfill,
-        location: {href: 'https://acme.com/path'},
-      }),
+    }, {
+      xhr: installXhrService(polyfillWin),
       desc: 'Polyfill',
     },
   ];
@@ -68,6 +81,15 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    location.href = 'https://acme.com/path';
+    nativePlatform = platformFor(nativeWin);
+    polyfillPlatform = platformFor(polyfillWin);
+    isIe = false;
+    isEdge = false;
+    sandbox.stub(nativePlatform, 'isIe', () => isIe);
+    sandbox.stub(nativePlatform, 'isEdge', () => isEdge);
+    sandbox.stub(polyfillPlatform, 'isIe', () => isIe);
+    sandbox.stub(polyfillPlatform, 'isEdge', () => isEdge);
   });
 
   afterEach(() => {
@@ -224,6 +246,38 @@ describe('XHR', function() {
         });
       });
     }
+
+    describe('AMP-Same-Origin', () => {
+      it('should not be set for cross origin requests', () => {
+        const init = {};
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+      });
+
+      it('should not set for same origin POST on non-IE/Edge', () => {
+        const init = {method: 'POST', body: {}};
+        isEdge = false;
+        isIe = false;
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+      });
+
+      it('should be set for all same origin GET requests', () => {
+        const init = {};
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+
+      it('should be set for same origin POST requests on IE/Edge', () => {
+        const init = {method: 'post', body: {}};
+        location.href = '/path';
+        isIe = true;
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+    });
 
     describe(test.desc, () => {
 

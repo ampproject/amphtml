@@ -21,6 +21,7 @@ import {
   getCorsUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
+import {platformFor} from '../platform';
 
 
 /**
@@ -112,8 +113,16 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, opt_init) {
+    const init = opt_init || {};
     input = this.getCorsUrl(this.win, input);
-    return this.fetch_(input, opt_init).then(response => {
+    // For some same origin requests, add AMP-Same-Origin: true header to allow
+    // publishers to validate that this request came from their own origin
+    // when Origin header is not going to be set by the browser.
+    if (!this.willSetOriginHeader_(input, init)) {
+      init['headers'] = init['headers'] || {};
+      init['headers']['AMP-Same-Origin'] = 'true';
+    }
+    return this.fetch_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
@@ -124,7 +133,7 @@ export class Xhr {
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
+      } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
         user().assert(false, `Response must contain the` +
@@ -244,6 +253,26 @@ export class Xhr {
    */
   getCorsUrl(win, url) {
     return getCorsUrl(win, url);
+  }
+
+  /**
+   * Checks if the current browsers will set the origin header for the request.
+   * @param {string} url
+   * @param {?Object} opt_init
+   * @return {boolean}
+   * @private
+   */
+  willSetOriginHeader_(url, opt_init) {
+    const init = opt_init || {};
+    const platform = platformFor(this.win);
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const targetOrigin = getSourceOrigin(url);
+    const isSameOrigin = sourceOrigin == targetOrigin;
+    const isGet = (init['method'] || 'GET').toUpperCase() == 'GET';
+    const isIEOrEdge = platform.isIe() || platform.isEdge();
+    // All same origin GET requests will not set Origin.
+    // Same Origin GET and POST requests on IE or Edge will not set Origin.
+    return !((isSameOrigin && isGet) || (isSameOrigin && isIEOrEdge));
   }
 
 }

@@ -98,20 +98,30 @@ const SOURCE_ORIGIN_REGEX = new RegExp('^http://localhost:8000|' +
     '^https?://.+\.herokuapp\.com:8000/');
 
 app.use('/form/html/post', function(req, res) {
-  if (!ORIGIN_REGEX.test(req.headers.origin)) {
-    res.statusCode = 500;
+  if (req.method != 'POST') {
+    res.statusCode = 405;
     res.end(JSON.stringify({
-      message: 'Origin header is invalid.'
+      message: req.method + ' method is not allowed. Use POST.'
     }));
     return;
   }
 
-  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
-      message: '__amp_source_origin parameter is invalid.'
-    }));
-    return;
+  if (req.headers['amp-same-origin'] != 'true') {
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: 'Origin header is invalid.'
+      }));
+      return;
+    }
+
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: '__amp_source_origin parameter is invalid.'
+      }));
+      return;
+    }
   }
 
   var form = new formidable.IncomingForm();
@@ -132,21 +142,31 @@ app.use('/form/html/post', function(req, res) {
   });
 });
 
+
 app.use('/form/echo-json/post', function(req, res) {
-  if (!ORIGIN_REGEX.test(req.headers.origin)) {
-    res.statusCode = 500;
+  if (req.method != 'POST') {
+    res.statusCode = 405;
     res.end(JSON.stringify({
-      message: 'Origin header is invalid.'
+      message: req.method + ' method is not allowed. Use POST.'
     }));
     return;
   }
+  if (req.headers['amp-same-origin'] != 'true') {
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: 'Origin header is invalid.'
+      }));
+      return;
+    }
 
-  if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
-    res.statusCode = 500;
-    res.end(JSON.stringify({
-      message: '__amp_source_origin parameter is invalid.'
-    }));
-    return;
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: '__amp_source_origin parameter is invalid.'
+      }));
+      return;
+    }
   }
 
   var form = new formidable.IncomingForm();
@@ -155,6 +175,7 @@ app.use('/form/echo-json/post', function(req, res) {
     if (fields['email'] == 'already@subscribed.com') {
       res.statusCode = 500;
     }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin',
         req.headers.origin);
     res.setHeader('Access-Control-Expose-Headers',
@@ -164,6 +185,52 @@ app.use('/form/echo-json/post', function(req, res) {
     res.end(JSON.stringify(fields));
   });
 });
+
+
+app.use('/form/search-html/get', function(req, res) {
+  res.setHeader('Content-Type', 'text/html');
+  res.end(`
+     <h1>Here's results for your search<h1>
+     <ul>
+      <li>Result 1</li>
+      <li>Result 2</li>
+      <li>Result 3</li>
+     </ul>
+  `);
+});
+
+
+app.use('/form/search-json/get', function(req, res) {
+  if (req.headers['amp-same-origin'] != 'true') {
+    if (!ORIGIN_REGEX.test(req.headers.origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: 'Origin header is invalid.'
+      }));
+      return;
+    }
+
+    if (!SOURCE_ORIGIN_REGEX.test(req.query.__amp_source_origin)) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({
+        message: '__amp_source_origin parameter is invalid.'
+      }));
+      return;
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin',
+        req.headers.origin);
+  }
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Expose-Headers',
+      'AMP-Access-Control-Allow-Source-Origin')
+  res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+      req.query.__amp_source_origin);
+  res.json({
+    results: [{title: 'Result 1'}, {title: 'Result 2'}, {title: 'Result 3'}]
+  });
+});
+
 
 app.use('/share-tracking/get-outgoing-fragment', function(req, res) {
   res.setHeader('AMP-Access-Control-Allow-Source-Origin',

@@ -53,7 +53,12 @@ The resulting HTTP response has to also contain the following headers:
 #### Note on non-idempotent Requests
 When making CORS requests that would change the state of your system (e.g. user subscribes to or unsubscribes from a mailing list) the first two steps you need to make sure to do:
 
-1. Check the `Origin` header. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
-2. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
+1. Check if the request has `AMP-Same-Origin: true` header. If yes, proceed to process the request safely (skip next steps).
+  * This custom request header is sent by AMP runtime when making an XHR request on sameorigin (document served from non-cache URL).
+2. Else, check the `Origin` header. If the origin was not `*.ampproject.org` or the publisher's origin, stop and return an error response.
+3. Check the `__amp_source_origin` query parameter. If it's not the publisher's origin stop and return an error response.
+
+**Important Note**: Only use POST for non-idempotent requests. 
+**Important Note**: non-XHR GET requests are not going to receive accurate origin/headers and backends won't be able to protect against XSRF with the above mechanism. Use non-XHR GET for navigational purposes only, e.g. Search.
 
 It's very important that these are done first before processing the request, this provides protection against CSRF attacks and avoids processing untrusted sources requests.

@@ -16,7 +16,7 @@
 
 import {startsWith} from './string';
 import {dev, user} from './log';
-import {assertHttpsUrl, getCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
+import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
@@ -59,21 +59,20 @@ export function onDocumentFormSubmit_(e) {
         'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
 
-  const win = form.ownerDocument.defaultView;
-  let action = form.getAttribute('action');
-  if (!form.__AMP_INIT_ACTION__) {
-    form.__AMP_INIT_ACTION__ = action;
-  } else {
-    action = form.__AMP_INIT_ACTION__;
-  }
+  const action = form.getAttribute('action');
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
   user().assert(action, 'form action attribute is required: %s', form);
   assertHttpsUrl(action, dev().assertElement(form), 'action');
   user().assert(!startsWith(action, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
-
-  // Update the form non-xhr action to add `__amp_source_origin` parameter.
-  // This allows publishers to understand where the request is coming from.
-  form.setAttribute('action', getCorsUrl(win, action));
+  if (!actionXhr && method != 'GET') {
+    e.preventDefault();
+    user().assert(false,
+        'action-xhr attribute is required for non-GET form submissions. %s',
+        form);
+  }
+  checkCorsUrl(action);
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);
