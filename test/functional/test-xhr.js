@@ -29,24 +29,14 @@ import {platformFor} from '../../src/platform';
 describe('XHR', function() {
   let sandbox;
   let requests;
-  let nativePlatform;
-  let polyfillPlatform;
-  let isIe;
-  let isEdge;
   const location = {href: 'https://acme.com/path'};
   const nativeWin = {
     location,
-    navigator: {
-      userAgent: window.navigator.userAgent,
-    },
     fetch: window.fetch,
   };
 
   const polyfillWin = {
     location,
-    navigator: {
-      userAgent: window.navigator.userAgent,
-    },
     fetch: fetchPolyfill,
   };
 
@@ -83,14 +73,6 @@ describe('XHR', function() {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     location.href = 'https://acme.com/path';
-    nativePlatform = platformFor(nativeWin);
-    polyfillPlatform = platformFor(polyfillWin);
-    isIe = false;
-    isEdge = false;
-    sandbox.stub(nativePlatform, 'isIe', () => isIe);
-    sandbox.stub(nativePlatform, 'isEdge', () => isEdge);
-    sandbox.stub(polyfillPlatform, 'isIe', () => isIe);
-    sandbox.stub(polyfillPlatform, 'isEdge', () => isEdge);
   });
 
   afterEach(() => {
@@ -255,15 +237,6 @@ describe('XHR', function() {
         expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
       });
 
-      it('should not set for same origin POST on non-IE/Edge', () => {
-        const init = {method: 'POST', body: {}};
-        isEdge = false;
-        isIe = false;
-        location.href = '/path';
-        xhr.fetchJson('/whatever', init);
-        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
-      });
-
       it('should be set for all same origin GET requests', () => {
         const init = {};
         location.href = '/path';
@@ -271,10 +244,9 @@ describe('XHR', function() {
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
 
-      it('should be set for same origin POST requests on IE/Edge', () => {
+      it('should be set for all same origin POST requests', () => {
         const init = {method: 'post', body: {}};
         location.href = '/path';
-        isIe = true;
         xhr.fetchJson('/whatever', init);
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
