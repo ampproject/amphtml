@@ -127,8 +127,8 @@ function maybeSetExperimentFromUrl(win, experimentName,
   if (!expParam) {
     return;
   }
-  const a4aParam = expParam.split(',').find(
-      x => { return x.indexOf('a4a:') == 0; });
+  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
+  const a4aParam = match && match[2];
   if (!a4aParam) {
     return;
   }
