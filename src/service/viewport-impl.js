@@ -669,8 +669,8 @@ export class ViewportBindingDef {
   /**
    * Updates binding with the new padding.
    * @param {number} unusedPaddingTop
-   * @param {boolean|undefined} unusedOptUpdateScrollPos
-   * @param {number|undefined} unusedOptLastPaddingTop
+   * @param {(boolean|undefined)=} unusedOptUpdateScrollPos
+   * @param {(number|undefined)=} unusedOptLastPaddingTop
    */
   updatePaddingTop(unusedPaddingTop, unusedOptUpdateScrollPos,
       unusedOptLastPaddingTop) {}

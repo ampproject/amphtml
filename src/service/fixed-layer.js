@@ -168,10 +168,10 @@ export class FixedLayer {
    * @param {!Element} element
    */
   removeElement(element) {
-    this.removeFixedElement_(element);
-    if (this.fixedLayer_) {
+    const fe = this.removeFixedElement_(element);
+    if (fe && this.fixedLayer_) {
       this.vsync_.mutate(() => {
-        this.returnFromFixedLayer_(element);
+        this.returnFromFixedLayer_(/** @type {FixedElementDef} */ (fe));
       });
     }
   }
@@ -413,6 +413,7 @@ export class FixedLayer {
    * Removes element from the fixed layer.
    *
    * @param {!Element} element
+   * @return {FixedElementDef|undefined} [description]
    * @private
    */
   removeFixedElement_(element) {
@@ -421,10 +422,12 @@ export class FixedLayer {
         this.vsync_.mutate(() => {
           element.style.top = '';
         });
+        const fe = this.fixedElements_[i];
         this.fixedElements_.splice(i, 1);
-        break;
+        return fe;
       }
     }
+    return undefined;
   }
 
   /** @private */
@@ -642,10 +645,10 @@ export class FixedLayer {
  *   id: string,
  *   selectors: !Array,
  *   element: !Element,
- *   placeholder: ?Element,
- *   fixedNow: boolean,
- *   top: string,
- *   transform: string,
+ *   placeholder: (?Element|undefined),
+ *   fixedNow: (boolean|undefined),
+ *   top: (string|undefined),
+ *   transform: (string|undefined),
  * }}
  */
 let FixedElementDef;

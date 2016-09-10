@@ -78,7 +78,7 @@ export class AmpDocService {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {?AmpDoc} */
+    /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
       this.singleDoc_ = new AmpDocSingle(win);
@@ -100,7 +100,7 @@ export class AmpDocService {
    * instance is always returned. Otherwise, this method locates the `AmpDoc`
    * that contains the specified node and, if necessary, initializes it.
    *
-   * @param {!Node} node
+   * @param {!Node=} node
    * @return {!AmpDoc}
    */
   getAmpDoc(node) {
@@ -108,7 +108,7 @@ export class AmpDocService {
     if (this.singleDoc_) {
       return this.singleDoc_;
     }
-
+    dev().assert(node);
     // Otherwise discover and possibly create the ampdoc.
     let n = node;
     while (n) {
@@ -140,7 +140,7 @@ export class AmpDocService {
    * Creates and installs the ampdoc for the shadow root.
    * @param {string} url
    * @param {!ShadowRoot} shadowRoot
-   * @return {!AmpDoc}
+   * @return {!AmpDocShadow}
    * @private
    */
   installShadowDoc_(url, shadowRoot) {
@@ -175,7 +175,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isSingleDoc() {
-    return dev().assert(null, 'not implemented');
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /**
@@ -195,7 +195,7 @@ export class AmpDoc {
    * @return {!Document|!ShadowRoot}
    */
   getRootNode() {
-    return dev().assert(null, 'not implemented');
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /**
@@ -204,7 +204,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isBodyAvailable() {
-    return dev().assert(false, 'not implemented');
+    return /** @type {?} */ (dev().assert(false, 'not implemented'));
   }
 
   /**
@@ -215,7 +215,7 @@ export class AmpDoc {
    * @return {!Element}
    */
   getBody() {
-    return dev().assert(null, 'not implemented');
+    return dev().assertElement(null, 'not implemented');
   }
 
   /**
@@ -224,7 +224,7 @@ export class AmpDoc {
    * @return {!Promise<!Element>}
    */
   whenBodyAvailable() {
-    return dev().assert(null, 'not implemented');
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /**
@@ -235,7 +235,7 @@ export class AmpDoc {
    * @return {boolean}
    */
   isReady() {
-    return dev().assert(null, 'not implemented');;
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /**
@@ -244,7 +244,7 @@ export class AmpDoc {
    * @return {!Promise}
    */
   whenReady() {
-    return dev().assert(null, 'not implemented');
+    return /** @type {?} */ (dev().assert(null, 'not implemented'));
   }
 
   /**
@@ -252,7 +252,7 @@ export class AmpDoc {
    * @return {string}
    */
   getUrl() {
-    return dev().assert(null, 'not implemented');
+    return dev().assertString(null, 'not implemented');
   }
 
   /**
@@ -314,7 +314,7 @@ export class AmpDocSingle extends AmpDoc {
 
   /** @override */
   getBody() {
-    return dev().assert(this.win.document.body, 'body not available');
+    return dev().assertElement(this.win.document.body, 'body not available');
   }
 
   /** @override */
@@ -397,7 +397,7 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getBody() {
-    return dev().assert(this.body_, 'body not available');
+    return dev().assertElement(this.body_, 'body not available');
   }
 
   /**
@@ -445,7 +445,7 @@ export class AmpDocShadow extends AmpDoc {
  * @return {!AmpDocService}
  */
 export function installDocService(win, isSingleDoc) {
-  return getService(win, 'ampdoc', () => {
+  return /** @type {!AmpDocService} */ (getService(win, 'ampdoc', () => {
     return new AmpDocService(win, isSingleDoc);
-  });
+  }));
 };

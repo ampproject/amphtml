@@ -37,7 +37,7 @@ export class Pass {
     /** @private @const {function()} */
     this.handler_ = handler;
 
-    /** @private @const {number|string} */
+    /** @private @const {number} */
     this.defaultDelay_ = opt_defaultDelay || 0;
 
     /** @private {number|string} */

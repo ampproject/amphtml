@@ -340,6 +340,7 @@ var forbiddenTerms = {
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -347,6 +348,7 @@ var forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]

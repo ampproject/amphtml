@@ -73,11 +73,13 @@ export class Animation {
    * Sets the default curve for the animation. Each segment is allowed to have
    * its own curve, but this curve will be used if a segment doesn't specify
    * its own.
-   * @param {!./curve.CurveDef|string} curve
+   * @param {!./curve.CurveDef|string|undefined} curve
    * @return {!Animation}
    */
   setCurve(curve) {
-    this.curve_ = getCurve(curve);
+    if (curve) {
+      this.curve_ = getCurve(curve);
+    }
     return this;
   }
 
@@ -127,7 +129,8 @@ export class Animation {
  * semantics of a Promise and signal when the animation completed or failed.
  * Additionally, it exposes the method "halt" which allows to stop/reset the
  * animation.
- * @implements {IThenable}
+ * // TODO(@cramforce) Actually fully implement.
+ * implements {IThenable}
  */
 class AnimationPlayer {
 

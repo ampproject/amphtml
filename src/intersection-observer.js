@@ -91,13 +91,13 @@ export function getIntersectionChangeEntry(element, owner, viewport) {
       // No intersection.
       layoutRectLtwh(0, 0, 0, 0);
 
-  return {
+  return /** @type {!IntersectionObserverEntry} */ ({
     time: Date.now(),
     rootBounds: DomRectFromLayoutRect(viewport),
     boundingClientRect: DomRectFromLayoutRect(element),
     intersectionRect: DomRectFromLayoutRect(intersectionRect),
     intersectionRatio: intersectionRatio(intersectionRect, element),
-  };
+  });
 }
 
 /**
@@ -140,7 +140,7 @@ export class IntersectionObserver {
     /** @private {!Array<!IntersectionObserverEntry>} */
     this.pendingChanges_ = [];
 
-    /** @private {number} */
+    /** @private {number|string} */
     this.flushTimeout_ = 0;
 
     /** @private @const {function()} */
@@ -158,6 +158,9 @@ export class IntersectionObserver {
         // Each time someone subscribes we make sure that they
         // get an update.
         () => this.startSendingIntersectionChanges_());
+
+    /** @private {?Function} */
+    this.unlistenViewportChanges_ = null;
   }
 
   fire() {

@@ -21,5 +21,6 @@ import {getElementService} from './element-service';
  * @return {!Promise<!Activity>}
  */
 export function activityFor(win) {
-  return getElementService(win, 'activity', 'amp-analytics');
+  return /** @type {!Promise<!Activity>} */ (
+      getElementService(win, 'activity', 'amp-analytics'));
 };

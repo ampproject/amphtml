@@ -72,6 +72,7 @@ describe('amp-apester-media', () => {
         media.setAttribute(key, attributes[key]);
 
       }
+      media.setAttribute('width', '600');
       media.setAttribute('height', '390');
       //todo test width?
       if (opt_responsive) {

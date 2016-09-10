@@ -297,6 +297,8 @@ describe('3p-frame', () => {
 
     const div = document.createElement('div');
     div.setAttribute('type', '_ping_');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
     div.getIntersectionChangeEntry = function() {
       return {
         left: 0,

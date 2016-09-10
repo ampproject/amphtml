@@ -20,9 +20,9 @@ import {getElementServiceIfAvailable} from './element-service';
  * Returns a promise for the experiment variants or a promise for null if it is
  * not available on the current page.
  * @param {!Window} win
- * @return {!Promise<?Object<string, string>>}
+ * @return {!Promise<?Object<string>>}
  */
 export function variantForOrNull(win) {
-  return /** @type {!Promise<?Object<string, string>>} */ (
+  return /** @type {!Promise<?Object<string>>} */ (
       getElementServiceIfAvailable(win, 'variant', 'amp-experiment'));
 }

@@ -163,10 +163,7 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an extended element and installs its styles.
-   * @param {string} name
-   * @param {!Function} implementationClass
-   * @param {string=} opt_css Optional CSS to install with the component.
-   *     Typically imported from generated CSS-in-JS file for each component.
+   * @const
    */
   global.AMP.registerElement = opts.registerElement.bind(null,
       global, extensions);
@@ -182,9 +179,7 @@ function adoptShared(global, opts, callback) {
 
   /**
    * Registers an ampdoc service.
-   * @param {string} name
-   * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)=} opt_ctor
-   * @param {function(!./service/ampdoc-impl.AmpDoc):!Object=} opt_factory
+   * @const
    */
   global.AMP.registerServiceForDoc = opts.registerServiceForDoc.bind(null,
       global, extensions);
@@ -358,7 +353,7 @@ function prepareAndRegisterElementShadowMode(global, extensions,
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
     addShadowRootFactoryToExtension(extensions, shadowRoot => {
-      installStylesForShadowRoot(shadowRoot, opt_css,
+      installStylesForShadowRoot(shadowRoot, dev().assertString(opt_css),
           /* isRuntimeCss */ false, name);
     });
   }
@@ -506,12 +501,13 @@ function mergeShadowHead(global, extensions, shadowRoot, doc) {
   const extensionIds = [];
   if (doc.head) {
     const parentLinks = {};
-    childElementsByTag(global.document.head, 'link').forEach(link => {
-      const href = link.getAttribute('href');
-      if (href) {
-        parentLinks[href] = true;
-      }
-    });
+    childElementsByTag(dev().assertElement(global.document.head), 'link')
+        .forEach(link => {
+          const href = link.getAttribute('href');
+          if (href) {
+            parentLinks[href] = true;
+          }
+        });
 
     for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
       const tagName = n.tagName;

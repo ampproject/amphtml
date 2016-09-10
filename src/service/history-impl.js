@@ -314,10 +314,10 @@ export class HistoryBindingNatural_ {
       };
     }
 
-    /** @private @const {function(*, string=, string=)} */
+    /** @private @const {!Function} */
     this.pushState_ = pushState;
 
-    /** @private @const {function(*, string=, string=)} */
+    /** @private @const {!Function} */
     this.replaceState_ = replaceState;
 
     try {
@@ -503,9 +503,9 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {*} state
-   * @param {string|undefined} title
-   * @param {string|undefined} url
+   * @param {*=} state
+   * @param {(string|undefined)=} title
+   * @param {(string|undefined)=} url
    * @private
    */
   historyPushState_(state, title, url) {
@@ -525,9 +525,9 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {*} state
-   * @param {string|undefined} title
-   * @param {string|undefined} url
+   * @param {*=} state
+   * @param {(string|undefined)=} title
+   * @param {(string|undefined)=} url
    * @private
    */
   historyReplaceState_(state, title, url) {

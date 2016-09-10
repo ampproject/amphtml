@@ -28,7 +28,7 @@ export class Platform {
    */
   constructor(win) {
     /** @const {!Navigator} */
-    this.navigator = win.navigator;
+    this.navigator = /** @type {!Navigator} */ (win.navigator);
   }
 
   /**

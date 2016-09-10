@@ -168,14 +168,14 @@ export function parseLength(s) {
 
 /**
  * Asserts that the supplied value is a non-percent CSS Length value.
- * @param {!LengthDef|string} length
+ * @param {!LengthDef|string|null|undefined} length
  * @return {!LengthDef}
  */
 export function assertLength(length) {
   user().assert(
       /^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|cm|mm|q|in|pc|pt)$/.test(length),
       'Invalid length value: %s', length);
-  return length;
+  return /** @type {!LengthDef} */ (length);
 }
 
 
@@ -196,11 +196,12 @@ export function assertLengthOrPercent(length) {
 
 /**
  * Returns units from the CSS length value.
- * @param {!LengthDef} length
+ * @param {!LengthDef|string|null|undefined} length
  * @return {string}
  */
 export function getLengthUnits(length) {
   assertLength(length);
+  dev().assertString(length);
   const m = user().assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
@@ -209,7 +210,7 @@ export function getLengthUnits(length) {
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!LengthDef|string} length
+ * @param {!LengthDef|string|null|undefined} length
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
@@ -222,7 +223,7 @@ export function getLengthNumeral(length) {
  * Determines whether the tagName is a known element that has natural dimensions
  * in our runtime or the browser.
  * @param {string} tagName The element tag name.
- * @return {DimensionsDef}
+ * @return {boolean}
  */
 export function hasNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
@@ -256,7 +257,7 @@ export function getNaturalDimensions(element) {
     };
     doc.body.removeChild(temp);
   }
-  return naturalDimensions_[tagName];
+  return /** @type {DimensionsDef} */ (naturalDimensions_[tagName]);
 }
 
 

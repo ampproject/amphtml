@@ -30,7 +30,7 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
  * Currently only limitted to elements.
  *
  * @typedef {{
- *   elements: !Array<!{implementationClass:
+ *   elements: !Object<string, !{implementationClass:
  *       function(new:../base-element.BaseElement, !Element)}>,
  * }}
  */
@@ -286,7 +286,7 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(ampdoc.getRootNode());
+            factory(/** @type {!ShadowRoot} */ (ampdoc.getRootNode()));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
@@ -318,7 +318,7 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(shadowRoot);
+            factory(/** @type {!ShadowRoot} */ (shadowRoot));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
@@ -340,7 +340,7 @@ export class Extensions {
       const extension = {
         elements: {},
       };
-      holder = {
+      holder = /** @type {ExtensionHolderDef} */ ({
         extension,
         docFactories: [],
         shadowRootFactories: [],
@@ -350,7 +350,7 @@ export class Extensions {
         loaded: undefined,
         error: undefined,
         scriptPresent: undefined,
-      };
+      });
       this.extensions_[extensionId] = holder;
     }
     return holder;
@@ -397,7 +397,6 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
-   * @return {boolean}
    * @private
    */
   insertExtensionScriptIfNeeded_(extensionId, holder) {
@@ -431,7 +430,7 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
-   * @return {!HTMLScriptElement} Script object
+   * @return {!Element} Script object
    * @private
    */
   createExtensionScript_(extensionId) {
