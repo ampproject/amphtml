@@ -59,5 +59,7 @@ env:
     - NPM_CONFIG_PROGRESS="false"
 
 cache:
+  pip: true,
   directories:
-  - node_modules
+    - node_modules
+    - $HOME/.nvm
