@@ -87,7 +87,6 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
 
   if (opt_context) {
     Object.keys(opt_context).forEach(contextId => {
-      console.log(opt_context[contextId]);
       attributes._context[contextId] = opt_context[contextId];
     });
   }

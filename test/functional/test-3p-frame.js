@@ -100,7 +100,6 @@ describe('3p-frame', () => {
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
-    div.setAttribute('ampcid', 'cidValue');
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -140,7 +139,7 @@ describe('3p-frame', () => {
         .returns('http://acme.org/')
         .once();
 
-    const iframe = getIframe(window, div, '_ping_');
+    const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
