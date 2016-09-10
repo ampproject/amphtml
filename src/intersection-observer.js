@@ -160,7 +160,7 @@ export class IntersectionObserver {
         () => this.startSendingIntersectionChanges_());
 
     /** @private {?Function} */
-    this.unlistenViewportChanges_ = null
+    this.unlistenViewportChanges_ = null;
   }
 
   fire() {

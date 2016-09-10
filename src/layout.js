@@ -213,7 +213,6 @@ export function getLengthUnits(length) {
  * @return {number|undefined}
  */
 export function getLengthNumeral(length) {
-  dev().assertString(length);
   const res = parseFloat(length);
   return !isFiniteNumber(res) ? undefined : res;
 }

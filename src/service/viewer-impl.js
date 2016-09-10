@@ -314,7 +314,6 @@ export class Viewer {
       } else {
         // Race to resolve with a timer.
         timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        /** @private @const {!function(string)|undefined} */
         this.viewerOriginResolver_ = resolve;
       }
     });

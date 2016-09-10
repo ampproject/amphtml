@@ -81,7 +81,9 @@ export function reportError(error, opt_associatedElement) {
   if (element && element.dispatchCustomEvent) {
     element.dispatchCustomEvent('amp:error', error.message);
   }
-  reportErrorToServer.call(undefined, undefined, undefined, undefined,
+  // 'call' to make linter happy. And .call to make compiler happy
+  // that expects some @this.
+  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
       undefined, error);
 }
 

@@ -58,7 +58,7 @@ export function documentInfoForDoc(nodeOrDoc) {
         const pageViewId = getPageViewId(ampdoc.win);
         return {url, sourceUrl, canonicalUrl, pageViewId};
       }));
-    }
+}
 
 
 /**

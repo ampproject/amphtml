@@ -280,8 +280,8 @@ export class Log {
    */
   /*eslint "google-camelcase/google-camelcase": 2*/
   assertString(shouldBeString, opt_message) {
-    this.assert(typeof shouldBeString == 'string', (opt_message || 'String expected') + ': %s',
-        shouldBeString);
+    this.assert(typeof shouldBeString == 'string',
+        (opt_message || 'String expected') + ': %s', shouldBeString);
     return /** @type {string} */ (shouldBeString);
   }
 
