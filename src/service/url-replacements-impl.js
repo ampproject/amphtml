@@ -53,13 +53,16 @@ export class UrlReplacements {
     /** @private @const {!Object<string, function(*, *):*>} */
     this.replacements_ = this.win_.Object.create(null);
 
-    /** @private @const {function():!Promise<?AccessService>} */
+    /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, ?string>>} */
+    /** @private @const {!Promise<?Object<string>>} */
     this.variants_ = variantForOrNull(win);
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /**
+     * @private @const {
+     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
+     */
     this.shareTrackingFragments_ = shareTrackingForOrNull(win);
 
     /** @private {boolean} */
@@ -166,7 +169,8 @@ export class UrlReplacements {
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user().assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user().assertString(scope,
+          'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -179,7 +183,7 @@ export class UrlReplacements {
       }
       return cidFor(this.win_).then(cid => {
         return cid.get({
-          scope,
+          scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
         }, consent);
       });
@@ -426,7 +430,7 @@ export class UrlReplacements {
    * @template T
    */
   getAccessValue_(getter, expr) {
-    return this.getAccessService_().then(accessService => {
+    return this.getAccessService_(this.win_).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
         user().error(TAG, 'Access service is not installed to access: ', expr);

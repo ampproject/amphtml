@@ -20,6 +20,7 @@ import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {dev} from '../src/log';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -36,7 +37,7 @@ export function installVideo(win) {
 
     /** @override */
     buildCallback() {
-      /** @private @const {!HTMLVideoElement} */
+      /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
 
       const posterAttr = this.element.getAttribute('poster');
@@ -82,7 +83,8 @@ export function installVideo(win) {
           return;
         }
         if (child.getAttribute && child.getAttribute('src')) {
-          assertHttpsUrl(child.getAttribute('src'), child);
+          assertHttpsUrl(child.getAttribute('src'),
+              dev().assertElement(child));
         }
         this.video_.appendChild(child);
       });

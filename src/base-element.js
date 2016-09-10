@@ -143,7 +143,7 @@ export class BaseElement {
     /** @private {!Object<string, function(!./service/action-impl.ActionInvocation)>} */
     this.actionMap_ = this.win.Object.create(null);
 
-    /** @protected {!./preconnect.Preconnect} */
+    /** @public {!./preconnect.Preconnect} */
     this.preconnect = preconnectFor(this.win);
   }
 
@@ -164,13 +164,13 @@ export class BaseElement {
 
   /**
    * DO NOT CALL. Retained for backward compat during rollout.
-   * @protected @return {!Window}
+   * @public @return {!Window}
    */
   getWin() {
     return this.win;
   }
 
-  /** @protected @return {!./service/vsync-impl.Vsync} */
+  /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.win);
   }
@@ -180,7 +180,7 @@ export class BaseElement {
    * layout is not yet known. A `0` value indicates that the element is not
    * visible.
    * @return {number}
-   * @protected
+   * @public
    */
   getLayoutWidth() {
     return this.layoutWidth_;
@@ -192,7 +192,7 @@ export class BaseElement {
    * supported.
    * @param {!Layout} layout
    * @return {boolean}
-   * @protected
+   * @public
    */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
@@ -202,7 +202,7 @@ export class BaseElement {
    * Intended to be implemented by subclasses. Tests whether the element
    * requires fixed positioning.
    * @return {boolean}
-   * @protected
+   * @public
    */
   isAlwaysFixed() {
     return false;
@@ -267,8 +267,9 @@ export class BaseElement {
    * Called by the framework to give the element a chance to preconnect to
    * hosts and prefetch resources it is likely to need. May be called
    * multiple times because connections can time out.
+   * @param {boolean=} opt_onLayout
    */
-  preconnectCallback() {
+  preconnectCallback(opt_onLayout) {
     // Subclasses may override.
   }
 
@@ -357,7 +358,7 @@ export class BaseElement {
    * The default behavior of this method is to hide the placeholder. However,
    * a subclass may choose to hide placeholder earlier or not hide it at all.
    *
-   * @protected
+   * @public
    */
   firstLayoutCompleted() {
     this.togglePlaceholder(false);
@@ -420,7 +421,7 @@ export class BaseElement {
    * Registers the action handler for the method with the specified name.
    * @param {string} method
    * @param {function(!./service/action-impl.ActionInvocation)} handler
-   * @protected
+   * @public
    */
   registerAction(method, handler) {
     this.actionMap_[method] = handler;
@@ -469,7 +470,7 @@ export class BaseElement {
    * to the given element.
    * @param  {!Array<string>} attributes
    * @param  {!Element} element
-   * @protected @final
+   * @public @final
    */
   propagateAttributes(attributes, element) {
     for (let i = 0; i < attributes.length; i++) {
@@ -484,7 +485,7 @@ export class BaseElement {
   /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
-   * @protected @final
+   * @public @final
    */
   getPlaceholder() {
     return this.element.getPlaceholder();
@@ -493,7 +494,7 @@ export class BaseElement {
   /**
    * Hides or shows the placeholder, if available.
    * @param {boolean} state
-   * @protected @final
+   * @public @final
    */
   togglePlaceholder(state) {
     this.element.togglePlaceholder(state);
@@ -502,7 +503,7 @@ export class BaseElement {
   /**
    * Returns an optional fallback element for this custom element.
    * @return {?Element}
-   * @protected @final
+   * @public @final
    */
   getFallback() {
     return this.element.getFallback();
@@ -512,7 +513,7 @@ export class BaseElement {
    * Hides or shows the fallback, if available. This function must only
    * be called inside a mutate context.
    * @param {boolean} state
-   * @protected @final
+   * @public @final
    */
   toggleFallback(state) {
     this.element.toggleFallback(state);
@@ -521,7 +522,7 @@ export class BaseElement {
   /**
    * Returns an optional overflow element for this custom element.
    * @return {?Element}
-   * @protected @final
+   * @public @final
    */
   getOverflowElement() {
     return this.element.getOverflowElement();
@@ -532,7 +533,7 @@ export class BaseElement {
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
    * @return {!Array<!Node>}
-   * @protected @final
+   * @public @final
    */
   getRealChildNodes() {
     return this.element.getRealChildNodes();
@@ -542,7 +543,7 @@ export class BaseElement {
    * Returns the original children of the custom element without any service
    * nodes that could have been added for markup.
    * @return {!Array<!Element>}
-   * @protected @final
+   * @public @final
    */
   getRealChildren() {
     return this.element.getRealChildren();
@@ -558,7 +559,7 @@ export class BaseElement {
    *
    * @param {!Element} element
    * @param {boolean=} opt_replacedContent
-   * @protected @final
+   * @public @final
    */
   applyFillContent(element, opt_replacedContent) {
     element.classList.add('-amp-fill-content');
@@ -589,7 +590,7 @@ export class BaseElement {
    * specified. Resource manager will perform the actual layout based on the
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
-   * @protected
+   * @public
    */
   scheduleLayout(elements) {
     this.element.getResources().scheduleLayout(this.element, elements);
@@ -597,7 +598,7 @@ export class BaseElement {
 
   /**
    * @param {!Element|!Array<!Element>} elements
-   * @protected
+   * @public
    */
   schedulePause(elements) {
     this.element.getResources().schedulePause(this.element, elements);
@@ -605,7 +606,7 @@ export class BaseElement {
 
   /**
    * @param {!Element|!Array<!Element>} elements
-   * @protected
+   * @public
    */
   scheduleResume(elements) {
     this.element.getResources().scheduleResume(this.element, elements);
@@ -616,8 +617,7 @@ export class BaseElement {
    * specified. Resource manager will perform the actual preload based on the
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
-   * @protected
+   * @public
    */
   schedulePreload(elements) {
     this.element.getResources().schedulePreload(this.element, elements);
@@ -625,7 +625,7 @@ export class BaseElement {
 
   /**
    * @param {!Element|!Array<!Element>} elements
-   * @protected
+   * @public
    */
   scheduleUnlayout(elements) {
     this.element.getResources()./*OK*/scheduleUnlayout(this.element, elements);
@@ -637,7 +637,7 @@ export class BaseElement {
    * based on the state of these elements and their parent subtree.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
-   * @protected
+   * @public
    */
   updateInViewport(elements, inLocalViewport) {
     this.element.getResources().updateInViewport(
@@ -649,7 +649,7 @@ export class BaseElement {
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.
    * @param {number} newHeight
-   * @protected
+   * @public
    */
   changeHeight(newHeight) {
     this.element.getResources()./*OK*/changeSize(
@@ -668,7 +668,7 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number} newHeight
    * @return {!Promise}
-   * @protected
+   * @public
    */
   attemptChangeHeight(newHeight) {
     return this.element.getResources().attemptChangeSize(
@@ -688,7 +688,7 @@ export class BaseElement {
   * @param {number|undefined} newHeight
   * @param {number|undefined} newWidth
   * @return {!Promise}
-  * @protected
+  * @public
   */
   attemptChangeSize(newHeight, newWidth) {
     return this.element.getResources().attemptChangeSize(
@@ -725,7 +725,7 @@ export class BaseElement {
 
   /**
    * Requests full overlay mode from the viewer.
-   * @protected
+   * @public
    * @deprecated Use `Viewport.enterLightboxMode`.
    * TODO(dvoytenko, #3406): Remove as deprecated.
    */
@@ -735,7 +735,7 @@ export class BaseElement {
 
   /**
    * Requests to cancel full overlay mode from the viewer.
-   * @protected
+   * @public
    * @deprecated Use `Viewport.leaveLightboxMode`.
    * TODO(dvoytenko, #3406): Remove as deprecated.
    */
@@ -766,7 +766,7 @@ export class BaseElement {
    * more expensive style reads should now be cheap.
    * This may currently not work with extended elements. Please file
    * an issue if that is required.
-   * @protected
+   * @public
    */
   onLayoutMeasure() {}
 };

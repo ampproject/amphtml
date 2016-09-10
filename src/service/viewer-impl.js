@@ -314,7 +314,6 @@ export class Viewer {
       } else {
         // Race to resolve with a timer.
         timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        /** @private @const {!function(string)|undefined} */
         this.viewerOriginResolver_ = resolve;
       }
     });
@@ -735,7 +734,11 @@ export class Viewer {
 
   /**
    * Adds a "viewport" event listener for viewer events.
-   * @param {function()} handler
+   * @param {function({
+   *   paddingTop: number,
+   *   duration: (number|undefined),
+   *   curve: (string|undefined)
+   * })} handler
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
@@ -863,7 +866,7 @@ export class Viewer {
 
   /**
    * Triggers "tick" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   tick(message) {
     this.sendMessageUnreliable_('tick', message, false);
@@ -878,7 +881,7 @@ export class Viewer {
 
   /**
    * Triggers "setFlushParams" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   setFlushParams(message) {
     this.sendMessageUnreliable_('setFlushParams', message, false);
@@ -886,7 +889,7 @@ export class Viewer {
 
   /**
    * Triggers "prerenderComplete" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   prerenderComplete(message) {
     this.sendMessageUnreliable_('prerenderComplete', message, false);

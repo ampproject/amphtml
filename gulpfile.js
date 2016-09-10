@@ -138,11 +138,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
   });
-  // The main binary does not yet compile successfully with type checking
-  // turned on. Skip for now.
-  if (opt_checkTypes && !argv.more) {
-    return;
-  }
+
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
   compileJs('./src/', 'amp-babel.js', './dist', {
@@ -163,6 +159,10 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
         's.animation="none";' +
         's.WebkitAnimation="none;"},1000);throw e};'
   });
+  if (opt_checkTypes) {
+    // We don't rerun type check for the shadow entry point for now.
+    return;
+  }
   // Entry point for shadow runtime.
   compileJs('./src/', 'amp-shadow-babel.js', './dist', {
     toName: 'amp-shadow.js',
@@ -344,11 +344,12 @@ function checkTypes() {
     checkTypes: true,
     preventRemoveAndMakeDir: true,
   });
-  buildSw({
+  // Temporarily turned off due to unknown type warnings.
+  /*buildSw({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
-  });
+  });*/
   buildExperiments({
     minify: true,
     checkTypes: true,
@@ -356,7 +357,6 @@ function checkTypes() {
   });
   compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
       /* check types */ true);
-  // These are not turned on on Travis.
 }
 
 /**

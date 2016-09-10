@@ -97,7 +97,7 @@ const UpgradeState = {
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   if (!knownElements[name]) {
-    registerElement(win, name, toClass);
+    registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
   }
   user().assert(knownElements[name] == ElementStub,
@@ -185,7 +185,7 @@ export function stubElementIfNotKnown(win, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
- * @param {!AmpElement} element
+ * @param {!Element} element
  */
 export function applyLayout_(element) {
   const layoutAttr = element.getAttribute('layout');
@@ -269,10 +269,10 @@ export function applyLayout_(element) {
   if (layout == Layout.NODISPLAY) {
     element.style.display = 'none';
   } else if (layout == Layout.FIXED) {
-    element.style.width = width;
-    element.style.height = height;
+    element.style.width = dev().assertString(width);
+    element.style.height = dev().assertString(height);
   } else if (layout == Layout.FIXED_HEIGHT) {
-    element.style.height = height;
+    element.style.height = dev().assertString(height);
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amp-sizer');
     sizer.style.display = 'block';
@@ -334,7 +334,7 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
  *     testing only.
  * @return {!Object} Prototype of element.
  */
@@ -504,7 +504,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Completes the upgrade of the element with the provided implementation.
-   * @param {./base-element.BaseElement} newImpl
+   * @param {!./base-element.BaseElement} newImpl
    * @final @private @this {!Element}
    */
   ElementProto.completeUpgrade_ = function(newImpl) {
@@ -861,7 +861,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Whether the element should ever render when it is not in viewport.
-   * @return {boolean}
+   * @return {boolean|number}
    * @final @this {!Element}
    */
   ElementProto.renderOutsideViewport = function() {
@@ -1054,7 +1054,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Called every time an owned AmpElement collapses itself.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} element
    */
   ElementProto.collapsedCallback = function(element) {
     this.implementation_.collapsedCallback(element);
@@ -1371,8 +1371,6 @@ export function registerElement(win, name, implementationClass) {
  * @param {!Window} win The window in which to register the elements.
  * @param {string} aliasName Additional name for an existing custom element.
  * @param {string} sourceName Name of an existing custom element
- * @param {Object} state Optional map to be merged into the prototype
- *                 to override the original state with new default values
  */
 export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];

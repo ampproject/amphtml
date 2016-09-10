@@ -269,6 +269,23 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument isn't a string.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeString
+   * @param {string=} opt_message The assertion message
+   * @return {string} The value of shouldBeTrueish.
+   * @template T
+   */
+  /*eslint "google-camelcase/google-camelcase": 2*/
+  assertString(shouldBeString, opt_message) {
+    this.assert(typeof shouldBeString == 'string',
+        (opt_message || 'String expected') + ': %s', shouldBeString);
+    return /** @type {string} */ (shouldBeString);
+  }
+
+  /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *
