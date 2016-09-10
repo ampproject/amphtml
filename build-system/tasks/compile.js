@@ -224,6 +224,7 @@ function compile(entryModuleFilename, outputDir,
           '3p/environment.js',
           'src/document-state.js',
         ],
+        jscomp_error: [],
       }
     };
 
@@ -232,7 +233,8 @@ function compile(entryModuleFilename, outputDir,
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
-      compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+      compilerOptions.compilerFlags.jscomp_error.push(
+          'checkTypes', 'accessControls', 'const', 'constantProperty');
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');

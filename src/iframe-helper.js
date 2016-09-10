@@ -298,7 +298,7 @@ export function listenFor(
  * Returns a promise that resolves when one of given messages has been observed
  * for the first time. And remove listener for all other messages.
  * @param {!Element} iframe
- * @param {string|!Array<string>} typeOfMessage
+ * @param {string|!Array<string>} typeOfMessages
  * @param {boolean=} opt_is3P
  * @return {!Promise<!{data, source, origin}>}
  */
@@ -323,7 +323,7 @@ export function listenForOncePromise(iframe, typeOfMessages, opt_is3P) {
 
 /**
  * Posts a message to the iframe.
- * @param {!Element} element The iframe.
+ * @param {!Element} iframe The iframe.
  * @param {string} type Type of the message.
  * @param {!Object} object Message payload.
  * @param {string} targetOrigin origin of the target.

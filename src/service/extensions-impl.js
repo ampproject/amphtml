@@ -397,7 +397,6 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
-   * @return {boolean}
    * @private
    */
   insertExtensionScriptIfNeeded_(extensionId, holder) {

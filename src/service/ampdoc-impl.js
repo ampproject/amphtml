@@ -78,7 +78,7 @@ export class AmpDocService {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {?AmpDoc} */
+    /** @private {?AmpDoc} */
     this.singleDoc_ = null;
     if (isSingleDoc) {
       this.singleDoc_ = new AmpDocSingle(win);

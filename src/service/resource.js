@@ -121,7 +121,7 @@ export class Resource {
     /** @private {boolean} */
     this.blacklisted_ = false;
 
-    /** @const {!AmpElement|undefined|null} */
+    /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */

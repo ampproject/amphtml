@@ -1473,7 +1473,7 @@ export class Resources {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {function(!Resource, number)} iterator
+   * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const prerender = VisibilityState.PRERENDER;

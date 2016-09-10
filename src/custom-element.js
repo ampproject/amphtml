@@ -1054,7 +1054,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Called every time an owned AmpElement collapses itself.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} element
    */
   ElementProto.collapsedCallback = function(element) {
     this.implementation_.collapsedCallback(element);
@@ -1371,8 +1371,6 @@ export function registerElement(win, name, implementationClass) {
  * @param {!Window} win The window in which to register the elements.
  * @param {string} aliasName Additional name for an existing custom element.
  * @param {string} sourceName Name of an existing custom element
- * @param {Object} state Optional map to be merged into the prototype
- *                 to override the original state with new default values
  */
 export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
