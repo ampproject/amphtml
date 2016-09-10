@@ -93,6 +93,7 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
   });
 
   it('should fail when POST and action-xhr is not set', () => {
+    evt.target.removeAttribute('action');
     evt.target.setAttribute('method', 'post');
     expect(() => onDocumentFormSubmit_(evt))
         .to.throw(/Only XHR based \(via action-xhr attribute\) submissions/);
@@ -102,6 +103,13 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
     evt.target.setAttribute('action-xhr', 'https://example.com');
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
     expect(preventDefaultSpy.callCount).to.equal(2);
+  });
+
+  it('should fail when action is provided for POST', () => {
+    evt.target.setAttribute('method', 'post');
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/form action attribute is invalid for method=POST/);
+    expect(preventDefaultSpy.callCount).to.equal(1);
   });
 
   it('should do nothing if already prevented', () => {

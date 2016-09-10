@@ -62,18 +62,25 @@ export function onDocumentFormSubmit_(e) {
   const action = form.getAttribute('action');
   const actionXhr = form.getAttribute('action-xhr');
   const method = (form.getAttribute('method') || 'GET').toUpperCase();
-  user().assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, dev().assertElement(form), 'action');
-  user().assert(!startsWith(action, urls.cdn),
-      'form action should not be on AMP CDN: %s', form);
-  if (!actionXhr && method != 'GET') {
+  if (method == 'GET') {
+    user().assert(action,
+        'form action attribute is required for method=GET: %s', form);
+    assertHttpsUrl(action, form, 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on AMP CDN: %s', form);
+    checkCorsUrl(action);
+  } else if (action) {
+    e.preventDefault();
+    user().assert(false,
+        'form action attribute is invalid for method=POST: %s', form);
+  } else if (!actionXhr) {
     e.preventDefault();
     user().assert(false,
         'Only XHR based (via action-xhr attribute) submissions are support ' +
         'for POST requests. %s',
         form);
   }
-  checkCorsUrl(action);
+  checkCorsUrl(actionXhr);
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);

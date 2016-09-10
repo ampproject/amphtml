@@ -19,6 +19,7 @@ import {fromClass} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  parseUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 
@@ -116,9 +117,9 @@ export class Xhr {
     input = this.getCorsUrl(this.win, input);
     // For some same origin requests, add AMP-Same-Origin: true header to allow
     // publishers to validate that this request came from their own origin.
-    const sourceOrigin = getSourceOrigin(this.win.location.href);
-    const targetOrigin = getSourceOrigin(input);
-    if (sourceOrigin == targetOrigin) {
+    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const targetOrigin = parseUrl(input).origin;
+    if (currentOrigin == targetOrigin) {
       init['headers'] = init['headers'] || {};
       init['headers']['AMP-Same-Origin'] = 'true';
     }
@@ -126,6 +127,7 @@ export class Xhr {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
+        const sourceOrigin = getSourceOrigin(this.win.location.href);
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
         user().assert(allowSourceOriginHeader == sourceOrigin,
