@@ -149,6 +149,8 @@ export class Viewport {
     // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
     // The enables passive touch handlers, e.g. for document swipe, since they
     // no will longer need to try to cancel vertical scrolls during swipes.
+    // This is only done in the embedded mode because (a) the document swipe
+    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
     if (viewer.isEmbedded() && isExperimentOn(this.win_, 'pan-y')) {
       setStyle(this.win_.document.documentElement, 'touch-action', 'pan-y');
     }
