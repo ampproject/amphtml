@@ -78,12 +78,6 @@ const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4002',
   },
   {
-    id: 'amp-live-list',
-    name: 'AMP Live List/Blog',
-    spec: 'https://github.com/ampproject/amphtml/issues/2762',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4001',
-  },
-  {
     id: 'amp-access-server',
     name: 'AMP Access server side prototype',
     spec: '',
@@ -180,6 +174,19 @@ const EXPERIMENTS = [
     name: 'Allows the new lightbox experience to automatically include some ' +
         'elements without the need to manually add the `lightbox` attribute',
     spec: 'https://github.com/ampproject/amphtml/issues/4152',
+  },
+  {
+    id: 'amp-fresh',
+    name: 'Guaranteed minimum freshness on sections of a page',
+    spec: '',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4715',
+  },
+  {
+    id: 'pan-y',
+    name: 'Sets "touch-action: pan-y" on doc root to enable passive' +
+        ' touch handlers',
+    spec: 'https://github.com/ampproject/amphtml/issues/4820',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/4894',
   },
 ];
 

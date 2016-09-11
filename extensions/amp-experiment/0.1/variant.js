@@ -99,7 +99,8 @@ function validateConfig(config) {
       const percentage = variants[variantName];
       user().assert(
           typeof percentage === 'number' && percentage > 0 && percentage < 100,
-          'Invalid percentage %s:%s. Has to be in range of (0,100)',
+          'Invalid percentage %s:%s.'
+              + ' Has to be greater than 0 and less than 100',
           variantName, percentage);
       totalPercentage += percentage;
     }

@@ -249,7 +249,41 @@ export class Log {
     }
     return shouldBeTrueish;
   }
+
+  /**
+   * Throws an error if the first argument isn't an Element
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeElement
+   * @param {string=} opt_message The assertion message
+   * @return {!Element} The value of shouldBeTrueish.
+   * @template T
+   */
   /*eslint "google-camelcase/google-camelcase": 2*/
+  assertElement(shouldBeElement, opt_message) {
+    const shouldBeTrueish = shouldBeElement && shouldBeElement.nodeType == 1;
+    this.assert(shouldBeTrueish, (opt_message || 'Element expected') + ': %s',
+        shouldBeElement);
+    return /** @type {!Element} */ (shouldBeElement);
+  }
+
+  /**
+   * Throws an error if the first argument isn't a string.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeString
+   * @param {string=} opt_message The assertion message
+   * @return {string} The value of shouldBeTrueish.
+   * @template T
+   */
+  /*eslint "google-camelcase/google-camelcase": 2*/
+  assertString(shouldBeString, opt_message) {
+    this.assert(typeof shouldBeString == 'string',
+        (opt_message || 'String expected') + ': %s', shouldBeString);
+    return /** @type {string} */ (shouldBeString);
+  }
 
   /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
@@ -261,6 +295,7 @@ export class Log {
    * @return T
    * @template T
    */
+  /*eslint "google-camelcase/google-camelcase": 2*/
   assertEnumValue(enumObj, s, opt_enumName) {
     for (const k in enumObj) {
       if (enumObj[k] == s) {

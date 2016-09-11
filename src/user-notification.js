@@ -26,6 +26,7 @@ import {getElementService} from './element-service';
  * @return {!Promise<!UserNotificationManager>}
  */
 export function userNotificationManagerFor(window) {
-  return getElementService(window, 'userNotificationManager',
-      'amp-user-notification');
+  return /** @type {!Promise<!UserNotificationManager>} */ (
+      getElementService(window, 'userNotificationManager',
+          'amp-user-notification'));
 }

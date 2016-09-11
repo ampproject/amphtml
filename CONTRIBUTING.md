@@ -43,7 +43,7 @@ Code contributors to the AMP HTML project must sign a Contributor License Agreem
 ### Contributing Features
 
 All pull requests for new features must go through the following process:
-* Please familiarize yourself with the [AMP Design Principles](DESIGN_PRINCIPLES).md
+* Please familiarize yourself with the [AMP Design Principles](DESIGN_PRINCIPLES.md)
 * Start an Intent-to-implement GitHub issue for discussion of the new feature.
 * LGTM from Tech Lead and one other core committer is required
 * Development occurs on a separate branch of a separate fork, noted in the intent-to-implement issue

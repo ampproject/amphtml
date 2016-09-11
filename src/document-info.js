@@ -34,7 +34,7 @@ import {user} from './log';
  *   pageViewId: string,
  * }}
  */
-let DocumentInfoDef;
+export let DocumentInfoDef;
 
 
 /**
@@ -42,20 +42,22 @@ let DocumentInfoDef;
  * @return {!DocumentInfoDef} Info about the doc
  */
 export function documentInfoForDoc(nodeOrDoc) {
-  return getServiceForDoc(nodeOrDoc, 'documentInfo', ampdoc => {
-    const url = ampdoc.getUrl();
-    const sourceUrl = getSourceUrl(url);
-    const rootNode = ampdoc.getRootNode();
-    let canonicalUrl = rootNode && rootNode.AMP && rootNode.AMP.canonicalUrl;
-    if (!canonicalUrl) {
-      const canonicalTag = user().assert(
-          rootNode.querySelector('link[rel=canonical]'),
-          'AMP files are required to have a <link rel=canonical> tag.');
-      canonicalUrl = parseUrl(canonicalTag.href).href;
-    }
-    const pageViewId = getPageViewId(ampdoc.win);
-    return {url, sourceUrl, canonicalUrl, pageViewId};
-  });
+  return /** @type {!DocumentInfoDef} */ (getServiceForDoc(nodeOrDoc,
+      'documentInfo', ampdoc => {
+        const url = ampdoc.getUrl();
+        const sourceUrl = getSourceUrl(url);
+        const rootNode = ampdoc.getRootNode();
+        let canonicalUrl = rootNode && rootNode.AMP
+            && rootNode.AMP.canonicalUrl;
+        if (!canonicalUrl) {
+          const canonicalTag = user().assert(
+              rootNode.querySelector('link[rel=canonical]'),
+              'AMP files are required to have a <link rel=canonical> tag.');
+          canonicalUrl = parseUrl(canonicalTag.href).href;
+        }
+        const pageViewId = getPageViewId(ampdoc.win);
+        return {url, sourceUrl, canonicalUrl, pageViewId};
+      }));
 }
 
 

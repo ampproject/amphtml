@@ -484,7 +484,8 @@ export class FetchResponse {
     user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
-    return Promise.resolve(this.xhr_.responseXML);
+    return /** @type {!Promise<!Document>} */ (
+        Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
 
   /**

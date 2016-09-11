@@ -124,6 +124,15 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="5"] #container5 {
+      visibility: visible;
+      transform: none;
+    }
+
+    viewer[data-show-container="5"] #show-container5-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -509,6 +518,13 @@
           false).start();
       addShowContainer('4');
 
+      new Viewer(
+          'container5',
+          '5',
+          './article-fixed-header.amp.max.html',
+          false).start();
+      addShowContainer('5');
+
       showContainer('1');
     }
 
@@ -539,6 +555,7 @@
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a class="show-container-anchor" id="show-container4-anchor">ALP</a>
+      <a class="show-container-anchor" id="show-container5-anchor">Five</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -558,6 +575,11 @@
       </div>
     </container>
     <container id="container4">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container5">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

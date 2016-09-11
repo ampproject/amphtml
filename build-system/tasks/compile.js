@@ -125,9 +125,11 @@ function compile(entryModuleFilename, outputDir,
       'builtins/**.js',
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
+      'third_party/css-escape/css-escape.js',
       'third_party/mustache/**/*.js',
       'third_party/vega/**/*.js',
       'third_party/d3/**/*.js',
+      'third_party/webcomponentsjs/ShadowCSS.js',
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
@@ -212,6 +214,7 @@ function compile(entryModuleFilename, outputDir,
         hide_warnings_for: [
           'third_party/d3/',
           'third_party/vega/',
+          'third_party/webcomponentsjs/',
           'node_modules/',
           'build/patched-module/',
           // TODO: The following three are whitelisted only because they're
@@ -221,6 +224,7 @@ function compile(entryModuleFilename, outputDir,
           '3p/environment.js',
           'src/document-state.js',
         ],
+        jscomp_error: [],
       }
     };
 
@@ -229,7 +233,8 @@ function compile(entryModuleFilename, outputDir,
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
-      compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+      compilerOptions.compilerFlags.jscomp_error.push(
+          'checkTypes', 'accessControls', 'const', 'constantProperty');
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');

@@ -116,7 +116,7 @@ export class Viewer {
     /** @private {boolean} */
     this.overtakeHistory_ = false;
 
-    /** @private {string} */
+    /** @private {!VisibilityState} */
     this.visibilityState_ = VisibilityState.VISIBLE;
 
     /** @private {string} */
@@ -125,7 +125,7 @@ export class Viewer {
     /** @private {number} */
     this.prerenderSize_ = 1;
 
-    /** @private {string} */
+    /** @private {!ViewportType} */
     this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
@@ -137,7 +137,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
 
-    /** @private {!Observable} */
+    /** @private {!Observable<!{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}>} */
     this.viewportObservable_ = new Observable();
 
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
@@ -164,6 +164,15 @@ export class Viewer {
     /** @private {?time} */
     this.firstVisibleTime_ = null;
 
+    /** @private {?Function} */
+    this.messagingReadyResolver_ = null;
+
+    /** @private {?Function} */
+    this.viewerOriginResolver_ = null;
+
+    /** @private {?Function} */
+    this.trustedViewerResolver_ = null;
+
     /**
      * This promise might be resolved right away if the current
      * document is already visible. See end of this constructor where we call
@@ -188,8 +197,8 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     dev().fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
-        this.overtakeHistory_;
+    this.overtakeHistory_ = !!(parseInt(this.params_['history'], 10) ||
+        this.overtakeHistory_);
     dev().fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
@@ -248,10 +257,10 @@ export class Viewer {
         timerFor(this.win).timeoutPromise(
             20000,
             new Promise(resolve => {
-              /** @private @const {function()|undefined} */
               this.messagingReadyResolver_ = resolve;
             })).catch(reason => {
-              throw getChannelError(reason);
+              throw getChannelError(/** @type {!Error|string|undefined} */ (
+                  reason));
             }) : null;
 
     /**
@@ -265,7 +274,8 @@ export class Viewer {
         this.messagingReadyPromise_
             .catch(reason => {
               // Don't fail promise, but still report.
-              reportError(getChannelError(reason));
+              reportError(getChannelError(
+                  /** @type {!Error|string|undefined} */ (reason)));
             }) : null;
 
     // Trusted viewer and referrer.
@@ -286,7 +296,6 @@ export class Viewer {
       // Wait for comms channel to confirm the origin.
       trustedViewerResolved = undefined;
       trustedViewerPromise = new Promise(resolve => {
-        /** @const @private {!function(boolean)|undefined} */
         this.trustedViewerResolver_ = resolve;
       });
     }
@@ -305,7 +314,6 @@ export class Viewer {
       } else {
         // Race to resolve with a timer.
         timerFor(this.win).delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
-        /** @private @const {!function(string)|undefined} */
         this.viewerOriginResolver_ = resolve;
       }
     });
@@ -532,14 +540,22 @@ export class Viewer {
     const oldState = this.visibilityState_;
     state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
 
-    // The viewer is informing us we are not currently active because we are
-    // being pre-rendered, or the user swiped to another doc (or closed the
-    // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
-    // INACTIVE, though we know better.
-    if (state === VisibilityState.HIDDEN) {
-      state = this.hasBeenVisible_ ?
-        VisibilityState.INACTIVE :
-        VisibilityState.PRERENDER;
+    if (this.isEmbedded_) {
+      // The viewer is informing us we are not currently active because we are
+      // being pre-rendered, or the user swiped to another doc (or closed the
+      // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
+      // INACTIVE, though we know better.
+      if (state === VisibilityState.HIDDEN) {
+        state = this.hasBeenVisible_ ?
+          VisibilityState.INACTIVE :
+          VisibilityState.PRERENDER;
+      }
+    } else if (!getMode().localDev) {
+      // When not embedded, only VISIBLE and HIDDEN states are allowed.
+      if (state !== VisibilityState.VISIBLE ||
+          state !== VisibilityState.HIDDEN) {
+        state = VisibilityState.VISIBLE;
+      }
     }
 
     this.viewerVisibilityState_ = state;
@@ -718,7 +734,11 @@ export class Viewer {
 
   /**
    * Adds a "viewport" event listener for viewer events.
-   * @param {function()} handler
+   * @param {function({
+   *   paddingTop: number,
+   *   duration: (number|undefined),
+   *   curve: (string|undefined)
+   * })} handler
    * @return {!UnlistenDef}
    */
   onViewportEvent(handler) {
@@ -758,7 +778,8 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('requestFullOverlay', {}, true));
   }
 
   /**
@@ -767,7 +788,8 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
+    return /** @type {!Promise} */ (
+        this.sendMessageUnreliable_('cancelFullOverlay', {}, true));
   }
 
   /**
@@ -776,8 +798,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'pushHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex}, true));
   }
 
   /**
@@ -786,8 +808,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessageUnreliable_(
-        'popHistory', {stackIndex}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'popHistory', {stackIndex}, true));
   }
 
   /**
@@ -800,7 +822,7 @@ export class Viewer {
       if (!trusted) {
         return undefined;
       }
-      return this.sendMessage('cid', opt_data, true)
+      const cidPromise = this.sendMessage('cid', opt_data, true)
           .then(data => {
             // For backward compatibility: #4029
             if (data && !tryParseJson(data)) {
@@ -810,6 +832,14 @@ export class Viewer {
               });
             }
             return data;
+          });
+      // Getting the CID may take some time (waits for JS file to
+      // load, might hit GC), but we do not wait indefinitely. Typically
+      // it should resolve in milli seconds.
+      return timerFor(this.win).timeoutPromise(10000, cidPromise, 'base cid')
+          .catch(error => {
+            dev().error(TAG_, error);
+            return undefined;
           });
     });
   }
@@ -836,7 +866,7 @@ export class Viewer {
 
   /**
    * Triggers "tick" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   tick(message) {
     this.sendMessageUnreliable_('tick', message, false);
@@ -851,7 +881,7 @@ export class Viewer {
 
   /**
    * Triggers "setFlushParams" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   setFlushParams(message) {
     this.sendMessageUnreliable_('setFlushParams', message, false);
@@ -859,7 +889,7 @@ export class Viewer {
 
   /**
    * Triggers "prerenderComplete" event for the viewer.
-   * @param {!JSONType} message
+   * @param {!Object} message
    */
   prerenderComplete(message) {
     this.sendMessageUnreliable_('prerenderComplete', message, false);
@@ -868,7 +898,7 @@ export class Viewer {
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
-   * @param {*} data
+   * @param {!JSONType} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @export
@@ -877,8 +907,12 @@ export class Viewer {
     if (eventType == 'viewport') {
       if (data['paddingTop'] !== undefined) {
         this.paddingTop_ = data['paddingTop'];
+        this.viewportObservable_.fire({
+          paddingTop: this.paddingTop_,
+          duration: data['duration'],
+          curve: data['curve'],
+        });
       }
-      this.viewportObservable_.fire();
       return undefined;
     }
     if (eventType == 'historyPopped') {
@@ -896,7 +930,8 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
-      this.broadcastObservable_.fire(data);
+      this.broadcastObservable_.fire(
+          /** @type {!JSONType|undefined} */ (data));
       return Promise.resolve();
     }
     dev().fine(TAG_, 'unknown message:', eventType);
@@ -989,7 +1024,7 @@ export class Viewer {
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>|undefined}
+   * @return {?Promise<*>|undefined}
    * @private
    */
   sendMessageUnreliable_(eventType, data, awaitResponse) {
@@ -1065,7 +1100,7 @@ function parseParams_(str, allParams) {
 
 /**
  * Creates an error for the case where a channel cannot be established.
- * @param {!Error=} opt_reason
+ * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {

@@ -404,7 +404,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
       for (const k in params) {
-        params[k] = this.expandTemplate_(params[k], trigger, event);
+        if (typeof params[k] == 'string') {
+          params[k] = this.expandTemplate_(params[k], trigger, event);
+        }
       }
       if (request.indexOf('${extraUrlParams}') >= 0) {
         const extraUrlParams = addParamsToUrl('', params).substr(1);
