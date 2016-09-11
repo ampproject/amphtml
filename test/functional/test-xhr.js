@@ -286,15 +286,15 @@ describe.skip('XHR', function() {
       });
 
       it('should do simple JSON fetch', () => {
-        return xhr.fetchJson('http://localhost:9987/get?k=v1').then(res => {
+        return xhr.fetchJson('http://localhost:31862/get?k=v1').then(res => {
           expect(res).to.exist;
           expect(res['args']['k']).to.equal('v1');
         });
       });
 
       it('should redirect fetch', () => {
-        const url = 'http://localhost:9987/redirect-to?url=' + encodeURIComponent(
-            'http://localhost:9987/get?k=v2');
+        const url = 'http://localhost:31862/redirect-to?url=' + encodeURIComponent(
+            'http://localhost:31862/get?k=v2');
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
           expect(res['args']['k']).to.equal('v2');
@@ -302,7 +302,7 @@ describe.skip('XHR', function() {
       });
 
       it('should fail fetch for 400-error', () => {
-        const url = 'http://localhost:9987/status/404';
+        const url = 'http://localhost:31862/status/404';
         return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
@@ -313,7 +313,7 @@ describe.skip('XHR', function() {
       });
 
       it('should fail fetch for 500-error', () => {
-        const url = 'http://localhost:9987/status/500';
+        const url = 'http://localhost:31862/status/500';
         return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
@@ -326,7 +326,7 @@ describe.skip('XHR', function() {
 
       it('should NOT succeed CORS setting cookies without credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:9987/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.be.null;
@@ -335,7 +335,7 @@ describe.skip('XHR', function() {
 
       it('should succeed CORS setting cookies with credentials', () => {
         const cookieName = 'TEST_CORS_' + Math.round(Math.random() * 10000);
-        const url = 'http://localhost:9987/cookies/set?' + cookieName + '=v1';
+        const url = 'http://localhost:31862/cookies/set?' + cookieName + '=v1';
         return xhr.fetchJson(url, {credentials: 'include'}).then(res => {
           expect(res).to.exist;
           expect(getCookie(window, cookieName)).to.equal('v1');
@@ -349,7 +349,7 @@ describe.skip('XHR', function() {
       });
 
       it('should expose HTTP headers', () => {
-        const url = 'http://localhost:9987/response-headers?' +
+        const url = 'http://localhost:31862/response-headers?' +
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
@@ -482,7 +482,7 @@ describe.skip('XHR', function() {
   });
 
   scenarios.forEach(test => {
-    const url = 'http://localhost:9987/post';
+    const url = 'http://localhost:31862/post';
 
     describe(test.desc + ' POST', () => {
       const xhr = test.xhr;
