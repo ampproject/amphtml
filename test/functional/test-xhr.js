@@ -25,10 +25,7 @@ import {
 import {getCookie} from '../../src/cookies';
 
 
-// These tests are currently broken.
-// See https://github.com/ampproject/amphtml/issues/4899
-// and https://github.com/ampproject/amphtml/issues/3101 for fix.
-describe.skip('XHR', function() {
+describe('XHR', function() {
   let sandbox;
   let requests;
 
