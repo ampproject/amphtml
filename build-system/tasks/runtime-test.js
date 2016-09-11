@@ -22,6 +22,14 @@ var karmaConfig = config.karma;
 var extend = require('util')._extend;
 var fs = require('fs');
 var path = require('path');
+var util = require('gulp-util');
+var webserver = require('gulp-webserver');
+var app = require('../test-server').app;
+
+var host = argv.testResponsesServerHost || 'localhost';
+var port = argv.testResponsesServerPort || 9987;
+var useHttps = argv.https != undefined;
+
 
 /**
  * Read in and process the configuration settings for karma
@@ -113,8 +121,23 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     };
   }
 
+  // Run fake-server to test XHR responses.
+  var server = gulp.src(process.cwd())
+      .pipe(webserver({
+        port,
+        host,
+        directoryListing: true,
+        https: useHttps,
+        middleware: [app]
+      }));
+  util.log(util.colors.yellow('Started test responses server on' + getHost()));
 
-  new Karma(c, done).start();
+  new Karma(c, function() {
+    util.log(util.colors.yellow('Shutting down test responses server on' +
+        getHost()));
+    server.emit('kill');
+    done();
+  }).start();
 }, {
   options: {
     'verbose': '  With logging enabled',
@@ -130,3 +153,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     'files': 'Runs tests for specific files',
   }
 });
+
+function getHost() {
+  return (useHttps ? 'https' : 'http') + '://' + host + ':' + port;
+}
