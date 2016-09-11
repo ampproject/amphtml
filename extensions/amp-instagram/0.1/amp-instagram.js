@@ -83,6 +83,7 @@ class AmpInstagram extends AMP.BaseElement {
     const placeholder = this.win.document.createElement('div');
     placeholder.setAttribute('placeholder', '');
     const image = this.win.document.createElement('amp-img');
+    image.setAttribute('noprerender', '');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +

@@ -40,6 +40,12 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private @const {boolean} */
+    this.isPrerenderAllowed_ = !this.element.hasAttribute('noprerender');
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -74,7 +80,7 @@ export class AmpImg extends BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return true;
+    return this.isPrerenderAllowed_;
   }
 
   /** @override */
