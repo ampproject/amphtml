@@ -16,6 +16,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import {urls} from '../config';
+import {endsWith, startsWith} from '../string';
 
 /**
  * The SW's current version.
@@ -75,9 +76,9 @@ function versionedUrl(url, version) {
  * @return {boolean}
  */
 function isCdnJsFile(url) {
-  return url.endsWith('.js') && (
-    url.startsWith(`${urls.cdn}/rtv`) ||
-    url.startsWith(`${urls.cdn}/v0`)
+  return endsWith(url, '.js') && (
+    startsWith(url, `${urls.cdn}/rtv`) ||
+    startsWith(url, `${urls.cdn}/v0`)
   );
 }
 
@@ -245,7 +246,7 @@ self.addEventListener('fetch', event => {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && requestVersion.endsWith(VERSION)) {
+        if (version !== requestVersion && endsWith(requestVersion, VERSION)) {
           fetchAndCache(request, requestFile, requestVersion);
         }
 
