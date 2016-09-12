@@ -414,7 +414,7 @@ export function childElementsByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}

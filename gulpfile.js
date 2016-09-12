@@ -355,8 +355,15 @@ function checkTypes() {
     checkTypes: true,
     preventRemoveAndMakeDir: true,
   });
-  compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
-      /* check types */ true);
+  //compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
+  //    /* check types */ true);
+  closureCompile([
+    './src/amp-babel.js',
+    './extensions/amp-youtube/0.1/amp-youtube.js',
+  ],  './dist', 'check-types.js', {
+    checkTypes: true,
+    externs: ['build-system/amp.extension.extern.js',],
+  });
 }
 
 /**

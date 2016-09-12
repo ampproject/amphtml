@@ -18,7 +18,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {loadPromise} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {setStyles} from '../../../src/style';
 import {addParamsToUrl} from '../../../src/url';
 import {timerFor} from '../../../src/timer';
@@ -29,13 +29,35 @@ const YT_PLAYER_STATE_PLAYING = 1;
 
 class AmpYoutube extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://www.youtube.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+    /** @private {number} */
+    this.playerState_ = 0;
+
+    /** @private {?string}  */
+    this.videoid_ = null;
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.playerReadyPromise_ = null;
+
+    /** @private {?Function} */
+    this.playerReadyResolver_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://www.youtube.com', opt_onLayout);
     // Host that YT uses to serve JS needed by player.
-    this.preconnect.url('https://s.ytimg.com', onLayout);
+    this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
-    this.preconnect.url('https://i.ytimg.com', onLayout);
+    this.preconnect.url('https://i.ytimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -50,10 +72,6 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {number} */
-    this.playerState_ = 0;
-
-    /** @private @const {string} */
     this.videoid_ = user().assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-youtube> %s',
@@ -69,8 +87,8 @@ class AmpYoutube extends AMP.BaseElement {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
-
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_)}?enablejsapi=1`;
+    dev().assert(this.videoid_);
+    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {
@@ -85,12 +103,9 @@ class AmpYoutube extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
 
-    /** @private {!Element} */
     this.iframe_ = iframe;
 
-    /** @private @const {!Promise} */
     this.playerReadyPromise_ = new Promise(resolve => {
-      /** @private @const {function()} */
       this.playerReadyResolver_ = resolve;
     });
 
@@ -164,7 +179,8 @@ class AmpYoutube extends AMP.BaseElement {
   /** @private */
   buildImagePlaceholder_() {
     const imgPlaceholder = this.element.ownerDocument.createElement('img');
-    const videoid = this.videoid_;
+    dev().assert(this.videoid_);
+    const videoid = this.videoid_ || '';
 
     setStyles(imgPlaceholder, {
       // Cover matches YouTube Player styling.
@@ -178,7 +194,7 @@ class AmpYoutube extends AMP.BaseElement {
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
     imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+        encodeURIComponent(videoid) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
