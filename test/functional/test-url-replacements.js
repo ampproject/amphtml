@@ -32,6 +32,9 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
+import {
+  installAmpAnalyticsResourcesService,
+} from '../../extensions/amp-analytics-resources/0.1/analytics-resources-impl';
 
 import * as sinon from 'sinon';
 
@@ -464,6 +467,87 @@ describe('UrlReplacements', () => {
     return expand('?sh=AMP_VERSION').then(res => {
       expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
     });
+  });
+
+  it('should replace PAGE_DOC_LENGTH', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=PAGE_DOC_LENGTH', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace RESOURCE_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=RESOURCE_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace DOM_NODE_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=DOM_NODE_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace DOM_IMG_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=DOM_IMG_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace DOM_EXT_IMG_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=DOM_EXT_IMG_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace DOM_SCRIPT_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=DOM_SCRIPT_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace DOM_EXT_SCRIPT_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=DOM_EXT_SCRIPT_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace PAGE_DOMAIN_COUNT', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=PAGE_DOMAIN_COUNT', false, true).then(
+      res => {
+        expect(res).to.match(/sh=\d+/);
+      });
+  });
+
+  it('should replace RESOURCE_TIMING', () => {
+    const replacements = installUrlReplacementsService(window);
+    installAmpAnalyticsResourcesService(window);
+    return replacements.expand('?sh=RESOURCE_TIMING', false, true).then(
+      res => {
+        expect(res).to.match(/sh=[a-zA-Z0-9,{}\.%]+/);
+      });
   });
 
   it('should accept $expressions', () => {

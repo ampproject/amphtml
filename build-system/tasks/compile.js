@@ -137,6 +137,7 @@ function compile(entryModuleFilename, outputDir,
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
+      'node_modules/resourcetiming-compression/src/resourcetiming-compression.js',
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
