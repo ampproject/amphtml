@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * `amp-fresh` starts as invisible by default and is shown once the content is
+ * updated. Can be customized by the page author.
+ */
 amp-fresh.amp-fresh-ready {
   visibility: visible;
 }

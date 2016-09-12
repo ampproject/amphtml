@@ -20,7 +20,7 @@ import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined, Layout} from '../../../src/layout';
 import {setStyle} from '../../../src/style';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 
 /** @const */
@@ -28,22 +28,33 @@ const TAG = 'amp-fresh';
 
 export class AmpFresh extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.isExperimentOn_ = false;
+
+    /** @private {string} */
+    this.ampFreshId_ = '';
+
+    /** @private {?./amp-fresh-manager.AmpFreshManager} */
+    this.manager_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return true;
   }
 
   buildCallback() {
-    /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
 
     user().assert(this.isExperimentOn_, `Experiment ${TAG} disabled`);
 
-    /** @private @const {string} */
     this.ampFreshId_ = user().assert(this.element.getAttribute('id'),
         'amp-fresh must have an id.');
 
-    /** @private @const {!AmpFreshManager} */
     this.manager_ = getOrInsallAmpFreshManager(this.element);
 
     this.manager_.register(this.ampFreshId_, this);
@@ -56,10 +67,11 @@ export class AmpFresh extends AMP.BaseElement {
     // Never reparent the surrogate to the current document's subtree
     // as this will trigger custom element life cycles,
     // importing it shouldn't trigger.
-    surrogateAmpFresh = this.win.document.adoptNode(surrogateAmpFresh);
+    const orphanSurrogate = dev().assertElement(
+      this.win.document.adoptNode(surrogateAmpFresh));
     this.mutateElement(() => {
       this.element.textContent = '';
-      copyChildren(surrogateAmpFresh, this.element);
+      copyChildren(orphanSurrogate, this.element);
       this.setFreshReady();
     });
   }

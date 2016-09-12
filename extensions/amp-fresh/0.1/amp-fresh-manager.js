@@ -36,10 +36,10 @@ export class AmpFreshManager {
    */
   constructor(ampdoc) {
 
-    /** @type {!../../../src/service/ampdoc-impl.AmpDoc} */
+    /** @const @type {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    if (!isExperimentOn(this.win, TAG)) {
+    if (!isExperimentOn(this.ampdoc.win, TAG)) {
       return;
     }
 
@@ -48,7 +48,7 @@ export class AmpFreshManager {
 
     /**
      * Used only for testing.
-     * @private @const {Promise<!Document>}
+     * @private @const {!Promise}
      */
     this.docPromise_ = this.fetchDocument_().then(doc => {
       this.update_(doc);
@@ -61,7 +61,7 @@ export class AmpFreshManager {
    * Registers an amp-fresh component instance to be managed by this windows
    * amp-fresh-manager instance.
    * @param {string} id
-   * @param {!./amp-fresh.AmpFresh} ampFreshIntance
+   * @param {!./amp-fresh.AmpFresh} ampFreshInstance
    */
   register(id, ampFreshInstance) {
     user().assert(!this.ampFreshInstances_[id],
@@ -74,8 +74,10 @@ export class AmpFreshManager {
    * @private
    */
   fetchDocument_() {
+    // NOTE(erwinm): confirm that we actually need a unique timestamp or if we
+    // can just do `amp-fresh=1`
     const url = addParamToUrl(this.ampdoc.win.location.href,
-        'amp-fresh', '1');
+        'amp-fresh', String(Date.now()));
     return Promise.all([
       xhrFor(this.ampdoc.win).fetchDocument(url),
       this.ampdoc.whenReady(),
@@ -91,7 +93,7 @@ export class AmpFreshManager {
       const ampFresh = this.ampFreshInstances_[id];
       const counterpart = docFromServer.querySelector(`#${id}`);
       if (counterpart) {
-        ampFresh.update(counterpart);
+        ampFresh.update(user().assertElement(counterpart));
       }
     });
   }
