@@ -53,6 +53,10 @@ function clickHandlerFor(window) {
   return fromClass(window, 'clickhandler', ClickHandler);
 }
 
+function captureClickHandlerFor(window) {
+  return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
+}
+
 /**
  * @param {!Window} window
  * @return {!CaptureClickHandler} capture document click handler.

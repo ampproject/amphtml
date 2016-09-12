@@ -527,18 +527,6 @@ export class UrlReplacements {
    * Can be called in conjuction with setAsync to allow for additional
    * asynchronous resolver where expand will use async and expandSync the sync
    * version.
-<<<<<<< 8e3b93c0014b5068350ae95abf3f186fedab4e8d
-   * @param {string} varName
-   * @param {!SyncResolverDef} syncResolver
-   * @return {!UrlReplacements}
-   * @private
-   */
-  set_(varName, syncResolver) {
-    dev().assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
-    this.replacements_[varName].sync = syncResolver;
-=======
    * @param {string} varName
    * @param {!SyncResolverDef} syncResolver
    * @return {!UrlReplacements}
@@ -602,6 +590,7 @@ export class UrlReplacements {
   expandSync(url, opt_bindings, opt_collectVars) {
     return this.expand_(url, opt_bindings, opt_collectVars, true);
   }
+
   /**
    * Expands the provided URL by replacing all known variables with their
    * resolved values. Optional `opt_bindings` can be used to add new variables
