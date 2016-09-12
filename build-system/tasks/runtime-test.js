@@ -22,6 +22,10 @@ var karmaConfig = config.karma;
 var extend = require('util')._extend;
 var fs = require('fs');
 var path = require('path');
+var util = require('gulp-util');
+var webserver = require('gulp-webserver');
+var app = require('../test-server').app;
+
 
 /**
  * Read in and process the configuration settings for karma
@@ -113,8 +117,23 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
     };
   }
 
+  // Run fake-server to test XHR responses.
+  var server = gulp.src(process.cwd())
+      .pipe(webserver({
+        port: 31862,
+        host: 'localhost',
+        directoryListing: true,
+        middleware: [app],
+      }));
+  util.log(util.colors.yellow(
+      'Started test responses server on localhost:31862'));
 
-  new Karma(c, done).start();
+  new Karma(c, function() {
+    util.log(util.colors.yellow(
+        'Shutting down test responses server on localhost:31862'));
+    server.emit('kill');
+    done();
+  }).start();
 }, {
   options: {
     'verbose': '  With logging enabled',

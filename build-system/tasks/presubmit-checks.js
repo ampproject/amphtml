@@ -258,6 +258,7 @@ var forbiddenTerms = {
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
     ],
