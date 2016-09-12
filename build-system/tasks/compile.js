@@ -72,13 +72,20 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilename, outputDir,
+function compile(entryModuleFilenames, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+    var entryModuleFilename;
+    if (entryModuleFilenames instanceof Array) {
+      entryModuleFilename = entryModuleFilenames[0];
+    } else {
+      entryModuleFilename = entryModuleFilenames;
+      entryModuleFilenames = [entryModuleFilename];
+    }
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
 
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -197,7 +204,7 @@ function compile(entryModuleFilename, outputDir,
           'build/patched-module/',
           'build/fake-module/',
         ],
-        entry_point: entryModuleFilename,
+        entry_point: entryModuleFilenames,
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
