@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getService} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {recreateNonProtoObject} from '../../../src/json';
-import {viewerFor} from '../../../src/viewer';
+import {getService} from '../service';
+import {getSourceOrigin} from '../url';
+import {dev} from '../log';
+import {recreateNonProtoObject} from '../json';
+import {viewerFor} from '../viewer';
 
 /** @const */
 const TAG = 'Storage';

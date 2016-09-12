@@ -57,6 +57,7 @@ import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
+import {installStorageService} from './service/storage-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {initLogConstructor} from './log';
 import {platformFor} from './platform';
@@ -87,6 +88,7 @@ export function installRuntimeServices(global) {
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
