@@ -2826,22 +2826,7 @@ class ParsedTagSpec {
         }
       }
       if (parsedSpec.hasBlacklistedValueRegex()) {
-        let decodedAttrValue;
-        try {
-          decodedAttrValue = decodeURIComponent(attrValue);
-        } catch (e) {
-          // This branch is best effort, since unescape is deprecated.
-          // However unescape appears to work even if the value is not a
-          // properly encoded attribute.
-          // TODO(powdercloud): We're currently using this to prohibit
-          // __amp_source_origin for URLs. We may want to introduce a
-          // global bad url functionality with patterns or similar, as opposed
-          // to applying this to every attribute htat has a blacklisted value
-          // regex.
-          decodedAttrValue = unescape(attrValue);
-        }
-        if (parsedSpec.getBlacklistedValueRegex().test(attrValue) ||
-            parsedSpec.getBlacklistedValueRegex().test(decodedAttrValue)) {
+        if (parsedSpec.getBlacklistedValueRegex().test(attrValue)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,

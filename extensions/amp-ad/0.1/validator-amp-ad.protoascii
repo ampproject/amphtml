@@ -65,7 +65,6 @@ tags: {  # <amp-ad>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
@@ -95,7 +94,6 @@ tags: {  # <amp-embed>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
-    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "type" mandatory: true }
   attr_lists: "extended-amp-global"
