@@ -248,7 +248,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
         const opt_context = {
-          clientId: cid ? cid : null,
+          clientId: cid || null,
           container: this.container_ ? this.container_.tagName : null,
         };
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,

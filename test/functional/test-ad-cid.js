@@ -119,7 +119,7 @@ function tests(name) {
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":"sentinel123"')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":"sentinel123"');
         });
       });
 
@@ -138,7 +138,7 @@ function tests(name) {
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":null')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":null');
         });
       });
 
@@ -167,7 +167,7 @@ function tests(name) {
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":"consent-cid"')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":"consent-cid"');
         });
       });
 
@@ -195,7 +195,7 @@ function tests(name) {
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":"consent"')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":"consent"');
         });
       });
 
@@ -221,7 +221,7 @@ function tests(name) {
         }).then(ad => {
           expect(uidSpy.callCount).to.equal(0);
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":null')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":null');
         });
       });
 
@@ -238,7 +238,7 @@ function tests(name) {
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');
-          expect(src.indexOf('"clientId":null')).to.not.equal(-1);
+          expect(src).to.contain('"clientId":null');
         });
       });
     });

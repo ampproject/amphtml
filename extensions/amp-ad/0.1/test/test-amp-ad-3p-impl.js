@@ -41,6 +41,10 @@ function tests(name) {
         type: '_ping_',
         src: 'testsrc',
       });
+      const link = iframe.doc.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', 'blah');
+      iframe.doc.head.appendChild(link);
       adContainer.appendChild(ampAd);
       return iframe.addElement(adContainer).then(() => {
         return Promise.resolve({
@@ -425,7 +429,10 @@ function tests(name) {
         const impl = ampAd.implementation_;
         expect(ampAd.getAttribute('amp-container-element')).to.be.null;
         impl.onLayoutMeasure();
-        expect(impl.container_.tagName).to.equal('AMP-STICKY-AD');
+        return impl.layoutCallback().then(() => {
+          const src = ampAd.firstChild.getAttribute('src');
+          expect(src).to.contain('"container":"AMP-STICKY-AD"');
+        });
       });
     });
   };

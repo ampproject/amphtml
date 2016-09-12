@@ -84,13 +84,7 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     initialIntersection: element.getIntersectionChangeEntry(),
     startTime,
   };
-
-  if (opt_context) {
-    Object.keys(opt_context).forEach(contextId => {
-      attributes._context[contextId] = opt_context[contextId];
-    });
-  }
-
+  Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
