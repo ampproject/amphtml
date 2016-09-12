@@ -27,6 +27,7 @@ import com.google.javascript.rhino.IR;
 import com.google.javascript.rhino.Node;
 
 import java.io.IOException;
+import java.util.Set;
 
 
 /**
@@ -46,8 +47,11 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   /**
    * List of string suffixes to eliminate from the AST.
    */
-  ImmutableSet<String> suffixTypes = ImmutableSet.of(
-      "dev.fine");
+  ImmutableMap<String, Set<String>> suffixTypes = ImmutableMap.of(
+      "module$src$log.dev", ImmutableSet.of(
+          "assert", "fine", "assertElement", "assertString",
+          "assertNumber", "assertBoolean"),
+      "module$src$log.user", ImmutableSet.of("fine"));
 
 
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
