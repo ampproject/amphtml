@@ -55,6 +55,7 @@ export const adPrefetch = {
     'https://www.googletagservices.com/tag/js/gpt.js',
     'https://g.ezoic.net/ezoic/ampad.js',
   ],
+  f1e: 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js',
   genieessp: 'https://js.gsspcln.jp/l/amp.js',
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
@@ -133,6 +134,7 @@ export const adPreconnect = {
     'https://partner.googleadservices.com',
     'https://tpc.googlesyndication.com',
   ],
+  f1e: 'https://img.ak.impact-ad.jp',
   imobile: 'https://spad.i-mobile.co.jp',
   improvedigital: 'https://ad.360yield.com/',
   industrybrains: [
