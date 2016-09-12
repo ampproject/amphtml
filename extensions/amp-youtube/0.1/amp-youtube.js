@@ -29,8 +29,9 @@ const YT_PLAYER_STATE_PLAYING = 1;
 
 class AmpYoutube extends AMP.BaseElement {
 
-  constructor() {
-    super();
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
     /** @private {number} */
     this.playerState_ = 0;
 

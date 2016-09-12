@@ -25,7 +25,10 @@ window.AMP;
  * @constructor
  * @extends {BaseElement$$module$src$base_element}
  */
-AMP.BaseElement = class {};
+AMP.BaseElement = class {
+  /** @param {!AmpElement} element */
+  constructor(element) {}
+};
 
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
