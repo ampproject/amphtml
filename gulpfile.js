@@ -40,6 +40,84 @@ var cssOnly = argv['css-only'];
 
 require('./build-system/tasks');
 
+// All declared extensions.
+var extensions = {};
+
+// Each extension and version must be listed individually here.
+// NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
+declareExtension('amp-a4a', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-ad', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad-network-adsense-impl', 0.1, false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad-network-doubleclick-impl', 0.1, false, 'NO_TYPE_CHECK');
+declareExtension('amp-ad-network-fake-impl', 0.1, false, 'NO_TYPE_CHECK');
+declareExtension('amp-analytics', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-anim', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-app-banner', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-audio', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-brid-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-brightcove', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-kaltura-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-carousel', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-dailymotion', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-facebook', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-fresh', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-gfycat', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-image-lightbox', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-instagram', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-install-serviceworker', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-lightbox', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-live-list', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-reach-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-share-tracking', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-soundcloud', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-springboard-player', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-sticky-ad', '0.1', true, 'NO_TYPE_CHECK');
+/**
+ * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+ * Please see {@link AmpCarousel} with `type=slides` attribute instead.
+ */
+declareExtension('amp-slides', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-social-share', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-twitter', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-user-notification', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-vimeo', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-vine', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-viz-vega', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-google-vrview-image', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-youtube', '0.1', false);
+
+/**
+ * @param {string} name
+ * @param {string} version E.g. 0.1
+ * @param {boolean} hasCss Whether the extension comes with CSS.
+ * @param {string=} opt_noTypeCheck Whether not to check types.
+ *     No new extension must pass this.
+ */
+function declareExtension(name, version, hasCss, opt_noTypeCheck) {
+  extensions[name + '-' + version] = {
+    name: name,
+    version: version,
+    hasCss: hasCss,
+    noTypeCheck: !!opt_noTypeCheck
+  }
+}
 
 /**
  * Build all the AMP extensions
@@ -109,7 +187,6 @@ function buildExtensions(options) {
   buildExtension('amp-google-vrview-image', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
-
 
 /**
  * Compile the polyfills script and drop it in the build folder
@@ -355,15 +432,18 @@ function checkTypes() {
     checkTypes: true,
     preventRemoveAndMakeDir: true,
   });
-  //compile(false, true, /* opt_preventRemoveAndMakeDir*/ true,
-  //    /* check types */ true);
-  closureCompile([
-    './src/amp-babel.js',
-    './extensions/amp-youtube/0.1/amp-youtube.js',
-  ],  './dist', 'check-types.js', {
-    checkTypes: true,
-    externs: ['build-system/amp.extension.extern.js',],
-  });
+  var compileSrcs = ['./src/amp-babel.js'];
+  var extensionSrcs = Object.values(extensions).filter(function(extension) {
+    return !extension.noTypeCheck;
+  }).map(function(extension) {
+    return './extensions/' + extension.name + '/' +
+        extension.version + '/' + extension.name + '.js';
+  }).sort();
+  closureCompile(compileSrcs.concat(extensionSrcs),  './dist',
+      'check-types.js', {
+        checkTypes: true,
+        externs: ['build-system/amp.extension.extern.js',],
+      });
 }
 
 /**
