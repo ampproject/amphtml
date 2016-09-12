@@ -2294,6 +2294,11 @@ class ParsedTagSpec {
      */
     this.alsoRequiresTag_ = [];
     /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.alsoRequiresTagWarning_ = [];
+    /**
      * @type {ParsedAttrSpec}
      * @private
      */
@@ -2329,6 +2334,9 @@ class ParsedTagSpec {
 
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+    }
+    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
+      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
   }
 
@@ -2376,6 +2384,15 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTag() { return this.alsoRequiresTag_; }
+
+  /**
+   * A TagSpec may specify other tags to be required as well, when that
+   * tag is used. This accessor returns the IDs for the tagspecs that
+   * are also required if |this| tag occurs in the document, but where
+   * such requirement is currently only a warning.
+   * @return {!Array<number>}
+   */
+  getAlsoRequiresTagWarning() { return this.alsoRequiresTagWarning_; }
 
   /**
    * Whether or not the tag should be recorded via
@@ -3321,11 +3338,15 @@ class ParsedValidatorRules {
       goog.asserts.assert(
           !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
       tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
-      if (tag.alsoRequiresTag.length > 0) {
+      if (tag.alsoRequiresTag.length > 0 ||
+          tag.alsoRequiresTagWarning.length > 0) {
         tagSpecNamesToTrack[getTagSpecName(tag)] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
+      }
+      for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
+        tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
       }
     }
     for (let i = 0; i < this.rules_.tags.length; ++i) {
@@ -3492,12 +3513,10 @@ class ParsedValidatorRules {
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagSpecId];
-      for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
-        if (!context.getTagspecsValidated().hasOwnProperty(
-                alsoRequiresTagspecId)) {
+      for (const tagspecId of spec.getAlsoRequiresTag()) {
+        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec =
-                this.tagSpecById_[alsoRequiresTagspecId];
+            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -3512,6 +3531,23 @@ class ParsedValidatorRules {
             validationResult.status =
                 amp.validator.ValidationResult.Status.FAIL;
             return;
+          }
+        }
+      }
+      for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
+        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
+            context.addError(
+                amp.validator.ValidationError.Severity.WARNING,
+                amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  getTagSpecName(alsoRequiresTagspec.getSpec()),
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
           }
         }
       }
@@ -4379,7 +4415,9 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
       error.code ===
-          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY) {
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY ||
+      error.code ===
+          amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
   }
   // E.g. "The parent tag of tag 'source' is 'picture', but it can
