@@ -22,8 +22,16 @@ import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
   /** @override */
-  createdCallback() {
+  preconnectCallback() {
     this.preconnect.url('https://players.brightcove.net');
   }
 
@@ -66,7 +74,6 @@ class AmpBrightcove extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
     return loadPromise(iframe);
   }
