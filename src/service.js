@@ -68,10 +68,11 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):!Object=} opt_factory Should create the service
+ * @param {function(!Window):T} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
- * @return {*}
+ * @template T
+ * @return {T}
  */
 export function getService(win, id, opt_factory) {
   return getServiceInternal(win, win, id,

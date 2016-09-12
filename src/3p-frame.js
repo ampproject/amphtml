@@ -166,7 +166,6 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
- * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
