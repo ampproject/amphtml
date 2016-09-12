@@ -209,7 +209,7 @@ function tests(name) {
     });
 
     describe('has no-content', () => {
-      it('should display fallback', () => {
+      it('should attemptChangeHeight to 0', () => {
         return getAd({
           width: 300,
           height: 250,
@@ -225,21 +225,6 @@ function tests(name) {
               ad.implementation_, 'deferMutate', function(callback) {
                 callback();
               });
-          expect(ad).to.not.have.class('amp-notsupported');
-          ad.implementation_.noContentHandler_();
-          expect(ad).to.have.class('amp-notsupported');
-        });
-      });
-
-      it('should attemptChangeHeight to 0 when there is no fallback', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
-          return ad;
-        }).then(ad => {
           const attemptChangeHeight = sandbox.stub(ad.implementation_,
               'attemptChangeHeight',
               function() {
@@ -251,6 +236,32 @@ function tests(name) {
           ad.implementation_.noContentHandler_();
           expect(attemptChangeHeight).to.have.been.called;
           expect(attemptChangeHeight.firstCall.args[0]).to.equal(0);
+        });
+      });
+
+      it('should display fallback when attemptChangeHeight to 0 fails', () => {
+        return getAd({
+          width: 300,
+          height: 250,
+          type: '_ping_',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          const fallback = document.createElement('div');
+          fallback.setAttribute('fallback', '');
+          ad.appendChild(fallback);
+          return ad;
+        }).then(ad => {
+          sandbox.stub(ad.implementation_, 'attemptChangeHeight',
+              () => {
+                return Promise.reject(new Error('forTesting'));
+              });
+          sandbox.stub(
+              ad.implementation_, 'deferMutate', function(callback) {
+                callback();
+                expect(ad).to.have.class('amp-notsupported');
+              });
+          expect(ad).to.not.have.class('amp-notsupported');
+          ad.implementation_.noContentHandler_();
         });
       });
 
@@ -334,9 +345,12 @@ function tests(name) {
           sandbox.stub(
               ad.implementation_, 'deferMutate', function(callback) {
                 callback();
+                expect(ad.implementation_.iframe_).to.be.null;
               });
+          sandbox.stub(ad.implementation_, 'attemptChangeHeight', function() {
+            return Promise.reject();
+          });
           ad.implementation_.noContentHandler_();
-          expect(ad.implementation_.iframe_).to.be.null;
         });
       });
 

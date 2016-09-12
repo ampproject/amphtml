@@ -1,0 +1,59 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+
+    amp-ad iframe {
+      margin: 30px;
+      padding: 30px;
+      border: 10px solid red;
+    }
+
+    #fill-div {
+      width: 300px;
+      height: 700px;
+      background-color: red;
+    }
+
+   /* amp-ad {
+      border: 2px solid green;
+    }*/
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="../../dist/amp.js"></script>
+  <script async custom-element="amp-ad" src="../../dist/v0/amp-ad-0.1.max.js"></script>
+</head>
+<body>
+  <div id="fill-div">
+    Testing Div
+  </div>
+  <h2>Doubleclick no ad with placeholder and no fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+     <div class="adv-placeholder" placeholder>
+       <amp-anim width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+           <amp-img placeholder width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+         </amp-img>
+       </amp-anim>
+     </div>
+       <a href="http://www.repubblica.it/sport/2016/02/09/news/app_rep-133068373/">
+         <amp-img placeholder width=300 height=100 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1/img/adv-300-100.jpg">
+       </a>
+     </div> -->
+  </amp-ad>
+  <div id="fill-div">
+    Testing Div
+  </div>
+</body>
+</html>
