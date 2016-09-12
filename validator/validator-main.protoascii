@@ -25,7 +25,7 @@ min_validator_revision_required: 164
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 275
+spec_file_revision: 277
 
 reference_points_can_define_reference_points: true
 
@@ -77,13 +77,13 @@ tags: {  # AMP
 tags: {  # A4A
   html_format: A4A
   tag_name: "HTML"
-  spec_name: "html a4⚡ for top-level html"
+  spec_name: "html ⚡4ads for top-level html"
   mandatory: true
   mandatory_parent: "!DOCTYPE"
   unique: true
   attrs: {
-    name: "a4⚡"
-    alternative_names: "a4amp"
+    name: "⚡4ads"
+    alternative_names: "amp4ads"
     mandatory: true
     value: ""
   }
@@ -2630,7 +2630,7 @@ attr_lists: {
   attrs: { name: "i-amp-access-id" }
 }
 
-manufactured_body_tag_is_error: false
+manufactured_body_tag_is_error: true
 manufactured_body_spec_url: ""  # TODO(gregable)
 
 # Error Specificity: Used in the verbose validator to select between multiple
