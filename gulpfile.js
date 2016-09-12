@@ -344,12 +344,11 @@ function checkTypes() {
     checkTypes: true,
     preventRemoveAndMakeDir: true,
   });
-  // Temporarily turned off due to unknown type warnings.
-  /*buildSw({
+  buildSw({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
-  });*/
+  });
   buildExperiments({
     minify: true,
     checkTypes: true,
