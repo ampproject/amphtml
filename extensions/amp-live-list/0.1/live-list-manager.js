@@ -34,10 +34,10 @@ export class LiveListManager {
   constructor(win) {
     this.win = win;
 
-    /** @private @const {!Object<string, !AmpLiveList>} */
+    /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(this.win);
 
     /** @private {number} */
@@ -103,14 +103,13 @@ export class LiveListManager {
   /**
    * Makes a request to the given url for the latest document.
    *
-   * @param {string} url
    * @private
    */
   fetchDocument_() {
     let url = this.url_;
     if (this.latestUpdateTime_ > 0) {
       url = addParamToUrl(url, 'amp_latest_update_time',
-          this.latestUpdateTime_);
+          String(this.latestUpdateTime_));
     }
     return xhrFor(this.win)
         // TODO(erwinm): add update time here when possible.
@@ -161,8 +160,8 @@ export class LiveListManager {
   /**
    * Register an `amp-live-list` instance for updates.
    *
-   * @param {number} id
-   * @param {!AmpLiveList} liveList
+   * @param {string} id
+   * @param {!./amp-live-list.AmpLiveList} liveList
    */
   register(id, liveList) {
     const isNotRegistered = !(id in this.liveLists_);
