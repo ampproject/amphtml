@@ -53,9 +53,11 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {number} */
     this.playerState_ = 0;
 
+    // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
     this.videoid_ = user().assert(
-        this.element.getAttribute('data-videoid'),
+        (this.element.getAttribute('data-videoid') ||
+        this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
 
