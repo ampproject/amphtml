@@ -451,14 +451,7 @@ message ValidationError {
     ERROR = 1;
     // A document may have warnings and still pass validation.
     WARNING = 4;
-    // No longer used.
-    // A prod warning is OK in prod mode (the overall status of a validation
-    // result is still PASS) but an error in dev mode.
-    PROD_WARNING = 2; // DEPRECATED DO NOT USE.
-    // No longer used.
-    // A dev warning is OK in dev mode (the overall status of a validation
-    // result is still PASS) but an error in prod mode.
-    DEV_WARNING = 3; // DEPRECATED DO NOT USE.
+    // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
   // NEXT AVAILABLE TAG: 76
