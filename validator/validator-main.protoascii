@@ -87,8 +87,7 @@ tags: {  # A4A
     mandatory: true
     value: ""
   }
-  # TODO(gregable): Replace with a better URL eventually.
-  spec_url: "https://github.com/google/amphtml/blob/5cae97e7442df863a5a7ceac78257af02792f71c/extensions/amp-a4a/amp-a4a-format.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/amp-a4a-format.md"
 }
 
 
@@ -761,11 +760,11 @@ tags: {
 tags: {
   html_format: AMP4ADS
   tag_name: "STYLE"
-  spec_name: "head > style[amp-a4a-boilerplate]"
+  spec_name: "head > style[amp4ads-boilerplate]"
   unique: true
   mandatory_parent: "HEAD"
   attrs: {
-    name: "amp-a4a-boilerplate"
+    name: "amp4ads-boilerplate"
     mandatory: true
     value: ""
     dispatch_key: true
