@@ -65,7 +65,7 @@ export function onDocumentFormSubmit_(e) {
   if (method == 'GET') {
     user().assert(action,
         'form action attribute is required for method=GET: %s', form);
-    assertHttpsUrl(action, form, 'action');
+    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
     user().assert(!startsWith(action, urls.cdn),
         'form action should not be on AMP CDN: %s', form);
     checkCorsUrl(action);
