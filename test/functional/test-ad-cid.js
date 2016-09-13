@@ -118,7 +118,8 @@ function tests(name) {
           installCidService(win);
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"sentinel123"');
         });
       });
 
@@ -136,7 +137,8 @@ function tests(name) {
               () => Promise.reject(new Error('nope')));
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
 
@@ -164,7 +166,8 @@ function tests(name) {
           });
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent-cid');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"consent-cid"');
         });
       });
 
@@ -191,7 +194,8 @@ function tests(name) {
           });
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"consent"');
         });
       });
 
@@ -216,7 +220,8 @@ function tests(name) {
           return ad;
         }).then(ad => {
           expect(uidSpy.callCount).to.equal(0);
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
 
@@ -232,7 +237,8 @@ function tests(name) {
               Date.now() + 5000);
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
     });

@@ -206,10 +206,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** detect ad containers, add the list to element as a new attribute */
     if (this.container_ === undefined) {
       this.container_ = getAdContainer(this.element);
-      if (this.container_) {
-        this.element.setAttribute('amp-container-element',
-            this.container_.tagName);
-      }
     }
     // We remeasured this tag, let's also remeasure the iframe. Should be
     // free now and it might have changed.
@@ -250,11 +246,12 @@ export class AmpAd3PImpl extends AMP.BaseElement {
           'position:fixed: %s', this.element);
       incrementLoadingAds(this.win);
       return getAdCid(this).then(cid => {
-        if (cid) {
-          this.element.setAttribute('ampcid', cid);
-        }
+        const opt_context = {
+          clientId: cid || null,
+          container: this.container_ ? this.container_.tagName : null,
+        };
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element);
+            this.element, null, opt_context);
         this.apiHandler_ = new AmpAdApiHandler(
             this, this.element, this.boundNoContentHandler_);
         return this.apiHandler_.startUp(this.iframe_, true);
