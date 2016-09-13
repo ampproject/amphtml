@@ -212,6 +212,23 @@ function tests(name) {
       })).to.be.not.be.rejected;
     });
 
+    it('should only layout once', () => {
+      return getAd({
+        width: 300,
+        height: 250,
+        type: '_ping_',
+        src: 'testsrc',
+      }, 'https://schema.org').then(ad => {
+        const firstLayout = ad.implementation_.layoutCallback();
+        expect(firstLayout).to.be.resolved;
+        const secondLayout = ad.implementation_.layoutCallback();
+        ad.implementation_.unlayoutCallback();
+        const newLayout = ad.implementation_.layoutCallback();
+        expect(firstLayout).to.equal(secondLayout);
+        expect(newLayout).to.not.equal(secondLayout);
+      });
+    });
+
     describe('has no-content', () => {
       it('should display fallback', () => {
         return getAd({

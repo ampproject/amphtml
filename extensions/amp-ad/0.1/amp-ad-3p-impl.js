@@ -100,6 +100,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     /** @private {?Element|undefined} */
     this.container_ = undefined;
+
+    /** @private {?Promise} */
+    this.layoutPromise_ = null;
   }
 
   /**
@@ -176,24 +179,24 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.iframe_) {
-      user().assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      incrementLoadingAds(this.win);
-      return getAdCid(this).then(cid => {
-        const opt_context = {
-          clientId: cid || null,
-          container: this.container_ ? this.container_.tagName : null,
-        };
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element, null, opt_context);
-        this.apiHandler_ = new AmpAdApiHandler(
-            this, this.element, this.boundNoContentHandler_);
-        return this.apiHandler_.startUp(this.iframe_, true);
-      });
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
     }
-    return this.loadPromise(this.iframe_);
+    user().assert(!this.isInFixedContainer_,
+        '<amp-ad> is not allowed to be placed in elements with ' +
+        'position:fixed: %s', this.element);
+    incrementLoadingAds(this.win);
+    return this.layoutPromise_ = getAdCid(this).then(cid => {
+      const opt_context = {
+        clientId: cid || null,
+        container: this.container_ ? this.container_.tagName : null,
+      };
+      this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+          this.element, null, opt_context);
+      this.apiHandler_ = new AmpAdApiHandler(
+          this, this.element, this.boundNoContentHandler_);
+      return this.apiHandler_.startUp(this.iframe_, true);
+    });
   }
 
   /** @override  */
@@ -252,6 +255,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     this.iframe_ = null;
+    this.layoutPromise_ = null;
     if (this.apiHandler_) {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;
