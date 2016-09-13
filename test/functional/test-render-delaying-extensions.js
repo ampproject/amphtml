@@ -18,11 +18,13 @@ import {waitForExtensions} from '../../src/render-delaying-extensions';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('waitForExtensions', () => {
 
   let win;
   let sandbox;
+  let clock;
   let accordionResolve;
   let dynamicCssResolve;
   let experimentResolve;
@@ -38,6 +40,7 @@ describe('waitForExtensions', () => {
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
+      clock = lolex.install(iframe.win);
     });
   });
 
@@ -49,7 +52,7 @@ describe('waitForExtensions', () => {
     expect(waitForExtensions(win)).to.equal(undefined);
   });
 
-  it('should keep waiting when some extensions are not ready yet', () => {
+  it('should timeout if some extensions do not load', () => {
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     addExtensionScript(win, 'amp-experiment');
@@ -59,8 +62,8 @@ describe('waitForExtensions', () => {
     accordionResolve();
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
-
-    return expect(promise).to.eventually.be.reject;
+    clock.tick(3000);
+    return expect(promise).to.eventually.be.rejectedWith('amp-experiment');
   });
 
   it('should resolve when all extensions are ready', () => {
