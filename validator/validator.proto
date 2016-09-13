@@ -284,7 +284,7 @@ message TagSpec {
   // for all formats, rather than none.
   enum HtmlFormat {
     AMP = 1;
-    A4A = 2;
+    AMP4ADS = 2;
   }
   // Specifies which amp html document formats we allow this TagSpec to
   // validate.
