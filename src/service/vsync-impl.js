@@ -19,6 +19,7 @@ import {cancellation} from '../error';
 import {getService} from '../service';
 import {dev} from '../log';
 import {installViewerService} from './viewer-impl';
+import {installTimerService} from './timer-impl';
 
 
 /** @const {time} */
@@ -387,6 +388,7 @@ export class Vsync {
  */
 export function installVsyncService(window) {
   return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
+    installTimerService(window);
     return new Vsync(window, installViewerService(window));
   }));
 };
