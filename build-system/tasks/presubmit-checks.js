@@ -164,8 +164,8 @@ var forbiddenTerms = {
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/runtime.js',
+      'src/service/storage-impl.js',
     ],
   },
   'installTemplatesService': {
@@ -241,7 +241,7 @@ var forbiddenTerms = {
     message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
@@ -330,7 +330,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': {
