@@ -18,6 +18,7 @@ import {waitForExtensions} from '../../src/render-delaying-extensions';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
 import * as sinon from 'sinon';
+import * as lolex from 'lolex';
 
 describe('waitForExtensions', () => {
 
@@ -31,7 +32,6 @@ describe('waitForExtensions', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     const getService = sandbox.stub(service, 'getServicePromise');
     accordionResolve = waitForService(getService, 'amp-accordion');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
@@ -40,12 +40,13 @@ describe('waitForExtensions', () => {
 
     return createIframePromise().then(iframe => {
       win = iframe.win;
+      clock = lolex.install(iframe.win);
     });
   });
 
   afterEach(() => {
     sandbox.restore();
-    window.document.head.innerHTML = '';
+    clock.uninstall();
   });
 
   it('should return undefined if no extension is presented', () => {
@@ -53,7 +54,6 @@ describe('waitForExtensions', () => {
   });
 
   it('should timeout if some extensions do not load', () => {
-    win = window; // Use the main window to be able to tick the clock
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     addExtensionScript(win, 'amp-experiment');
