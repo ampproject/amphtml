@@ -15,6 +15,7 @@
  */
 
 import {Layout} from './layout';
+import {loadPromise} from './event-helper';
 import {preconnectFor} from './preconnect';
 import {isArray} from './types';
 import {viewerFor} from './viewer';
@@ -416,6 +417,20 @@ export class BaseElement {
    * @param {!./service/action-impl.ActionInvocation} unusedInvocation
    */
   activate(unusedInvocation) {
+  }
+
+  /**
+   * Returns a promise that will resolve or fail based on the element's 'load'
+   * and 'error' events. Optionally this method takes a timeout, which will reject
+   * the promise if the resource has not loaded by then.
+   * @param {T} element
+   * @param {number=} opt_timeout
+   * @return {!Promise<T>}
+   * @template T
+   * @final
+   */
+  loadPromise(element, opt_timeout) {
+    return loadPromise(element, opt_timeout);
   }
 
   /**

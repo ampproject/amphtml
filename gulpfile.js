@@ -79,7 +79,7 @@ declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-list', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-live-list', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-live-list', '0.1', true);
 declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');

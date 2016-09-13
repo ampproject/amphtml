@@ -18,7 +18,6 @@ import {BaseElement} from '../src/base-element';
 import {listenOnce} from '../src/event-helper';
 import {assertHttpsUrl} from '../src/url';
 import {isLayoutSizeDefined} from '../src/layout';
-import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
 import {dev} from '../src/log';
@@ -112,7 +111,7 @@ export function installVideo(win) {
         this.video_.appendChild(child);
       });
 
-      return loadPromise(this.video_);
+      return this.loadPromise(this.video_);
     }
 
     /** @override */

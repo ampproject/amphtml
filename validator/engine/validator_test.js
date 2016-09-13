@@ -88,7 +88,7 @@ function findHtmlFilesRelativeToTestdata() {
       // to validate A4A documents.
       if (candidate.match(/^.*.html/g) &&
           !entry.subdir.match(/amp4ads_feature_tests/g) &&
-          !candidate.match('^validator-a4a-')) {
+          !candidate.match('^validator-amp4ads-')) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }

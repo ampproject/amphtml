@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {srcsetFromElement} from '../../../src/srcset';
 import * as st from '../../../src/style';
 
@@ -97,7 +96,7 @@ class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_)
+    this.loadPromise_ = this.loadPromise(this.img_)
         .catch(error => {
           if (!this.img_.getAttribute('src')) {
             return;
