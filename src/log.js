@@ -390,7 +390,7 @@ export function rethrowAsync(var_args) {
  * on Log and closure literally can't even.
  * @type {{user: ?Log, dev: ?Log}}
  */
-let logs = window.log = (window.log || {
+const logs = self.log = (self.log || {
   user: null,
   dev: null,
 });
