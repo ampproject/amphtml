@@ -62,7 +62,7 @@ export function installVideo(win) {
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
       this.propagateAttributes(['poster', 'controls'], this.video_);
-      this.bubbleEvents([VideoEvents.CANPLAY], this.video_);
+      this.forwardEvents([VideoEvents.CANPLAY], this.video_);
       this.fixIOSCanplayEventForAutoplay_();
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
