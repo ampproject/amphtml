@@ -23,7 +23,6 @@ import {
   assertSuccess,
 } from '../../src/service/xhr-impl';
 import {getCookie} from '../../src/cookies';
-import {platformFor} from '../../src/platform';
 
 
 describe('XHR', function() {

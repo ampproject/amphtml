@@ -15,7 +15,7 @@
  */
 
 import {startsWith} from './string';
-import {dev, user} from './log';
+import {user} from './log';
 import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
