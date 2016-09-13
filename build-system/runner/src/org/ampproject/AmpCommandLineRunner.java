@@ -48,8 +48,8 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev.fine");
-  
-  
+
+
   ImmutableMap<String, Node> assignmentReplacements = ImmutableMap.of(
       "IS_DEV",
       IR.falseNode());
@@ -98,6 +98,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   protected CompilerOptions createTypeCheckingOptions() {
     CompilerOptions options = super.createOptions();
     options.setCheckTypes(true);
+    options.setInferTypes(true);
     return options;
   }
 

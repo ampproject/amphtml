@@ -18,7 +18,7 @@ import {closestByTag} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
@@ -218,7 +218,7 @@ export class Visibility {
     this.visibilityListenerRegistered_ = false;
 
     /** @private {!Resources} */
-    this.resourcesService_ = resourcesFor(this.win_);
+    this.resourcesService_ = resourcesForDoc(this.win_.document);
 
     /** @private {number|string} */
     this.scheduledRunId_ = null;
@@ -322,8 +322,8 @@ export class Visibility {
 
     for (let r = this.resources_.length - 1; r >= 0; r--) {
       const res = this.resources_[r];
-      if (res.isLayoutPending()) {
-        loadedPromises.push(res.loaded());
+      if (!res.hasLoadedOnce()) {
+        loadedPromises.push(res.loadedOnce());
         continue;
       }
 

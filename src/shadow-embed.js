@@ -17,8 +17,9 @@
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {ampdocFor} from './ampdoc';
 import {dev} from './log';
+import {escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
-import {copyRuntimeStylesToShadowRoot} from './style-installer';
+import {insertStyleElement} from './style-installer';
 
 
 /** @const {!RegExp} */
@@ -29,15 +30,94 @@ const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
 
 
 /**
+ * @type {boolean|undefined}
+ * @visiblefortesting
+ */
+let shadowDomSupported;
+
+/**
+ * @param {boolean|undefined} val
+ * @visiblefortesting
+ */
+export function setShadowDomSupportedForTesting(val) {
+  shadowDomSupported = val;
+}
+
+/**
+ * Returns `true` if the Shadow DOM is supported.
+ * @return {boolean}
+ */
+export function isShadowDomSupported() {
+  if (shadowDomSupported === undefined) {
+    shadowDomSupported = !!Element.prototype.createShadowRoot;
+  }
+  return shadowDomSupported;
+}
+
+
+/**
+ * Creates a shadow root for the specified host and returns it. Polyfills
+ * shadow root creation if necessary.
+ * @param {!Element} hostElement
+ * @return {!ShadowRoot}
+ */
+export function createShadowRoot(hostElement) {
+  const existingRoot = hostElement.shadowRoot || hostElement.__AMP_SHADOW_ROOT;
+  if (existingRoot) {
+    existingRoot./*OK*/innerHTML = '';
+    return existingRoot;
+  }
+
+  // Native support.
+  if (isShadowDomSupported()) {
+    return hostElement.createShadowRoot();
+  }
+
+  // Polyfill.
+  return createShadowRootPolyfill(hostElement);
+}
+
+
+/**
+ * Shadow root polyfill.
+ * @param {!Element} hostElement
+ * @return {!ShadowRoot}
+ */
+function createShadowRootPolyfill(hostElement) {
+  const doc = hostElement.ownerDocument;
+  const win = doc.defaultView;
+  const shadowRoot = /** @type {!ShadowRoot} */ (
+      // Cast to ShadowRoot even though it is an Element
+      // TODO(@dvoytenko) Consider to switch to a type union instead.
+      /** @type {?}  */ (doc.createElement('i-amp-shadow-root')));
+  shadowRoot.id = 'i-amp-sd-' + Math.floor(win.Math.random() * 10000);
+  hostElement.appendChild(shadowRoot);
+  hostElement.shadowRoot = hostElement.__AMP_SHADOW_ROOT = shadowRoot;
+
+  // API: https://www.w3.org/TR/shadow-dom/#the-shadowroot-interface
+
+  /** @type {!Element} */
+  shadowRoot.host = hostElement;
+
+  /** @type {function (this:ShadowRoot, string): ?HTMLElement} */
+  shadowRoot.getElementById = function(id) {
+    const escapedId = escapeCssSelectorIdent(win, id);
+    return /** @type {HTMLElement|null} */ (
+        shadowRoot.querySelector(`#${escapedId}`));
+  };
+
+  return shadowRoot;
+}
+
+
+/**
+ * Creates a shadow root for an shadow embed.
  * @param {!Element} hostElement
  * @param {!Array<string>} extensionIds
  * @return {!ShadowRoot}
  */
 export function createShadowEmbedRoot(hostElement, extensionIds) {
-  if (hostElement.shadowRoot) {
-    hostElement.shadowRoot./*OK*/innerHTML = '';
-  }
-  const shadowRoot = hostElement.shadowRoot || hostElement.createShadowRoot();
+  const shadowRoot = createShadowRoot(hostElement);
   shadowRoot.AMP = {};
 
   const win = hostElement.ownerDocument.defaultView;
@@ -55,6 +135,85 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
   extensions.installFactoriesInShadowRoot(shadowRoot, extensionIds);
 
   return shadowRoot;
+}
+
+
+/**
+ * Imports a body into a shadow root with the workaround for a polyfill case.
+ * @param {!ShadowRoot} shadowRoot
+ * @param {!Element} body
+ * @return {!Element}
+ */
+export function importShadowBody(shadowRoot, body) {
+  const doc = shadowRoot.ownerDocument;
+  let resultBody;
+  if (isShadowDomSupported()) {
+    resultBody = doc.importNode(body, true);
+  } else {
+    resultBody = doc.createElement('amp-body');
+    for (let n = body.firstChild; !!n; n = n.nextSibling) {
+      resultBody.appendChild(doc.importNode(n, true));
+    }
+    resultBody.style.display = 'block';
+  }
+  resultBody.style.position = 'relative';
+  shadowRoot.appendChild(resultBody);
+  return dev().assertElement(resultBody);
+}
+
+
+/**
+ * Adds the given css text to the given shadow root.
+ *
+ * The style tags will be at the beginning of the shadow root before all author
+ * styles. One element can be the main runtime CSS. This is guaranteed
+ * to always be the first stylesheet in the doc.
+ *
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} cssText
+ * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
+ *     as the first element in head and all style elements will be positioned
+ *     after.
+ * @param {string=} opt_ext
+ * @return {!Element}
+ */
+export function installStylesForShadowRoot(shadowRoot, cssText,
+    opt_isRuntimeCss, opt_ext) {
+  return insertStyleElement(
+      dev().assert(shadowRoot.ownerDocument),
+      shadowRoot,
+      transformShadowCss(shadowRoot, cssText),
+      opt_isRuntimeCss || false,
+      opt_ext || null);
+}
+
+
+/*
+ * Copies runtime styles from the ampdoc context into a shadow root.
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!ShadowRoot} shadowRoot
+ */
+export function copyRuntimeStylesToShadowRoot(ampdoc, shadowRoot) {
+  const style = dev().assert(
+      ampdoc.getRootNode().querySelector('style[amp-runtime]'),
+      'Runtime style is not found in the ampdoc: %s', ampdoc.getRootNode());
+  const cssText = style.textContent;
+  installStylesForShadowRoot(shadowRoot, cssText, /* opt_isRuntimeCss */ true);
+}
+
+
+/**
+ * If necessary, transforms CSS to isolate AMP CSS within the shaodw root and
+ * reduce the possibility of high-level conflicts.
+ * @param {!ShadowRoot} shadowRoot
+ * @param {string} css
+ * @return {string}
+ */
+export function transformShadowCss(shadowRoot, css) {
+  if (isShadowDomSupported()) {
+    return css;
+  }
+  return scopeShadowCss(shadowRoot, css);
 }
 
 
@@ -105,17 +264,29 @@ export function scopeShadowCss(shadowRoot, css) {
  * @return {string}
  */
 function transformRootSelectors(selector) {
-  return selector.replace(/(html|body)/g, function(match, name, pos) {
-    const prev = pos > 0 ? selector.charAt(pos - 1) : '';
-    const next = pos + match.length < selector.length ?
-        selector.charAt(pos + match.length) : '';
-    if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
-        (!next || CSS_SELECTOR_END_REGEX.test(next))) {
-      return 'amp-' + match;
-    }
-    return match;
-  });
+  return selector.replace(/(html|body)/g, rootSelectorPrefixer);
 }
+
+
+/**
+ * See `transformRootSelectors`.
+ * @param {string} match
+ * @param {string} name
+ * @param {number} pos
+ * @param {string} selector
+ * @return {string}
+ * @private
+ */
+function rootSelectorPrefixer(match, name, pos, selector) {
+  const prev = selector.charAt(pos - 1);
+  const next = selector.charAt(pos + match.length);
+  if ((!prev || CSS_SELECTOR_BEG_REGEX.test(prev)) &&
+      (!next || CSS_SELECTOR_END_REGEX.test(next))) {
+    return 'amp-' + match;
+  }
+  return match;
+}
+
 
 
 /**

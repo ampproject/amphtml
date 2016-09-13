@@ -18,6 +18,7 @@ import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
 import {Animation} from '../../../../src/animation';
+import {resourcesForDoc} from '../../../../src/resources';
 
 describe('Slides functional', () => {
 
@@ -42,6 +43,7 @@ describe('Slides functional', () => {
     element.style.width = '320px';
     element.style.height = '200px';
     document.body.appendChild(element);
+    element.getResources = () => resourcesForDoc(element);
 
     element.appendChild(slide0 = document.createElement('div'));
     element.appendChild(slide1 = document.createElement('div'));

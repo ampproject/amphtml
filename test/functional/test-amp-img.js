@@ -17,6 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg, AmpImg} from '../../builtins/amp-img';
+import {resourcesForDoc} from '../../src/resources';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -102,6 +103,7 @@ describe('amp-img', () => {
       el.setAttribute('src', 'test.jpg');
       el.setAttribute('width', 100);
       el.setAttribute('height', 100);
+      el.getResources = () => resourcesForDoc(el);
       impl = new AmpImg(el);
       impl.createdCallback();
       sandbox.stub(impl, 'getLayoutWidth').returns(100);
@@ -244,5 +246,26 @@ describe('amp-img', () => {
       });
     });
 
+  });
+
+  it('should respect noprerender attribute', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    el.setAttribute('noprerender', '');
+    const impl = new AmpImg(el);
+    impl.buildCallback();
+    expect(impl.prerenderAllowed()).to.equal(false);
+  });
+
+  it('should allow prerender by default', () => {
+    const el = document.createElement('amp-img');
+    el.setAttribute('src', 'test.jpg');
+    el.setAttribute('width', 100);
+    el.setAttribute('height', 100);
+    const impl = new AmpImg(el);
+    impl.buildCallback();
+    expect(impl.prerenderAllowed()).to.equal(true);
   });
 });
