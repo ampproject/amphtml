@@ -23,6 +23,7 @@ describe('waitForExtensions', () => {
 
   let win;
   let sandbox;
+  let clock;
   let accordionResolve;
   let dynamicCssResolve;
   let experimentResolve;
@@ -30,6 +31,7 @@ describe('waitForExtensions', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     const getService = sandbox.stub(service, 'getServicePromise');
     accordionResolve = waitForService(getService, 'amp-accordion');
     dynamicCssResolve = waitForService(getService, 'amp-dynamic-css-classes');
@@ -43,13 +45,15 @@ describe('waitForExtensions', () => {
 
   afterEach(() => {
     sandbox.restore();
+    window.document.head.innerHTML = '';
   });
 
   it('should return undefined if no extension is presented', () => {
     expect(waitForExtensions(win)).to.equal(undefined);
   });
 
-  it('should keep waiting when some extensions are not ready yet', () => {
+  it('should timeout if some extensions do not load', () => {
+    win = window; // Use the main window to be able to tick the clock
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
     addExtensionScript(win, 'amp-experiment');
@@ -59,8 +63,8 @@ describe('waitForExtensions', () => {
     accordionResolve();
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
-
-    return expect(promise).to.eventually.be.reject;
+    clock.tick(3000);
+    return expect(promise).to.eventually.be.rejectedWith('amp-experiment');
   });
 
   it('should resolve when all extensions are ready', () => {
