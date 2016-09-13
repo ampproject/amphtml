@@ -70,7 +70,7 @@ declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-fresh', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-gfycat', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-instagram', '0.1', false, 'NO_TYPE_CHECK');
@@ -86,7 +86,7 @@ declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-share-tracking', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-soundcloud', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-sticky-ad', '0.1', true, 'NO_TYPE_CHECK');
 /**
