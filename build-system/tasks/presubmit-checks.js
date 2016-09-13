@@ -164,8 +164,8 @@ var forbiddenTerms = {
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/runtime.js',
+      'src/service/storage-impl.js',
     ],
   },
   'installTemplatesService': {
@@ -225,11 +225,23 @@ var forbiddenTerms = {
       'src/service/xhr-impl.js',
     ],
   },
+  'initLogConstructor': {
+    message: 'Should only be called from JS binary entry files.',
+    whitelist: [
+      '3p/integration.js',
+      'ads/alp/install-alp.js',
+      'dist.3p/current/integration.js',
+      'extensions/amp-access/0.1/amp-login-done.js',
+      'src/runtime.js',
+      'src/log.js',
+      'tools/experiments/experiments.js',
+    ],
+  },
   'sendMessage': {
-    message: privateServiceFactory,
+    message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
@@ -318,7 +330,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': {

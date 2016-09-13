@@ -48,6 +48,7 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
+import {installStorageService} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
@@ -59,6 +60,7 @@ import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {initLogConstructor} from './log';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -69,6 +71,7 @@ import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
+initLogConstructor();
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -86,6 +89,7 @@ export function installRuntimeServices(global) {
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
   installXhrService(global);

@@ -16,6 +16,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import {urls} from '../config';
+import {endsWith, startsWith} from '../string';
 
 /**
  * The SW's current version.
@@ -75,9 +76,9 @@ function versionedUrl(url, version) {
  * @return {boolean}
  */
 function isCdnJsFile(url) {
-  return url.endsWith('.js') && (
-    url.startsWith(`${urls.cdn}/rtv`) ||
-    url.startsWith(`${urls.cdn}/v0`)
+  return endsWith(url, '.js') && (
+    startsWith(url, `${urls.cdn}/rtv`) ||
+    startsWith(url, `${urls.cdn}/v0`)
   );
 }
 
@@ -121,12 +122,13 @@ const cachePromise = caches.open('cdn-js').then(result => {
  * Fetches the request, and stores it in the cache. Since we only store one
  * version of each file, we'll prune all older versions after we cache this.
  *
+ * @param {!Cache} cache
  * @param {!Request} request
  * @param {string} requestFile the basename of the request
  * @param {string} requestVersion the version of the request
  * @return {!Promise<!Response>}
  */
-function fetchAndCache(request, requestFile, requestVersion) {
+function fetchAndCache(cache, request, requestFile, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
 
@@ -167,10 +169,11 @@ function fetchAndCache(request, requestFile, requestVersion) {
  *  - Some older version
  *  - An empty string, meaning we have nothing cached for this file.
  *
+ * @param {!Cache} cache
  * @param {string} requestFile
  * @return {!Promise<string>}
  */
-function getCachedVersion(requestFile) {
+function getCachedVersion(cache, requestFile) {
   return cache.keys().then(requests => {
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
@@ -215,7 +218,7 @@ self.addEventListener('fetch', event => {
     }
 
     // If not, do we have this version cached?
-    return getCachedVersion(requestFile).then(version => {
+    return getCachedVersion(cache, requestFile).then(version => {
       // We have a cached version! Serve it up!
       if (version && !isBlacklisted(version)) {
         return version;
@@ -245,15 +248,15 @@ self.addEventListener('fetch', event => {
         // Now, was it because we served an old cached version or because
         // they requested this exact version; If we served an old version,
         // let's get the new one.
-        if (version !== requestVersion && requestVersion.endsWith(VERSION)) {
-          fetchAndCache(request, requestFile, requestVersion);
+        if (version !== requestVersion && endsWith(requestVersion, VERSION)) {
+          fetchAndCache(cache, request, requestFile, requestVersion);
         }
 
         return response;
       }
 
       // If not, let's fetch and cache the request.
-      return fetchAndCache(versionedRequest, requestFile, version);
+      return fetchAndCache(cache, versionedRequest, requestFile, version);
     });
   });
 
