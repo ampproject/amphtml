@@ -132,7 +132,7 @@ class VideoEntry {
     /** @private {boolean} */
     this.userInteracted_ = false;
 
-    /** @const @private {!../../src/service/vsync-impl.Vsync} */
+    /** @const @private {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
 
     /** @private {boolean} */
@@ -279,7 +279,8 @@ class VideoEntry {
 
 /**
  * Detects whether the platform even supports autoplay videos.
- * @private
+ * @param {!../platform.Platform} platform
+ * @return {boolean}
  */
 function platformSupportsAutoplay(platform) {
   // non-mobile platforms always supported autoplay
