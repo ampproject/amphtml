@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -100,7 +99,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -133,9 +132,9 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.applyFillContent(imgPlaceholder);
     this.element.appendChild(imgPlaceholder);
 
-    loadPromise(imgPlaceholder).catch(() => {
+    this.loadPromise(imgPlaceholder).catch(() => {
       imgPlaceholder.src = 'https://cdn.brid.tv/live/default/defaultSnapshot.png';
-      return loadPromise(imgPlaceholder);
+      return this.loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',

@@ -36,7 +36,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
 import {user} from '../../../src/log';
@@ -133,7 +132,7 @@ class AmpInstagram extends AMP.BaseElement {
     setStyles(iframe, {
       'opacity': 0,
     });
-    return this.iframePromise_ = loadPromise(iframe).then(() => {
+    return this.iframePromise_ = this.loadPromise(iframe).then(() => {
       this.getVsync().mutate(() => {
         setStyles(iframe, {
           'opacity': 1,
