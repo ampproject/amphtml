@@ -283,3 +283,7 @@ export class AmpAdApiHandler {
     }
   }
 }
+
+// Make the class available to other late loaded amp-ad implementations
+// without them having to depend on it directly.
+AMP.AmpAdApiHandler = AmpAdApiHandler;

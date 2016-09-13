@@ -30,6 +30,9 @@ AMP.BaseElement = class {
   constructor(element) {}
 };
 
+// TODO(@cramforce): Properly type.
+AMP.AmpAdApiHandler;
+
 /*
      \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
  \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __

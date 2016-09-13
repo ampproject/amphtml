@@ -45,7 +45,6 @@ var extensions = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
-declareExtension('amp-a4a', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-ad', '0.1', false, 'NO_TYPE_CHECK');
