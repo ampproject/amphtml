@@ -207,6 +207,7 @@ const defaultAllowedTypesInCustomFrame = [
 // yourself here if you'd like to do so (which we encourage).
 export const waitForRenderStart = [
   'doubleclick',
+  'loka',
 ];
 
 /**

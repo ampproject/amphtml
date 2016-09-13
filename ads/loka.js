@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 const lokaFields = ['unit_params'];
 
@@ -24,6 +24,17 @@ const lokaFields = ['unit_params'];
  */
 export function loka(global, data) {
   validateData(data, lokaFields, []);
+
   global.lokaParams = data;
-  writeScript(global, 'https://loka-cdn.akamaized.net/scene/amp.js');
+
+  const container = global.document.querySelector('#c');
+  container.addEventListener('lokaUnitFetched', e => {
+    if (e.detail.isReady) {
+      global.context.renderStart();
+    } else {
+      global.context.noContentAvailable();
+    }
+  });
+
+  loadScript(global, 'https://loka-cdn.akamaized.net/scene/amp.js');
 }
