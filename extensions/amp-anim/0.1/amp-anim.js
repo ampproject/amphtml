@@ -20,6 +20,20 @@ import * as st from '../../../src/style';
 
 class AmpAnim extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private @const {!Element} */
+    this.img_ = new Image();
+
+    /** @private {?../../../src/srcset.Srcset} */
+    this.srcset_ = null;
+
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -27,8 +41,6 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {!Element} */
-    this.img_ = new Image();
     this.propagateAttributes(['alt'], this.img_);
     this.applyFillContent(this.img_, true);
 
@@ -37,11 +49,7 @@ class AmpAnim extends AMP.BaseElement {
 
     this.element.appendChild(this.img_);
 
-    /** @private @const {!Srcset} */
     this.srcset_ = srcsetFromElement(this.element);
-
-    /** @private {?Promise} */
-    this.loadPromise_ = null;
   }
 
   /** @override */
