@@ -405,6 +405,9 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   compile(false, true, true);
+  // NOTE:
+  // When adding a line here, consider whether you need to include polyfills
+  // and whether you need to init logging (initLogConstructor).
   buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildSw({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});

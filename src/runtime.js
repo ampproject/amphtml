@@ -58,6 +58,7 @@ import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {initLogConstructor} from './log';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -68,6 +69,7 @@ import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
+initLogConstructor();
 
 /** @const @private {string} */
 const TAG = 'runtime';

@@ -30,6 +30,10 @@ import {
   createIframePromise,
   doNotLoadExternalResourcesInTest,
 } from '../../testing/iframe';
+import {
+  initLogConstructor,
+  resetLogConstructorForTesting,
+} from '../../src/log';
 import * as cust from '../../src/custom-element';
 import * as sinon from 'sinon';
 
@@ -446,6 +450,16 @@ describe('Extensions', () => {
   });
 
   describe('get correct script source', () => {
+
+    beforeEach(() => {
+      // These functions must not rely on log for cases in SW.
+      resetLogConstructorForTesting();
+    });
+
+    afterEach(() => {
+      initLogConstructor();
+    });
+
     it('with local mode for testing with compiled js', () => {
       const script = calculateExtensionScriptUrl({
         pathname: 'examples/ads.amp.html',
