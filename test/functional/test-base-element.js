@@ -128,7 +128,7 @@ describe('BaseElement', () => {
       return Promise.all([
         event1Promise,
         event2Promise
-        .then(() => { throw new Error('Blur should not have been forwarded'); })
+        .then(() => { assert.fail('Blur should not have been forwarded'); })
         .catch(() => { /* timed-out, all good */ }),
       ]);
     });
