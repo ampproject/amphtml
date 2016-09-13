@@ -200,14 +200,6 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
-// List of ad networks that will manually call `window.context.renderStart` to
-// emit render-start event when ad actually starts rendering. Please add
-// yourself here if you'd like to do so (which we encourage).
-export const waitForRenderStart = [
-  'doubleclick',
-  'fakead3p',
-];
-
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
