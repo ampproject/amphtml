@@ -46,7 +46,6 @@ describe('waitForExtensions', () => {
 
   afterEach(() => {
     sandbox.restore();
-    clock.uninstall();
   });
 
   it('should return undefined if no extension is presented', () => {
