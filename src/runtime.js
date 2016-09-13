@@ -48,6 +48,7 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
+import {installStorageService} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
@@ -87,6 +88,7 @@ export function installRuntimeServices(global) {
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
   installXhrService(global);

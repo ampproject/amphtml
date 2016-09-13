@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {getService} from '../../../src/service';
-import {getSourceOrigin} from '../../../src/url';
-import {dev} from '../../../src/log';
-import {recreateNonProtoObject} from '../../../src/json';
-import {viewerFor} from '../../../src/viewer';
+import {getService} from '../service';
+import {getSourceOrigin} from '../url';
+import {dev} from '../log';
+import {recreateNonProtoObject} from '../json';
+import {viewerFor} from '../viewer';
 
 /** @const */
 const TAG = 'Storage';
@@ -41,14 +41,14 @@ export class Storage {
 
   /**
    * @param {!Window} win
-   * @param {!Viewer} viewer
+   * @param {!../service/viewer-impl.Viewer} viewer
    * @param {!StorageBindingDef} binding
    */
   constructor(win, viewer, binding) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!Viewer} */
+    /** @private @const {!../service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
 
     /** @private @const {!StorageBindingDef} */
@@ -75,7 +75,6 @@ export class Storage {
    * key.
    * @param {string} name
    * @return {!Promise<*>}
-   * @override
    */
   get(name) {
     return this.getStore_().then(store => store.get(name));
@@ -87,7 +86,6 @@ export class Storage {
    * @param {string} name
    * @param {*} value
    * @return {!Promise}
-   * @override
    */
   set(name, value) {
     dev().assert(typeof value == 'boolean', 'Only boolean values accepted');
@@ -99,7 +97,6 @@ export class Storage {
    * the operation completes.
    * @param {string} name
    * @return {!Promise}
-   * @override
    */
   remove(name) {
     return this.saveStore_(store => store.remove(name));
@@ -151,10 +148,10 @@ export class Storage {
   /** @private */
   broadcastReset_() {
     dev().fine(TAG, 'Broadcasted reset message');
-    this.viewer_.broadcast({
+    this.viewer_.broadcast(/** @type {!JSONType} */ ({
       'type': 'amp-storage-reset',
       'origin': this.origin_,
-    });
+    }));
   }
 }
 
@@ -181,7 +178,7 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONType} */
-    this.obj = recreateNonProtoObject(obj);
+    this.obj = /** @type {!JSONType} */ (recreateNonProtoObject(obj));
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
@@ -216,7 +213,10 @@ export class Store {
       item['v'] = value;
       item['t'] = Date.now();
     } else {
-      this.values_[name] = {'v': value, 't': Date.now()};
+      this.values_[name] = /** @type {!JSONType} */ ({
+        'v': value,
+        't': Date.now(),
+      });
     }
 
     // Purge old values.
@@ -335,10 +335,10 @@ export class LocalStorageBinding {
 export class ViewerStorageBinding {
 
   /**
-   * @param {!Viewer} viewer
+   * @param {!../service/viewer-impl.Viewer} viewer
    */
   constructor(viewer) {
-    /** @private @const {!Viewer} */
+    /** @private @const {!../service/viewer-impl.Viewer} */
     this.viewer_ = viewer;
   }
 
@@ -351,7 +351,8 @@ export class ViewerStorageBinding {
 
   /** @override */
   saveBlob(origin, blob) {
-    return this.viewer_.sendMessage('saveStore', {origin, blob}, true);
+    return /** @type {!Promise} */ (this.viewer_.sendMessage(
+        'saveStore', {origin, blob}, true));
   }
 }
 
@@ -361,12 +362,12 @@ export class ViewerStorageBinding {
  * @return {!Storage}
  */
 export function installStorageService(window) {
-  return getService(window, 'storage', () => {
+  return /** @type {!Storage} */ (getService(window, 'storage', () => {
     const viewer = viewerFor(window);
     const overrideStorage = parseInt(viewer.getParam('storage'), 10);
     const binding = overrideStorage ?
         new ViewerStorageBinding(viewer) :
         new LocalStorageBinding(window);
     return new Storage(window, viewer, binding).start_();
-  });
+  }));
 };
