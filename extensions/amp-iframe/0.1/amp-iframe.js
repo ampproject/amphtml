@@ -395,15 +395,15 @@ export class AmpIframe extends AMP.BaseElement {
   updateSize_(height, width) {
     if (!this.isResizable_) {
       user().error(TAG_,
-          'ignoring embed-size request because this iframe is not resizable',
+          'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
       user().error(TAG_,
-          'ignoring embed-size request because the resize height is ' +
-          'less than 100px',
+          'Ignoring embed-size request because the resize height is ' +
+          'less than 100px. Please use amp-ad for displaying ads.',
           this.element);
       return;
     }
@@ -435,7 +435,7 @@ export class AmpIframe extends AMP.BaseElement {
       }, () => {});
     } else {
       user().error(TAG_,
-          'ignoring embed-size request because'
+          'Ignoring embed-size request because'
           + 'no width or height value is provided',
           this.element);
     }
