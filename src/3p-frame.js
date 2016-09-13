@@ -72,7 +72,6 @@ function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
-    clientId: null,
     location: {
       href: locationHref,
     },
