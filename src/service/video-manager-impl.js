@@ -45,7 +45,7 @@ export class VideoManager {
     /** @private @const {!Window} */
     this.win_ = ampdoc.win;
 
-    /** @private {?Array<!../video-interface.VideoInterface>} */
+    /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
 
     /** @private {boolean} */

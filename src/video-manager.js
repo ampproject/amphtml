@@ -22,5 +22,6 @@ import {getExistingServiceForDoc} from './service';
  * @return {!./service/video-manager-impl.VideoManager}
  */
 export function videoManagerForDoc(nodeOrDoc) {
-  return getExistingServiceForDoc(nodeOrDoc, 'video-manager');
-}
+  return /** @type {!./service/video-manager-impl.VideoManager} */ (
+      getExistingServiceForDoc(nodeOrDoc, 'video-manager'));
+};

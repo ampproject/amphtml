@@ -504,7 +504,7 @@ export class BaseElement {
    * from the given element to this element as custom events with the same name.
    * @param  {string|!Array<string>} events
    * @param  {!Element} element
-   * @protected @final
+   * @public @final
    */
   forwardEvents(events, element) {
     events = isArray(events) ? events : [events];

@@ -28,7 +28,6 @@
  * their `builtCallback`.
  *
  * @interface
- * @extends {./base-element.BaseElement}
  */
 export class VideoInterface {
 
@@ -42,7 +41,7 @@ export class VideoInterface {
   /**
    * Plays the video..
    *
-   * @param {boolean} isAutoplay Whether the call to the `play` method is
+   * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
    * triggered by the autoplay functionality. Video players can use this hint
    * to make decisions such as not playing pre-roll video ads.
    */
@@ -76,7 +75,22 @@ export class VideoInterface {
    * AMP will not call this method if `controls` attribute is not set.
    */
   hideControls() {}
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @return {!AmpElement}
+   */
+  get element() {}
+
+  /**
+   * Automatically comes from {@link ./base-element.BaseElement}
+   *
+   * @return {boolean}
+   */
+  isInViewport() {}
 }
+
 
 /**
  * Attributes
@@ -123,6 +137,7 @@ export const VideoAttributes = {
   CONTROLS: 'controls',
 };
 
+
 /**
  * Events
  *
@@ -149,7 +164,7 @@ export const VideoEvents = {
    * from `viewportCallback`.
    *
    * @event amp:video:visibility
-   * @param {boolean} visible Whether the video player is visible or not.
+   * @property {boolean} visible Whether the video player is visible or not.
    */
   VISIBILITY: 'amp:video:visibility',
 };
