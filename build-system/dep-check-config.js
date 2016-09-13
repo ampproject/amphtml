@@ -116,6 +116,10 @@ exports.rules = [
   },
   {
     filesMatching: 'extensions/**/*.js',
+    mustNotDependOn: '3p/**/*.js',
+  },
+  {
+    filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
   },
 
