@@ -16,7 +16,7 @@
 
     import '../amp-pinterest';
     import {adopt} from '../../../../src/runtime';
-    import {Timer} from '../../../../src/timer';
+    import {timerFor} from '../../../../src/timer';
 
     adopt(window);
 
@@ -29,7 +29,7 @@
             div,
             addElement: function(element) {
               div.appendChild(element);
-              return new Timer(window).promise(16).then(() => {
+              return timerFor(window).promise(16).then(() => {
                 element.implementation_.layoutCallback();
                 return element;
               });
