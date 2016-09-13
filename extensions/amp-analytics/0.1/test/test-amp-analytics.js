@@ -34,7 +34,7 @@ import {
 } from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 import {installStorageService} from '../../../../src/service/storage-impl';
-import '../../../amp-analytics/0.1/amp-analytics';
+
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');

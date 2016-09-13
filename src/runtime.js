@@ -48,6 +48,7 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
+import {installStorageService} from './service/storage-impl';
 import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
@@ -57,7 +58,6 @@ import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
-import {installStorageService} from './service/storage-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {initLogConstructor} from './log';
 import {platformFor} from './platform';
