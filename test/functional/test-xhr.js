@@ -28,23 +28,26 @@ import {getCookie} from '../../src/cookies';
 describe('XHR', function() {
   let sandbox;
   let requests;
+  const location = {href: 'https://acme.com/path'};
+  const nativeWin = {
+    location,
+    fetch: window.fetch,
+  };
+
+  const polyfillWin = {
+    location,
+    fetch: fetchPolyfill,
+  };
 
   // Given XHR calls give tests more time.
   this.timeout(5000);
 
   const scenarios = [
     {
-      xhr: installXhrService({
-        fetch: window.fetch,
-        location: {href: 'https://acme.com/path'},
-      }),
+      xhr: installXhrService(nativeWin),
       desc: 'Native',
-    },
-    {
-      xhr: installXhrService({
-        fetch: fetchPolyfill,
-        location: {href: 'https://acme.com/path'},
-      }),
+    }, {
+      xhr: installXhrService(polyfillWin),
       desc: 'Polyfill',
     },
   ];
@@ -68,6 +71,7 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    location.href = 'https://acme.com/path';
   });
 
   afterEach(() => {
@@ -224,6 +228,40 @@ describe('XHR', function() {
         });
       });
     }
+
+    describe('AMP-Same-Origin', () => {
+      it('should not be set for cross origin requests', () => {
+        const init = {};
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+      });
+
+      it('should be set for all same origin GET requests', () => {
+        const init = {};
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+
+      it('should be set for all same origin POST requests', () => {
+        const init = {method: 'post', body: {}};
+        location.href = '/path';
+        xhr.fetchJson('/whatever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+
+      it('should check origin not source origin', () => {
+        let init = {method: 'post', body: {}};
+        location.href = 'https://cdn.ampproject.org/c/s/example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+
+        init = {method: 'post', body: {}};
+        location.href = 'https://example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
+    });
 
     describe(test.desc, () => {
 
