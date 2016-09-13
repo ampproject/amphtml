@@ -402,8 +402,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     if (height < 100) {
       user().error(TAG_,
-          'Ignoring embed-size request because the resize height is ' +
-          'less than 100px. Please use amp-ad for displaying ads.',
+          'Ignoring embed-size request because the resize height is less ' +
+          'than 100px. If you are using amp-iframe to display ads, consider ' +
+          'using amp-ad instead.',
           this.element);
       return;
     }
