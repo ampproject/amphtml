@@ -43,14 +43,32 @@ import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
-  /** @override */
-  preconnectCallback(onLayout) {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+
+    /** @private {?string} */
+    this.shortcode_ = '';
+  }
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    this.preconnect.url('https://www.instagram.com', onLayout);
+    this.preconnect.url('https://www.instagram.com', opt_onLayout);
     // Host instagram used for image serving. While the host name is
     // funky this appears to be stable in the post-domain sharding era.
-    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net', onLayout);
+    this.preconnect.url('https://instagram.fsnc1-1.fna.fbcdn.net',
+        opt_onLayout);
   }
 
   /** @override */
@@ -60,17 +78,6 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /**
-     * @private {?Element}
-     */
-    this.iframe_ = null;
-    /**
-     * @private {?Promise}
-     */
-    this.iframePromise_ = null;
-    /**
-     * @private @const
-     */
     this.shortcode_ = user().assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),

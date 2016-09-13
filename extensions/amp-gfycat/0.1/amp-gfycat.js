@@ -20,22 +20,27 @@ import {user} from '../../../src/log';
 
 class AmpGfycat extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    // Gfycat iframe
-    this.preconnect.url('https://gfycat.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-    // Iframe video and poster urls
-    this.preconnect.url('https://giant.gfycat.com', onLayout);
-    this.preconnect.url('https://thumbs.gfycat.com', onLayout);
-  }
-
-  /** @override */
-  buildCallback() {
     /**
      * @private {?Element}
      */
     this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    // Gfycat iframe
+    this.preconnect.url('https://gfycat.com', opt_onLayout);
+
+    // Iframe video and poster urls
+    this.preconnect.url('https://giant.gfycat.com', opt_onLayout);
+    this.preconnect.url('https://thumbs.gfycat.com', opt_onLayout);
   }
 
   /** @override */

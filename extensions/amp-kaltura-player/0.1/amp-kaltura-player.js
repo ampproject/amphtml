@@ -23,9 +23,20 @@ import {user} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
 
-  /** @override */
-  createdCallback() {
-    this.preconnect.url('https://cdnapisec.kaltura.com');
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://cdnapisec.kaltura.com', opt_onLayout);
   }
 
   /** @override */
@@ -60,7 +71,6 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-      /** @private {?Element} */
     this.iframe_ = iframe;
     return loadPromise(iframe);
   }

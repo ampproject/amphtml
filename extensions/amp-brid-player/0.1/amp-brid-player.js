@@ -21,10 +21,27 @@ import {user} from '../../../src/log';
 
 class AmpBridPlayer extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://services.brid.tv', onLayout);
-    this.preconnect.url('https://cdn.brid.tv', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.partnerID_ = '';
+
+    /** @private {string} */
+    this.feedID_ = '';
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://services.brid.tv', opt_onLayout);
+    this.preconnect.url('https://cdn.brid.tv', opt_onLayout);
   }
 
   /** @override */
@@ -34,13 +51,11 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {string} */
     this.partnerID_ = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
-    /** @private @const {string} */
     this.feedID_ = user().assert(
         (this.element.getAttribute('data-video') ||
         this.element.getAttribute('data-playlist')),
@@ -64,7 +79,7 @@ class AmpBridPlayer extends AMP.BaseElement {
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
-    let feedType;
+    let feedType = '';
 
     if (this.element.getAttribute('data-video')) {
       feedType = 'video';
@@ -84,7 +99,6 @@ class AmpBridPlayer extends AMP.BaseElement {
     iframe.src = src;
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {?Element} */
     this.iframe_ = iframe;
     return loadPromise(iframe);
   }
