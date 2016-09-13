@@ -890,22 +890,15 @@ export class Viewer {
   }
 
   /**
-   *
+   * Update the fragment of the viewer if embedded in a viewer,
+   * otherwise update the page url fragment
+   * @param {string} fragment
    * @return {!Promise}
    */
-  replaceShareTrackingFragment(incomingFragment, outgoingFragment) {
+  updateFragment(fragment) {
     if (!this.isEmbedded_) {
       if (this.win.history.replaceState) {
-        let newUrl = this.win.location.href;
-        if (incomingFragment == '') {
-          if (newUrl.indexOf('#') == -1) {
-            newUrl = newUrl + '#.' + outgoingFragment;
-          } else {
-            newUrl = newUrl.replace('#', '#.' + outgoingFragment + '&');
-          }
-        } else {
-          newUrl = newUrl.replace(incomingFragment, outgoingFragment);
-        }
+        const newUrl = this.win.location.href.split('#')[0] + '#' + fragment;
         this.win.history.replaceState({}, '', newUrl);
       }
       return Promise.resolve();
@@ -913,8 +906,8 @@ export class Viewer {
     if (!this.hasCapability('fragment')) {
       return Promise.resolve();
     }
-    return this.sendMessageUnreliable_('updateShareTracking',
-      {incomingFragment, outgoingFragment}, true);
+    return /** @type {!Promise} */ (this.sendMessageUnreliable_(
+        'updateFragment', {fragment}, true));
   }
 
   /**

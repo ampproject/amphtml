@@ -43,6 +43,9 @@ export class AmpShareTracking extends AMP.BaseElement {
 
     /** @private {?Promise<!Object<string, string>>} */
     this.shareTrackingFragments_ = null;
+
+    /** @private {string} */
+    this.originalViewerFragment_ = '';
   }
 
   /**
@@ -76,8 +79,9 @@ export class AmpShareTracking extends AMP.BaseElement {
         const outgoingFragment = results[1];
         dev().fine(TAG, 'incomingFragment: ', incomingFragment);
         dev().fine(TAG, 'outgoingFragment: ', outgoingFragment);
-        viewerFor(this.win).replaceShareTrackingFragment(incomingFragment,
-            outgoingFragment);
+        const newFragment = this.getNewViewerFragment_(
+            this.originalViewerFragment_, incomingFragment, outgoingFragment);
+        viewerForDoc(this.getAmpDoc()).updateFragment(newFragment);
         return {incomingFragment, outgoingFragment};
       });
 
@@ -92,6 +96,7 @@ export class AmpShareTracking extends AMP.BaseElement {
   getIncomingFragment_() {
     dev().fine(TAG, 'getting incoming fragment');
     return viewerForDoc(this.getAmpDoc()).getFragment().then(fragment => {
+      this.originalViewerFragment_ = fragment;
       const match = fragment.match(/\.([^&]*)/);
       return match ? match[1] : '';
     });
@@ -162,6 +167,30 @@ export class AmpShareTracking extends AMP.BaseElement {
     }
     return bytes;
   }
+
+  /**
+   * Generate the new url fragment by replacing incoming share tracking fragment
+   * with outgoing share tracking fragment.
+   * The original fragment is not modified.
+   * @param {string} originalViewerFragment
+   * @param {string} incomingFragment
+   * @param {string} outgoingFragment
+   * @return {string}
+   * @private
+   */
+  getNewViewerFragment_(originalViewerFragment, incomingFragment,
+      outgoingFragment) {
+    if (originalViewerFragment == '') {
+      return '.' + outgoingFragment;
+    }
+    if (incomingFragment == '') {
+      return '.' + outgoingFragment + '&' + originalViewerFragment;
+    } else {
+      return originalViewerFragment.replace('.' + incomingFragment, '.' +
+          outgoingFragment);
+    }
+  }
+
 }
 
 
