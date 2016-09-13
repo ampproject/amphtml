@@ -39,6 +39,7 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
+import {installTimerService} from './service/timer-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
 import {installResourcesServiceForDoc} from './service/resources-impl';
@@ -80,6 +81,7 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installTimerService(global);
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
