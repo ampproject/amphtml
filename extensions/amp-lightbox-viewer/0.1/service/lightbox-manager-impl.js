@@ -164,7 +164,7 @@ export class LightboxManager {
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
    * The function is not implemented yet. Fake it for testing
-   * @return {!Array{string, !Element}}
+   * @return {!Array<{string,Element}>}
    */
   getThumbnails() {
     const thumbnailList = [];

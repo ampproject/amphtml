@@ -90,10 +90,9 @@
 }
 
 .-amp-lightbox-viewer-gallery {
-  display: none !important;
+  display: none;
   z-index: 2147483645 !important;
   top: 50px !important;
-  display: flex 0 0 auto !important;
   overflow: auto !important;
 }
 
@@ -103,6 +102,7 @@
 
 .-amp-lightbox-viewer-gallery-thumbnail {
   display: inline-block;
+  object-fit: contain;
   width: calc(100vw/3);
   height: calc(100vw/3);
   padding: 5px;
