@@ -113,14 +113,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const next = this.next_.bind(this);
     const prev = this.previous_.bind(this);
     const close = this.close_.bind(this);
-    const showGallery = this.showGallery_.bind(this);
+    const openGallery = this.openGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
     this.buildButton_('Next', 'amp-lightbox-viewer-button-next', next);
     this.buildButton_('Previous', 'amp-lightbox-viewer-button-prev', prev);
     this.buildButton_('Close', 'amp-lightbox-viewer-button-close', close);
     this.buildButton_('Gallery', 'amp-lightbox-viewer-button-gallery',
-        showGallery);
+        openGallery);
 
     this.container_.setAttribute('no-prev', '');
     this.container_.setAttribute('no-next', '');
@@ -131,10 +131,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * @param {!string} label Text of the button for a11y
    * @param {!string} className Css classname
    * @param {!function()} action function to call when tapped
-   * @param {opt_parent=} opt_parent parent element that append the button to
    * @private
    */
-  buildButton_(label, className, action, opt_parent) {
+  buildButton_(label, className, action) {
     const button = this.win.document.createElement('div');
 
     button.setAttribute('role', 'button');
@@ -142,8 +141,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     button.classList.add(className);
     button.addEventListener('click', action);
 
-    const parent = opt_parent ? opt_parent : this.container_;
-    parent.appendChild(button);
+    this.container_.appendChild(button);
   }
 
   /**
@@ -208,7 +206,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.activeElement_ = null;
     this.active_ = false;
 
-    //if there's gallery, set gallery to display none'
+    // If there's gallery, set gallery to display none
     this.container_.removeAttribute('gallery-view');
 
     this.container_.setAttribute('no-prev', '');
@@ -391,50 +389,41 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    * Display gallery view to show thumbnails of lightboxed elements
    * @private
    */
-  showGallery_() {
-    // Create gallery div for the first time
+  openGallery_() {
+    // Build gallery div for the first time
     if (!this.gallery_) {
-      this.createGallery_();
+      this.buildGallery_();
     }
     this.container_.setAttribute('gallery-view', '');
   }
 
   /**
-   * Hide gallery view
+   * Close gallery view
    * @private
    */
-  hideGallery_() {
+  closeGallery_() {
     this.container_.removeAttribute('gallery-view');
   }
 
   /**
-   * Create lightbox gallery. This is called only once when user enter gallery
+   * Build lightbox gallery. This is called only once when user enter gallery
    * view for the first time.
    * @private
    */
-  createGallery_() {
-    // Create gallery mask that cover current lightbox view
-    const galleryMask = this.win.document.createElement('div');
-    galleryMask.classList.add('-amp-lightbox-viewer-gallery-mask');
-    this.container_.appendChild(galleryMask);
-
-    // create gallery grid
+  buildGallery_() {
+    // Build gallery
     this.gallery_ = this.win.document.createElement('div');
-    this.gallery_.classList.add('-amp-lightbox-viewer-gallery-grid');
-    galleryMask.appendChild(this.gallery_);
-
-    // add close button
-    const close = this.close_.bind(this);
-    this.buildButton_('Close', 'amp-lightbox-viewer-button-close',
-         close, galleryMask);
-
-    // add leave gallery mode button
-    const back = this.hideGallery_.bind(this);
-    this.buildButton_('Back', 'amp-lightbox-viewer-button-back',
-        back, galleryMask);
+    this.gallery_.classList.add('-amp-lightbox-viewer-gallery');
 
     // Initialize thumbnails
     this.updateThumbnails_();
+
+    this.container_.appendChild(this.gallery_);
+
+    // Add go back button
+    const back = this.closeGallery_.bind(this);
+    this.buildButton_('Back', 'amp-lightbox-viewer-button-back', back);
+
   }
 
   /**
@@ -454,9 +443,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     thumbnailList.forEach(thumbnail => {
       const thumbnailElement = this.createThumbnailElement_(thumbnail);
       this.thumbnails_.push(thumbnailElement);
-    });
-    this.thumbnails_.forEach(thumbnail => {
-      this.gallery_.appendChild(thumbnail);
+      this.gallery_.appendChild(thumbnailElement);
     });
   }
 
@@ -468,14 +455,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
     element.classList.add('-amp-lightbox-viewer-gallery-thumbnail');
-    // TODO: img? Or amp-img? What kind of element should be created???
+    // TODO(zhouyx): img? Or amp-img? What kind of element should be created???
     const imgElement = this.win.document.createElement('img');
-    // fake url here testing
+    imgElement.classList.add('-amp-lightbox-viewer-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
     const redirect = () => {
       this.updateViewer_(thumbnailObj.element);
-      this.hideGallery_();
+      this.closeGallery_();
     };
     element.addEventListener('click', redirect);
     return element;

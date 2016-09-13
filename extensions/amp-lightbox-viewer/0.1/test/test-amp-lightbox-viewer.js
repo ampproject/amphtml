@@ -164,11 +164,11 @@ describe('amp-lightbox-viewer', () => {
         return impl.activate({source: item1}).then(() => {
           expect(impl.activeElement_).to.equal(item1);
           assertLightboxed(item1, impl, true, /*closed*/ false);
-          impl.showGallery_();
+          impl.openGallery_();
           const container = viewer.querySelector('.-amp-lightbox-viewer');
           expect(container.getAttribute('gallery-view')).to.equal('');
           const gallery = viewer.querySelector(
-              '.-amp-lightbox-viewer-gallery-grid ');
+              '.-amp-lightbox-viewer-gallery ');
           expect(gallery.childNodes).to.have.length(3);
           gallery.childNodes[1].dispatchEvent(new Event('click'));
           expect(container.getAttribute('gallery-view')).to.be.null;
