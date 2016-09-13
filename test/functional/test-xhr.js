@@ -249,6 +249,18 @@ describe('XHR', function() {
         xhr.fetchJson('/whatever', init);
         expect(init['headers']['AMP-Same-Origin']).to.equal('true');
       });
+
+      it('should check origin not source origin', () => {
+        let init = {method: 'post', body: {}};
+        location.href = 'https://cdn.ampproject.org/c/s/example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.be.undefined;
+
+        init = {method: 'post', body: {}};
+        location.href = 'https://example.com/hello/path';
+        xhr.fetchJson('https://example.com/what/ever', init);
+        expect(init['headers']['AMP-Same-Origin']).to.equal('true');
+      });
     });
 
     describe(test.desc, () => {
