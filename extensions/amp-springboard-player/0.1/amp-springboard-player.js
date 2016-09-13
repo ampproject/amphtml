@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -101,7 +100,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.iframe_ = iframe;
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -138,7 +137,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     this.applyFillContent(imgPlaceholder);
     this.element.appendChild(imgPlaceholder);
 
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',
       });

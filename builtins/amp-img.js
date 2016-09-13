@@ -16,7 +16,6 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
-import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 
@@ -27,7 +26,7 @@ export class AmpImg extends BaseElement {
   constructor(element) {
     super(element);
     /** @private @const {function(!Element, number=): !Promise<!Element>} */
-    this.loadPromise_ = loadPromise;
+    this.loadPromise_ = this.loadPromise;
 
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;

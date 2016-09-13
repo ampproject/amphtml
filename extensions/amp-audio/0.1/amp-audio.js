@@ -16,7 +16,6 @@
 
 import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
-import {loadPromise} from '../../../src/event-helper';
 import {dev} from '../../../src/log';
 
 /**
@@ -65,7 +64,7 @@ export class AmpAudio extends AMP.BaseElement {
     });
     this.element.appendChild(audio);
     this.audio_ = audio;
-    return loadPromise(audio);
+    return this.loadPromise(audio);
   }
 
   /** @override */

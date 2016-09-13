@@ -20,7 +20,6 @@ import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
-import {loadPromise} from '../../../src/event-helper';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
@@ -261,7 +260,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         return this.apiHandler_.startUp(this.iframe_, true);
       });
     }
-    return loadPromise(this.iframe_);
+    return this.loadPromise(this.iframe_);
   }
 
   /** @override  */
