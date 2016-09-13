@@ -71,7 +71,7 @@ export class Preconnect {
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
 
-    /** @private @const {!./timer.Timer} */
+    /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
   }
 

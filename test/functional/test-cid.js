@@ -24,6 +24,7 @@ import {installCryptoService, Crypto,}
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -80,7 +81,9 @@ describe('cid', () => {
       ampExtendedElements: {
         'amp-analytics': true,
       },
+      setTimeout: window.setTimeout,
     };
+    installTimerService(fakeWin);
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
@@ -259,6 +262,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
+    installTimerService(win);
     installViewerService(win).isIframed = () => false;
     installCidService(win);
     installCryptoService(win);

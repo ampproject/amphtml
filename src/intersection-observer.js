@@ -130,7 +130,7 @@ export class IntersectionObserver {
   constructor(baseElement, iframe, opt_is3p) {
     /** @private @const */
     this.baseElement_ = baseElement;
-    /** @private @const {!./timer.Timer} */
+    /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(baseElement.win);
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
