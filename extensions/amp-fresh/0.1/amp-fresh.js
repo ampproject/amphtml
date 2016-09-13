@@ -18,8 +18,7 @@ import {CSS} from '../../../build/amp-fresh-0.1.css';
 import {copyChildren} from '../../../src/dom';
 import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined, Layout} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
 
 
@@ -43,7 +42,7 @@ export class AmpFresh extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported() {
     return true;
   }
 

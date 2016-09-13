@@ -17,7 +17,6 @@
 import {addParamToUrl} from '../../../src/url';
 import {fromClassForDoc} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {whenDocumentReady} from '../../../src/document-ready';
 import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
