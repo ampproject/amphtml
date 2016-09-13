@@ -112,7 +112,7 @@ A4A creatives require a different, and considerably simpler, boilerplate style l
 [general AMP documents do](https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md):
 
 ```html
-<style amp-a4a-boilerplate>body{visibility:hidden}</style>
+<style amp4ads-boilerplate>body{visibility:hidden}</style>
 ```
 
 _Rationale:_ The `amp-boilerplate` style hides body content until the AMP 
