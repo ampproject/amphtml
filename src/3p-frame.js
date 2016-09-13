@@ -81,6 +81,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     },
     tagName: element.tagName,
     mode: getModeObject(),
+    canary: !!(parentWindow.AMP_CONFIG && parentWindow.AMP_CONFIG.canary),
     hidden: !viewer.isVisible(),
     amp3pSentinel: generateSentinel(parentWindow),
     initialIntersection: element.getIntersectionChangeEntry(),
@@ -165,7 +166,6 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
- * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);

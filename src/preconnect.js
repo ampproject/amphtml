@@ -25,6 +25,7 @@ import {parseUrl} from './url';
 import {timerFor} from './timer';
 import {platformFor} from './platform';
 import {viewerFor} from './viewer';
+import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -39,7 +40,7 @@ export class Preconnect {
     this.document_ = win.document;
 
     /** @private @const {!Element} */
-    this.head_ = win.document.head;
+    this.head_ = dev().assertElement(win.document.head);
     /**
      * Origin we've preconnected to and when that connection
      * expires as a timestamp in MS.
@@ -60,7 +61,10 @@ export class Preconnect {
      * Detect support for the given resource hints.
      * Unfortunately not all browsers support this, so this can only
      * be used as an affirmative signal.
-     * @private @const {{preload: boolean, preconnect: boolean}}
+     * @private @const {{
+     *   preload: (boolean|undefined),
+     *   preconnect: (boolean|undefined)
+     * }}
      */
     this.features_ = this.detectFeatures_();
 
@@ -191,11 +195,14 @@ export class Preconnect {
   /**
    * Detect related features if feature detection is supported by the
    * browser. Even if this fails, the browser may support the feature.
-   * @return {{preload: boolean, preconnect: boolean}}
+   * @return {{
+   *   preload: (boolean|undefined),
+   *   preconnect: (boolean|undefined)
+   * }}
    * @private
    */
   detectFeatures_() {
-    const tokenList = this.document_.createElement('link').relList;
+    const tokenList = this.document_.createElement('link')['relList'];
     if (!tokenList || !tokenList.supports) {
       return {};
     }

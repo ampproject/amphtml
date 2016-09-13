@@ -83,7 +83,7 @@ export class PullToRefreshBlocker {
     // already tracking this touch and for non-single-touch events.
     if (this.tracking_ ||
           !(event.touches && event.touches.length == 1) ||
-          this.viewport_.getTop() > 0) {
+          this.viewport_.getScrollTop() > 0) {
       return;
     }
 

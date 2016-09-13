@@ -21,6 +21,7 @@ import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {dev} from '../src/log';
 import {platformFor} from '../src/platform';
 import {VideoEvents} from '../src/video-interface';
 import {videoManagerForDoc} from '../src/video-manager';
@@ -44,7 +45,7 @@ export function installVideo(win) {
 
     /** @override */
     buildCallback() {
-      /** @private @const {!HTMLVideoElement} */
+      /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
 
       /** @private @const {!../src/platform.Platform} */
@@ -105,7 +106,8 @@ export function installVideo(win) {
           return;
         }
         if (child.getAttribute && child.getAttribute('src')) {
-          assertHttpsUrl(child.getAttribute('src'), child);
+          assertHttpsUrl(child.getAttribute('src'),
+              dev().assertElement(child));
         }
         this.video_.appendChild(child);
       });

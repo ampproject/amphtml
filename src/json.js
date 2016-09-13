@@ -105,14 +105,14 @@ export function getValueForExpr(obj, expr) {
  * Parses the given `json` string without throwing an exception if not valid.
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
- * @param {string} json JSON string to parse
+ * @param {*} json JSON string to parse
  * @param {function(!Error)=} opt_onFailed Optional function that will be called with
  *     the error if parsing fails.
  * @return {?JSONValueDef|undefined}
  */
 export function tryParseJson(json, opt_onFailed) {
   try {
-    return JSON.parse(json);
+    return JSON.parse(/** @type {string} */ (json));
   } catch (e) {
     if (opt_onFailed) {
       opt_onFailed(e);

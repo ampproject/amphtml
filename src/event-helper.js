@@ -101,9 +101,10 @@ export function isLoaded(element) {
  * Returns a promise that will resolve or fail based on the element's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
- * @param {!Element} element
+ * @param {T} element
  * @param {number=} opt_timeout
- * @return {!Promise<!Element>}
+ * @return {!Promise<T>}
+ * @template T
  */
 export function loadPromise(element, opt_timeout) {
   let unlistenLoad;

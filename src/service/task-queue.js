@@ -26,7 +26,7 @@ import {dev} from '../log';
  *   callback: function(boolean),
  *   scheduleTime: time,
  *   startTime: time,
- *   promise: (!Promise|undefined)
+ *   promise: (?Promise|undefined)
  * }}
  */
 export let TaskDef;

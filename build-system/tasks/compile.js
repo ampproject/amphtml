@@ -72,13 +72,20 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilename, outputDir,
+function compile(entryModuleFilenames, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+    var entryModuleFilename;
+    if (entryModuleFilenames instanceof Array) {
+      entryModuleFilename = entryModuleFilenames[0];
+    } else {
+      entryModuleFilename = entryModuleFilenames;
+      entryModuleFilenames = [entryModuleFilename];
+    }
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
 
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -191,13 +198,15 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
+        rewrite_polyfills: !!(
+            options.includePolyfills || options.includeBasicPolyfills),
         externs: externs,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
         ],
-        entry_point: entryModuleFilename,
+        entry_point: entryModuleFilenames,
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -224,6 +233,7 @@ function compile(entryModuleFilename, outputDir,
           '3p/environment.js',
           'src/document-state.js',
         ],
+        jscomp_error: [],
       }
     };
 
@@ -232,7 +242,8 @@ function compile(entryModuleFilename, outputDir,
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.compilerFlags.define.push('TYPECHECK_ONLY=true');
-      compilerOptions.compilerFlags.jscomp_error = 'checkTypes';
+      compilerOptions.compilerFlags.jscomp_error.push(
+          'checkTypes', 'accessControls', 'const', 'constantProperty');
     }
     if (argv.pseudo_names) {
       compilerOptions.compilerFlags.define.push('PSEUDO_NAMES=true');

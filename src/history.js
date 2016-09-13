@@ -21,8 +21,9 @@ import {getExistingServiceForWindow} from './service';
 /**
  * Returns service implemented in service/history-impl.
  * @param {!Window} window
- * @return {!History}
+ * @return {!./service/history-impl.History}
  */
 export function historyFor(window) {
-  return getExistingServiceForWindow(window, 'history');
+  return /** @type {!./service/history-impl.History} */ (
+      getExistingServiceForWindow(window, 'history'));
 };

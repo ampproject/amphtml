@@ -1837,7 +1837,7 @@ class ParsedAttrSpec {
    */
   validateAttrValueProperties(context, attrName, attrValue, tagSpec, result) {
     // TODO(johannes): Replace this hack with a parser.
-    const segments = attrValue.split(',');
+    const segments = attrValue.split(/[,;]/);
     /** @type {!Object<string, string>} */
     const properties = {};
     for (const segment of segments) {
@@ -2294,6 +2294,11 @@ class ParsedTagSpec {
      */
     this.alsoRequiresTag_ = [];
     /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.alsoRequiresTagWarning_ = [];
+    /**
      * @type {ParsedAttrSpec}
      * @private
      */
@@ -2329,6 +2334,9 @@ class ParsedTagSpec {
 
     for (const tagSpecName of tagSpec.alsoRequiresTag) {
       this.alsoRequiresTag_.push(tagSpecIdsByTagSpecName[tagSpecName]);
+    }
+    for (const tagSpecName of tagSpec.alsoRequiresTagWarning) {
+      this.alsoRequiresTagWarning_.push(tagSpecIdsByTagSpecName[tagSpecName]);
     }
   }
 
@@ -2376,6 +2384,15 @@ class ParsedTagSpec {
    * @return {!Array<number>}
    */
   getAlsoRequiresTag() { return this.alsoRequiresTag_; }
+
+  /**
+   * A TagSpec may specify other tags to be required as well, when that
+   * tag is used. This accessor returns the IDs for the tagspecs that
+   * are also required if |this| tag occurs in the document, but where
+   * such requirement is currently only a warning.
+   * @return {!Array<number>}
+   */
+  getAlsoRequiresTagWarning() { return this.alsoRequiresTagWarning_; }
 
   /**
    * Whether or not the tag should be recorded via
@@ -3279,9 +3296,12 @@ function validateTagAgainstSpec(
  * @private
  */
 class ParsedValidatorRules {
-  /** Creates a new instance and initializes it with
-   * amp.validator.ValidatorRules. */
-  constructor() {
+  /**
+   * Creates a new instance and initializes it with
+   * amp.validator.ValidatorRules.
+   * @param {string} htmlFormat
+   */
+  constructor(htmlFormat) {
     /**
      * ParsedTagSpecs in id order.
      * @type {!Array<!ParsedTagSpec>}
@@ -3305,7 +3325,7 @@ class ParsedValidatorRules {
      * @type {!amp.validator.ValidatorRules}
      * @private
      */
-    this.rules_ = this.filterRules(amp.validator.createRules());
+    this.rules_ = this.filterRules(amp.validator.createRules(), htmlFormat);
 
     const parsedAttrSpecs = new ParsedAttrSpecs(this.rules_.attrLists);
 
@@ -3318,11 +3338,15 @@ class ParsedValidatorRules {
       goog.asserts.assert(
           !tagSpecIdsByTagSpecName.hasOwnProperty(getTagSpecName(tag)));
       tagSpecIdsByTagSpecName[getTagSpecName(tag)] = i;
-      if (tag.alsoRequiresTag.length > 0) {
+      if (tag.alsoRequiresTag.length > 0 ||
+          tag.alsoRequiresTagWarning.length > 0) {
         tagSpecNamesToTrack[getTagSpecName(tag)] = true;
       }
       for (const alsoRequiresTag of tag.alsoRequiresTag) {
         tagSpecNamesToTrack[alsoRequiresTag] = true;
+      }
+      for (const alsoRequiresTagWarning of tag.alsoRequiresTagWarning) {
+        tagSpecNamesToTrack[alsoRequiresTagWarning] = true;
       }
     }
     for (let i = 0; i < this.rules_.tags.length; ++i) {
@@ -3381,13 +3405,14 @@ class ParsedValidatorRules {
    * Filters the input rules so that only TagSpecs this validator needs are
    * returned.
    * @param {!amp.validator.ValidatorRules} allRules
+   * @param {string} htmlFormat
    * @return {!amp.validator.ValidatorRules}
    */
-  filterRules(allRules) {
+  filterRules(allRules, htmlFormat) {
     let newRules = allRules;
     let filteredTags = [];
     for (let i = 0; i < allRules.tags.length; ++i) {
-      if (this.isTagSpecCorrectHtmlFormat(allRules.tags[i]))
+      if (this.isTagSpecCorrectHtmlFormat(allRules.tags[i], htmlFormat))
         filteredTags.push(allRules.tags[i]);
     }
     newRules.tags = filteredTags;
@@ -3397,17 +3422,15 @@ class ParsedValidatorRules {
   /**
    * True iff tagspec's html_format matches the AMP html_format.
    * @param {amp.validator.TagSpec} tagSpec
+   * @param {string} htmlFormat
    * @return {boolean}
    */
-  isTagSpecCorrectHtmlFormat(tagSpec) {
+  isTagSpecCorrectHtmlFormat(tagSpec, htmlFormat) {
     // Empty html_format field implies tagspec applies to all docs.
     if (tagSpec.htmlFormat.length === 0) return true;
 
     for (let i = 0; i < tagSpec.htmlFormat.length; ++i) {
-      // TODO(gregable): Make the validator's format configurable so we can
-      // validate different document types.
-      if (tagSpec.htmlFormat[i] === amp.validator.TagSpec.HtmlFormat.AMP)
-        return true;
+      if (tagSpec.htmlFormat[i] === htmlFormat) return true;
     }
 
     return false;
@@ -3490,12 +3513,10 @@ class ParsedValidatorRules {
     goog.array.sort(tagspecsValidated);
     for (const tagSpecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagSpecId];
-      for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
-        if (!context.getTagspecsValidated().hasOwnProperty(
-                alsoRequiresTagspecId)) {
+      for (const tagspecId of spec.getAlsoRequiresTag()) {
+        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
           if (amp.validator.GENERATE_DETAILED_ERRORS) {
-            const alsoRequiresTagspec =
-                this.tagSpecById_[alsoRequiresTagspecId];
+            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
             context.addError(
                 amp.validator.ValidationError.Severity.ERROR,
                 amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
@@ -3510,6 +3531,23 @@ class ParsedValidatorRules {
             validationResult.status =
                 amp.validator.ValidationResult.Status.FAIL;
             return;
+          }
+        }
+      }
+      for (const tagspecId of spec.getAlsoRequiresTagWarning()) {
+        if (!context.getTagspecsValidated().hasOwnProperty(tagspecId)) {
+          if (amp.validator.GENERATE_DETAILED_ERRORS) {
+            const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
+            context.addError(
+                amp.validator.ValidationError.Severity.WARNING,
+                amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING,
+                context.getDocLocator(),
+                /* params */
+                [
+                  getTagSpecName(alsoRequiresTagspec.getSpec()),
+                  getTagSpecName(spec.getSpec())
+                ],
+                spec.getSpec().specUrl, validationResult);
           }
         }
       }
@@ -3587,7 +3625,21 @@ class ParsedValidatorRules {
   }
 }
 
-const parsedValidatorRulesSingleton = new ParsedValidatorRules();
+/** @type {!Object<string, !ParsedValidatorRules>} */
+const parsedValidatorRulesByFormat = {};
+
+/**
+ * @param {string} htmlFormat
+ * @return {!ParsedValidatorRules}
+ */
+function getParsedValidatorRules(htmlFormat) {
+  if (!parsedValidatorRulesByFormat.hasOwnProperty(htmlFormat)) {
+    const rules = new ParsedValidatorRules(htmlFormat);
+    parsedValidatorRulesByFormat[htmlFormat] = rules;
+    return rules;
+  }
+  return parsedValidatorRulesByFormat[htmlFormat];
+}
 
 /**
  * Computes the byte length, rather than character length, of a utf8 string.
@@ -3611,8 +3663,11 @@ function byteLength(utf8Str) {
  */
 amp.validator.ValidationHandler =
     class extends amp.htmlparser.HtmlSaxHandlerWithLocation {
-  /** Creates a new handler. */
-  constructor() {
+  /**
+   * Creates a new handler.
+   * @param {string} htmlFormat
+   */
+  constructor(htmlFormat) {
     super();
 
     this.validationResult_ = new amp.validator.ValidationResult();
@@ -3629,7 +3684,7 @@ amp.validator.ValidationHandler =
      * @type {!ParsedValidatorRules}
      * @private
      */
-    this.rules_ = parsedValidatorRulesSingleton;
+    this.rules_ = getParsedValidatorRules(htmlFormat);
   }
 
   /**
@@ -3684,14 +3739,13 @@ amp.validator.ValidationHandler =
    * @override
    */
   markManufacturedBody() {
-    if (parsedValidatorRulesSingleton.isManufacturedBodyTagError()) {
+    if (this.rules_.isManufacturedBodyTagError()) {
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         this.context_.addError(
             amp.validator.ValidationError.Severity.ERROR,
             amp.validator.ValidationError.Code.DISALLOWED_MANUFACTURED_BODY,
             this.context_.getDocLocator(),
-            /* params */[],
-            parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
+            /* params */[], this.rules_.manufacturedBodySpecUrl(),
             this.validationResult_);
       } else {
         this.validationResult_.status =
@@ -3702,8 +3756,7 @@ amp.validator.ValidationHandler =
           amp.validator.ValidationError.Severity.WARNING,
           amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY,
           this.context_.getDocLocator(),
-          /* params */[],
-          parsedValidatorRulesSingleton.manufacturedBodySpecUrl(),
+          /* params */[], this.rules_.manufacturedBodySpecUrl(),
           this.validationResult_);
     }
   }
@@ -3891,7 +3944,7 @@ amp.validator.validateString = function(inputDocContents) {
   }
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
 
-  const handler = new amp.validator.ValidationHandler();
+  const handler = new amp.validator.ValidationHandler('AMP');
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);
 
@@ -4050,7 +4103,12 @@ amp.validator.renderErrorMessage = function(error) {
     throw 'not implemented';
   }
   goog.asserts.assert(error.code !== null);
-  const format = parsedValidatorRulesSingleton.getFormatByCode(error.code);
+  // TODO(powdercloud): It doesn't matter which ParsedValidatorRules
+  // instance we access here - all of them have all error message
+  // formats. We should probably refactor this a bit to keep the
+  // error message formats seperately, to avoid initializing the
+  // ParsedValidatorRules for AMP if we're really doing A4A.
+  const format = getParsedValidatorRules('AMP').getFormatByCode(error.code);
   goog.asserts.assert(format !== undefined);
   return applyFormat(format, error);
 };
@@ -4357,7 +4415,9 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR ||
       error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG ||
       error.code ===
-          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY) {
+          amp.validator.ValidationError.Code.DEPRECATED_MANUFACTURED_BODY ||
+      error.code ===
+          amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING) {
     return amp.validator.ErrorCategory.Code.DEPRECATION;
   }
   // E.g. "The parent tag of tag 'source' is 'picture', but it can
@@ -4471,7 +4531,7 @@ amp.validator.validateNode = function(rootDoc) {
   if (amp.validator.GENERATE_DETAILED_ERRORS) {
     throw 'not implemented';
   }
-  const handler = new amp.validator.ValidationHandler();
+  const handler = new amp.validator.ValidationHandler('AMP');
   const visitor = new amp.domwalker.DomWalker();
   visitor.walktree(handler, rootDoc);
 
