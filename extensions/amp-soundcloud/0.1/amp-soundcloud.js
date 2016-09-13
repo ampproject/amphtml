@@ -29,7 +29,6 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 
@@ -94,7 +93,7 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

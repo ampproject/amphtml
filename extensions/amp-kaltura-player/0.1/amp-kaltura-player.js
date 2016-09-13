@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
@@ -72,7 +71,7 @@ class AmpKaltura extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */
@@ -105,7 +104,7 @@ class AmpKaltura extends AMP.BaseElement {
     this.applyFillContent(imgPlaceholder);
     this.element.appendChild(imgPlaceholder);
 
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',
       });

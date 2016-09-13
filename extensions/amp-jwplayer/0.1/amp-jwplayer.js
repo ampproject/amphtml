@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -70,7 +69,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -100,7 +99,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
     // Not every media item has a thumbnail image.  If no image is found,
     // don't add the placeholder to the DOM.
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       this.element.appendChild(imgPlaceholder);
     }).catch(() => {
       // If the thumbnail image isn't available, we can safely ignore this

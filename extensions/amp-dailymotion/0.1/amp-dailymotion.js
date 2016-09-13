@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 
@@ -59,7 +58,7 @@ class AmpDailymotion extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @private */

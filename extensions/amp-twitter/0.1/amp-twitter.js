@@ -18,7 +18,6 @@
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
 
 
 class AmpTwitter extends AMP.BaseElement {
@@ -58,7 +57,7 @@ class AmpTwitter extends AMP.BaseElement {
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 };
 

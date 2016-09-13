@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpGfycat extends AMP.BaseElement {
@@ -69,7 +68,7 @@ class AmpGfycat extends AMP.BaseElement {
     this.element.appendChild(iframe);
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

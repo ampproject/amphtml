@@ -16,7 +16,6 @@
 
 import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
-import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {srcsetFromElement} from '../src/srcset';
 
@@ -26,8 +25,6 @@ export class AmpImg extends BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
-    /** @private @const {function(!Element, number=): !Promise<!Element>} */
-    this.loadPromise_ = loadPromise;
 
     /** @private {boolean} */
     this.allowImgLoadFallback_ = true;
@@ -120,7 +117,7 @@ export class AmpImg extends BaseElement {
 
     this.img_.setAttribute('src', src);
 
-    return this.loadPromise_(this.img_).then(() => {
+    return this.loadPromise(this.img_).then(() => {
       // Clean up the fallback if the src has changed.
       if (!this.allowImgLoadFallback_ &&
           this.img_.classList.contains('-amp-ghost')) {

@@ -529,6 +529,17 @@ var forbiddenTermsSrcInclusive = {
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
   },
+  '[^.]loadPromise': {
+    message: 'Most users should use BaseElement…loadPromise.',
+    whitelist: [
+      'src/base-element.js',
+      'src/event-helper.js',
+      'src/service/performance-impl.js',
+      'src/service/url-replacements-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-analytics/0.1/transport.js',
+    ]
+  },
 };
 
 // Terms that must appear in a source file.

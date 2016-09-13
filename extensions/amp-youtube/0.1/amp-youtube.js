@@ -15,7 +15,6 @@
  */
 
 import {getDataParamsFromAttributes} from '../../../src/dom';
-import {loadPromise} from '../../../src/event-helper';
 import {tryParseJson} from '../../../src/json';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {dev, user} from '../../../src/log';
@@ -112,7 +111,7 @@ class AmpYoutube extends AMP.BaseElement {
     this.win.addEventListener(
         'message', event => this.handleYoutubeMessages_(event));
 
-    return loadPromise(iframe)
+    return this.loadPromise(iframe)
         .then(() => {
           // Make sure the YT player is ready for this. For some reason YT player
           // would send couple of messages but then stop. Waiting for a bit before
@@ -203,7 +202,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       // A pretty ugly hack since onerror won't fire on YouTube image 404.
       // This might be due to the fact that YouTube returns data to the request
       // even when the status is 404. YouTube returns a placeholder image that
@@ -215,7 +214,7 @@ class AmpYoutube extends AMP.BaseElement {
     }).catch(() => {
       imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
           encodeURIComponent(videoid) + '/hqdefault.jpg';
-      return loadPromise(imgPlaceholder);
+      return this.loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',
