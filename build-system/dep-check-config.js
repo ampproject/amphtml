@@ -105,6 +105,12 @@ exports.rules = [
           'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
     ],
   },
+  // Rules for extensions and main src.
+  {
+    filesMatching: '{src,extensions}/**/*.js',
+    mustNotDependOn: '3p/**/*.js',
+  },
+
   // Rules for extensions.
   {
     filesMatching: 'extensions/**/*.js',
@@ -128,9 +134,5 @@ exports.rules = [
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'ads/**/*.js',
     whitelist: 'src/ad-cid.js->ads/_config.js',
-  },
-  {
-    filesMatching: 'src/**/*.js',
-    mustNotDependOn: '3p/**/*.js',
   },
 ];
