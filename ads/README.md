@@ -39,7 +39,7 @@ We will provide the following information to the ad:
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
-- `window.context.data.container` contains the name of ad container element if exist.
+- `window.context.container` contains the name of ad container element if there is one, otherwise it will be null.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
