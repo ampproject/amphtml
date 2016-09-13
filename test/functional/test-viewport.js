@@ -767,6 +767,7 @@ describe('ViewportBindingNatural', () => {
       body: documentBody,
       defaultView: windowApi,
     };
+    windowApi.navigator = {userAgent: ''};
     windowMock = sandbox.mock(windowApi);
     viewer = {
       isEmbedded: () => false,
