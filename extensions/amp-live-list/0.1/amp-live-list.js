@@ -49,7 +49,7 @@ export class LiveListInterface {
   /**
    * Update the underlying live list dom structure.
    *
-   * @param {?Element} unusedElement
+   * @param {!Element} unusedElement
    * @return {time}
    */
   update(unusedElement) {
@@ -108,15 +108,15 @@ export function getNumberMaxOrDefault(value, defaultValue) {
  */
 export class AmpLiveList extends AMP.BaseElement {
 
-  /** @param {!Element} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @private @const {?../../../src/service/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport-impl.Viewport} */
     this.viewport_ = null;
 
-    /** @private {!LiveListManager} */
-    this.manager_;
+    /** @private {?LiveListManager} */
+    this.manager_ = null;
 
     /** @private {?Element} */
     this.updateSlot_ = null;
@@ -127,16 +127,16 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private {?Element} */
     this.paginationSlot_ = null;
 
-    /** @private @const {string} */
+    /** @private {string} */
     this.liveListId_ = '';
 
-    /** @private @const {number} */
+    /** @private {number} */
     this.pollInterval_ = 0;
 
     /**
      * Use the passed in value OR the actual item count if the actual item
      * count is higher.
-     * @private @const {number}
+     * @private {number}
      */
     this.maxItemsPerPage_ = 0;
 
@@ -155,7 +155,7 @@ export class AmpLiveList extends AMP.BaseElement {
     /** @private @const {!Array<!Element>} */
     this.pendingItemsTombstone_ = [];
 
-    /** @private @const {?Element} */
+    /** @private {?Element} */
     this.pendingPagination_ = null;
 
     /**
@@ -284,26 +284,28 @@ export class AmpLiveList extends AMP.BaseElement {
 
     let promise = this.mutateElement(() => {
 
+      const itemsSlot = user().assertElement(this.itemsSlot_);
+
       if (hasInsertItems) {
         // Remove the new class from the previously inserted items if
         // we are inserting new items.
-        this.eachChildElement_(this.itemsSlot_, child => {
+        this.eachChildElement_(itemsSlot, child => {
           child.classList.remove(classes.NEW_ITEM);
         });
 
         this.curNumOfLiveItems_ += this.insert_(
-            this.itemsSlot_, this.pendingItemsInsert_);
+            itemsSlot, this.pendingItemsInsert_);
         this.pendingItemsInsert_.length = 0;
       }
 
       if (this.pendingItemsReplace_.length > 0) {
-        this.replace_(this.itemsSlot_, this.pendingItemsReplace_);
+        this.replace_(itemsSlot, this.pendingItemsReplace_);
         this.pendingItemsReplace_.length = 0;
       }
 
       if (this.pendingItemsTombstone_.length > 0) {
         this.curNumOfLiveItems_ -= this.tombstone_(
-            this.itemsSlot_, this.pendingItemsTombstone_);
+            itemsSlot, this.pendingItemsTombstone_);
         this.pendingItemsTombstone_.length = 0;
       }
 
@@ -324,7 +326,7 @@ export class AmpLiveList extends AMP.BaseElement {
 
       // Insert and tombstone operations must happen first before we measure
       // number of items to delete down to `data-max-items-per-page`.
-      return this.removeOverflowItems_(this.itemsSlot_);
+      return this.removeOverflowItems_(itemsSlot);
       // TODO(erwinm, #3332) compensate scroll position here.
     });
 
@@ -352,15 +354,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * Reparents the html from the server to the live DOM.
    * Returns the number of element insertion operations done.
    *
-   * @param {?Element} parent
+   * @param {!Element} parent
    * @param {!Array<!Element>} orphans
    * @return {number} number of actual insert operations done.
    * @private
    */
   insert_(parent, orphans) {
-    if (!parent) {
-      return 0;
-    }
     let count = 0;
     const fragment = this.win.document.createDocumentFragment();
     orphans.forEach(elem => {
@@ -378,15 +377,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * Returns the number of actual replace operations done as this can differ
    * from the number of elements to replace passed in.
    *
-   * @param {?Element} parent
+   * @param {!Element} parent
    * @param {!Array<!Element>} orphans
    * @return {number} number of actual replace operations done.
    * @private
    */
   replace_(parent, orphans) {
-    if (!parent) {
-      return 0;
-    }
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
@@ -408,15 +404,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * Returns the number of actual tombstone operations done as this can differ
    * from the number of elements to tombstone passed in.
    *
-   * @param {?Element} parent
+   * @param {!Element} parent
    * @param {!Array<!Element>} orphans
    * @return {number} number of actual tombstone operations done.
    * @private
    */
   tombstone_(parent, orphans) {
-    if (parent) {
-      return 0;
-    }
     let count = 0;
     orphans.forEach(orphan => {
       const orphanId = orphan.getAttribute('id');
@@ -439,13 +432,10 @@ export class AmpLiveList extends AMP.BaseElement {
    * the `max-items-per-page` limit. `data-tombstone`d items are not considered
    * live items and are ignored in the count.
    *
-   * @param {?Element} parent
+   * @param {!Element} parent
    * @return {!Promise}
    */
   removeOverflowItems_(parent) {
-    if (!parent) {
-      return Promise.resolve();
-    }
     const numOfItemsToDelete = this.curNumOfLiveItems_ - this.maxItemsPerPage_;
 
     if (numOfItemsToDelete < 1) {
@@ -567,7 +557,7 @@ export class AmpLiveList extends AMP.BaseElement {
   /**
    * Seggregates new, updated and tombstoned elements.
    *
-   * @param {!HTMLElement} element
+   * @param {!Element} updatedElement
    * @return {!MutateItemsDef}
    * @private
    */
@@ -705,15 +695,12 @@ export class AmpLiveList extends AMP.BaseElement {
    * them. Has optional opt_cacheIds flag which caches the ids while we iterate
    * through the children.
    *
-   * @param {?Element} element
+   * @param {!Element} element
    * @param {boolean=} opt_cacheIds
    * @return {number}
    * @private
    */
   validateLiveListItems_(element, opt_cacheIds) {
-    if (!element) {
-      return 0;
-    }
     let numItems = 0;
     let foundInvalid = false;
     this.eachChildElement_(element, child => {

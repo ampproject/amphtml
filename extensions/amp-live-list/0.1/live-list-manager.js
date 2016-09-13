@@ -140,7 +140,7 @@ export class LiveListManager {
   /**
    * Updates the appropriate `amp-live-list` with its updates from the server.
    *
-   * @param {!HTMLElement} liveList
+   * @param {!Element} liveList
    * @return {number}
    */
   updateLiveList_(liveList) {
@@ -218,7 +218,7 @@ export class LiveListManager {
 }
 
 /**
- * @param {!Window} window
+ * @param {!Window} win
  * @return {!LiveListManager}
  */
 export function installLiveListManager(win) {
