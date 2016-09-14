@@ -25,7 +25,7 @@ min_validator_revision_required: 178
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 283
+spec_file_revision: 284
 
 reference_points_can_define_reference_points: true
 
@@ -1236,7 +1236,11 @@ tags: {
   attrs: { name: "controls" }
   attrs: { name: "height" }
   attrs: { name: "loop" }
-  attrs: { name: "muted" }
+  attrs: {
+    name: "muted"
+    deprecation: "autoplay"
+    deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  }
   attrs: { name: "poster" }
   attrs: { name: "preload" }
   attrs: {
