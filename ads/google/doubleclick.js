@@ -278,10 +278,7 @@ function doubleClickWithGpt(global, data, gladeExperiment) {
         } else {
           // We don't want to call renderStart() on ads that failed to load, for
           // whatever reasons, because then the fallback will not be shown.
-          global.context.renderStart();
-          // TODO(levitzky) This call will no longer be necessary once
-          // renderStart() can take a size as an argument.
-          global.context.requestResize(rWidth, rHeight);
+          global.context.renderStart({width: rWidth, height: rHeight});
         }
         global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
