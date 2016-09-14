@@ -17,6 +17,7 @@
 import {Layout} from './layout';
 import {loadPromise} from './event-helper';
 import {preconnectFor} from './preconnect';
+import {isArray} from './types';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
@@ -483,17 +484,35 @@ export class BaseElement {
   /**
    * Utility method that propagates attributes from this element
    * to the given element.
-   * @param  {!Array<string>} attributes
+   * @param  {string|!Array<string>} attributes
    * @param  {!Element} element
    * @public @final
    */
   propagateAttributes(attributes, element) {
+    attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
       if (!this.element.hasAttribute(attr)) {
         continue;
       }
       element.setAttribute(attr, this.element.getAttribute(attr));
+    }
+  }
+
+  /**
+   * Utility method that forwards the given list of non-bubbling events
+   * from the given element to this element as custom events with the same name.
+   * @param  {string|!Array<string>} events
+   * @param  {!Element} element
+   * @public @final
+   */
+  forwardEvents(events, element) {
+    events = isArray(events) ? events : [events];
+    for (let i = 0; i < events.length; i++) {
+      const name = events[i];
+      element.addEventListener(name, event => {
+        this.element.dispatchCustomEvent(name, event.data || {});
+      });
     }
   }
 

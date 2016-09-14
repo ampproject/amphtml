@@ -1236,7 +1236,11 @@ tags: {
   attrs: { name: "controls" }
   attrs: { name: "height" }
   attrs: { name: "loop" }
-  attrs: { name: "muted" }
+  attrs: {
+    name: "muted"
+    deprecation: "autoplay"
+    deprecation_url: "https://www.ampproject.org/docs/reference/amp-video.html"
+  }
   attrs: { name: "poster" }
   attrs: { name: "preload" }
   attrs: {

@@ -54,6 +54,7 @@ import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
+import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
@@ -108,6 +109,7 @@ export function installAmpdocServices(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installVideoManagerForDoc(ampdoc);
 }
 
 
