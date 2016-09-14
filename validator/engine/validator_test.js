@@ -84,11 +84,7 @@ function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
   for (const entry of testSubdirs) {
     for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
-      // TODO(gregable): Remove this hack once the js validator knows how
-      // to validate A4A documents.
-      if (candidate.match(/^.*.html/g) &&
-          !entry.subdir.match(/amp4ads_feature_tests/g) &&
-          !candidate.match('^validator-amp4ads-')) {
+      if (candidate.match(/^.*.html/g)) {
         testFiles.push(path.join(entry.subdir, candidate));
       }
     }
@@ -108,6 +104,12 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   this.ampHtmlFile = ampHtmlFile;
   /** @type {string} */
   this.ampUrl = opt_ampUrl || ampHtmlFile;
+  /** @type {string} */
+  this.htmlFormat = 'AMP';
+  if (this.ampHtmlFile.indexOf('amp4ads_feature_tests/') != -1 ||
+      this.ampHtmlFile.indexOf('/validator-amp4ads-') != -1) {
+    this.htmlFormat = 'AMP4ADS';
+  }
   /**
    * This field can be null, indicating that the expectedOutput did not
    * come from a file.
@@ -128,7 +130,8 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
  * against the golden file content.
  */
 ValidatorTestCase.prototype.run = function() {
-  const results = amp.validator.validateString(this.ampHtmlFileContents);
+  const results =
+      amp.validator.validateString(this.ampHtmlFileContents, this.htmlFormat);
   amp.validator.annotateWithErrorCategories(results);
   const observed =
       amp.validator.renderValidationResult(results, this.ampUrl).join('\n');

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('parse_css.A4aParseCssTest');
+goog.provide('parse_css.Amp4AdsParseCssTest');
 
 goog.require('json_testutil.makeJsonKeyCmpFn');
 goog.require('json_testutil.renderJSON');
@@ -22,7 +22,7 @@ goog.require('parse_css.BlockType');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.stripVendorPrefix');
 goog.require('parse_css.tokenize');
-goog.require('parse_css.validateA4aCss');
+goog.require('parse_css.validateAmp4AdsCss');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -64,7 +64,7 @@ function assertJSONEquals(left, right) {
 }
 
 /** @type {!Object<string,parse_css.BlockType>} */
-const a4aCssParsingSpec = {
+const amp4AdsCssParsingSpec = {
   'font-face': parse_css.BlockType.PARSE_AS_DECLARATIONS,
   'media': parse_css.BlockType.PARSE_AS_RULES,
   'keyframes': parse_css.BlockType.PARSE_AS_RULES,
@@ -74,7 +74,7 @@ const a4aCssParsingSpec = {
   '-ms-keyframes': parse_css.BlockType.PARSE_AS_RULES,
 };
 
-describe('validateA4aCss', () => {
+describe('validateAmp4AdsCss', () => {
   it('validates good amp-animate example', () => {
     const css = '.amp-animate .box { ' +
         '  transform: rotate(180deg); transition: transform 2s; ' +
@@ -82,9 +82,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -96,9 +97,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -107,9 +109,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [
           {
@@ -141,9 +144,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -171,10 +175,10 @@ describe('validateA4aCss', () => {
        const errors = [];
        const tokens = parse_css.tokenize(css, 1, 0, errors);
        const sheet = parse_css.parseAStylesheet(
-           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
            errors);
        assertJSONEquals([], errors);
-       parse_css.validateA4aCss(sheet, errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
        assertJSONEquals(
            [{
              'line': 1,
@@ -198,9 +202,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -219,9 +224,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -244,9 +250,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -259,10 +266,10 @@ describe('validateA4aCss', () => {
        const errors = [];
        const tokens = parse_css.tokenize(css, 1, 0, errors);
        const sheet = parse_css.parseAStylesheet(
-           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
            errors);
        assertJSONEquals([], errors);
-       parse_css.validateA4aCss(sheet, errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
        assertJSONEquals([], errors);
      });
 
@@ -274,9 +281,10 @@ describe('validateA4aCss', () => {
     const errors = [];
     const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
-        tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE, errors);
+        tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
     assertJSONEquals([], errors);
-    parse_css.validateA4aCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [
           {
@@ -330,10 +338,10 @@ describe('validateA4aCss', () => {
        const errors = [];
        const tokens = parse_css.tokenize(css, 1, 0, errors);
        const sheet = parse_css.parseAStylesheet(
-           tokens, a4aCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+           tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
            errors);
        assertJSONEquals([], errors);
-       parse_css.validateA4aCss(sheet, errors);
+       parse_css.validateAmp4AdsCss(sheet, errors);
        assertJSONEquals(
            [
              {

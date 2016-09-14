@@ -50,6 +50,7 @@ goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
+goog.require('parse_css.validateAmp4AdsCss');
 goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
 
@@ -155,10 +156,14 @@ class LineCol {
   }
 
   /** @return {number} */
-  getLine() { return this.line_; }
+  getLine() {
+    return this.line_;
+  }
 
   /** @return {number} */
-  getCol() { return this.col_; }
+  getCol() {
+    return this.col_;
+  }
 }
 
 /**
@@ -194,7 +199,9 @@ class ChildTagMatcher {
   /**
    * @param {!LineCol} lineCol
    */
-  setLineCol(lineCol) { this.lineCol_ = lineCol; }
+  setLineCol(lineCol) {
+    this.lineCol_ = lineCol;
+  }
 
   /**
    * @return {boolean}
@@ -327,19 +334,29 @@ class ParsedReferencePoints {
   }
 
   /** @return {!Array<ParsedReferencePoint>} */
-  iterate() { return this.parsed_; }
+  iterate() {
+    return this.parsed_;
+  }
 
   /** @return {boolean} */
-  empty() { return this.parsed_.length === 0; }
+  empty() {
+    return this.parsed_.length === 0;
+  }
 
   /** @return {number} */
-  size() { return this.parsed_.length; }
+  size() {
+    return this.parsed_.length;
+  }
 
   /** @return {?string} */
-  parentSpecUrl() { return this.parent_.specUrl; }
+  parentSpecUrl() {
+    return this.parent_.specUrl;
+  }
 
   /** @return {string} */
-  parentTagSpecName() { return getTagSpecName(this.parent_); }
+  parentTagSpecName() {
+    return getTagSpecName(this.parent_);
+  }
 }
 
 /**
@@ -379,7 +396,9 @@ class ReferencePointMatcher {
   /**
    * @param {!LineCol} lineCol
    */
-  setLineCol(lineCol) { this.lineCol_ = lineCol; }
+  setLineCol(lineCol) {
+    this.lineCol_ = lineCol;
+  }
 
   /**
    * This method gets invoked when matching a child tag of the parent
@@ -512,12 +531,16 @@ class ReferencePointMatcher {
   /**
    * @return {!Array<number>}
    */
-  getReferencePointsMatched() { return this.referencePointsMatched_; }
+  getReferencePointsMatched() {
+    return this.referencePointsMatched_;
+  }
 
   /**
    * @return {!ParsedReferencePoints}
    */
-  getParsedReferencePoints() { return this.parsedReferencePoints_; }
+  getParsedReferencePoints() {
+    return this.parsedReferencePoints_;
+  }
 }
 
 /**
@@ -854,22 +877,30 @@ class CdataMatcher {
   /**
    * @return {boolean}
    */
-  hasCdataRegex() { return this.cdataRegex_ !== null; }
+  hasCdataRegex() {
+    return this.cdataRegex_ !== null;
+  }
 
   /**
    * @return {RegExp} cdataRegex
    */
-  getCdataRegex() { return this.cdataRegex_; }
+  getCdataRegex() {
+    return this.cdataRegex_;
+  }
 
   /**
    * @return {boolean}
    */
-  hasBlacklistedCdataRegex() { return this.blacklistedCdataRegex_ !== null; }
+  hasBlacklistedCdataRegex() {
+    return this.blacklistedCdataRegex_ !== null;
+  }
 
   /**
    * @return {RegExp} blacklistedCdataRegex
    */
-  getBlacklistedCdataRegex() { return this.blacklistedCdataRegex_; }
+  getBlacklistedCdataRegex() {
+    return this.blacklistedCdataRegex_;
+  }
 
   /**
    * Matches the provided cdata against what this matcher expects.
@@ -976,6 +1007,10 @@ class CdataMatcher {
       /** @type {!Array<!parse_css.ParsedCssUrl>} */
       const parsedUrls = [];
       parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+      if (cdataSpec.cssSpec.validateAmp4Ads) {
+        parse_css.validateAmp4AdsCss(sheet, cssErrors);
+      }
+
       if (amp.validator.GENERATE_DETAILED_ERRORS) {
         for (const errorToken of cssErrors) {
           // Override the first parameter with the name of this style tag.
@@ -1040,10 +1075,14 @@ class CdataMatcher {
   }
 
   /** @param {!LineCol} lineCol */
-  setLineCol(lineCol) { this.lineCol_ = lineCol; }
+  setLineCol(lineCol) {
+    this.lineCol_ = lineCol;
+  }
 
   /** @return {!LineCol} */
-  getLineCol() { return this.lineCol_; }
+  getLineCol() {
+    return this.lineCol_;
+  }
 }
 
 /**
@@ -1092,10 +1131,14 @@ class Context {
    * Callback before startDoc which gives us a document locator.
    * @param {!amp.htmlparser.DocLocator} locator
    */
-  setDocLocator(locator) { this.docLocator_ = locator; }
+  setDocLocator(locator) {
+    this.docLocator_ = locator;
+  }
 
   /** @return {amp.htmlparser.DocLocator} */
-  getDocLocator() { return this.docLocator_; }
+  getDocLocator() {
+    return this.docLocator_;
+  }
 
   /**
    * @param {!amp.validator.ValidationError.Severity} severity
@@ -1143,7 +1186,9 @@ class Context {
   /**
    * @return {!Object<number, ?>}
    */
-  getTagspecsValidated() { return this.tagspecsValidated_; }
+  getTagspecsValidated() {
+    return this.tagspecsValidated_;
+  }
 
   /**
    * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
@@ -1162,7 +1207,9 @@ class Context {
   }
 
   /** @return {?CdataMatcher} */
-  getCdataMatcher() { return this.cdataMatcher_; }
+  getCdataMatcher() {
+    return this.cdataMatcher_;
+  }
 
   /** @param {CdataMatcher} matcher */
   setCdataMatcher(matcher) {
@@ -1177,7 +1224,9 @@ class Context {
   }
 
   /** @return {!TagStack} */
-  getTagStack() { return this.tagStack_; }
+  getTagStack() {
+    return this.tagStack_;
+  }
 
   /** @param {?ChildTagMatcher} matcher */
   setChildTagMatcher(matcher) {
@@ -1334,7 +1383,9 @@ ParsedUrlSpec.AttrErrorAdapter_ = class {
   /**
    * @param {string} attrName
    */
-  constructor(attrName) { this.attrName_ = attrName; }
+  constructor(attrName) {
+    this.attrName_ = attrName;
+  }
 
   /**
    * @param {!Context} context
@@ -1535,22 +1586,30 @@ class ParsedAttrTriggerSpec {
   /**
    * @return {boolean}
    */
-  hasIfValueRegex() { return this.ifValueRegex_ !== null; }
+  hasIfValueRegex() {
+    return this.ifValueRegex_ !== null;
+  }
 
   /**
    * @return {RegExp} ifValueRegex
    */
-  getIfValueRegex() { return this.ifValueRegex_; }
+  getIfValueRegex() {
+    return this.ifValueRegex_;
+  }
 
   /**
    * @return {string} attrName
    */
-  getAttrName() { return this.attrName_; }
+  getAttrName() {
+    return this.attrName_;
+  }
 
   /**
    * @return {amp.validator.AttrTriggerSpec}
    */
-  getSpec() { return this.spec_; }
+  getSpec() {
+    return this.spec_;
+  }
 }
 
 /**
@@ -1644,52 +1703,72 @@ class ParsedAttrSpec {
   /**
    * @return {boolean}
    */
-  hasValueRegex() { return this.valueRegex_ !== null; }
+  hasValueRegex() {
+    return this.valueRegex_ !== null;
+  }
 
   /**
    * @return {RegExp} valueRegex
    */
-  getValueRegex() { return this.valueRegex_; }
+  getValueRegex() {
+    return this.valueRegex_;
+  }
 
   /**
    * @return {boolean}
    */
-  hasValueRegexCasei() { return this.valueRegexCasei_ !== null; }
+  hasValueRegexCasei() {
+    return this.valueRegexCasei_ !== null;
+  }
 
   /**
    * @return {RegExp} valueRegex
    */
-  getValueRegexCasei() { return this.valueRegexCasei_; }
+  getValueRegexCasei() {
+    return this.valueRegexCasei_;
+  }
 
   /**
    * @return {boolean}
    */
-  hasBlacklistedValueRegex() { return this.blacklistedValueRegex_ !== null; }
+  hasBlacklistedValueRegex() {
+    return this.blacklistedValueRegex_ !== null;
+  }
 
   /**
    * @return {RegExp} blacklistedValueRegex
    */
-  getBlacklistedValueRegex() { return this.blacklistedValueRegex_; }
+  getBlacklistedValueRegex() {
+    return this.blacklistedValueRegex_;
+  }
 
   /**
    * @return {number} unique for this attr spec.
    */
-  getId() { return this.id_; }
+  getId() {
+    return this.id_;
+  }
 
   /**
    * @return {!amp.validator.AttrSpec}
    */
-  getSpec() { return this.spec_; }
+  getSpec() {
+    return this.spec_;
+  }
 
   /**
    * @return {boolean}
    */
-  hasTriggerSpec() { return this.triggerSpec_ !== null; }
+  hasTriggerSpec() {
+    return this.triggerSpec_ !== null;
+  }
 
   /**
    * @return {ParsedAttrTriggerSpec}
    */
-  getTriggerSpec() { return this.triggerSpec_; }
+  getTriggerSpec() {
+    return this.triggerSpec_;
+  }
 
   /**
    * @param {!Context} context
@@ -2027,7 +2106,9 @@ class ParsedAttrSpecs {
    * @param {number} id
    * @return {!ParsedAttrSpec}
    */
-  getById(id) { return this.parsedAttrSpecs_[id]; }
+  getById(id) {
+    return this.parsedAttrSpecs_[id];
+  }
 }
 
 
@@ -2343,14 +2424,18 @@ class ParsedTagSpec {
   /**
    * @return {number} unique id for this tag spec.
    */
-  getId() { return this.id_; }
+  getId() {
+    return this.id_;
+  }
 
   /**
    * Return the original tag spec. This is the json object representation from
    * amp.validator.rules_.
    * @return {!amp.validator.TagSpec}
    */
-  getSpec() { return this.spec_; }
+  getSpec() {
+    return this.spec_;
+  }
 
   /**
    * A dispatch key is a mandatory attribute name/value unique to this
@@ -2360,7 +2445,9 @@ class ParsedTagSpec {
    * dispatch key.
    * @return {boolean}
    */
-  hasDispatchKey() { return this.dispatchKeyAttrSpec_ !== null; }
+  hasDispatchKey() {
+    return this.dispatchKeyAttrSpec_ !== null;
+  }
 
   /**
    * You must check hasDispatchKey before accessing
@@ -2383,7 +2470,9 @@ class ParsedTagSpec {
    * are also required if |this| tag occurs in the document.
    * @return {!Array<number>}
    */
-  getAlsoRequiresTag() { return this.alsoRequiresTag_; }
+  getAlsoRequiresTag() {
+    return this.alsoRequiresTag_;
+  }
 
   /**
    * A TagSpec may specify other tags to be required as well, when that
@@ -2392,7 +2481,9 @@ class ParsedTagSpec {
    * such requirement is currently only a warning.
    * @return {!Array<number>}
    */
-  getAlsoRequiresTagWarning() { return this.alsoRequiresTagWarning_; }
+  getAlsoRequiresTagWarning() {
+    return this.alsoRequiresTagWarning_;
+  }
 
   /**
    * Whether or not the tag should be recorded via
@@ -2401,7 +2492,9 @@ class ParsedTagSpec {
    * mandatory, unique, or possibly required by some other tag.
    * @return {boolean}
    */
-  shouldRecordTagspecValidated() { return this.shouldRecordTagspecValidated_; }
+  shouldRecordTagspecValidated() {
+    return this.shouldRecordTagspecValidated_;
+  }
 
   /**
    * Returns true if |value| contains mustache template syntax.
@@ -3061,16 +3154,22 @@ class ParsedTagSpec {
   }
 
   /** @return {boolean} */
-  isReferencePoint() { return this.isReferencePoint_; }
+  isReferencePoint() {
+    return this.isReferencePoint_;
+  }
 
   /** @return {!ParsedReferencePoints} */
-  getReferencePoints() { return this.referencePoints_; }
+  getReferencePoints() {
+    return this.referencePoints_;
+  }
 
   /**
    * @param {string} name
    * @return {boolean}
    */
-  hasAttrWithName(name) { return this.attrsByName_.hasOwnProperty(name); }
+  hasAttrWithName(name) {
+    return this.attrsByName_.hasOwnProperty(name);
+  }
 }
 
 /**
@@ -3113,17 +3212,23 @@ class TagSpecDispatch {
    * @param {number} tagSpecId
    * @public
    */
-  registerTagSpec(tagSpecId) { this.allTagSpecs_.push(tagSpecId); }
+  registerTagSpec(tagSpecId) {
+    this.allTagSpecs_.push(tagSpecId);
+  }
 
   /**
    * @return {boolean}
    */
-  empty() { return !this.hasDispatchKeys() && !this.hasTagSpecs(); }
+  empty() {
+    return !this.hasDispatchKeys() && !this.hasTagSpecs();
+  }
 
   /**
    * @return {boolean}
    */
-  hasDispatchKeys() { return this.tagSpecsByDispatch_ !== null; }
+  hasDispatchKeys() {
+    return this.tagSpecsByDispatch_ !== null;
+  }
 
   /**
    * Looks up a dispatch key as previously registered, returning the
@@ -3160,12 +3265,16 @@ class TagSpecDispatch {
   /**
    * @return {boolean}
    */
-  hasTagSpecs() { return this.allTagSpecs_.length > 0; }
+  hasTagSpecs() {
+    return this.allTagSpecs_.length > 0;
+  }
 
   /**
    * @return {!Array<number>}
    */
-  allTagSpecs() { return this.allTagSpecs_; }
+  allTagSpecs() {
+    return this.allTagSpecs_;
+  }
 }
 
 
@@ -3446,19 +3555,25 @@ class ParsedValidatorRules {
   /**
    * @return {null|string}
    */
-  manufacturedBodySpecUrl() { return this.rules_.manufacturedBodySpecUrl; }
+  manufacturedBodySpecUrl() {
+    return this.rules_.manufacturedBodySpecUrl;
+  }
 
   /**
    * @param {amp.validator.ValidationError.Code} errorCode
    * @return {!string}
    */
-  getFormatByCode(errorCode) { return this.errorCodes_[errorCode].format; }
+  getFormatByCode(errorCode) {
+    return this.errorCodes_[errorCode].format;
+  }
 
   /**
    * @param {amp.validator.ValidationError.Code} error_code
    * @return {number}
    */
-  specificity(error_code) { return this.errorCodes_[error_code].specificity; }
+  specificity(error_code) {
+    return this.errorCodes_[error_code].specificity;
+  }
 
   /**
    * A helper function which allows us to compare two candidate results
@@ -3540,7 +3655,8 @@ class ParsedValidatorRules {
             const alsoRequiresTagspec = this.tagSpecById_[tagspecId];
             context.addError(
                 amp.validator.ValidationError.Severity.WARNING,
-                amp.validator.ValidationError.Code.WARNING_TAG_REQUIRED_BY_MISSING,
+                amp.validator.ValidationError.Code
+                    .WARNING_TAG_REQUIRED_BY_MISSING,
                 context.getDocLocator(),
                 /* params */
                 [
@@ -3607,13 +3723,17 @@ class ParsedValidatorRules {
   }
 
   /** @return {!Array<!ParsedTagSpec>} */
-  getTagSpecById() { return this.tagSpecById_; }
+  getTagSpecById() {
+    return this.tagSpecById_;
+  }
 
   /**
    * @param {number} id
    * @return {!ParsedTagSpec}
    */
-  getTagSpec(id) { return this.tagSpecById_[id]; }
+  getTagSpec(id) {
+    return this.tagSpecById_[id];
+  }
 
   /**
    * @param {!string} tagName
@@ -3691,7 +3811,9 @@ amp.validator.ValidationHandler =
    * @return {!amp.validator.ValidationResult} Validation Result at the current
    *     step.
    */
-  Result() { return this.validationResult_; }
+  Result() {
+    return this.validationResult_;
+  }
 
   /**
    * Callback before startDoc which gives us a document locator.
@@ -3934,17 +4056,19 @@ amp.validator.isSeverityWarning = function(error) {
 /**
  * Validates a document input as a string.
  * @param {string} inputDocContents
+ * @param {string=} opt_htmlFormat the allowed format. Defaults to 'AMP'.
  * @return {!amp.validator.ValidationResult} Validation Result (status and
  *     errors)
  * @export
  */
-amp.validator.validateString = function(inputDocContents) {
+amp.validator.validateString = function(inputDocContents, opt_htmlFormat) {
   if (!amp.validator.GENERATE_DETAILED_ERRORS) {
     throw 'not implemented';
   }
   goog.asserts.assertString(inputDocContents, 'Input document is not a string');
 
-  const handler = new amp.validator.ValidationHandler('AMP');
+  const htmlFormat = opt_htmlFormat || 'AMP';
+  const handler = new amp.validator.ValidationHandler(htmlFormat);
   const parser = new amp.htmlparser.HtmlParser();
   parser.parse(handler, inputDocContents);
 
@@ -3965,7 +4089,9 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
      * @param {!Array<string>=} opt_out an array into which the terminal will
      *     emit one string per info / warn / error calls.
      */
-    constructor(opt_out) { this.out_ = opt_out || null; }
+    constructor(opt_out) {
+      this.out_ = opt_out || null;
+    }
 
     /** @param {string} msg */
     info(msg) {
@@ -4157,6 +4283,16 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
 };
 
 /**
+ * Detects the author stylesheet based on the parameter name for it in
+ * a ValidationError proto message.
+ * @param {string} param
+ * @return {boolean}
+ */
+function isAuthorStylesheet(param) {
+  return param === 'style amp-custom' || param === 'style amp-custom (AMP4ADS)';
+}
+
+/**
  * Computes the validation category for this |error|. This is a higher
  * level classification that distinguishes layout problems, problems
  * with specific tags, etc. The category is determined with heuristics,
@@ -4253,14 +4389,14 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG ||
       (error.code ===
            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST &&
-       error.params[0] === 'style amp-custom')) {
+       isAuthorStylesheet(error.params[0]))) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
   // TODO(powdercloud): Legacy generic css error code. Remove after
   // 2016-06-01.
   if (error.code === amp.validator.ValidationError.Code.CSS_SYNTAX &&
-      error.params[0] === 'style amp-custom') {
+      isAuthorStylesheet(error.params[0])) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
@@ -4302,8 +4438,23 @@ amp.validator.categorizeError = function(error) {
            amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_DOMAIN ||
        error.code ===
            amp.validator.ValidationError.Code
-               .CSS_SYNTAX_DISALLOWED_RELATIVE_URL) &&
-      error.params[0] === 'style amp-custom') {
+               .CSS_SYNTAX_DISALLOWED_RELATIVE_URL ||
+       error.code ==
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE ||
+       error.code ==
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_DISALLOWED_PROPERTY_VALUE_WITH_HINT ||
+       error.code ==
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_PROPERTY_DISALLOWED_WITHIN_AT_RULE ||
+       error.code ==
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_PROPERTY_DISALLOWED_TOGETHER_WITH ||
+       error.code ==
+           amp.validator.ValidationError.Code
+               .CSS_SYNTAX_PROPERTY_REQUIRES_QUALIFICATION) &&
+      isAuthorStylesheet(error.params[0])) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   // E.g. "The mandatory tag 'boilerplate (noscript)' is missing or
