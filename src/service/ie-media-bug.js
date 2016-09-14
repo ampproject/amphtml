@@ -26,7 +26,7 @@ const TAG = 'ie-media-bug';
  * are evaluated incorrectly. See #2577 for more details. Returns the promise
  * that will be resolved when the bug is fixed.
  * @param {!Window} win
- * @param {!../platform.Platform=} opt_platform
+ * @param {!../service/platform-impl.Platform=} opt_platform
  * @return {?Promise}
  * @package
  */

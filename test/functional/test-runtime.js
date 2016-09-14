@@ -23,6 +23,7 @@ import {
   getServicePromise,
   getServicePromiseOrNullForDoc,
 } from '../../src/service';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
@@ -63,6 +64,7 @@ describe('runtime', () => {
         ampdoc: {obj: ampdocService},
       },
     };
+    installPlatformService(win);
     errorStub = sandbox.stub(dev(), 'error');
   });
 
