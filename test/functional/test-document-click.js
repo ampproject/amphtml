@@ -293,7 +293,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should open link in _top on Safari iOS when embedded', () => {
-      onDocumentElementClick_(evt, viewport, history, null, true);
+      onDocumentElementClick_(evt, viewport, history, true);
       expect(win.open.called).to.be.true;
       expect(win.open.calledWith(
           'whatsapp://send?text=hello', '_top')).to.be.true;
@@ -302,19 +302,19 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should not do anything for mailto: protocol', () => {
       tgt.href = 'mailto:hello@example.com';
-      onDocumentElementClick_(evt, viewport, history, null, true);
+      onDocumentElementClick_(evt, viewport, history, true);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other non-safari iOS', () => {
-      onDocumentElementClick_(evt, viewport, history, null, false);
+      onDocumentElementClick_(evt, viewport, history, false);
       expect(win.open.called).to.be.false;
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
 
     it('should not do anything on other platforms', () => {
-      onDocumentElementClick_(evt, viewport, history, null, false);
+      onDocumentElementClick_(evt, viewport, history, false);
       expect(win.top.location.href).to.equal('https://google.com');
       expect(preventDefaultSpy.callCount).to.equal(0);
     });
