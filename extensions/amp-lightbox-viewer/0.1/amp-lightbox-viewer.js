@@ -74,7 +74,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     /** @const @private {!Element} */
     this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('-amp-lightbox-viewer');
+    this.container_.classList.add('-amp-lbv');
 
     /** @private  {?Element} */
     this.gallery_ = null;
@@ -103,7 +103,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildMask_() {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
-    mask.classList.add('-amp-lightbox-viewer-mask');
+    mask.classList.add('-amp-lbv-mask');
     this.container_.appendChild(mask);
   }
 
@@ -119,10 +119,10 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const openGallery = this.openGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Next', 'amp-lightbox-viewer-button-next', next);
-    this.buildButton_('Previous', 'amp-lightbox-viewer-button-prev', prev);
-    this.buildButton_('Close', 'amp-lightbox-viewer-button-close', close);
-    this.buildButton_('Gallery', 'amp-lightbox-viewer-button-gallery',
+    this.buildButton_('Next', 'amp-lbv-button-next', next);
+    this.buildButton_('Previous', 'amp-lbv-button-prev', prev);
+    this.buildButton_('Close', 'amp-lbv-button-close', close);
+    this.buildButton_('Gallery', 'amp-lbv-button-gallery',
         openGallery);
 
     this.container_.setAttribute('no-prev', '');
@@ -416,7 +416,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildGallery_() {
     // Build gallery
     this.gallery_ = this.win.document.createElement('div');
-    this.gallery_.classList.add('-amp-lightbox-viewer-gallery');
+    this.gallery_.classList.add('-amp-lbv-gallery');
 
     // Initialize thumbnails
     this.updateThumbnails_();
@@ -427,7 +427,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
 
     // Add go back button
     const back = this.closeGallery_.bind(this);
-    this.buildButton_('Back', 'amp-lightbox-viewer-button-back', back);
+    this.buildButton_('Back', 'amp-lbv-button-back', back);
 
   }
 
@@ -463,9 +463,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
    */
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
-    element.classList.add('-amp-lightbox-viewer-gallery-thumbnail');
+    element.classList.add('-amp-lbv-gallery-thumbnail');
     const imgElement = this.win.document.createElement('img');
-    imgElement.classList.add('-amp-lightbox-viewer-gallery-thumbnail-img');
+    imgElement.classList.add('-amp-lbv-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
     element.appendChild(imgElement);
     const redirect = () => {
