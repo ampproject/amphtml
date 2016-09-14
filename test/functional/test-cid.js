@@ -205,19 +205,20 @@ describe('cid', () => {
       time: 0,
       cid: expectedBaseCid,
     });
-    return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
-        .then(() => {
-          expect(viewerBaseCidStub).to.be.calledOnce;
-          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+    return Promise.all([
+      compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
+      compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
+    ]).then(() => {
+      expect(viewerBaseCidStub).to.be.calledOnce;
+      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
 
-          // Ensure it's called only once since we cache it in memory.
-          return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
-        })
-        .then(() => {
-          expect(viewerBaseCidStub).to.be.calledOnce;
-          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
-          return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
-        });
+      // Ensure it's called only once since we cache it in memory.
+      return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
+    }).then(() => {
+      expect(viewerBaseCidStub).to.be.calledOnce;
+      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
+    });
   });
 
   it('should store to viewer storage if embedded', () => {

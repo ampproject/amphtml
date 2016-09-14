@@ -45,7 +45,6 @@ var extensions = {};
 
 // Each extension and version must be listed individually here.
 // NOTE: No new extensions must pass the NO_TYPE_CHECK argument.
-declareExtension('amp-a4a', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-access', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-accordion', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-ad', '0.1', false, 'NO_TYPE_CHECK');
@@ -53,7 +52,7 @@ declareExtension('amp-ad-network-adsense-impl', 0.1, false, 'NO_TYPE_CHECK');
 declareExtension('amp-ad-network-doubleclick-impl', 0.1, false, 'NO_TYPE_CHECK');
 declareExtension('amp-ad-network-fake-impl', 0.1, false, 'NO_TYPE_CHECK');
 declareExtension('amp-analytics', '0.1', false, 'NO_TYPE_CHECK');
-declareExtension('amp-anim', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-anim', '0.1', false);
 declareExtension('amp-apester-media', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-app-banner', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-audio', '0.1', false);
@@ -74,7 +73,7 @@ declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-image-lightbox', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-instagram', '0.1', false);
-declareExtension('amp-install-serviceworker', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-install-serviceworker', '0.1', false);
 declareExtension('amp-jwplayer', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-lightbox-viewer', '0.1', true, 'NO_TYPE_CHECK');
@@ -84,7 +83,7 @@ declareExtension('amp-mustache', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-o2-player', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-pinterest', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-reach-player', '0.1', false);
-declareExtension('amp-share-tracking', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-share-tracking', '0.1', false);
 declareExtension('amp-sidebar', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-soundcloud', '0.1', false);
 declareExtension('amp-springboard-player', '0.1', false);

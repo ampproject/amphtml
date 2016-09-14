@@ -307,7 +307,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (diff == 0) {
       // Snap and stay.
       toScrollLeft = hasPrev ? this.slideWidth_ : 0;
-    } else if (diff == 1 || diff == -1 * (this.noOfSlides_ - 1)) {
+    } else if (diff == 1 ||
+          (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
