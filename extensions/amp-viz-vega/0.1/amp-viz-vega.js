@@ -78,13 +78,12 @@ export class AmpVizVega extends AMP.BaseElement {
     user().assert(isExperimentOn(this.win, EXPERIMENT),
         `Experiment ${EXPERIMENT} disabled`);
 
-    this.inlineData_ = this.getInlineData_();
-
     /**
      * Global vg (and implicitly d3) are required and they are created by
      * appending vega and d3 minified files during the build process.
      */
     this.vega_ = this.win.vg;
+    this.inlineData_ = this.getInlineData_();
     this.src_ = this.element.getAttribute('src');
     this.useDataWidth_ = this.element.hasAttribute('use-data-width');
     this.useDataHeight_ = this.element.hasAttribute('use-data-height');
