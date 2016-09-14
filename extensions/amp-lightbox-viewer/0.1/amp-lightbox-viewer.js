@@ -421,7 +421,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // Initialize thumbnails
     this.updateThumbnails_();
 
-    this.container_.appendChild(this.gallery_);
+    this.vsync_.mutate(() => {
+      this.container_.appendChild(this.gallery_);
+    });
 
     // Add go back button
     const back = this.closeGallery_.bind(this);
