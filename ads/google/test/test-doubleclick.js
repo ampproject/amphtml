@@ -31,7 +31,7 @@ const doubleClickTest = function(config) {
   let ampAdIframe;
   let canvas;
 
-  it(config.it, function() {debugger;
+  it(config.it, function() {
     return createFixtureIframeFromHtml(config.html, 500,
         config.beforeLoad).then(f => {
       fixture = f;
@@ -142,7 +142,7 @@ const doubleClickTest = function(config) {
 
       // If a secondary dimension is larger than a larger dimension, the
       // returned creative ought to be empty.
-      if (config.multiSize) { debugger;
+      if (config.multiSize) {
         const secondarySize = config.multiSize.split('x');
         if (secondarySize[0] > config.primarySize.width ||
             secondarySize[1] > config.primarySize.height) {
