@@ -831,7 +831,7 @@ export class Resources {
           if (diff < 0) {
             // The new height is smaller than the current one, and there's
             // not an underflow callback.
-          } else  {
+          } else {
             // try overflow callback instead.
             request.resource.overflowCallback(/* overflown */ true,
                 request.newHeight, request.newWidth);
@@ -889,7 +889,10 @@ export class Resources {
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
           },
-        }, {});
+        }, {
+          scrollHeight: 0,
+          scrollTop: 0,
+        });
       }
     }
   }
