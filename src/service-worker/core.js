@@ -188,16 +188,27 @@ function getCachedVersion(cache, requestFile) {
 
 self.addEventListener('install', install => {
   install.waitUntil(cachePromise);
+  if (install.registerForeignFetch) {
+    install.registerForeignFetch({
+      scopes: [self.registration.scope],
+      origins: ['*'],
+    });
+  }
 });
 
-// Setup the Fetch listener
-// My assumptions:
-//   - Doc requests one uniform AMP release version for all files, anything
-//     else is malarkey.
-//   - The requested version is always the newest AMP version.
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  const clientId = event.clientId;
+/**
+ * Handles fetching the request from Cache, or fetching and caching from the
+ * Cache CDN, if we care about the request.
+ * My assumptions:
+ *   - Doc requests one uniform AMP release version for all files, anything
+ *     else is malarkey.
+ *   - The requested version is always the newest AMP version.
+ *
+ * @param {!Request} request
+ * @param {string|undefined} clientId
+ * @return {?Promise<!Response>}
+ */
+function handleFetch(request, clientId) {
   const url = request.url;
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
@@ -210,7 +221,7 @@ self.addEventListener('fetch', event => {
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
-  const response = cachePromise.then(() => {
+  return cachePromise.then(() => {
     // If we already registered this client, we must always use the same
     // version.
     if (clientsMap[clientId]) {
@@ -259,6 +270,36 @@ self.addEventListener('fetch', event => {
       return fetchAndCache(cache, versionedRequest, requestFile, version);
     });
   });
+}
+
+// Setup the Fetch listener, for when the client is on the CDN origin.
+self.addEventListener('fetch', event => {
+  const response = handleFetch(event.request, event.clientId);
+
+  // We only get a response promise back if it's a request we care to cache.
+  if (!response) {
+    return;
+  }
 
   event.respondWith(response);
+});
+
+// Setup the Foreign Fetch listener, for when the client is on a Publisher
+// origin.
+self.addEventListener('foreignfetch', event => {
+  const response = handleFetch(event.request, event.clientId);
+
+  // We only get a response promise back if it's a request we care to cache.
+  if (!response) {
+    return;
+  }
+
+  event.respondWith(response.then(response => {
+    // Foreign Fetch requires an { response: !Response } object.
+    return {
+      response,
+      // This allows CORS requests, if one were to come in.
+      origin: event.origin,
+    };
+  }));
 });
