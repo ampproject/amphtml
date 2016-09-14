@@ -222,12 +222,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
     return;
   }
 
-  // If within a shadowRoot, the event target will be the host element due to
-  // event target rewrite.  Given that it is possible a shadowRoot could be
-  // within an anchor tag, we need to check the event path prior to looking
-  // at the host element's closest tags.
-  const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
-      closestByTag(e.target, 'A');
+  const target = closestByTag(dev().assertElement(e.target), 'A');
   if (!target) {
     return;
   }

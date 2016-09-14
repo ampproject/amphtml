@@ -65,7 +65,7 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win)) {
+  if (isGoogleAdsA4AValidEnvironment(win, element)) {
     maybeSetExperimentFromUrl(win, experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
@@ -127,8 +127,8 @@ function maybeSetExperimentFromUrl(win, experimentName,
   if (!expParam) {
     return;
   }
-  const a4aParam = expParam.split(',').find(
-      x => { return x.indexOf('a4a:') == 0; });
+  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
+  const a4aParam = match && match[2];
   if (!a4aParam) {
     return;
   }

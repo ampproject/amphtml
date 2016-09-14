@@ -15,7 +15,7 @@
  */
 
 import {startsWith} from './string';
-import {user} from './log';
+import {dev, user} from './log';
 import {assertHttpsUrl, getCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
@@ -67,7 +67,7 @@ export function onDocumentFormSubmit_(e) {
     action = form.__AMP_INIT_ACTION__;
   }
   user().assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, form, 'action');
+  assertHttpsUrl(action, dev().assertElement(form), 'action');
   user().assert(!startsWith(action, urls.cdn),
       'form action should not be on AMP CDN: %s', form);
 

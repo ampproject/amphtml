@@ -65,13 +65,16 @@ export class UrlReplacements {
     /** @private @const {!Object<string, !ReplacementDef>} */
     this.replacements_ = this.win_.Object.create(null);
 
-    /** @private @const {function():!Promise<?AccessService>} */
+    /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, ?string>>} */
+    /** @private @const {!Promise<?Object<string>>} */
     this.variants_ = variantForOrNull(win);
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /**
+     * @private @const {
+     *   !Promise<(?{incomingFragment: string, outgoingFragment: string})>}
+     */
     this.shareTrackingFragments_ = shareTrackingForOrNull(win);
 
     /** @private {boolean} */
@@ -178,7 +181,8 @@ export class UrlReplacements {
     });
 
     this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      user().assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user().assertString(scope,
+          'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -191,7 +195,7 @@ export class UrlReplacements {
       }
       return cidFor(this.win_).then(cid => {
         return cid.get({
-          scope,
+          scope: dev().assertString(scope),
           createCookieIfNotPresent: true,
         }, consent);
       });
@@ -421,7 +425,7 @@ export class UrlReplacements {
 
   /**
    * Resolves the value via document info.
-   * @param {function(!DocumentInfoDef):T} getter
+   * @param {function(!../document-info.DocumentInfoDef):T} getter
    * @return {T}
    * @template T
    */
@@ -453,8 +457,8 @@ export class UrlReplacements {
    * The data for the timing events is retrieved from performance.timing API.
    * If start and end events are both given, the result is the difference between the two.
    * If only start event is given, the result is the timing value at start event.
-   * @param {string} startEvent
-   * @param {string=} endEvent
+   * @param {*} startEvent
+   * @param {*=} endEvent
    * @return {!Promise<string|undefined>}
    * @private
    */
@@ -709,7 +713,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {function(*):*}
+   * @return {function(*, *):*}
    */
   getReplacement_(name) {
     return this.replacements_[name];
@@ -725,7 +729,7 @@ export class UrlReplacements {
     if (additionalKeys && additionalKeys.length > 0) {
       const allKeys = Object.keys(this.replacements_);
       additionalKeys.forEach(key => {
-        if (allKeys[key] === undefined) {
+        if (this.replacements_[key] === undefined) {
           allKeys.push(key);
         }
       });

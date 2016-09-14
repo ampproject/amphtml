@@ -242,7 +242,7 @@ describe('AmpDocSingle', () => {
     const bodyPromise = ampdoc.whenBodyAvailable();
     const readyPromise = ampdoc.whenReady();
 
-    doc.body = {};
+    doc.body = {nodeType: 1};
     bodyCallback();
     ready = true;
     readyCallback();
@@ -317,7 +317,7 @@ describe('AmpDocShadow', () => {
 
     // Set body.
     const bodyPromise = ampdoc.whenBodyAvailable();
-    const body = {};
+    const body = {nodeType: 1};
     shadowDocHasBody(ampdoc, body);
     expect(ampdoc.isBodyAvailable()).to.be.true;
     expect(ampdoc.getBody()).to.equal(body);
@@ -330,7 +330,7 @@ describe('AmpDocShadow', () => {
   });
 
   it('should only allow one body update', () => {
-    const body = {};
+    const body = {nodeType: 1};
     shadowDocHasBody(ampdoc, body);
     expect(() => {
       shadowDocHasBody(ampdoc, body);

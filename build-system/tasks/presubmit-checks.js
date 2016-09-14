@@ -210,7 +210,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesService': {
+  'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -258,6 +258,7 @@ var forbiddenTerms = {
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
     ],
@@ -340,6 +341,7 @@ var forbiddenTerms = {
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -347,6 +349,7 @@ var forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -431,7 +434,12 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign' : ThreePTermsMessage,
+  'Math\\.sign': ThreePTermsMessage,
+  'Object\\.assign': {
+    message: ThreePTermsMessage,
+    // See https://github.com/ampproject/amphtml/issues/4877
+    whitelist: ['ads/openx.js'],
+  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +

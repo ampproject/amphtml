@@ -42,7 +42,7 @@ let globalExponentialBackoff = function(work) {
  * If the error has a "messageArray" property, that array is logged.
  * This way one gets the native fidelity of the console for things like
  * elements instead of stringification.
- * @param {!Error} error
+ * @param {*} error
  * @param {!Element=} opt_associatedElement
  */
 export function reportError(error, opt_associatedElement) {
@@ -81,7 +81,10 @@ export function reportError(error, opt_associatedElement) {
   if (element && element.dispatchCustomEvent) {
     element.dispatchCustomEvent('amp:error', error.message);
   }
-  reportErrorToServer(undefined, undefined, undefined, undefined, error);
+  // 'call' to make linter happy. And .call to make compiler happy
+  // that expects some @this.
+  reportErrorToServer['call'](undefined, undefined, undefined, undefined,
+      undefined, error);
 }
 
 /**
@@ -97,7 +100,7 @@ export function cancellation() {
  * @param {!Window} win
  */
 export function installErrorReporting(win) {
-  win.onerror = reportErrorToServer;
+  win.onerror = /** @type {!Function} */ (reportErrorToServer);
   win.addEventListener('unhandledrejection', event => {
     reportError(event.reason || new Error('rejected promise ' + event));
   });
@@ -109,7 +112,7 @@ export function installErrorReporting(win) {
  * @param {string|undefined} filename
  * @param {string|undefined} line
  * @param {string|undefined} col
- * @param {!Error|undefined} error
+ * @param {*|undefined} error
  * @this {!Window|undefined}
  */
 function reportErrorToServer(message, filename, line, col, error) {
@@ -134,7 +137,7 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} filename
  * @param {string|undefined} line
  * @param {string|undefined} col
- * @param {!Error|undefined} error
+ * @param {*|undefined} error
  * @return {string|undefined} The URL
  * visibleForTesting
  */
@@ -194,8 +197,8 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&s=' + encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {
-    url += '&f=' + encodeURIComponent(filename) +
-        '&l=' + encodeURIComponent(line) +
+    url += '&f=' + encodeURIComponent(filename || '') +
+        '&l=' + encodeURIComponent(line || '') +
         '&c=' + encodeURIComponent(col || '');
   }
   url += '&r=' + encodeURIComponent(self.document.referrer);
