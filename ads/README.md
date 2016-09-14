@@ -39,7 +39,7 @@ We will provide the following information to the ad:
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
-- `window.context.container` contains the name of ad container element if there is one, otherwise it will be null.
+- `window.context.container` contains the ad container element name if there is one. Ad container is an amp element that amp-ad is allowed to append to, for example AMP-FX-FLYING-CARPET.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
