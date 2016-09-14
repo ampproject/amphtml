@@ -225,7 +225,7 @@ export class AmpSlideScroll extends BaseSlides {
       const hasPrev = this.hasPrev();
       if ((dir == 1 && hasNext) ||
           (dir == -1 && hasPrev)) {
-        let newIndex = (this.slideIndex_ || 0) + dir;
+        let newIndex = (dev().assertNumber(this.slideIndex_)) + dir;
         if (newIndex == -1) {
           newIndex = this.noOfSlides_ - 1;
         } else if (newIndex >= this.noOfSlides_) {

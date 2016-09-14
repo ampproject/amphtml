@@ -295,7 +295,7 @@ export class Log {
    * @return {number} The value of shouldBeTrueish.
    */
   assertNumber(shouldBeNumber, opt_message) {
-    this.assert(typeof shouldBeNumber == 'number' && !isNaN(shouldBeNumber),
+    this.assert(typeof shouldBeNumber == 'number',
         (opt_message || 'Number expected') + ': %s', shouldBeNumber);
     return /** @type {number} */ (shouldBeNumber);
   }
