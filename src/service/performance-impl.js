@@ -97,7 +97,7 @@ export class Performance {
         });
 
     // Tick window.onload event.
-    loadPromise(win).then(() => {
+    loadPromise(win.document).then(() => {
       this.tick('ol');
       this.flush();
     });
