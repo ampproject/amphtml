@@ -270,7 +270,8 @@ def CompileValidatorMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/dom-walker.js', 'engine/htmlparser-interface.js'],
+                'engine/amp4ads-parse-css.js', 'engine/dom-walker.js',
+                'engine/htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -347,8 +348,8 @@ def CompileValidatorTestMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
-                'engine/validator_test.js'],
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
@@ -367,8 +368,8 @@ def CompileValidatorLightTestMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
-                'engine/validator-light_test.js'],
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator-light_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
