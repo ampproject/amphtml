@@ -24,7 +24,6 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {platformFor} from './platform';
 import {urlReplacementsFor} from './url-replacements';
-import {closestNode} from './dom';
 
 /** @private @const {string} */
 const ORIGINAL_HREF_ATTRIBUTE = 'data-amp-orig-href';
@@ -53,14 +52,6 @@ function clickHandlerFor(window) {
   return fromClass(window, 'clickhandler', ClickHandler);
 }
 
-function captureClickHandlerFor(window) {
-  return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
-}
-
-/**
- * @param {!Window} window
- * @return {!CaptureClickHandler} capture document click handler.
- */
 function captureClickHandlerFor(window) {
   return fromClass(window, 'CaptureClickHandler', CaptureClickHandler);
 }
@@ -127,7 +118,6 @@ export class ClickHandler {
 }
 
 /**
-<<<<<<< 848be7f9dffbffe8922cb19af504dc939caf6a17
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
  * @visibleForTesting
@@ -328,7 +318,7 @@ function getClickLocation_(e) {
           (e.path && e.target ? e.target./*OK*/offsetLeft : 0))),
     top: (e.clientY === undefined ? '' :
         String(e.clientY -
-          (e.path && e.target ? e.target./*OK*/offsetTop : 0)))
+          (e.path && e.target ? e.target./*OK*/offsetTop : 0))),
   };
 }
 
@@ -345,7 +335,7 @@ function getClickLocation_(e) {
  */
 export function expandTargetHref_(e, target, urlReplacements) {
   const hrefToExpand =
-    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute("href");
+    target.getAttribute(ORIGINAL_HREF_ATTRIBUTE) || target.getAttribute('href');
   if (!hrefToExpand) {
     return;
   }
@@ -357,7 +347,7 @@ export function expandTargetHref_(e, target, urlReplacements) {
       return getClickLocation_(e).top;
     },
   };
-  let newHref = urlReplacements.expandSync(hrefToExpand, vars);
+  const newHref = urlReplacements.expandSync(hrefToExpand, vars);
   if (newHref != hrefToExpand) {
     // Store original value so that later clicks can be processed with
     // freshest values.

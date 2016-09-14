@@ -321,7 +321,8 @@ describe('UrlReplacements', () => {
   it('should replace PAGE_LOAD_TIME if timing info is not available', () => {
     const win = getFakeWindow();
     win.complete = true;
-    return installUrlReplacementsService(win).expandAsync('?sh=PAGE_LOAD_TIME&s')
+    return installUrlReplacementsService(win)
+        .expandAsync('?sh=PAGE_LOAD_TIME&s')
         .then(res => {
           expect(res).to.match(/sh=&s/);
         });
@@ -479,11 +480,12 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace several substitutions', () => {
-    return expandAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE').then(res => {
-      expect(res).to.equal('?a=UNKNOWN' +
-          '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
-          '&title=Pixel%20Test');
-    });
+    return expandAsync('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE')
+        .then(res => {
+          expect(res).to.equal('?a=UNKNOWN' +
+              '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
+              '&title=Pixel%20Test');
+        });
   });
 
   it('should replace new substitutions', () => {
@@ -502,7 +504,8 @@ describe('UrlReplacements', () => {
     replacements.set_('ONE', () => {
       throw new Error('boom');
     });
-    const p = expect(replacements.expandAsync('?a=ONE')).to.eventually.equal('?a=');
+    const p = expect(replacements.expandAsync('?a=ONE')).to.eventually
+        .equal('?a=');
     expect(() => {
       clock.tick(1);
     }).to.throw(/boom/);
@@ -580,10 +583,11 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand bindings as functions', () => {
-    return expandAsync('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value}).then(
-      res => {
-        expect(res).to.match(/rid=func_abc\?$/);
-      });
+    return expandAsync('rid=FUNC(abc)?', {'FUNC': value => 'func_' + value})
+        .then(
+          res => {
+            expect(res).to.match(/rid=func_abc\?$/);
+          });
   });
 
   it('should expand bindings as functions with promise', () => {
@@ -626,10 +630,11 @@ describe('UrlReplacements', () => {
 
   it('should resolve sub-included bindings', () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
-    return expandAsync('r=RANDOM&ro=RANDOM_OTHER?', {'RANDOM_OTHER': 'ABC'}).then(
-      res => {
-        expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
-      });
+    return expandAsync('r=RANDOM&ro=RANDOM_OTHER?', {'RANDOM_OTHER': 'ABC'})
+        .then(
+          res => {
+            expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+          });
   });
 
   it('should expand multiple vars', () => {
@@ -695,7 +700,7 @@ describe('UrlReplacements', () => {
     const win = getFakeWindow();
     const urlReplacements = installUrlReplacementsService(win);
     urlReplacements.win_.performance.timing.loadEventStart = 109;
-    let collectVars = {};
+    const collectVars = {};
     const expanded = urlReplacements.expandSync(
       'r=RANDOM&c=CONST&f=FUNCT(hello,world)&a=b&d=PROM&e=PAGE_LOAD_TIME',
       {
@@ -709,7 +714,7 @@ describe('UrlReplacements', () => {
       'RANDOM': parseFloat(/^r=(\d\.\d+)/.exec(expanded)[1]),
       'CONST': 'ABC',
       'FUNCT(hello,world)': 'helloworld',
-      'PAGE_LOAD_TIME': '9'
+      'PAGE_LOAD_TIME': '9',
     });
   });
 
@@ -773,10 +778,11 @@ describe('UrlReplacements', () => {
     it('should report error if not available', () => {
       accessServiceMock.expects('getAccessReaderId')
           .never();
-      return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
-        expect(res).to.match(/a=;/);
-        expect(userErrorStub.callCount).to.equal(1);
-      });
+      return expandAsync('?a=ACCESS_READER_ID;', /* disabled */ true)
+          .then(res => {
+            expect(res).to.match(/a=;/);
+            expect(userErrorStub.callCount).to.equal(1);
+          });
     });
   });
 });

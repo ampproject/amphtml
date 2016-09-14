@@ -493,7 +493,7 @@ export class UrlReplacements {
       return;
     }
 
-    let metric = (endEvent === undefined)
+    const metric = (endEvent === undefined)
         ? timingInfo[startEvent]
         : timingInfo[endEvent] - timingInfo[startEvent];
 
