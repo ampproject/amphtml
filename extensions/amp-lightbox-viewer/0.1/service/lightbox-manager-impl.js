@@ -161,9 +161,9 @@ export class LightboxManager {
   }
 
   /**
+   * The function is not implemented yet. Fake for testing.
    * Find or create thumbnails for lightboxed elements.
    * Return a list of thumbnails obj for lightbox gallery view
-   * The function is not implemented yet. Fake it for testing
    * @return {!Array<{string,Element}>}
    */
   getThumbnails() {
@@ -179,8 +179,8 @@ export class LightboxManager {
   }
 
   /**
-   * Get thumbnail url for single element.
    * The function is not implemented yet. Fake for testing.
+   * Get thumbnail url for single element.
    * @param {!Element} element
    * @param {Number=} index fake it for testing only, will delete later
    * @return {string}

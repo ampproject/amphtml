@@ -164,6 +164,9 @@ describe('amp-lightbox-viewer', () => {
         return impl.activate({source: item1}).then(() => {
           expect(impl.activeElement_).to.equal(item1);
           assertLightboxed(item1, impl, true, /*closed*/ false);
+          impl.vsync_.mutate = function(callback) {
+            callback();
+          };
           impl.openGallery_();
           const container = viewer.querySelector('.-amp-lightbox-viewer');
           expect(container.getAttribute('gallery-view')).to.equal('');

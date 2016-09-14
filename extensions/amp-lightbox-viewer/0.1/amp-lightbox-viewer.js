@@ -69,6 +69,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
      */
     this.manager_ = dev().assert(manager_);
 
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+
     /** @const @private {!Element} */
     this.container_ = this.win.document.createElement('div');
     this.container_.classList.add('-amp-lightbox-viewer');
@@ -443,7 +446,11 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     thumbnailList.forEach(thumbnail => {
       const thumbnailElement = this.createThumbnailElement_(thumbnail);
       this.thumbnails_.push(thumbnailElement);
-      this.gallery_.appendChild(thumbnailElement);
+    });
+    this.vsync_.mutate(() => {
+      this.thumbnails_.forEach(thumbnailElement => {
+        this.gallery_.appendChild(thumbnailElement);
+      });
     });
   }
 
@@ -455,7 +462,6 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   createThumbnailElement_(thumbnailObj) {
     const element = this.win.document.createElement('div');
     element.classList.add('-amp-lightbox-viewer-gallery-thumbnail');
-    // TODO(zhouyx): img? Or amp-img? What kind of element should be created???
     const imgElement = this.win.document.createElement('img');
     imgElement.classList.add('-amp-lightbox-viewer-gallery-thumbnail-img');
     imgElement.setAttribute('src', thumbnailObj.url);
