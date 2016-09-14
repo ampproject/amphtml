@@ -56,6 +56,9 @@ describe('Curve', () => {
     expect(getCurve('ease-in')).to.equal(Curves.EASE_IN);
     expect(getCurve('ease-out')).to.equal(Curves.EASE_OUT);
     expect(getCurve('ease-in-out')).to.equal(Curves.EASE_IN_OUT);
+    expect(getCurve('cubic-bezier(0.4, 0, 0.2, 1)')).to.equal(
+        bezierCurve(0.4, 0, 0.2, 1));
+    expect(getCurve('cubic-bezier(0.4, 0, 0.2)')).to.equal(null);
   });
 
 });

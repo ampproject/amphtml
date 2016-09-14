@@ -299,9 +299,10 @@ export function getCurve(curve) {
   if (typeof curve == 'string') {
     // If the curve is a custom cubic-bezier curve
     if (curve.indexOf('cubic-bezier') != -1) {
-      const matches = curve.match(
-        /cubic-bezier\((\d*.+\d*)\s*,\s*(\d*.+\d*),\s*(\d*.+\d*),\s*(\d*.+\d*)\)/);
-      if (matches.length != 5) {
+      const floatExp = '(\\d*.+\\d*)';
+      const matches = curve.match(new RegExp(`cubic-bezier\\(${floatExp}\\s*,` +
+          `\\s*${floatExp},\\s*${floatExp},\\s*${floatExp}\\)`));
+      if (!matches) {
         return null;
       }
       return bezierCurve(parseFloat(matches[1]), parseFloat(matches[2]),
