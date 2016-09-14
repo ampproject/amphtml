@@ -34,10 +34,10 @@ import {
 } from '../../../src/dom';
 import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
-import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
 import {actionServiceForDoc} from '../../../src/action';
 import {urls} from '../../../src/config';
+import {getFormValidator} from './form-validators';
 
 /** @type {string} */
 const TAG = 'amp-form';
@@ -57,36 +57,6 @@ const UserValidityState = {
   USER_VALID: 'valid',
   USER_INVALID: 'invalid',
 };
-
-
-/** @type {?./validation-bubble.ValidationBubble|undefined} */
-let validationBubble;
-
-
-/** @type {boolean|undefined} */
-let reportValiditySupported;
-
-
-/**
- * @param {boolean} isSupported
- * @private visible for testing.
- */
-export function setReportValiditySupported(isSupported) {
-  reportValiditySupported = isSupported;
-}
-
-
-/**
- * Returns whether reportValidity API is supported.
- * @param {!Document} doc
- * @return {boolean}
- */
-function isReportValiditySupported(doc) {
-  if (reportValiditySupported === undefined) {
-    reportValiditySupported = !!doc.createElement('form').reportValidity;
-  }
-  return reportValiditySupported;
-}
 
 
 export class AmpForm {
@@ -161,6 +131,9 @@ export class AmpForm {
           'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
     }
 
+    /** @const @private {!FormValidator} */
+    this.validator_ = getFormValidator(this.form_);
+
     this.installSubmitHandler_();
   }
 
@@ -169,8 +142,14 @@ export class AmpForm {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
     const inputs = this.form_.querySelectorAll('input,select,textarea');
     for (let i = 0; i < inputs.length; i++) {
-      inputs[i].addEventListener('blur', onInputInteraction_);
-      inputs[i].addEventListener('input', onInputInteraction_);
+      inputs[i].addEventListener('blur', e => {
+        onInputInteraction_(e);
+        this.validator_.onBlur(e);
+      });
+      inputs[i].addEventListener('input', e => {
+        onInputInteraction_(e);
+        this.validator_.onInput(e);
+      });
     }
   }
 
@@ -201,7 +180,10 @@ export class AmpForm {
       this.vsync_.run({
         measure: undefined,
         mutate: reportValidity,
-      }, {form: this.form_});
+      }, {
+        form: this.form_,
+        validator: this.validator_,
+      });
       return;
     }
 
@@ -323,71 +305,7 @@ export class AmpForm {
  * @param {!Object} state
  */
 function reportValidity(state) {
-  reportFormValidity(state.form);
-}
-
-
-/**
- * Reports validity for the first invalid input - if any.
- * @param {!HTMLFormElement} form
- */
-function reportFormValidity(form) {
-  const inputs = form.querySelectorAll('input,select,textarea');
-  for (let i = 0; i < inputs.length; i++) {
-    if (!inputs[i].checkValidity()) {
-      reportInputValidity(inputs[i]);
-      break;
-    }
-  }
-}
-
-
-/**
- * Revalidates the currently focused input after a change.
- * @param {!KeyboardEvent} event
- */
-function onInvalidInputKeyUp_(event) {
-  if (event.target.checkValidity()) {
-    event.target.removeAttribute('aria-invalid');
-    validationBubble.hide();
-  } else {
-    event.target.setAttribute('aria-invalid', 'true');
-    validationBubble.show(event.target, event.target.validationMessage);
-  }
-}
-
-
-/**
- * Hides validation bubble and removes listeners on the invalid input.
- * @param {!Event} event
- */
-function onInvalidInputBlur_(event) {
-  validationBubble.hide();
-  event.target.removeEventListener('blur', onInvalidInputBlur_);
-  event.target.removeEventListener('keyup', onInvalidInputKeyUp_);
-}
-
-
-/**
- * Focuses and reports the invalid message of the input in a message bubble.
- * @param {!HTMLInputElement} input
- */
-function reportInputValidity(input) {
-  if (isReportValiditySupported(input.ownerDocument)) {
-    input.reportValidity();
-  } else {
-    input./*OK*/focus();
-
-    // Remove any previous listeners on the same input. This avoids adding many
-    // listeners on the same element when the user submit pressing Enter or any
-    // other method to submit the form without the element losing focus.
-    input.removeEventListener('blur', onInvalidInputBlur_);
-    input.removeEventListener('keyup', onInvalidInputKeyUp_);
-
-    input.addEventListener('keyup', onInvalidInputKeyUp_);
-    input.addEventListener('blur', onInvalidInputBlur_);
-    validationBubble.show(input, input.validationMessage);
-  }
+  state.validator.report();
 }
 
 
@@ -418,6 +336,23 @@ function getUserValidityStateFor(element) {
   }
 
   return UserValidityState.NONE;
+}
+
+
+/**
+ * Updates class names on the element to reflect the active invalid types on it.
+ *
+ * TODO(#5005): Maybe propagate the invalid type classes to parents of the input as well.
+ *
+ * @param {!Element} element
+ */
+function updateInvalidTypesClasses(element) {
+  if (!element.validity) {
+    return;
+  }
+  for (const validationType in element.validity) {
+    element.classList.toggle(validationType, element.validity[validationType]);
+  }
 }
 
 
@@ -458,6 +393,7 @@ function checkUserValidity(element, propagate = false) {
     // guaranteed to make the fieldset and form invalid as well.
     shouldPropagate = true;
   }
+  updateInvalidTypesClasses(element);
 
   if (propagate && shouldPropagate) {
     // Propagate user validity to ancestor fieldsets.
@@ -507,6 +443,8 @@ function isDisabled_(element) {
 }
 
 
+
+
 /**
  * Installs submission handler on all forms in the document.
  * @param {!Window} win
@@ -528,7 +466,6 @@ export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
         installSubmissionHandlers(win);
       });
     }
