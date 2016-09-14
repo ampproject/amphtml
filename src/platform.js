@@ -66,7 +66,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is a Chrome browser.
+   * Whether the current browser is a Firefox browser.
    * @return {boolean}
    */
   isFirefox() {

@@ -521,7 +521,7 @@ function createBaseAmpElementProto(win) {
     this.implementation_.layoutWidth_ = this.layoutWidth_;
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEvent('amp:attached');
+      this.dispatchCustomEventForTesting('amp:attached');
       // For a never-added resource, the build will be done automatically
       // via `resources.add` on the first attach.
       this.resources_.upgraded(this);
@@ -757,9 +757,9 @@ function createBaseAmpElementProto(win) {
         if (!this.isUpgraded()) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEvent('amp:stubbed');
+          this.dispatchCustomEventForTesting('amp:stubbed');
         } else {
-          this.dispatchCustomEvent('amp:attached');
+          this.dispatchCustomEventForTesting('amp:attached');
         }
       } catch (e) {
         reportError(e, this);
@@ -821,17 +821,11 @@ function createBaseAmpElementProto(win) {
   /**
    * Dispatches a custom event.
    *
-   * NOTE: This is currently only active for tests.
-   * Do not rely on this mechanism for production code.
-   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
-    if (!getMode().test) {
-      return;
-    }
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
@@ -839,6 +833,20 @@ function createBaseAmpElementProto(win) {
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
+  };
+
+  /**
+   * Dispatches a custom event only in testing environment.
+   *
+   * @param {string} name
+   * @param {!Object=} opt_data Event data.
+   * @final @this {!Element}
+   */
+  ElementProto.dispatchCustomEventForTesting = function(name, opt_data) {
+    if (!getMode().test) {
+      return;
+    }
+    this.dispatchCustomEvent(name, opt_data);
   };
 
   /**
@@ -919,7 +927,7 @@ function createBaseAmpElementProto(win) {
     assertNotTemplate(this);
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
-    this.dispatchCustomEvent('amp:load:start');
+    this.dispatchCustomEventForTesting('amp:load:start');
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
