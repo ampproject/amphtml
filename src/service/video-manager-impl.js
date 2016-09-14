@@ -19,6 +19,7 @@ import {dev} from '../log';
 import {platformFor} from '../platform';
 import {fromClassForDoc} from '../service';
 import {VideoEvents, VideoAttributes} from '../video-interface';
+import {viewerFor} from '../viewer';
 import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 
@@ -132,8 +133,11 @@ class VideoEntry {
     /** @private {boolean} */
     this.userInteracted_ = false;
 
-    /** @const @private {!../service/vsync-impl.Vsync} */
+    /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
+
+    /** @private @const {!../service/viewer-impl.Viewer} */
+    this.viewer_ = viewerFor(win);
 
     /** @private {boolean} */
     this.canAutoplay_ = video.element.hasAttribute(VideoAttributes.AUTOPLAY) &&
@@ -227,7 +231,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_) {
+    if (this.userInteracted_ || !this.viewer_.isVisible()) {
       return;
     }
 
