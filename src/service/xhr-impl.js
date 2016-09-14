@@ -19,6 +19,7 @@ import {fromClass} from '../service';
 import {
   getSourceOrigin,
   getCorsUrl,
+  parseUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
 
@@ -112,8 +113,17 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, opt_init) {
+    const init = opt_init || {};
     input = this.getCorsUrl(this.win, input);
-    return this.fetch_(input, opt_init).then(response => {
+    // For some same origin requests, add AMP-Same-Origin: true header to allow
+    // publishers to validate that this request came from their own origin.
+    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const targetOrigin = parseUrl(input).origin;
+    if (currentOrigin == targetOrigin) {
+      init['headers'] = init['headers'] || {};
+      init['headers']['AMP-Same-Origin'] = 'true';
+    }
+    return this.fetch_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
@@ -124,7 +134,7 @@ export class Xhr {
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
+      } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
         user().assert(false, `Response must contain the` +
