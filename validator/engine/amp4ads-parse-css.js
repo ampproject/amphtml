@@ -16,7 +16,7 @@
  */
 
 goog.provide('parse_css.stripVendorPrefix');
-goog.provide('parse_css.validateA4aCss');
+goog.provide('parse_css.validateAmp4AdsCss');
 
 goog.require('parse_css.DelimToken');
 goog.require('parse_css.ErrorToken');
@@ -93,7 +93,7 @@ function hasAmpAnimate(rule) {
 }
 
 /** @private */
-class A4aVisitor extends parse_css.RuleVisitor {
+class Amp4AdsVisitor extends parse_css.RuleVisitor {
   /**
    * @param {!Array<parse_css.ErrorToken>} errors
    */
@@ -212,7 +212,7 @@ class A4aVisitor extends parse_css.RuleVisitor {
  * @param {!parse_css.Stylesheet} styleSheet
  * @param {!Array<!parse_css.ErrorToken>} errors
  */
-parse_css.validateA4aCss = function(styleSheet, errors) {
-  const visitor = new A4aVisitor(errors);
+parse_css.validateAmp4AdsCss = function(styleSheet, errors) {
+  const visitor = new Amp4AdsVisitor(errors);
   styleSheet.accept(visitor);
 };
