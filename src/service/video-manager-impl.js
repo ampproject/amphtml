@@ -121,6 +121,9 @@ class VideoEntry {
    */
   constructor(win, video) {
 
+    /** @private @const {!Window} */
+    this.win_ = win;
+
     /** @package @const {!../video-interface.VideoInterface} */
     this.video = video;
 
@@ -135,9 +138,6 @@ class VideoEntry {
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = vsyncFor(win);
-
-    /** @private @const {!../service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(win);
 
     /** @private {boolean} */
     this.canAutoplay_ = video.element.hasAttribute(VideoAttributes.AUTOPLAY) &&
@@ -231,7 +231,7 @@ class VideoEntry {
    * @private
    */
   autoplayLoadedVideoVisibilityChanged_() {
-    if (this.userInteracted_ || !this.viewer_.isVisible()) {
+    if (this.userInteracted_ || !viewerFor(this.win_).isVisible()) {
       return;
     }
 
