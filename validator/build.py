@@ -421,7 +421,7 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
                 'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
                 'engine/css-selectors.js', 'engine/json-testutil.js',
                 '%s/validator-generated.js' % out_dir],
-      closure_entry_points=['parse_css.A4aParseCssTest'],
+      closure_entry_points=['parse_css.Amp4AdsParseCssTest'],
       output_file='%s/amp4ads-parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
