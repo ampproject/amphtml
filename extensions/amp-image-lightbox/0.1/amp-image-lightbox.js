@@ -27,7 +27,7 @@ import {Layout} from '../../../src/layout';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
-import {isLoaded, loadPromise} from '../../../src/event-helper';
+import {isLoaded} from '../../../src/event-helper';
 import {
   layoutRectFromDomRect,
   layoutRectLtwh,
@@ -289,7 +289,7 @@ export class ImageViewer {
     // and then naturally upgrade to a higher quality image.
     return timerFor(this.win).promise(1).then(() => {
       this.image_.setAttribute('src', src);
-      return loadPromise(this.image_);
+      return this.loadPromise(this.image_);
     });
   }
 

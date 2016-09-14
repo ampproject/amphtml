@@ -22,7 +22,10 @@
 import '../../../third_party/babel/custom-babel-helpers';
 import '../../../src/polyfills';
 import {LoginDoneDialog} from './amp-login-done-dialog';
+import {initLogConstructor} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
+
+initLogConstructor();
 
 onDocumentReady(document, () => {
   new LoginDoneDialog(window).start();

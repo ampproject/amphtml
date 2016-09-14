@@ -40,18 +40,18 @@ let overrideBootstrapBaseUrl;
  * @param {!Window} parentWindow
  * @param {!Element} element
  * @param {string=} opt_type
+ * @param {Object=} opt_context
  * @return {!Object} Contains
  *     - type, width, height, src attributes of <amp-ad> tag. These have
  *       precedence over the data- attributes.
  *     - data-* attributes of the <amp-ad> tag with the "data-" removed.
  *     - A _context object for internal use.
  */
-function getFrameAttributes(parentWindow, element, opt_type) {
+function getFrameAttributes(parentWindow, element, opt_type, opt_context) {
   const startTime = Date.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
-  const container = element.getAttribute('amp-container-element');
   user().assert(type, 'Attribute type required for <amp-ad>: %s', element);
   const attributes = {};
   // Do these first, as the other attributes have precedence.
@@ -60,9 +60,6 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.height = getLengthNumeral(height);
   attributes.type = type;
   const docInfo = documentInfoForDoc(element);
-  if (container) {
-    attributes.container = container;
-  }
   const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
@@ -75,7 +72,6 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
-    clientId: element.getAttribute('ampcid'),
     location: {
       href: locationHref,
     },
@@ -87,6 +83,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     initialIntersection: element.getIntersectionChangeEntry(),
     startTime,
   };
+  Object.assign(attributes._context, opt_context);
   const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
@@ -100,10 +97,12 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  * @param {!Window} parentWindow
  * @param {!Element} element
  * @param {string=} opt_type
+ * @param {Object=} opt_context
  * @return {!Element} The iframe.
  */
-export function getIframe(parentWindow, element, opt_type) {
-  const attributes = getFrameAttributes(parentWindow, element, opt_type);
+export function getIframe(parentWindow, element, opt_type, opt_context) {
+  const attributes =
+      getFrameAttributes(parentWindow, element, opt_type, opt_context);
   const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -166,7 +165,6 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} window
- * @return {string}
  */
 export function preloadBootstrap(window) {
   const url = getBootstrapBaseUrl(window);

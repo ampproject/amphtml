@@ -19,7 +19,6 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listenFor} from '../../../src/iframe-helper';
-import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timerFor} from '../../../src/timer';
@@ -306,7 +305,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     this.container_.appendChild(iframe);
 
-    return loadPromise(iframe).then(() => {
+    return this.loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
       // 1s later via `amp-active` class.
@@ -396,15 +395,16 @@ export class AmpIframe extends AMP.BaseElement {
   updateSize_(height, width) {
     if (!this.isResizable_) {
       user().error(TAG_,
-          'ignoring embed-size request because this iframe is not resizable',
+          'Ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
 
     if (height < 100) {
       user().error(TAG_,
-          'ignoring embed-size request because the resize height is ' +
-          'less than 100px',
+          'Ignoring embed-size request because the resize height is less ' +
+          'than 100px. If you are using amp-iframe to display ads, consider ' +
+          'using amp-ad instead.',
           this.element);
       return;
     }
@@ -436,7 +436,7 @@ export class AmpIframe extends AMP.BaseElement {
       }, () => {});
     } else {
       user().error(TAG_,
-          'ignoring embed-size request because'
+          'Ignoring embed-size request because'
           + 'no width or height value is provided',
           this.element);
     }

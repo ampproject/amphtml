@@ -24,6 +24,7 @@ import {installCryptoService, Crypto,}
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 const DAY = 24 * 3600 * 1000;
@@ -80,7 +81,9 @@ describe('cid', () => {
       ampExtendedElements: {
         'amp-analytics': true,
       },
+      setTimeout: window.setTimeout,
     };
+    installTimerService(fakeWin);
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
@@ -202,19 +205,20 @@ describe('cid', () => {
       time: 0,
       cid: expectedBaseCid,
     });
-    return compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`)
-        .then(() => {
-          expect(viewerBaseCidStub).to.be.calledOnce;
-          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+    return Promise.all([
+      compare('e1', `sha384(${expectedBaseCid}http://www.origin.come1)`),
+      compare('e2', `sha384(${expectedBaseCid}http://www.origin.come2)`),
+    ]).then(() => {
+      expect(viewerBaseCidStub).to.be.calledOnce;
+      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
 
-          // Ensure it's called only once since we cache it in memory.
-          return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
-        })
-        .then(() => {
-          expect(viewerBaseCidStub).to.be.calledOnce;
-          expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
-          return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
-        });
+      // Ensure it's called only once since we cache it in memory.
+      return compare('e3', `sha384(${expectedBaseCid}http://www.origin.come3)`);
+    }).then(() => {
+      expect(viewerBaseCidStub).to.be.calledOnce;
+      expect(viewerBaseCidStub).to.not.be.calledWith(sinon.match.string);
+      return expect(cid.baseCid_).to.eventually.equal(expectedBaseCid);
+    });
   });
 
   it('should store to viewer storage if embedded', () => {
@@ -259,6 +263,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
+    installTimerService(win);
     installViewerService(win).isIframed = () => false;
     installCidService(win);
     installCryptoService(win);
