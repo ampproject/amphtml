@@ -208,14 +208,15 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(extensionId) {
+  loadExtension(extensionId, stubElement = true) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder, stubElement);
     return this.waitFor_(holder);
   }
 
@@ -397,14 +398,17 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
+   * @param {boolean} stubElement
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder) {
+  insertExtensionScriptIfNeeded_(extensionId, holder, stubElement) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
       const scriptElement = this.createExtensionScript_(extensionId);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
-      stubElementIfNotKnown(this.win, extensionId);
+      if (stubElement) {
+        stubElementIfNotKnown(this.win, extensionId);
+      }
     }
   }
 
