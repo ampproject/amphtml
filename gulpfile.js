@@ -59,7 +59,7 @@ declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
-declareExtension('amp-carousel', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-carousel', '0.1', true);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
@@ -67,7 +67,7 @@ declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-fresh', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
@@ -158,6 +158,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
     includeBasicPolyfills: true,
+    include3pDirectories: true,
   });
 
   // For compilation with babel we start with the amp-babel entry point,

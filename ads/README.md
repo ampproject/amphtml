@@ -130,6 +130,20 @@ Here are some factors that affect whether the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
+
+### Support for multi-size ad requests
+Allowing more than a single ad size to fill a slot improves ad server competition. Increased competition gives the publisher better monetization for the same slot, therefore increasing overall revenue earned by the publisher.
+In order to support multi-size ad requests, AMP accepts an optional `data` param to `window.context.renderStart` (details in [Methods available to the ad](#methods-available-to-the-ad) section) which will automatically invoke request resize with the width and height passed.
+In case the resize is not successful, AMP will horizontally and vertically center align the creative within the space initially reserved for the creative.
+
+#### Example
+```
+// Use the optional param to specify the width and height to request resize.
+window.context.renderStart({width: 200, height: 100});
+```
+
+Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height)` API. Details in [Ad Resizing](#ad-resizing).
+
 ### Optimizing ad performance
 
 #### JS reuse across iframes

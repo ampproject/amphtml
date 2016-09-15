@@ -270,7 +270,8 @@ def CompileValidatorMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/dom-walker.js', 'engine/htmlparser-interface.js'],
+                'engine/amp4ads-parse-css.js', 'engine/dom-walker.js',
+                'engine/htmlparser-interface.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
                             'amp.validator.renderErrorMessage'],
@@ -347,8 +348,8 @@ def CompileValidatorTestMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
-                'engine/validator_test.js'],
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
@@ -367,8 +368,8 @@ def CompileValidatorLightTestMinified(out_dir):
                 'engine/parse-srcset.js', 'engine/tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'engine/validator-in-browser.js', 'engine/validator.js',
-                'engine/htmlparser-interface.js', 'engine/dom-walker.js',
-                'engine/validator-light_test.js'],
+                'engine/amp4ads-parse-css.js', 'engine/htmlparser-interface.js',
+                'engine/dom-walker.js', 'engine/validator-light_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator-light_test_minified.js' % out_dir)
   logging.info('... success')
@@ -408,8 +409,8 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('... success')
 
 
-def CompileA4aParseCssTestMinified(out_dir):
-  """Runs closure compiler for a4a-parse-css_test.js.
+def CompileAmp4AdsParseCssTestMinified(out_dir):
+  """Runs closure compiler for amp4ads-parse-css_test.js.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -417,12 +418,12 @@ def CompileA4aParseCssTestMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['engine/a4a-parse-css_test.js', 'engine/parse-css.js',
-                'engine/a4a-parse-css.js', 'engine/tokenize-css.js',
+      js_files=['engine/amp4ads-parse-css_test.js', 'engine/parse-css.js',
+                'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
                 'engine/css-selectors.js', 'engine/json-testutil.js',
                 '%s/validator-generated.js' % out_dir],
-      closure_entry_points=['parse_css.A4aParseCssTest'],
-      output_file='%s/a4a-parse-css_test_minified.js' % out_dir)
+      closure_entry_points=['parse_css.Amp4AdsParseCssTest'],
+      output_file='%s/amp4ads-parse-css_test_minified.js' % out_dir)
   logging.info('... success')
 
 
@@ -468,7 +469,7 @@ def GenerateTestRunner(out_dir):
              require('./validator-light_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
-             require('./a4a-parse-css_test_minified');
+             require('./amp4ads-parse-css_test_minified');
              require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
@@ -512,7 +513,7 @@ def Main():
   CompileValidatorLightTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
-  CompileA4aParseCssTestMinified(out_dir='dist')
+  CompileAmp4AdsParseCssTestMinified(out_dir='dist')
   CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)

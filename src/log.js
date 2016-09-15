@@ -286,6 +286,21 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument isn't a number.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeNumber
+   * @param {string=} opt_message The assertion message
+   * @return {number} The value of shouldBeTrueish.
+   */
+  assertNumber(shouldBeNumber, opt_message) {
+    this.assert(typeof shouldBeNumber == 'number',
+        (opt_message || 'Number expected') + ': %s', shouldBeNumber);
+    return /** @type {number} */ (shouldBeNumber);
+  }
+
+  /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *

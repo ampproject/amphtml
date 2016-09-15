@@ -22,10 +22,33 @@ import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {user, dev} from '../../../src/log';
 
 
 export class AmpSlides extends BaseSlides {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Array<!Element>} */
+    this.slides_ = null;
+
+    /** @private {number} */
+    this.currentIndex_ = 0;
+
+    /**
+     * @private {?{
+     *   containerWidth: number,
+     *   prevTr: !../../../src/transition.TransitionDef,
+     *   nextTr: !../../../src/transition.TransitionDef,
+     *   min: number,
+     *   max: number,
+     *   pos: number,
+     *   currentIndex: number
+     * }} */
+    this.swipeState_ = null;
+  }
 
   /** @override */
   isLayoutSupported(layout) {
@@ -34,7 +57,6 @@ export class AmpSlides extends BaseSlides {
 
   /** @override */
   buildSlides() {
-    /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
       this.setAsOwner(slide);
@@ -42,9 +64,6 @@ export class AmpSlides extends BaseSlides {
       slide.style.visibility = i > 0 ? 'hidden' : 'visible';
       this.applyFillContent(slide);
     });
-
-    /** @private {number} */
-    this.currentIndex_ = 0;
 
     user().assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
@@ -139,7 +158,7 @@ export class AmpSlides extends BaseSlides {
    * @param {!Element} oldSlide
    * @param {!Element} newSlide
    * @param {number} dir
-   * @return {!Transition}
+   * @return {!../../../src/transition.TransitionDef}
    */
   createTransition_(oldSlide, newSlide, dir) {
     const containerWidth = this.element./*OK*/offsetWidth;
@@ -183,10 +202,10 @@ export class AmpSlides extends BaseSlides {
 
   /**
    * @private
-   * @return {?Element}
+   * @return {!Element}
    */
   curSlide_() {
-    return this.slides_[this.currentIndex_];
+    return dev().assertElement(this.slides_[this.currentIndex_]);
   }
 
   /**
@@ -219,18 +238,6 @@ export class AmpSlides extends BaseSlides {
 
   /** @override */
   setupGestures() {
-    /**
-     * @private {?{
-     *   containerWidth: number,
-     *   prevTr: !Transition,
-     *   nextTr: !Transition,
-     *   min: number,
-     *   max: number,
-     *   pos: number,
-     *   currentIndex: number
-     * }} */
-    this.swipeState_ = null;
-
     const gestures = Gestures.get(this.element);
     gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
@@ -244,7 +251,7 @@ export class AmpSlides extends BaseSlides {
   }
 
   /**
-   * @param {!Swipe} unusedSwipe
+   * @param {!../../../src/gesture-recognizers.SwipeDef} unusedSwipe
    * @private
    */
   onSwipeStart_(unusedSwipe) {
@@ -287,7 +294,7 @@ export class AmpSlides extends BaseSlides {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!../../../src/gesture-recognizers.SwipeDef} swipe
    * @private
    */
   onSwipe_(swipe) {
@@ -308,8 +315,8 @@ export class AmpSlides extends BaseSlides {
   }
 
   /**
-   * @param {!Swipe} swipe
-   * @return {!Promise}
+   * @param {!../../../src/gesture-recognizers.SwipeDef} swipe
+   * @return {!Promise|undefined}
    * @private
    */
   onSwipeEnd_(swipe) {

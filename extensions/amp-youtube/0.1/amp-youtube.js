@@ -52,7 +52,7 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://www.youtube.com', opt_onLayout);
+    this.preconnect.preload(this.getVideoIframeSrc_());
     // Host that YT uses to serve JS needed by player.
     this.preconnect.url('https://s.ytimg.com', opt_onLayout);
     // Load high resolution placeholder images for videos in prerender mode.
@@ -66,7 +66,11 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   renderOutsideViewport() {
-    return false;
+    // We are conservative about loading YT videos outside the viewport,
+    // because the player is pretty heavy.
+    // This will still start loading before they become visible, but it
+    // won't typically load a large number of embeds.
+    return 0.75;
   }
 
   /** @override */
@@ -81,13 +85,18 @@ class AmpYoutube extends AMP.BaseElement {
     }
   }
 
+  /** @return {string} */
+  getVideoIframeSrc_() {
+    dev().assert(this.videoid_);
+    return `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+  }
+
   /** @override */
   layoutCallback() {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
     const iframe = this.element.ownerDocument.createElement('iframe');
-    dev().assert(this.videoid_);
-    let src = `https://www.youtube.com/embed/${encodeURIComponent(this.videoid_ || '')}?enablejsapi=1`;
+    let src = this.getVideoIframeSrc_();
 
     const params = getDataParamsFromAttributes(this.element);
     if ('autoplay' in params) {

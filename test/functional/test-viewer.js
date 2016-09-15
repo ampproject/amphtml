@@ -17,6 +17,7 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platformFor} from '../../src/platform';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
 import {timerFor} from '../../src/timer';
@@ -77,6 +78,7 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
+    installPlatformService(windowApi);
     installTimerService(windowApi);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');

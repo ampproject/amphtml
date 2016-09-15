@@ -161,7 +161,7 @@ message CssSpec {
 
   // Enables checks specific to the draft A4A specification.
   // TODO(powdercloud): Make this more generic.
-  optional bool validate_a4a = 5;
+  optional bool validate_amp4ads = 5;
 }
 
 // NEXT AVAILABLE TAG: 8

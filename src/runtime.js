@@ -41,6 +41,7 @@ import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
+import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
@@ -54,6 +55,7 @@ import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
+import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
@@ -84,6 +86,7 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installPlatformService(global);
   installTimerService(global);
   installViewerService(global);
   installViewportService(global);
@@ -108,6 +111,7 @@ export function installAmpdocServices(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installVideoManagerForDoc(ampdoc);
 }
 
 
