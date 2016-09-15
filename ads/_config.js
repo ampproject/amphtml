@@ -244,4 +244,5 @@ export const clientIdScope = {
 export const waitForRenderStart = [
   'doubleclick',
   'fakead3p',
+  'smartadserver',
 ];
