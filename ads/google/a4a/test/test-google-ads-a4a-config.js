@@ -20,10 +20,10 @@ import {
     isInManualExperiment,
 } from '../traffic-experiments';
 import {resetExperimentToggles_} from '../../../../src/experiments';
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {resetServiceForTesting} from '../../../../src/service';
 import {documentStateFor} from '../../../../src/document-state';
-import {platformFor} from '../../../../src/platform';
 import * as sinon from 'sinon';
 
 const EXP_ID = 'EXP_ID';
@@ -72,8 +72,8 @@ describe('a4a_config', () => {
       navigator: window.navigator,
     };
     events = {};
-    platformFor(win);
     documentStateFor(win);
+    installPlatformService(win);
     installViewerService(win);
   });
 
@@ -330,7 +330,7 @@ describe('a4a_config hash param parsing', () => {
       navigator: window.navigator,
     };
     events = {};
-    platformFor(win);
+    installPlatformService(win);
     documentStateFor(win);
   });
   afterEach(() => {

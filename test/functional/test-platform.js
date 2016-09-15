@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Platform} from '../../src/platform';
+import {Platform} from '../../src/service/platform-impl';
 
 describe('Platform', () => {
 
