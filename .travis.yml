@@ -48,6 +48,8 @@ script:
   # Disabled because it regressed. Better to run the other saucelabs tests.
   # - gulp test --saucelabs --oldchrome
   - gulp validator
+  - gulp size
+  - git diff
 branches:
   only:
     - master
