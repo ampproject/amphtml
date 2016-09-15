@@ -408,3 +408,7 @@ amp-live-list > [update] {
 amp-experiment, amp-share-tracking {
   display: none;
 }
+
+amp-fresh {
+  visibility: hidden;
+}

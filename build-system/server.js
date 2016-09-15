@@ -389,6 +389,21 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
     next();
 });
 
+app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
+    if ('amp-fresh' in req.query && req.query['amp-fresh'] == '1') {
+      res.setHeader('Content-Type', 'text/html');
+      res.end(`<!doctype html>
+          <html ⚡>
+            <body>
+              <amp-fresh id="amp-fresh-1"><span>hello</span> world!</amp-fresh>
+              <amp-fresh id="amp-fresh-2">foo bar</amp-fresh>
+            </body>
+          </html>`);
+      return;
+    }
+    next();
+});
+
 // Proxy with unminified JS.
 // Example:
 // http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
