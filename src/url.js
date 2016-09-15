@@ -240,7 +240,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
- * @return {!Object<string, string>}
+ * @return {!Object<string>}
  */
 export function parseQueryString(queryString) {
   const params = Object.create(null);

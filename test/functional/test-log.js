@@ -414,8 +414,51 @@ describe('Logging', () => {
       expect(isUserErrorMessage(error.message)).to.be.false;
       expect(error.message).to.contain('test-other');
     });
+
+    it('should pass for elements', () => {
+      log.assertElement(document.documentElement);
+      const element = document.createElement('element');
+      const ret = log.assertElement(element);
+      expect(ret).to.equal(element);
+    });
+
+    it('should should identify non-elements', () => {
+      expect(() => {
+        log.assertElement(document);
+      }).to.throw(/Element expected: /);
+      expect(() => {
+        log.assertElement(null);
+      }).to.throw(/Element expected: null/);
+      expect(() => {
+        log.assertElement(null, 'custom error');
+      }).to.throw(/custom error: null/);
+    });
   });
 
+  describe('assertNumber', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return the number value', () => {
+      expect(log.assertNumber(3)).to.equal(3);
+      const nan = log.assertNumber(NaN);
+      expect(nan).to.not.equal(nan);
+    });
+
+    it('should fail with on non number', () => {
+      expect(() => log.assertNumber({}))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(null))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(undefined))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber([]))
+          .to.throw('Number expected: ');
+    });
+  });
 
   describe('assertEnumValue', () => {
 

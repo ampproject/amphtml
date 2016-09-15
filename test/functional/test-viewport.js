@@ -24,7 +24,9 @@ import {
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
@@ -46,6 +48,7 @@ describe('Viewport', () => {
     clock = sandbox.useFakeTimers();
     viewerViewportHandler = undefined;
     viewer = {
+      isEmbedded: () => false,
       getPaddingTop: () => 19,
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
@@ -65,6 +68,7 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
+    installPlatformService(windowApi);
     installViewerService(windowApi);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
@@ -190,28 +194,25 @@ describe('Viewport', () => {
   it('should update padding when changed only', () => {
     // Shouldn't call updatePaddingTop since it hasn't changed.
     let bindingMock = sandbox.mock(binding);
-    bindingMock.expects('updatePaddingTop').never();
-    viewerViewportHandler();
+    viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
-    viewport.fixedLayer_.updatePaddingTop = () => {};
-    viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
-    bindingMock.expects('updatePaddingTop').withArgs(21).once();
-    viewerViewportHandler();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
+    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
   });
 
   it('should update padding for fixed layer', () => {
     // Should call updatePaddingTop.
     const bindingMock = sandbox.mock(binding);
-    viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
-    bindingMock.expects('updatePaddingTop').withArgs(21).once();
+    bindingMock.expects('updatePaddingTop').withArgs(0, true, 19).once();
     viewport.fixedLayer_ = {updatePaddingTop: () => {}};
     const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
-    fixedLayerMock.expects('updatePaddingTop').withArgs(21).once();
-    viewerViewportHandler();
+    fixedLayerMock.expects('updatePaddingTop').withArgs(0).once();
+    viewerViewportHandler({paddingTop: 0});
     bindingMock.verify();
     fixedLayerMock.verify();
   });
@@ -250,7 +251,7 @@ describe('Viewport', () => {
   it('should call binding.updateViewerViewport', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('updateViewerViewport').once();
-    viewerViewportHandler();
+    viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
   });
 
@@ -441,6 +442,33 @@ describe('Viewport', () => {
     bindingMock.expects('getScrollHeight').withArgs().returns(117).once();
     expect(viewport.getScrollHeight()).to.equal(117);
   });
+
+  it('should not set pan-y w/o experiment', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'pan-y', false);
+    viewport = new Viewport(windowApi, binding, viewer);
+    expect(windowApi.document.documentElement.style['touch-action'])
+        .to.not.exist;
+  });
+
+  it('should not set pan-y when not embedded', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    viewer.isEmbedded = () => false;
+    toggleExperiment(windowApi, 'pan-y', true);
+    viewport = new Viewport(windowApi, binding, viewer);
+    expect(windowApi.document.documentElement.style['touch-action'])
+        .to.not.exist;
+  });
+
+  it('should set pan-y with experiment', () => {
+    // TODO(dvoytenko, #4894): Cleanup the experiment.
+    viewer.isEmbedded = () => true;
+    toggleExperiment(windowApi, 'pan-y', true);
+    viewport = new Viewport(windowApi, binding, viewer);
+    expect(windowApi.document.documentElement.style['touch-action'])
+        .to.equal('pan-y');
+  });
 });
 
 
@@ -598,6 +626,7 @@ describe('Viewport META', () => {
       sandbox = sinon.sandbox.create();
       clock = sandbox.useFakeTimers();
       viewer = {
+        isEmbedded: () => false,
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
         isIframed: () => false,
@@ -630,6 +659,7 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
+      installPlatformService(windowApi);
       installViewerService(windowApi);
       binding = new ViewportBindingDef();
       viewport = new Viewport(windowApi, binding, viewer);
@@ -729,6 +759,7 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+
     documentElement = {
       style: {},
     };
@@ -740,8 +771,11 @@ describe('ViewportBindingNatural', () => {
       body: documentBody,
       defaultView: windowApi,
     };
+    windowApi.navigator = {userAgent: ''};
     windowMock = sandbox.mock(windowApi);
+    installPlatformService(windowApi);
     viewer = {
+      isEmbedded: () => false,
       getPaddingTop: () => 19,
       onViewportEvent: () => {},
       requestFullOverlay: () => {},

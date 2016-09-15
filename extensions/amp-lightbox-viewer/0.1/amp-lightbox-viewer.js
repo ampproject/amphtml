@@ -21,7 +21,7 @@ import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
 import {user, dev} from '../../../src/log';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {toggle} from '../../../src/style';
 import {LightboxManager} from './service/lightbox-manager-impl';
 
@@ -69,9 +69,19 @@ export class AmpLightboxViewer extends AMP.BaseElement {
      */
     this.manager_ = dev().assert(manager_);
 
+    /** @const @private {!Vsync} */
+    this.vsync_ = this.getVsync();
+
     /** @const @private {!Element} */
     this.container_ = this.win.document.createElement('div');
-    this.container_.classList.add('-amp-lightbox-viewer');
+    this.container_.classList.add('-amp-lbv');
+
+    /** @private  {?Element} */
+    this.gallery_ = null;
+
+    /** @private {?Array<{string, Element}>} */
+    this.thumbnails_ = null;
+
     this.buildMask_();
     this.buildControls_();
     this.element.appendChild(this.container_);
@@ -93,7 +103,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   buildMask_() {
     dev().assert(this.container_);
     const mask = this.win.document.createElement('div');
-    mask.classList.add('-amp-lightbox-viewer-mask');
+    mask.classList.add('-amp-lbv-mask');
     this.container_.appendChild(mask);
   }
 
@@ -106,11 +116,14 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     const next = this.next_.bind(this);
     const prev = this.previous_.bind(this);
     const close = this.close_.bind(this);
+    const openGallery = this.openGallery_.bind(this);
 
     // TODO(aghassemi): i18n and customization. See https://git.io/v6JWu
-    this.buildButton_('Next', 'amp-lightbox-viewer-button-next', next);
-    this.buildButton_('Previous', 'amp-lightbox-viewer-button-prev', prev);
-    this.buildButton_('Close', 'amp-lightbox-viewer-button-close', close);
+    this.buildButton_('Next', 'amp-lbv-button-next', next);
+    this.buildButton_('Previous', 'amp-lbv-button-prev', prev);
+    this.buildButton_('Close', 'amp-lbv-button-close', close);
+    this.buildButton_('Gallery', 'amp-lbv-button-gallery',
+        openGallery);
 
     this.container_.setAttribute('no-prev', '');
     this.container_.setAttribute('no-next', '');
@@ -196,6 +209,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     this.activeElement_ = null;
     this.active_ = false;
 
+    // If there's gallery, set gallery to display none
+    this.container_.removeAttribute('gallery-view');
+
     this.container_.setAttribute('no-prev', '');
     this.container_.setAttribute('no-next', '');
 
@@ -240,7 +256,9 @@ export class AmpLightboxViewer extends AMP.BaseElement {
   updateViewer_(newElement) {
     const previousElement = this.activeElement_;
     dev().assert(newElement);
-    dev().assert(newElement != previousElement);
+    if (newElement == previousElement) {
+      return Promise.resolve();
+    }
 
     // tear down the previous element
     if (previousElement) {
@@ -263,7 +281,7 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     // not belong to the element requesting the layout.
     if (newElement.__AMP__RESOURCE) {
       newElement.__AMP__RESOURCE.setInViewport(true);
-      resourcesFor(this.win).scheduleLayout(newElement, newElement);
+      resourcesForDoc(this.element).scheduleLayout(newElement, newElement);
     }
 
     return updateControlsPromise;
@@ -368,6 +386,94 @@ export class AmpLightboxViewer extends AMP.BaseElement {
     if (code == 37) {
       this.previous_();
     }
+  }
+
+  /**
+   * Display gallery view to show thumbnails of lightboxed elements
+   * @private
+   */
+  openGallery_() {
+    // Build gallery div for the first time
+    if (!this.gallery_) {
+      this.buildGallery_();
+    }
+    this.container_.setAttribute('gallery-view', '');
+  }
+
+  /**
+   * Close gallery view
+   * @private
+   */
+  closeGallery_() {
+    this.container_.removeAttribute('gallery-view');
+  }
+
+  /**
+   * Build lightbox gallery. This is called only once when user enter gallery
+   * view for the first time.
+   * @private
+   */
+  buildGallery_() {
+    // Build gallery
+    this.gallery_ = this.win.document.createElement('div');
+    this.gallery_.classList.add('-amp-lbv-gallery');
+
+    // Initialize thumbnails
+    this.updateThumbnails_();
+
+    this.vsync_.mutate(() => {
+      this.container_.appendChild(this.gallery_);
+    });
+
+    // Add go back button
+    const back = this.closeGallery_.bind(this);
+    this.buildButton_('Back', 'amp-lbv-button-back', back);
+
+  }
+
+  /**
+   * Update thumbnails displayed in lightbox gallery.
+   * This function only supports initialization now.
+   * @private
+   */
+  updateThumbnails_() {
+    if (this.thumbnails_) {
+      // TODO: Need to update gallery if there's change with thumbnails
+      return;
+    }
+
+    // Initialize thumbnails from lightbox manager
+    this.thumbnails_ = [];
+    const thumbnailList = this.manager_.getThumbnails();
+    thumbnailList.forEach(thumbnail => {
+      const thumbnailElement = this.createThumbnailElement_(thumbnail);
+      this.thumbnails_.push(thumbnailElement);
+    });
+    this.vsync_.mutate(() => {
+      this.thumbnails_.forEach(thumbnailElement => {
+        this.gallery_.appendChild(thumbnailElement);
+      });
+    });
+  }
+
+  /**
+   * Create an element inside gallery from the thumbnail info from manager.
+   * @param {{string, Element}} thumbnailObj
+   * @private
+   */
+  createThumbnailElement_(thumbnailObj) {
+    const element = this.win.document.createElement('div');
+    element.classList.add('-amp-lbv-gallery-thumbnail');
+    const imgElement = this.win.document.createElement('img');
+    imgElement.classList.add('-amp-lbv-gallery-thumbnail-img');
+    imgElement.setAttribute('src', thumbnailObj.url);
+    element.appendChild(imgElement);
+    const redirect = () => {
+      this.updateViewer_(thumbnailObj.element);
+      this.closeGallery_();
+    };
+    element.addEventListener('click', redirect);
+    return element;
   }
 }
 

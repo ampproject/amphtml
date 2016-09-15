@@ -19,6 +19,8 @@
 import '../../third_party/babel/custom-babel-helpers';
 
 import {installAlpClickHandler, warmupStatic} from './handler';
+import {initLogConstructor} from '../../src/log';
 
+initLogConstructor();
 installAlpClickHandler(window);
 warmupStatic(window);

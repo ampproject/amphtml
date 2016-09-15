@@ -15,13 +15,23 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 
 class AmpReachPlayer extends AMP.BaseElement {
 
-  /** @override */
-  preconnectCallback(onLayout) {
-    this.preconnect.url('https://player-cdn.beachfrontmedia.com', onLayout);
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://player-cdn.beachfrontmedia.com', opt_onLayout);
   }
 
   /** @override */
@@ -39,9 +49,8 @@ class AmpReachPlayer extends AMP.BaseElement {
     iframe.src = 'https://player-cdn.beachfrontmedia.com/playerapi/v1/frame/player/?embed_id=' + encodeURIComponent(embedId);
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
-    /** @private {!Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

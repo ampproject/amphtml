@@ -26,7 +26,8 @@ import {
  * @return {!Promise<!AccessService>}
  */
 export function accessServiceFor(win) {
-  return getElementService(win, 'access', 'amp-access');
+  return /** @type {!Promise<!AccessService>} */ (
+        getElementService(win, 'access', 'amp-access'));
 }
 
 /**
@@ -36,5 +37,6 @@ export function accessServiceFor(win) {
  * @return {!Promise<?AccessService>}
  */
 export function accessServiceForOrNull(win) {
-  return getElementServiceIfAvailable(win, 'access', 'amp-access');
+  return /** @type {!Promise<?AccessService>} */ (
+      getElementServiceIfAvailable(win, 'access', 'amp-access'));
 }

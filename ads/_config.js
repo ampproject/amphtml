@@ -38,6 +38,7 @@ export const adPrefetch = {
     'https://j.amoad.com/js/n.js',
   ],
   appnexus: 'https://acdn.adnxs.com/ast/ast.js',
+  atomx: 'https://s.ato.mx/p.js',
   caprofitx: [
     'https://cdn.caprofitx.com/pfx.min.js',
     'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
@@ -229,3 +230,14 @@ export const clientIdScope = {
   adsense: 'AMP_ECID_GOOGLE',
   doubleclick: 'AMP_ECID_GOOGLE',
 };
+
+/**
+ * List of ad networks that will manually call `window.context.renderStart` to
+ * emit render-start event when ad actually starts rendering.
+ * Please add yourself here if you'd like to do so (which we encourage).
+ * @const {!Array<string>}
+ */
+export const waitForRenderStart = [
+  'doubleclick',
+  'fakead3p',
+];

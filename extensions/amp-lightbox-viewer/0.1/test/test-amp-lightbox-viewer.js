@@ -40,17 +40,19 @@ describe('amp-lightbox-viewer', () => {
   function runTests(autoLightbox) {
     it('should build', () => {
       return getAmpLightboxViewer(autoLightbox).then(viewer => {
-        const container = viewer.querySelector('.-amp-lightbox-viewer');
+        const container = viewer.querySelector('.-amp-lbv');
         expect(container).to.exist;
 
-        const mask = viewer.querySelector('.-amp-lightbox-viewer-mask');
+        const mask = viewer.querySelector('.-amp-lbv-mask');
         expect(mask).to.exist;
 
         const btns = viewer.querySelectorAll('[role=button]');
-        expect(btns.length).to.equal(3);
-        expect(btns[0].className).to.equal('amp-lightbox-viewer-button-next');
-        expect(btns[1].className).to.equal('amp-lightbox-viewer-button-prev');
-        expect(btns[2].className).to.equal('amp-lightbox-viewer-button-close');
+        expect(btns.length).to.equal(4);
+        expect(btns[0].className).to.equal('amp-lbv-button-next');
+        expect(btns[1].className).to.equal('amp-lbv-button-prev');
+        expect(btns[2].className).to.equal('amp-lbv-button-close');
+        expect(btns[3].className).to.equal(
+            'amp-lbv-button-gallery');
       });
     });
 
@@ -155,6 +157,28 @@ describe('amp-lightbox-viewer', () => {
         });
       });
     });
+
+    it('should create gallery with thumbnails', () => {
+      return getAmpLightboxViewer(autoLightbox).then(viewer => {
+        const impl = viewer.implementation_;
+        return impl.activate({source: item1}).then(() => {
+          expect(impl.activeElement_).to.equal(item1);
+          assertLightboxed(item1, impl, true, /*closed*/ false);
+          impl.vsync_.mutate = function(callback) {
+            callback();
+          };
+          impl.openGallery_();
+          const container = viewer.querySelector('.-amp-lbv');
+          expect(container.getAttribute('gallery-view')).to.equal('');
+          const gallery = viewer.querySelector(
+              '.-amp-lbv-gallery ');
+          expect(gallery.childNodes).to.have.length(3);
+          gallery.childNodes[1].dispatchEvent(new Event('click'));
+          expect(container.getAttribute('gallery-view')).to.be.null;
+          expect(impl.activeElement_).to.equal(item2);
+        });
+      });
+    });
   }
 
   function assertLightboxed(element, impl, isIt, closed) {
@@ -173,7 +197,7 @@ describe('amp-lightbox-viewer', () => {
   }
 
   function assertControls(viewer, hasPrevious, hasNext) {
-    const container = viewer.querySelector('.-amp-lightbox-viewer');
+    const container = viewer.querySelector('.-amp-lbv');
     expect(container.hasAttribute('no-prev')).to.equal(!hasPrevious);
     expect(container.hasAttribute('no-next')).to.equal(!hasNext);
   }

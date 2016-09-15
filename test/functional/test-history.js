@@ -20,6 +20,7 @@ import {
   HistoryBindingVirtual_,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -185,6 +186,7 @@ describe('HistoryBindingNatural', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
     };
+    installTimerService(windowStub);
     new HistoryBindingNatural_(windowStub);
     expect(replaceStateSpy.callCount).to.be.greaterThan(0);
     expect(replaceStateSpy.lastCall.args.length).to.equal(2);
@@ -202,7 +204,7 @@ describe('HistoryBindingNatural', () => {
     });
   });
 
-  it.skip('should pop a state from the window.history and notify', () => {
+  it('should pop a state from the window.history and notify', () => {
     return history.push().then(stackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
@@ -225,7 +227,7 @@ describe('HistoryBindingNatural', () => {
     });
   });
 
-  it.skip('should update its state and notify on history.back', () => {
+  it('should update its state and notify on history.back', () => {
     return history.push().then(unusedStackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(

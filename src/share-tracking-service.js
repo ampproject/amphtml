@@ -20,9 +20,11 @@ import {getElementServiceIfAvailable} from './element-service';
  * Returns a promise for the share tracking fragments or a promise for null
  * if it is not available on the current page.
  * @param {!Window} win
- * @return {!Promise<?Object<string, string>>}
+ * @return {!Promise<?{incomingFragment: string, outgoingFragment: string}>}
  */
 export function shareTrackingForOrNull(win) {
-  return getElementServiceIfAvailable(win, 'share-tracking',
-      'amp-share-tracking');
+  return (/** @type {
+    !Promise<?{incomingFragment: string, outgoingFragment: string}>} */ (
+      getElementServiceIfAvailable(win, 'share-tracking',
+          'amp-share-tracking')));
 }

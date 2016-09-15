@@ -59,16 +59,9 @@ export function layoutRectLtwh(left, top, width, height) {
  * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
-  return {
-    left: rect.left,
-    top: rect.top,
-    width: rect.width,
-    height: rect.height,
-    bottom: rect.top + rect.height,
-    right: rect.left + rect.width,
-  };
+  return layoutRectLtwh(Number(rect.left), Number(rect.top),
+      Number(rect.width), Number(rect.height));
 }
-
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.

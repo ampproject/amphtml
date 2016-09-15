@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
+import {listenOncePromise} from '../../src/event-helper';
 import {BaseElement} from '../../src/base-element';
+import {createAmpElementProto} from '../../src/custom-element';
+import {timerFor} from '../../src/timer';
 import * as sinon from 'sinon';
 
 describe('BaseElement', () => {
 
   let sandbox;
-  let div;
+  let customElement;
   let element;
-
+  document.registerElement('amp-test-element', {
+    prototype: createAmpElementProto(window, 'amp-test-element', BaseElement),
+  });
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    div = document.createElement('div');
-    element = new BaseElement(div);
+    customElement = document.createElement('amp-test-element');
+    element = new BaseElement(customElement);
   });
 
   afterEach(() => {
@@ -48,11 +53,11 @@ describe('BaseElement', () => {
     const target = document.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
-    div.setAttribute('data-test1', 'abc');
-    div.setAttribute('data-test2', 'xyz');
-    div.setAttribute('data-test3', '123');
+    customElement.setAttribute('data-test1', 'abc');
+    customElement.setAttribute('data-test2', 'xyz');
+    customElement.setAttribute('data-test3', '123');
 
-    element.propagateAttributes(['data-test1'], target);
+    element.propagateAttributes('data-test1', target);
     expect(target.hasAttributes()).to.be.true;
 
     expect(target.getAttribute('data-test1')).to.equal('abc');
@@ -89,4 +94,55 @@ describe('BaseElement', () => {
     element.executeAction({method: 'activate'}, false);
     expect(handler.callCount).to.equal(1);
   });
+
+  describe('forwardEvents', () => {
+    const TIMEOUT = 1000;
+    let target;
+    let event1;
+    let event2;
+    let event1Promise;
+    let event2Promise;
+
+    beforeEach(() => {
+      const timer = timerFor(element.win);
+      target = document.createElement('div');
+
+      event1 = document.createEvent('Event');
+      event1.initEvent('event1', false, true);
+
+      event2 = document.createEvent('Event');
+      event2.initEvent('event2', false, true);
+
+      event1Promise = listenOncePromise(element.element, 'event1');
+      event1Promise = timer.timeoutPromise(TIMEOUT, event1Promise);
+
+      event2Promise = listenOncePromise(element.element, 'event2');
+      event2Promise = timer.timeoutPromise(TIMEOUT, event2Promise);
+    });
+
+    it('forwards single event', () => {
+      element.forwardEvents('event1', target);
+      target.dispatchEvent(event1);
+      target.dispatchEvent(event2);
+
+      return Promise.all([
+        event1Promise,
+        event2Promise
+        .then(() => { assert.fail('Blur should not have been forwarded'); })
+        .catch(() => { /* timed-out, all good */ }),
+      ]);
+    });
+
+    it('forwards multiple events', () => {
+      element.forwardEvents(['event1', 'event2'], target);
+      target.dispatchEvent(event1);
+      target.dispatchEvent(event2);
+
+      return Promise.all([
+        event1Promise,
+        event2Promise,
+      ]);
+    });
+  });
+
 });

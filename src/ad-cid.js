@@ -18,6 +18,7 @@ import {cidForOrNull} from './cid';
 import {clientIdScope} from '../ads/_config';
 import {userNotificationManagerFor} from './user-notification';
 import {dev} from '../src/log';
+import {timerFor} from '../src/timer';
 
 
 /**
@@ -33,7 +34,7 @@ export function getAdCid(adElement) {
   if (!(scope || consentId)) {
     return Promise.resolve();
   }
-  return cidForOrNull(adElement.win).then(cidService => {
+  const cidPromise = cidForOrNull(adElement.win).then(cidService => {
     if (!cidService) {
       return;
     }
@@ -52,4 +53,12 @@ export function getAdCid(adElement) {
       return undefined;
     });
   });
+  // The CID should never be crucial for an ad. If it does not come within
+  // 1 second, assume it will never arrive.
+  return timerFor(adElement.win)
+      .timeoutPromise(1000, cidPromise, 'cid timeout').catch(error => {
+        // Timeout is not fatal.
+        dev().warn(error);
+        return undefined;
+      });
 }

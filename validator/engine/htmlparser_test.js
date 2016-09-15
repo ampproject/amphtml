@@ -208,6 +208,55 @@ describe('HtmlParser', () => {
       'startTag(A,[href,foo.html,",])', 'endTag(A)', 'endTag(BODY)', 'endDoc()'
     ]);
   });
+
+  // See https://www.w3.org/TR/html-markup/p.html for the logic.
+  it('closes <p> tags with omitted </p> tags implicitly', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    // Note the two double quotes at the end of the tag.
+    parser.parse(handler, '<p>I am not closed!<p>I am closed!</p>');
+    expect(handler.log).toEqual([
+      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
+      'startTag(P,[])', 'pcdata("I am not closed!")', 'endTag(P)',
+      'startTag(P,[])', 'pcdata("I am closed!")', 'endTag(P)',
+      'endTag(BODY)', 'endDoc()'
+    ]);
+  });
+
+  // See https://www.w3.org/TR/html-markup/dd.html for the logic.
+  it('closes <dd> and <dt> with omitted </dd> and </dt> implicitly', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    // Note the two double quotes at the end of the tag.
+    parser.parse(handler, '<dl><dd><dd><dt><dd></dl>');
+    expect(handler.log).toEqual([
+      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
+      'startTag(DL,[])',
+      'startTag(DD,[])', 'endTag(DD)',
+      'startTag(DD,[])', 'endTag(DD)',
+      'startTag(DT,[])', 'endTag(DT)',
+      'startTag(DD,[])', 'endTag(DD)',
+      'endTag(DL)',
+      'endTag(BODY)', 'endDoc()'
+    ]);
+  });
+
+  // See https://www.w3.org/TR/html-markup/li.html for the logic.
+  it('closes <li> tags with omitted </li> tags implicitly', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    // Note the two double quotes at the end of the tag.
+    parser.parse(handler, '<ul><li><li></ul>');
+    expect(handler.log).toEqual([
+      'startDoc()', 'markManufacturedBody()', 'startTag(BODY,[])',
+      'startTag(UL,[])',
+      'startTag(LI,[])', 'endTag(LI)',
+      'startTag(LI,[])', 'endTag(LI)',
+      'endTag(UL)',
+      'endTag(BODY)', 'endDoc()'
+    ]);
+  });
+
 });
 
 /**

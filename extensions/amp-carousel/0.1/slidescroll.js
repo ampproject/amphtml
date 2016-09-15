@@ -13,12 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {getStyle, setStyle} from '../../../src/style';
 import {numeric} from '../../../src/transition';
 import {timerFor} from '../../../src/timer';
+import {dev} from '../../../src/log';
 
 /** @const {string} */
 const SHOWN_CSS_CLASS = '-amp-slide-item-show';
@@ -33,59 +36,30 @@ const NATIVE_TOUCH_TIMEOUT = 120;
 const CUSTOM_SNAP_TIMEOUT = 100;
 
 export class AmpSlideScroll extends BaseSlides {
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-  /** @override */
-  buildSlides() {
-    /** @private @const {!Window} */
-    this.win_ = this.win;
 
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-    /** @private @const {!boolean} */
-    this.hasNativeSnapPoints_ = (
-        getStyle(this.element, 'scrollSnapType') != undefined);
-    this.element.classList.add('-amp-slidescroll');
+    /** @private {?../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = null;
+
+    /** @private {!boolean} */
+    this.hasNativeSnapPoints_ = false;
 
     /** @private {!Array<!Element>} */
-    this.slides_ = this.getRealChildren();
+    this.slides_ = [];
 
     /** @private {number} */
-    this.noOfSlides_ = this.slides_.length;
+    this.noOfSlides_ = 0;
 
-    /** @private {!Element} */
-    this.slidesContainer_ = this.win_.document.createElement('div');
-    this.slidesContainer_.classList.add('-amp-slides-container');
-
-    // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
-    if (this.hasNativeSnapPoints_) {
-      const start = this.win_.document.createElement('div');
-      start.classList.add('-amp-carousel-start-marker');
-      this.slidesContainer_.appendChild(start);
-
-      const end = this.win_.document.createElement('div');
-      end.classList.add('-amp-carousel-end-marker');
-      this.slidesContainer_.appendChild(end);
-    }
+    /** @private {?Element} */
+    this.slidesContainer_ = null;
 
     /** @private {!Array<!Element>} */
     this.slideWrappers_ = [];
 
-    this.slides_.forEach(slide => {
-      this.setAsOwner(slide);
-      const slideWrapper = this.win_.document.createElement('div');
-      slideWrapper.appendChild(slide);
-      slideWrapper.classList.add('-amp-slide-item');
-      this.slidesContainer_.appendChild(slideWrapper);
-      this.slideWrappers_.push(slideWrapper);
-    });
-
-    this.element.appendChild(this.slidesContainer_);
-
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.snappingInProgress_ = false;
 
     /** @private {?number} */
@@ -104,6 +78,58 @@ export class AmpSlideScroll extends BaseSlides {
      * @private {number}
      */
     this.elasticScrollState_ = 0;
+
+    /** @private {?number} */
+    this.slideIndex_ = null;
+
+    /** @private {number} */
+    this.slideWidth_ = 0;
+
+    /** @private {number} */
+    this.previousScrollLeft_ = 0;
+  }
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+  /** @override */
+  buildSlides() {
+    this.vsync_ = this.getVsync();
+
+    this.hasNativeSnapPoints_ = (
+        getStyle(this.element, 'scrollSnapType') != undefined);
+    this.element.classList.add('-amp-slidescroll');
+
+    this.slides_ = this.getRealChildren();
+
+    this.noOfSlides_ = this.slides_.length;
+
+    this.slidesContainer_ = this.win.document.createElement('div');
+    this.slidesContainer_.classList.add('-amp-slides-container');
+
+    // Workaround - https://bugs.webkit.org/show_bug.cgi?id=158821
+    if (this.hasNativeSnapPoints_) {
+      const start = this.win.document.createElement('div');
+      start.classList.add('-amp-carousel-start-marker');
+      this.slidesContainer_.appendChild(start);
+
+      const end = this.win.document.createElement('div');
+      end.classList.add('-amp-carousel-end-marker');
+      this.slidesContainer_.appendChild(end);
+    }
+
+    this.slides_.forEach(slide => {
+      this.setAsOwner(slide);
+      const slideWrapper = this.win.document.createElement('div');
+      slide.classList.add('amp-carousel-slide');
+      slideWrapper.appendChild(slide);
+      slideWrapper.classList.add('-amp-slide-item');
+      this.slidesContainer_.appendChild(slideWrapper);
+      this.slideWrappers_.push(slideWrapper);
+    });
+
+    this.element.appendChild(this.slidesContainer_);
 
     this.cancelTouchEvents_();
 
@@ -161,16 +187,14 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   onLayoutMeasure() {
-    /** @private {number} */
     this.slideWidth_ = this.getLayoutWidth();
 
-    /** @private {number} */
     this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
   layoutCallback() {
-    if (this.slideIndex_ == null) {
+    if (this.slideIndex_ === null) {
       this.showSlide_(0);
     }
     return Promise.resolve();
@@ -178,8 +202,9 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   updateViewportState(inViewport) {
-    if (this.slideIndex_ != null) {
-      this.updateInViewport(this.slides_[this.slideIndex_], inViewport);
+    if (this.slideIndex_ !== null) {
+      this.updateInViewport(
+          this.slides_[dev().assertNumber(this.slideIndex_)], inViewport);
     }
   }
 
@@ -195,12 +220,12 @@ export class AmpSlideScroll extends BaseSlides {
 
   /** @override */
   moveSlide(dir, animate) {
-    if (this.slideIndex_ != null) {
+    if (this.slideIndex_ !== null) {
       const hasNext = this.hasNext();
       const hasPrev = this.hasPrev();
       if ((dir == 1 && hasNext) ||
           (dir == -1 && hasPrev)) {
-        let newIndex = this.slideIndex_ + dir;
+        let newIndex = (dev().assertNumber(this.slideIndex_)) + dir;
         if (newIndex == -1) {
           newIndex = this.noOfSlides_ - 1;
         } else if (newIndex >= this.noOfSlides_) {
@@ -304,7 +329,8 @@ export class AmpSlideScroll extends BaseSlides {
     if (diff == 0) {
       // Snap and stay.
       toScrollLeft = hasPrev ? this.slideWidth_ : 0;
-    } else if (diff == 1 || diff == -1 * (this.noOfSlides_ - 1)) {
+    } else if (diff == 1 ||
+          (diff != -1 && diff == -1 * (this.noOfSlides_ - 1))) {
       // Move fwd.
       toScrollLeft = hasPrev ? this.slideWidth_ * 2 : this.slideWidth_;
     } else if (diff == -1 || diff == this.noOfSlides_ - 1) {
@@ -402,8 +428,9 @@ export class AmpSlideScroll extends BaseSlides {
     if (nextIndex != null) {
       showIndexArr.push(nextIndex);
     }
-    if (this.slideIndex_ != null) {
-      this.updateInViewport(this.slides_[this.slideIndex_], false);
+    if (this.slideIndex_ !== null) {
+      this.updateInViewport(this.slides_[
+          dev().assertNumber(this.slideIndex_)], false);
     }
     this.updateInViewport(this.slides_[newIndex], true);
     showIndexArr.forEach((showIndex, loopIndex) => {
@@ -470,9 +497,12 @@ export class AmpSlideScroll extends BaseSlides {
       return Promise.resolve();
     }
     const interpolate = numeric(fromScrollLeft, toScrollLeft);
-    return Animation.animate(this.slidesContainer_, pos => {
+    const curve = bezierCurve(0.4, 0, 0.2, 1); // fast-out-slow-in
+    const duration = 80;
+    const slidesContainer = dev().assertElement(this.slidesContainer_);
+    return Animation.animate(slidesContainer, pos => {
       this.slidesContainer_./*OK*/scrollLeft = interpolate(pos);
-    }, 80, 'ease-out').thenAlways();
+    }, duration, curve).thenAlways();
   }
 
   /**
@@ -481,12 +511,10 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   cancelTouchEvents_() {
-    // TODO(aghassemi): https://github.com/ampproject/amphtml/issues/4742
-    // prevents us from using SwipeXRecognizer with an empty handler to
-    // cancel the events. This work around is not great and temporary until
-    // #4742 is fixed.
-    this.element.addEventListener('touchmove', evt => {
-      evt.stopPropagation();
+    // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
+    // touchmove events.
+    this.element.addEventListener('touchmove', event => {
+      event.stopPropagation();
     });
   }
 }
