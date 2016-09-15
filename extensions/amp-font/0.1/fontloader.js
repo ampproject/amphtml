@@ -106,8 +106,8 @@ export class FontLoader {
         this.fontConfig_.style + ' ' +
         this.fontConfig_.variant + ' ' +
         this.fontConfig_.weight + ' ' +
-        this.fontConfig_.size + ' ' +
-        this.fontConfig_.family);
+        this.fontConfig_.size + ' \'' +
+        this.fontConfig_.family + '\'');
 
       if (this.canUseNativeApis_()) {
         // Check if font already exists.
