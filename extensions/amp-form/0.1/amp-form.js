@@ -181,7 +181,6 @@ export class AmpForm {
         measure: undefined,
         mutate: reportValidity,
       }, {
-        form: this.form_,
         validator: this.validator_,
       });
       return;

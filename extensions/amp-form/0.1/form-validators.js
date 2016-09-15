@@ -50,6 +50,9 @@ class FormValidator {
   constructor(form) {
     /** @const {!HTMLFOrmElement} */
     this.form = form;
+
+    /** @const {!Document} */
+    this.doc = form.ownerDocument;
   }
 
   /**
@@ -85,7 +88,7 @@ class PolyfillDefaultValidator extends FormValidator {
     super(form);
 
     if (!validationBubble) {
-      const win = form.ownerDocument.defaultView;
+      const win = this.doc.defaultView;
       validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
     }
   }
@@ -152,7 +155,7 @@ class AbstractCustomValidator extends FormValidator {
       return null;
     }
 
-    return document.querySelector(
+    return this.doc.querySelector(
         `[visible-when-invalid=${invalidType}][validation-for=${input.id}]`);
   }
 
@@ -197,7 +200,7 @@ class AbstractCustomValidator extends FormValidator {
     if (!input.id) {
       return null;
     }
-    return document.querySelector(
+    return this.doc.querySelector(
         `[visible-when-invalid][validation-for=${input.id}].visible`);;
   }
 
