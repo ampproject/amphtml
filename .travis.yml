@@ -49,7 +49,7 @@ script:
   # - gulp test --saucelabs --oldchrome
   - gulp validator
   - gulp size
-  - git diff
+  - git --no-pager diff
 branches:
   only:
     - master
