@@ -150,7 +150,6 @@ const cachePromise = caches.open('cdn-js').then(result => {
 function fetchAndCache(cache, request, requestFile, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
-
   return fetch(request).then(response => {
     // Did we receive a valid response (200 <= status < 300)?
     if (response && response.ok) {
@@ -193,6 +192,8 @@ function fetchAndCache(cache, request, requestFile, requestVersion) {
  * @return {!Promise<string>}
  */
 function getCachedVersion(cache, requestFile) {
+  // TODO(jridgewell): We should make this a bit smarter, so that it selects
+  // the version that has a lot of matches, not just this request file.
   return cache.keys().then(requests => {
     for (let i = 0; i < requests.length; i++) {
       const url = requests[i].url;
@@ -314,10 +315,10 @@ self.addEventListener('foreignfetch', event => {
     return;
   }
 
-  event.respondWith(response.then(response => {
-    // Foreign Fetch requires an { response: !Response } object.
+  event.respondWith(response.then(resp => {
+    // Foreign Fetch requires a { response: !Response } object.
     return {
-      response,
+      response: resp,
       // This allows CORS requests, if one were to come in.
       origin: event.origin,
     };
