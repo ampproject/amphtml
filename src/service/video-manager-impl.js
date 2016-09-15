@@ -283,7 +283,7 @@ class VideoEntry {
 
 /**
  * Detects whether the platform even supports autoplay videos.
- * @param {!../platform.Platform} platform
+ * @param {!../service/platform-impl.Platform} platform
  * @return {boolean}
  */
 function platformSupportsAutoplay(platform) {

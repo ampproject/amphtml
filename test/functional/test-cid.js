@@ -23,6 +23,7 @@ import {installCryptoService, Crypto,}
     from '../../extensions/amp-analytics/0.1/crypto-impl';
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
@@ -84,6 +85,7 @@ describe('cid', () => {
       setTimeout: window.setTimeout,
     };
     installTimerService(fakeWin);
+    installPlatformService(fakeWin);
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
@@ -264,6 +266,7 @@ describe('cid', () => {
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
+    installPlatformService(win);
     installViewerService(win).isIframed = () => false;
     installCidService(win);
     installCryptoService(win);

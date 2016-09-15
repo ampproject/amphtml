@@ -24,6 +24,7 @@ import {
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
@@ -67,6 +68,7 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
+    installPlatformService(windowApi);
     installViewerService(windowApi);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
@@ -657,6 +659,7 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
+      installPlatformService(windowApi);
       installViewerService(windowApi);
       binding = new ViewportBindingDef();
       viewport = new Viewport(windowApi, binding, viewer);
@@ -756,6 +759,7 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+
     documentElement = {
       style: {},
     };
@@ -769,6 +773,7 @@ describe('ViewportBindingNatural', () => {
     };
     windowApi.navigator = {userAgent: ''};
     windowMock = sandbox.mock(windowApi);
+    installPlatformService(windowApi);
     viewer = {
       isEmbedded: () => false,
       getPaddingTop: () => 19,

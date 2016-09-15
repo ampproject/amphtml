@@ -53,7 +53,7 @@ class AmpSocialShare extends AMP.BaseElement {
     this.params_ = Object.assign({}, typeConfig.defaultParams,
         getDataParamsFromAttributes(this.element));
 
-    /** @private @const {!../../../src/platform.Platform} */
+    /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = platformFor(this.win);
 
     /** @private {string} */

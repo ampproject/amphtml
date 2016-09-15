@@ -41,6 +41,7 @@ import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
+import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
@@ -85,6 +86,7 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installPlatformService(global);
   installTimerService(global);
   installViewerService(global);
   installViewportService(global);

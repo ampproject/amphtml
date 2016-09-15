@@ -47,7 +47,7 @@ export function installVideo(win) {
       /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
 
-      /** @private @const {!../src/platform.Platform} */
+      /** @private @const {!../src/service/platform-impl.Platform} */
       this.platform_ = platformFor(this.win);
 
       const posterAttr = this.element.getAttribute('poster');
