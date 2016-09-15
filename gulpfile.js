@@ -215,6 +215,7 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir,
     preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     externs: ['ads/ads.extern.js',],
     includeBasicPolyfills: true,
+    include3pDirectories: true,
   });
 
   // For compilation with babel we start with the amp-babel entry point,
