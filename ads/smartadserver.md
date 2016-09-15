@@ -29,14 +29,7 @@ All of the parameters listed here should be prefixed with "data-" when used.
 | target         | Your targeting string               | No       |
 | tag            | An ID for the tag containing the ad | No       |
 
-Note: If any of the required parameters is missing, the integration won't be able to work correctly,
-the Smart AdServer integration will call the ```window.context.noContentAvailable()``` function
-to let AMP know that the slot was not filled.
-
-## Supported AMP features
-
-```window.context.noContentAvailable()``` will be called for every failure to deliver an ad.
-```window.context.renderStart()``` will be called once the ad has been loaded.
+Note: If any of the required parameters is missing, the ad slot won't be filled.
 
 ## Example
 
