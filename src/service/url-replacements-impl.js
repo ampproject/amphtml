@@ -36,18 +36,6 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 
-/** @typedef {string|undefined} */
-let ResolverReturnDef;
-
-/** @typedef {function(...*):ResolverReturnDef} */
-let SyncResolverDef;
-
-/** @typedef {function(...*):!Promise<ResolverReturnDef>} */
-let AsyncResolverDef;
-
-/** @typedef {{sync: SyncResolverDef, async: AsyncResolverDef}} */
-let ReplacementDef;
-
 /**
  * This class replaces substitution variables with their values.
  * Document new values in ../spec/amp-var-substitutions.md
@@ -62,13 +50,13 @@ export class UrlReplacements {
     /** @private {!RegExp|undefined} */
     this.replacementExpr_ = undefined;
 
-    /** @private @const {!Object<string, !ReplacementDef>} */
+    /** @private @const {!Object<string, function(*, *):*>} */
     this.replacements_ = this.win_.Object.create(null);
 
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string, string>>} */
+    /** @private @const {!Promise<?Object<string>>} */
     this.variants_ = variantForOrNull(win);
 
     /**
@@ -88,7 +76,7 @@ export class UrlReplacements {
     this.initialized_ = true;
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
-      return String(Math.random());
+      return Math.random();
     });
 
     // Returns the canonical URL for this AMP document.
@@ -115,10 +103,8 @@ export class UrlReplacements {
     }));
 
     // Returns the referrer URL.
-    this.setAsync_('DOCUMENT_REFERRER', () => {
-      return viewerFor(this.win_).getReferrerUrl().then(referrer => {
-        return referrer === undefined ? '' : referrer;
-      });
+    this.set_('DOCUMENT_REFERRER', () => {
+      return viewerFor(this.win_).getReferrerUrl();
     });
 
     // Returns the title of this AMP document.
@@ -182,7 +168,7 @@ export class UrlReplacements {
         defaultValue;
     });
 
-    this.setAsync_('CLIENT_ID', (scope, opt_userNotificationId) => {
+    this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
       user().assertString(scope,
           'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
@@ -204,21 +190,21 @@ export class UrlReplacements {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.setAsync_('VARIANT', experiment => {
+    this.set_('VARIANT', experiment => {
       return this.variants_.then(variants => {
         user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        const variant = variants[/** @type {string} */(experiment)];
-        user().assert(variant !== undefined,
+        user().assert(variants[experiment] !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
+        const variant = variants[experiment];
         // When no variant assigned, use reserved keyword 'none'.
-        return variant === null ? 'none' : /** @type {string} */(variant);
+        return variant === null ? 'none' : variant;
       });
     });
 
     // Returns all assigned experiment variants in a serialized form.
-    this.setAsync_('VARIANTS', () => {
+    this.set_('VARIANTS', () => {
       return this.variants_.then(variants => {
         user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
@@ -235,7 +221,7 @@ export class UrlReplacements {
     });
 
     // Returns incoming share tracking fragment.
-    this.setAsync_('SHARE_TRACKING_INCOMING', () => {
+    this.set_('SHARE_TRACKING_INCOMING', () => {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
             'amp-share-tracking should be configured');
@@ -244,7 +230,7 @@ export class UrlReplacements {
     });
 
     // Returns outgoing share tracking fragment.
-    this.setAsync_('SHARE_TRACKING_OUTGOING', () => {
+    this.set_('SHARE_TRACKING_OUTGOING', () => {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
             'amp-share-tracking should be configured');
@@ -254,71 +240,71 @@ export class UrlReplacements {
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return String(Date.now());
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set_('TIMEZONE', () => {
-      return String(new Date().getTimezoneOffset());
+      return new Date().getTimezoneOffset();
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
-    this.setAsync_('SCROLL_TOP', () => {
+    this.set_('SCROLL_TOP', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollTop());
     });
 
     // Returns a promise resolving to viewport.getScrollLeft.
-    this.setAsync_('SCROLL_LEFT', () => {
+    this.set_('SCROLL_LEFT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollLeft());
     });
 
     // Returns a promise resolving to viewport.getScrollHeight.
-    this.setAsync_('SCROLL_HEIGHT', () => {
+    this.set_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollHeight());
     });
 
     // Returns a promise resolving to viewport.getScrollWidth.
-    this.setAsync_('SCROLL_WIDTH', () => {
+    this.set_('SCROLL_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollWidth());
     });
 
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
-      return String(this.win_.screen.width);
+      return this.win_.screen.width;
     });
 
     // Returns screen.height.
     this.set_('SCREEN_HEIGHT', () => {
-      return String(this.win_.screen.height);
+      return this.win_.screen.height;
     });
 
     // Returns screen.availHeight.
     this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
-      return String(this.win_.screen.availHeight);
+      return this.win_.screen.availHeight;
     });
 
     // Returns screen.availWidth.
     this.set_('AVAILABLE_SCREEN_WIDTH', () => {
-      return String(this.win_.screen.availWidth);
+      return this.win_.screen.availWidth;
     });
 
     // Returns screen.ColorDepth.
     this.set_('SCREEN_COLOR_DEPTH', () => {
-      return String(this.win_.screen.colorDepth);
+      return this.win_.screen.colorDepth;
     });
 
     // Returns the viewport height.
-    this.setAsync_('VIEWPORT_HEIGHT', () => {
+    this.set_('VIEWPORT_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().height);
     });
 
     // Returns the viewport width.
-    this.setAsync_('VIEWPORT_WIDTH', () => {
+    this.set_('VIEWPORT_WIDTH', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getSize().width);
     });
@@ -338,82 +324,80 @@ export class UrlReplacements {
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
-    this.setTimingResolver_(
-      'PAGE_LOAD_TIME', 'navigationStart', 'loadEventStart');
+    this.set_('PAGE_LOAD_TIME', () => {
+      return this.getTimingData_('navigationStart', 'loadEventStart');
+    });
 
     // Returns the time it took to perform DNS lookup for the domain.
-    this.setTimingResolver_(
-      'DOMAIN_LOOKUP_TIME', 'domainLookupStart', 'domainLookupEnd');
+    this.set_('DOMAIN_LOOKUP_TIME', () => {
+      return this.getTimingData_('domainLookupStart', 'domainLookupEnd');
+    });
 
     // Returns the time it took to connet to the server.
-    this.setTimingResolver_(
-      'TCP_CONNECT_TIME', 'connectStart', 'connectEnd');
+    this.set_('TCP_CONNECT_TIME', () => {
+      return this.getTimingData_('connectStart', 'connectEnd');
+    });
 
     // Returns the time it took for server to start sending a response to the
     // request.
-    this.setTimingResolver_(
-      'SERVER_RESPONSE_TIME', 'requestStart', 'responseStart');
+    this.set_('SERVER_RESPONSE_TIME', () => {
+      return this.getTimingData_('requestStart', 'responseStart');
+    });
 
     // Returns the time it took to download the page.
-    this.setTimingResolver_(
-      'PAGE_DOWNLOAD_TIME', 'responseStart', 'responseEnd');
+    this.set_('PAGE_DOWNLOAD_TIME', () => {
+      return this.getTimingData_('responseStart', 'responseEnd');
+    });
 
     // Returns the time it took for redirects to complete.
-    this.setTimingResolver_(
-      'REDIRECT_TIME', 'navigationStart', 'fetchStart');
+    this.set_('REDIRECT_TIME', () => {
+      return this.getTimingData_('navigationStart', 'fetchStart');
+    });
 
     // Returns the time it took for DOM to become interactive.
-    this.setTimingResolver_(
-      'DOM_INTERACTIVE_TIME', 'navigationStart', 'domInteractive');
+    this.set_('DOM_INTERACTIVE_TIME', () => {
+      return this.getTimingData_('navigationStart', 'domInteractive');
+    });
 
     // Returns the time it took for content to load.
-    this.setTimingResolver_(
-      'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
+    this.set_('CONTENT_LOAD_TIME', () => {
+      return this.getTimingData_('navigationStart',
+          'domContentLoadedEventStart');
+    });
 
     // Access: Reader ID.
-    this.setAsync_('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
+    this.set_('ACCESS_READER_ID', () => {
       return this.getAccessValue_(accessService => {
         return accessService.getAccessReaderId();
       }, 'ACCESS_READER_ID');
-    }));
+    });
 
     // Access: data from the authorization response.
-    this.setAsync_('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
+    this.set_('AUTHDATA', field => {
       user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
-    }));
+    });
 
     // Returns an identifier for the viewer.
-    this.setAsync_('VIEWER', () => {
-      return viewerFor(this.win_).getViewerOrigin().then(viewer => {
-        return viewer == undefined ? '' : viewer;
-      });
+    this.set_('VIEWER', () => {
+      return viewerFor(this.win_).getViewerOrigin();
     });
 
     // Returns the total engaged time since the content became viewable.
-    this.setAsync_('TOTAL_ENGAGED_TIME', () => {
+    this.set_('TOTAL_ENGAGED_TIME', () => {
       return activityFor(this.win_).then(activity => {
         return activity.getTotalEngagedTime();
       });
     });
 
-    this.set_('NAV_TIMING',
-      (startAttribute, endAttribute) => {
-        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-            'start attribute name, is required');
-        return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
-            /**@type {string}*/(endAttribute));
-      });
-    this.setAsync_('NAV_TIMING',
-      (startAttribute, endAttribute) => {
-        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-            'start attribute name, is required');
-        return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
-            /**@type {string}*/(endAttribute));
-      });
+    this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return this.getTimingData_(startAttribute, endAttribute);
+    });
 
     this.set_('NAV_TYPE', () => {
       return this.getNavigationData_('type');
@@ -442,7 +426,7 @@ export class UrlReplacements {
    * the resulting value is `null`.
    * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {Promise<?AccessService>}
+   * @return {T|null}
    * @template T
    */
   getAccessValue_(getter, expr) {
@@ -461,60 +445,46 @@ export class UrlReplacements {
    * The data for the timing events is retrieved from performance.timing API.
    * If start and end events are both given, the result is the difference between the two.
    * If only start event is given, the result is the timing value at start event.
-   * @param {string} startEvent
-   * @param {string=} endEvent
-   * @return {!Promise<ResolverReturnDef>}
+   * @param {*} startEvent
+   * @param {*=} endEvent
+   * @return {!Promise<string|undefined>}
    * @private
    */
-  getTimingDataAsync_(startEvent, endEvent) {
-    let metric = this.getTimingDataSync_(startEvent, endEvent);
-    if (metric === '') {
-      // Metric is not yet available. Retry after a delay.
-      return loadPromise(this.win_).then(() => {
-        metric = this.getTimingDataSync_(startEvent, endEvent);
-        return metric === '' ? undefined : metric;
-      });
-    }
-    return Promise.resolve(metric);
-  }
-
-  /**
-   * Returns navigation timing information based on the start and end events.
-   * The data for the timing events is retrieved from performance.timing API.
-   * If start and end events are both given, the result is the difference between the two.
-   * If only start event is given, the result is the timing value at start event.
-   * Enforces synchronous evaluation.
-   * @param {string} startEvent
-   * @param {string=} endEvent
-   * @return {string|undefined} undefined if API is not available, empty string
-   *    if it is not yet available, or value as string
-   */
-  getTimingDataSync_(startEvent, endEvent) {
-    const timingInfo = this.win_['performance'] &&
-        this.win_['performance']['timing'];
+  getTimingData_(startEvent, endEvent) {
+    const timingInfo = this.win_['performance']
+        && this.win_['performance']['timing'];
     if (!timingInfo || timingInfo['navigationStart'] == 0) {
       // Navigation timing API is not supported.
-      return;
+      return Promise.resolve();
     }
 
-    const metric = (endEvent === undefined)
+    let metric = (endEvent === undefined)
         ? timingInfo[startEvent]
         : timingInfo[endEvent] - timingInfo[startEvent];
 
     if (!isFiniteNumber(metric)) {
       // The metric is not supported.
-      return;
-    } else if (metric < 0) {;
-      return '';
+      return Promise.resolve();
+    } else if (metric < 0) {
+      // Metric is not yet available. Retry after a delay.
+      return loadPromise(this.win_).then(() => {
+        metric = (endEvent === undefined)
+            ? timingInfo[startEvent]
+            : timingInfo[endEvent] - timingInfo[startEvent];
+        return (!isFiniteNumber(metric) || metric < 0)
+            ? undefined
+            : String(metric);
+      });
     } else {
-      return String(metric);
+      return /** @type {!Promise<(string|undefined)>} */ (
+          Promise.resolve(String(metric)));
     }
   }
 
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {string|undefined}
+   * @return {!Promise<undefined>|string}
    * @private
    */
   getNavigationData_(attribute) {
@@ -522,82 +492,25 @@ export class UrlReplacements {
         && this.win_['performance']['navigation'];
     if (!navigationInfo || navigationInfo[attribute] === undefined) {
       // PerformanceNavigation interface is not supported or attribute is not implemented.
-      return ;
+      return Promise.resolve();
     }
 
     return String(navigationInfo[attribute]);
   }
 
   /**
-   *
-   * Sets a synchronous value resolver for the variable with the specified name.
-   * The value resolver may optionally take an extra parameter.
-   * Can be called in conjuction with setAsync to allow for additional
-   * asynchronous resolver where expand will use async and expandSync the sync
-   * version.
+   * Sets the value resolver for the variable with the specified name. The
+   * value resolver may optionally take an extra parameter.
    * @param {string} varName
-   * @param {!SyncResolverDef} syncResolver
+   * @param {function(*, *):*} resolver
    * @return {!UrlReplacements}
    * @private
    */
-  set_(varName, syncResolver) {
+  set_(varName, resolver) {
     dev().assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
-    this.replacements_[varName].sync = syncResolver;
+    this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;
-  }
-
-  /**
-   * Sets an async value resolver for the variable with the specified name.
-   * The value resolver may optionally take an extra parameter.
-   * Can be called in conjuction with setAsync to allow for additional
-   * asynchronous resolver where expand will use async and expandSync the sync
-   * version.
-   * @param {string} varName
-   * @param {!AsyncResolverDef} asyncResolver
-   * @return {!UrlReplacements}
-   * @private
-   */
-  setAsync_(varName, asyncResolver) {
-    dev().assert(varName.indexOf('RETURN') == -1);
-    this.replacements_[varName] =
-        this.replacements_[varName] || {sync: undefined, async: undefined};
-    this.replacements_[varName].async = asyncResolver;
-    this.replacementExpr_ = undefined;
-    return this;
-  }
-
-  /**
-   * Utility function for setting resolver for timing data that supports
-   * sync and async.
-   * @param {string} varName
-   * @param {string} startEvent
-   * @param {string=} endEvent
-   * @return {!UrlReplacements}
-   * @private
-   */
-  setTimingResolver_(varName, startEvent, endEvent) {
-    return this.set_(varName, () => {
-      return this.getTimingDataSync_(startEvent, endEvent);
-    }).setAsync_(varName, () => {
-      return this.getTimingDataAsync_(startEvent, endEvent);
-    });
-  }
-
-  /**
-   * Synchronously expands the provided URL by replacing all known variables with
-   * their resolved values. Optional `opt_bindings` can be used to add new
-   * variables or override existing ones.  Any async bindings are ignored.
-   * @param {string} url
-   * @param {!Object<string, (ResolverReturnDef|!SyncResolverDef)>=} opt_bindings
-   * @param {!Object<string, ResolverReturnDef>=} opt_collectVars
-   * @return {string}
-   */
-  expandSync(url, opt_bindings, opt_collectVars) {
-    return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, true));
   }
 
   /**
@@ -608,19 +521,18 @@ export class UrlReplacements {
    * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expandAsync(url, opt_bindings) {
-    return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
+  expand(url, opt_bindings) {
+    return this.expand_(url, opt_bindings);
   }
 
   /**
    * @param {string} url
    * @param {!Object<string, *>=} opt_bindings
    * @param {!Object<string, *>=} opt_collectVars
-   * @param {boolean=} opt_sync
-   * @return {!Promise<string>|string}
+   * @return {!Promise<string>}
    * @private
    */
-  expand_(url, opt_bindings, opt_collectVars, opt_sync) {
+  expand_(url, opt_bindings, opt_collectVars) {
     if (!this.initialized_) {
       this.initialize_();
     }
@@ -637,20 +549,8 @@ export class UrlReplacements {
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
       }
-      let binding;
-      if (opt_bindings && (name in opt_bindings)) {
-        binding = opt_bindings[name];
-      } else if ((binding = this.getReplacement_(name))) {
-        if (opt_sync) {
-          binding = binding.sync;
-          if (!binding) {
-            user().error('ignoring async replacement key: ' + name);
-            return '';
-          }
-        } else {
-          binding = binding.async || binding.sync;
-        }
-      }
+      const binding = (opt_bindings && (name in opt_bindings)) ?
+          opt_bindings[name] : this.getReplacement_(name);
       let val;
       try {
         val = (typeof binding == 'function') ?
@@ -658,20 +558,11 @@ export class UrlReplacements {
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
-        if (opt_sync) {
-          user().error('Error evaluating replacement: ' + name, e);
-          val = '';
-        } else {
-          rethrowAsync(e);
-        }
+        rethrowAsync(e);
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
-        if (opt_sync) {
-          user().error('ignoring promise value for key: ' + name);
-          return '';
-        }
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.
@@ -699,7 +590,7 @@ export class UrlReplacements {
       replacementPromise = replacementPromise.then(() => url);
     }
 
-    return opt_sync ? url : (replacementPromise || Promise.resolve(url));
+    return replacementPromise || Promise.resolve(url);
   }
 
   /**
@@ -718,7 +609,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {!ReplacementDef}
+   * @return {function(*, *):*}
    */
   getReplacement_(name) {
     return this.replacements_[name];
