@@ -89,9 +89,9 @@ export class AmpFreshManager {
    */
   update_(docFromServer) {
     Object.keys(this.ampFreshInstances_).forEach(id => {
-      const ampFresh = this.ampFreshInstances_[id];
-      const counterpart = docFromServer.querySelector(`#${id}`);
+      const counterpart = docFromServer.getElementById(id);
       if (counterpart) {
+        const ampFresh = this.ampFreshInstances_[id];
         ampFresh.update(user().assertElement(counterpart));
       }
     });

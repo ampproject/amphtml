@@ -58,9 +58,14 @@ describe('amp-fresh', () => {
   it('should replace its subtree', () => {
     fresh.buildCallback();
     expect(fresh.element.innerHTML).to.equal('<span>hello</span>');
-    const doc = document.createElement('div');
-    doc.innerHTML = '<amp-fresh id="amp-fresh-1">' +
-        '<span>hello</span><div>world</div>!</amp-fresh>';
+    const doc = {
+      getElementById: function(id) {
+        const el = document.createElement('amp-fresh');
+        el.innerHTML = '<span>hello</span><div>world</div>!';
+        el.setAttribute('id', id);
+        return el;
+      },
+    };
     manager.update_(doc);
     expect(fresh.element.innerHTML).to.equal(
         '<span>hello</span><div>world</div>!');
