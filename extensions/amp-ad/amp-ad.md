@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -89,6 +89,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Atomx](../../ads/atomx.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
+- [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -148,7 +149,7 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 Optional attribute. If provided will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
-### Experimental: data-loading-strategy
+### data-loading-strategy
 
 Supported value: `prefer-viewability-over-views`. Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view.
 

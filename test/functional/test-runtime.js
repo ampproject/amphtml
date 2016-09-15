@@ -27,6 +27,7 @@ import {platformFor} from '../../src/platform';
 import * as ext from '../../src/service/extensions-impl';
 import * as extel from '../../src/extended-element';
 import * as styles from '../../src/style-installer';
+import * as shadowembed from '../../src/shadow-embed';
 import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
@@ -48,8 +49,9 @@ describe('runtime', () => {
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
+      localStorage: {},
       AMP: [],
-      location: {},
+      location: 'https://acme.com/',
       addEventListener: () => {},
       document: window.document,
       history: {},
@@ -236,11 +238,11 @@ describe('runtime', () => {
     expect(progress).to.equal('13');
 
     expect(errorStub.callCount).to.equal(1);
-    expect(errorStub.calledWith('runtime',
+    expect(errorStub).to.be.calledWith('runtime',
         sinon.match(() => true),
         sinon.match(arg => {
           return !!arg.message.match(/extension error/);
-        }))).to.be.true;
+        }));
   });
 
   describe('single-mode', () => {
@@ -410,7 +412,7 @@ describe('runtime', () => {
 
     it('should register element without CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({
@@ -444,7 +446,7 @@ describe('runtime', () => {
 
     it('should register element with CSS', () => {
       const servicePromise = getServicePromise(win, 'amp-ext');
-      const installStylesStub = sandbox.stub(styles,
+      const installStylesStub = sandbox.stub(shadowembed,
           'installStylesForShadowRoot');
 
       win.AMP.push({

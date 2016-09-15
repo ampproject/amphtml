@@ -115,12 +115,12 @@ export class ActionService {
       // fast-click.
       this.ampdoc.getRootNode().addEventListener('click', event => {
         if (!event.defaultPrevented) {
-          this.trigger(event.target, 'tap', event);
+          this.trigger(dev().assertElement(event.target), 'tap', event);
         }
       });
     } else if (name == 'submit') {
       this.ampdoc.getRootNode().addEventListener('submit', event => {
-        this.trigger(event.target, 'submit', event);
+        this.trigger(dev().assertElement(event.target), 'submit', event);
       });
     }
   }
@@ -196,7 +196,7 @@ export class ActionService {
   /**
    * @param {!Element} source
    * @param {string} actionEventType
-   * @param {!Event} event
+   * @param {?Event} event
    * @private
    */
   action_(source, actionEventType, event) {
@@ -442,7 +442,7 @@ function assertActionForParser(s, context, condition, opt_message) {
  * @param {!{type: TokenType, value: *}} tok
  * @param {TokenType} type
  * @param {*=} opt_value
- * @return {!{type: string, value: *}}
+ * @return {!{type: TokenType, value: *}}
  * @private
  */
 function assertTokenForParser(s, context, tok, type, opt_value) {

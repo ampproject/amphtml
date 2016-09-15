@@ -49,6 +49,7 @@ describe('AccessOtherAdapter', () => {
         authorizationResponse: null,
       });
       expect(adapter.isProxyOrigin_).to.be.false;
+      expect(adapter.isPingbackEnabled()).to.be.false;
     });
 
     it('should load valid config with fallback object', () => {

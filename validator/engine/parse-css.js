@@ -182,6 +182,7 @@ parse_css.Stylesheet = class extends parse_css.Rule {
     for (const rule of this.rules) {
       rule.accept(visitor);
     }
+    visitor.leaveStylesheet(this);
   }
 };
 if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -221,6 +222,7 @@ parse_css.AtRule = class extends parse_css.Rule {
     for (const declaration of this.declarations) {
       declaration.accept(visitor);
     }
+    visitor.leaveAtRule(this);
   }
 };
 if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -252,6 +254,7 @@ parse_css.QualifiedRule = class extends parse_css.Rule {
     for (const declaration of this.declarations) {
       declaration.accept(visitor);
     }
+    visitor.leaveQualifiedRule(this);
   }
 };
 if (amp.validator.GENERATE_DETAILED_ERRORS) {
@@ -281,7 +284,10 @@ parse_css.Declaration = class extends parse_css.Rule {
   }
 
   /** @inheritDoc */
-  accept(visitor) { visitor.visitDeclaration(this); }
+  accept(visitor) {
+    visitor.visitDeclaration(this);
+    visitor.leaveDeclaration(this);
+  }
 };
 if (amp.validator.GENERATE_DETAILED_ERRORS) {
   /** @inheritDoc */
@@ -294,20 +300,38 @@ if (amp.validator.GENERATE_DETAILED_ERRORS) {
   };
 }
 
+/**
+ * A visitor for Rule subclasses (StyleSheet, AtRule, QualifiedRule,
+ * Declaration). Pass this to the Rule::Accept method.
+ * Visitation order is to call the Visit* method on the current node,
+ * then visit the children, then call the Leave* method on the current node.
+ */
 parse_css.RuleVisitor = class {
   constructor() {}
 
   /** @param {!parse_css.Stylesheet} stylesheet */
   visitStylesheet(stylesheet) {}
 
+  /** @param {!parse_css.Stylesheet} stylesheet */
+  leaveStylesheet(stylesheet) {}
+
   /** @param {!parse_css.AtRule} atRule */
   visitAtRule(atRule) {}
+
+  /** @param {!parse_css.AtRule} atRule */
+  leaveAtRule(atRule) {}
 
   /** @param {!parse_css.QualifiedRule} qualifiedRule */
   visitQualifiedRule(qualifiedRule) {}
 
+  /** @param {!parse_css.QualifiedRule} qualifiedRule */
+  leaveQualifiedRule(qualifiedRule) {}
+
   /** @param {!parse_css.Declaration} declaration */
   visitDeclaration(declaration) {}
+
+  /** @param {!parse_css.Declaration} declaration */
+  leaveDeclaration(declaration) {}
 };
 
 /**
@@ -897,10 +921,10 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
   }
 
   /** @inheritDoc */
-  visitStylesheet(stylesheet) { this.atRuleScope = ''; }
+  visitAtRule(atRule) { this.atRuleScope = atRule.name; }
 
   /** @inheritDoc */
-  visitAtRule(atRule) { this.atRuleScope = atRule.name; }
+  leaveAtRule(atRule) { this.atRuleScope = ''; }
 
   /** @inheritDoc */
   visitQualifiedRule(qualifiedRule) { this.atRuleScope = ''; }

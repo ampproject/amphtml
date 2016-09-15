@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -92,6 +92,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [CA-ProFit-X](../ads/caprofitx.md)
 - [Chargeads](../ads/chargeads.md)
 - [Colombia](../ads/colombia.md)
+- [Content.ad](../ads/contentad.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/google/doubleclick.md)

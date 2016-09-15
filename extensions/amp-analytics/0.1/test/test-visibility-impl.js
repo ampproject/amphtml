@@ -66,7 +66,7 @@ describe('amp-analytics.visibility', () => {
           getLayoutBox: () => {},
           element: {getIntersectionChangeEntry: getIntersectionStub},
           getId: getIdStub,
-          isLayoutPending: () => false});
+          hasLoadedOnce: () => true});
   });
 
   afterEach(() => {

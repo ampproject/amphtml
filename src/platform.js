@@ -28,7 +28,7 @@ export class Platform {
    */
   constructor(win) {
     /** @const {!Navigator} */
-    this.navigator = win.navigator;
+    this.navigator = /** @type {!Navigator} */ (win.navigator);
   }
 
   /**
@@ -66,7 +66,7 @@ export class Platform {
   }
 
   /**
-   * Whether the current browser is a Chrome browser.
+   * Whether the current browser is a Firefox browser.
    * @return {boolean}
    */
   isFirefox() {

@@ -20,6 +20,7 @@ import {
   HistoryBindingVirtual_,
 } from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -185,6 +186,7 @@ describe('HistoryBindingNatural', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
     };
+    installTimerService(windowStub);
     new HistoryBindingNatural_(windowStub);
     expect(replaceStateSpy.callCount).to.be.greaterThan(0);
     expect(replaceStateSpy.lastCall.args.length).to.equal(2);

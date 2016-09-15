@@ -63,6 +63,13 @@ describe('amp-instagram', () => {
     });
   });
 
+  it('sets noprerender on amp-img', () => {
+    return getIns('fBwFP').then(ins => {
+      expect(ins.querySelector('amp-img').hasAttribute('noprerender'))
+          .to.be.true;
+    });
+  });
+
   it('builds a placeholder image without inserting iframe', () => {
     return getIns('fBwFP', true, ins => {
       console.log(ins);

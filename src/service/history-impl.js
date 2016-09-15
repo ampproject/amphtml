@@ -52,7 +52,7 @@ export class History {
    * @param {!HistoryBindingInterface} binding
    */
   constructor(win, binding) {
-    /** @private @const {!../timer.Timer} */
+    /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
 
     /** @private @const {!HistoryBindingInterface} */
@@ -244,7 +244,7 @@ export class HistoryBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!../timer.Timer} */
+    /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
 
     const history = this.win.history;
@@ -314,10 +314,10 @@ export class HistoryBindingNatural_ {
       };
     }
 
-    /** @private @const {function(*, string=, string=)} */
+    /** @private @const {!Function} */
     this.pushState_ = pushState;
 
-    /** @private @const {function(*, string=, string=)} */
+    /** @private @const {!Function} */
     this.replaceState_ = replaceState;
 
     try {
@@ -503,9 +503,9 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {*} state
-   * @param {string|undefined} title
-   * @param {string|undefined} url
+   * @param {*=} state
+   * @param {(string|undefined)=} title
+   * @param {(string|undefined)=} url
    * @private
    */
   historyPushState_(state, title, url) {
@@ -525,9 +525,9 @@ export class HistoryBindingNatural_ {
   }
 
   /**
-   * @param {*} state
-   * @param {string|undefined} title
-   * @param {string|undefined} url
+   * @param {*=} state
+   * @param {(string|undefined)=} title
+   * @param {(string|undefined)=} url
    * @private
    */
   historyReplaceState_(state, title, url) {

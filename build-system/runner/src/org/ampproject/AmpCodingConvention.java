@@ -17,6 +17,7 @@
 package org.ampproject;
 
 import com.google.common.collect.ImmutableList;
+import com.google.javascript.jscomp.ClosureCodingConvention.AssertFunctionByTypeName;
 import com.google.javascript.jscomp.CodingConvention;
 import com.google.javascript.jscomp.CodingConvention.AssertionFunctionSpec;
 import com.google.javascript.jscomp.CodingConventions;
@@ -45,9 +46,10 @@ public final class AmpCodingConvention extends CodingConventions.Proxy {
     return ImmutableList.of(
         new AssertionFunctionSpec("user.assert", JSType.TRUTHY),
         new AssertionFunctionSpec("dev.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("module$src$log.user.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("module$src$log.dev.assert", JSType.TRUTHY),
-        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY)
+        new AssertionFunctionSpec("Log$$module$src$log.prototype.assert", JSType.TRUTHY),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertElement", "Element"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertString", "string"),
+        new AssertFunctionByTypeName("Log$$module$src$log.prototype.assertNumber", "number")
     );
   }
 
