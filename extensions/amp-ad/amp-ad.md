@@ -1,6 +1,6 @@
-# <a name="amp-ad"></a> `amp-ad`
+# <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
-NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
+NOTE: The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A container to display an ad. AMP documents only support ads served via HTTPS.</td>
+    <td>A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -58,8 +58,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_pubname="test123"
     data-aax_src="302">
 </amp-ad>
-```
-```html
+
 <amp-ad width=320 height=140
     type="colombia"
     layout=responsive
@@ -67,6 +66,15 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-clmb_position="1"
     data-clmb_section="0">
 </amp-ad>
+
+<amp-embed width=400 height=300
+    type="taboola"
+    layout=responsive
+    data-publisher=thepublisher
+    data-mode=themode
+    data-article=auto
+    data-placement="Below Article Thumbnails">
+</amp-embed>
 ```
 
 ## Supported ad networks
@@ -121,6 +129,11 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldbot](../../ads/yieldbot.md)
 - [Yieldmo](../../ads/yieldmo.md)
 - [YahooJP](../../ads/yahoojp.md)
+
+## Supported embed types
+
+- [Taboola](../../ads/taboola.md)
+- [ZergNet](../../ads/zergnet.md)
 
 ## Styling
 
@@ -224,4 +237,4 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/validator/v
 
 ## Notes
 
-To use `<amp-ad>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.
+To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.
