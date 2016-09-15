@@ -146,7 +146,7 @@ function addRuntimeClasses(win) {
 /**
  * @param {!Window} win
  * @return {!Object} All services need to return an object to "load".
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function installDynamicClassesService(win) {
   return getService(win, 'amp-dynamic-css-classes', () => {

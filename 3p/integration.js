@@ -463,7 +463,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
@@ -489,7 +489,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
  * Check that parent host name was whitelisted.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   if (!window.document.referrer) {
@@ -525,7 +525,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
 /**
  * Throws if this window is a top level window.
  * @param {!Window} window
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function ensureFramed(window) {
   if (window == window.parent) {
