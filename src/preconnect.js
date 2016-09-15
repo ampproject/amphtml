@@ -135,18 +135,6 @@ export class Preconnect {
   }
 
   /**
-   * Temporary to not break prod when versions are misaligned across binaries.
-   * DO NOT USE!
-   * This should be safe to remove 1 version after 1468017284333 hits prod.
-   * @param {string} url
-   * @param {string=} opt_preloadAs
-   * @deprecated
-   */
-  prefetch(url, opt_preloadAs) {
-    this.preload(url, opt_preloadAs);
-  }
-
-  /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
