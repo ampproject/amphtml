@@ -82,14 +82,12 @@ export class ClickHandler {
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
-    /** @private {!function(!Event)|undefined} */
-    this.boundHandler_ = undefined;
-
     // Only intercept clicks when iframed.
     if (this.viewer_.isIframed() && this.viewer_.isOvertakeHistory()) {
-      this.boundHandler_ = this.handle_.bind(this);
+      /** @private @const {!function(!Event)|undefined} */
+      this.boundHandle_ = this.handle_.bind(this);
       this.win.document.documentElement.addEventListener(
-          'click', this.boundHandler_);
+          'click', this.boundHandle_);
     }
   }
 
@@ -97,23 +95,21 @@ export class ClickHandler {
    * Removes all event listeners.
    */
   cleanup() {
-    if (this.boundHandler_) {
+    if (this.boundHandle_) {
       this.win.document.documentElement.removeEventListener(
-          'click', this.boundHandler_);
-      this.boundHandler_ = undefined;
+          'click', this.boundHandle_);
     }
   }
 
   /**
    * Click event handler which on bubble propagation intercepts any click on the
    * current document and prevent any linking to an identifier from pushing into
-   * the history stack; on capture propagation expands anchor href.
-   * @param {boolean} isCapture
+   * the history stack.
    * @param {!Event} e
    */
-  handle_(isCapture, e) {
-    onDocumentElementClick_(e, this.viewport_, this.history_,
-        this.urlReplacements_, this.isIosSafari_, isCapture);
+  handle_(e) {
+    onDocumentElementClick_(
+          e, this.viewport_, this.history_, this.isIosSafari_);
   }
 }
 
@@ -186,7 +182,7 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
   // within an anchor tag, we need to check the event path prior to looking
   // at the host element's closest tags.
   const target = getElementByTagNameFromEventShadowDomPath_(e, 'A') ||
-      closestByTag(e.target, 'A');
+      closestByTag(dev().assertElement(e.target), 'A');
 
   // Expand URL where valid.
   if (target && target.href) {
@@ -205,7 +201,6 @@ export function onDocumentElementCapturedClick_(e, urlReplacements) {
  * @param {!./service/viewport-impl.Viewport} viewport
  * @param {!./service/history-impl.History} history
  * @param {boolean} isIosSafari
- * @param {boolean} isIframed
  */
 export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
   if (e.defaultPrevented) {

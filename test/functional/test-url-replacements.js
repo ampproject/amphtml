@@ -711,7 +711,7 @@ describe('UrlReplacements', () => {
       }, collectVars);
     expect(expanded).to.match(/^r=\d\.\d+&c=ABC&f=helloworld&a=b&d=&e=9$/);
     expect(collectVars).to.deep.equal({
-      'RANDOM': parseFloat(/^r=(\d\.\d+)/.exec(expanded)[1]),
+      'RANDOM': /^r=(\d\.\d+)/.exec(expanded)[1],
       'CONST': 'ABC',
       'FUNCT(hello,world)': 'helloworld',
       'PAGE_LOAD_TIME': '9',

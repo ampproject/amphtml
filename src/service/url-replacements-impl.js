@@ -68,7 +68,7 @@ export class UrlReplacements {
     /** @private @const {function(!Window):!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull;
 
-    /** @private @const {!Promise<?Object<string>>} */
+    /** @private @const {!Promise<?Object<string, string>>} */
     this.variants_ = variantForOrNull(win);
 
     /**
@@ -88,7 +88,7 @@ export class UrlReplacements {
     this.initialized_ = true;
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
-      return Math.random();
+      return String(Math.random());
     });
 
     // Returns the canonical URL for this AMP document.
@@ -116,7 +116,9 @@ export class UrlReplacements {
 
     // Returns the referrer URL.
     this.setAsync_('DOCUMENT_REFERRER', () => {
-      return viewerFor(this.win_).getReferrerUrl();
+      return viewerFor(this.win_).getReferrerUrl().then(referrer => {
+        return referrer === undefined ? '' : referrer;
+      });
     });
 
     // Returns the title of this AMP document.
@@ -202,21 +204,21 @@ export class UrlReplacements {
     });
 
     // Returns assigned variant name for the given experiment.
-    this.set_('VARIANT', experiment => {
+    this.setAsync_('VARIANT', experiment => {
       return this.variants_.then(variants => {
         user().assert(variants,
             'To use variable VARIANT, amp-experiment should be configured');
-        user().assert(variants[experiment] !== undefined,
+        const variant = variants[/** @type {string} */(experiment)];
+        user().assert(variant !== undefined,
             'The value passed to VARIANT() is not a valid experiment name:' +
                 experiment);
-        const variant = variants[experiment];
         // When no variant assigned, use reserved keyword 'none'.
-        return variant === null ? 'none' : variant;
+        return variant === null ? 'none' : /** @type {string} */(variant);
       });
     });
 
     // Returns all assigned experiment variants in a serialized form.
-    this.set_('VARIANTS', () => {
+    this.setAsync_('VARIANTS', () => {
       return this.variants_.then(variants => {
         user().assert(variants,
             'To use variable VARIANTS, amp-experiment should be configured');
@@ -233,7 +235,7 @@ export class UrlReplacements {
     });
 
     // Returns incoming share tracking fragment.
-    this.set_('SHARE_TRACKING_INCOMING', () => {
+    this.setAsync_('SHARE_TRACKING_INCOMING', () => {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_INCOMING, ' +
             'amp-share-tracking should be configured');
@@ -242,7 +244,7 @@ export class UrlReplacements {
     });
 
     // Returns outgoing share tracking fragment.
-    this.set_('SHARE_TRACKING_OUTGOING', () => {
+    this.setAsync_('SHARE_TRACKING_OUTGOING', () => {
       return this.shareTrackingFragments_.then(fragments => {
         user().assert(fragments, 'To use variable SHARE_TRACKING_OUTGOING, ' +
             'amp-share-tracking should be configured');
@@ -252,12 +254,12 @@ export class UrlReplacements {
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return Date.now();
+      return String(Date.now());
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set_('TIMEZONE', () => {
-      return new Date().getTimezoneOffset();
+      return String(new Date().getTimezoneOffset());
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
@@ -286,27 +288,27 @@ export class UrlReplacements {
 
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
-      return this.win_.screen.width;
+      return String(this.win_.screen.width);
     });
 
     // Returns screen.height.
     this.set_('SCREEN_HEIGHT', () => {
-      return this.win_.screen.height;
+      return String(this.win_.screen.height);
     });
 
     // Returns screen.availHeight.
     this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
-      return this.win_.screen.availHeight;
+      return String(this.win_.screen.availHeight);
     });
 
     // Returns screen.availWidth.
     this.set_('AVAILABLE_SCREEN_WIDTH', () => {
-      return this.win_.screen.availWidth;
+      return String(this.win_.screen.availWidth);
     });
 
     // Returns screen.ColorDepth.
     this.set_('SCREEN_COLOR_DEPTH', () => {
-      return this.win_.screen.colorDepth;
+      return String(this.win_.screen.colorDepth);
     });
 
     // Returns the viewport height.
@@ -369,24 +371,26 @@ export class UrlReplacements {
       'CONTENT_LOAD_TIME', 'navigationStart', 'domContentLoadedEventStart');
 
     // Access: Reader ID.
-    this.set_('ACCESS_READER_ID', () => {
+    this.setAsync_('ACCESS_READER_ID', /** @type {AsyncResolverDef} */(() => {
       return this.getAccessValue_(accessService => {
         return accessService.getAccessReaderId();
       }, 'ACCESS_READER_ID');
-    });
+    }));
 
     // Access: data from the authorization response.
-    this.setAsync_('AUTHDATA', field => {
+    this.setAsync_('AUTHDATA', /** @type {AsyncResolverDef} */(field => {
       user().assert(field,
           'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
-    });
+    }));
 
     // Returns an identifier for the viewer.
     this.setAsync_('VIEWER', () => {
-      return viewerFor(this.win_).getViewerOrigin();
+      return viewerFor(this.win_).getViewerOrigin().then(viewer => {
+        return viewer == undefined ? '' : viewer;
+      });
     });
 
     // Returns the total engaged time since the content became viewable.
@@ -457,9 +461,9 @@ export class UrlReplacements {
    * The data for the timing events is retrieved from performance.timing API.
    * If start and end events are both given, the result is the difference between the two.
    * If only start event is given, the result is the timing value at start event.
-   * @param {*} startEvent
-   * @param {*=} endEvent
-   * @return {!Promise<string|undefined>}
+   * @param {string} startEvent
+   * @param {string=} endEvent
+   * @return {!Promise<ResolverReturnDef>}
    * @private
    */
   getTimingDataAsync_(startEvent, endEvent) {
@@ -592,7 +596,8 @@ export class UrlReplacements {
    * @return {string}
    */
   expandSync(url, opt_bindings, opt_collectVars) {
-    return this.expand_(url, opt_bindings, opt_collectVars, true);
+    return /** @type {string} */(
+        this.expand_(url, opt_bindings, opt_collectVars, true));
   }
 
   /**
@@ -604,7 +609,7 @@ export class UrlReplacements {
    * @return {!Promise<string>}
    */
   expandAsync(url, opt_bindings) {
-    return this.expand_(url, opt_bindings);
+    return /** @type {!Promise<string>} */(this.expand_(url, opt_bindings));
   }
 
   /**
@@ -713,7 +718,7 @@ export class UrlReplacements {
   /**
    * Method exists to assist stubbing in tests.
    * @param {string} name
-   * @return {function(*, *):*}
+   * @return {!ReplacementDef}
    */
   getReplacement_(name) {
     return this.replacements_[name];
