@@ -421,22 +421,20 @@ function dist() {
 function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
-  buildAlp({
+  // Disabled to improve type check performance, since this provides
+  // little incremental value.
+  /*buildExperiments({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
-  });
-  buildSw({
-    minify: true,
-    checkTypes: true,
-    preventRemoveAndMakeDir: true,
-  });
-  buildExperiments({
-    minify: true,
-    checkTypes: true,
-    preventRemoveAndMakeDir: true,
-  });
-  var compileSrcs = ['./src/amp-babel.js'];
+  });*/
+  var compileSrcs = [
+    './src/amp-babel.js',
+    './src/amp-shadow.js',
+    './ads/alp/install-alp.js',
+    './src/service-worker/shell.js',
+    './src/service-worker/kill.js',
+  ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {
