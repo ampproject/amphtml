@@ -15,6 +15,8 @@
  */
 
 import {getStyle} from '../../src/style';
+import {waitForBodyPromise} from '../../src/dom';
+import {waitForServices} from '../../src/render-delaying-services';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
 import * as sinon from 'sinon';
@@ -86,11 +88,19 @@ describe('Styles', () => {
     expect(document.defaultView[bodyVisibleSentinel]).to.be.undefined;
     styles.makeBodyVisible(document, true);
     // mbv = make body visible
-    expect(tickSpy.lastCall.args[0]).to.equal('mbv');
-    expect(tickSpy.callCount).to.equal(1);
-    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
-    styles.makeBodyVisible(document, true);
-    expect(tickSpy.callCount).to.equal(1);
-    expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
+    return waitForBodyPromise(document).then(() => {
+      return waitForServices(document.defaultView).then(() => {
+        expect(tickSpy.lastCall.args[0]).to.equal('mbv');
+        expect(tickSpy.callCount).to.equal(1);
+        expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
+        styles.makeBodyVisible(document, true);
+        return waitForBodyPromise(document).then(() => {
+          return waitForServices(document.defaultView);
+        }).then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(document.defaultView[bodyVisibleSentinel]).to.be.true;
+        });
+      });
+    });
   });
 });
