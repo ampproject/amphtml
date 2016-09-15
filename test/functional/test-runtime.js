@@ -49,8 +49,9 @@ describe('runtime', () => {
     };
     ampdocServiceMock = sandbox.mock(ampdocService);
     win = {
+      localStorage: {},
       AMP: [],
-      location: {},
+      location: 'https://acme.com/',
       addEventListener: () => {},
       document: window.document,
       history: {},
@@ -237,11 +238,11 @@ describe('runtime', () => {
     expect(progress).to.equal('13');
 
     expect(errorStub.callCount).to.equal(1);
-    expect(errorStub.calledWith('runtime',
+    expect(errorStub).to.be.calledWith('runtime',
         sinon.match(() => true),
         sinon.match(arg => {
           return !!arg.message.match(/extension error/);
-        }))).to.be.true;
+        }));
   });
 
   describe('single-mode', () => {
