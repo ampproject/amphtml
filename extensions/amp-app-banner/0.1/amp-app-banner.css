@@ -40,7 +40,23 @@ amp-app-banner {
   z-index: 13 !important;
 }
 
+/* Increase tapping area of the dismiss button */
+.amp-app-banner-dismiss-button:before {
+  position: absolute;
+  content: '';
+  top: -18px;
+  right: 0;
+  left: -18px;
+  bottom: 0;
+}
+
 [dir=rtl] .amp-app-banner-dismiss-button {
-  right: auto;
+  right: auto !important;
+  left: 0 !important;;
+}
+
+[dir=rtl] .amp-app-banner-dismiss-button:before {
+  top: -18px;
+  right: -18px;
   left: 0;
 }
