@@ -32,7 +32,7 @@ before_script:
 script:
   - npm run ava
   - gulp lint
-  - gulp build --css-only
+  - gulp build
   - gulp check-types
   - gulp dist --fortesting
   # Output size change.
