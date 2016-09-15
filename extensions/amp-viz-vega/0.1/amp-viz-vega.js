@@ -159,8 +159,8 @@ export class AmpVizVega extends AMP.BaseElement {
       // calls. We may want to intercept all "urls" in spec and do the loading
       // and parsing ourselves.
 
-      const src = /** @type {string} */(dev().assert(this.src_));
-      return xhrFor(this.win).fetchJson(src).then(data => {
+      return xhrFor(this.win).fetchJson(dev().assertString(this.src_))
+      .then(data => {
         this.data_ = data;
       });
     }
@@ -202,9 +202,7 @@ export class AmpVizVega extends AMP.BaseElement {
 
     return parsePromise.then(chartFactory => {
       return vsyncFor(this.win).mutatePromise(() => {
-        const container = /** @type {!Element} */(
-            dev().assert(this.container_));
-        dom.removeChildren(container);
+        dom.removeChildren(dev().assertElement(this.container_));
         this.chart_ = chartFactory({el: this.container_});
         if (!this.useDataWidth_) {
           const w = this.measuredWidth_ - this.getDataPadding_('width');
