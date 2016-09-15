@@ -100,7 +100,6 @@ describe('3p-frame', () => {
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
-    div.setAttribute('ampcid', 'cidValue');
 
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -140,7 +139,7 @@ describe('3p-frame', () => {
         .returns('http://acme.org/')
         .once();
 
-    const iframe = getIframe(window, div, '_ping_');
+    const iframe = getIframe(window, div, '_ping_', {clientId: 'cidValue'});
     const src = iframe.src;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
@@ -156,6 +155,7 @@ describe('3p-frame', () => {
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false,' +
         '"test":false,"version":"$internalRuntimeVersion$"}' +
+        ',"canary":true' +
         ',"hidden":false' +
         ',"startTime":1234567888' +
         ',"amp3pSentinel":"' + amp3pSentinel + '"' +
@@ -296,6 +296,8 @@ describe('3p-frame', () => {
 
     const div = document.createElement('div');
     div.setAttribute('type', '_ping_');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
     div.getIntersectionChangeEntry = function() {
       return {
         left: 0,

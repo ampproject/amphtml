@@ -15,6 +15,7 @@
  */
 
 import {FocusHistory} from '../../src/focus-history';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -51,6 +52,7 @@ describe('FocusHistory', () => {
       setTimeout: window.setTimeout,
       clearTimeout: window.clearTimeout,
     };
+    installTimerService(testWindow);
     focusHistory = new FocusHistory(testWindow, 10000);
   });
 

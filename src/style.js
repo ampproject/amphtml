@@ -87,7 +87,7 @@ export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {!Element} element
+ * @param {Element} element
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units

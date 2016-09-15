@@ -32,7 +32,7 @@ describe('SlideScroll', () => {
     sandbox.restore();
   });
 
-  function getAmpSlideScroll(opt_hasLooping) {
+  function getAmpSlideScroll(opt_hasLooping, opt_slideCount = 5) {
     return createIframePromise().then(iframe => {
       toggleExperiment(iframe.win, 'amp-slidescroll', true);
       const imgUrl = 'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-' +
@@ -48,7 +48,7 @@ describe('SlideScroll', () => {
         ampSlideScroll.setAttribute('loop', '');
       }
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < opt_slideCount; i++) {
         const img = document.createElement('amp-img');
         ampSlideScroll.setAttribute('src', imgUrl);
         ampSlideScroll.setAttribute('width', '400');
@@ -465,6 +465,23 @@ describe('SlideScroll', () => {
       expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
       impl.customSnap_(400, 1);
       expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+    });
+  });
+
+  it('should custom snap to the correct slide - special case', () => {
+    return getAmpSlideScroll(null, 2).then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+      impl.slideWidth_ = 400;
+
+      impl.customSnap_(0, 1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 400);
+
+      impl.showSlide_(1);
+
+      impl.customSnap_(400, -1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
     });
   });
 

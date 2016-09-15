@@ -19,7 +19,7 @@ import {
   Store,
   LocalStorageBinding,
   ViewerStorageBinding,
-} from '../../extensions/amp-analytics/0.1/storage-impl';
+} from '../../src/service/storage-impl';
 import {dev} from '../../src/log';
 import * as sinon from 'sinon';
 

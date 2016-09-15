@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getElementService} from './element-service';
+import {getServicePromise} from './service';
 
 
 /**
@@ -22,5 +22,5 @@ import {getElementService} from './element-service';
  * @return {!Promise<!Storage>}
  */
 export function storageFor(window) {
-  return getElementService(window, 'storage', 'amp-analytics');
+  return getServicePromise(window, 'storage');
 };

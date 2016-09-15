@@ -18,7 +18,6 @@ import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {dev} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
-import {loadPromise} from '../../../src/event-helper';
 
 /** @const */
 const TAG = 'amp-google-vrview-image';
@@ -98,7 +97,7 @@ class AmpGoogleVrviewImage extends AMP.BaseElement {
     /** @private {!Element} */
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 }
 

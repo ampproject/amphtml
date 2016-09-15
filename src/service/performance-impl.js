@@ -213,7 +213,7 @@ export class Performance {
   /**
    * Forward an object to be appended as search params to the external
    * intstrumentation library.
-   * @param {!JSONType} params
+   * @param {!Object} params
    * @private
    */
   setFlushParams_(params) {
@@ -242,6 +242,13 @@ export class Performance {
       });
     } else {
       this.queueTick_(label, opt_from, opt_value);
+    }
+    // Add browser performance timeline entries for simple ticks.
+    // These are for example exposed in WPT.
+    if (this.win.performance
+        && this.win.performance.mark
+        && arguments.length == 1) {
+      this.win.performance.mark(label);
     }
   }
 

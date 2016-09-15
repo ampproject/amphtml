@@ -241,7 +241,7 @@ export function childElement(parent, callback) {
 
 
 /**
- * Finds all child elements that satisfies the callback.
+ * Finds all child elements that satisfy the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
  * @return {!Array<!Element>}
@@ -275,7 +275,7 @@ export function lastChildElement(parent, callback) {
 }
 
 /**
- * Finds all child nodes that satisfies the callback.
+ * Finds all child nodes that satisfy the callback.
  * These nodes can include Text, Comment and other child nodes.
  * @param {!Node} parent
  * @param {function(!Node):boolean} callback
@@ -414,7 +414,7 @@ export function childElementsByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
@@ -455,7 +455,7 @@ export function hasNextNodeInDocumentOrder(element) {
 
 
 /**
- * Finds all ancestor elements that satisfies predicate.
+ * Finds all ancestor elements that satisfy predicate.
  * @param {!Element} child
  * @param {function(!Element):boolean} predicate
  * @return {!Array<!Element>}

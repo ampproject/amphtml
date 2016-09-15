@@ -32,7 +32,7 @@ export class ElementStub extends BaseElement {
     const name = element.tagName.toLowerCase();
     if (!loadingChecked[name]) {
       loadingChecked[name] = true;
-      extensionsFor(this.win).loadExtension(name);
+      extensionsFor(this.win).loadExtension(name, /* stubElement */ false);
     }
     stubbedElements.push(this);
   }

@@ -73,6 +73,7 @@ default the first frame is displayed.
 **autoplay**
 
 If present, the video will automatically start playback once rendered (if autoplay is supported by the browser).
+Autoplay, when supported, will automatically mute the video before auto playing.
 
 **controls**
 
@@ -82,9 +83,10 @@ Similar to the `video` tag `controls` attribute - if present, the browser offers
 
 If present, will automatically loop the video back to the start upon reaching the end.
 
-**muted**
+**muted (deprecated)**
 
-If present, will mute the audio by default.
+`muted` attribute is deprecated and no longer has any effect.
+`autoplay` attribute automatically controls the mute behavior.
 
 ## Validation
 
