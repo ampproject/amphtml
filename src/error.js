@@ -78,8 +78,8 @@ export function reportError(error, opt_associatedElement) {
       (console.error || console.log).call(console, error.stack);
     }
   }
-  if (element && element.dispatchCustomEvent) {
-    element.dispatchCustomEvent('amp:error', error.message);
+  if (element && element.dispatchCustomEventForTesting) {
+    element.dispatchCustomEventForTesting('amp:error', error.message);
   }
   // 'call' to make linter happy. And .call to make compiler happy
   // that expects some @this.

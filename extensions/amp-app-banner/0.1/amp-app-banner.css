@@ -22,7 +22,7 @@ amp-app-banner {
   max-height: 150px !important;
   box-sizing: border-box;
   background: #fefefe;
-  z-index: 11 !important;
+  z-index: 12 !important;
   height: 100px !important;
 }
 
@@ -37,7 +37,7 @@ amp-app-banner {
   background-position: center;
   background-color: #fff;
   border: 1px solid #c8c8c8;
-  z-index: 12 !important;
+  z-index: 13 !important;
 }
 
 [dir=rtl] .amp-app-banner-dismiss-button {

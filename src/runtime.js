@@ -41,6 +41,7 @@ import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
 import {installImg} from '../builtins/amp-img';
 import {installPixel} from '../builtins/amp-pixel';
+import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
@@ -48,15 +49,19 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
+import {installStorageService} from './service/storage-impl';
 import {installStyles} from './style-installer';
+import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installVideo} from '../builtins/amp-video';
+import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {initLogConstructor} from './log';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -67,6 +72,7 @@ import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
+initLogConstructor();
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -80,9 +86,12 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installPlatformService(global);
+  installTimerService(global);
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
@@ -102,6 +111,7 @@ export function installAmpdocServices(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installVideoManagerForDoc(ampdoc);
 }
 
 

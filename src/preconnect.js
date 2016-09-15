@@ -52,7 +52,7 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!./platform.Platform}  */
+    /** @private @const {!./service/platform-impl.Platform}  */
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
@@ -71,7 +71,7 @@ export class Preconnect {
     /** @private @const {!./service/viewer-impl.Viewer} */
     this.viewer_ = viewerFor(win);
 
-    /** @private @const {!./timer.Timer} */
+    /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
   }
 
@@ -132,18 +132,6 @@ export class Preconnect {
     }, 10000);
 
     this.preconnectPolyfill_(origin);
-  }
-
-  /**
-   * Temporary to not break prod when versions are misaligned across binaries.
-   * DO NOT USE!
-   * This should be safe to remove 1 version after 1468017284333 hits prod.
-   * @param {string} url
-   * @param {string=} opt_preloadAs
-   * @deprecated
-   */
-  prefetch(url, opt_preloadAs) {
-    this.preload(url, opt_preloadAs);
   }
 
   /**

@@ -22,7 +22,7 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {waitForRenderStart} from '../../../3p/integration';
+import {waitForRenderStart} from '../../../ads/_config';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -283,3 +283,7 @@ export class AmpAdApiHandler {
     }
   }
 }
+
+// Make the class available to other late loaded amp-ad implementations
+// without them having to depend on it directly.
+AMP.AmpAdApiHandler = AmpAdApiHandler;

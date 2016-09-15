@@ -29,7 +29,7 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
-import {user} from '../src/log';
+import {initLogConstructor, user} from '../src/log';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -99,6 +99,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
+initLogConstructor();
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -198,14 +199,6 @@ const defaultAllowedTypesInCustomFrame = [
   'doubleclick',
   'yieldbot',
   '_ping_',
-];
-
-// List of ad networks that will manually call `window.context.renderStart` to
-// emit render-start event when ad actually starts rendering. Please add
-// yourself here if you'd like to do so (which we encourage).
-export const waitForRenderStart = [
-  'doubleclick',
-  'fakead3p',
 ];
 
 /**

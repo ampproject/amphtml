@@ -16,12 +16,16 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {dev} from '../../src/log';
+import {dev, initLogConstructor} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {getMode} from '../../src/mode';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
 import {onDocumentReady} from '../../src/document-ready';
+//TODO(@cramforce): For type. Replace with forward declaration.
+import '../../src/service/timer-impl';
+
+initLogConstructor();
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -148,11 +152,6 @@ const EXPERIMENTS = [
     name: 'AMP extension for Apester media',
     spec: 'https://github.com/ampproject/amphtml/issues/3233',
     cleanupIssue: 'https://github.com/ampproject/amphtml/pull/4291',
-  },
-  {
-    id: 'amp-ios-overflow-x',
-    name: 'Fixes a horizontal scroll issue on iOS browsers.',
-    spec: 'https://github.com/ampproject/amphtml/issues/3712',
   },
   {
     id: 'amp-app-banner',
