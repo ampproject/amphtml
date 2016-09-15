@@ -308,8 +308,7 @@ export function getCurve(curve) {
               return null;
             }
           }
-          return bezierCurve(parseFloat(values[0]), parseFloat(values[1]),
-              parseFloat(values[2]), parseFloat(values[3]));
+          return bezierCurve(values[0], values[1], values[2], values[3]);
         }
       }
       return null;
