@@ -21,18 +21,23 @@ import {validateData, writeScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function inmobi(global, data) {
-  validateData(data, ['siteid','slotid'], ['testdeviceid']);
+  validateData(data, ['siteid','slotid'], []);
+
   const inmobiConf = {
     siteid: data.siteid,
     slot: data.slotid,
     manual: true,
-    testdeviceid: document.testdeviceid,
-    onError: function(code) {
+    onError: code => {
       if (code == 'nfr') {
+        global.context.noContentAvailable();
         document.getElementById('my-ad-slot').style.display = 'none';
       }
     },
+    onSuccess: () => {
+      global.context.renderStart();
+    },
   };
+
   writeScript(global, 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js', () => {
     global.document.write('<div id=\'my-ad-slot\'></div>');
     global._inmobi.getNewAd(document.getElementById('my-ad-slot'), inmobiConf);

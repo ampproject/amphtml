@@ -26,8 +26,7 @@ width="320"
 height="50"
 type="inmobi"
 data-siteid="a0078c4ae5a54199a8689d49f3b46d4b"
-data-slotid="15"
-data-testdeviceid="26F6721C-6852-4077-A60A-DD58BD1F2A8C">
+data-slotid="15">
 </amp-ad>
 ```
 
@@ -39,22 +38,25 @@ width="300"
 height="250"
 type="inmobi"
 data-siteid="a0078c4ae5a54199a8689d49f3b46d4b"
-data-slotid="10"
-data-testdeviceid="26F6721C-6852-4077-A60A-DD58BD1F2A8C">
+data-slotid="10">
 </amp-ad>
 ```
 
-## Configuration
+### Banner Ad SlotIds
 
-For configuration, please see [ad network documentation](https://support.inmobi.com/monetize/integration/mobile-web/mobile-web-integration-guide/#integrating-the-ad-code).
+| AdSize  | SlotId |
+|---------|--------|
+| 320x50  |   15   |
+| 300x250 |   10   |
+| 468x60  |   12   |
+| 728x90  |   11   |
+| 120x600 |   13   |
 
 Supported parameters:
 
 **Required**
-- width:        required by amp
-- height:       required by amp
 - data-siteid: Site Id is the InMobi property id. You can get this from InMobi dashboard.
-- data-slotid: Slot Id is the ad size. 15 for 320x50 and 10 for 300x250.
+- data-slotid: Slot Id is the ad size.
 
-**Optional**
-- data-testdeviceid: To get test ads for specific device id. This device id should be added in the diagnostic mode of Site settings.
+For Test Ads:
+* To get test ads, you need to enable Diagnostic Mode from Site settings.

@@ -208,6 +208,7 @@ const defaultAllowedTypesInCustomFrame = [
 export const waitForRenderStart = [
   'doubleclick',
   'fakead3p',
+  'inmobi',
 ];
 
 /**
