@@ -299,15 +299,20 @@ export function getCurve(curve) {
   if (typeof curve == 'string') {
     // If the curve is a custom cubic-bezier curve
     if (curve.indexOf('cubic-bezier') != -1) {
-      const floatExp = '(\\d+\\.?\\d*|\\.\\d+)';
-      const curveExp = `cubic-bezier\\(${floatExp}\\s*,\\s*${floatExp},` +
-          `\\s*${floatExp},\\s*${floatExp}\\)`;
-      const matches = curve.match(new RegExp(curveExp));
-      if (!matches) {
-        return null;
+      const match = curve.match(/cubic-bezier\((.+)\)/);
+      if (match) {
+        const values = match[1].split(',').map(parseFloat);
+        if (values.length == 4) {
+          for (let i = 0; i < 4; i++) {
+            if (isNaN(values[i])) {
+              return null;
+            }
+          }
+          return bezierCurve(parseFloat(values[0]), parseFloat(values[1]),
+              parseFloat(values[2]), parseFloat(values[3]));
+        }
       }
-      return bezierCurve(parseFloat(matches[1]), parseFloat(matches[2]),
-          parseFloat(matches[3]), parseFloat(matches[4]));
+      return null;
     }
     return NAME_MAP[curve];
   }
