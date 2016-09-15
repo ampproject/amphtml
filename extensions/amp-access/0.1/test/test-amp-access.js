@@ -1036,7 +1036,7 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
-      return Promise.all([service.reportViewPromise_,
+      return Promise.all([service.firstAuthorizationPromise_,
           service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
