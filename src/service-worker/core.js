@@ -65,9 +65,28 @@ function basename(url) {
  * @param {string} version
  * @return {string}
  */
-function versionedUrl(url, version) {
-  // Ensure we do not replace the prefix.
-  return url.replace(ampVersion(url), version);
+function urlWithVersion(url, version) {
+  const location = new URL(url);
+  location.pathname = `/rtv/${version}/${basename(url)}`;
+  return location.href;
+}
+
+/**
+ * Normalizes the request to a new RTV version. This handles changing the
+ * request from one version to another, or rewriting an unversioned request to
+ * a versioned.
+ *
+ * @param {!Request} request
+ * @param {string} version
+ * @return {!Request}
+ */
+function normalizedRequest(request, version) {
+  const url = request.url;
+  if (url.indexOf(`rtv/${version}`) > -1) {
+    return request;
+  }
+
+  return new Request(urlWithVersion(url, version), request);
 }
 
 /**
@@ -218,6 +237,9 @@ function handleFetch(request, clientId) {
 
   const requestFile = basename(url);
   const requestVersion = ampVersion(url);
+  // Rewrite unversioned requests to the versioned RTV URL. This is a noop if
+  // it's already versioned.
+  request = normalizedRequest(request, requestVersion);
 
   // Wait for the cachePromise to resolve. This is necessary
   // since the SW thread may be killed and restarted at any time.
@@ -249,9 +271,7 @@ function handleFetch(request, clientId) {
       return version;
     });
   }).then(version => {
-    const versionedRequest = version === requestVersion ?
-        request :
-        new Request(versionedUrl(url, version), request);
+    const versionedRequest = normalizedRequest(request, version);
 
     return cache.match(versionedRequest).then(response => {
       // Cache hit!
