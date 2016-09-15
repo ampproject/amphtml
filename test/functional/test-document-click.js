@@ -322,6 +322,15 @@ describe('test-document-click onDocumentElementClick_', () => {
 });
 
 describe('test-document-click onDocumentElementCapturedClick_', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   describe('usage of getElementByTagNameFromEventShadowDomPath_', () => {
     it('should handle absence of path', () => {
@@ -342,7 +351,7 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
       return createIframePromise().then(iframe => {
         installUrlReplacementsService(iframe.win);
         const replacements = urlReplacementsFor(iframe.win);
-        Math.random = function() { return 135; };
+        sandbox.stub(Math, 'random', () => 135);
         const evt = {
           clientX: 123,
           clientY: 456,
@@ -364,7 +373,7 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
       return createIframePromise().then(iframe => {
         installUrlReplacementsService(iframe.win);
         const replacements = urlReplacementsFor(iframe.win);
-        Math.random = function() { return 135; };
+        sandbox.stub(Math, 'random', () => 135);
         const evt = {
           clientX: 123,
           clientY: 456,
