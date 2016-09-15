@@ -112,6 +112,11 @@ export function documentContainsPolyfillInternal_(doc, element) {
  */
 export function removeElement(element) {
   if (element.parentElement) {
+    const activeElement = element.ownerDocument.activeElement;
+    // Restore focus to document if the focused element is inside the removed one.
+    if (element == activeElement || element.contains(activeElement)) {
+      element.ownerDocument.defaultView./*REVIEW*/focus();
+    }
     element.parentElement.removeChild(element);
   }
 }
