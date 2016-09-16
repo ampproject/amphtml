@@ -54,7 +54,8 @@
       <paper-material elevation="0">
         <paper-dropdown-menu label="Format" id="formatDropdown">
           <paper-listbox class="dropdown-content" selected="AMP"
-                         id="formatSelector" attr-for-selected="format">
+                         id="formatSelector" attr-for-selected="format"
+                         on-iron-select="formatChange">
             <paper-item format="AMP">AMP</paper-item>
             <paper-item format="AMP4ADS">AMP4ADS</paper-item>
           </paper-listbox>
@@ -74,6 +75,10 @@
           type: Boolean,
           value: false
         }
+      },
+      formatChange: function() {
+        this.fire('webui-urlform-format-changes',
+                  {'format': this.$.formatSelector.selected});
       },
       checkURL: function(e) {
         this.validURL = !this.$.urlToFetch.invalid;
@@ -95,6 +100,9 @@
       },
       getFormat: function() {
         return this.$.formatSelector.selected;
+      },
+      setFormat: function(htmlFormat) {
+        this.$.formatSelector.selected = htmlFormat;
       }
     });
   </script>
