@@ -558,7 +558,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSigningServiceNames_() {
     // TODO(levitzky) Add dev key name once it goes live.
-    return getMode().localDev ? ['ampproject'] : ['ampproject'];
+    return getMode().localDev ? ['google'] : ['google'];
   }
 
   /**
