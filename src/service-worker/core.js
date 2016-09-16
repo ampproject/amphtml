@@ -116,14 +116,14 @@ function isBlacklisted(version) {
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @type {!Object<string, string>}
+ * @type {!Object}
  */
 const clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
  *
- * @type {Cache}
+ * @type {!Cache}
  */
 let cache;
 
@@ -210,7 +210,8 @@ self.addEventListener('install', install => {
   install.waitUntil(cachePromise);
   if (install.registerForeignFetch) {
     install.registerForeignFetch({
-      scopes: [self.registration.scope],
+      scopes: [/** @type {!ServiceWorkerGlobalScope} */(
+          self).registration.scope],
       origins: ['*'],
     });
   }
@@ -233,7 +234,7 @@ function handleFetch(request, clientId) {
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
   if (!clientId || !isCdnJsFile(url)) {
-    return;
+    return null;
   }
 
   const requestFile = basename(url);
