@@ -19,16 +19,16 @@ import {getServicePromise} from './service';
 import {timerFor} from './timer';
 
 /**
- * A map of extensions that, if they're included on the page, must be loaded
- * before the page should be shown to users. The key is the extension name,
- * the value is the blocking service.
- * Do not add an extension unless absolutely necessary.
+ * A map of services that delay rendering. The key is the name of the service
+ * and the value is a DOM query which is used to check if the service is needed
+ * in the current document.
+ * Do not add a service unless absolutely necessary.
  * @const {!Object<string, string>}
  */
-const EXTENSIONS = {
-  'amp-accordion': 'amp-accordion',
-  'amp-dynamic-css-classes': 'amp-dynamic-css-classes',
-  'amp-experiment': 'variant',
+const SERVICES = {
+  'amp-accordion': '[custom-element=amp-accordion]',
+  'amp-dynamic-css-classes': '[custom-element=amp-dynamic-css-classes]',
+  'variant': 'amp-experiment',
 };
 
 /**
@@ -37,27 +37,21 @@ const EXTENSIONS = {
  */
 const LOAD_TIMEOUT = 3000;
 
-
 /**
- * Detects any extensions that are were included on the page that need to
- * delay unhiding the body (to avoid Flash of Unstyled Content), and returns
- * a promise that will resolve when they have loaded or reject after a timeout.
+ * Detects any render delaying services that are required on the page,
+ * and returns a promise with a timeout.
  * @param {!Window} win
- * @return {!Promise|undefined}
+ * @return {!Promise}
  */
-export function waitForExtensions(win) {
-  const extensions = includedExtensions(win);
-  const promises = extensions.map(extension => {
+export function waitForServices(win) {
+  const promises = includedServices(win).map(service => {
     return timerFor(win).timeoutPromise(
       LOAD_TIMEOUT,
-      getServicePromise(win, EXTENSIONS[extension]),
-      `Render timeout waiting for ${extension} to load.`
+      getServicePromise(win, service),
+      `Render timeout waiting for service ${service} to be ready.`
     );
   });
-  // Only return a waiting promise if there are promises to wait for.
-  return promises.length ?
-    Promise.all(promises) :
-    undefined;
+  return Promise.all(promises);
 }
 
 /**
@@ -66,11 +60,11 @@ export function waitForExtensions(win) {
  * @return {!Array<string>}
  * @private
  */
-function includedExtensions(win) {
+function includedServices(win) {
   const doc = win.document;
   dev().assert(doc.body);
 
-  return Object.keys(EXTENSIONS).filter(extension => {
-    return doc.querySelector(`[custom-element="${extension}"]`);
+  return Object.keys(SERVICES).filter(service => {
+    return doc.querySelector(SERVICES[service]);
   });
 }

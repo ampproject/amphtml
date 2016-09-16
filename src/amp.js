@@ -71,7 +71,7 @@ try {
       installGlobalClickListener(self);
 
       maybeValidate(self);
-      makeBodyVisible(self.document, /* waitForExtensions */ true);
+      makeBodyVisible(self.document, /* waitForServices */ true);
       installCacheServiceWorker(self);
     } catch (e) {
       makeBodyVisible(self.document);

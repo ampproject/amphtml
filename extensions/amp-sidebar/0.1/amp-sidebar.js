@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
 import {historyFor} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
-import {setStyles} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timerFor} from '../../../src/timer';
 
@@ -132,9 +132,7 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.viewport_.disableTouchZoom();
     this.vsync_.mutate(() => {
-      setStyles(this.element, {
-        'display': 'block',
-      });
+      toggle(this.element, /* display */true);
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
       if (this.isIosSafari_) {
@@ -174,9 +172,7 @@ export class AmpSidebar extends AMP.BaseElement {
         if (!this.isOpen_()) {
           this.viewport_.removeFromFixedLayer(this.element);
           this.vsync_.mutate(() => {
-            setStyles(this.element, {
-              'display': 'none',
-            });
+            toggle(this.element, /* display */false);
             this.schedulePause(this.getRealChildren());
           });
         }
@@ -204,9 +200,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.maskElement_ = mask;
     }
-    setStyles(this.maskElement_, {
-      'display': 'block',
-    });
+    toggle(this.maskElement_, /* display */true);
   }
 
   /**
@@ -214,9 +208,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   closeMask_() {
     if (this.maskElement_) {
-      setStyles(this.maskElement_, {
-        'display': 'none',
-      });
+      toggle(this.maskElement_, /* display */false);
     }
   }
 
