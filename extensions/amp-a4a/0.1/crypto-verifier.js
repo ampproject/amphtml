@@ -89,7 +89,7 @@ export function importPublicKey(jwk) {
  * @return {!Promise<boolean>} whether the signature is valid for
  *     the public key.
  */
-export function verifySignature(data, signature, publicKeyInfo) { debugger;
+export function verifySignature(data, signature, publicKeyInfo) {
   // The signature has the following format:
   // 1-byte version + 4-byte key hash + raw RSA signature where
   // the raw RSA signature is computed over (data || 1-byte version).
