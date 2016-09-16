@@ -25,40 +25,43 @@ import {doubleclick} from '../ads/google/doubleclick';
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
-    if (data.tagtype === "rta") {
-        if (!data.varname) {
-            data.varname = Criteo.PubTag.RTA.DefaultCrtgContentName;
-        }
-        if (!data.cookiename) {
-            data.cookiename = Criteo.PubTag.RTA.DefaultCrtgRtaCookieName;
-        }
+    if (data.tagtype === 'rta') {
+      if (!data.varname) {
+        data.varname = Criteo.PubTag.RTA.DefaultCrtgContentName;
+      }
+      if (!data.cookiename) {
+        data.cookiename = Criteo.PubTag.RTA.DefaultCrtgRtaCookieName;
+      }
 
-        // Make sure RTA is called only once
-        computeInMasterFrame(window, 'call-rta', resultCallback => {
-            params = { 'networkid': data.networkid, 'varname': data.varname, 'cookiename': data.cookiename };
-            Criteo.CallRTA(params);
-            resultCallback(null);
-        }, result => { });
-
-        setTargeting(data);
-   } else if (!data.tagtype || data.tagtype === 'passback') {
-        Criteo.DisplayAd({'zoneid': data.zone,
-                          'containerid': 'c',
-                          'integrationmode': 'amp'});
-   }
+      // Make sure RTA is called only once
+      computeInMasterFrame(window, 'call-rta', resultCallback => {
+        const params = {'networkid': data.networkid,
+                       'varname': data.varname,
+                       'cookiename': data.cookiename};
+        Criteo.CallRTA(params);
+        resultCallback(null);
+      }, () => {});
+      setTargeting(global, data);
+    } else if (!data.tagtype || data.tagtype === 'passback') {
+      Criteo.DisplayAd({'zoneid': data.zone,
+                       'containerid': 'c',
+                       'integrationmode': 'amp'});
+    }
   });
 }
 
-function setTargeting(data) {
-        if (data.adserver === "DFP") {
-            var dbl_params = { 'slot' : data.slot,
-                                'targeting' : Criteo.ComputeDFPTargetingForAMP(data.cookiename, data.varname),
-                                'width' : data.width,
-                                'height': data.height,
-                                'type' : 'criteo'
-                                };
-            doubleclick(global, dbl_params);
-        }
+function setTargeting(global, data) {
+  if (data.adserver === 'DFP') {
+    const dblParams = {'slot': data.slot,
+                      'targeting': Criteo.ComputeDFPTargetingForAMP(
+                                              data.cookiename,
+                                              data.varname),
+                      'width': data.width,
+                      'height': data.height,
+                      'type': 'criteo',
+                     };
+    doubleclick(global, dblParams);
+  }
 }
 
 
