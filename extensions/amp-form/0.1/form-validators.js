@@ -17,12 +17,12 @@
 import {ValidationBubble} from './validation-bubble';
 
 
-/** @type {?./validation-bubble.ValidationBubble|undefined} */
-let validationBubble;
-
-
 /** @type {boolean|undefined} */
 let reportValiditySupported;
+
+
+/** @type {number} */
+let validationBubbleCount = 0;
 
 
 /**
@@ -91,10 +91,10 @@ class PolyfillDefaultValidator extends FormValidator {
   constructor(form) {
     super(form);
 
-    if (!validationBubble) {
-      const win = this.doc.defaultView;
-      validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
-    }
+    const win = this.doc.defaultView;
+    const bubbleId = `amp-validation-bubble-${validationBubbleCount++}`;
+    /** @private @const {!./validation-bubble.ValidationBubble} */
+    this.validationBubble_ = new ValidationBubble(win, bubbleId);
   }
 
   /** @override */
@@ -103,7 +103,7 @@ class PolyfillDefaultValidator extends FormValidator {
     for (let i = 0; i < inputs.length; i++) {
       if (!inputs[i].checkValidity()) {
         inputs[i]./*REVIEW*/focus();
-        validationBubble.show(inputs[i], inputs[i].validationMessage);
+        this.validationBubble_.show(inputs[i], inputs[i].validationMessage);
         break;
       }
     }
@@ -111,17 +111,21 @@ class PolyfillDefaultValidator extends FormValidator {
 
   /** @override */
   onBlur(unusedEvent) {
-    validationBubble.hide();
+    this.validationBubble_.hide();
   }
 
   /** @override */
   onInput(event) {
+    if (!this.validationBubble_.isActiveOn(event.target)) {
+      return;
+    }
+
     if (event.target.checkValidity()) {
       event.target.removeAttribute('aria-invalid');
-      validationBubble.hide();
+      this.validationBubble_.hide();
     } else {
       event.target.setAttribute('aria-invalid', 'true');
-      validationBubble.show(event.target, event.target.validationMessage);
+      this.validationBubble_.show(event.target, event.target.validationMessage);
     }
   }
 }
@@ -131,6 +135,16 @@ class PolyfillDefaultValidator extends FormValidator {
  * @abstract
  */
 class AbstractCustomValidator extends FormValidator {
+
+  constructor(form) {
+    super(form);
+
+    /** @private @const {!Object<string, !Element>} */
+    this.inputValidationsDict_ = {};
+
+    /** @private @const {!Array<!Element>} */
+    this.inputVisibleValidationDict_ = {};
+  }
 
   /**
    * @param {!Element} input
@@ -161,9 +175,12 @@ class AbstractCustomValidator extends FormValidator {
     if (!input.id) {
       return null;
     }
-
-    return this.doc.querySelector(
-        `[visible-when-invalid=${invalidType}][validation-for=${input.id}]`);
+    const selector = `[visible-when-invalid=${invalidType}]` +
+        `[validation-for=${input.id}]`;
+    if (!this.inputValidationsDict_[selector]) {
+      this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
+    }
+    return this.inputValidationsDict_[selector];
   }
 
   /**
@@ -182,6 +199,7 @@ class AbstractCustomValidator extends FormValidator {
 
     input.setAttribute('aria-invalid', 'true');
     validation.classList.add('visible');
+    this.inputVisibleValidationDict_[input.id] = validation;
   }
 
   /**
@@ -195,6 +213,7 @@ class AbstractCustomValidator extends FormValidator {
 
     input.removeAttribute('aria-invalid');
     visibleValidation.classList.remove('visible');
+    delete this.inputVisibleValidationDict_[input.id];
   }
 
   /**
@@ -205,8 +224,7 @@ class AbstractCustomValidator extends FormValidator {
     if (!input.id) {
       return null;
     }
-    return this.doc.querySelector(
-        `[visible-when-invalid][validation-for=${input.id}].visible`);;
+    return this.inputVisibleValidationDict_[input.id];
   }
 
   /**
