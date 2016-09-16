@@ -27,7 +27,12 @@ class AmpStickyAd extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {!Element} */
+    /**
+     * This variable must not be nullable to be scheduleLayout later.
+     * It is mutable and temporarily assigned to element during construction.
+     * Will always change it during buildCallback.
+     * @private {!Element}
+     */
     this.ad_ = element;
 
     /** @const @private {!../../../src/service/viewport-impl.Viewport} */
