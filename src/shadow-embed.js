@@ -31,13 +31,13 @@ const CSS_SELECTOR_END_REGEX = /[^\-\_0-9a-zA-Z]/;
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let shadowDomSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setShadowDomSupportedForTesting(val) {
   shadowDomSupported = val;
