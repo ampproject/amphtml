@@ -1,5 +1,7 @@
 {
   "canary": false,
+  "cache-service-worker-kill": 0,
+  "cache-service-worker-blacklist": [],
   "no-auth-in-prerender": 1,
   "amp-sticky-ad": 1,
   "amp-live-list": 1,
