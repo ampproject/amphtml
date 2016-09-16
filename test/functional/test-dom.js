@@ -713,4 +713,19 @@ describe('DOM', () => {
       expect(dom.escapeCssSelectorIdent({}, 'a b')).to.equal('a\\ b');
     });
   });
+
+  describe('escapeHtml', () => {
+    it('should tolerate empty string', () => {
+      expect(dom.escapeHtml('')).to.equal('');
+    });
+
+    it('should ignore non-escapes', () => {
+      expect(dom.escapeHtml('abc')).to.equal('abc');
+    });
+
+    it('should subsctitute escapes', () => {
+      expect(dom.escapeHtml('a<b>&c"d\'e\`f')).to.equal(
+          'a&lt;b&gt;&amp;c&quot;d&#x27;e&#x60;f');
+    });
+  });
 });

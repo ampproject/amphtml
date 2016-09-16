@@ -34,6 +34,7 @@ import {
   initLogConstructor,
   resetLogConstructorForTesting,
 } from '../../src/log';
+import {loadPromise} from '../../src/event-helper';
 import * as cust from '../../src/custom-element';
 import * as sinon from 'sinon';
 
@@ -445,6 +446,86 @@ describe('Extensions', () => {
         expect(doc.head.querySelectorAll('[custom-element="amp-embed"]'))
             .to.have.length(0);
         expect(extensions.extensions_['amp-embed']).to.be.undefined;
+      });
+    });
+  });
+
+  describe('installExtensionsInChildWindow', () => {
+
+    let parentWin;
+    let extensions;
+    let extensionsMock;
+    let iframe;
+    let iframeWin;
+
+    beforeEach(() => {
+      return createIframePromise().then(f => {
+        parentWin = f.win;
+        extensions = installExtensionsService(parentWin);
+        extensionsMock = sandbox.mock(extensions);
+
+        iframe = parentWin.document.createElement('iframe');
+        const promise = loadPromise(iframe);
+        const html = '<div id="one"></div>';
+        if ('srcdoc' in iframe) {
+          iframe.srcdoc = html;
+        } else {
+          iframe.src = 'about:blank';
+          const childDoc = iframe.contentWindow.document;
+          childDoc.open();
+          childDoc.write(html);
+          childDoc.close();
+        }
+        parentWin.document.body.appendChild(iframe);
+        return promise.then(() => {
+          iframeWin = iframe.contentWindow;
+        });
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+      extensionsMock.verify();
+    });
+
+    it('should set window hierarchy', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.__AMP_PARENT).to.equal(parentWin);
+      expect(iframeWin.__AMP_TOP).to.equal(parentWin);
+    });
+
+    it('should install runtime styles', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.document.querySelector('style[amp-runtime]'))
+          .to.exist;
+    });
+
+    it('should install built-ins', () => {
+      extensions.installExtensionsInChildWindow(iframeWin, []);
+      expect(iframeWin.ampExtendedElements).to.exist;
+      expect(iframeWin.ampExtendedElements['amp-img']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-video']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-pixel']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-ad']).to.be.true;
+      expect(iframeWin.ampExtendedElements['amp-embed']).to.be.true;
+    });
+
+    it('should install extensions', () => {
+      extensionsMock.expects('loadExtension')
+          .withExactArgs('amp-test')
+          .returns(Promise.resolve({
+            elements: {'amp-test': {css: 'a{}'}},
+          }))
+          .once();
+      const promise = extensions.installExtensionsInChildWindow(
+          iframeWin, ['amp-test']);
+      return promise.then(() => {
+        expect(parentWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.ampExtendedElements['amp-test']).to.be.true;
+        expect(iframeWin.document
+            .querySelector('style[amp-extension=amp-test]')).to.exist;
       });
     });
   });

@@ -34,6 +34,7 @@ describe('Resource', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
+      ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
       style: {},
       isBuilt: () => false,
@@ -717,6 +718,7 @@ describe('Resource renderOutsideViewport', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
+      ownerDocument: {defaultView: window},
       tagName: 'AMP-AD',
       isBuilt: () => false,
       isUpgraded: () => false,

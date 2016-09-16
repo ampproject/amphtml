@@ -16,7 +16,10 @@
 
 import {closestNode} from '../dom';
 import {dev} from '../log';
-import {getService} from '../service';
+import {
+  getParentWindowFrameElement,
+  getService,
+} from '../service';
 import {isShadowRoot} from '../types';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {waitForBodyPromise} from '../dom';
@@ -120,6 +123,14 @@ export class AmpDocService {
         }
       }
 
+      // Traverse the boundary of a friendly iframe.
+      const frameElement = getParentWindowFrameElement(n, this.win);
+      if (frameElement) {
+        n = frameElement;
+        continue;
+      }
+
+      // Shadow doc.
       // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
       const shadowRoot = closestNode(n, n => isShadowRoot(n));
       if (!shadowRoot) {

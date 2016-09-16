@@ -517,6 +517,7 @@ var forbiddenTermsSrcInclusive = {
     message: bannedTermsHelpString,
     whitelist: [
       'src/element-stub.js',
+      'src/friendly-iframe-embed.js',
       'src/runtime.js',
       'src/service/extensions-impl.js',
       'src/service/lightbox-manager-discovery.js',
@@ -546,6 +547,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'src/base-element.js',
       'src/event-helper.js',
+      'src/friendly-iframe-embed.js',
       'src/service/performance-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-ad/0.1/amp-ad-api-handler.js',

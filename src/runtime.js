@@ -20,6 +20,7 @@ import {
   addDocFactoryToExtension,
   addElementToExtension,
   addShadowRootFactoryToExtension,
+  installBuiltinElements,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
@@ -39,8 +40,6 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
-import {installImg} from '../builtins/amp-img';
-import {installPixel} from '../builtins/amp-pixel';
 import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
@@ -54,7 +53,6 @@ import {installStyles} from './style-installer';
 import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
-import {installVideo} from '../builtins/amp-video';
 import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
@@ -120,9 +118,7 @@ export function installAmpdocServices(ampdoc) {
  * @param {!Window} global Global scope to adopt.
  */
 export function installBuiltins(global) {
-  installImg(global);
-  installPixel(global);
-  installVideo(global);
+  installBuiltinElements(global);
 }
 
 
@@ -338,7 +334,7 @@ export function adoptShadowMode(global) {
  */
 function prepareAndRegisterElement(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   if (opt_css) {
     installStyles(global.document, opt_css, () => {
       registerElementClass(global, name, implementationClass, opt_css);
@@ -359,7 +355,7 @@ function prepareAndRegisterElement(global, extensions,
  */
 function prepareAndRegisterElementShadowMode(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
     addShadowRootFactoryToExtension(extensions, shadowRoot => {
