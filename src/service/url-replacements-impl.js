@@ -36,7 +36,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 
-/** @typedef {string|undefined} */
+/** @typedef {string|undefined|number} */
 let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
@@ -88,7 +88,7 @@ export class UrlReplacements {
     this.initialized_ = true;
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
-      return String(Math.random());
+      return Math.random();
     });
 
     // Returns the canonical URL for this AMP document.
@@ -252,12 +252,12 @@ export class UrlReplacements {
 
     // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
     this.set_('TIMESTAMP', () => {
-      return String(Date.now());
+      return Date.now();
     });
 
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set_('TIMEZONE', () => {
-      return String(new Date().getTimezoneOffset());
+      return new Date().getTimezoneOffset();
     });
 
     // Returns a promise resolving to viewport.getScrollTop.
@@ -286,27 +286,27 @@ export class UrlReplacements {
 
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
-      return String(this.win_.screen.width);
+      return this.win_.screen.width;
     });
 
     // Returns screen.height.
     this.set_('SCREEN_HEIGHT', () => {
-      return String(this.win_.screen.height);
+      return this.win_.screen.height;
     });
 
     // Returns screen.availHeight.
     this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
-      return String(this.win_.screen.availHeight);
+      return this.win_.screen.availHeight;
     });
 
     // Returns screen.availWidth.
     this.set_('AVAILABLE_SCREEN_WIDTH', () => {
-      return String(this.win_.screen.availWidth);
+      return this.win_.screen.availWidth;
     });
 
     // Returns screen.ColorDepth.
     this.set_('SCREEN_COLOR_DEPTH', () => {
-      return String(this.win_.screen.colorDepth);
+      return this.win_.screen.colorDepth;
     });
 
     // Returns the viewport height.
@@ -398,20 +398,18 @@ export class UrlReplacements {
       });
     });
 
-    this.set_('NAV_TIMING',
-      (startAttribute, endAttribute) => {
-        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-            'start attribute name, is required');
-        return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
-            /**@type {string}*/(endAttribute));
-      });
-    this.setAsync_('NAV_TIMING',
-      (startAttribute, endAttribute) => {
-        user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
-            'start attribute name, is required');
-        return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
-            /**@type {string}*/(endAttribute));
-      });
+    this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return this.getTimingDataSync_(/**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
+    this.setAsync_('NAV_TIMING', (startAttribute, endAttribute) => {
+      user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
+      return this.getTimingDataAsync_(/**@type {string}*/(startAttribute),
+          /**@type {string}*/(endAttribute));
+    });
 
     this.set_('NAV_TYPE', () => {
       return this.getNavigationData_('type');
@@ -440,7 +438,7 @@ export class UrlReplacements {
    * the resulting value is `null`.
    * @param {function(!AccessService):(T|!Promise<T>)} getter
    * @param {string} expr
-   * @return {Promise<?AccessService>}
+   * @return {T|null}
    * @template T
    */
   getAccessValue_(getter, expr) {
@@ -505,7 +503,7 @@ export class UrlReplacements {
     } else if (metric < 0) {;
       return '';
     } else {
-      return String(metric);
+      return metric;
     }
   }
 
@@ -523,7 +521,7 @@ export class UrlReplacements {
       return ;
     }
 
-    return String(navigationInfo[attribute]);
+    return navigationInfo[attribute];
   }
 
   /**
@@ -595,7 +593,7 @@ export class UrlReplacements {
    */
   expandSync(url, opt_bindings, opt_collectVars) {
     return /** @type {string} */(
-        this.expand_(url, opt_bindings, opt_collectVars, true));
+        this.expand_(url, opt_bindings, opt_collectVars, /* opt_sync */ true));
   }
 
   /**
@@ -642,7 +640,7 @@ export class UrlReplacements {
         if (opt_sync) {
           binding = binding.sync;
           if (!binding) {
-            user().error('ignoring async replacement key: ' + name);
+            user().error(TAG, 'ignoring async replacement key: ', name);
             return '';
           }
         } else {
@@ -657,7 +655,7 @@ export class UrlReplacements {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
         if (opt_sync) {
-          user().error('Error evaluating replacement: ' + name, e);
+          user().error(TAG, 'Error evaluating replacement: ', name, e);
           val = '';
         } else {
           rethrowAsync(e);
@@ -667,7 +665,7 @@ export class UrlReplacements {
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
         if (opt_sync) {
-          user().error('ignoring promise value for key: ' + name);
+          user().error(TAG, 'ignoring promise value for key: ', name);
           return '';
         }
         const p = val.catch(err => {
