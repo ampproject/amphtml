@@ -19,8 +19,21 @@ import {urls} from '../config';
 import {endsWith, startsWith} from '../string';
 
 /**
+ * An AMP Release version, not to be confused with an RTV version
+ * @typedef {string}
+ */
+let AmpVersion
+
+/**
+ * An RTV version, not to be confused with an AMP Release version.
+ * @typedef {string}
+ */
+let RtvVersion
+
+/**
  * The SW's current version.
  * @const
+ * @type {AmpVersion}
  */
 const VERSION = '$internalRuntimeVersion$';
 
@@ -31,6 +44,7 @@ const TAG = 'cache-service-worker';
  * A list of blacklisted AMP versions that must never be served from
  * cache. Versions may be blacklisted if they contain a significant
  * implementation bug.
+ * @type {!Array<RtvVersion>}
  */
 const BLACKLIST = (self.AMP_CONFIG &&
     self.AMP_CONFIG[`${TAG}-blacklist`]) || [];
@@ -39,12 +53,12 @@ const BLACKLIST = (self.AMP_CONFIG &&
  * Returns the version of a given versioned JS file.
  *
  * @param {string} url
- * @return {string}
+ * @return {RtvVersion}
  */
 function ampVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
-  return matches ? matches[1] : VERSION;
+  return matches ? matches[1] : `01${VERSION}`;
 }
 
 /**
@@ -62,7 +76,7 @@ function basename(url) {
  * Returns the url with the requested version changed to `version`.
  *
  * @param {string} url
- * @param {string} version
+ * @param {RtvVersion} version
  * @return {string}
  */
 function urlWithVersion(url, version) {
@@ -77,7 +91,7 @@ function urlWithVersion(url, version) {
  * a versioned.
  *
  * @param {!Request} request
- * @param {string} version
+ * @param {RtvVersion} version
  * @return {!Request}
  */
 function normalizedRequest(request, version) {
@@ -103,7 +117,7 @@ function isCdnJsFile(url) {
 
 /**
  * Determines if a AMP version is blacklisted.
- * @param {string} version
+ * @param {RtvVersion} version
  * @return {boolean}
  */
 function isBlacklisted(version) {
@@ -116,7 +130,7 @@ function isBlacklisted(version) {
  * A mapping from a Client's (unique per tab _and_ refresh) ID to the AMP
  * release version we are serving it.
  *
- * @type {!Object}
+ * @type {!Object<string, RtvVersion>}
  */
 const clientsMap = Object.create(null);
 
@@ -144,7 +158,7 @@ const cachePromise = caches.open('cdn-js').then(result => {
  * @param {!Cache} cache
  * @param {!Request} request
  * @param {string} requestFile the basename of the request
- * @param {string} requestVersion the version of the request
+ * @param {RtvVersion} requestVersion the version of the request
  * @return {!Promise<!Response>}
  */
 function fetchAndCache(cache, request, requestFile, requestVersion) {
@@ -189,7 +203,7 @@ function fetchAndCache(cache, request, requestFile, requestVersion) {
  *
  * @param {!Cache} cache
  * @param {string} requestFile
- * @return {!Promise<string>}
+ * @return {!Promise<RtvVersion>}
  */
 function getCachedVersion(cache, requestFile) {
   // TODO(jridgewell): We should make this a bit smarter, so that it selects
@@ -226,16 +240,19 @@ self.addEventListener('install', install => {
  *   - The requested version is always the newest AMP version.
  *
  * @param {!Request} request
- * @param {string|undefined} clientId
+ * @param {string|undefined} maybeClientId
  * @return {?Promise<!Response>}
  */
-function handleFetch(request, clientId) {
+function handleFetch(request, maybeClientId) {
   const url = request.url;
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
-  if (!clientId || !isCdnJsFile(url)) {
+  if (!maybeClientId || !isCdnJsFile(url)) {
     return null;
   }
+
+  // Closure Compiler!
+  const clientId = /** @type {string} */(maybeClientId);
 
   const requestFile = basename(url);
   const requestVersion = ampVersion(url);
