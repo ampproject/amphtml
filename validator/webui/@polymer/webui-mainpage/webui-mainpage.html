@@ -71,7 +71,7 @@
             // Validate - result is of type amp.validator.ValidationResult.
             // See validator.proto for the provided fields.
             var validationResult = amp.validator.validateString(
-                editor.getEditorValue());
+                editor.getEditorValue(), urlForm.getFormat());
 
             // Set the status property, which will cause the status bar below
             // the editor to redisplay.
