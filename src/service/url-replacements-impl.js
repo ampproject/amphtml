@@ -115,11 +115,9 @@ export class UrlReplacements {
     }));
 
     // Returns the referrer URL.
-    this.setAsync_('DOCUMENT_REFERRER', () => {
-      return viewerFor(this.win_).getReferrerUrl().then(referrer => {
-        return referrer === undefined ? '' : referrer;
-      });
-    });
+    this.setAsync_('DOCUMENT_REFERRER', /** @type {AsyncResolverDef} */(() => {
+      return viewerFor(this.win_).getReferrerUrl();
+    }));
 
     // Returns the title of this AMP document.
     this.set_('TITLE', () => {
