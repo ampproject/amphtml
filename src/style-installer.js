@@ -19,7 +19,7 @@ import {documentStateFor} from './document-state';
 import {performanceFor} from './performance';
 import {platformFor} from './platform';
 import {setStyles} from './style';
-import {waitForExtensions} from './render-delaying-extensions';
+import {waitForServices} from './render-delaying-services';
 
 
 const bodyVisibleSentinel = '__AMP_BODY_VISIBLE';
