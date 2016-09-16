@@ -15,7 +15,7 @@
  */
 
 import {utf8Encode} from '../../../src/utils/bytes';
-import {base64UrlDecode} from '../../../src/utils/base64';
+import {base64UrlDecodeToBytes} from '../../../src/utils/base64';
 
 /** @const {boolean} */
 const isWebkit = window.crypto && 'webkitSubtle' in window.crypto;
@@ -63,22 +63,20 @@ export function importPublicKey(jwk) {
                 if (typeof jwk.n != 'string' || typeof jwk.e != 'string') {
                   throw new Error('missing fields in JSON Web Key');
                 }
-                return base64UrlDecode(jwk.n).then(mod =>
-                    base64UrlDecode(jwk.e).then(pubExp => {
-                      const lenMod = lenPrefix(mod);
-                      const lenPubExp = lenPrefix(pubExp);
-                      const data = new Uint8Array(
-                          lenMod.length + lenPubExp.length);
-                      data.set(lenMod);
-                      data.set(lenPubExp, lenMod.length);
-                      // The list of RSA public keys are not under attacker's
-                      // control, so a collision would not help.
-                      return crossCrypto.digest({name: 'SHA-1'}, data)
-                          .then(digest => ({
-                            cryptoKey,
-                            // Hash is the first 4 bytes of the SHA-1 digest.
-                            hash: new Uint8Array(digest, 0, 4),
-                          }));
+                const mod = base64UrlDecodeToBytes(jwk.n);
+                const pubExp = base64UrlDecodeToBytes(jwk.e);
+                const lenMod = lenPrefix(mod);
+                const lenPubExp = lenPrefix(pubExp);
+                const data = new Uint8Array(lenMod.length + lenPubExp.length);
+                data.set(lenMod);
+                data.set(lenPubExp, lenMod.length);
+                // The list of RSA public keys are not under attacker's
+                // control, so a collision would not help.
+                return crossCrypto.digest({name: 'SHA-1'}, data)
+                    .then(digest => ({
+                      cryptoKey,
+                      // Hash is the first 4 bytes of the SHA-1 digest.
+                      hash: new Uint8Array(digest, 0, 4),
                     }));
               });
 }
@@ -91,7 +89,7 @@ export function importPublicKey(jwk) {
  * @return {!Promise<boolean>} whether the signature is valid for
  *     the public key.
  */
-export function verifySignature(data, signature, publicKeyInfo) {
+export function verifySignature(data, signature, publicKeyInfo) { debugger;
   // The signature has the following format:
   // 1-byte version + 4-byte key hash + raw RSA signature where
   // the raw RSA signature is computed over (data || 1-byte version).
@@ -154,3 +152,4 @@ function hashesEqual(signature, keyHash) {
   }
   return true;
 }
+
