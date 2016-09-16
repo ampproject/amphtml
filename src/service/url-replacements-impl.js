@@ -36,7 +36,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 
-/** @typedef {string|undefined|number} */
+/** @typedef {string|number|boolean|undefined} */
 let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
@@ -655,11 +655,9 @@ export class UrlReplacements {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
         if (opt_sync) {
-          user().error(TAG, 'Error evaluating replacement: ', name, e);
           val = '';
-        } else {
-          rethrowAsync(e);
         }
+        rethrowAsync(e);
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
