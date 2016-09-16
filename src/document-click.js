@@ -120,7 +120,7 @@ export function onDocumentElementClick_(e, viewport, history, isIosSafari) {
     return;
   }
 
-  const target = closestByTag(e.target, 'A');
+  const target = closestByTag(dev().assertElement(e.target), 'A');
   if (!target) {
     return;
   }

@@ -34,7 +34,7 @@ let TapDef;
  */
 export class TapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tap', manager);
@@ -109,7 +109,7 @@ let DoubletapDef;
  */
 export class DoubletapRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('doubletap', manager);
@@ -197,7 +197,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let SwipeDef;
+export let SwipeDef;
 
 
 /**
@@ -207,7 +207,7 @@ let SwipeDef;
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(type, manager, horiz, vert) {
     super(type, manager);
@@ -383,7 +383,7 @@ class SwipeRecognizer extends GestureRecognizer {
  */
 export class SwipeXYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-xy', manager, true, true);
@@ -396,7 +396,7 @@ export class SwipeXYRecognizer extends SwipeRecognizer {
  */
 export class SwipeXRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-x', manager, true, false);
@@ -409,7 +409,7 @@ export class SwipeXRecognizer extends SwipeRecognizer {
  */
 export class SwipeYRecognizer extends SwipeRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('swipe-y', manager, false, true);
@@ -442,7 +442,7 @@ let TapzoomDef;
  */
 export class TapzoomRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('tapzoom', manager);
@@ -635,7 +635,7 @@ let PinchDef;
  */
 export class PinchRecognizer extends GestureRecognizer {
   /**
-   * @param {!Gestures} manager
+   * @param {!./gesture.Gestures} manager
    */
   constructor(manager) {
     super('pinch', manager);

@@ -16,7 +16,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpVine extends AMP.BaseElement {
@@ -51,7 +50,7 @@ class AmpVine extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = iframe;
 
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

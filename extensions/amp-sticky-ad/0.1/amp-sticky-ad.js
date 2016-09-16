@@ -163,6 +163,7 @@ class AmpStickyAd extends AMP.BaseElement {
     this.vsync_.mutate(() => {
       this.visible_ = false;
       this./*OK*/scheduleUnlayout(this.ad_);
+      this.viewport_.removeFromFixedLayer(this.element);
       removeElement(this.element);
       this.viewport_.updatePaddingBottom(0);
     });

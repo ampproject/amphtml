@@ -15,6 +15,7 @@
  * limitations under the license.
  */
 goog.provide('json_testutil.defaultCmpFn');
+goog.provide('json_testutil.makeJsonKeyCmpFn');
 goog.provide('json_testutil.renderJSON');
 
 /**
@@ -117,6 +118,42 @@ json_testutil.defaultCmpFn = function(a, b) {
   if (a > b) return 1;
   return 0;
 };
+
+
+/**
+ * Given an order for the json keys, creates a function which
+ * lets us sort the keys in json output. This can improve the
+ * rendered json output that's used in assertions in a unittest.
+ *
+ * @param {!Array<string>} keyOrder
+ * @return {function(string, string): number}
+ */
+json_testutil.makeJsonKeyCmpFn = function(keyOrder) {
+  /** @type {!Object<string, number>} */
+  const keyPriority = {};
+  for (var ii = 0; ii < keyOrder.length; ++ii) {
+    keyPriority[keyOrder[ii]] = ii;
+  }
+
+  return function(a, b) {
+    // Handle cases where only only one of the two keys is recognized.
+    // Unrecognized keys go last.
+    if (keyPriority.hasOwnProperty(a) && !keyPriority.hasOwnProperty(b)) {
+      return -1;
+    }
+    if (keyPriority.hasOwnProperty(b) && !keyPriority.hasOwnProperty(a)) {
+      return 1;
+    }
+
+    // Handle case where both keys are recognized.
+    if (keyPriority.hasOwnProperty(b) && keyPriority.hasOwnProperty(a)) {
+      return keyPriority[a] - keyPriority[b];
+    }
+
+    return json_testutil.defaultCmpFn(a, b);
+  };
+};
+
 
 /**
  * Determines whether the provided string starts with a particular character.

@@ -1,6 +1,6 @@
-# <a name="amp-ad"></a> `amp-ad`
+# <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
-NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
+NOTE: The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -21,7 +21,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A container to display an ad. AMP documents only support ads served via HTTPS.</td>
+    <td>A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -58,8 +58,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_pubname="test123"
     data-aax_src="302">
 </amp-ad>
-```
-```html
+
 <amp-ad width=320 height=140
     type="colombia"
     layout=responsive
@@ -67,6 +66,15 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-clmb_position="1"
     data-clmb_section="0">
 </amp-ad>
+
+<amp-embed width=400 height=300
+    type="taboola"
+    layout=responsive
+    data-publisher=thepublisher
+    data-mode=themode
+    data-article=auto
+    data-placement="Below Article Thumbnails">
+</amp-embed>
 ```
 
 ## Supported ad networks
@@ -89,6 +97,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Atomx](../../ads/atomx.md)
 - [Chargeads](../../ads/chargeads.md)
 - [Colombia](../../ads/colombia.md)
+- [Content.ad](../../ads/contentad.md)
 - [Criteo](../../ads/criteo.md)
 - [Dot and Media](../../ads/dotandads.md)
 - [Doubleclick](../../ads/google/doubleclick.md)
@@ -121,6 +130,11 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Yieldmo](../../ads/yieldmo.md)
 - [YahooJP](../../ads/yahoojp.md)
 
+## Supported embed types
+
+- [Taboola](../../ads/taboola.md)
+- [ZergNet](../../ads/zergnet.md)
+
 ## Styling
 
 `<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
@@ -148,7 +162,7 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 Optional attribute. If provided will require confirming the [amp-user-notification](../amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
-### Experimental: data-loading-strategy
+### data-loading-strategy
 
 Supported value: `prefer-viewability-over-views`. Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view.
 
@@ -223,4 +237,4 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/validator/v
 
 ## Notes
 
-To use `<amp-ad>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.
+To use `<amp-ad>` or `<amp-embed>`, the script to the `amp-ad` library is needed. It is recommended to add the script manually but currently it will be automatically fetched when `amp-ad` is used.

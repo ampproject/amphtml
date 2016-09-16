@@ -58,10 +58,12 @@ describe('AccessClientAdapter', () => {
           .equal(3000);
       expect(adapter.getConfig()).to.deep.equal({
         authorizationUrl: 'https://acme.com/a?rid=READER_ID',
+        pingbackEnabled: true,
         pingbackUrl: 'https://acme.com/p?rid=READER_ID',
         authorizationTimeout: 3000,
       });
       expect(adapter.isAuthorizationEnabled()).to.be.true;
+      expect(adapter.isPingbackEnabled()).to.be.true;
     });
 
     it('should set authorization timeout if provided', () => {
@@ -115,6 +117,14 @@ describe('AccessClientAdapter', () => {
       expect(() => {
         new AccessClientAdapter(window, validConfig, context);
       }).to.throw(/"pingback".*https\:/);
+    });
+
+    it('should allow missing pingback when noPingback=true', () => {
+      delete validConfig['pingback'];
+      validConfig['noPingback'] = true;
+      const adapter = new AccessClientAdapter(window, validConfig, context);
+      expect(adapter.isPingbackEnabled()).to.be.false;
+      expect(adapter.pingbackUrl_).to.not.exist;
     });
   });
 

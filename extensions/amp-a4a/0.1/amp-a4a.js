@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   allowRenderOutsideViewport,
   decrementLoadingAds,
   incrementLoadingAds,
-} from '../../amp-ad/0.1/amp-ad-3p-impl';
+} from '../../amp-ad/0.1/concurrent-load';
 import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -91,6 +90,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
+    dev().assert(AMP.AmpAdApiHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
@@ -726,7 +726,7 @@ export class AmpA4A extends AMP.BaseElement {
         'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
     this.vsync_.mutate(() => {
       // TODO(keithwrightbos): noContentCallback?
-      this.apiHandler_ = new AmpAdApiHandler(this, this.element);
+      this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
       // TODO(keithwrightbos): startup returns load event, do we need to wait?
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.

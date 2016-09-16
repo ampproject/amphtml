@@ -18,7 +18,11 @@
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
-import {adopt} from '../src/runtime';
+import {
+  adopt,
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/runtime';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {platformFor} from '../src/platform';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
@@ -140,9 +144,15 @@ beforeEach(beforeTest);
 
 function beforeTest() {
   window.AMP_MODE = null;
+  window.AMP_CONFIG = {
+    canary: 'testSentinel',
+  };
   window.AMP_TEST = true;
   window.ampExtendedElements = {};
-  installDocService(window, true);
+  const ampdocService = installDocService(window, true);
+  const ampdoc = ampdocService.getAmpDoc(window.document);
+  installRuntimeServices(window);
+  installAmpdocServices(ampdoc);
 }
 
 // Global cleanup of tags added during tests. Cool to add more

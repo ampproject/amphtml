@@ -159,4 +159,38 @@ export class LightboxManager {
       }
     });
   }
+
+  /**
+   * The function is not implemented yet. Fake for testing.
+   * Find or create thumbnails for lightboxed elements.
+   * Return a list of thumbnails obj for lightbox gallery view
+   * @return {!Array<{string,Element}>}
+   */
+  getThumbnails() {
+    const thumbnailList = [];
+    for (let i = 0; i < this.elements_.length; i++) {
+      const thumbnail = {
+        url: this.getThumbnailUrl_(this.elements_[i], i),
+        element: this.elements_[i],
+      };
+      thumbnailList.push(thumbnail);
+    }
+    return thumbnailList;
+  }
+
+  /**
+   * The function is not implemented yet. Fake for testing.
+   * Get thumbnail url for single element.
+   * @param {!Element} element
+   * @param {Number=} index fake it for testing only, will delete later
+   * @return {string}
+   * @private
+   */
+  getThumbnailUrl_(element, index) {
+    if (element.tagName == 'AMP-IMG') {
+      return element.getAttribute('src');
+    } else {
+      return 'https://placehold.it/128x128?text=' + index;
+    }
+  }
 }

@@ -18,6 +18,7 @@ import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
 import {Animation} from '../../../../src/animation';
+import {resourcesForDoc} from '../../../../src/resources';
 
 describe('Slides functional', () => {
 
@@ -42,6 +43,7 @@ describe('Slides functional', () => {
     element.style.width = '320px';
     element.style.height = '200px';
     document.body.appendChild(element);
+    element.getResources = () => resourcesForDoc(element);
 
     element.appendChild(slide0 = document.createElement('div'));
     element.appendChild(slide1 = document.createElement('div'));
@@ -916,18 +918,12 @@ describe('empty Slides functional', () => {
     expect(() => {
       slides.buildCallback();
     }).to.throw(/should have at least 1 slide/);
-    expect(() => {
-      slides.layoutCallback();
-    }).to.not.throw();
   });
 
   it('should not throw an error on viewportCallback', () => {
     expect(() => {
       slides.buildCallback();
     }).to.throw(/should have at least 1 slide/);
-    expect(() => {
-      slides.viewportCallback();
-    }).to.not.throw();
   });
 
   it('should not throw an error on goCallback', () => {

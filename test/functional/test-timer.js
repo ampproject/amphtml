@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../src/timer';
+import {Timer} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 describe('Timer', () => {

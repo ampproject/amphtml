@@ -30,7 +30,7 @@ const UNKNOWN_EXTENSION = '_UNKNOWN_';
  * Currently only limitted to elements.
  *
  * @typedef {{
- *   elements: !Array<!{implementationClass:
+ *   elements: !Object<string, !{implementationClass:
  *       function(new:../base-element.BaseElement, !Element)}>,
  * }}
  */
@@ -208,14 +208,15 @@ export class Extensions {
    * Returns the promise that will be resolved when the extension has been
    * loaded. If necessary, adds the extension script to the page.
    * @param {string} extensionId
+   * @param {boolean=} stubElement
    * @return {!Promise<!ExtensionDef>}
    */
-  loadExtension(extensionId) {
+  loadExtension(extensionId, stubElement = true) {
     if (extensionId == 'amp-embed') {
       extensionId = 'amp-ad';
     }
     const holder = this.getExtensionHolder_(extensionId);
-    this.insertExtensionScriptIfNeeded_(extensionId, holder);
+    this.insertExtensionScriptIfNeeded_(extensionId, holder, stubElement);
     return this.waitFor_(holder);
   }
 
@@ -286,7 +287,7 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(ampdoc.getRootNode());
+            factory(/** @type {!ShadowRoot} */ (ampdoc.getRootNode()));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
@@ -318,7 +319,7 @@ export class Extensions {
       promises.push(this.waitFor_(holder).then(() => {
         holder.shadowRootFactories.forEach(factory => {
           try {
-            factory(shadowRoot);
+            factory(/** @type {!ShadowRoot} */ (shadowRoot));
           } catch (e) {
             rethrowAsync('ShadowRoot factory failed: ', e, extensionId);
           }
@@ -340,7 +341,7 @@ export class Extensions {
       const extension = {
         elements: {},
       };
-      holder = {
+      holder = /** @type {ExtensionHolderDef} */ ({
         extension,
         docFactories: [],
         shadowRootFactories: [],
@@ -350,7 +351,7 @@ export class Extensions {
         loaded: undefined,
         error: undefined,
         scriptPresent: undefined,
-      };
+      });
       this.extensions_[extensionId] = holder;
     }
     return holder;
@@ -397,15 +398,17 @@ export class Extensions {
    * Ensures that the script has already been injected in the page.
    * @param {string} extensionId
    * @param {!ExtensionHolderDef} holder
-   * @return {boolean}
+   * @param {boolean} stubElement
    * @private
    */
-  insertExtensionScriptIfNeeded_(extensionId, holder) {
+  insertExtensionScriptIfNeeded_(extensionId, holder, stubElement) {
     if (this.isExtensionScriptRequired_(extensionId, holder)) {
       const scriptElement = this.createExtensionScript_(extensionId);
       this.win.document.head.appendChild(scriptElement);
       holder.scriptPresent = true;
-      stubElementIfNotKnown(this.win, extensionId);
+      if (stubElement) {
+        stubElementIfNotKnown(this.win, extensionId);
+      }
     }
   }
 
@@ -431,7 +434,7 @@ export class Extensions {
   /**
    * Create the missing amp extension HTML script element.
    * @param {string} extensionId
-   * @return {!HTMLScriptElement} Script object
+   * @return {!Element} Script object
    * @private
    */
   createExtensionScript_(extensionId) {

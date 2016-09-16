@@ -25,7 +25,7 @@ import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {getMode} from './mode';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resourcesFor} from './resources';
+import {resourcesForDoc} from './resources';
 import {timerFor} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
@@ -97,7 +97,7 @@ const UpgradeState = {
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   if (!knownElements[name]) {
-    registerElement(win, name, toClass);
+    registerElement(win, name, /** @type {!Function} */ (toClass));
     return;
   }
   user().assert(knownElements[name] == ElementStub,
@@ -185,7 +185,7 @@ export function stubElementIfNotKnown(win, name) {
 
 /**
  * Applies layout to the element. Visible for testing only.
- * @param {!AmpElement} element
+ * @param {!Element} element
  */
 export function applyLayout_(element) {
   const layoutAttr = element.getAttribute('layout');
@@ -269,10 +269,10 @@ export function applyLayout_(element) {
   if (layout == Layout.NODISPLAY) {
     element.style.display = 'none';
   } else if (layout == Layout.FIXED) {
-    element.style.width = width;
-    element.style.height = height;
+    element.style.width = dev().assertString(width);
+    element.style.height = dev().assertString(height);
   } else if (layout == Layout.FIXED_HEIGHT) {
-    element.style.height = height;
+    element.style.height = dev().assertString(height);
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amp-sizer');
     sizer.style.display = 'block';
@@ -334,7 +334,7 @@ class AmpElement {
  *
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
- * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass For
+ * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For
  *     testing only.
  * @return {!Object} Prototype of element.
  */
@@ -387,7 +387,7 @@ function createBaseAmpElementProto(win) {
     this.everAttached = false;
 
     /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesFor(this.ownerDocument.defaultView);
+    this.resources_ = resourcesForDoc(this);
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -467,6 +467,16 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
+   * Returns Resources manager.
+   * @return {!./service/resources-impl.Resources}
+   * @final @this {!Element}
+   * @package
+   */
+  ElementProto.getResources = function() {
+    return this.resources_;
+  };
+
+  /**
    * Whether the element has been upgraded yet. Always returns false when
    * the element has not yet been added to DOM. After the element has been
    * added to DOM, the value depends on the `BaseElement` implementation and
@@ -494,7 +504,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Completes the upgrade of the element with the provided implementation.
-   * @param {./base-element.BaseElement} newImpl
+   * @param {!./base-element.BaseElement} newImpl
    * @final @private @this {!Element}
    */
   ElementProto.completeUpgrade_ = function(newImpl) {
@@ -511,7 +521,7 @@ function createBaseAmpElementProto(win) {
     this.implementation_.layoutWidth_ = this.layoutWidth_;
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
-      this.dispatchCustomEvent('amp:attached');
+      this.dispatchCustomEventForTesting('amp:attached');
       // For a never-added resource, the build will be done automatically
       // via `resources.add` on the first attach.
       this.resources_.upgraded(this);
@@ -747,9 +757,9 @@ function createBaseAmpElementProto(win) {
         if (!this.isUpgraded()) {
           // amp:attached is dispatched from the ElementStub class when it
           // replayed the firstAttachedCallback call.
-          this.dispatchCustomEvent('amp:stubbed');
+          this.dispatchCustomEventForTesting('amp:stubbed');
         } else {
-          this.dispatchCustomEvent('amp:attached');
+          this.dispatchCustomEventForTesting('amp:attached');
         }
       } catch (e) {
         reportError(e, this);
@@ -811,17 +821,11 @@ function createBaseAmpElementProto(win) {
   /**
    * Dispatches a custom event.
    *
-   * NOTE: This is currently only active for tests.
-   * Do not rely on this mechanism for production code.
-   *
    * @param {string} name
    * @param {!Object=} opt_data Event data.
    * @final @this {!Element}
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
-    if (!getMode().test) {
-      return;
-    }
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
@@ -829,6 +833,20 @@ function createBaseAmpElementProto(win) {
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
+  };
+
+  /**
+   * Dispatches a custom event only in testing environment.
+   *
+   * @param {string} name
+   * @param {!Object=} opt_data Event data.
+   * @final @this {!Element}
+   */
+  ElementProto.dispatchCustomEventForTesting = function(name, opt_data) {
+    if (!getMode().test) {
+      return;
+    }
+    this.dispatchCustomEvent(name, opt_data);
   };
 
   /**
@@ -851,7 +869,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Whether the element should ever render when it is not in viewport.
-   * @return {boolean}
+   * @return {boolean|number}
    * @final @this {!Element}
    */
   ElementProto.renderOutsideViewport = function() {
@@ -874,11 +892,11 @@ function createBaseAmpElementProto(win) {
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
-    const rootBounds = this.implementation_.getViewport().getRect();
-    return getIntersectionChangeEntry(
-        Date.now(),
-        rootBounds,
-        box);
+    const owner = this.resources_.getResourceForElement(this).getOwner();
+    const viewportBox = this.implementation_.getViewport().getRect();
+    // TODO(jridgewell, #4826): We may need to make this recursive.
+    const ownerBox = owner && owner.getLayoutBox();
+    return getIntersectionChangeEntry(box, ownerBox, viewportBox);
   };
 
   /**
@@ -909,7 +927,7 @@ function createBaseAmpElementProto(win) {
     assertNotTemplate(this);
     dev().assert(this.isBuilt(),
         'Must be built to receive viewport events');
-    this.dispatchCustomEvent('amp:load:start');
+    this.dispatchCustomEventForTesting('amp:load:start');
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
@@ -1044,7 +1062,7 @@ function createBaseAmpElementProto(win) {
 
   /**
    * Called every time an owned AmpElement collapses itself.
-   * @param {!AmpElement} unusedElement
+   * @param {!AmpElement} element
    */
   ElementProto.collapsedCallback = function(element) {
     this.implementation_.collapsedCallback(element);
@@ -1361,8 +1379,6 @@ export function registerElement(win, name, implementationClass) {
  * @param {!Window} win The window in which to register the elements.
  * @param {string} aliasName Additional name for an existing custom element.
  * @param {string} sourceName Name of an existing custom element
- * @param {Object} state Optional map to be merged into the prototype
- *                 to override the original state with new default values
  */
 export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];

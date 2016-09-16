@@ -22,7 +22,6 @@ import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
-import {installStorageService} from './storage-impl';
 import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
@@ -36,7 +35,6 @@ import {toggle} from '../../../src/style';
 installActivityService(AMP.win);
 installCidService(AMP.win);
 installCryptoService(AMP.win);
-installStorageService(AMP.win);
 installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
@@ -404,7 +402,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
       for (const k in params) {
-        params[k] = this.expandTemplate_(params[k], trigger, event);
+        if (typeof params[k] == 'string') {
+          params[k] = this.expandTemplate_(params[k], trigger, event);
+        }
       }
       if (request.indexOf('${extraUrlParams}') >= 0) {
         const extraUrlParams = addParamsToUrl('', params).substr(1);

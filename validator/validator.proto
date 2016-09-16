@@ -161,7 +161,7 @@ message CssSpec {
 
   // Enables checks specific to the draft A4A specification.
   // TODO(powdercloud): Make this more generic.
-  optional bool validate_a4a = 5;
+  optional bool validate_amp4ads = 5;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -276,7 +276,7 @@ message ReferencePoint {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 22
+// NEXT AVAILABLE TAG: 23
 message TagSpec {
   // The HtmlFormat field tells the validator which html formats
   // (ie: (<html ⚡> vs <html a4⚡>) this HTML TagSpec is relevant for.)
@@ -284,7 +284,7 @@ message TagSpec {
   // for all formats, rather than none.
   enum HtmlFormat {
     AMP = 1;
-    A4A = 2;
+    AMP4ADS = 2;
   }
   // Specifies which amp html document formats we allow this TagSpec to
   // validate.
@@ -330,6 +330,9 @@ message TagSpec {
   // If set, other tags - identified by their detail string - must be
   // present as well.
   repeated string also_requires_tag = 14;
+  // Same as also_requires_tag, but rather than invalidating a document if not
+  // present, emits a deprecation warning.
+  repeated string also_requires_tag_warning = 22;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -451,21 +454,15 @@ message ValidationError {
     ERROR = 1;
     // A document may have warnings and still pass validation.
     WARNING = 4;
-    // No longer used.
-    // A prod warning is OK in prod mode (the overall status of a validation
-    // result is still PASS) but an error in dev mode.
-    PROD_WARNING = 2; // DEPRECATED DO NOT USE.
-    // No longer used.
-    // A dev warning is OK in dev mode (the overall status of a validation
-    // result is still PASS) but an error in prod mode.
-    DEV_WARNING = 3; // DEPRECATED DO NOT USE.
+    // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 76
+  // NEXT AVAILABLE TAG: 77
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
+    WARNING_TAG_REQUIRED_BY_MISSING = 76;
     ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;

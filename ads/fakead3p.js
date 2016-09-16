@@ -22,6 +22,30 @@ import {dev} from '../src/log';
  */
 export function fakead3p(global, data) {
   if (data.ad_container) {
-    dev().assert(data.container == data.ad_container, 'wrong container');
+    dev().assert(
+        global.context.container == data.ad_container, 'wrong container');
+  }
+  if (data.valid && data.valid == 'true') {
+    const img = document.createElement('img');
+    if (data.url) {
+      img.setAttribute('src', data.url);
+    }
+    let width, height;
+    if (data.adHeight) {
+      img.setAttribute('height', data.adHeight);
+      height = Number(data.adHeight);
+    }
+    if (data.adWidth) {
+      img.setAttribute('width', data.adWidth);
+      width = Number(data.adWidth);
+    }
+    document.body.appendChild(img);
+    if (width || height) {
+      context.renderStart({width, height});
+    } else {
+      context.renderStart();
+    }
+  } else {
+    context.noContentAvailable();
   }
 }

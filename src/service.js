@@ -55,7 +55,7 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
   const serviceHolder = getAmpdocServiceHolder(nodeOrDoc);
   const exists = serviceHolder && serviceHolder.services &&
       serviceHolder.services[id] && serviceHolder.services[id].obj;
-  return dev().assert(exists, `${id} service not found. Make sure it is ` +
+  return dev().assert(exists, `${id} doc service not found. Make sure it is ` +
       `installed.`);
 }
 
@@ -68,10 +68,11 @@ export function getExistingServiceForDoc(nodeOrDoc, id) {
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):!Object=} opt_factory Should create the service
+ * @param {function(!Window):T} opt_factory Should create the service
  *     if it does not exist yet. If the factory is not given, it is an error
  *     if the service does not exist yet.
- * @return {*}
+ * @template T
+ * @return {T}
  */
 export function getService(win, id, opt_factory) {
   return getServiceInternal(win, win, id,

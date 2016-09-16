@@ -19,31 +19,48 @@ import {BaseCarousel} from './base-carousel';
 
 export class BaseSlides extends BaseCarousel {
 
-  /** @override */
-  buildCarousel() {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
     /** @private {?number} */
     this.autoplayTimeoutId_ = null;
 
     /** @private {boolean} */
-    this.hasLoop_ = this.element.hasAttribute('loop');
+    this.hasLoop_ = false;
 
     /** @private {boolean} */
-    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+    this.hasAutoplay_ = false;
 
     /** @private {number} */
     this.autoplayDelay_ = 5000;
 
-    this.buildSlides();
-
     /** @protected {boolean} */
-    this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
+    this.shouldLoop = false;
 
     /** @private {boolean} */
+    this.shouldAutoplay_ = false;
+  }
+
+  /** @override */
+  buildCarousel() {
+    this.hasLoop_ = this.element.hasAttribute('loop');
+
+    this.hasAutoplay_ = this.element.hasAttribute('autoplay');
+
+    this.buildSlides();
+
+    this.shouldLoop = this.hasLoop_ && this.isLoopingEligible();
+
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
 
     if (this.shouldAutoplay_) {
       this.setupAutoplay_();
     }
+  }
+
+  buildSlides() {
+    // Subclasses may override
   }
 
   /** @override */

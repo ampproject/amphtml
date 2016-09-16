@@ -164,8 +164,8 @@ var forbiddenTerms = {
   'installStorageService': {
     message: privateServiceFactory,
     whitelist: [
-      'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/runtime.js',
+      'src/service/storage-impl.js',
     ],
   },
   'installTemplatesService': {
@@ -210,7 +210,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesService': {
+  'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -225,11 +225,23 @@ var forbiddenTerms = {
       'src/service/xhr-impl.js',
     ],
   },
+  'initLogConstructor': {
+    message: 'Should only be called from JS binary entry files.',
+    whitelist: [
+      '3p/integration.js',
+      'ads/alp/install-alp.js',
+      'dist.3p/current/integration.js',
+      'extensions/amp-access/0.1/amp-login-done.js',
+      'src/runtime.js',
+      'src/log.js',
+      'tools/experiments/experiments.js',
+    ],
+  },
   'sendMessage': {
-    message: privateServiceFactory,
+    message: 'Usages must be reviewed.',
     whitelist: [
       'src/service/viewer-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
@@ -258,6 +270,7 @@ var forbiddenTerms = {
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/test-server.js',
       'src/cookies.js',
       'extensions/amp-analytics/0.1/cid-impl.js',
     ],
@@ -317,7 +330,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-analytics/0.1/cid-impl.js',
-      'extensions/amp-analytics/0.1/storage-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': {
@@ -340,6 +353,7 @@ var forbiddenTerms = {
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -347,6 +361,7 @@ var forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -431,7 +446,12 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign' : ThreePTermsMessage,
+  'Math\\.sign': ThreePTermsMessage,
+  'Object\\.assign': {
+    message: ThreePTermsMessage,
+    // See https://github.com/ampproject/amphtml/issues/4877
+    whitelist: ['ads/openx.js'],
+  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -520,6 +540,17 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
+  },
+  '[^.]loadPromise': {
+    message: 'Most users should use BaseElement…loadPromise.',
+    whitelist: [
+      'src/base-element.js',
+      'src/event-helper.js',
+      'src/service/performance-impl.js',
+      'src/service/url-replacements-impl.js',
+      'extensions/amp-ad/0.1/amp-ad-api-handler.js',
+      'extensions/amp-analytics/0.1/transport.js',
+    ]
   },
 };
 

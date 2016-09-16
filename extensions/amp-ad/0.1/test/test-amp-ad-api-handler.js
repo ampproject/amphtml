@@ -58,8 +58,8 @@ describe('amp-ad-api-handler', () => {
 
     it('should be able to use embed-state API', () => {
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
         type: 'send-embed-state',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         inViewport: false,
@@ -113,6 +113,41 @@ describe('amp-ad-api-handler', () => {
                 }).then(() => {
                   expect(noContentCallbackSpy).to.not.been.called;
                 });
+              });
+            });
+      });
+
+      it('should resolve and resize on message "render-start" w/ size if '
+          + 'render-start is implemented by 3P', () => {
+        adImpl.adType = 'doubleclick';
+        sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+          expect(height).to.equal(217);
+          expect(width).to.equal(114);
+          return Promise.resolve();
+        });
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
+        const beforeAttachedToDom = element => {
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(iframe.style.visibility).to.equal('hidden');
+              iframe.postMessageToParent({
+                width: 114,
+                height: 217,
+                type: 'render-start',
+                sentinel: 'amp3ptest' + testIndex,
+              });
+              return startUpPromise.then(() => {
+                expect(iframe.style.visibility).to.equal('');
+                return iframe.expectMessageFromParent('amp-' + JSON.stringify({
+                  requestedWidth: 114,
+                  requestedHeight: 217,
+                  type: 'embed-size-changed',
+                  sentinel: 'amp3ptest' + testIndex,
+                }));
               });
             });
       });
@@ -173,71 +208,88 @@ describe('amp-ad-api-handler', () => {
               });
             });
       });
+
+      it('should resolve on timeout', () => {
+        const noContentCallbackSpy = sandbox.spy();
+        apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
+             noContentCallbackSpy);
+        const clock = sandbox.useFakeTimers();
+        clock.tick(0);
+        const beforeAttachedToDom = element => {
+          element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
+          startUpPromise = apiHandler.startUp(element, true);
+        };
+        return createIframeWithMessageStub(window, beforeAttachedToDom)
+            .then(newIframe => {
+              iframe = newIframe;
+              expect(noContentCallbackSpy).to.not.be.called;
+              clock.tick(10001);
+              return startUpPromise.then(() => {
+                expect(iframe.style.visibility).to.equal('');
+                expect(noContentCallbackSpy).to.be.calledOnce;
+              });
+            });
+      });
     });
 
 
     it('should be able to use embed-size API, change size deny', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.equal(114);
         return Promise.reject(new Error('for testing'));
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
-        height: 217,
         width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: 114,
         requestedHeight: 217,
         type: 'embed-size-denied',
         sentinel: 'amp3ptest' + testIndex,
-      })).then(() => {
-        expect(iframe.height).to.equal('217');
-        expect(iframe.width).to.equal('114');
-      });
+      }));
     });
 
     it('should be able to use embed-size API, change size succeed', () => {
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.equal(114);
         return Promise.resolve();
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
-        height: 217,
         width: 114,
+        height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: 114,
         requestedHeight: 217,
         type: 'embed-size-changed',
         sentinel: 'amp3ptest' + testIndex,
-      })).then(() => {
-        expect(iframe.height).to.equal('217');
-        expect(iframe.width).to.equal('114');
-      });
+      }));
     });
 
     it('should be able to use embed-size API to resize height only', () => {
-      iframe.height = 11;
-      iframe.width = 22;
-      sandbox.stub(adImpl, 'attemptChangeSize', () => {
+      sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
+        expect(height).to.equal(217);
+        expect(width).to.be.undefined;
         return Promise.resolve();
       });
       iframe.postMessageToParent({
-        sentinel: 'amp3ptest' + testIndex,
-        type: 'embed-size',
         height: 217,
+        type: 'embed-size',
+        sentinel: 'amp3ptest' + testIndex,
       });
       return iframe.expectMessageFromParent('amp-' + JSON.stringify({
         requestedWidth: undefined,
         requestedHeight: 217,
         type: 'embed-size-changed',
         sentinel: 'amp3ptest' + testIndex,
-      })).then(() => {
-        expect(iframe.height).to.equal('217');
-        expect(iframe.width).to.equal('22');
-      });
+      }));
     });
   });
 });

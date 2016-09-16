@@ -33,6 +33,18 @@ const SHARE_TRACKING_NUMBER_OF_BYTES = 6;
  * @visibleForTesting
  */
 export class AmpShareTracking extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.vendorHref_ = '';
+
+    /** @private {?Promise<!Object<string, string>>} */
+    this.shareTrackingFragments_ = null;
+  }
+
   /**
     * @return {boolean}
     * @private
@@ -54,11 +66,9 @@ export class AmpShareTracking extends AMP.BaseElement {
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
-    /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    /** @private {!Promise<!Object<string, string>>} */
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_()]).then(results => {
@@ -131,7 +141,7 @@ export class AmpShareTracking extends AMP.BaseElement {
    * Get a random bytes array that has 48 bits (6 bytes).
    * Use win.crypto.getRandomValues if it is available.
    * Otherwise, use Math.random as fallback.
-   * @return {!Promise<string>}
+   * @return {!Uint8Array}
    * @private
    */
   getShareTrackingRandomBytes_() {

@@ -89,6 +89,9 @@ export function isFormData(value) {
 export function isShadowRoot(value) {
   // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
   // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value && value.tagName == 'I-AMP-SHADOW-ROOT') {
+    return true;
+  }
   return (!!value &&
       value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
       toString(value) === '[object ShadowRoot]');

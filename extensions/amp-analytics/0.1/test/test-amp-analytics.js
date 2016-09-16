@@ -33,6 +33,8 @@ import {
   installUrlReplacementsService,
 } from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
+import {installStorageService} from '../../../../src/service/storage-impl';
+
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -65,6 +67,7 @@ describe('amp-analytics', function() {
       iframe.doc.title = 'Test Title';
       markElementScheduledForTesting(iframe.win, 'amp-analytics');
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
+      installStorageService(iframe.win);
       installViewerService(iframe.win);
       installViewportService(iframe.win);
       installCidService(iframe.win);
@@ -712,6 +715,15 @@ describe('amp-analytics', function() {
         expect(sendRequestSpy.args[0][0]).to.equal(
             'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld' +
             '&foofoo=baz&a=b');
+      });
+    });
+
+    it('work when the value is an array', () => {
+      config.extraUrlParams = {'foo': ['0']};
+      const analytics = getAnalyticsTag(config);
+      return waitForSendRequest(analytics).then(() => {
+        expect(sendRequestSpy.args[0][0]).to.equal(
+            'https://example.com/helloworld?a=b&foo=0');
       });
     });
   });

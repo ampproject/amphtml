@@ -37,7 +37,7 @@ import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {performanceFor} from '../../../src/performance';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timerFor} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -137,7 +137,7 @@ export class AccessService {
     this.templates_ = templatesFor(win);
 
     /** @private @const {!Resources} */
-    this.resources_ = resourcesFor(win);
+    this.resources_ = resourcesForDoc(win.document);
 
     /** @private @const {!Performance} */
     this.performance_ = performanceFor(win);
@@ -622,6 +622,9 @@ export class AccessService {
    * @private
    */
   scheduleView_(timeToView) {
+    if (!this.adapter_.isPingbackEnabled()) {
+      return;
+    }
     this.reportViewPromise_ = null;
     onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
@@ -885,6 +888,11 @@ class AccessTypeAdapterDef {
    * @return {!Promise<!JSONType>}
    */
   authorize() {}
+
+  /**
+   * @return {boolean}
+   */
+  isPingbackEnabled() {}
 
   /**
    * @return {!Promise}

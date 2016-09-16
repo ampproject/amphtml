@@ -19,6 +19,8 @@ import {isExperimentOn} from '../experiments';
 import {dev} from '../log';
 import {getMode} from '../mode';
 import {timerFor} from '../timer';
+import {parseUrl} from '../url';
+import {urls} from '../config';
 
 /** @const */
 const TAG = 'cache-service-worker';
@@ -35,7 +37,7 @@ export function installCacheServiceWorker(win) {
       return;
     }
     if (!getMode().localDev &&
-        win.location.hostname !== 'cdn.ampproject.org') {
+        win.location.hostname !== parseUrl(urls.cdn).hostname) {
       return;
     }
     const base = calculateScriptBaseUrl(win.location, getMode().localDev,

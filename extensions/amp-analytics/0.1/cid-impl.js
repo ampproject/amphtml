@@ -239,30 +239,31 @@ function getBaseCid(cid, persistenceConsent) {
   }
   const win = cid.win;
 
-  return read(win).then(stored => {
+  return cid.baseCid_ = read(win).then(stored => {
     let needsToStore = false;
+    let baseCid;
 
     // See if we have a stored base cid and whether it is still valid
     // in terms of expiration.
     if (stored && !isExpired(stored)) {
-      cid.baseCid_ = Promise.resolve(stored.cid);
+      baseCid = Promise.resolve(stored.cid);
       if (shouldUpdateStoredTime(stored)) {
         needsToStore = true;
       }
     } else {
       // We need to make a new one.
-      cid.baseCid_ = cryptoFor(win)
+      baseCid = cryptoFor(win)
           .then(crypto => crypto.sha384Base64(getEntropy(win)));
       needsToStore = true;
     }
 
     if (needsToStore) {
-      cid.baseCid_.then(baseCid => {
+      baseCid.then(baseCid => {
         store(win, persistenceConsent, baseCid);
       });
     }
 
-    return cid.baseCid_;
+    return baseCid;
   });
 }
 
