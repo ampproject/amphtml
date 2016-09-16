@@ -130,14 +130,14 @@ export function makeBodyVisible(doc, opt_waitForServices) {
   const win = doc.defaultView;
   const docState = documentStateFor(win);
   docState.onBodyAvailable(() => {
-    if (doc.defaultView[bodyVisibleSentinel]) {
+    if (win[bodyVisibleSentinel]) {
       return;
     }
-    doc.defaultView[bodyVisibleSentinel] = true;
+    win[bodyVisibleSentinel] = true;
     if (opt_waitForServices) {
-      waitForServices(doc.defaultView).then(set, set).then(() => {
+      waitForServices(win).then(set, set).then(() => {
         try {
-          const perf = performanceFor(doc.defaultView);
+          const perf = performanceFor(win);
           perf.tick('mbv');
           perf.flush();
         } catch (e) {}
