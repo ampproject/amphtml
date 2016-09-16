@@ -188,11 +188,11 @@ The intersection message would be sent by the parent to the iframe when the ifra
 
 ## Tracking/Analytics iframes
 
-To conserve resources, the AMP runtime will remove iframes that are used for tracking or analytics purposes from the DOM after 5 seconds, and only allow one such iframe per page.  The runtime will consider iframes as being tracking/analytics if they do not appear to serve a direct user purpose, such as by being invisible or small.
+To conserve resources, the AMP runtime will only allow one iframe per page that is used for tracking or analytics purposes, and will remove it from the DOM five seconds after loading.  Iframes that do not appear to serve a direct user purpose, such as by being small or invisible, will be considered as being used for tracking/analytics.
 
-For this reason, it is advised to not use amp-iframe for analytics or tracking purposes.  Instead, we strongly recommend using [`amp-analytics`](../amp-analytics/amp-analytics.md) for analytics purposes.  It is a significantly more robust, complete and efficient solution and can be configured for a wide range of analytics vendors.  If you are using an analytics vendor that doesn't support amp-analytics, please ask them to reach out to the AMP Project for integration.
+For this reason, it is advised to not use amp-iframe for analytics or tracking purposes.  Instead, we strongly recommend using [`amp-analytics`](../amp-analytics/amp-analytics.md) for analytics purposes.  It is a significantly more robust, complete and efficient solution, and can be configured for a wide range of analytics vendors.  If you are using an analytics vendor that doesn't support amp-analytics, please ask them to reach out to the AMP Project for integration.
 
-Alternatively, [`amp-pixel`](../amp-pixel/amp-pixel.md) may be an appropriate solution for simple tracking use cases.
+Alternatively, [`amp-pixel`](../../builtins/amp-pixel.md) may be an appropriate solution for simple tracking use cases.
 
 ## Validation
 
