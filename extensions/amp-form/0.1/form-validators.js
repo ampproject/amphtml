@@ -42,16 +42,20 @@ const CustomValidationTypes = {
 };
 
 
+/**
+ * Form validator interface.
+ * @interface
+ */
 class FormValidator {
 
   /**
    * @param {!HTMLFormElement} form
    */
   constructor(form) {
-    /** @const {!HTMLFOrmElement} */
+    /** @protected @const {!HTMLFormElement} */
     this.form = form;
 
-    /** @const {!Document} */
+    /** @protected @const {!Document} */
     this.doc = form.ownerDocument;
   }
 
@@ -123,6 +127,9 @@ class PolyfillDefaultValidator extends FormValidator {
 }
 
 
+/**
+ * @abstract
+ */
 class AbstractCustomValidator extends FormValidator {
 
   /**
@@ -179,17 +186,15 @@ class AbstractCustomValidator extends FormValidator {
 
   /**
    * @param {!Element} input
-   * @return {boolean} Whether a validation was visible and was successfully hidden.
    */
   hideValidationFor(input) {
     const visibleValidation = this.getVisibleValidationFor(input);
     if (!visibleValidation) {
-      return false;
+      return;
     }
 
     input.removeAttribute('aria-invalid');
     visibleValidation.classList.remove('visible');
-    return true;
   }
 
   /**

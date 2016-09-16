@@ -377,7 +377,7 @@ function updateInvalidTypesClasses(element) {
 function checkUserValidity(element, propagate = false) {
   let shouldPropagate = false;
   const previousValidityState = getUserValidityStateFor(element);
-  const isCurrentlyValid = element.checkValidity && element.checkValidity();
+  const isCurrentlyValid = element.checkValidity();
   if (previousValidityState != UserValidityState.USER_VALID &&
       isCurrentlyValid) {
     element.classList.add('user-valid');
