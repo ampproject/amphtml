@@ -72,13 +72,20 @@ function cleanupBuildDir() {
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilename, outputDir,
+function compile(entryModuleFilenames, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
+    var entryModuleFilename;
+    if (entryModuleFilenames instanceof Array) {
+      entryModuleFilename = entryModuleFilenames[0];
+    } else {
+      entryModuleFilename = entryModuleFilenames;
+      entryModuleFilenames = [entryModuleFilename];
+    }
     const checkTypes = options.checkTypes || argv.typecheck_only;
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+    console./*OK*/log('Starting closure compiler for', entryModuleFilenames);
 
     // If undefined/null or false then we're ok executing the deletions
     // and mkdir.
@@ -111,13 +118,23 @@ function compile(entryModuleFilename, outputDir,
             internalRuntimeVersion + '/';
     }
     const srcs = [
-      '3p/**/*.js',
-      'ads/**/*.js',
-      'extensions/**/*.js',
-      'build/**/*.js',
-      '!build/cc/**',
-      '!build/polyfills.js',
-      '!build/polyfills/**/*.js',
+      '3p/3p.js',
+      // Ads config files.
+      'ads/_*.js',
+      'ads/alp/**/*.js',
+      'ads/google/**/*.js',
+      // Files under build/. Should be sparse.
+      'build/css.js',
+      'build/*.css.js',
+      'build/fake-module/**/*.js',
+      'build/patched-module/**/*.js',
+      'build/experiments/**/*.js',
+      // Strange access/login related files.
+      'build/all/v0/*.js',
+      // A4A has these cross extension deps.
+      'extensions/**/*-config.js',
+      'extensions/amp-ad/**/*.js',
+      'extensions/amp-a4a/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -133,7 +150,7 @@ function compile(entryModuleFilename, outputDir,
       'node_modules/promise-pjs/promise.js',
       'build/patched-module/document-register-element/build/' +
           'document-register-element.max.js',
-      'node_modules/core-js/modules/**.js',
+      //'node_modules/core-js/modules/**.js',
       // Not sure what these files are, but they seem to duplicate code
       // one level below and confuse the compiler.
       '!node_modules/core-js/modules/library/**.js',
@@ -142,6 +159,21 @@ function compile(entryModuleFilename, outputDir,
       '!**/test-*.js',
       '!**/*.extern.js',
     ];
+    // Add needed path for extensions.
+    // Instead of globbing all extensions, this will only add the actual
+    // extension path for much quicker build times.
+    entryModuleFilenames.forEach(function(filename) {
+      if (filename.indexOf('extensions/') == -1) {
+        return;
+      }
+      var path = filename.replace(/\/[^/]+\.js$/, '/**/*.js');
+      srcs.push(path);
+    });
+    if (options.include3pDirectories) {
+      srcs.push(
+        '3p/**/*.js',
+        'ads/**/*.js')
+    }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
@@ -191,13 +223,15 @@ function compile(entryModuleFilename, outputDir,
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
+        rewrite_polyfills: !!(
+            options.includePolyfills || options.includeBasicPolyfills),
         externs: externs,
         js_module_root: [
           'node_modules/',
           'build/patched-module/',
           'build/fake-module/',
         ],
-        entry_point: entryModuleFilename,
+        entry_point: entryModuleFilenames,
         process_common_js_modules: true,
         // This strips all files from the input set that aren't explicitly
         // required.
@@ -250,6 +284,7 @@ function compile(entryModuleFilename, outputDir,
     var stream = gulp.src(srcs)
         .pipe(closureCompiler(compilerOptions))
         .on('error', function(err) {
+          console./*OK*/error('Error compiling', entryModuleFilenames);
           console./*OK*/error(err.message);
           process.exit(1);
         });

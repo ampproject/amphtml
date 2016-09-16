@@ -435,6 +435,30 @@ describe('Logging', () => {
     });
   });
 
+  describe('assertNumber', () => {
+    let log;
+
+    beforeEach(() => {
+      log = new Log(win, RETURNS_FINE);
+    });
+
+    it('should return the number value', () => {
+      expect(log.assertNumber(3)).to.equal(3);
+      const nan = log.assertNumber(NaN);
+      expect(nan).to.not.equal(nan);
+    });
+
+    it('should fail with on non number', () => {
+      expect(() => log.assertNumber({}))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(null))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber(undefined))
+          .to.throw('Number expected: ');
+      expect(() => log.assertNumber([]))
+          .to.throw('Number expected: ');
+    });
+  });
 
   describe('assertEnumValue', () => {
 
