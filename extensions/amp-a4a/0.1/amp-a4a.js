@@ -320,42 +320,45 @@ export class AmpA4A extends AMP.BaseElement {
       // Promise that will resolve to null after all keys have been checked.
       // Will call resolveValidation if a successful validation does happen.
       const allKeysCheckedPromise = Promise.all(
-          this.keyInfoSetPromises_.map(keyInfoSetPromise =>
-              // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>} keyInfoSetPromise
-              // @return {!Promise}
-              keyInfoSetPromise.then(keyInfoSet =>
+          this.keyInfoSetPromises_.map(keyInfoSetPromise => {
+            // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
+            // keyInfoSetPromise
+            // @return {!Promise}
+            return keyInfoSetPromise.then(keyInfoSet => {
               // @param {!Array<!Promise<?PublicKeyInfoDef>>} keyInfoSet
               // @return {!Promise}
-              Promise.all(keyInfoSet.map(keyInfoPromise =>
-              // @param {!Promise<?PublicKeyInfoDef>} keyInfoPromise
-              // @return {!Promise}
-              keyInfoPromise.then(keyInfo =>
-              // @param {?PublicKeyInfoDef} keyInfo
-              // @return {!Promise}
-              keyInfo ?
-              verifySignature(
-                  new Uint8Array(creativeParts.creative),
-                  creativeParts.signature,
-                  keyInfo)
-                      .then(
-                          isValid => {
-                            // @param {boolean} isValid
-                            // @return {!Promise}
-                            if (isValid) {
-                              resolveValidation(creativeParts.creative);
-                            }
-                            return Promise.resolve();
-                          },
-                          err => {
-                            // @param {*} err
-                            // @return {!Promise}
-                            user().error('Amp Ad', err, this.element);
-                            return Promise.resolve();
-                          }) :
-                                  Promise.resolve())))))
-                      .then(() =>
-                      // @return {!Promise<?ArrayBuffer>}
-                      Promise.resolve(null)));
+              return Promise.all(keyInfoSet.map(keyInfoPromise => {
+                // @param {!Promise<?PublicKeyInfoDef>} keyInfoPromise
+                // @return {!Promise}
+                return keyInfoPromise.then(keyInfo => {
+                  // @param {?PublicKeyInfoDef} keyInfo
+                  // @return {!Promise}
+                  return !keyInfo ? Promise.resolve() :
+                      verifySignature(
+                          new Uint8Array(creativeParts.creative),
+                          creativeParts.signature,
+                          keyInfo).then(isValid => {
+                        // @param {boolean} isValid
+                        // @return {!Promise}
+                        if (isValid) {
+                          resolveValidation(creativeParts.creative);
+                        }
+                        return Promise.resolve();
+                      },
+                      err => {
+                        // @param {*} err
+                        // @return {!Promise}
+                        user().error('Amp Ad', err, this.element);
+                        return Promise.resolve();
+                      });
+                })
+              }))
+            })
+          })
+      ).then(() => {
+        // @return {!Promise<?ArrayBuffer>}
+        return Promise.resolve(null);
+      });
       // Race the two promises: Either validCreativePromise will resolve if a
       // successful validation occurs, or allKeysCheckedPromise will resolve to
       // null.
@@ -736,6 +739,7 @@ export class AmpA4A extends AMP.BaseElement {
       // render-start event never to fire which will remove visiblity hidden.
       this.apiHandler_.startUp(
           iframe, /* is3p */opt_isNonAmpCreative, /* opt_defaultVisible */true);
+      this.rendered_ = true;
     });
   }
 

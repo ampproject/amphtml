@@ -39,7 +39,7 @@ const modulus =
       'eJ8jvDx2_mBb';
 const pubExp = 'AQAB';
 
-const pubKeyInfo = importPublicKey({
+const pubKeyInfoPromise = importPublicKey({
   kty: 'RSA',
   'n': modulus,
   'e': pubExp,
@@ -53,7 +53,7 @@ const modulus1 =
       'kpcJ-XC_Q62ArEY5vqxJgdYjq4bE8s3f8rKC-Uqg_uepoFEn-X' +
       'Xf2l0UQmVcYCxeRY6ahvM';
 const pubExp1 = 'AQAB';
-const pubKeyInfo1 = importPublicKey({
+const pubKeyInfoPromise1 = importPublicKey({
   kty: 'RSA',
   'n': modulus1,
   'e': pubExp1,
@@ -89,6 +89,18 @@ const signature = hexToBytes(
 const data = stringToBytes('Hello');
 const wrongData = stringToBytes('Hello0');
 
+describe('importPublicKet', function() {
+  if (!isCryptoAvailable()) { return; }
+
+  it('should resolve to a PublicKeyInfoDef object', () =>
+    pubKeyInfoPromise.then(pubKeyInfo => {
+      expect(pubKeyInfo).to.not.be.null;
+      expect(pubKeyInfo.hash).to.not.be.null;
+      expect(pubKeyInfo.hash.length).to.equal(4);
+      expect(pubKeyInfo.cryptoKey).to.not.be.null;
+    }));
+});
+
 describe('verifySignature', function() {
 
   if (!isCryptoAvailable()) { return; }
@@ -101,41 +113,34 @@ describe('verifySignature', function() {
     sandbox.restore();
   });
 
-  it('should validate with the correct key and signature', () => {
-    verifySignature(data, signature, [pubKeyInfo])
-      .then(isvalid => expect(isvalid).to.be.true);
-  });
+  it('should validate with the correct key and signature', () =>
+      pubKeyInfoPromise.then(pubKeyInfo =>
+        verifySignature(data, signature, pubKeyInfo)
+        .then(isvalid => expect(isvalid).to.be.true)));
 
-  it('should not validate with the correct key but wrong data', () => {
-    // Test with correct key, but wrong data.
-    verifySignature(wrongData, signature, [pubKeyInfo])
-      .then(isvalid => expect(isvalid).to.be.false);
-  });
+  it('should not validate with the correct key but wrong data', () =>
+      // Test with correct key, but wrong data.
+      pubKeyInfoPromise.then(pubKeyInfo =>
+        verifySignature(wrongData, signature, pubKeyInfo)
+        .then(isvalid => expect(isvalid).to.be.false)));
 
   it('should not validate with the correct key but modified signature', () => {
-    const arr = new Array(signature.length);
-    for (let i = 0; i < signature.length ; i++) {
-      const modifiedSig = signature.slice(0);
-      modifiedSig[i] += 1;
-      arr[i] = verifySignature(data, modifiedSig, [pubKeyInfo, pubKeyInfo])
-        .then(isvalid => expect(isvalid).to.be.false);
-    };
-    return Promise.all(arr);
+    pubKeyInfoPromise.then(pubKeyInfo => {
+      const arr = new Array(signature.length);
+      for (let i = 0; i < signature.length ; i++) {
+        const modifiedSig = signature.slice(0);
+        modifiedSig[i] += 1;
+        arr[i] = verifySignature(data, modifiedSig, pubKeyInfo)
+            .then(isvalid => expect(isvalid).to.be.false);
+      };
+      return Promise.all(arr);
+    });
   });
 
   it('should not validate with wrong key', () =>
-    verifySignature(data, signature, [pubKeyInfo1])
-      .then(isvalid => expect(isvalid).to.be.false));
+      pubKeyInfoPromise1.then(pubKeyInfo1 =>
+        verifySignature(data, signature, pubKeyInfo1)
+        .then(isvalid => expect(isvalid).to.be.false)));
 
-  it('should validate with 1 correct key and 1 wrong key', () =>
-     verifySignature(data, signature, [pubKeyInfo, pubKeyInfo1])
-      .then(isvalid => expect(isvalid).to.be.true));
-
-  it('should validate with 1 wrong key and 1 correct key', () =>
-    verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1, pubKeyInfo])
-      .then(isvalid => expect(isvalid).to.be.true));
-
-  it('should not validate with 2 wrong keys', () =>
-    verifySignature(data, signature, [pubKeyInfo1, pubKeyInfo1])
-      .then(isvalid => expect(isvalid).to.be.false));
 });
+
