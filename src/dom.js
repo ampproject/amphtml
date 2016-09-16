@@ -294,13 +294,13 @@ export function childNodes(parent, callback) {
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;
