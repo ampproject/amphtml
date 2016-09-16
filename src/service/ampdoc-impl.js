@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {closestNode, getFrameElement} from '../dom';
+import {closestNode} from '../dom';
 import {dev} from '../log';
-import {getService, getTopWindow} from '../service';
+import {
+  getParentWindowFrameElement,
+  getService,
+} from '../service';
 import {isShadowRoot} from '../types';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {waitForBodyPromise} from '../dom';
@@ -121,13 +124,10 @@ export class AmpDocService {
       }
 
       // Traverse the boundary of a friendly iframe.
-      const win = (n.ownerDocument || n).defaultView;
-      if (win && win != this.win && getTopWindow(win) == this.win) {
-        const frameElement = getFrameElement(win);
-        if (frameElement) {
-          n = frameElement;
-          continue;
-        }
+      const frameElement = getParentWindowFrameElement(n, this.win);
+      if (frameElement) {
+        n = frameElement;
+        continue;
       }
 
       // Shadow doc.

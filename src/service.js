@@ -216,6 +216,24 @@ export function getTopWindow(win) {
 }
 
 /**
+ * Returns the parent "friendly" iframe if the node belongs to a child window.
+ * @param {!Node} node
+ * @param {!Window} topWin
+ * @return {?HTMLIFrameElement}
+ */
+export function getParentWindowFrameElement(node, topWin) {
+  const childWin = (node.ownerDocument || node).defaultView;
+  if (childWin && childWin != topWin && getTopWindow(childWin) == topWin) {
+    try {
+      return /** @type {?HTMLIFrameElement} */ (childWin.frameElement);
+    } catch (e) {
+      // Ignore the error.
+    }
+  }
+  return null;
+}
+
+/**
  * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/ampdoc-impl.AmpDoc}
  */

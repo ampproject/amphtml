@@ -557,21 +557,6 @@ export function escapeCssSelectorIdent(win, ident) {
 
 
 /**
- * Returns a frame element if available.
- * @param {!Window} win
- * @return {?HTMLIFrameElement}
- */
-export function getFrameElement(win) {
-  try {
-    return /** @type {?HTMLIFrameElement} */ (win.frameElement);
-  } catch (e) {
-    // Ignore the error.
-    return null;
-  }
-}
-
-
-/**
  * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
  * @param {string} text
  * @return {string}

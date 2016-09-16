@@ -116,7 +116,7 @@ export function installFriendlyIframeEmbed(iframe, container, spec) {
   }
   return readyPromise.then(() => {
     // Add extensions.
-    extensionsFor(win).installExtensionsInChildWindow(
+    extensions.installExtensionsInChildWindow(
         iframe.contentWindow, spec.extensionIds || []);
     // Ready to be shown.
     iframe.style.visibility = '';

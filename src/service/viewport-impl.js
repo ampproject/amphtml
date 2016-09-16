@@ -19,8 +19,10 @@ import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
-import {getFrameElement, waitForBody} from '../dom';
-import {getService, getTopWindow} from '../service';
+import {
+  getParentWindowFrameElement,
+  getService,
+} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
@@ -31,6 +33,7 @@ import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 import {isExperimentOn} from '../experiments';
+import {waitForBody} from '../dom';
 
 
 const TAG_ = 'Viewport';
@@ -290,18 +293,15 @@ export class Viewport {
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
-    const win = (el.ownerDocument || el).defaultView;
-    if (win && win != this.win_ && getTopWindow(win) == this.win_) {
-      const frameElement = getFrameElement(win);
-      if (frameElement) {
-        const b = this.binding_.getLayoutRect(el, 0, 0);
-        const c = this.binding_.getLayoutRect(
-            frameElement, scrollLeft, scrollTop);
-        return layoutRectLtwh(Math.round(b.left + c.left),
-            Math.round(b.top + c.top),
-            Math.round(b.width),
-            Math.round(b.height));
-      }
+    const frameElement = getParentWindowFrameElement(el, this.win_);
+    if (frameElement) {
+      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const c = this.binding_.getLayoutRect(
+          frameElement, scrollLeft, scrollTop);
+      return layoutRectLtwh(Math.round(b.left + c.left),
+          Math.round(b.top + c.top),
+          Math.round(b.width),
+          Math.round(b.height));
     }
 
     return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
