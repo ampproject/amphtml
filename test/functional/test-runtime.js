@@ -321,6 +321,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       expect(installStylesStub.callCount).to.equal(1);
       expect(installStylesStub.calledWithExactly(
@@ -464,6 +465,7 @@ describe('runtime', () => {
       expect(ext.elements['amp-ext']).exist;
       expect(ext.elements['amp-ext'].implementationClass)
           .to.equal(win.AMP.BaseElement);
+      expect(ext.elements['amp-ext'].css).to.equal('a{}');
 
       // Register is called immediately as well.
       expect(registerStub.calledWithExactly(win, 'amp-ext', AMP.BaseElement))

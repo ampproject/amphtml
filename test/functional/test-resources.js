@@ -286,6 +286,7 @@ describe('Resources pause/resume/unlayout scheduling', () => {
 
   function createElement() {
     return {
+      ownerDocument: {defaultView: window},
       tagName: 'amp-test',
       isBuilt() {
         return true;
@@ -467,6 +468,7 @@ describe('Resources schedulePreload', () => {
 
   function createElement() {
     return {
+      ownerDocument: {defaultView: window},
       tagName: 'amp-test',
       isBuilt() {
         return true;
@@ -592,6 +594,7 @@ describe('Resources discoverWork', () => {
 
   function createElement(rect) {
     return {
+      ownerDocument: {defaultView: window},
       tagName: 'amp-test',
       isBuilt: () => {
         return true;
@@ -854,6 +857,7 @@ describe('Resources changeSize', () => {
 
   function createElement(rect) {
     return {
+      ownerDocument: {defaultView: window},
       tagName: 'amp-test',
       isBuilt: () => {
         return true;
@@ -1208,6 +1212,7 @@ describe('Resources mutateElement and collapse', () => {
 
   function createElement(rect, isAmp) {
     return {
+      ownerDocument: {defaultView: window},
       tagName: isAmp ? 'amp-test' : 'div',
       classList: {
         contains: className => isAmp && className == '-amp-element',
@@ -1415,6 +1420,7 @@ describe('Resources.add', () => {
 
   function createElement() {
     const element = {
+      ownerDocument: {defaultView: window},
       tagName: 'amp-test',
       isBuilt() {
         return true;

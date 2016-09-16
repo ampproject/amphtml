@@ -115,6 +115,9 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
     /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
