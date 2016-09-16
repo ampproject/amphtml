@@ -21,24 +21,8 @@ import {loadScript} from '../3p/3p';
  * @param {!Object} data
  */
 export function smartadserver(global, data) {
-  loadScript(global, 'https://ec-ns.sascdn.com/diff/js/smart.js', () => {
-    if (!global.document.getElementById(data.tag)) {
-      const divElt = global.document.createElement('div');
-      divElt.Id = data.tag;
-      const cElt = global.document.getElementById('c');
-      cElt.appendChild(divElt);
-    }
-    global.sas.cmd.push(function() {
-      global.sas.setup({'domain': data.domain, 'async': true});
-    });
-    global.sas.cmd.push(function() {
-      global.sas.call(data.call, {
-        'siteId': data.site,
-        'pageId': data.page,
-        'formatId': data.format,
-        'target': data.target,
-        'tagId': data.tag,
-      });
-    });
+  // For more flexibility, we construct the call to SmartAdServer's URL in the external loader, based on the data received from the AMP tag.
+  loadScript(global, 'https://ec-ns.sascdn.com/diff/js/amp.v0.js', () => {
+    global.sas.callAmpAd(data);
   });
 }

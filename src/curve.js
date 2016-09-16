@@ -259,7 +259,7 @@ export const Curves = {
   EASE: bezierCurve(0.25, 0.1, 0.25, 1.0),
 
   /**
-   * ease-out: slow out, fast in
+   * ease-in: slow out, fast in
    */
   EASE_IN: bezierCurve(0.42, 0.0, 1.0, 1.0),
 
@@ -297,6 +297,22 @@ export function getCurve(curve) {
     return null;
   }
   if (typeof curve == 'string') {
+    // If the curve is a custom cubic-bezier curve
+    if (curve.indexOf('cubic-bezier') != -1) {
+      const match = curve.match(/cubic-bezier\((.+)\)/);
+      if (match) {
+        const values = match[1].split(',').map(parseFloat);
+        if (values.length == 4) {
+          for (let i = 0; i < 4; i++) {
+            if (isNaN(values[i])) {
+              return null;
+            }
+          }
+          return bezierCurve(values[0], values[1], values[2], values[3]);
+        }
+      }
+      return null;
+    }
     return NAME_MAP[curve];
   }
   return curve;

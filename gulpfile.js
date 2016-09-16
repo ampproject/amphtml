@@ -59,7 +59,7 @@ declareExtension('amp-audio', '0.1', false);
 declareExtension('amp-brid-player', '0.1', false);
 declareExtension('amp-brightcove', '0.1', false);
 declareExtension('amp-kaltura-player', '0.1', false);
-declareExtension('amp-carousel', '0.1', true, 'NO_TYPE_CHECK');
+declareExtension('amp-carousel', '0.1', true);
 declareExtension('amp-dailymotion', '0.1', false);
 declareExtension('amp-dynamic-css-classes', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-experiment', '0.1', false, 'NO_TYPE_CHECK');
@@ -67,7 +67,7 @@ declareExtension('amp-facebook', '0.1', false);
 declareExtension('amp-fit-text', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-font', '0.1', false, 'NO_TYPE_CHECK');
 declareExtension('amp-form', '0.1', true, 'NO_TYPE_CHECK');
-declareExtension('amp-fresh', '0.1', false, 'NO_TYPE_CHECK');
+declareExtension('amp-fresh', '0.1', true);
 declareExtension('amp-fx-flying-carpet', '0.1', true, 'NO_TYPE_CHECK');
 declareExtension('amp-gfycat', '0.1', false);
 declareExtension('amp-iframe', '0.1', false, 'NO_TYPE_CHECK');
@@ -364,22 +364,20 @@ function dist() {
 function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
-  buildAlp({
+  // Disabled to improve type check performance, since this provides
+  // little incremental value.
+  /*buildExperiments({
     minify: true,
     checkTypes: true,
     preventRemoveAndMakeDir: true,
-  });
-  buildSw({
-    minify: true,
-    checkTypes: true,
-    preventRemoveAndMakeDir: true,
-  });
-  buildExperiments({
-    minify: true,
-    checkTypes: true,
-    preventRemoveAndMakeDir: true,
-  });
-  var compileSrcs = ['./src/amp-babel.js'];
+  });*/
+  var compileSrcs = [
+    './src/amp-babel.js',
+    './src/amp-shadow.js',
+    './ads/alp/install-alp.js',
+    './src/service-worker/shell.js',
+    './src/service-worker/kill.js',
+  ];
   var extensionSrcs = Object.values(extensions).filter(function(extension) {
     return !extension.noTypeCheck;
   }).map(function(extension) {

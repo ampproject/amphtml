@@ -763,7 +763,7 @@ export class ViewportBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../platform.Platform} */
+    /** @const {!../service/platform-impl.Platform} */
     this.platform_ = platformFor(win);
 
     /** @private @const {!./viewer-impl.Viewer} */
