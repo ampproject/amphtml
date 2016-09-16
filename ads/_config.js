@@ -179,10 +179,7 @@ export const adPreconnect = {
     'https://ads.rubiconproject.com',
     'https://optimized-by.rubiconproject.com',
   ],
-  smartadserver: [
-    'https://ec-ns.sascdn.com',
-    'https://static.sascdn.com',
-  ],
+  smartadserver: 'https://static.sascdn.com',
   sortable: [
     'https://tags-cdn.deployads.com',
     'https://partner.googleadservices.com',
