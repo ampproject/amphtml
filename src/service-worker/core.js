@@ -35,7 +35,7 @@ let RtvVersion
  * @const
  * @type {AmpVersion}
  */
-const VERSION = '$internalRuntimeVersion$';
+let VERSION = '$internalRuntimeVersion$';
 
 /** @const */
 const TAG = 'cache-service-worker';
@@ -44,21 +44,36 @@ const TAG = 'cache-service-worker';
  * A list of blacklisted AMP versions that must never be served from
  * cache. Versions may be blacklisted if they contain a significant
  * implementation bug.
- * @type {!Array<RtvVersion>}
+ * @type {!Array<AmpVersion>}
  */
 const BLACKLIST = (self.AMP_CONFIG &&
     self.AMP_CONFIG[`${TAG}-blacklist`]) || [];
+
+
+/**
+ * Sets the default version for tests.
+ *
+ * @param {string} version
+ * @visibleForTesting
+ */
+export function setVersionForTesting(version) {
+  VERSION = version;
+}
 
 /**
  * Returns the version of a given versioned JS file.
  *
  * @param {string} url
  * @return {RtvVersion}
+ * @visibleForTesting
  */
-function ampVersion(url) {
+export function ampVersion(url) {
   // RTVs are 2 digit prefixes followed by the timestamp of the release.
   const matches = /rtv\/(\d{2}\d{13,})/.exec(url);
-  return matches ? matches[1] : `01${VERSION}`;
+  return matches ?
+      matches[1] :
+      // 01 is the prod prefix.
+      `01${VERSION}`;
 }
 
 /**
@@ -67,9 +82,12 @@ function ampVersion(url) {
  *
  * @param {string} url
  * @return {string}
+ * @visibleForTesting
  */
-function basename(url) {
-  return url.substr(url.lastIndexOf('/') + 1);
+export function basename(url) {
+  const match = /(?!.*?\/)[\w.]+/.exec(url);
+  // Yes, I know there'll always be a match. But Closure!
+  return match ? match[0] : '';
 }
 
 /**
@@ -78,8 +96,9 @@ function basename(url) {
  * @param {string} url
  * @param {RtvVersion} version
  * @return {string}
+ * @visibleForTesting
  */
-function urlWithVersion(url, version) {
+export function urlWithVersion(url, version) {
   const location = new URL(url);
   location.pathname = `/rtv/${version}/${basename(url)}`;
   return location.href;
@@ -93,8 +112,9 @@ function urlWithVersion(url, version) {
  * @param {!Request} request
  * @param {RtvVersion} version
  * @return {!Request}
+ * @visibleForTesting
  */
-function normalizedRequest(request, version) {
+export function normalizedRequest(request, version) {
   const url = request.url;
   if (url.indexOf(`rtv/${version}`) > -1) {
     return request;
@@ -107,8 +127,9 @@ function normalizedRequest(request, version) {
  * Determines if a url is a request to a CDN JS file.
  * @param {string} url
  * @return {boolean}
+ * @visibleForTesting
  */
-function isCdnJsFile(url) {
+export function isCdnJsFile(url) {
   return endsWith(url, '.js') && (
     startsWith(url, `${urls.cdn}/rtv`) ||
     startsWith(url, `${urls.cdn}/v0`)
@@ -119,8 +140,9 @@ function isCdnJsFile(url) {
  * Determines if a AMP version is blacklisted.
  * @param {RtvVersion} version
  * @return {boolean}
+ * @visibleForTesting
  */
-function isBlacklisted(version) {
+export function isBlacklisted(version) {
   // Trim the RTV perfix.
   version = version.substr(2);
   return BLACKLIST.indexOf(version) > -1;
@@ -131,8 +153,9 @@ function isBlacklisted(version) {
  * release version we are serving it.
  *
  * @type {!Object<string, RtvVersion>}
+ * @visibleForTesting
  */
-const clientsMap = Object.create(null);
+export const clientsMap = Object.create(null);
 
 /**
  * Our cache of CDN JS files.
@@ -147,7 +170,7 @@ let cache;
  *
  * @type {!Promise}
  */
-const cachePromise = caches.open('cdn-js').then(result => {
+const cachePromise = self.caches.open('cdn-js').then(result => {
   cache = result;
 });
 
@@ -160,8 +183,9 @@ const cachePromise = caches.open('cdn-js').then(result => {
  * @param {string} requestFile the basename of the request
  * @param {RtvVersion} requestVersion the version of the request
  * @return {!Promise<!Response>}
+ * @visibleForTesting
  */
-function fetchAndCache(cache, request, requestFile, requestVersion) {
+export function fetchAndCache(cache, request, requestFile, requestVersion) {
   // TODO(jridgewell): we should also fetch this requestVersion for all files
   // we know about.
   return fetch(request).then(response => {
@@ -204,8 +228,9 @@ function fetchAndCache(cache, request, requestFile, requestVersion) {
  * @param {!Cache} cache
  * @param {string} requestFile
  * @return {!Promise<RtvVersion>}
+ * @visibleForTesting
  */
-function getCachedVersion(cache, requestFile) {
+export function getCachedVersion(cache, requestFile) {
   // TODO(jridgewell): We should make this a bit smarter, so that it selects
   // the version that has a lot of matches, not just this request file.
   return cache.keys().then(requests => {
@@ -242,8 +267,9 @@ self.addEventListener('install', install => {
  * @param {!Request} request
  * @param {string|undefined} maybeClientId
  * @return {?Promise<!Response>}
+ * @visibleForTesting
  */
-function handleFetch(request, maybeClientId) {
+export function handleFetch(request, maybeClientId) {
   const url = request.url;
 
   // We only cache CDN JS files, and we need a clientId to do our magic.
