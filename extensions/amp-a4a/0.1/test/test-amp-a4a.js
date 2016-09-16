@@ -122,10 +122,6 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {mode: 'cors', method: 'GET'})
-      .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
@@ -136,8 +132,6 @@ describe('amp-a4a', () => {
         const getAdUrlSpy = sandbox.spy(a4a, 'getAdUrl');
         const extractCreativeAndSignatureSpy = sandbox.spy(
             a4a, 'extractCreativeAndSignature');
-        const validateAdResponseSpy = sandbox.spy(
-            a4a, 'validateAdResponse_');
         const maybeRenderAmpAdSpy = sandbox.spy(
             a4a, 'maybeRenderAmpAd_');
         doc.body.appendChild(a4aElement);
@@ -153,8 +147,6 @@ describe('amp-a4a', () => {
               'xhr.fetchTextAndHeaders called exactly once').to.be.true;
           expect(extractCreativeAndSignatureSpy.calledOnce,
               'extractCreativeAndSignatureSpy called exactly once').to.be.true;
-          expect(validateAdResponseSpy.calledTwice,
-              'validateAdResponse_ called exactly twice').to.be.true;
           expect(maybeRenderAmpAdSpy.calledOnce,
               'maybeRenderAmpAd_ called exactly once').to.be.true;
           expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;
@@ -175,10 +167,6 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {mode: 'cors', method: 'GET'})
-      .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
@@ -234,10 +222,6 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {mode: 'cors', method: 'GET'})
-      .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
@@ -282,10 +266,6 @@ describe('amp-a4a', () => {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
       }).onFirstCall().returns(Promise.resolve(mockResponse));
-      xhrMockJson.withArgs(
-          'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-          {mode: 'cors', method: 'GET'})
-      .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const a4aElement = doc.createElement('amp-a4a');
@@ -321,7 +301,10 @@ describe('amp-a4a', () => {
               creative: stringToArrayBuffer(validCSSAmp.reserialized),
               signature: new Uint8Array([]),
             }));
-        sandbox.stub(a4a, 'validateAdResponse_').returns(
+        // Since we can't (easily) stub imported functions, which, if we could,
+        // we would just stub verifySignature here, we'll just rig the outcome
+        // of the promise race.
+        sandbox.stub(Promise, 'race').returns(
             Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized)));
         a4a.onLayoutMeasure();
         expect(a4a.adPromise_).to.be.instanceof(Promise);
@@ -682,11 +665,6 @@ describe('amp-a4a', () => {
             credentials: 'include',
             requireAmpResponseSourceOrigin: true,
           }).returns(Promise.resolve(mockResponse));
-          xhrMockJson.withArgs(
-              'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
-              {mode: 'cors', method: 'GET'})
-          .returns(
-              Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
           a4a.onLayoutMeasure();
           expect(a4a.adPromise_).to.not.be.null;
           return a4a.adPromise_.then(() => {
@@ -753,5 +731,6 @@ describe('amp-a4a', () => {
   // Other cases to handle for body reformatting:
   //   - All
 });
+
 
 
