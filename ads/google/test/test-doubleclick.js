@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-import {AmpAd3PImpl} from '../../../extensions/amp-ad/0.1/amp-ad-3p-impl';
 import {
   createFixtureIframeFromHtml,
   pollForLayout,
   poll,
 } from '../../../testing/iframe';
-import * as sinon from 'sinon';
 
 const waitTime = 20 * 1000;
 
 const doubleClickTest = function(config) {
   let fixture;
   let ampAd;
-  let ampAdStyleInitial;
+  let initialAmpAdStyle;
   let ampAdIframe;
   let canvas;
 
   it(config.it, function() {
-    return createFixtureIframeFromHtml(config.html, 500,
-        config.beforeLoad).then(f => {
-      fixture = f;
-      return pollForLayout(fixture.win, 1, waitTime).then(() => {
-        return poll('iframe in DOM', () => fixture.doc.querySelector('iframe'));
-      });
-    }).then(iframe => {
+    return createFixtureIframeFromHtml(config.html, 500, config.beforeLoad)
+        .then(f => {
+          fixture = f;
+          return pollForLayout(fixture.win, 1, waitTime).then(() => {
+            return poll('iframe in DOM', () =>
+                fixture.doc.querySelector('iframe'));
+          });
+        })
+    .then(iframe => {
       ampAdIframe = iframe;
       ampAd = iframe.parentElement;
-      ampAdStyle = ampAd.getAttribute('style');
-      expect(ampAdStyle).to.not.be.null;
+      initialAmpAdStyle = ampAd.getAttribute('style');
+      expect(initialAmpAdStyle).to.not.be.null;
 
       if (config.multiSize) {
         expect(ampAd.getAttribute('data-multi-size')).to.equal(
@@ -85,7 +85,7 @@ const doubleClickTest = function(config) {
       // In some browsers the referrer is empty. But in Chrome it works, so
       // we always check there.
       if (context.referrer !== '' ||
-          (navigator.userAgent.match(/Chrome/) && !isEdge)) {
+          (navigator.userAgent.match(/Chrome/))) {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
@@ -94,7 +94,7 @@ const doubleClickTest = function(config) {
       return poll('main ad JS is injected', () => {
         return ampAdIframe.contentWindow.document.querySelector(
           'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-        }, undefined, waitTime);
+      }, undefined, waitTime);
     }).then(() => {
       return fixture.messages.filter(message => {
         return message.type == 'render-start';
@@ -106,25 +106,18 @@ const doubleClickTest = function(config) {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();
       });
     }).then(pubads => {
-      expect(pubads.get('page_url')).to.equal(config.page_url);
+      expect(pubads.get('page_url')).to.equal(config.pageUrl);
       const slot = canvas.slot;
       expect(slot).to.not.be.null;
       return poll('Actual ad loaded', () => {
         return canvas.querySelector(
             '[id="' + config.adIframeId + '"]');
       }, null, 5000);
-    }).then(() => {
+    }).then(adIframe => {
       expect(ampAdIframe.contentWindow.context.hidden).to.be.false;
-      return new Promise(resolve => {
-        ampAdIframe.contentWindow.addEventListener('amp:visibilitychange',
-            resolve);
-        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
-          state: 'hidden',
-        });
-        fixture.win.AMP.viewer.receiveMessage('visibilitychange', {
-          state: 'visible',
-        });
-      });
+      return poll('Creative content loaded', () => {
+        return adIframe.contentWindow.document.body.childNodes !== 0;
+      }, null, 5000);
     }).then(() => {
       expect(ampAdIframe.getAttribute('width')).to.equal(
           config.primarySize.width);
@@ -159,7 +152,7 @@ const doubleClickTest = function(config) {
       }
       return poll('<amp-ad> resized', () => {
         const newAmpAdStyle = ampAd.getAttribute('style');
-        if (newAmpAdStyle != ampAdStyle) {
+        if (newAmpAdStyle != initialAmpAdStyle) {
           return newAmpAdStyle;
         }
       }, null, 15000);
@@ -175,7 +168,7 @@ const doubleClickTest = function(config) {
       }
     });
   });
-}
+};
 
 const htmlFirstHalf =
 '<!doctype html>' +
@@ -210,7 +203,7 @@ const createFixtureHtml = function(config, fold) {
   }
   ampAd += '></amp-ad>';
   return htmlFirstHalf + ampAd + htmlSecondHalf;
-}
+};
 
 describe('doubleclick ad request', function() {
   this.timeout(waitTime);
@@ -224,7 +217,7 @@ describe('doubleclick ad request', function() {
     primarySize: {height: '50', width: '320'},
     actualCreativeSize: {height: '50', width: '320'},
     expectResize: false,
-    page_url: 'http://nonblocking.io/',
+    pageUrl: 'http://nonblocking.io/',
     categoryExclusions: ['health'],
     targeting: {'amptest': 'true'},
     adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
@@ -250,7 +243,7 @@ describe('multi-size doubleclick ad request, above the fold', function() {
     primarySize: {height: '75', width: '480'},
     actualCreativeSize: {height: '50', width: '320'},
     expectResize: false,
-    page_url: 'http://nonblocking.io/',
+    pageUrl: 'http://nonblocking.io/',
     adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
     it: '(multi-size) should render an ad without resizing',
   });
@@ -268,7 +261,7 @@ describe('multi-size doubleclick ad request, below the fold', function() {
     primarySize: {height: '75', width: '480'},
     actualCreativeSize: {height: '50', width: '320'},
     expectResize: true,
-    page_url: 'http://nonblocking.io/',
+    pageUrl: 'http://nonblocking.io/',
     adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
     it: '(multi-size) should render an ad with resizing',
   });
@@ -288,7 +281,7 @@ describe(
         primarySize: {height: '75', width: '480'},
         actualCreativeSize: {height: '50', width: '320'},
         expectResize: false,
-        page_url: 'http://nonblocking.io/',
+        pageUrl: 'http://nonblocking.io/',
         adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
         it: '(multi-size) ad rendering should fail',
         expectEmpty: true,
@@ -309,7 +302,7 @@ describe('multi-size doubleclick ad request, ' +
         primarySize: {height: '100', width: '900'},
         actualCreativeSize: {height: '50', width: '320'},
         expectResize: false,
-        page_url: 'http://nonblocking.io/',
+        pageUrl: 'http://nonblocking.io/',
         adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
         it: '(multi-size) ad rendering should fail',
         expectEmpty: true,
@@ -332,7 +325,7 @@ describe('multi-size doubleclick ad request, ' +
         primarySize: {height: '100', width: '900'},
         actualCreativeSize: {height: '50', width: '320'},
         expectResize: false,
-        page_url: 'http://nonblocking.io/',
+        pageUrl: 'http://nonblocking.io/',
         adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
         it: '(multi-size) ad should render',
       });
@@ -354,8 +347,9 @@ describe('multi-size doubleclick ad request, ' +
         primarySize: {height: '76', width: '480'},
         actualCreativeSize: {height: '50', width: '320'},
         expectResize: true,
-        page_url: 'http://nonblocking.io/',
+        pageUrl: 'http://nonblocking.io/',
         adIframeId: 'google_ads_iframe_/4119129/mobile_ad_banner_0',
         it: '(multi-size) ad should render',
       });
     });
+
