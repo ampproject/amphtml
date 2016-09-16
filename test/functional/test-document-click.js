@@ -342,7 +342,6 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
       return createIframePromise().then(iframe => {
         installUrlReplacementsService(iframe.win);
         const replacements = urlReplacementsFor(iframe.win);
-        Math.random = function() { return 135; };
         const evt = {
           clientX: 123,
           clientY: 456,
@@ -350,13 +349,15 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
         };
         evt.target.href = 'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM';
         onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.equal('http://foo.com/?nx=123&ny=456&r=135');
+        expect(evt.target.href).to.match(
+            /http:\/\/foo\.com\/\?nx=123&ny=456&r=\d+(\.\d+)?/);
         expect(evt.target.getAttribute('data-amp-orig-href')).to.equal(
           'http://foo.com?nx=CLICK_X&ny=CLICK_Y&r=RANDOM');
         // Execute again with different event values and verify new href.
         evt.clientX = 999;
         onDocumentElementCapturedClick_(evt, replacements);
-        expect(evt.target.href).to.equal('http://foo.com/?nx=999&ny=456&r=135');
+        expect(evt.target.href).to.match(
+            /http:\/\/foo\.com\/\?nx=999&ny=456&r=\d+(\.\d+)?/);
       });
     });
 
@@ -364,7 +365,6 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
       return createIframePromise().then(iframe => {
         installUrlReplacementsService(iframe.win);
         const replacements = urlReplacementsFor(iframe.win);
-        Math.random = function() { return 135; };
         const evt = {
           clientX: 123,
           clientY: 456,
@@ -376,11 +376,13 @@ describe('test-document-click onDocumentElementCapturedClick_', () => {
         // Target should be containerDiv due to target rewrite for shadowRoot.
         evt.target = containerDiv;
         const anchorTarget = iframe.doc.createElement('A');
-        anchorTarget.setAttribute('href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
+        anchorTarget.setAttribute(
+            'href', 'http://foo.com/?r=RANDOM&nx=CLICK_X&ny=CLICK_Y');
         shadowRoot.appendChild(anchorTarget);
         evt.path = [anchorTarget];
         onDocumentElementCapturedClick_(evt, replacements);
-        expect(anchorTarget.href).to.equal('http://foo.com/?r=135&nx=107&ny=445');
+        expect(anchorTarget.href).to.match(
+            /http:\/\/foo\.com\/\?r=\d+(\.\d+)?&nx=107&ny=445/);
       });
     });
   });
