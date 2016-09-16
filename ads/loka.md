@@ -20,8 +20,8 @@ limitations under the License.
 
 ```html
 <amp-ad width="300" height="250"
-  type="loka"
-  data-unit-params='{"unit":"mvbanner","id":"Oriowd6zgmpXa9Eg"}'>
+    type="loka"
+    data-unit-params='{"unit":"mvbanner","id":"Oriowd6zgmpXa9Eg"}'>
 </amp-ad>
 ```
 
@@ -29,8 +29,8 @@ limitations under the License.
 
 ```html
 <amp-ad width="300" height="250"
-  type="loka"
-  data-unit-params='{"unit":"backdrop","id":"Oriowd6zgmpXa9Eg","tag":"campaign1"}'>
+    type="loka"
+    data-unit-params='{"unit":"backdrop","id":"Oriowd6zgmpXa9Eg","tag":"campaign1"}'>
 </amp-ad>
 ```
 
