@@ -103,10 +103,8 @@ export class AmpAdApiHandler {
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
-    const renderStartImplemented =
-        (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0);
-
-    if (renderStartImplemented) {
+    if (this.baseInstance_.config
+        && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
