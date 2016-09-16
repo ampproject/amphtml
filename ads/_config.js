@@ -59,6 +59,7 @@ export const adPrefetch = {
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
+  inmobi: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
   mads: 'https://eu2.madsone.com/js/tags.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
@@ -243,5 +244,6 @@ export const clientIdScope = {
 export const waitForRenderStart = [
   'doubleclick',
   'fakead3p',
+  'inmobi',
   'smartadserver',
 ];
