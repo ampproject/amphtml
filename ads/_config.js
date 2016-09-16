@@ -71,7 +71,7 @@ export const adPrefetch = {
   pubmine: 'https://s.pubmine.com/showad.js',
   pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
-  smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  smartadserver: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
   sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
@@ -179,6 +179,9 @@ export const adPreconnect = {
     'https://ads.rubiconproject.com',
     'https://optimized-by.rubiconproject.com',
   ],
+  smartadserver: [
+    'https://static.sascdn.com',
+  ],
   sortable: [
     'https://tags-cdn.deployads.com',
     'https://partner.googleadservices.com',
@@ -240,4 +243,5 @@ export const clientIdScope = {
 export const waitForRenderStart = [
   'doubleclick',
   'fakead3p',
+  'smartadserver',
 ];
