@@ -24,14 +24,6 @@ in the relevant URLs. AMP provides a number of standard variable substitutions a
 allows each component to add their own. The rest of this document talks about
 the variables supported by the platform.
 
-Anchor href's that are the target (or have a child who is the target) of a click
-are synchronously expanded.  Variables below that are asynchronous by nature
-are replaced with empty string to ensure page navigation is not delayed.  If
-the navigation is prevented, the href is still updated however later clicks
-will still update to the most current values of the variables.  Note that some
-variables will not allow for expansion for A4A creatives.  Specifics will be
-addressed at a later time.
-
 ## Page and Content
 
 ### AMPDOC_HOST
