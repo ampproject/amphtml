@@ -16,7 +16,7 @@
 
 import {loadScript, validateData} from '../3p/3p';
 
-const lokaFields = ['unit_params'];
+const lokaFields = ['unitParams'];
 
 /**
  * @param {!Window} global
