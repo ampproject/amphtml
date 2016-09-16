@@ -34,26 +34,20 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const mode = user.assert(
+    const mode = user().assert(
         this.element.getAttribute('data-mode'),
         'The data-mode attribute is required for <amp-springboard-player> %s',
         this.element);
-    const contentId = user.assert(
+    const contentId = user().assert(
         this.element.getAttribute('data-content-id'),
         'The data-content-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    const domain = user.assert(
+    const domain = user().assert(
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
 
-    /** @private @const {number} */
-    this.width_ = width;
-    /** @private @const {number} */
-    this.height_ = height;
     /** @private @const {string} */
     this.mode_ = mode;
     /** @private @const {number} */
@@ -69,12 +63,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const siteId = user.assert(
+    const siteId = user().assert(
         this.element.getAttribute('data-site-id'),
         'The data-site-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    const playerId = user.assert(
+    const playerId = user().assert(
         this.element.getAttribute('data-player-id'),
         'The data-player-id attribute is required for' +
         '<amp-springboard-player> %s',
@@ -90,8 +84,6 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     	encodeURIComponent(playerId) + '/' + encodeURIComponent(this.domain_) +
     	'/' + encodeURIComponent(items);
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     /** @private {?Element} */
     this.iframe_ = iframe;
     this.element.appendChild(iframe);
@@ -127,11 +119,10 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         'snapshots/default_snapshot.png';
     }
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
     loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {

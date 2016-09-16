@@ -21,17 +21,18 @@ data.bn;
 data.mid;
 data.ws;
 data.s;
+data.sid;
 data.zid;
 data.pid;
-data.custom3
-window.uAd = {}
+data.custom3;
+window.uAd = {};
 window.uAd.embed;
 data.pageOpts;
 data.adUnits;
 data.clmb_slot;
 data.clmb_position;
 data.clmb_divid;
-data.clmb_section
+data.clmb_section;
 var Criteo;
 Criteo.DisplayAd;
 Criteo.Log.Debug;
@@ -132,3 +133,32 @@ data.ybSlot;
 yieldbot.nextPageview;
 yieldbot.getSlotCriteria;
 data.ymid;
+var PostRelease;
+PostRelease.Start;
+PostRelease.checkIsAdVisible;
+var _prx;
+data.delayByTime;
+window.PulsePointHeaderTag;
+data.tagid;
+data.tagtype;
+data.zergid;
+window.zergnetWidgetId;
+data.ankv;
+data.ancat;
+data.annid;
+data.anwid;
+data.antid;
+data.anapiid;
+window.MADSAdrequest = {};
+window.MADSAdrequest.adrequest;
+/**
+ * @constructor
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+window.EzoicAmpAd = function(global, data) {};
+window.EzoicAmpAd.prototype.createAd;
+data.id;
+data.d;
+data.wid;
+data.url;

@@ -36,6 +36,12 @@ var privateServiceFactory = 'This service should only be installed in ' +
 var shouldNeverBeUsed =
     'Usage of this API is not allowed - only for internal purposes.';
 
+var backwardCompat = 'This method must not be called. It is only retained ' +
+    'for backward compatibility during rollout.';
+
+var realiasGetMode = 'Do not re-alias getMode or its return so it can be ' +
+    'DCE\'d. Use explicitly like "getMode().localDev" instead.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -53,24 +59,46 @@ var forbiddenTerms = {
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-    // TODO: temporary, remove when validator is up to date
     whitelist: [
       'build-system/server.js',
-      'validator/index.js',  // NodeJs only.
-      'validator/parse-css.js',
-      'validator/validator-full.js',
-      'validator/validator-in-browser.js',
-      'validator/validator.js',
+      'validator/nodejs/index.js',  // NodeJs only.
+      'validator/engine/parse-css.js',
+      'validator/engine/validator-in-browser.js',
+      'validator/engine/validator.js',
     ]
   },
   // Match `getMode` that is not followed by a "()." and is assigned
   // as a variable.
-  '(?:var|let|const).*?getMode(?!\\(\\)\\.)': {
-    message: 'Do not re-alias getMode or its return so it can be DCE\'d.' +
-        ' Use explicitly like "getMode().localDev" instead.',
+  '\\bgetMode\\([^)]*\\)(?!\\.)': {
+    message: realiasGetMode,
     whitelist: [
-      'dist.3p/current/integration.js'
+      'src/mode.js',
+      'dist.3p/current/integration.js',
     ]
+  },
+  'import[^}]*\\bgetMode as': {
+    message: realiasGetMode,
+  },
+  '\\bgetModeObject\\(': {
+    message: realiasGetMode,
+    whitelist: [
+      'src/mode-object.js',
+      'src/3p-frame.js',
+      'src/log.js',
+      'dist.3p/current/integration.js',
+    ]
+  },
+  '(?:var|let|const) +IS_DEV +=': {
+    message: 'IS_DEV local var only allowed in mode.js and ' +
+        'dist.3p/current/integration.js',
+    whitelist: [
+      'src/mode.js',
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
+    ],
+  },
+  '\\.prefetch\\(': {
+    message: 'Do not use preconnect.prefetch, use preconnect.preload instead.'
   },
   'iframePing': {
     message: 'This is only available in vendor config for ' +
@@ -110,12 +138,20 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installCryptoService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/crypto-impl.js',
+    ],
+  },
   'installDocService': {
     message: privateServiceFactory,
     whitelist: [
       'src/amp.js',
       'src/amp-shadow.js',
       'src/service/ampdoc-impl.js',
+      'testing/iframe.js',
     ],
   },
   'installPerformanceService': {
@@ -174,7 +210,7 @@ var forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesService': {
+  'installResourcesServiceForDoc': {
     message: privateServiceFactory,
     whitelist: [
       'src/runtime.js',
@@ -196,6 +232,7 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
+      'extensions/amp-access/0.1/signin.js',
     ],
   },
   // Privacy sensitive
@@ -207,6 +244,7 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-experiment/0.1/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
@@ -272,6 +310,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/storage.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'extensions/amp-app-banner/0.1/amp-app-banner.js',
     ],
   },
   'localStorage': {
@@ -287,13 +326,21 @@ var forbiddenTerms = {
       'extensions/amp-accordion/0.1/amp-accordion.js',
     ],
   },
-  'indexedDB': requiresReviewPrivacy,
+  'indexedDB': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      // https://docs.google.com/document/d/1tH_sj93Lo8XRpLP0cDSFNrBi1K_jmx_-q1sk_ZW3Nbg/edit#heading=h.ko4gxsan9svq
+      'src/service-worker/core.js',
+      'src/service-worker/kill.js',
+    ]
+  },
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
   'getAccessReaderId': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -301,6 +348,7 @@ var forbiddenTerms = {
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'build-system/amp.extern.js',
       'extensions/amp-access/0.1/amp-access.js',
       'src/service/url-replacements-impl.js',
     ]
@@ -314,10 +362,10 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
-      'validator/index.js',  // NodeJs only.
-      'validator/tokenize-css.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
+      'validator/engine/tokenize-css.js',
+      'validator/engine/validator.js',
+      // Service workers are only available in ES6 environments
+      'src/service-worker/core.js',
       // exports.startsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ]
@@ -326,29 +374,18 @@ var forbiddenTerms = {
     message: es6polyfill,
     whitelist: [
       'build-system/tasks/csvify-size/index.js',
+      // Service workers are only available in ES6 environments
+      'src/service-worker/core.js',
       // .endsWith occurs in babel generated code.
       'dist.3p/current/integration.js',
     ],
   },
-  // TODO: (erwinm) rewrite the destructure and spread warnings as
-  // eslint rules (takes more time than this quick regex fix).
-  // No destructuring allowed since we dont ship with Array polyfills.
-  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]|{[^}]+}) *=': es6polyfill,
-  // No spread (eg. test(...args) allowed since we dont ship with Array
-  // polyfills except `arguments` spread as babel does not polyfill
-  // it since it can assume that it can `slice` w/o the use of helpers.
-  '\\.\\.\\.(?!arguments\\))[_$A-Za-z0-9]*(?:\\)|])': {
-    message: es6polyfill,
-    whitelist: [
-      'extensions/amp-access/0.1/access-expr-impl.js',
-    ],
-  },
-
   // Overridden APIs.
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       '3p/integration.js',
+      'ads/google/a4a/utils.js',
       'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
@@ -358,20 +395,6 @@ var forbiddenTerms = {
     message: 'Use dom.documentContains API.',
     whitelist: [
       'src/dom.js',
-    ],
-  },
-  '\\sdocument(?![a-zA-Z0-9_])': {
-    message: 'Use `window.document` or similar to access document, the global' +
-      '`document` is forbidden',
-    whitelist: [
-      'build-system/server.js',
-      'examples/pwa/pwa.js',
-      'examples/viewer-integr.js',
-      'testing/iframe.js',
-      'testing/screenshots/make-screenshot.js',
-      'tools/experiments/experiments.js',
-      'validator/validator-full.js',
-      'validator/validator.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -394,6 +417,11 @@ var forbiddenTerms = {
       'src/dom.js',
     ],
   },
+  '\\.getWin\\(': {
+    message: backwardCompat,
+    whitelist: [
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -405,7 +433,12 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign' : ThreePTermsMessage,
+  'Math\\.sign': ThreePTermsMessage,
+  'Object\\.assign': {
+    message: ThreePTermsMessage,
+    // See https://github.com/ampproject/amphtml/issues/4877
+    whitelist: ['ads/openx.js'],
+  },
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -425,7 +458,6 @@ var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
 var forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
-  '\\.postMessage(?!_)': bannedTermsHelpString,
   '\\.offsetLeft(?!_)': bannedTermsHelpString,
   '\\.offsetTop(?!_)': bannedTermsHelpString,
   '\\.offsetWidth(?!_)': bannedTermsHelpString,
@@ -435,40 +467,58 @@ var forbiddenTermsSrcInclusive = {
   '\\.clientTop(?!_)': bannedTermsHelpString,
   '\\.clientWidth(?!_)': bannedTermsHelpString,
   '\\.clientHeight(?!_)': bannedTermsHelpString,
-  '\\.getClientRects(?!_)': bannedTermsHelpString,
-  '\\.getBoundingClientRect(?!_)': bannedTermsHelpString,
-  '\\.scrollBy(?!_)': bannedTermsHelpString,
-  '\\.scrollTo(?!_|p|p_)': bannedTermsHelpString,
-  '\\.scrollIntoView(?!_)': bannedTermsHelpString,
-  '\\.scrollIntoViewIfNeeded(?!_)': bannedTermsHelpString,
   '\\.scrollWidth(?!_)': 'please use `getScrollWidth()` from viewport',
   '\\.scrollHeight(?!_)': bannedTermsHelpString,
   '\\.scrollTop(?!_)': bannedTermsHelpString,
   '\\.scrollLeft(?!_)': bannedTermsHelpString,
-  '\\.focus(?!_)': bannedTermsHelpString,
   '\\.computedRole(?!_)': bannedTermsHelpString,
   '\\.computedName(?!_)': bannedTermsHelpString,
   '\\.innerText(?!_)': bannedTermsHelpString,
-  '\\.getComputedStyle(?!_)': bannedTermsHelpString,
   '\\.scrollX(?!_)': bannedTermsHelpString,
   '\\.scrollY(?!_)': bannedTermsHelpString,
   '\\.pageXOffset(?!_)': bannedTermsHelpString,
   '\\.pageYOffset(?!_)': bannedTermsHelpString,
   '\\.innerWidth(?!_)': bannedTermsHelpString,
   '\\.innerHeight(?!_)': bannedTermsHelpString,
-  '\\.getMatchedCSSRules(?!_)': bannedTermsHelpString,
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
-  '\\.getBBox(?!_)': bannedTermsHelpString,
-  '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
-  '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
-  '\\.changeHeight(?!_)': bannedTermsHelpString,
-  '\\.changeSize(?!_)': bannedTermsHelpString,
-  'insertAmpExtensionScript': {
+  // Functions
+  '\\.changeHeight\\(': bannedTermsHelpString,
+  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.collapse\\(': bannedTermsHelpString,
+  '\\.focus\\(': bannedTermsHelpString,
+  '\\.getBBox\\(': bannedTermsHelpString,
+  '\\.getBoundingClientRect\\(': bannedTermsHelpString,
+  '\\.getClientRects\\(': bannedTermsHelpString,
+  '\\.getComputedStyle\\(': bannedTermsHelpString,
+  '\\.getMatchedCSSRules\\(': bannedTermsHelpString,
+  '\\.postMessage\\(': bannedTermsHelpString,
+  '\\.scrollBy\\(': bannedTermsHelpString,
+  '\\.scrollIntoView\\(': bannedTermsHelpString,
+  '\\.scrollIntoViewIfNeeded\\(': bannedTermsHelpString,
+  '\\.scrollTo\\(': bannedTermsHelpString,
+  '\\.webkitConvertPointFromNodeToPage\\(': bannedTermsHelpString,
+  '\\.webkitConvertPointFromPageToNode\\(': bannedTermsHelpString,
+  '\\.scheduleUnlayout\\(': bannedTermsHelpString,
+  'loadExtension': {
     message: bannedTermsHelpString,
     whitelist: [
-      'src/insert-extension.js',
       'src/element-stub.js',
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
+      'src/service/lightbox-manager-discovery.js',
+      'src/shadow-embed.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
+    ],
+  },
+  'loadElementClass': {
+    message: bannedTermsHelpString,
+    whitelist: [
+      'src/runtime.js',
+      'src/service/extensions-impl.js',
+      'extensions/amp-ad/0.1/amp-ad.js',
+      'extensions/amp-a4a/0.1/amp-a4a.js',
     ],
   },
   'reject\\(\\)': {
@@ -477,7 +527,7 @@ var forbiddenTermsSrcInclusive = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
 };
 
 // Terms that must appear in a source file.
@@ -587,10 +637,12 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /3p|ads/.test(pathname) ||
+  var is3pFile = /\/(3p|ads)\//.test(pathname) ||
       basename == '3p.js' ||
       basename == 'style.js';
-  if (is3pFile && !isTestFile) {
+  // Yet another reason to move ads/google/a4a somewhere else
+  var isA4A = /\/a4a\//.test(pathname);
+  if (is3pFile && !isTestFile && !isA4A) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
 

@@ -16,6 +16,8 @@
 
 import {createIframePromise} from '../../../../testing/iframe';
 import {AmpExperiment} from '../amp-experiment';
+import * as variant from '../variant';
+import {variantForOrNull} from '../../../../src/variant-service';
 import {toggleExperiment} from '../../../../src/experiments';
 import * as sinon from 'sinon';
 
@@ -32,6 +34,11 @@ describe('amp-experiment', () => {
       variants: {
         'variant-c': 50,
         'variant-d': 50,
+      },
+    },
+    'experiment-3': {
+      variants: {
+        'variant-e': 1,
       },
     },
   };
@@ -51,7 +58,7 @@ describe('amp-experiment', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-experiment', false);
+    toggleExperiment(win, 'amp-experiment', false);
     sandbox.restore();
   });
 
@@ -115,16 +122,27 @@ describe('amp-experiment', () => {
 
   it('should add attributes to body element for the allocated variants', () => {
     addConfigElement('script');
-    const stub = sandbox.stub(experiment, 'getVariantAllocation_');
-    stub.withArgs(config['experiment-1']).returns(Promise.resolve('variant-a'));
-    stub.withArgs(config['experiment-2']).returns(Promise.resolve('variant-d'));
+    const stub = sandbox.stub(variant, 'allocateVariant');
+    stub.withArgs(win, 'experiment-1', config['experiment-1'])
+        .returns(Promise.resolve('variant-a'));
+    stub.withArgs(win, 'experiment-2', config['experiment-2'])
+        .returns(Promise.resolve('variant-d'));
+    stub.withArgs(win, 'experiment-3', config['experiment-3'])
+        .returns(Promise.resolve(null));
 
     experiment.buildCallback();
-    return experiment.experimentVariants.then(() => {
+    return variantForOrNull(win).then(variants => {
+      expect(variants).to.jsonEqual({
+        'experiment-1': 'variant-a',
+        'experiment-2': 'variant-d',
+        'experiment-3': null,
+      });
       expectBodyHasAttributes({
         'amp-x-experiment-1': 'variant-a',
         'amp-x-experiment-2': 'variant-d',
       });
+      expect(win.document.body.getAttribute('amp-x-experiment-3'))
+          .to.equal(null);
     });
   });
 });

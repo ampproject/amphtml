@@ -181,12 +181,6 @@ class AmpViewer {
     this.baseUrl_ = null;
     /** @private @const {?Element} */
     this.host_ = null;
-    /** @private @const {?ShadowRoot} */
-    this.shadowRoot_ = null;
-    /** @private @const {!Array<string>} */
-    this.stylesheets_ = [];
-    /** @private @const {!Array<!Element>} */
-    this.scripts_ = [];
     /** @private @const {...} */
     this.viewer_ = null;
 
@@ -220,110 +214,14 @@ class AmpViewer {
 
     this.container.appendChild(this.host_);
 
-    this.shadowRoot_ = this.host_.createShadowRoot();
-    log('Shadow root:', this.shadowRoot_);
-
     this.ampReadyPromise_.then(AMP => {
-      const amp = AMP.attachShadowRoot(this.shadowRoot_);
+      const amp = AMP.attachShadowDoc(this.host_, doc, url);
+      this.win.document.title = amp.title || '';
       this.viewer_ = amp.viewer;
+      /* TODO(dvoytenko): enable message deliverer as soon as viewer is provided
       this.viewer_.setMessageDeliverer(this.onMessage_.bind(this),
           this.getOrigin_(this.win.location.href));
-    });
-
-    // Head
-    log('head:', doc.head);
-    for (let n = doc.head.firstElementChild; n; n = n.nextElementSibling) {
-      const tagName = n.tagName;
-      const isMeta = tagName == 'META';
-      const isLink = tagName == 'LINK';
-      const name = n.getAttribute('name');
-      const rel = n.getAttribute('rel');
-      if (n.tagName == 'TITLE') {
-        this.title_ = n.textContent;
-        log('- title: ', this.title_);
-      } else if (isMeta && n.hasAttribute('charset')) {
-        // Ignore.
-      } else if (isMeta && name == 'viewport') {
-        // Ignore.
-      } else if (isLink && rel == 'canonical') {
-        this.canonicalUrl_ = n.getAttribute('href');
-        log('- canonical: ', this.canonicalUrl_);
-      } else if (isLink && rel == 'stylesheet') {
-        this.stylesheets_.push(n.getAttribute('href'));
-        log('- stylesheet: ', this.stylesheets_[this.stylesheets_.length - 1]);
-      } else if (n.tagName == 'STYLE') {
-        if (n.hasAttribute('amp-boilerplate')) {
-          // Ignore.
-          log('- ignored embedded style: ', n);
-        } else {
-          log('- embedded style: ', n);
-          this.shadowRoot_.appendChild(this.win.document.importNode(n, true));
-        }
-      } else if (n.tagName == 'SCRIPT') {
-        if (n.hasAttribute('src')) {
-          log('- src script: ', n);
-          this.scripts_.push(n);
-        } else {
-          log('- non-src script: ', n);
-          this.shadowRoot_.appendChild(this.win.document.importNode(n, true));
-        }
-      } else if (n.tagName == 'NOSCRIPT') {
-        // Ignore.
-      } else {
-        log('- UNKNOWN head element:', n);
-      }
-    }
-
-    this.mergeHead_();
-
-    // Body
-    this.shadowRoot_.appendChild(this.win.document.importNode(doc.body, true));
-  }
-
-  mergeHead_() {
-    const doc = this.win.document;
-
-    // Title.
-    doc.title = this.title_ || '';
-    log('SET title: ', doc.title);
-
-    // Stylesheets.
-    this.stylesheets_.forEach(stylesheet => {
-      const href = this.resolveUrl_(stylesheet);
-      const exists = doc.querySelector('link[href="' + href + '"]');
-      if (exists) {
-        log('- stylesheet already exists: ', href);
-      } else {
-        const el = doc.createElement('link');
-        el.setAttribute('rel', 'stylesheet');
-        el.setAttribute('type', 'text/css');
-        el.setAttribute('href', href);
-        doc.head.appendChild(el);
-        log('- stylesheet added: ', href, el);
-      }
-    });
-
-    // Scripts.
-    this.scripts_.forEach(script => {
-      // TODO(dvoytenko): extensions should be ideally registered via runtime
-      // to ensure correct stubbing, version management and other dependencies.
-      const customElement = script.getAttribute('custom-element');
-      const customTemplate = script.getAttribute('custom-template');
-      const src = this.resolveUrl_(script.getAttribute('src'));
-      log('script: ', customElement, customTemplate, script.getAttribute('src'), src);
-      const existsExpr =
-          customElement ? '[custom-element="' + customElement + '"]' :
-          customTemplate ? '[custom-template="' + customTemplate + '"]' :
-          '[src="' + src + '"]';
-      const exists = doc.querySelector('script' + existsExpr);
-      if (exists) {
-        log('- script already exists: ', customElement, customTemplate, src);
-      } else if (src.indexOf('/amp.js') != -1) {
-        // Do not install runtime again. Already installed via amp-shadow.js.
-        log('- runtime already installed: ', src);
-      } else {
-        this.installScript_(src, customElement, customTemplate);
-      }
+      */
     });
   }
 
@@ -389,7 +287,6 @@ function fetchDocument(url) {
     xhr.open('GET', url, true);
     xhr.responseType = 'document';
     xhr.setRequestHeader('Accept', 'text/html');
-    xhr.setRequestHeader('AMP-Direct-Fetch', '1');
     xhr.onreadystatechange = () => {
       if (xhr.readyState < /* STATUS_RECEIVED */ 2) {
         return;

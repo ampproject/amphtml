@@ -33,6 +33,7 @@ module.exports = function(config) {
       'test/fixtures/*.html': ['html2js'],
       'src/**/*.js': ['browserify'],
       'test/**/*.js': ['browserify'],
+      'ads/**/test/test-*.js': ['browserify'],
       'extensions/**/test/**/*.js': ['browserify'],
       'testing/**/*.js': ['browserify']
     },
@@ -49,6 +50,16 @@ module.exports = function(config) {
     port: 9876,
 
     colors: true,
+
+    proxies: {
+      '/ads/': '/base/ads/',
+      '/dist/': '/base/dist/',
+      '/dist.3p/': '/base/dist.3p/',
+      '/examples/': '/base/examples/',
+      '/extensions/': '/base/extensions/',
+      '/src/': '/base/src/',
+      '/test/': '/base/test/',
+    },
 
     logLevel: config.LOG_WARN,
 

@@ -42,9 +42,7 @@ class AmpKaltura extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-kaltura-player> %s',
         this.element);
@@ -61,8 +59,6 @@ class AmpKaltura extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
       /** @private {?Element} */
     this.iframe_ = iframe;
@@ -79,7 +75,7 @@ class AmpKaltura extends AMP.BaseElement {
     });
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = user.assert(
+    const partnerid = user().assert(
       this.element.getAttribute('data-partner'),
       'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element);
@@ -94,11 +90,10 @@ class AmpKaltura extends AMP.BaseElement {
 
     imgPlaceholder.src = src;
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
 
     loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {

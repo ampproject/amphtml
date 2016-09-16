@@ -23,12 +23,14 @@ import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
-import {onDocumentReady} from '../document-ready';
-import {platform} from '../platform';
+import {onDocumentReady, whenDocumentReady} from '../document-ready';
+import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
-import {timer} from '../timer';
+import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
+import {waitForBody} from '../dom';
+import {isExperimentOn} from '../experiments';
 
 
 const TAG_ = 'Viewport';
@@ -117,7 +119,7 @@ export class Viewport {
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
 
-    /** @private {?HTMLMetaElement|undefined} */
+    /** @private {?Element|undefined} */
     this.viewportMeta_ = undefined;
 
     /** @private {string|undefined} */
@@ -134,15 +136,7 @@ export class Viewport {
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
-    this.viewer_.onViewportEvent(() => {
-      this.binding_.updateViewerViewport(this.viewer_);
-      const paddingTop = this.viewer_.getPaddingTop();
-      if (paddingTop != this.paddingTop_) {
-        this.paddingTop_ = paddingTop;
-        this.binding_.updatePaddingTop(this.paddingTop_);
-        this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-      }
-    });
+    this.viewer_.onViewportEvent(this.updateOnViewportEvent_.bind(this));
     this.binding_.updateViewerViewport(this.viewer_);
     this.binding_.updatePaddingTop(this.paddingTop_);
 
@@ -150,6 +144,16 @@ export class Viewport {
     this.binding_.onResize(this.resize_.bind(this));
 
     this.onScroll(this.sendScrollMessage_.bind(this));
+
+    // TODO(dvoytenko, #4894): Cleanup the experiment by moving this to CSS:
+    // `html {touch-action: pan-y}` (will require adding `amp-embedded` class).
+    // The enables passive touch handlers, e.g. for document swipe, since they
+    // no will longer need to try to cancel vertical scrolls during swipes.
+    // This is only done in the embedded mode because (a) the document swipe
+    // is only possible in this case, and (b) we'd like to preserve pinch-zoom.
+    if (viewer.isEmbedded() && isExperimentOn(this.win_, 'pan-y')) {
+      setStyle(this.win_.document.documentElement, 'touch-action', 'pan-y');
+    }
   }
 
   /** For testing. */
@@ -211,9 +215,8 @@ export class Viewport {
    * @param {number} paddingBottom
    */
   updatePaddingBottom(paddingBottom) {
-    onDocumentReady(this.win_.document, () => {
-      this.win_.document.body.style.borderBottom =
-          `${paddingBottom}px solid transparent`;
+    onDocumentReady(this.win_.document, doc => {
+      doc.body.style.borderBottom = `${paddingBottom}px solid transparent`;
     });
   }
 
@@ -391,7 +394,7 @@ export class Viewport {
       return;
     }
     if (this.disableTouchZoom()) {
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.restoreOriginalTouchZoom();
       }, 50);
     }
@@ -482,7 +485,7 @@ export class Viewport {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
-      dev.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
+      dev().fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
     }
@@ -490,7 +493,7 @@ export class Viewport {
   }
 
   /**
-   * @return {?HTMLMetaElement}
+   * @return {?Element}
    * @private
    */
   getViewportMeta_() {
@@ -499,13 +502,40 @@ export class Viewport {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = this.win_.document.querySelector(
-          'meta[name=viewport]');
+      this.viewportMeta_ = /** @type {?HTMLMetaElement} */ (
+          this.win_.document.querySelector('meta[name=viewport]'));
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
     }
     return this.viewportMeta_;
+  }
+
+  /**
+   * @param {{paddingTop: number, duration: (number|undefined), curve: (string|undefined)}} event
+   * @private
+   */
+  updateOnViewportEvent_(event) {
+    this.binding_.updateViewerViewport(this.viewer_);
+    const paddingTop = event.paddingTop;
+    if (paddingTop != this.paddingTop_) {
+      const lastPaddingTop = this.paddingTop_;
+      this.paddingTop_ = paddingTop;
+      this.binding_.updatePaddingTop(this.paddingTop_, /* adjustScroll */true,
+          lastPaddingTop);
+      this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+
+      if (event.duration > 0) {
+        // Add transit effect on position fixed element
+        const tr = numeric(lastPaddingTop - this.paddingTop_, 0);
+        Animation.animate(this.win_.document.documentElement, time => {
+          const p = tr(time);
+          this.fixedLayer_.transformMutate(`translateY(${p}px)`);
+        }, event.duration, event.curve).thenAlways(() => {
+          this.fixedLayer_.transformMutate(null);
+        });
+      }
+    }
   }
 
   /**
@@ -517,7 +547,7 @@ export class Viewport {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
     const scrollLeft = this.getScrollLeft();
-    dev.fine(TAG_, 'changed event:',
+    dev().fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
         'left=', scrollLeft,
@@ -548,9 +578,9 @@ export class Viewport {
     this.scrollTop_ = newScrollTop;
     if (!this.scrollTracking_) {
       this.scrollTracking_ = true;
-      const now = timer.now();
+      const now = Date.now();
       // Wait 2 frames and then request an animation frame.
-      timer.delay(() => {
+      timerFor(this.win_).delay(() => {
         this.vsync_.measure(() => {
           this.throttledScroll_(now, newScrollTop);
         });
@@ -569,20 +599,20 @@ export class Viewport {
    */
   throttledScroll_(referenceTime, referenceTop) {
     const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
-    const now = timer.now();
+    const now = Date.now();
     let velocity = 0;
     if (now != referenceTime) {
       velocity = (newScrollTop - referenceTop) /
           (now - referenceTime);
     }
-    dev.fine(TAG_, 'scroll: ' +
+    dev().fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
       this.scrollTracking_ = false;
     } else {
-      timer.delay(() => this.vsync_.measure(
+      timerFor(this.win_).delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
@@ -626,9 +656,7 @@ export class ViewportBindingDef {
    * independent fixed layer.
    * @return {boolean}
    */
-  requiresFixedLayerTransfer() {
-    return false;
-  }
+  requiresFixedLayerTransfer() {}
 
   /**
    * Register a callback for scroll events.
@@ -651,8 +679,11 @@ export class ViewportBindingDef {
   /**
    * Updates binding with the new padding.
    * @param {number} unusedPaddingTop
+   * @param {(boolean|undefined)=} unusedOptUpdateScrollPos
+   * @param {(number|undefined)=} unusedOptLastPaddingTop
    */
-  updatePaddingTop(unusedPaddingTop) {}
+  updatePaddingTop(unusedPaddingTop, unusedOptUpdateScrollPos,
+      unusedOptLastPaddingTop) {}
 
   /**
    * Updates the viewport whether it's currently in the lightbox or a normal
@@ -728,9 +759,15 @@ export class ViewportBindingNatural_ {
   /**
    * @param {!Window} win
    */
-  constructor(win) {
+  constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!../platform.Platform} */
+    this.platform_ = platformFor(win);
+
+    /** @private @const {!./viewer-impl.Viewer} */
+    this.viewer_ = viewer;
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -741,7 +778,24 @@ export class ViewportBindingNatural_ {
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    dev.fine(TAG_, 'initialized natural viewport');
+    // Override a user-supplied `body{overflow}` to be always visible. This
+    // style is set in runtime vs css to avoid conflicts with ios-embedded
+    // mode and fixed transfer layer.
+    if (this.win.document.defaultView) {
+      waitForBody(this.win.document, () => {
+        this.win.document.body.style.overflow = 'visible';
+        if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
+                this.platform_.isIos() &&
+                this.viewer_.getParam('webview') === '1') {
+          setStyles(this.win.document.body, {
+            overflowX: 'hidden',
+            overflowY: 'visible',
+          });
+        }
+      });
+    }
+
+    dev().fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
@@ -770,8 +824,12 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
+  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
     this.win.document.documentElement.style.paddingTop = px(paddingTop);
+    if (opt_updateScrollPos) {
+      const oldScrollTop = this.getScrollTop();
+      this.setScrollTop(oldScrollTop + paddingTop - opt_lastPaddingTop);
+    }
   }
 
   /** @override */
@@ -851,7 +909,7 @@ export class ViewportBindingNatural_ {
         // scrolling purposes. This has mostly being resolved via
         // `scrollingElement` property, but this branch is still necessary
         // for backward compatibility purposes.
-        && platform.isWebKit()) {
+        && this.platform_.isWebKit()) {
       return doc.body;
     }
     return doc.documentElement;
@@ -884,6 +942,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {?Element} */
     this.scrollMoveEl_ = null;
 
+    /** @private {?Element} */
+    this.endPosEl_ = null;
+
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
 
@@ -896,16 +957,12 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    onDocumentReady(this.win.document, () => {
-      // Microtask is necessary here to let Safari to recalculate scrollWidth
-      // post DocumentReady signal.
-      timer.delay(() => {
-        this.setup_();
-      }, 0);
-    });
+    // Microtask is necessary here to let Safari to recalculate scrollWidth
+    // post DocumentReady signal.
+    whenDocumentReady(this.win.document).then(() => this.setup_());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
+    dev().fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
 
   /** @override */
@@ -916,7 +973,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @private */
   setup_() {
     const documentElement = this.win.document.documentElement;
-    const documentBody = this.win.document.body;
+    const documentBody = /** @type {!Element} */ (
+        this.win.document.body);
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -1002,13 +1060,22 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  updatePaddingTop(paddingTop) {
-    onDocumentReady(this.win.document, () => {
+  updatePaddingTop(paddingTop, opt_updateScrollPos, opt_lastPaddingTop) {
+    onDocumentReady(this.win.document, doc => {
       this.paddingTop_ = paddingTop;
       // Also tried `paddingTop` but it didn't work for `position:absolute`
       // on iOS.
-      this.win.document.body.style.borderTop =
-          `${paddingTop}px solid transparent`;
+      doc.body.style.borderTop = `${paddingTop}px solid transparent`;
+      if (opt_updateScrollPos) {
+        // TODO(yuxichen): This is a partially working formula for calculating
+        // adjusted scroll top. Add two more paddingTop to compensate the
+        // paddingTop being removed by the setScrollTop function and the removal
+        // of border top. This formula only works when either paddingTop or
+        // lastPaddingTop is 0.
+        const adjScrollTop = this.getScrollTop() + 3 * paddingTop
+            - opt_lastPaddingTop;
+        this.setScrollTop(adjScrollTop);
+      }
     });
   }
 
@@ -1016,9 +1083,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   updateLightboxMode(lightboxMode) {
     // This code will no longer be needed with the newer iOS viewport
     // implementation.
-    onDocumentReady(this.win.document, () => {
-      this.win.document.body.style.borderStyle =
-          lightboxMode ? 'none' : 'solid';
+    onDocumentReady(this.win.document, doc => {
+      doc.body.style.borderStyle = lightboxMode ? 'none' : 'solid';
     });
   }
 
@@ -1167,7 +1233,7 @@ export class ViewportBindingNaturalIosEmbed_ {
  * width=device-width,initial-scale=1,minimum-scale=1
  * ```
  * @param {string} content
- * @return {!Object<string, string>}
+ * @return {!Object<string, (string|undefined)>}
  * @private Visible for testing only.
  */
 export function parseViewportMeta(content) {
@@ -1176,7 +1242,7 @@ export function parseViewportMeta(content) {
   if (!content) {
     return params;
   }
-  const pairs = content.split(',');
+  const pairs = content.split(/,|;/);
   for (let i = 0; i < pairs.length; i++) {
     const pair = pairs[i];
     const split = pair.split('=');
@@ -1235,7 +1301,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
     if (params[k] !== updateParams[k]) {
       changed = true;
       if (updateParams[k] !== undefined) {
-        params[k] = updateParams[k];
+        params[k] = /** @type {string} */ (updateParams[k]);
       } else {
         delete params[k];
       }
@@ -1259,7 +1325,7 @@ function createViewport_(window) {
   if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
-    binding = new ViewportBindingNatural_(window);
+    binding = new ViewportBindingNatural_(window, viewer);
   }
   return new Viewport(window, binding, viewer);
 }
@@ -1270,7 +1336,7 @@ function createViewport_(window) {
  * @return {!Viewport}
  */
 export function installViewportService(window) {
-  return getService(window, 'viewport', () => {
+  return /** @type !Viewport} */ (getService(window, 'viewport', () => {
     return createViewport_(window);
-  });
+  }));
 };

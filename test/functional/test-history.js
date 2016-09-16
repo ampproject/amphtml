@@ -45,7 +45,7 @@ describe('History', () => {
     };
     bindingMock = sandbox.mock(binding);
 
-    history = new History(binding);
+    history = new History(window, binding);
   });
 
   afterEach(() => {
@@ -182,6 +182,8 @@ describe('HistoryBindingNatural', () => {
         length: 11,
       },
       addEventListener: () => {},
+      setTimeout: window.setTimeout,
+      clearTimeout: window.clearTimeout,
     };
     new HistoryBindingNatural_(windowStub);
     expect(replaceStateSpy.callCount).to.be.greaterThan(0);

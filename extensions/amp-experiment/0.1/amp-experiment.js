@@ -17,7 +17,10 @@
 import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
-import {waitForBody} from '../../../src/dom';
+import {Layout} from '../../../src/layout';
+import {waitForBodyPromise} from '../../../src/dom';
+import {allocateVariant} from './variant';
+import {getService} from '../../../src/service';
 
 /** @const */
 const EXPERIMENT = 'amp-experiment';
@@ -26,36 +29,41 @@ const ATTR_PREFIX = 'amp-x-';
 export class AmpExperiment extends AMP.BaseElement {
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
-    return true;
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY || layout == Layout.CONTAINER;
   }
 
   /** @override */
   buildCallback() {
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
     if (!this.isExperimentOn_) {
-      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
+      dev().warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       toggle(this.element, false);
+      getService(this.win, 'variant', () => Promise.resolve());
       return;
     }
 
     const config = this.getConfig_();
     const results = Object.create(null);
-    this.experimentVariants = Promise.all(
-        Object.keys(config).map(experimentName => {
-          return this.getVariantAllocation_(config[experimentName])
+    const variants = Object.keys(config).map(experimentName => {
+      return allocateVariant(
+          this.win, experimentName, config[experimentName])
               .then(variantName => {
-                if (variantName) {
-                  results[experimentName] = variantName;
-                }
+                results[experimentName] = variantName;
               });
-        })).then(() => results);
-    this.experimentVariants.then(this.addToBody_.bind(this));
+    });
+
+    /** @private @const {!Promise<!Object<string, ?string>>} */
+    this.experimentVariants_ = Promise.all(variants)
+        .then(() => results)
+        .then(this.addToBody_.bind(this));
+
+    getService(this.win, 'variant', () => this.experimentVariants_);
   }
 
   getConfig_() {
     const children = this.element.children;
-    user.assert(
+    user().assert(
         children.length == 1 && children[0].tagName == 'SCRIPT'
             && children[0].getAttribute('type').toUpperCase()
                 == 'APPLICATION/JSON',
@@ -66,29 +74,22 @@ export class AmpExperiment extends AMP.BaseElement {
   }
 
   /**
-   * Allocates the current page view to a variant according to the given
-   * experiment config.
-   * @param {!JSONType} config experiment config
-   * @returns {!Promise<?string>} the name of the allocated variant
-   * @private
-   */
-  getVariantAllocation_(config) {
-    // TODO(@lannka, #1411): wire up with real variant allocation code.
-    return Promise.resolve(Object.keys(config.variants)[0]);
-  }
-
-  /**
    * Adds the given experiment and variant pairs to body element as attributes
-   * and values.
-   * @param {!Object<string, string>} experiments
+   * and values. Experiment with no variant assigned (null) will be skipped.
+   * @param {!Object<string, ?string>} experiments
+   * @return {!Promise<!Object<string, ?string>>} a promise of the original
+   *     param passed in
    * @private
    */
   addToBody_(experiments) {
-    const doc = this.getWin().document;
-    waitForBody(doc, () => {
+    const doc = this.win.document;
+    return waitForBodyPromise(doc).then(() => {
       for (const name in experiments) {
-        doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+        if (experiments[name]) {
+          doc.body.setAttribute(ATTR_PREFIX + name, experiments[name]);
+        }
       }
+      return experiments;
     });
   }
 }

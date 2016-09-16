@@ -42,8 +42,10 @@ export function criteo(global, data) {
 
         setTargeting(data);
    } else if (!data.tagtype || data.tagtype === 'passback') {
-        Criteo.DisplayAd({ 'zoneid': data.zone, 'containerid': 'c', 'integrationmode': 'amp' });
-    }
+        Criteo.DisplayAd({'zoneid': data.zone,
+                          'containerid': 'c',
+                          'integrationmode': 'amp'});
+   }
   });
 }
 

@@ -27,6 +27,8 @@ import {
   removeFragment,
   resolveRelativeUrl,
   resolveRelativeUrlFallback_,
+  serializeQueryString,
+  getCorsUrl,
 } from '../../src/url';
 
 describe('parseUrl', () => {
@@ -216,6 +218,34 @@ describe('parseQueryString', () => {
   });
 });
 
+
+describe('serializeQueryString', () => {
+  it('should return empty string for empty params', () => {
+    expect(serializeQueryString({})).to.equal('');
+    expect(serializeQueryString({
+      nullValue: null,
+      undefValue: undefined,
+    })).to.equal('');
+  });
+  it('should serialize a single value', () => {
+    expect(serializeQueryString({a: 'A'})).to.equal('a=A');
+  });
+  it('should serialize multiple values', () => {
+    expect(serializeQueryString({a: 'A', b: 'B'})).to.equal('a=A&b=B');
+  });
+  it('should coerce to string', () => {
+    expect(serializeQueryString({a: 1, b: true})).to.equal('a=1&b=true');
+  });
+  it('should encode values and keys', () => {
+    expect(serializeQueryString({'a+b': 'A+B'})).to.equal('a%2Bb=A%2BB');
+  });
+  it('should serialize multiple valued parameters', () => {
+    expect(serializeQueryString({a: [1,2,3], b: true})).to.equal(
+        'a=1&a=2&a=3&b=true');
+  });
+});
+
+
 describe('assertHttpsUrl', () => {
   const referenceElement = document.createElement('div');
   it('should NOT allow null or undefined, but allow empty string', () => {
@@ -358,6 +388,13 @@ describe('addParamsToUrl', () => {
     url = addParamsToUrl(url, params);
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
+
+    expect(addParamsToUrl('http://example.com', {
+      firstname: 'Cool',
+      lastname: 'Beans',
+      interests: ['Basketball', 'Food', 'Running'],
+    })).to.equal('http://example.com?firstname=Cool&lastname=Beans&' +
+        'interests=Basketball&interests=Food&interests=Running');
   });
 
   it('should keep host and path intact', () => {
@@ -530,4 +567,20 @@ describe('resolveRelativeUrl', () => {
       'file?f=0#h',
       parseUrl('http://base.org/bfile?bf=0#bh'),
       'http://base.org/file?f=0#h');
+});
+
+
+describe('getCorsUrl', () => {
+  it('should error if __amp_source_origin is set', () => {
+    expect(() => getCorsUrl(window, 'http://example.com/?__amp_source_origin'))
+        .to.throw(/Source origin is not allowed in/);
+    expect(() => getCorsUrl(window, 'http://example.com/?name=hello'))
+        .to.not.throw;
+  });
+
+  it('should set __amp_source_origin as a url param', () => {
+    expect(getCorsUrl(window, 'http://example.com/?name=hello'))
+        .to.equal('http://example.com/?name=hello&' +
+            '__amp_source_origin=http%3A%2F%2Flocalhost%3A9876');
+  });
 });

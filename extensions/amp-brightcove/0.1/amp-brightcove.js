@@ -40,9 +40,7 @@ class AmpBrightcove extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const account = user.assert(
+    const account = user().assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
@@ -67,8 +65,6 @@ class AmpBrightcove extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;

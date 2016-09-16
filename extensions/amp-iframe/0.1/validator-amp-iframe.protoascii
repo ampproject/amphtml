@@ -15,6 +15,7 @@
 #
 
 tags: {  # amp-iframe
+  html_format: AMP  # Iframes not allowed in ads.
   tag_name: "SCRIPT"
   spec_name: "amp-iframe extension .js script"
   mandatory_parent: "HEAD"
@@ -47,12 +48,14 @@ tags: {  # amp-iframe
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
 }
 tags: {  # <amp-iframe>
+  html_format: AMP  # Iframes not allowed in ads.
   tag_name: "AMP-IFRAME"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-iframe extension .js script"
   attrs: { name: "allowfullscreen" value: "" }
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "frameborder" value_regex: "0|1" }
+  attrs: { name: "referrerpolicy" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "sandbox" }
   attrs: { name: "scrolling" value_regex: "auto|yes|no" }
@@ -64,6 +67,7 @@ tags: {  # <amp-iframe>
       allowed_protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
+    blacklisted_value_regex: "__amp_source_origin"
   }
   attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
   attr_lists: "extended-amp-global"

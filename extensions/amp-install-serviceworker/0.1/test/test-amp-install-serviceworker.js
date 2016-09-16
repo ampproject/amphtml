@@ -16,7 +16,11 @@
 
 import '../amp-install-serviceworker';
 import {adopt} from '../../../../src/runtime';
-import {getService} from '../../../../src/service';
+import {
+  getService,
+  getServiceForDoc,
+  resetServiceForTesting,
+} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -42,21 +46,19 @@ describe('amp-install-serviceworker', () => {
     install.setAttribute('src', 'https://example.com/sw.js');
     let calledSrc;
     const p = new Promise(() => {});
-    implementation.getWin = () => {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: src => {
-              expect(calledSrc).to.be.undefined;
-              calledSrc = src;
-              return p;
-            },
+    implementation.win = {
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: src => {
+            expect(calledSrc).to.be.undefined;
+            calledSrc = src;
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(calledSrc).to.equal('https://example.com/sw.js');
@@ -67,14 +69,12 @@ describe('amp-install-serviceworker', () => {
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
-    implementation.getWin = () => {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-        },
-      };
+    implementation.win = {
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+      },
     };
     implementation.buildCallback();
   });
@@ -85,19 +85,17 @@ describe('amp-install-serviceworker', () => {
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     const p = new Promise(() => {});
-    implementation.getWin = () => {
-      return {
-        location: {
-          href: 'https://example.com/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: () => {
-              return p;
-            },
+    implementation.win = {
+      location: {
+        href: 'https://example.com/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: () => {
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(install.children).to.have.length(0);
@@ -110,20 +108,18 @@ describe('amp-install-serviceworker', () => {
     install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
     let calledSrc;
     const p = new Promise(() => {});
-    implementation.getWin = () => {
-      return {
-        location: {
-          href: 'https://cdn.ampproject.org/some/path',
-        },
-        navigator: {
-          serviceWorker: {
-            register: src => {
-              calledSrc = src;
-              return p;
-            },
+    implementation.win = {
+      location: {
+        href: 'https://cdn.ampproject.org/some/path',
+      },
+      navigator: {
+        serviceWorker: {
+          register: src => {
+            calledSrc = src;
+            return p;
           },
         },
-      };
+      },
     };
     implementation.buildCallback();
     expect(calledSrc).to.undefined;
@@ -157,13 +153,18 @@ describe('amp-install-serviceworker', () => {
             },
           },
         },
+        setTimeout: window.setTimeout,
+        clearTimeout: window.clearTimeout,
+        document: {nodeType: /* document */ 9},
       };
-      implementation.getWin = () => win;
+      win.document.defaultView = win;
+      implementation.win = win;
       documentInfo = {
         canonicalUrl: 'https://www.example.com/path',
         sourceUrl: 'https://source.example.com/path',
       };
-      getService(win, 'documentInfo', () => {
+      resetServiceForTesting(window, 'documentInfo');
+      getServiceForDoc(document, 'documentInfo', () => {
         return documentInfo;
       });
       whenVisible = Promise.resolve();

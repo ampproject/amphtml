@@ -36,7 +36,7 @@ export class AmpList extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @const {!Element} */
-    this.container_ = this.getWin().document.createElement('div');
+    this.container_ = this.win.document.createElement('div');
     this.applyFillContent(this.container_, true);
     this.element.appendChild(this.container_);
     if (!this.element.hasAttribute('role')) {
@@ -44,7 +44,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.getWin());
+    this.urlReplacements_ = urlReplacementsFor(this.win);
   }
 
   /** @override */
@@ -58,13 +58,13 @@ export class AmpList extends AMP.BaseElement {
           if (opts.credentials) {
             opts.requireAmpResponseSourceOrigin = true;
           }
-          return xhrFor(this.getWin()).fetchJson(src, opts);
+          return xhrFor(this.win).fetchJson(src, opts);
         }).then(data => {
-          user.assert(typeof data == 'object' && Array.isArray(data['items']),
+          user().assert(typeof data == 'object' && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];
-          return templatesFor(this.getWin()).findAndRenderTemplateArray(
+          return templatesFor(this.win).findAndRenderTemplateArray(
               this.element, items).then(this.rendered_.bind(this));
         });
   }
@@ -86,7 +86,7 @@ export class AmpList extends AMP.BaseElement {
       const scrollHeight = this.container_./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.attemptChangeHeight(scrollHeight);
+        this.attemptChangeHeight(scrollHeight).catch(() => {});
       }
     });
   }

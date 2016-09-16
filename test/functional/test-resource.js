@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {Resources} from '../../src/service/resources-impl';
 import {Resource, ResourceState} from '../../src/service/resource';
 import {layoutRectLtwh} from '../../src/layout-rect';
@@ -34,6 +35,7 @@ describe('Resource', () => {
 
     element = {
       tagName: 'AMP-AD',
+      style: {},
       isBuilt: () => false,
       isUpgraded: () => false,
       prerenderAllowed: () => false,
@@ -54,7 +56,7 @@ describe('Resource', () => {
     };
     elementMock = sandbox.mock(element);
 
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewportMock = sandbox.mock(resources.viewport_);
   });
@@ -298,6 +300,22 @@ describe('Resource', () => {
     expect(resource.isFixed()).to.be.true;
   });
 
+  it('should hide and update layout box on collapse', () => {
+    resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
+    resource.isFixed_ = true;
+    elementMock.expects('updateLayoutBox')
+        .withExactArgs(sinon.match(data => {
+          return data.width == 0 && data.height == 0;
+        }))
+        .once();
+
+    resource.completeCollapse();
+    expect(resource.element.style.display).to.equal('none');
+    expect(resource.getLayoutBox().width).to.equal(0);
+    expect(resource.getLayoutBox().height).to.equal(0);
+    expect(resource.isFixed()).to.be.false;
+  });
+
 
   it('should ignore startLayout if already completed or failed or going',
         () => {
@@ -420,7 +438,7 @@ describe('Resource', () => {
 
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    const loaded = resource.loaded();
+    const loaded = resource.loadedOnce();
     const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState.LAYOUT_SCHEDULED);
@@ -606,6 +624,26 @@ describe('Resource', () => {
         expect(resource.getState()).to.equal(ResourceState.LAYOUT_COMPLETE);
       });
     });
+
+    describe('when remove from DOM', () => {
+      it('should not call pauseCallback on remove for unbuilt ele', () => {
+        resource.state_ = ResourceState.NOT_BUILT;
+        resource.pauseOnRemove();
+        elementMock.expects('pauseCallback').never();
+        elementMock.expects('viewportCallback').never();
+      });
+
+      it('should call pauseCallback on remove for built ele', () => {
+        resource.state_ = ResourceState.LAYOUT_COMPLETE;
+        resource.isInViewport_ = true;
+        resource.paused_ = false;
+        elementMock.expects('pauseCallback').once();
+        elementMock.expects('viewportCallback').once();
+        resource.pauseOnRemove();
+        expect(resource.isInViewport_).to.equal(false);
+        expect(resource.paused_).to.equal(true);
+      });
+    });
   });
 
   describe('resumeCallback', () => {
@@ -699,7 +737,7 @@ describe('Resource renderOutsideViewport', () => {
     };
     elementMock = sandbox.mock(element);
 
-    resources = new Resources(window);
+    resources = new Resources(new AmpDocSingle(window));
     resource = new Resource(1, element, resources);
     viewport = resources.viewport_;
     sandbox.stub(viewport, 'getRect').returns(layoutRectLtwh(0, 0, 100, 100));
@@ -1075,6 +1113,86 @@ describe('Resource renderOutsideViewport', () => {
       it('should disallow rendering when scrolling away', () => {
         resources.lastVelocity_ = 2;
         expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is on the left of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is on the right of viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(200, 0, 100, 100);
+      });
+
+      it('should disallow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling towards on y-axis', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+
+      it('should disallow rendering when scrolling away on y-axis', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(false);
+      });
+    });
+
+    describe('when element is fully in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(0, 0, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+    });
+
+    describe('when element is partially in viewport', () => {
+      beforeEach(() => {
+        resource.layoutBox_ = layoutRectLtwh(-50, -50, 100, 100);
+      });
+
+      it('should allow rendering', () => {
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling towards', () => {
+        resources.lastVelocity_ = -2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when scrolling away', () => {
+        resources.lastVelocity_ = 2;
+        expect(resource.renderOutsideViewport()).to.equal(true);
       });
     });
   });

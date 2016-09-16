@@ -22,89 +22,127 @@
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPrefetch = {
+  // Keep the list in alphabetic order
+  a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  accesstrade: 'https://h.accesstrade.net/js/amp/amp.js',
+  adblade: 'https://web.adblade.com/js/ads/async/show.js',
+  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
+  // TODO: Remove this once we switch over to the direct request version of adsense.js.
+  adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  adsnative: 'https://static.adsnative.com/static/js/render.v1.js',
+  adstir: 'https://js.ad-stir.com/js/adstir_async.js',
+  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
+  aduptech: 'https://s.d.adup-tech.com/jsapi',
+  amoad: [
+    'https://j.amoad.com/js/a.js',
+    'https://j.amoad.com/js/n.js',
+  ],
+  appnexus: 'https://acdn.adnxs.com/ast/ast.js',
+  atomx: 'https://s.ato.mx/p.js',
+  caprofitx: [
+    'https://cdn.caprofitx.com/pfx.min.js',
+    'https://cdn.caprofitx.com/tags/amp/profitx_amp.js',
+  ],
+  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
+  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
+  dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   doubleclick: [
     'https://www.googletagservices.com/tag/js/gpt.js',
     'https://securepubads.g.doubleclick.net/static/glade.js',
   ],
-  a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
-  adblade: 'https://web.adblade.com/js/ads/async/show.js',
-  adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
-  aduptech: 'https://s.d.adup-tech.com/jsapi',
-  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
-  dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
+  ezoic: [
+    'https://www.googletagservices.com/tag/js/gpt.js',
+    'https://g.ezoic.net/ezoic/ampad.js',
+  ],
+  genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
-  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
-  openx: 'https://www.googletagservices.com/tag/js/gpt.js',
-  smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  mads: 'https://eu2.madsone.com/js/tags.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
-  sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
-  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
-  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
-  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
-  imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  microad: 'https://j.microad.net/js/camp.js',
+  nativo: 'https://s.ntv.io/serve/load.js',
+  nend: 'https://js1.nend.net/js/amp.js',
+  openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
+  pubmine: 'https://s.pubmine.com/showad.js',
+  pulsepoint: 'https://ads.contextweb.com/TagPublish/getjs.static.js',
+  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
+  smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
-  gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
+  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   'weborama-display': [
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
-  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
-  adstir: 'https://js.ad-stir.com/js/adstir_async.js',
-  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
-  eplanning: 'https://us.img.e-planning.net/layers/epl-amp.js',
-  appnexus: 'https://acdn.adnxs.com/ast/ast.js',
-  microad: 'https://j.microad.net/js/camp.js',
   yahoojp: [
     'https://s.yimg.jp/images/listing/tool/yads/ydn/amp/amp.js',
     'https://yads.c.yimg.jp/js/yads.js',
   ],
-  nend: 'https://js1.nend.net/js/amp.js',
-  adgeneration: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
-  adtech: 'http://s.aolcdn.com/os/ads/adsWrapper3.js',
-  genieessp: 'https://js.gsspcln.jp/l/amp.js',
+  yieldbot: [
+    'https://cdn.yldbt.com/js/yieldbot.intent.amp.js',
+    'https://msg.yldbt.com/js/ybmsg.html',
+  ],
+  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  yieldone: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
 };
 
 /**
  * URLs to connect to for a given ad type.
- *
+ * No need to add URLs that have same hosts as in the adPrefetch.
  * This MUST be kept in sync with actual implementation.
  *
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPreconnect = {
+  // Keep the list in alphabetic order
   adblade: [
     'https://staticd.cdn.adblade.com',
     'https://static.adblade.com',
   ],
-  industrybrains: [
-    'https://staticd.cdn.industrybrains.com',
-    'https://static.industrybrains.com',
-  ],
-  adition: 'https://imagesrv.adition.com',
   adform: 'https://track.adform.net',
+  adition: 'https://imagesrv.adition.com',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
-  aduptech: 'https://s.d.adup-tech.com',
-  taboola: [
-    'https://cdn.taboola.com',
-    'https://trc.taboola.com',
-    'https://images.taboola.com',
+  adsnative: 'https://api.adsnative.com',
+  adstir: 'https://ad.ad-stir.com',
+  adtech: [
+    'https://mads.at.atwola.com',
+    'https://aka-cdn.adtechus.com',
   ],
-  teads: [
-    'https://cdn.teads.tv',
-    'https://cdn2.teads.tv',
-    'https://a.teads.tv',
-    'https://t.teads.tv',
+  amoad: [
+    'https://d.amoad.com',
+    'https://i.amoad.com',
+    'https://m.amoad.com',
+    'https://v.amoad.com',
+  ],
+  appnexus: 'https://ib.adnxs.com',
+  caprofitx: 'https://ad.caprofitx.adtdp.com',
+  chargeads: [
+    'https://www.chargeplatform.com',
   ],
   criteo: [
     'https://cas.criteo.com',
   ],
+  dotandads: 'https://bal.ad.dotandad.com',
   doubleclick: [
     'https://partner.googleadservices.com',
-    'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
+  ],
+  imobile: 'https://spad.i-mobile.co.jp',
+  improvedigital: 'https://ad.360yield.com/',
+  industrybrains: [
+    'https://staticd.cdn.industrybrains.com',
+    'https://static.industrybrains.com',
+  ],
+  kargo: [
+    'https://storage.cloud.kargo.com',
+    'https://pubads.g.doubleclick.net',
+    'https://prg.kargo.com',
   ],
   'mantis-display': [
     'https://mantodea.mantisadnetwork.com',
@@ -115,24 +153,23 @@ export const adPreconnect = {
     'https://mantodea.mantisadnetwork.com',
     'https://resize.mantisadnetwork.com',
   ],
-  dotandads: 'https://bal.ad.dotandad.com',
-  improvedigital: 'https://ad.360yield.com/',
+  microad: [
+    'https://s-rtb.send.microad.jp',
+    'https://s-rtb.send.microadinc.com',
+    'https://cache.send.microad.jp',
+    'https://cache.send.microadinc.com',
+    'https://deb.send.microad.jp',
+  ],
+  nend: [
+    'https://output.nend.net',
+    'https://img1.nend.net',
+  ],
   openx: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
-  yieldmo: [
-    'https://static.yieldmo.com',
-    'https://s.yieldmo.com',
-    'https://ads.yieldmo.com',
-  ],
-  triplelift: [
-    'https://ib.3lift.com',
-    'https://dynamic.3lift.com',
-    'https://img.3lift.com',
-    'https://eb2.3lift.com',
-  ],
+  pulsepoint: 'https://tag.contextweb.com',
   revcontent: [
     'https://trends.revcontent.com',
     'https://cdn.revcontent.com',
@@ -148,33 +185,37 @@ export const adPreconnect = {
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
-  imobile: 'https://spad.i-mobile.co.jp',
+  taboola: [
+    'https://cdn.taboola.com',
+    'https://trc.taboola.com',
+    'https://images.taboola.com',
+  ],
+  teads: [
+    'https://cdn2.teads.tv',
+    'https://a.teads.tv',
+    'https://t.teads.tv',
+  ],
+  triplelift: [
+    'https://ib.3lift.com',
+    'https://dynamic.3lift.com',
+    'https://img.3lift.com',
+    'https://eb2.3lift.com',
+  ],
   webediads: [
     'https://eu1.wbdds.com',
   ],
-  gmossp: 'https://cdn.gmossp-sp.jp',
-  yieldbot: 'https://i.yldbt.com',
-  adstir: 'https://ad.ad-stir.com',
-  appnexus: 'https://ib.adnxs.com',
-  microad: [
-    'https://s-rtb.send.microad.jp',
-    'https://cache.send.microad.jp',
-  ],
+  widespace: 'https://engine.widespace.com',
   yahoojp: [
-    'https://s.yimg.jp',
     'https://yads.yahoo.co.jp',
   ],
-  chargeads: [
-    'https://www.chargeplatform.com',
+  yieldbot: 'https://i.yldbt.com',
+  yieldmo: [
+    'https://s.yieldmo.com',
+    'https://ads.yieldmo.com',
   ],
-  nend: [
-    'https://js1.nend.net',
-    'https://output.nend.net',
-    'https://img1.nend.net',
-  ],
-  adtech: [
-    'https://mads.at.atwola.com',
-    'https://aka-cdn.adtechus.com',
+  zergnet: [
+    'https://www.zergnet.com',
+    'https://zergnet.com',
   ],
 };
 

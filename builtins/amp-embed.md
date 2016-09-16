@@ -30,7 +30,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -55,6 +55,7 @@ The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriv
 ## Supported embed types
 
 - [Taboola](../ads/taboola.md)
+- [ZergNet](../ads/zergnet.md)
 
 ## Validation
 

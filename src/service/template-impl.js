@@ -15,7 +15,7 @@
  */
 
 import {childElementByTag} from '../dom';
-import {getService} from '../service';
+import {fromClass} from '../service';
 import {user} from '../log';
 
 
@@ -48,12 +48,10 @@ export class BaseTemplate {
     /** @public @const */
     this.element = element;
 
-    this.compileCallback();
-  }
+    /** @public @const */
+    this.win = element.ownerDocument.defaultView;
 
-  /** @protected @return {!Window} */
-  getWin() {
-    return this.element.ownerDocument.defaultView;
+    this.compileCallback();
   }
 
   /**
@@ -207,8 +205,8 @@ export class Templates {
     } else {
       templateElement = childElementByTag(parent, 'template');
     }
-    user.assert(templateElement, 'Template not found for %s', parent);
-    user.assert(templateElement.tagName == 'TEMPLATE',
+    user().assert(templateElement, 'Template not found for %s', parent);
+    user().assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
   }
@@ -226,7 +224,7 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
-    const type = user.assert(element.getAttribute('type'),
+    const type = user().assert(element.getAttribute('type'),
         'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
@@ -284,7 +282,7 @@ export class Templates {
             'custom-template')] = true;
       }
     }
-    user.assert(this.declaredTemplates_[type],
+    user().assert(this.declaredTemplates_[type],
         'Template must be declared for %s as <script custom-template=%s>',
         element, type);
   }
@@ -301,7 +299,7 @@ export class Templates {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
-      user.assert(resolver, 'Duplicate template type: %s', type);
+      user().assert(resolver, 'Duplicate template type: %s', type);
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
@@ -349,7 +347,5 @@ export function registerExtendedTemplate(win, type, templateClass) {
  * @return {!Templates}
  */
 export function installTemplatesService(window) {
-  return getService(window, 'templates', () => {
-    return new Templates(window);
-  });
+  return fromClass(window, 'templates', Templates);
 };

@@ -55,6 +55,10 @@
     }
   };
 
+  babelHelpers.interopRequireDefault = function (obj) {
+    return obj && obj.__esModule ? obj : { default: obj };
+  };
+
   babelHelpers.get = function get(object, property, receiver) {
     if (object === null) object = Function.prototype;
     var desc = Object.getOwnPropertyDescriptor(object, property);

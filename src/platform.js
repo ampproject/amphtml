@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {fromClass} from './service';
 
 
 /**
@@ -28,7 +28,15 @@ export class Platform {
    */
   constructor(win) {
     /** @const {!Navigator} */
-    this.navigator = win.navigator;
+    this.navigator = /** @type {!Navigator} */ (win.navigator);
+  }
+
+  /**
+   * Whether the current platform an Android device.
+   * @return {boolean}
+   */
+  isAndroid() {
+    return /Android/i.test(this.navigator.userAgent);
   }
 
   /**
@@ -137,9 +145,5 @@ export class Platform {
  * @return {!Platform}
  */
 export function platformFor(window) {
-  return getService(window, 'platform', () => {
-    return new Platform(window);
-  });
+  return fromClass(window, 'platform', Platform);
 };
-
-export const platform = platformFor(window);

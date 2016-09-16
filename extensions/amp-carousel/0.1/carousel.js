@@ -72,11 +72,8 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  onViewportCallback(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
-    if (inViewport) {
-      this.hintControls();
-    }
   }
 
   /** @override */
@@ -155,6 +152,7 @@ export class AmpCarousel extends BaseCarousel {
   doLayout_(pos) {
     this.withinWindow_(pos, cell => {
       this.scheduleLayout(cell);
+      this.scheduleResume(cell);
     });
   }
 

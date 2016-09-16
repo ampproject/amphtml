@@ -33,7 +33,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -72,17 +72,24 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
+- [AccessTrade](../ads/accesstrade.md)
 - [Adblade](../ads/adblade.md)
 - [ADITION](../ads/adition.md)
 - [Adform](../ads/adform.md)
 - [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/google/adsense.md)
+- [AdsNative](../ads/adsnative.md)
 - [AdStir](../ads/adstir.md)
+- [AdSpriti](../ads/adspirit.md)
 - [AdTech](../ads/adtech.md)
 - [Ad Generation](../ads/adgeneration.md)
+- [Nativo](../ads/nativo.md)
 - [Ad Up Technology](../ads/aduptech.md)
+- [AMoAd](../ads/amoad.md)
 - [AppNexus](../ads/appnexus.md)
+- [Atomx](../ads/atomx.md)
+- [CA-ProFit-X](../ads/caprofitx.md)
 - [Chargeads](../ads/chargeads.md)
 - [Colombia](../ads/colombia.md)
 - [Criteo](../ads/criteo.md)
@@ -95,6 +102,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [I-Mobile](../ads/imobile.md)
 - [Improve Digital](../ads/improvedigital.md)
 - [Industrybrains](../ads/industrybrains.md)
+- [Kargo](../ads/kargo.md)
+- [MADS](../ads/mads.md)
 - [MANTIS](../ads/mantis.md)
 - [MediaImpact](../ads/mediaimpact.md)
 - [Nend](../ads/nend.md)
@@ -103,6 +112,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [PubMatic](../ads/pubmatic.md)
+- [Pubmine](../ads/pubmine.md)
+- [PulsePoint](../ads/pulsepoint.md)
 - [Revcontent](../ads/revcontent.md)
 - [Rubicon Project](../ads/rubicon.md)
 - [Sharethrough](../ads/sharethrough.md)
@@ -112,9 +123,11 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Teads](../ads/teads.md)
 - [Webediads](../ads/webediads.md)
 - [Weborama](../ads/weborama.md)
+- [Widespace](../ads/widespace.md)
 - [Yieldbot](../ads/yieldbot.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [YahooJP](../ads/yahoojp.md)
+- [yieldone](../ads/yieldone.md)
 
 ## Styling
 

@@ -16,18 +16,20 @@
 
 import {dev} from './log';
 import {getServicePromise} from './service';
-import {timer} from './timer';
+import {timerFor} from './timer';
 
 /**
- * List of extensions that, if they're included on the page, must be loaded
- * before the page should be shown to users.
+ * A map of extensions that, if they're included on the page, must be loaded
+ * before the page should be shown to users. The key is the extension name,
+ * the value is the blocking service.
  * Do not add an extension unless absolutely necessary.
- * @const {!Array<string>}
+ * @const {!Object<string, string>}
  */
-const EXTENSIONS = [
-  'amp-accordion',
-  'amp-dynamic-css-classes',
-];
+const EXTENSIONS = {
+  'amp-accordion': 'amp-accordion',
+  'amp-dynamic-css-classes': 'amp-dynamic-css-classes',
+  'amp-experiment': 'variant',
+};
 
 /**
  * Maximum milliseconds to wait for all extensions to load before erroring.
@@ -46,9 +48,9 @@ const LOAD_TIMEOUT = 3000;
 export function waitForExtensions(win) {
   const extensions = includedExtensions(win);
   const promises = extensions.map(extension => {
-    return timer.timeoutPromise(
+    return timerFor(win).timeoutPromise(
       LOAD_TIMEOUT,
-      getServicePromise(win, extension),
+      getServicePromise(win, EXTENSIONS[extension]),
       `Render timeout waiting for ${extension} to load.`
     );
   });
@@ -62,12 +64,13 @@ export function waitForExtensions(win) {
  * Detects which, if any, render-delaying extensions are included on the page.
  * @param {!Window} win
  * @return {!Array<string>}
+ * @private
  */
-export function includedExtensions(win) {
+function includedExtensions(win) {
   const doc = win.document;
-  dev.assert(doc.body);
+  dev().assert(doc.body);
 
-  return EXTENSIONS.filter(extension => {
+  return Object.keys(EXTENSIONS).filter(extension => {
     return doc.querySelector(`[custom-element="${extension}"]`);
   });
 }

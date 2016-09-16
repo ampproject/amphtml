@@ -23,60 +23,82 @@
  */
 
 import './polyfills';
-import {installEmbedStateListener} from './environment';
+import {installEmbedStateListener, manageWin} from './environment';
+import {nonSensitiveDataPostMessage, listenParent} from './messaging';
+import {computeInMasterFrame, nextTick, register, run} from './3p';
+import {urls} from '../src/config';
+import {endsWith} from '../src/string';
+import {parseUrl, getSourceUrl} from '../src/url';
+import {user} from '../src/log';
+
+// 3P - please keep in alphabetic order
+import {facebook} from './facebook';
+import {twitter} from './twitter';
+
+// 3P Ad Networks - please keep in alphabetic order
 import {a9} from '../ads/a9';
+import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
-import {adition} from '../ads/adition';
 import {adform} from '../ads/adform';
+import {adgeneration} from '../ads/adgeneration';
+import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
+import {adsnative} from '../ads/adsnative';
+import {adspirit} from '../ads/adspirit';
+import {adstir} from '../ads/adstir';
 import {adtech} from '../ads/adtech';
 import {aduptech} from '../ads/aduptech';
-import {plista} from '../ads/plista';
-import {criteo} from '../ads/criteo';
-import {doubleclick} from '../ads/google/doubleclick';
-import {dotandads} from '../ads/dotandads';
-import {endsWith} from '../src/string';
-import {facebook} from './facebook';
-import {flite} from '../ads/flite';
-import {mantisDisplay, mantisRecommend} from '../ads/mantis';
-import {improvedigital} from '../ads/improvedigital';
-import {manageWin} from './environment';
-import {mediaimpact} from '../ads/mediaimpact';
-import {nonSensitiveDataPostMessage, listenParent} from './messaging';
-import {twitter} from './twitter';
-import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, nextTick, register, run} from './3p';
-import {parseUrl, getSourceUrl} from '../src/url';
+import {amoad} from '../ads/amoad';
 import {appnexus} from '../ads/appnexus';
-import {taboola} from '../ads/taboola';
-import {smartadserver} from '../ads/smartadserver';
-import {sovrn} from '../ads/sovrn';
-import {sortable} from '../ads/sortable';
-import {revcontent} from '../ads/revcontent';
+import {atomx} from '../ads/atomx';
+import {caprofitx} from '../ads/caprofitx';
+import {chargeads} from '../ads/chargeads';
+import {colombia} from '../ads/colombia';
+import {contentad} from '../ads/contentad';
+import {criteo} from '../ads/criteo';
+import {ezoic} from '../ads/ezoic';
+import {dotandads} from '../ads/dotandads';
+import {doubleclick} from '../ads/google/doubleclick';
+import {eplanning} from '../ads/eplanning';
+import {fakead3p} from '../ads/fakead3p';
+import {flite} from '../ads/flite';
+import {genieessp} from '../ads/genieessp';
+import {gmossp} from '../ads/gmossp';
+import {imobile} from '../ads/imobile';
+import {improvedigital} from '../ads/improvedigital';
+import {kargo} from '../ads/kargo';
+import {mads} from '../ads/mads';
+import {mantisDisplay, mantisRecommend} from '../ads/mantis';
+import {mediaimpact} from '../ads/mediaimpact';
+import {microad} from '../ads/microad';
+import {nativo} from '../ads/nativo';
+import {nend} from '../ads/nend';
 import {openadstream} from '../ads/openadstream';
 import {openx} from '../ads/openx';
-import {triplelift} from '../ads/triplelift';
-import {teads} from '../ads/teads';
-import {rubicon} from '../ads/rubicon';
-import {imobile} from '../ads/imobile';
-import {webediads} from '../ads/webediads';
+import {plista} from '../ads/plista';
 import {pubmatic} from '../ads/pubmatic';
-import {yieldbot} from '../ads/yieldbot';
-import {user} from '../src/log';
-import {gmossp} from '../ads/gmossp';
-import {weboramaDisplay} from '../ads/weborama';
-import {adstir} from '../ads/adstir';
-import {colombia} from '../ads/colombia';
+import {pubmine} from '../ads/pubmine';
+import {pulsepoint} from '../ads/pulsepoint';
+import {revcontent} from '../ads/revcontent';
+import {rubicon} from '../ads/rubicon';
 import {sharethrough} from '../ads/sharethrough';
-import {eplanning} from '../ads/eplanning';
-import {microad} from '../ads/microad';
+import {smartadserver} from '../ads/smartadserver';
+import {sortable} from '../ads/sortable';
+import {sovrn} from '../ads/sovrn';
+import {taboola} from '../ads/taboola';
+import {teads} from '../ads/teads';
+import {triplelift} from '../ads/triplelift';
+import {webediads} from '../ads/webediads';
+import {weboramaDisplay} from '../ads/weborama';
+import {widespace} from '../ads/widespace';
 import {yahoojp} from '../ads/yahoojp';
-import {chargeads} from '../ads/chargeads';
-import {nend} from '../ads/nend';
-import {adgeneration} from '../ads/adgeneration';
-import {genieessp} from '../ads/genieessp';
+import {yieldbot} from '../ads/yieldbot';
+import {yieldmo} from '../ads/yieldmo';
+import {yieldone} from '../ads/yieldone';
+import {zergnet} from '../ads/zergnet';
+
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -86,60 +108,83 @@ const AMP_EMBED_ALLOWED = {
   taboola: true,
   'mantis-recommend': true,
   plista: true,
+  zergnet: true,
+  _ping_: true,
 };
 
+// used for extracting fakead3p from production code.
+const IS_DEV = true;
+
+// Keep the list in alphabetic order
 register('a9', a9);
+register('accesstrade', accesstrade);
 register('adblade', adblade);
-register('adition', adition);
 register('adform', adform);
+register('adgeneration', adgeneration);
+register('adition', adition);
 register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
+register('adsnative', adsnative);
+register('adspirit', adspirit);
+register('adstir', adstir);
 register('adtech', adtech);
 register('aduptech', aduptech);
-register('plista', plista);
-register('criteo', criteo);
-register('doubleclick', doubleclick);
+register('amoad', amoad);
 register('appnexus', appnexus);
+register('atomx', atomx);
+register('caprofitx', caprofitx);
+register('chargeads', chargeads);
+register('colombia', colombia);
+register('contentad', contentad);
+register('criteo', criteo);
+register('dotandads', dotandads);
+register('doubleclick', doubleclick);
+register('eplanning', eplanning);
+register('ezoic', ezoic);
+register('facebook', facebook);
 register('flite', flite);
-register('mantis-display', mantisDisplay);
-register('mantis-recommend', mantisRecommend);
+register('genieessp', genieessp);
+register('gmossp', gmossp);
+register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
+register('kargo', kargo);
+register('mads', mads);
+register('mantis-display', mantisDisplay);
+register('mantis-recommend', mantisRecommend);
+register('mediaimpact', mediaimpact);
+register('microad', microad);
+register('nativo', nativo);
+register('nend', nend);
+register('openadstream', openadstream);
+register('openx', openx);
+register('plista', plista);
+register('pubmatic', pubmatic);
+register('pubmine', pubmine);
+register('pulsepoint', pulsepoint);
+register('revcontent', revcontent);
+register('rubicon', rubicon);
+register('sharethrough', sharethrough);
+register('smartadserver', smartadserver);
+register('sortable', sortable);
+register('sovrn', sovrn);
 register('taboola', taboola);
-register('dotandads', dotandads);
+register('teads', teads);
+register('triplelift', triplelift);
+register('twitter', twitter);
+register('webediads', webediads);
+register('weborama-display', weboramaDisplay);
+register('widespace', widespace);
+register('yahoojp', yahoojp);
+register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
+register('zergnet', zergnet);
+register('yieldone', yieldone);
+
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
-register('twitter', twitter);
-register('facebook', facebook);
-register('smartadserver', smartadserver);
-register('sovrn', sovrn);
-register('mediaimpact', mediaimpact);
-register('revcontent', revcontent);
-register('sortable', sortable);
-register('openadstream', openadstream);
-register('openx', openx);
-register('triplelift', triplelift);
-register('teads', teads);
-register('rubicon', rubicon);
-register('imobile', imobile);
-register('webediads', webediads);
-register('pubmatic', pubmatic);
-register('gmossp', gmossp);
-register('weborama-display', weboramaDisplay);
-register('yieldbot', yieldbot);
-register('adstir', adstir);
-register('colombia', colombia);
-register('sharethrough', sharethrough);
-register('eplanning', eplanning);
-register('microad', microad);
-register('yahoojp', yahoojp);
-register('chargeads', chargeads);
-register('nend', nend);
-register('adgeneration', adgeneration);
-register('genieessp', genieessp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -155,6 +200,14 @@ const defaultAllowedTypesInCustomFrame = [
   '_ping_',
 ];
 
+// List of ad networks that will manually call `window.context.renderStart` to
+// emit render-start event when ad actually starts rendering. Please add
+// yourself here if you'd like to do so (which we encourage).
+export const waitForRenderStart = [
+  'doubleclick',
+  'fakead3p',
+];
+
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -168,14 +221,12 @@ const defaultAllowedTypesInCustomFrame = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  user.assert(win.context.location.originValidated != null,
-      'Origin should have been validated');
 
-  user.assert(isTagNameAllowed(data.type, win.context.tagName),
+  user().assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      user.assert(data,
+      user().assert(data,
           'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
@@ -212,6 +263,13 @@ function masterSelection(type) {
 }
 
 /**
+ * @return {boolean} Whether this is the master iframe.
+ */
+function isMaster() {
+  return window.context.master == window;
+}
+
+/**
  * Draws an embed, optionally synchronously, to the DOM.
  * @param {function(!Object, function(!Object))} opt_configCallback If provided
  *     will be invoked with two arguments:
@@ -235,11 +293,23 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     if (opt_allowedEmbeddingOrigins) {
       validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
     }
-    window.context.master = masterSelection(data.type);
-    window.context.isMaster = window.context.master == window;
+    // Define master related properties to be lazily read.
+    Object.defineProperties(window.context, {
+      master: {
+        get: () => masterSelection(data.type),
+      },
+      isMaster: {
+        get: isMaster,
+      },
+    });
     window.context.data = data;
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
+    window.context.renderStart = triggerRenderStart;
+
+    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
+      register('fakead3p', fakead3p);
+    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the
@@ -263,15 +333,17 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
         reportRenderedEntityIdentifier;
     window.context.computeInMasterFrame = computeInMasterFrame;
     delete data._context;
-
     manageWin(window);
     installEmbedStateListener();
     draw3p(window, data, opt_configCallback);
     updateVisibilityState(window);
-    nonSensitiveDataPostMessage('render-start');
+    // Subscribe to page visibility updates.
+    nonSensitiveDataPostMessage('send-embed-state');
+    nonSensitiveDataPostMessage('bootstrap-loaded');
   } catch (e) {
-    if (!window.context.mode.test) {
-      lightweightErrorReport(e);
+    const c = window.context || {mode: {test: false}};
+    if (!c.mode.test) {
+      lightweightErrorReport(e, c.canary);
       throw e;
     }
   }
@@ -287,6 +359,13 @@ function triggerDimensions(width, height) {
 
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {width, height});
+}
+
+/**
+ * @param {{width, height}=} opt_data
+ */
+function triggerRenderStart(opt_data) {
+  nonSensitiveDataPostMessage('render-start', opt_data);
 }
 
 /**
@@ -358,7 +437,7 @@ function onResizeDenied(observerCallback) {
  * @param {string} entityId See comment above for content.
  */
 function reportRenderedEntityIdentifier(entityId) {
-  user.assert(typeof entityId == 'string',
+  user().assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
     id: entityId,
@@ -368,8 +447,7 @@ function reportRenderedEntityIdentifier(entityId) {
 /**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
- * For browsers that don't support ancestorOrigins it adds
- * `originValidated = false` to the location object.
+ * Only check for browsers that support ancestorOrigins
  * @param {!Window} window
  * @param {!Location} parentLocation
  * @visibleForTesting
@@ -380,13 +458,11 @@ export function validateParentOrigin(window, parentLocation) {
   // ancestorOrigins. In that case we proceed but mark the origin
   // as non-validated.
   if (!ancestors || !ancestors.length) {
-    parentLocation.originValidated = false;
     return;
   }
-  user.assert(ancestors[0] == parentLocation.origin,
+  user().assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
-  parentLocation.originValidated = true;
 }
 
 /**
@@ -397,11 +473,13 @@ export function validateParentOrigin(window, parentLocation) {
  * @visiblefortesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
+  const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
+
   // Everything allowed in default iframe.
-  if (window.location.hostname == '3p.ampproject.net') {
+  if (window.location.hostname == thirdPartyHost) {
     return;
   }
-  if (/^d-\d+\.ampproject\.net$/.test(window.location.hostname)) {
+  if (urls.thirdPartyFrameRegex.test(window.location.hostname)) {
     return;
   }
   if (window.location.hostname == 'ads.localhost') {
@@ -410,7 +488,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  user.assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  user().assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
 }
 
@@ -429,7 +507,8 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   // nothing.
   const ancestor = ancestors ? ancestors[0] : window.document.referrer;
   let hostname = parseUrl(ancestor).hostname;
-  const onDefault = hostname == 'cdn.ampproject.org';
+  const cdnHostname = parseUrl(urls.cdn).hostname;
+  const onDefault = hostname == cdnHostname;
   if (onDefault) {
     // If we are on the cache domain, parse the source hostname from
     // the referrer. The referrer is used because it should be
@@ -501,10 +580,13 @@ export function isTagNameAllowed(type, tagName) {
  * too many deps for this small JS binary.
  *
  * @param {!Error} e
+ * @param {boolean} isCanary
  */
-function lightweightErrorReport(e) {
-  new Image().src = 'https://amp-error-reporting.appspot.com/r' +
+function lightweightErrorReport(e, isCanary) {
+  new Image().src = urls.errorReporting +
       '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
-      '&r=' + encodeURIComponent(document.referrer);
+      '&ca=' + (isCanary ? 1 : 0) +
+      '&r=' + encodeURIComponent(document.referrer) +
+      '&s=' + encodeURIComponent(e.stack || '');
 }

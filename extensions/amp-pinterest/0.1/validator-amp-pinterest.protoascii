@@ -15,6 +15,8 @@
 #
 
 tags: {  # amp-pinterest
+  html_format: AMP
+  html_format: A4A
   tag_name: "SCRIPT"
   spec_name: "amp-pinterest extension .js script"
   mandatory_parent: "HEAD"
@@ -50,6 +52,8 @@ tags: {  # amp-pinterest
 # attribute. In this case, depending on the value of data-do, data-media and
 # data-description may or may not be mandatory.
 tags: {  # <amp-pinterest>
+  html_format: AMP
+  html_format: A4A
   tag_name: "AMP-PINTEREST"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-pinterest extension .js script"

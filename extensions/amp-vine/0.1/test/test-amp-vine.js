@@ -46,8 +46,6 @@ describe('amp-vine', () => {
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://vine.co/v/MdKjXez002d/embed/simple');
-      expect(iframe.getAttribute('width')).to.equal('400');
-      expect(iframe.getAttribute('height')).to.equal('400');
     });
   });
 

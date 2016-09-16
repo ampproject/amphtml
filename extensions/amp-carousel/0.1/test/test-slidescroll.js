@@ -53,6 +53,8 @@ describe('SlideScroll', () => {
         ampSlideScroll.setAttribute('src', imgUrl);
         ampSlideScroll.setAttribute('width', '400');
         ampSlideScroll.setAttribute('height', '300');
+        // See https://github.com/ampproject/amphtml/issues/3989
+        ampSlideScroll.style.display = 'inline';
         ampSlideScroll.appendChild(img);
       }
       return iframe.addElement(ampSlideScroll).then(() => {
@@ -64,7 +66,7 @@ describe('SlideScroll', () => {
     });
   }
 
-  it('should create container and wrappers and show intial slides', () => {
+  it('should create container and wrappers and show initial slides', () => {
     return getAmpSlideScroll().then(obj => {
       const ampSlideScroll = obj.ampSlideScroll;
       expect(
@@ -73,6 +75,9 @@ describe('SlideScroll', () => {
       expect(
           ampSlideScroll.querySelectorAll(
             '.-amp-slides-container > .-amp-slide-item').length).to.equal(5);
+      expect(
+          ampSlideScroll.getElementsByClassName('amp-carousel-slide').length)
+              .to.equal(5);
       const impl = ampSlideScroll.implementation_;
       expect(impl.slideWrappers_[0].classList.contains(SHOW_CLASS))
           .to.be.true;
@@ -95,6 +100,26 @@ describe('SlideScroll', () => {
       expect(
           ampSlideScroll.getElementsByClassName(
               '-amp-carousel-end-marker').length).to.equal(1);
+    });
+  });
+
+  it('should go to the correct slide on button click', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+      impl.slideWidth_ = 400;
+
+      impl.goCallback(1);
+      expect(showSlideSpy).to.have.been.calledWith(1);
+      expect(showSlideSpy.callCount).to.equal(1);
+
+      impl.goCallback(-1);
+      expect(showSlideSpy).to.have.been.calledWith(0);
+      expect(showSlideSpy.callCount).to.equal(2);
+
+      impl.goCallback(0);
+      expect(showSlideSpy.callCount).to.equal(2);
     });
   });
 
@@ -219,8 +244,9 @@ describe('SlideScroll', () => {
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
           .to.be.false;
-      expect(schedulePauseSpy).to.not.have.been.called;
-      expect(schedulePauseSpy.callCount).to.equal(0);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
+      expect(schedulePauseSpy.callCount).to.equal(2);
 
       impl.showSlide_(0);
 
@@ -235,8 +261,9 @@ describe('SlideScroll', () => {
           .to.be.false;
       expect(impl.slideWrappers_[4].classList.contains(SHOW_CLASS))
           .to.be.false;
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-      expect(schedulePauseSpy.callCount).to.equal(1);
+      expect(schedulePauseSpy.callCount).to.equal(4);
 
       impl.showSlide_(4);
 
@@ -254,7 +281,8 @@ describe('SlideScroll', () => {
           .to.be.true;
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
       expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
-      expect(schedulePauseSpy.callCount).to.equal(3);
+      expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
+      expect(schedulePauseSpy.callCount).to.equal(7);
     });
   });
 
@@ -340,6 +368,132 @@ describe('SlideScroll', () => {
       impl.updateOnScroll_(700);
       expect(showSlideSpy).to.be.calledWith(4);
       expect(impl.slideIndex_).to.equal(4);
+    });
+  });
+
+  it('should get the correct next slide index for a scrollLeft' , () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      impl.slideWidth_ = 400;
+
+      // Already at slide 0;
+      expect(impl.getNextSlideIndex_(0)).to.equal(0);
+      expect(impl.getNextSlideIndex_(100)).to.equal(0);
+      expect(impl.getNextSlideIndex_(200)).to.equal(1);
+      expect(impl.getNextSlideIndex_(400)).to.equal(1);
+
+      impl.showSlide_(3);
+
+      expect(impl.getNextSlideIndex_(0)).to.equal(2);
+      expect(impl.getNextSlideIndex_(100)).to.equal(2);
+      expect(impl.getNextSlideIndex_(200)).to.equal(3);
+      expect(impl.getNextSlideIndex_(400)).to.equal(3);
+      expect(impl.getNextSlideIndex_(500)).to.equal(3);
+      expect(impl.getNextSlideIndex_(600)).to.equal(4);
+      expect(impl.getNextSlideIndex_(800)).to.equal(4);
+
+      impl.showSlide_(4);
+      expect(impl.getNextSlideIndex_(0)).to.equal(3);
+      expect(impl.getNextSlideIndex_(100)).to.equal(3);
+      expect(impl.getNextSlideIndex_(200)).to.equal(4);
+      expect(impl.getNextSlideIndex_(400)).to.equal(4);
+    });
+  });
+
+  it('should custom snap to the correct slide', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+      impl.slideWidth_ = 400;
+
+      impl.customSnap_(0);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
+      impl.customSnap_(100);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(100, 0);
+      impl.customSnap_(200);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(200, 400);
+      impl.customSnap_(400);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+
+      impl.showSlide_(3);
+
+      impl.customSnap_(0);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
+      impl.customSnap_(100);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(100, 0);
+      impl.customSnap_(200);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(200, 400);
+      impl.customSnap_(400);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+      impl.customSnap_(500);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(500, 400);
+      impl.customSnap_(600);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(600, 800);
+      impl.customSnap_(800);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(800, 800);
+
+      impl.showSlide_(4);
+
+      impl.customSnap_(0);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
+      impl.customSnap_(100);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(100, 0);
+      impl.customSnap_(200);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(200, 400);
+      impl.customSnap_(400);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+
+      impl.showSlide_(0);
+
+      impl.customSnap_(0, -1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
+      impl.customSnap_(0, 1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 400);
+
+      impl.showSlide_(3);
+
+      impl.customSnap_(400, -1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
+      impl.customSnap_(400, 1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(0, 400);
+
+      impl.showSlide_(4);
+
+      impl.customSnap_(400, -1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
+      impl.customSnap_(400, 1);
+      expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+    });
+  });
+
+  it('should handle custom elastic scroll', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const customSnapSpy = sandbox.stub(impl, 'customSnap_', () => {
+        return {
+          then: cb => {
+            cb();
+          },
+        };
+      });
+      impl.slideWidth_ = 400;
+
+      impl.handleCustomElasticScroll_(-10);
+      expect(impl.elasticScrollState_).to.equal(-1);
+      impl.previousScrollLeft_ = -10;
+      impl.handleCustomElasticScroll_(-5);
+      expect(customSnapSpy).to.have.been.calledWith(-5);
+
+      impl.previousScrollLeft_ = null;
+
+      impl.handleCustomElasticScroll_(410);
+      expect(impl.elasticScrollState_).to.equal(1);
+      impl.previousScrollLeft_ = 410;
+      impl.handleCustomElasticScroll_(405);
+      expect(customSnapSpy).to.have.been.calledWith(405);
     });
   });
 
@@ -485,7 +639,9 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[4].style.order).to.equal('');
 
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
-        expect(schedulePauseSpy.callCount).to.equal(1);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
+        expect(schedulePauseSpy.callCount).to.equal(3);
 
         impl.showSlide_(0);
 
@@ -507,7 +663,9 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[3].style.order).to.equal('');
         expect(impl.slideWrappers_[4].style.order).to.equal('1');
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[2]);
-        expect(schedulePauseSpy.callCount).to.equal(2);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[4]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
+        expect(schedulePauseSpy.callCount).to.equal(6);
 
         impl.showSlide_(4);
 
@@ -528,9 +686,10 @@ describe('SlideScroll', () => {
         expect(impl.slideWrappers_[2].style.order).to.equal('');
         expect(impl.slideWrappers_[3].style.order).to.equal('1');
         expect(impl.slideWrappers_[4].style.order).to.equal('2');
-        expect(schedulePauseSpy).to.not.have.been.calledWith(impl.slides_[0]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[3]);
+        expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[0]);
         expect(schedulePauseSpy).to.have.been.calledWith(impl.slides_[1]);
-        expect(schedulePauseSpy.callCount).to.equal(3);
+        expect(schedulePauseSpy.callCount).to.equal(9);
       });
     });
 
@@ -611,6 +770,94 @@ describe('SlideScroll', () => {
         impl.updateOnScroll_(1);
         expect(showSlideSpy).to.be.calledWith(4);
         expect(impl.slideIndex_).to.equal(4);
+      });
+    });
+
+    it('should get the correct next slide index for a scrollLeft' , () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+
+        //Slide width = 400
+        impl.slideWidth_ = 400;
+        // Already at slide 0;
+
+        expect(impl.getNextSlideIndex_(0)).to.equal(4);
+        expect(impl.getNextSlideIndex_(100)).to.equal(4);
+        expect(impl.getNextSlideIndex_(200)).to.equal(0);
+        expect(impl.getNextSlideIndex_(400)).to.equal(0);
+        expect(impl.getNextSlideIndex_(500)).to.equal(0);
+        expect(impl.getNextSlideIndex_(600)).to.equal(1);
+        expect(impl.getNextSlideIndex_(800)).to.equal(1);
+
+        impl.showSlide_(3);
+
+        expect(impl.getNextSlideIndex_(0)).to.equal(2);
+        expect(impl.getNextSlideIndex_(100)).to.equal(2);
+        expect(impl.getNextSlideIndex_(200)).to.equal(3);
+        expect(impl.getNextSlideIndex_(400)).to.equal(3);
+        expect(impl.getNextSlideIndex_(500)).to.equal(3);
+        expect(impl.getNextSlideIndex_(600)).to.equal(4);
+        expect(impl.getNextSlideIndex_(800)).to.equal(4);
+
+        impl.showSlide_(4);
+        expect(impl.getNextSlideIndex_(0)).to.equal(3);
+        expect(impl.getNextSlideIndex_(100)).to.equal(3);
+        expect(impl.getNextSlideIndex_(200)).to.equal(4);
+        expect(impl.getNextSlideIndex_(400)).to.equal(4);
+        expect(impl.getNextSlideIndex_(500)).to.equal(4);
+        expect(impl.getNextSlideIndex_(600)).to.equal(0);
+        expect(impl.getNextSlideIndex_(800)).to.equal(0);
+      });
+    });
+
+    it('should custom snap to the correct slide', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const animateScrollLeftSpy = sandbox.spy(impl, 'animateScrollLeft_');
+        impl.slideWidth_ = 400;
+
+        impl.customSnap_(0);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(0, 0);
+        impl.customSnap_(100);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(100, 0);
+        impl.customSnap_(200);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(200, 400);
+        impl.customSnap_(400);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(400, 400);
+        impl.customSnap_(500);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(500, 400);
+        impl.customSnap_(600);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(600, 800);
+        impl.customSnap_(800);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(800, 800);
+
+        impl.customSnap_(400, -1);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(400, 0);
+        impl.customSnap_(400, 1);
+        expect(animateScrollLeftSpy).to.have.been.calledWith(400, 800);
+      });
+    });
+
+    it('should go to the correct slide on button click', () => {
+      return getAmpSlideScroll(true).then(obj => {
+        const ampSlideScroll = obj.ampSlideScroll;
+        const impl = ampSlideScroll.implementation_;
+        const showSlideSpy = sandbox.spy(impl, 'showSlide_');
+        impl.slideWidth_ = 400;
+
+        impl.goCallback(-1);
+        expect(showSlideSpy).to.have.been.calledWith(4);
+        expect(showSlideSpy.callCount).to.equal(1);
+
+        impl.goCallback(1);
+        expect(showSlideSpy).to.have.been.calledWith(0);
+        expect(showSlideSpy.callCount).to.equal(2);
+
+        impl.goCallback(1);
+        expect(showSlideSpy).to.have.been.calledWith(1);
+        expect(showSlideSpy.callCount).to.equal(3);
       });
     });
   });

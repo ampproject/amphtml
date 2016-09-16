@@ -16,10 +16,11 @@
 
 import {BaseElement} from '../src/base-element';
 import {assertHttpsUrl} from '../src/url';
-import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
+import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getMode} from '../src/mode';
+import {dev} from '../src/log';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -36,13 +37,8 @@ export function installVideo(win) {
 
     /** @override */
     buildCallback() {
-      /** @private @const {!HTMLVideoElement} */
+      /** @private @const {!Element} */
       this.video_ = this.element.ownerDocument.createElement('video');
-      const width = this.element.getAttribute('width');
-      const height = this.element.getAttribute('height');
-
-      this.video_.width = getLengthNumeral(width);
-      this.video_.height = getLengthNumeral(height);
 
       const posterAttr = this.element.getAttribute('poster');
       if (!posterAttr && getMode().development) {
@@ -50,9 +46,12 @@ export function installVideo(win) {
             'No "poster" attribute has been provided for amp-video.');
       }
 
+      // Enable inline play for iOS.
+      this.video_.setAttribute('playsinline', '');
+      this.video_.setAttribute('webkit-playsinline', '');
       // Disable video preload in prerender mode.
       this.video_.setAttribute('preload', 'none');
-      this.propagateAttributes(['poster'], this.video_);
+      this.propagateAttributes(['poster', 'controls'], this.video_);
       this.applyFillContent(this.video_, true);
       this.element.appendChild(this.video_);
     }
@@ -68,7 +67,7 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'controls', 'autoplay', 'muted', 'loop'],
+          ['src', 'autoplay', 'muted', 'loop'],
           this.video_);
 
       if (this.element.hasAttribute('preload')) {
@@ -84,7 +83,8 @@ export function installVideo(win) {
           return;
         }
         if (child.getAttribute && child.getAttribute('src')) {
-          assertHttpsUrl(child.getAttribute('src'), child);
+          assertHttpsUrl(child.getAttribute('src'),
+              dev().assertElement(child));
         }
         this.video_.appendChild(child);
       });

@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Experimental</td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>CONTAINER, FIXED_HEIGHT</td>
+    <td>container, fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -213,10 +213,11 @@ attribute requirements.
 To uniquely identify an amp-live-list (since multiple are allowed on a single
 page).
 
-**data-poll-interval** (Required)
+**data-poll-interval** (Optional)
 
 Time (in milliseconds) interval between checks for new content (15000 ms minimum is
-enforced).
+enforced). If no `data-poll-interval` is provided it will default to the 15000 ms
+minimum.
 
 **data-max-items-per-page** (Required)
 
@@ -247,8 +248,11 @@ seconds that have elapsed since Thursday, 1 January 1970).
 
 **data-update-time** (Optional)
 
-Timestamp when the entry was last updated. We recommend using Unix time
-(the number of seconds that have elapsed since Thursday, 1 January 1970).
+Timestamp when the entry was last updated.  Use this attribute to trigger an
+update on an existing item: the client will replace all existing content in
+this item with the new, updated content, without triggering the appearance of
+the update reference point. We recommend using Unix time (the number of seconds
+that have elapsed since Thursday, 1 January 1970).
 
 **data-tombstone** (Optional)
 

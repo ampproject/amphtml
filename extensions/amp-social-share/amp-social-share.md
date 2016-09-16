@@ -37,7 +37,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>CONTAINER, FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>container, fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -82,7 +82,7 @@ __height__: default 44px
 #### Custom Styles:
 Sometimes you want to provide your own style. You can simply override the provided styles like the following: 
 ```css
-amp-social-share[type=twitter] {
+amp-social-share[type="twitter"] {
   background: red;
   background-image: url(datauri:svg/myownsvgicon);
 }

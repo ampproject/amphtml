@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  loadScript, writeScript, validateDataExists,
-}
-from '../3p/3p';
+import {loadScript, writeScript, validateData} from '../3p/3p';
 
 const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
@@ -29,12 +26,12 @@ export function appnexus(global, data) {
   const args = [];
   args.push('size=' + data.width + 'x' + data.height);
   if (data.tagid) {
-    validateDataExists(data, ['tagid']);
+    validateData(data, ['tagid']);
     args.push('id=' + encodeURIComponent(data.tagid));
     writeScript(global, constructTtj(args));
     return;
   } else if (data.member && data.code) {
-    validateDataExists(data, ['member', 'code']);
+    validateData(data, ['member', 'code']);
     args.push('member=' + encodeURIComponent(data.member));
     args.push('inv_code=' + encodeURIComponent(data.code));
     writeScript(global, constructTtj(args));
@@ -61,7 +58,7 @@ export function appnexus(global, data) {
 }
 
 function appnexusAst(global, data) {
-  validateDataExists(data, ['adUnits']);
+  validateData(data, ['adUnits']);
   let apntag;
   if (context.isMaster) { // in case we are in the master iframe, we load AST
     context.master.apntag = context.master.apntag || {};
