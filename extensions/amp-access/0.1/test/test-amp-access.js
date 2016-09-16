@@ -907,7 +907,7 @@ describe('AccessService pingback', () => {
 
     const adapter = {
       isPingbackEnabled: () => true,
-      pingback: () => {},
+      pingback: () => Promise.resolve(),
     };
     service.adapter_ = adapter;
     adapterMock = sandbox.mock(adapter);
@@ -1036,7 +1036,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       firstAuthorizationResolver();
-      return service.firstAuthorizationPromise_;
+      return Promise.all([service.firstAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);
@@ -1062,7 +1063,8 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(0);
       expect(triggerEventStub.callCount).to.equal(triggerStart);
       lastAuthorizationResolver();
-      return service.lastAuthorizationPromise_;
+      return Promise.all([service.lastAuthorizationPromise_,
+          service.reportViewPromise_]);
     }).then(() => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(triggerEventStub.callCount).to.equal(triggerStart + 1);

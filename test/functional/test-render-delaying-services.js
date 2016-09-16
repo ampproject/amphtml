@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {waitForExtensions} from '../../src/render-delaying-extensions';
+import {waitForServices} from '../../src/render-delaying-services';
 import {createIframePromise} from '../../testing/iframe';
 import * as service from '../../src/service';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
 
-describe('waitForExtensions', () => {
+describe('waitForServices', () => {
 
   let win;
   let sandbox;
@@ -48,31 +48,33 @@ describe('waitForExtensions', () => {
     sandbox.restore();
   });
 
-  it('should return undefined if no extension is presented', () => {
-    expect(waitForExtensions(win)).to.equal(undefined);
+  it('should resolve if no blocking services is presented', () => {
+    // <script custom-element="amp-experiment"> should not block
+    addExtensionScript(win, 'amp-experiment');
+    return expect(waitForServices(win)).to.eventually.be.fulfilled;
   });
 
-  it('should timeout if some extensions do not load', () => {
+  it('should timeout if some blocking services are missing', () => {
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
-    addExtensionScript(win, 'amp-experiment');
+    win.document.body.appendChild(win.document.createElement('amp-experiment'));
     addExtensionScript(win, 'non-blocking-extension');
 
-    const promise = waitForExtensions(win);
+    const promise = waitForServices(win);
     accordionResolve();
     dynamicCssResolve();
     experimentResolve(); // 'amp-experiment' is actually blocked by 'variant'
     clock.tick(3000);
-    return expect(promise).to.eventually.be.rejectedWith('amp-experiment');
+    return expect(promise).to.eventually.be.rejectedWith('variant');
   });
 
   it('should resolve when all extensions are ready', () => {
     addExtensionScript(win, 'amp-accordion');
     addExtensionScript(win, 'amp-dynamic-css-classes');
-    addExtensionScript(win, 'amp-experiment');
+    win.document.body.appendChild(win.document.createElement('amp-experiment'));
     addExtensionScript(win, 'non-blocking-extension');
 
-    const promise = waitForExtensions(win);
+    const promise = waitForServices(win);
     accordionResolve();
     dynamicCssResolve();
     variantResolve(); // this unblocks 'amp-experiment'
