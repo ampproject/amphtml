@@ -23,6 +23,26 @@ import {toggle} from '../../../src/style';
 
 
 class AmpStickyAd extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {!Element} */
+    this.ad_ = element;
+
+    /** @const @private {!../../../src/service/viewport-impl.Viewport} */
+    this.viewport_ = this.getViewport();
+
+    /** @const @private {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = this.getVsync();
+
+    /** @private {boolean} */
+    this.visible_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.scrollUnlisten_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.NODISPLAY;
@@ -36,23 +56,10 @@ class AmpStickyAd extends AMP.BaseElement {
     user().assert((children.length == 1 && children[0].tagName == 'AMP-AD'),
         'amp-sticky-ad must have a single amp-ad child');
 
-    /** @const @private {!Element} */
     this.ad_ = children[0];
     this.setAsOwner(this.ad_);
 
-    /** @private @const {!Viewport} */
-    this.viewport_ = this.getViewport();
-
-    /** @const @private {!Vsync} */
-    this.vsync_ = this.getVsync();
-
-    /** @const @private {boolean} */
-    this.visible_ = false;
-
-    /**
-     * On viewport scroll, check requirements for amp-stick-ad to display.
-     * @const @private {!UnlistenDef}
-     */
+    // On viewport scroll, check requirements for amp-stick-ad to display.
     this.scrollUnlisten_ =
         this.viewport_.onScroll(() => this.displayAfterScroll_());
   }
