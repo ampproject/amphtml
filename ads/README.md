@@ -39,7 +39,7 @@ We will provide the following information to the ad:
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 - `window.context.startTime` contains the time at which processing of the amp-ad element started.
-- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: amp-sticky-ad, amp-fx-flying-carpet, amp-lightbox. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
+- `window.context.container` contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: `amp-sticky-ad`, `amp-fx-flying-carpet`, `amp-lightbox`. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
