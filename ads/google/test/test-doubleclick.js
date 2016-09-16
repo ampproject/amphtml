@@ -207,6 +207,13 @@ const createFixtureHtml = function(config, fold) {
 
 describe('doubleclick ad request', function() {
   this.timeout(waitTime);
+  let beforeHref;
+  afterEach(() => {
+    if (beforeHref) {
+      window.history.replaceState(null, null, beforeHref);
+    }
+  });
+
   doubleClickTest({
     html: createFixtureHtml({
       width: 320,
@@ -224,6 +231,7 @@ describe('doubleclick ad request', function() {
     // Need the following to ensure we don't go into Glade code path.
     // TODO(levitzky) Figure out some tests for Glade.
     beforeLoad: function(win) {
+      beforeHref = win.parent.location.href;
       win.parent.history.replaceState(null, null, win.parent.location.href
           + '?google_glade=0');
     },
