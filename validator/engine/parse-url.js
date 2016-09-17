@@ -16,6 +16,7 @@
  */
 
 goog.provide('parse_url.URL');
+goog.require('goog.string');
 
 /**
  * @param {number} code
@@ -66,12 +67,12 @@ parse_url.URL = class {
    */
   parseProtocol_(url) {
     // Fast paths for the most common cases
-    if (url.startsWith('https:')) {
+    if (goog.string./*OK*/ startsWith(url, 'https:')) {
       this.hasProtocol = true;
       this.protocol = 'https';
       return url.substr(6);  // skip over 'https:' prefix
     }
-    if (url.startsWith('http:')) {
+    if (goog.string./*OK*/ startsWith(url, 'http:')) {
       this.hasProtocol = true;
       this.protocol = 'http';
       return url.substr(5);  // skip over 'http:' prefix
