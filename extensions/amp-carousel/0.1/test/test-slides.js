@@ -913,4 +913,12 @@ describe('empty Slides functional', () => {
       slides.buildCallback();
     }).to.throw(/should have at least 1 slide/);
   });
+
+  it('should not have any controls', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(slides.hasNext()).to.be.false;
+    expect(slides.hasPrev()).to.be.false;
+  });
 });
