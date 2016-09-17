@@ -76,7 +76,8 @@ class FormValidator {
 }
 
 
-class DefaultValidator extends FormValidator {
+/** @private visible for testing */
+export class DefaultValidator extends FormValidator {
 
   /** @override */
   report() {
@@ -86,11 +87,11 @@ class DefaultValidator extends FormValidator {
 }
 
 
-class PolyfillDefaultValidator extends FormValidator {
+/** @private visible for testing */
+export class PolyfillDefaultValidator extends FormValidator {
 
   constructor(form) {
     super(form);
-
     const win = this.doc.defaultView;
     const bubbleId = `amp-validation-bubble-${validationBubbleCount++}`;
     /** @private @const {!./validation-bubble.ValidationBubble} */
@@ -116,16 +117,17 @@ class PolyfillDefaultValidator extends FormValidator {
 
   /** @override */
   onInput(event) {
-    if (!this.validationBubble_.isActiveOn(event.target)) {
+    const input = /** @type {!Element} */ (event.target);
+    if (!this.validationBubble_.isActiveOn(input)) {
       return;
     }
 
-    if (event.target.checkValidity()) {
-      event.target.removeAttribute('aria-invalid');
+    if (input.checkValidity()) {
+      input.removeAttribute('aria-invalid');
       this.validationBubble_.hide();
     } else {
-      event.target.setAttribute('aria-invalid', 'true');
-      this.validationBubble_.show(event.target, event.target.validationMessage);
+      input.setAttribute('aria-invalid', 'true');
+      this.validationBubble_.show(input, input.validationMessage);
     }
   }
 }
@@ -133,8 +135,9 @@ class PolyfillDefaultValidator extends FormValidator {
 
 /**
  * @abstract
+ * @private visible for testing
  */
-class AbstractCustomValidator extends FormValidator {
+export class AbstractCustomValidator extends FormValidator {
 
   constructor(form) {
     super(form);
@@ -177,7 +180,7 @@ class AbstractCustomValidator extends FormValidator {
     }
     const selector = `[visible-when-invalid=${invalidType}]` +
         `[validation-for=${input.id}]`;
-    if (!this.inputValidationsDict_[selector]) {
+    if (this.inputValidationsDict_[selector] === undefined) {
       this.inputValidationsDict_[selector] = this.doc.querySelector(selector);
     }
     return this.inputValidationsDict_[selector];
@@ -232,8 +235,8 @@ class AbstractCustomValidator extends FormValidator {
    * @param {!Element} input
    * @return {boolean}
    */
-  shouldValidateOnInteraction(input) {
-    return !!this.getVisibleValidationFor(input);
+  shouldValidateOnInteraction(unusedInput) {
+    throw Error('Not Implemented');
   }
 
   /**
@@ -243,7 +246,7 @@ class AbstractCustomValidator extends FormValidator {
     const input = /** @type {!Element} */ (event.target);
     const shouldValidate = this.shouldValidateOnInteraction(input);
     this.hideValidationFor(input);
-    if (shouldValidate && !event.target.checkValidity()) {
+    if (shouldValidate && !input.checkValidity()) {
       this.reportInput(input);
     }
   }
@@ -260,7 +263,8 @@ class AbstractCustomValidator extends FormValidator {
 }
 
 
-class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
+/** @private visible for testing */
+export class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
 
   /** @override */
   report() {
@@ -275,10 +279,16 @@ class ShowFirstOnSubmitValidator extends AbstractCustomValidator {
     }
   }
 
+  /** @override */
+  shouldValidateOnInteraction(input) {
+    return !!this.getVisibleValidationFor(input);
+  }
+
 }
 
 
-class ShowAllOnSubmitValidator extends AbstractCustomValidator {
+/** @private visible for testing */
+export class ShowAllOnSubmitValidator extends AbstractCustomValidator {
 
   /** @override */
   report() {
@@ -296,10 +306,16 @@ class ShowAllOnSubmitValidator extends AbstractCustomValidator {
       firstInvalidInput./*REVIEW*/focus();
     }
   }
+
+  /** @override */
+  shouldValidateOnInteraction(input) {
+    return !!this.getVisibleValidationFor(input);
+  }
 }
 
 
-class AsYouGoValidator extends AbstractCustomValidator {
+/** @private visible for testing */
+export class AsYouGoValidator extends AbstractCustomValidator {
   /** @override */
   shouldValidateOnInteraction(unusedInput) {
     return true;
@@ -339,7 +355,6 @@ export function getFormValidator(form) {
 
   return new PolyfillDefaultValidator(form);
 }
-
 
 
 /**
