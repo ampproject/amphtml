@@ -65,6 +65,7 @@ export const adPrefetch = {
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   microad: 'https://j.microad.net/js/camp.js',
+  mixpo: 'https://cdn.mixpo.com/js/loader.js',
   nativo: 'https://s.ntv.io/serve/load.js',
   nend: 'https://js1.nend.net/js/amp.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
@@ -160,6 +161,10 @@ export const adPreconnect = {
     'https://cache.send.microad.jp',
     'https://cache.send.microadinc.com',
     'https://deb.send.microad.jp',
+  ],
+  mixpo: [
+    'https://player1.mixpo.com',
+    'https://player2.mixpo.com',
   ],
   nend: [
     'https://output.nend.net',
