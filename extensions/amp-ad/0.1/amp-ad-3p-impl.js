@@ -94,6 +94,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     const adType = this.element.getAttribute('type');
+    // TODO(lannka): this should be never null in real.
     /** {?Object} */
     this.config = adConfig[adType];
 

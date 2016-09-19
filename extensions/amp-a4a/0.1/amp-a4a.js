@@ -238,6 +238,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   preconnectCallback(unusedOnLayout) {
     const config = adConfig[this.element.getAttribute('type')];
+    // TODO(lannka): config should be never null in real.
     const preconnect = config ? config.preconnect : null;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
