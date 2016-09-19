@@ -411,7 +411,7 @@ function createBaseAmpElementProto(win) {
 
     /**
      * Resources can only be looked up when an element is attached.
-     * @private @const {?./service/resources-impl.Resources}
+     * @private {?./service/resources-impl.Resources}
      */
     this.resources_ = null;
 
@@ -499,7 +499,7 @@ function createBaseAmpElementProto(win) {
    * @package
    */
   ElementProto.getResources = function() {
-    return /** @typedef {!./service/resources-impl.Resources} */ (
+    return /** @type {!./service/resources-impl.Resources} */ (
         dev().assert(this.resources_, 'no resources yet'));
   };
 
