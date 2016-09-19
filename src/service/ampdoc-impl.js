@@ -127,7 +127,6 @@ export class AmpDocService {
       }
 
       // Shadow doc.
-      // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
       const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
         break;
