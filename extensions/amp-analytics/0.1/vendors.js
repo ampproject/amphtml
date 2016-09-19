@@ -342,7 +342,7 @@ export const ANALYTICS_CONFIG = {
           'loc=${sourceUrl}&rnd=${random}&ref=${documentReferrer}&' +
           'ltm=${timestamp}&wsz=${screenWidth}x${screenHeight}&' +
           'bln=${browserLanguage}&chs=${documentCharset}&' +
-          'col=${screenColorDepth}&tzo=${timezone}',
+          'col=${screenColorDepth}&tzo=${timezone}&cp_cx_channel=amp',
     },
     'triggers': {
       'defaultPageview': {
