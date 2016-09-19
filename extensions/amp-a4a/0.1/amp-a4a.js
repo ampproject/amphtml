@@ -549,7 +549,7 @@ export class AmpA4A extends AMP.BaseElement {
    * @return {!Array<string>} A list of signing services.
    * @private
    */
-  getSigningServiceNames_() {
+  getSigningServiceNames() {
     // TODO(levitzky) Add dev key name once it goes live.
     return getMode().localDev ? ['google'] : ['google'];
   }
@@ -565,7 +565,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (!isCryptoAvailable()) {
       return [];
     }
-    const jwkSetPromises = this.getSigningServiceNames_().map(serviceName => {
+    const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
       // @param {string} serviceName
       // @return {!Promise<!Array<!Object>>}
       const url = signingServerURLs[serviceName];
