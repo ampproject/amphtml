@@ -243,6 +243,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
   /** @override  */
   unlayoutCallback() {
+    this.layoutPromise_ = null;
     if (!this.iframe_) {
       return true;
     }
@@ -255,7 +256,6 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     }
 
     this.iframe_ = null;
-    this.layoutPromise_ = null;
     if (this.apiHandler_) {
       this.apiHandler_.unlayoutCallback();
       this.apiHandler_ = null;

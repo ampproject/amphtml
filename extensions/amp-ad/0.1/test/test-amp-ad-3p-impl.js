@@ -210,12 +210,15 @@ function tests(name) {
 
     it('should only layout once', () => {
       return getAd().then(ad => {
+        ad.implementation_.unlayoutCallback();
+
         const firstLayout = ad.implementation_.layoutCallback();
+        const secondLayout = ad.implementation_.layoutCallback();
+        expect(firstLayout).to.equal(secondLayout);
+
         ad.implementation_.unlayoutCallback();
         const newLayout = ad.implementation_.layoutCallback();
-        const secondLayout = ad.implementation_.layoutCallback();
-        expect(firstLayout).to.not.equal(newLayout);
-        expect(newLayout).to.equal(secondLayout);
+        expect(newLayout).to.not.equal(secondLayout);
       });
     });
 
