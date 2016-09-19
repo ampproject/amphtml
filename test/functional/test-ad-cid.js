@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {clientIdScope} from '../../ads/_config';
+import {adConfig} from '../../ads/_config';
 import {createAdPromise} from '../../testing/ad-iframe';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {
@@ -54,7 +54,7 @@ function tests(name) {
 
       afterEach(() => {
         sandbox.restore();
-        delete clientIdScope['_ping_'];
+        delete adConfig['_ping_'];
         setCookie(window, cidScope, '', Date.now() - 5000);
       });
 
@@ -73,10 +73,11 @@ function tests(name) {
         });
 
         it('provides cid to ad', () => {
-          clientIdScope['_ping_'] = cidScope;
+          adConfig['_ping_'] = {clientIdScope: cidScope};
+
           const s = installCidService(window);
           sandbox.stub(s, 'get', scope => {
-            expect(scope).to.be.equal(cidScope);
+            expect(scope).to.equal(cidScope);
             return Promise.resolve('test123');
           });
           return getAdCid(adElement).then(cid => {
@@ -85,10 +86,10 @@ function tests(name) {
         });
 
         it('times out', () => {
-          clientIdScope['_ping_'] = cidScope;
+          adConfig['_ping_'] = {clientIdScope: cidScope};
           const s = installCidService(window);
           sandbox.stub(s, 'get', scope => {
-            expect(scope).to.be.equal(cidScope);
+            expect(scope).to.equal(cidScope);
             return timerFor(window).promise(2000);
           });
           const p = getAdCid(adElement).then(cid => {
@@ -105,7 +106,7 @@ function tests(name) {
       });
 
       it('provides cid to ad', () => {
-        clientIdScope['_ping_'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
@@ -124,7 +125,7 @@ function tests(name) {
       });
 
       it('proceeds on failed CID', () => {
-        clientIdScope['_ping_'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
@@ -143,7 +144,7 @@ function tests(name) {
       });
 
       it('waits for consent', () => {
-        clientIdScope['_ping_'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
@@ -226,15 +227,14 @@ function tests(name) {
       });
 
       it('provides null if cid service not available', () => {
-        clientIdScope['_ping_'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
           type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
-          setCookie(window, cidScope, 'XXX',
-              Date.now() + 5000);
+          setCookie(window, cidScope, 'XXX', Date.now() + 5000);
           return ad;
         }).then(ad => {
           const src = ad.firstChild.getAttribute('src');

@@ -25,7 +25,7 @@ import {preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {isAdPositionAllowed, getAdContainer,}
     from '../../../src/ad-helper';
-import {adPrefetch, adPreconnect} from '../../../ads/_config';
+import {adConfig} from '../../../ads/_config';
 import {user} from '../../../src/log';
 import {getIframe} from '../../../src/3p-frame';
 import {setupA2AListener} from './a2a-listener';
@@ -93,8 +93,10 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     /** @private @const {function()} */
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
-    /** {!string} */
-    this.adType = this.element.getAttribute('type');
+    const adType = this.element.getAttribute('type');
+    // TODO(lannka): this should be never null in real.
+    /** {?Object} */
+    this.config = adConfig[adType];
 
     setupA2AListener(this.win);
 
@@ -109,8 +111,8 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const prefetch = adPrefetch[this.adType];
-    const preconnect = adPreconnect[this.adType];
+    const prefetch = this.config ? this.config.prefetch : null;
+    const preconnect = this.config ? this.config.preconnect : null;
     if (typeof prefetch == 'string') {
       this.preconnect.preload(prefetch, 'script');
     } else if (prefetch) {

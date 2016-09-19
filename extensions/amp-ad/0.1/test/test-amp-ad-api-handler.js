@@ -84,7 +84,7 @@ describe('amp-ad-api-handler', () => {
 
       it('should resolve on message "render-start" if render-start is'
           + 'implemented by 3P"', () => {
-        adImpl.adType = 'doubleclick';
+        adImpl.config = {renderStartImplemented: true};
         const noContentCallbackSpy = sandbox.spy();
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
             noContentCallbackSpy);
@@ -119,7 +119,7 @@ describe('amp-ad-api-handler', () => {
 
       it('should resolve and resize on message "render-start" w/ size if '
           + 'render-start is implemented by 3P', () => {
-        adImpl.adType = 'doubleclick';
+        adImpl.config = {renderStartImplemented: true};
         sandbox.stub(adImpl, 'attemptChangeSize', (height, width) => {
           expect(height).to.equal(217);
           expect(width).to.equal(114);
@@ -154,7 +154,7 @@ describe('amp-ad-api-handler', () => {
 
       it('should resolve on message "no-content" if render-start is'
           + 'implemented by 3P', () => {
-        adImpl.adType = 'doubleclick';
+        adImpl.config = {renderStartImplemented: true};
         const noContentCallbackSpy = sandbox.spy();
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element,
             noContentCallbackSpy);
@@ -179,7 +179,7 @@ describe('amp-ad-api-handler', () => {
 
       it('should NOT resolve on message "bootstrap-loaded" if render-start is'
           + 'implemented by 3P', () => {
-        adImpl.adType = 'doubleclick';
+        adImpl.config = {renderStartImplemented: true};
         apiHandler = new AmpAdApiHandler(adImpl, adImpl.element);
         const beforeAttachedToDom = element => {
           element.setAttribute('data-amp-3p-sentinel', 'amp3ptest' + testIndex);
