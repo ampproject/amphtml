@@ -98,7 +98,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     setupA2AListener(this.win);
 
-    /** @private {?Element|undefined} */
+    /** @private {?string|undefined} */
     this.container_ = undefined;
 
     /** @private {?Promise} */
@@ -189,7 +189,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     return this.layoutPromise_ = getAdCid(this).then(cid => {
       const opt_context = {
         clientId: cid || null,
-        container: this.container_ ? this.container_.tagName : null,
+        container: this.container_,
       };
       this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
           this.element, null, opt_context);

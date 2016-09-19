@@ -69,13 +69,13 @@ export function isAdPositionAllowed(el, win) {
  * This is called during layout measure.
  * @param {!Element} el
  * @param {!Window} win
- * @return {?Element}
+ * @return {?string}
  */
 export function getAdContainer(el) {
   do {
     el = el.parentNode;
     if (CONTAINERS[el.tagName]) {
-      return el;
+      return el.tagName;
     }
   } while (el && el.tagName != 'BODY');
   return null;
