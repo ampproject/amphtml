@@ -765,6 +765,7 @@ function createBaseAmpElementProto(win) {
       return;
     }
     if (!this.resources_) {
+      // Resources can now be initialized since the ampdoc is now available.
       this.resources_ = resourcesForDoc(this);
     }
     if (!this.everAttached) {
