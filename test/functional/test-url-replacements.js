@@ -23,7 +23,6 @@ import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {
@@ -32,6 +31,7 @@ import {
 import {getService} from '../../src/service';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
+import {viewerForDoc} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -84,7 +84,7 @@ describe('UrlReplacements', () => {
           }));
         }
       }
-      viewerService = installViewerService(iframe.win);
+      viewerService = viewerForDoc(iframe.ampdoc);
       replacements = urlReplacementsForDoc(iframe.ampdoc);
       return replacements;
     });

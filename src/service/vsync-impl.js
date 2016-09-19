@@ -15,10 +15,11 @@
  */
 
 import {Pass} from '../pass';
+import {ampdocServiceFor} from '../ampdoc';
 import {cancellation} from '../error';
+import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {dev} from '../log';
-import {installViewerService} from './viewer-impl';
 import {installTimerService} from './timer-impl';
 
 
@@ -52,14 +53,16 @@ export class Vsync {
 
   /**
    * @param {!Window} win
-   * @param {!./viewer-impl.Viewer} viewer
    */
-  constructor(win, viewer) {
+  constructor(win) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!./viewer-impl.Viewer} */
-    this.viewer_ = viewer;
+    /** @private @const {!./ampdoc-impl.AmpDocService} */
+    this.ampdocService_ = ampdocServiceFor(this.win);
+
+    /** @const {!../document-state.DocumentState} */
+    this.docState_ = documentStateFor(this.win);
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -112,11 +115,20 @@ export class Vsync {
 
     // When the document changes visibility, vsync has to reschedule the queue
     // processing.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.scheduled_) {
-        this.forceSchedule_();
-      }
-    });
+    const boundOnVisibilityChanged = this.onVisibilityChanged_.bind(this);
+    if (this.ampdocService_.isSingleDoc()) {
+      this.ampdocService_.getAmpDoc().onVisibilityChanged(
+          boundOnVisibilityChanged);
+    } else {
+      this.docState_.onVisibilityChanged(boundOnVisibilityChanged);
+    }
+  }
+
+  /** @private */
+  onVisibilityChanged_() {
+    if (this.scheduled_) {
+      this.forceSchedule_();
+    }
   }
 
   /**
@@ -228,9 +240,26 @@ export class Vsync {
    * @return {boolean}
    * @private
    */
-  canAnimate_(unusedOptContextNode) {
-    // TODO(dvoytenko, #3742): Use opt_node -> ampdoc.
-    return this.viewer_.isVisible();
+  canAnimate_(opt_contextNode) {
+    // Window level: animations allowed only when global window is visible.
+    if (this.docState_.isHidden()) {
+      return false;
+    }
+
+    // Single doc: animations allowed when single doc is visible.
+    if (this.ampdocService_.isSingleDoc()) {
+      return this.ampdocService_.getAmpDoc().isVisible();
+    }
+
+    // Multi-doc: animations depend on the state of the relevant doc.
+    if (opt_contextNode) {
+      const ampdoc = this.ampdocService_.getAmpDoc(opt_contextNode);
+      if (!ampdoc.isVisible()) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -389,6 +418,6 @@ export class Vsync {
 export function installVsyncService(window) {
   return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
     installTimerService(window);
-    return new Vsync(window, installViewerService(window));
+    return new Vsync(window);
   }));
 };

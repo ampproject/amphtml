@@ -24,7 +24,7 @@ import {installCryptoService, Crypto,}
 import {parseUrl} from '../../src/url';
 import {timerFor} from '../../src/timer';
 import {installPlatformService} from '../../src/service/platform-impl';
-import {installViewerService} from '../../src/service/viewer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
@@ -86,7 +86,7 @@ describe('cid', () => {
     };
     installTimerService(fakeWin);
     installPlatformService(fakeWin);
-    const viewer = installViewerService(fakeWin);
+    const viewer = installViewerServiceForDoc(new AmpDoc(fakeWin));//QQQ
     sandbox.stub(viewer, 'isIframed', function() {
       return isIframed;
     });
@@ -267,7 +267,7 @@ describe('cid', () => {
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
     installTimerService(win);
     installPlatformService(win);
-    installViewerService(win).isIframed = () => false;
+    installViewerServiceForDoc(new AmpDoc(win)).isIframed = () => false;//QQQQQ
     installCidService(win);
     installCryptoService(win);
     return cidFor(win).then(cid => {

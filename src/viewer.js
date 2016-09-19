@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {getExistingServiceForWindow} from './service';
+import {getExistingServiceForDoc} from './service';
 
 
 /**
- * @param {!Window} window
+ * @param {!Node|!./service/ampdoc-impl.AmpDoc} nodeOrDoc
  * @return {!./service/viewer-impl.Viewer}
  */
-export function viewerFor(window) {
+export function viewerForDoc(nodeOrDoc) {
   return /** @type {!./service/viewer-impl.Viewer} */ (
-      getExistingServiceForWindow(window, 'viewer'));
+      getExistingServiceForDoc(nodeOrDoc, 'viewer'));
 };

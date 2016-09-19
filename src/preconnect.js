@@ -24,7 +24,7 @@ import {fromClass} from './service';
 import {parseUrl} from './url';
 import {timerFor} from './timer';
 import {platformFor} from './platform';
-import {viewerFor} from './viewer';
+import {viewerForDoc} from './viewer';
 import {dev} from './log';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -69,7 +69,7 @@ export class Preconnect {
     this.features_ = this.detectFeatures_();
 
     /** @private @const {!./service/viewer-impl.Viewer} */
-    this.viewer_ = viewerFor(win);
+    this.viewer_ = viewerForDoc(this.document_);//QQQQ: what's viewer here for?
 
     /** @private @const {!./service/timer-impl.Timer} */
     this.timer_ = timerFor(win);

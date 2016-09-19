@@ -19,7 +19,7 @@ import {documentInfoForDoc} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 
 /** @private @const {string} */
 const TAG = 'amp-install-serviceworker';
@@ -78,7 +78,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
 
   /** @private */
   scheduleIframeLoad_() {
-    viewerFor(this.win).whenFirstVisible().then(() => {
+    this.getAmpDoc().whenFirstVisible().then(() => {
       // If the user is longer than 20 seconds on this page, load
       // the external iframe to install the ServiceWorker. The wait is
       // introduced to avoid installing SWs for content that the user
@@ -93,7 +93,7 @@ export class AmpInstallServiceWorker extends AMP.BaseElement {
   insertIframe_() {
     // If we are no longer visible, we will not do a SW registration on this
     // page view.
-    if (!viewerFor(this.win).isVisible()) {
+    if (!this.getAmpDoc().isVisible()) {
       return;
     }
     // The iframe will stil be loaded.

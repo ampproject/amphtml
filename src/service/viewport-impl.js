@@ -31,7 +31,7 @@ import {platformFor} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
-import {installViewerService} from './viewer-impl';
+import {installViewerServiceForDoc} from './viewer-impl';
 import {isExperimentOn} from '../experiments';
 import {waitForBody} from '../dom';
 
@@ -1346,7 +1346,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport(ampdoc) {
-  const viewer = installViewerService(ampdoc.win);
+  const viewer = installViewerServiceForDoc(ampdoc);
   let binding;
   if (ampdoc.isSingleDoc() &&
           viewer.getViewportType() == 'natural-ios-embed') {

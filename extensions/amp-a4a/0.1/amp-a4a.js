@@ -27,7 +27,7 @@ import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 import {
   importPublicKey,
@@ -300,7 +300,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = viewerFor(this.win).whenFirstVisible()
+    this.adPromise_ = this.getAmpDoc().whenFirstVisible()
       // This block returns the ad URL, if one is available.
       /** @return {!Promise<?string>} */
       .then(() => {

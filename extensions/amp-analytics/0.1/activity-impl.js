@@ -20,7 +20,7 @@
  */
 
 import {fromClass} from '../../../src/service';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {listen} from '../../../src/event-helper';
 
@@ -170,7 +170,7 @@ export class Activity {
     this.activityHistory_ = new ActivityHistory();
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win_);
+    this.viewer_ = viewerForDoc(this.win_.document);
 
     /** @private @const {!Viewport} */
     this.viewport_ = viewportForDoc(this.win_.document);

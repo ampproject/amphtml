@@ -80,7 +80,7 @@ function createAdTestingIframePromise() {
 describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
-  let viewerForMock;
+  let viewerWhenVisibleMock;
   let mockResponse;
 
   setPublicKeys([JSON.parse(validCSSAmp.publicKey)]);
@@ -88,7 +88,7 @@ describe('amp-a4a', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
-    viewerForMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
+    viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     mockResponse = {
       arrayBuffer: function() {
         return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
@@ -114,7 +114,7 @@ describe('amp-a4a', () => {
 
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in shadow root', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -163,7 +163,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end w/o shadow DOM support', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -195,7 +195,7 @@ describe('amp-a4a', () => {
       });
     });
     it('must not be position:fixed', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -213,7 +213,7 @@ describe('amp-a4a', () => {
       });
     });
     it('#onLayoutMeasure #layoutCallback not valid AMP', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -252,7 +252,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -309,7 +309,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end in the presence of an XHR error', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -335,7 +335,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves before layoutCallback', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
@@ -354,7 +354,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves after layoutCallback', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       let rejectXhr;
       xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
         rejectXhr = reject;
@@ -646,7 +646,7 @@ describe('amp-a4a', () => {
           a4aElement.setAttribute('type', 'adsense');
           doc.body.appendChild(a4aElement);
           const a4a = new MockA4AImpl(a4aElement);
-          viewerForMock.returns(Promise.resolve());
+          viewerWhenVisibleMock.returns(Promise.resolve());
           xhrMock.returns(Promise.resolve(mockResponse));
           a4a.onLayoutMeasure();
           expect(a4a.adPromise_).to.not.be.null;
@@ -674,7 +674,7 @@ describe('amp-a4a', () => {
       it('verify cancelled promise', () => {
         return createAdTestingIframePromise().then(fixture => {
           let whenFirstVisibleResolve = null;
-          viewerForMock.returns(new Promise(resolve => {
+          viewerWhenVisibleMock.returns(new Promise(resolve => {
             whenFirstVisibleResolve = resolve;
           }));
           const doc = fixture.doc;

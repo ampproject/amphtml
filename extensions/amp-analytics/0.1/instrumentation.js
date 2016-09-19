@@ -20,7 +20,7 @@ import {Observable} from '../../../src/observable';
 import {fromClass} from '../../../src/service';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {viewportForDoc} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -96,7 +96,7 @@ export class InstrumentationService {
     this.timer_ = timerFor(window);
 
     /** @const {!Viewer} */
-    this.viewer_ = viewerFor(window);
+    this.viewer_ = viewerForDoc(window.document);
 
     /** @const {!Viewport} */
     this.viewport_ = viewportForDoc(window.document);

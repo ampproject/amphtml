@@ -17,7 +17,7 @@
 import {Layout} from '../../../src/layout';
 import {user, dev, rethrowAsync} from '../../../src/log';
 import {platformFor} from '../../../src/platform';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
 import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
@@ -216,7 +216,7 @@ export class AmpIosAppBanner extends AbstractAppBanner {
 
     // We want to fallback to browser builtin mechanism when possible.
     const platform = platformFor(this.win);
-    const viewer = viewerFor(this.win);
+    const viewer = viewerForDoc(this.getAmpDoc());
     /** @private @const {boolean} */
     this.canShowBuiltinBanner_ = !viewer.isEmbedded() && platform.isSafari();
     if (this.canShowBuiltinBanner_) {
@@ -298,7 +298,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
       visibility: 'hidden',
     });
 
-    const viewer = viewerFor(this.win);
+    const viewer = viewerForDoc(this.getAmpDoc());
     /** @private @const {?Element} */
     this.manifestLink_ = this.win.document.head.querySelector(
         'link[rel=manifest],link[rel=amp-manifest]');

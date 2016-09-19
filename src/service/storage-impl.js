@@ -18,7 +18,7 @@ import {getServiceForDoc} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
-import {viewerFor} from '../viewer';
+import {viewerForDoc} from '../viewer';
 
 /** @const */
 const TAG = 'Storage';
