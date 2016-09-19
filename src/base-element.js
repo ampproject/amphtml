@@ -172,6 +172,15 @@ export class BaseElement {
     return this.win;
   }
 
+  /**
+   * Returns the associated ampdoc. Only available when `buildCallback` and
+   * going forward.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   */
+  getAmpDoc() {
+    return this.element.getAmpDoc();
+  }
+
   /** @public @return {!./service/vsync-impl.Vsync} */
   getVsync() {
     return vsyncFor(this.win);
