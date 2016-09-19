@@ -18,9 +18,10 @@ import {AmpA4A} from '../amp-a4a';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
+import {ampdocServiceFor} from '../../../../src/ampdoc';
+import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
-import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {data as minimumAmp} from './testdata/minimum_valid_amp.reserialized';
 import {data as regexpsAmpData} from './testdata/regexps.reserialized';
 import {
@@ -28,6 +29,7 @@ import {
 } from './testdata/valid_css_at_rules_amp.reserialized';
 import {data as testFragments} from './testdata/test_fragments';
 import {data as expectations} from './testdata/expectations';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import '../../../../extensions/amp-ad/0.1/amp-ad-api-handler';
 import * as sinon from 'sinon';
 
@@ -78,18 +80,18 @@ describe('amp-a4a', () => {
   let sandbox;
   let xhrMock;
   let xhrMockJson;
-  let viewerForMock;
+  let viewerWhenVisibleMock;
   let mockResponse;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     xhrMockJson = sandbox.stub(Xhr.prototype, 'fetchJson');
-    viewerForMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     xhrMockJson.withArgs(
         'https://cdn.ampproject.org/amp-ad-verifying-keyset.json',
         {mode: 'cors', method: 'GET'})
     .returns(Promise.resolve({keys: [JSON.parse(validCSSAmp.publicKey)]}));
+    viewerWhenVisibleMock = sandbox.stub(Viewer.prototype, 'whenFirstVisible');
     mockResponse = {
       arrayBuffer: function() {
         return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
@@ -106,6 +108,7 @@ describe('amp-a4a', () => {
       catch: callback => callback(),
     };
   });
+
   afterEach(() => {
     sandbox.restore();
   });
@@ -114,9 +117,19 @@ describe('amp-a4a', () => {
     return new TextEncoder('utf-8').encode(str);
   }
 
+  function createA4aElement(doc) {
+    const element = doc.createElement('amp-a4a');
+    element.getAmpDoc = () => {
+      const ampdocService = ampdocServiceFor(doc.defaultView);
+      return ampdocService.getAmpDoc(element);
+    };
+    doc.body.appendChild(element);
+    return element;
+  }
+
   describe('#onLayoutMeasure', () => {
     it('should run end-to-end and render in shadow root', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -125,7 +138,7 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -161,7 +174,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end w/o shadow DOM support', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -170,7 +183,7 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -198,11 +211,11 @@ describe('amp-a4a', () => {
       });
     });
     it('must not be position:fixed', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -216,7 +229,7 @@ describe('amp-a4a', () => {
       });
     });
     it('#onLayoutMeasure #layoutCallback not valid AMP', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -225,7 +238,7 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -260,7 +273,7 @@ describe('amp-a4a', () => {
       });
     });
     it('should not leak full response to rendered dom', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.withArgs('https://test.location.org/ad/012345?args', {
         mode: 'cors',
         method: 'GET',
@@ -269,7 +282,7 @@ describe('amp-a4a', () => {
       }).onFirstCall().returns(Promise.resolve(mockResponse));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -320,11 +333,11 @@ describe('amp-a4a', () => {
       });
     });
     it('should run end-to-end in the presence of an XHR error', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('width', 200);
         a4aElement.setAttribute('height', 50);
         a4aElement.setAttribute('type', 'adsense');
@@ -346,11 +359,11 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves before layoutCallback', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       xhrMock.onFirstCall().returns(Promise.reject(new Error('XHR Error')));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.onLayoutMeasure();
         return a4a.adPromise_.then(() => a4a.layoutCallback().then(() => {
@@ -365,14 +378,14 @@ describe('amp-a4a', () => {
       });
     });
     it('should handle XHR error when resolves after layoutCallback', () => {
-      viewerForMock.onFirstCall().returns(Promise.resolve());
+      viewerWhenVisibleMock.onFirstCall().returns(Promise.resolve());
       let rejectXhr;
       xhrMock.onFirstCall().returns(new Promise((unusedResolve, reject) => {
         rejectXhr = reject;
       }));
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         const a4a = new MockA4AImpl(a4aElement);
         a4a.onLayoutMeasure();
         const layoutCallbackPromise = a4a.layoutCallback();
@@ -396,7 +409,7 @@ describe('amp-a4a', () => {
     it('validate adsense', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         a4aElement.setAttribute('type', 'adsense');
         const a4a = new AmpA4A(a4aElement);
         a4a.preconnectCallback(false);
@@ -484,7 +497,7 @@ describe('amp-a4a', () => {
     it('should not render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'http://foo.com';
         a4a.maybeRenderAmpAd_ = function() { return Promise.resolve(false); };
@@ -512,7 +525,7 @@ describe('amp-a4a', () => {
     it('should render AMP natively', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
-        const a4aElement = doc.createElement('amp-a4a');
+        const a4aElement = createA4aElement(doc);
         doc.body.appendChild(a4aElement);
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
@@ -593,7 +606,7 @@ describe('amp-a4a', () => {
       return createAdTestingIframePromise().then(fixture => {
         const doc = fixture.doc;
         const metaData = {};
-        const a4a = new AmpA4A(doc.createElement('amp-a4a'));
+        const a4a = new AmpA4A(createA4aElement(doc));
         a4a.relocateFonts_(metaData);
         const hc = doc.head.children;
         for (let i = 0; i < hc.length; i++) {
@@ -617,7 +630,7 @@ describe('amp-a4a', () => {
             },
           ],
         };
-        const a4a = new AmpA4A(doc.createElement('amp-a4a'));
+        const a4a = new AmpA4A(createA4aElement(doc));
         a4a.relocateFonts_(metaData);
         const hc = doc.head.children;
         const foundStyles = [false, false];
@@ -651,13 +664,13 @@ describe('amp-a4a', () => {
       it('verify state reset', () => {
         return createAdTestingIframePromise().then(fixture => {
           const doc = fixture.doc;
-          const a4aElement = doc.createElement('amp-a4a');
+          const a4aElement = createA4aElement(doc);
           a4aElement.setAttribute('width', 200);
           a4aElement.setAttribute('height', 50);
           a4aElement.setAttribute('type', 'adsense');
           doc.body.appendChild(a4aElement);
           const a4a = new MockA4AImpl(a4aElement);
-          viewerForMock.returns(Promise.resolve());
+          viewerWhenVisibleMock.returns(Promise.resolve());
           xhrMock.withArgs('https://test.location.org/ad/012345?args', {
             mode: 'cors',
             method: 'GET',
@@ -690,11 +703,11 @@ describe('amp-a4a', () => {
       it('verify cancelled promise', () => {
         return createAdTestingIframePromise().then(fixture => {
           let whenFirstVisibleResolve = null;
-          viewerForMock.returns(new Promise(resolve => {
+          viewerWhenVisibleMock.returns(new Promise(resolve => {
             whenFirstVisibleResolve = resolve;
           }));
           const doc = fixture.doc;
-          const a4aElement = doc.createElement('amp-a4a');
+          const a4aElement = createA4aElement(doc);
           a4aElement.setAttribute('width', 200);
           a4aElement.setAttribute('height', 50);
           a4aElement.setAttribute('type', 'adsense');

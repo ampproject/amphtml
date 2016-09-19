@@ -15,6 +15,7 @@
  */
 
 import {handleMessageEvent} from '../a2a-listener';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import * as sinon from 'sinon';
 
 describe('amp-ad a2a listener', function() {
@@ -38,6 +39,7 @@ describe('amp-ad a2a listener', function() {
     navigateTo = sandbox.stub();
     win = {
       document: {
+        nodeType: /* DOCUMENT */ 9,
         activeElement: {
           tagName: 'IFRAME',
           contentWindow: source,
@@ -54,7 +56,10 @@ describe('amp-ad a2a listener', function() {
         },
       },
     };
+    win.document.defaultView = win;
+    installDocService(win, /* isSingleDoc */ true);
   });
+
   afterEach(() => {
     sandbox.restore();
   });

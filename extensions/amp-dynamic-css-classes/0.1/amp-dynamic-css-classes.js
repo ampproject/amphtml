@@ -17,7 +17,7 @@
 import {documentStateFor} from '../../../src/document-state';
 import {getService} from '../../../src/service';
 import {parseUrl} from '../../../src/url';
-import {viewerFor} from '../../../src/viewer';
+import {viewerForDoc} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
 
 /**
@@ -26,7 +26,7 @@ import {vsyncFor} from '../../../src/vsync';
  * @returns {string}
  */
 function referrerDomain(win) {
-  const referrer = viewerFor(win).getUnconfirmedReferrerUrl();
+  const referrer = viewerForDoc(win.document).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }
@@ -126,7 +126,7 @@ function addReferrerClasses(win) {
  * @param {!Window} win
  */
 function addViewerClass(win) {
-  const viewer = viewerFor(win);
+  const viewer = viewerForDoc(win.document);
   if (viewer.isEmbedded()) {
     vsyncFor(win).mutate(() => {
       addDynamicCssClasses(win, ['amp-viewer']);
@@ -154,6 +154,6 @@ export function installDynamicClassesService(win) {
     addRuntimeClasses(win);
     return {};
   });
-};
+}
 
 installDynamicClassesService(AMP.win);
