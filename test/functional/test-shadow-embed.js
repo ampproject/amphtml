@@ -40,6 +40,7 @@ describe('shadow-embed', () => {
   });
 
   afterEach(() => {
+    setShadowDomSupportedForTesting(undefined);
     sandbox.restore();
   });
 
@@ -73,10 +74,6 @@ describe('shadow-embed', () => {
         if (scenario == 'polyfill') {
           setShadowDomSupportedForTesting(false);
         }
-      });
-
-      afterEach(() => {
-        setShadowDomSupportedForTesting(undefined);
       });
 
       it('should transform CSS installStylesForShadowRoot', () => {

@@ -151,7 +151,7 @@ describe('amp-a4a', () => {
               'validateAdResponse_ called exactly once').to.be.true;
           expect(maybeRenderAmpAdSpy.calledOnce,
               'maybeRenderAmpAd_ called exactly once').to.be.true;
-          expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;//XXXXX
+          expect(a4aElement.shadowRoot, 'Shadow root is set').to.not.be.null;
           expect(a4aElement.shadowRoot.querySelector('style'),
               'style tag in shadow root').to.not.be.null;
           expect(a4aElement.shadowRoot.querySelector('amp-ad-body'),
