@@ -34,36 +34,16 @@ describe('3p integration.js', () => {
   });
 
   it('should register integrations', () => {
-    // Get all ad extensions from test env.
-    const extensions = window.ampTestRuntimeConfig.adExtensions;
-    const namingExceptions = {
-      // We recommend 3P ad networks use the same string for filename and ID.
-      // Write exceptions here in alpabetic order.
-      // filename: [ID1, ID2, ... ]
-      adblade: ['adblade', 'industrybrains'],
-      mantis: ['mantis-display', 'mantis-recommend'],
-      weborama: ['weborama-display'],
-    };
+    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+      expect(registrations, `Missing registration for [${adType}]`)
+          .to.contain.key(adType);
+    });
 
-    for (let i = 0; i < extensions.length; i++) {
-      const expanded = namingExceptions[extensions[i]];
-      if (expanded) {
-        for (let j = 0; j < expanded.length; j++) {
-          expect(registrations).to.include.key(expanded[j]);
-        }
-      } else {
-        if (extensions[i] == 'fakead3p') {
-          continue;
-        }
-        expect(registrations).to.include.key(extensions[i]);
-      }
-    }
-
-    // Google's ad networks.
-    expect(registrations).to.include.key('adsense');
-    expect(registrations).to.include.key('doubleclick');
-
-    expect(registrations).to.include.key('_ping_');
+    // Google ad networks and fake ad networks
+    ['adsense', 'doubleclick', '_ping_'].forEach(adType => {
+      expect(registrations, `Missing registration for [${adType}]`)
+          .to.contain.key(adType);
+    });
   });
 
   it('should not throw validateParentOrigin without ancestorOrigins', () => {

@@ -19,33 +19,14 @@ import {adConfig} from '../../ads/_config';
 describe('test-ads-config', () => {
 
   it('should have all ad networks configured', () => {
-    // Get all ad extensions from test env.
-    const extensions = window.ampTestRuntimeConfig.adExtensions;
-    const namingExceptions = {
-      // We recommend 3P ad networks use the same string for filename and ID.
-      // Write exceptions here in alpabetic order.
-      // filename: [ID1, ID2, ... ]
-      adblade: ['adblade', 'industrybrains'],
-      mantis: ['mantis-display', 'mantis-recommend'],
-      weborama: ['weborama-display'],
-    };
+    window.ampTestRuntimeConfig.adTypes.forEach(adType => {
+      expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
+    });
 
-    for (let i = 0; i < extensions.length; i++) {
-      const expanded = namingExceptions[extensions[i]];
-      if (expanded) {
-        for (let j = 0; j < expanded.length; j++) {
-          expect(adConfig).to.include.key(expanded[j]);
-        }
-      } else {
-        expect(adConfig).to.include.key(extensions[i]);
-      }
-    }
-
-    // Google's ad networks.
-    expect(adConfig).to.include.key('adsense');
-    expect(adConfig).to.include.key('doubleclick');
-
-    expect(adConfig).to.include.key('_ping_');
+    // Google ad networks and fake ad networks
+    ['adsense', 'doubleclick', '_ping_'].forEach(adType => {
+      expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
+    });
   });
 
   it('should sort adConfig in alphabetic order', () => {
