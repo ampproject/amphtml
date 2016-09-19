@@ -22,7 +22,7 @@
     "heroku-postbuild": "gulp clean && gulp build && gulp dist --fortesting"
   },
   "dependencies": {
-    "document-register-element": "0.5.4",
+    "document-register-element": "1.0.7",
     "promise-pjs": "1.1.2"
   },
   "devDependencies": {
