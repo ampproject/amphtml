@@ -24,6 +24,7 @@ import * as sinon from 'sinon';
 
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
+  copyElementToChildWindow,
   createAmpElementProto,
   getElementClassForTesting,
   markElementScheduledForTesting,
@@ -1770,6 +1771,30 @@ describe('CustomElement Overflow Element', () => {
       // Second stub is ignored.
       stubElementIfNotKnown(win, 'amp-test1');
       expect(doc.registerElement.callCount).to.equal(1);
+    });
+
+    it('should copy or stub element definitions in a child window', () => {
+      stubElementIfNotKnown(win, 'amp-test1');
+
+      const registerElement = sandbox.spy();
+      const childWin = {Object, HTMLElement, document: {registerElement}};
+
+      copyElementToChildWindow(childWin, 'amp-test1');
+      expect(childWin.ampExtendedElements['amp-test1']).to.be.true;
+      const firstCallCount = registerElement.callCount;
+      expect(firstCallCount > 1).to.be.true;
+      expect(registerElement.getCall(firstCallCount - 1).args[0])
+          .to.equal('amp-test1');
+
+      // Also stubs legacy elements.
+      expect(childWin.ampExtendedElements['amp-ad']).to.be.true;
+      expect(childWin.ampExtendedElements['amp-embed']).to.be.true;
+
+      copyElementToChildWindow(childWin, 'amp-test2');
+      expect(childWin.ampExtendedElements['amp-test1']).to.be.true;
+      expect(registerElement.callCount > firstCallCount).to.be.true;
+      expect(registerElement.getCall(registerElement.callCount - 1).args[0])
+          .to.equal('amp-test2');
     });
 
     it('getElementService should wait for body when not available', () => {

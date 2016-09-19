@@ -42,6 +42,18 @@ window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
 
+// amp-viz-vega related externs.
+/**
+ * @typedef {{spec: function(!JSONType, function())}}
+ */
+let VegaParser;
+/**
+ * @typedef {{parse: VegaParser}}
+ */
+let VegaObject;
+/* @type {VegaObject} */
+window.vg;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
