@@ -22,11 +22,6 @@ describe('test-ads-config', () => {
     window.ampTestRuntimeConfig.adTypes.forEach(adType => {
       expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
     });
-
-    // Google ad networks and fake ad networks
-    ['adsense', 'doubleclick', '_ping_'].forEach(adType => {
-      expect(adConfig, `Missing config for [${adType}]`).to.contain.key(adType);
-    });
   });
 
   it('should sort adConfig in alphabetic order', () => {

@@ -67,7 +67,10 @@ function getAdTypes() {
     weborama: ['weborama-display'],
   };
 
-  const adTypes = [];
+  // Start with Google ad types
+  const adTypes = ['adsense', 'doubleclick'];
+
+  // Add all other ad types
   const files = fs.readdirSync('./ads/');
   for (var i = 0; i < files.length; i++) {
     if (path.extname(files[i]) == '.js'

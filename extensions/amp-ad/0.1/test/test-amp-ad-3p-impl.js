@@ -175,7 +175,7 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-      }, null)).to.be.rejectedWith(/type/);
+      })).to.be.rejectedWith(/type/);
     });
 
     it('should reject unknown type', () => {
@@ -183,7 +183,7 @@ function tests(name) {
         width: 300,
         height: 250,
         type: 'unknownType',
-      }, null)).to.be.rejectedWith(/unknownType/);
+      })).to.be.rejectedWith(/unknownType/);
     });
 
     it('must not be position:fixed', () => {

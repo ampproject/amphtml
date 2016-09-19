@@ -38,12 +38,6 @@ describe('3p integration.js', () => {
       expect(registrations, `Missing registration for [${adType}]`)
           .to.contain.key(adType);
     });
-
-    // Google ad networks and fake ad networks
-    ['adsense', 'doubleclick', '_ping_'].forEach(adType => {
-      expect(registrations, `Missing registration for [${adType}]`)
-          .to.contain.key(adType);
-    });
   });
 
   it('should not throw validateParentOrigin without ancestorOrigins', () => {
