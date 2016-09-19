@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
+import {ampdocServiceFor} from './ampdoc';
 import {createLoaderElement} from '../src/loader';
 import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
@@ -410,6 +411,12 @@ function createBaseAmpElementProto(win) {
     this.everAttached = false;
 
     /**
+     * Ampdoc can only be looked up when an element is attached.
+     * @private {?./service/ampdoc-impl/AmpDoc}
+     */
+    this.ampdoc_ = null;
+
+    /**
      * Resources can only be looked up when an element is attached.
      * @private {?./service/resources-impl.Resources}
      */
@@ -490,6 +497,17 @@ function createBaseAmpElementProto(win) {
      * @private {boolean|undefined}
      */
     this.isInTemplate_ = undefined;
+  };
+
+  /**
+   * Returns the associated ampdoc. Only available after attachment.
+   * @return {!./service/ampdoc-impl.AmpDoc}
+   * @final @this {!Element}
+   * @package
+   */
+  ElementProto.getAmpDoc = function() {
+    return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
+        dev().assert(this.ampdoc_, 'no ampdoc yet'));
   };
 
   /**
@@ -765,9 +783,15 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
+    if (!this.ampdoc_) {
+      // Ampdoc can now be initialized.
+      // XXXX
+      const ampdocService = ampdocServiceFor(this.ownerDocument.defaultView);
+      this.ampdoc_ = ampdocService.getAmpDoc(this);
+    }
     if (!this.resources_) {
       // Resources can now be initialized since the ampdoc is now available.
-      this.resources_ = resourcesForDoc(this);
+      this.resources_ = resourcesForDoc(this.ampdoc_);
     }
     if (!this.everAttached) {
       if (!isStub(this.implementation_)) {
