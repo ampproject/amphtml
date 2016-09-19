@@ -19,13 +19,9 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-} from '../../amp-ad/0.1/amp-ad-3p-impl';
-import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {adPreconnect} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
 import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
-import {adPreconnect} from '../../../ads/_config';
-import {signingServerURLs} from '../../../ads/_a4a-config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
