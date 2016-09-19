@@ -23,7 +23,6 @@ import {insertStyleElement} from './style-installer';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
- * @const {!Object}
  */
 const UNCOMPOSED_SEARCH = {composed: false};
 
@@ -141,10 +140,10 @@ export function isShadowRoot(value) {
  */
 export function getShadowRootNode(node) {
   if (isShadowDomSupported() && Node.prototype.getRootNode) {
-    return node.getRootNode(UNCOMPOSED_SEARCH);
+    return /** @type {?ShadowRoot} */ (node.getRootNode(UNCOMPOSED_SEARCH));
   }
   // Polyfill shadow root lookup.
-  return closestNode(node, n => isShadowRoot(n));
+  return /** @type {?ShadowRoot} */ (closestNode(node, n => isShadowRoot(n)));
 }
 
 
