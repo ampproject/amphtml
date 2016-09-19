@@ -15,7 +15,7 @@
  */
 
 import {cidForOrNull} from './cid';
-import {clientIdScope} from '../ads/_config';
+import {adConfig} from '../ads/_config';
 import {userNotificationManagerFor} from './user-notification';
 import {dev} from '../src/log';
 import {timerFor} from '../src/timer';
@@ -28,7 +28,8 @@ import {timerFor} from '../src/timer';
  *     - `amp-analytics` which provides the CID service was not installed.
  */
 export function getAdCid(adElement) {
-  const scope = clientIdScope[adElement.element.getAttribute('type')];
+  const config = adConfig[adElement.element.getAttribute('type')];
+  const scope = config ? config.clientIdScope : null;
   const consentId = adElement.element.getAttribute(
     'data-consent-notification-id');
   if (!(scope || consentId)) {
