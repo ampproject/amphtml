@@ -15,7 +15,7 @@
  */
 
 import {Pass} from '../pass';
-import {getService} from '../service';
+import {getServiceForDoc} from '../service';
 import {getMode} from '../mode';
 import {dev} from '../log';
 import {timerFor} from '../timer';
@@ -48,12 +48,12 @@ let HistoryIdDef;
 export class History {
 
   /**
-   * @param {!Window} win
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {!HistoryBindingInterface} binding
    */
-  constructor(win, binding) {
+  constructor(ampdoc, binding) {
     /** @private @const {!../service/timer-impl.Timer} */
-    this.timer_ = timerFor(win);
+    this.timer_ = timerFor(ampdoc.win);
 
     /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
@@ -643,27 +643,28 @@ export class HistoryBindingVirtual_ {
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!History}
  * @private
  */
-function createHistory_(window) {
-  const viewer = installViewerService(window);
+function createHistory_(ampdoc) {
+  const viewer = installViewerService(ampdoc.win);
   let binding;
   if (viewer.isOvertakeHistory() || getMode().test) {
     binding = new HistoryBindingVirtual_(viewer);
   } else {
-    binding = new HistoryBindingNatural_(window);
+    binding = new HistoryBindingNatural_(ampdoc.win);
   }
-  return new History(window, binding);
+  return new History(ampdoc, binding);
 };
 
 
 /**
- * @param {!Window} window
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
+ * @return {!History}
  */
-export function installHistoryService(window) {
-  getService(window, 'history', () => {
-    return createHistory_(window);
+export function installHistoryServiceForDoc(ampdoc) {
+  return getServiceForDoc(ampdoc, 'history', ampdoc => {
+    return createHistory_(ampdoc);
   });
-};
+}

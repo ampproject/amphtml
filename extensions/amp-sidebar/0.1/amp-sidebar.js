@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {historyFor} from '../../../src/history';
+import {historyForDoc} from '../../../src/history';
 import {platformFor} from '../../../src/platform';
 import {setStyles, toggle} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
@@ -253,7 +253,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!History}
    */
   getHistory_() {
-    return historyFor(this.win);
+    return historyForDoc(new AmpDoc(this.win));//XXX
   }
 }
 
