@@ -34,7 +34,8 @@ export function supportsOptions(win) {
 }
 
 export function polyfillOptionsSupport(win) {
-  const eventPrototype = win.EventTarget.prototype;
+  const eventInterface = win.EventTarget || win.Element;
+  const eventPrototype = eventInterface.prototype;
   const originalAdd = eventPrototype.addEventListener;
   const originalRemove = eventPrototype.removeEventListener;
 
