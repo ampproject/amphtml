@@ -116,11 +116,8 @@ export class AmpDocService {
     let n = node;
     while (n) {
       // A custom element may already have the reference to the ampdoc.
-      if (typeof n.getAmpDoc == 'function') {
-        const ampdoc = n.getAmpDoc();
-        if (ampdoc) {
-          return ampdoc;
-        }
+      if (n.ampdoc_) {
+        return n.ampdoc_;
       }
 
       // Traverse the boundary of a friendly iframe.
