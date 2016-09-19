@@ -15,7 +15,7 @@
  */
 
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {dev} from './log';
 import {escapeCssSelectorIdent} from './dom';
 import {extensionsFor} from './extensions';
@@ -122,7 +122,7 @@ export function createShadowEmbedRoot(hostElement, extensionIds) {
 
   const win = hostElement.ownerDocument.defaultView;
   const extensions = extensionsFor(win);
-  const ampdocService = ampdocFor(win);
+  const ampdocService = ampdocServiceFor(win);
   const ampdoc = ampdocService.getAmpDoc(hostElement);
 
   // Instal runtime CSS.

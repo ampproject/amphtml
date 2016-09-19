@@ -25,7 +25,7 @@ import {
   installExtensionsService,
   registerExtension,
 } from './service/extensions-impl';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {cssText} from '../build/css';
 import {dev, user} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
@@ -398,7 +398,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
 }
@@ -449,7 +449,7 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
  */
 function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   dev().fine(TAG, 'Attach shadow doc:', doc);
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
 
   hostElement.style.visibility = 'hidden';
   const shadowRoot = createShadowRoot(hostElement);

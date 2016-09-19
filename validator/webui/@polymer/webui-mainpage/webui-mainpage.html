@@ -102,7 +102,7 @@
           // Validate - result is of type amp.validator.ValidationResult.
           // See validator.proto for the provided fields.
           var validationResult = amp.validator.validateString(
-              editor.getEditorValue(), urlForm.getFormat());
+              editor.getEditorValue(), urlForm.getHtmlFormat());
 
           // Set the status property, which will cause the status bar below
           // the editor to redisplay.
@@ -215,10 +215,10 @@
           }
         });
 
-        urlForm.addEventListener('webui-urlform-format-changes', function(e) {
-          if (e.detail.format === 'AMP4ADS') {
+        urlForm.addEventListener('webui-urlform-html-format-changes', function(e) {
+          if (e.detail.htmlFormat === 'AMP4ADS') {
             var params = getLocationHashParams();
-            params['format'] = 'AMP4ADS';
+            params['htmlFormat'] = 'AMP4ADS';
             setLocationHashParams(params);
             if (editor.getEditorValue() === minimumValidAmp) {
               editor.setEditorValue(minimumValidAmp4Ads);
@@ -226,7 +226,7 @@
               refreshEditorAndErrors();
             }
           } else {
-            removeParamFromLocationHashParams('format');
+            removeParamFromLocationHashParams('htmlFormat');
             if (editor.getEditorValue() === minimumValidAmp4Ads) {
               editor.setEditorValue(minimumValidAmp);
             } else {
@@ -245,12 +245,12 @@
           if (params.hasOwnProperty('filter') && params['filter']) {
             listbox.setFilter(params['filter']);
           }
-        } else if (params.hasOwnProperty('format') &&
-                   params['format'] === 'AMP4ADS' ) {
-          urlForm.setFormat('AMP4ADS');
+        } else if (params.hasOwnProperty('htmlFormat') &&
+                   params['htmlFormat'] === 'AMP4ADS' ) {
+          urlForm.setHtmlFormat('AMP4ADS');
           editor.setEditorValue(minimumValidAmp4Ads);
         } else {
-          urlForm.setFormat('AMP');
+          urlForm.setHtmlFormat('AMP');
           editor.setEditorValue(minimumValidAmp);
         }
       }
