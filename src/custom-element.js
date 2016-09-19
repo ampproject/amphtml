@@ -785,7 +785,6 @@ function createBaseAmpElementProto(win) {
     }
     if (!this.ampdoc_) {
       // Ampdoc can now be initialized.
-      // XXXX
       const ampdocService = ampdocServiceFor(this.ownerDocument.defaultView);
       this.ampdoc_ = ampdocService.getAmpDoc(this);
     }

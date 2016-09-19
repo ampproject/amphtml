@@ -231,13 +231,17 @@ describe('CustomElement', () => {
   });
 
 
-  it('should initialize resources on attach only', () => {
+  it('should initialize ampdoc and resources on attach only', () => {
     const element = new ElementClass();
+    expect(element.ampdoc_).to.be.null;
+    expect(() => element.getAmpDoc()).to.throw(/no ampdoc yet/);
     expect(element.resources_).to.be.null;
     expect(() => element.getResources()).to.throw(/no resources yet/);
 
     // Resources available after attachment.
     element.attachedCallback();
+    expect(element.ampdoc_).to.be.ok;
+    expect(element.getAmpDoc()).to.be.ok;
     expect(element.resources_).to.be.ok;
     expect(element.getResources()).to.be.ok;
   });
