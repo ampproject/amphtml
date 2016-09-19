@@ -145,10 +145,7 @@ export function stubElements(win) {
     // If amp-ad and amp-embed haven't been registered, manually register them
     // with ElementStub, in case the script to the element is not included.
     if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
-      win.ampExtendedElements['amp-ad'] = true;
-      registerElement(win, 'amp-ad', ElementStub);
-      win.ampExtendedElements['amp-embed'] = true;
-      registerElement(win, 'amp-embed', ElementStub);
+      stubLegacyElements(win);
     }
   }
   const list = win.document.querySelectorAll('[custom-element]');
@@ -167,6 +164,16 @@ export function stubElements(win) {
 }
 
 /**
+ * @param {!Window} win
+ */
+function stubLegacyElements(win) {
+  win.ampExtendedElements['amp-ad'] = true;
+  registerElement(win, 'amp-ad', ElementStub);
+  win.ampExtendedElements['amp-embed'] = true;
+  registerElement(win, 'amp-embed', ElementStub);
+}
+
+/**
  * Stub element if not yet known.
  * @param {!Window} win
  * @param {string} name
@@ -180,6 +187,22 @@ export function stubElementIfNotKnown(win, name) {
   }
   win.ampExtendedElements[name] = true;
   registerElement(win, name, ElementStub);
+}
+
+/**
+ * Copies the specified element to child window (friendly iframe). This way
+ * all implementations of the AMP elements are shared between all friendly
+ * frames.
+ * @param {!Window} childWin
+ * @param {string} name
+ */
+export function copyElementToChildWindow(childWin, name) {
+  if (!childWin.ampExtendedElements) {
+    childWin.ampExtendedElements = {};
+    stubLegacyElements(childWin);
+  }
+  childWin.ampExtendedElements[name] = true;
+  registerElement(childWin, name, knownElements[name] || ElementStub);
 }
 
 
