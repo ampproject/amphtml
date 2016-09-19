@@ -15,7 +15,7 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
-import {ampdocFor} from '../../src/ampdoc';
+import {ampdocServiceFor} from '../../src/ampdoc';
 import {
   copyRuntimeStylesToShadowRoot,
   createShadowEmbedRoot,
@@ -176,7 +176,7 @@ describe('shadow-embed', () => {
       style.setAttribute('amp-runtime', '');
       root.appendChild(style);
       const ampdoc = new AmpDocShadow(window, 'https://a.org/', root);
-      const ampdocService = ampdocFor(window);
+      const ampdocService = ampdocServiceFor(window);
       sandbox.stub(ampdocService, 'getAmpDoc', () => ampdoc);
     });
 
