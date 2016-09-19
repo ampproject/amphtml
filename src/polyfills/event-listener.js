@@ -15,21 +15,44 @@
  */
 
 export function supportsOptions(win) {
-  return false;
+  let supportsOptions = false;
+  win.document.createElement('div').addEventListener('test', function() {}, {
+    get passive() {
+      supportsOptions = true;
+      return false;
+    },
+    get capture() {
+      supportsOptions = true;
+      return false;
+    },
+    get once() {
+      supportsOptions = true;
+      return false;
+    },
+  });
+  return supportsOptions;
 }
 
 export function polyfillOptionsSupport(win) {
-  let originalAdd = win.EventTarget.prototype.addEventListener;
-  let originalRemove = win.EventTarget.prototype.removeEventListener;
+  const eventPrototype = win.EventTarget.prototype;
+  const originalAdd = eventPrototype.addEventListener;
+  const originalRemove = eventPrototype.removeEventListener;
 
-  win.EventTarget.prototype.addEventListener = function(type, listener, opt) {
-    console.log('\n\n*** in new add');
-    return originalAdd.call(this, type, listener, opt);
+  eventPrototype.addEventListener = function(type, listener, options) {
+    return originalAdd.call(this, type, listener, useCapture(options));
   };
 
-  win.EventTarget.prototype.removeEventListener = function(type, listener, opt) {
-    return originalRemove.call(this, type, listener, opt);
+  eventPrototype.removeEventListener = function(type, listener, options) {
+    return originalRemove.call(this, type, listener, useCapture(options));
   };
+}
+
+export function useCapture(options) {
+  if (typeof(options) === 'object') {
+    return !!options.capture;
+  } else {
+    return !!options;
+  }
 }
 
 /**
