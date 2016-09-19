@@ -1,0 +1,1 @@
+self.installDocumentRegisterElement = function(window, document) {

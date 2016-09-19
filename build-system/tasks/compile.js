@@ -316,12 +316,12 @@ function patchRegisterElement() {
   // compilation.
   // Details https://github.com/google/closure-compiler/issues/1831
   const patchedName = 'build/patched-module/document-register-element' +
-      '/build/document-register-element.max.js';
+      '/build/document-register-element-installer.max.js';
   if (!fs.existsSync(patchedName)) {
       fs.writeFileSync(patchedName,
           fs.readFileSync(
               'node_modules/document-register-element/build/' +
-              'document-register-element.max.js') +
+              'document-register-element-installer.max.js') +
           '\n\nexport function deadCode() {}\n');
     }
 }

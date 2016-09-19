@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import 'document-register-element/build/document-register-element.max';
+import 'document-register-element/build/document-register-element-installer.max';
 import {install as installMathSign} from './polyfills/math-sign';
 import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
 
+self.installDocumentRegisterElement(self, self.document);
 installMathSign(self);
 installObjectAssign(self);
 installPromise(self);

@@ -89,6 +89,12 @@ try {
   throw e;
 }
 
+const iframe = self.document.createElement('iframe');
+iframe.setAttribute('id', 'my-iframe');
+self.document.body.appendChild(iframe);
+self.installDocumentRegisterElement(iframe.contentWindow,
+    iframe.contentWindow.document);
+
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).

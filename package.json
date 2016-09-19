@@ -19,7 +19,8 @@
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist",
-    "heroku-postbuild": "gulp clean && gulp build && gulp dist --fortesting"
+    "heroku-postbuild": "gulp clean && gulp build && gulp dist --fortesting",
+    "postinstall": "templates/installer.sh"
   },
   "dependencies": {
     "document-register-element": "0.5.4",
