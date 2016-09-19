@@ -412,7 +412,7 @@ function createBaseAmpElementProto(win) {
 
     /**
      * Ampdoc can only be looked up when an element is attached.
-     * @private {?./service/ampdoc-impl/AmpDoc}
+     * @private {?./service/ampdoc-impl.AmpDoc}
      */
     this.ampdoc_ = null;
 
@@ -500,25 +500,29 @@ function createBaseAmpElementProto(win) {
   };
 
   /**
-   * Returns the associated ampdoc. Only available after attachment.
+   * Returns the associated ampdoc. Only available after attachment. It throws
+   * exception before the element is attached.
    * @return {!./service/ampdoc-impl.AmpDoc}
    * @final @this {!Element}
    * @package
    */
   ElementProto.getAmpDoc = function() {
     return /** @type {!./service/ampdoc-impl.AmpDoc} */ (
-        dev().assert(this.ampdoc_, 'no ampdoc yet'));
+        dev().assert(this.ampdoc_,
+            'no ampdoc yet, since element is not attached'));
   };
 
   /**
-   * Returns Resources manager.
+   * Returns Resources manager. Only available after attachment. It throws
+   * exception before the element is attached.
    * @return {!./service/resources-impl.Resources}
    * @final @this {!Element}
    * @package
    */
   ElementProto.getResources = function() {
     return /** @type {!./service/resources-impl.Resources} */ (
-        dev().assert(this.resources_, 'no resources yet'));
+        dev().assert(this.resources_,
+            'no resources yet, since element is not attached'));
   };
 
   /**

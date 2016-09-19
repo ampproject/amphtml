@@ -174,7 +174,7 @@ export class BaseElement {
 
   /**
    * Returns the associated ampdoc. Only available when `buildCallback` and
-   * going forward.
+   * going forward. It throws an exception before `buildCallback`.
    * @return {!./service/ampdoc-impl.AmpDoc}
    */
   getAmpDoc() {
