@@ -540,22 +540,14 @@ export class Viewer {
     const oldState = this.visibilityState_;
     state = dev().assertEnumValue(VisibilityState, state, 'VisibilityState');
 
-    if (this.isEmbedded_) {
-      // The viewer is informing us we are not currently active because we are
-      // being pre-rendered, or the user swiped to another doc (or closed the
-      // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
-      // INACTIVE, though we know better.
-      if (state === VisibilityState.HIDDEN) {
-        state = this.hasBeenVisible_ ?
-          VisibilityState.INACTIVE :
-          VisibilityState.PRERENDER;
-      }
-    } else if (!getMode().localDev) {
-      // When not embedded, only VISIBLE and HIDDEN states are allowed.
-      if (state !== VisibilityState.VISIBLE ||
-          state !== VisibilityState.HIDDEN) {
-        state = VisibilityState.VISIBLE;
-      }
+    // The viewer is informing us we are not currently active because we are
+    // being pre-rendered, or the user swiped to another doc (or closed the
+    // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
+    // INACTIVE, though we know better.
+    if (state === VisibilityState.HIDDEN) {
+      state = this.hasBeenVisible_ ?
+        VisibilityState.INACTIVE :
+        VisibilityState.PRERENDER;
     }
 
     this.viewerVisibilityState_ = state;
