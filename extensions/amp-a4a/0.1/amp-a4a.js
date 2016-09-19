@@ -19,9 +19,7 @@ import {
   incrementLoadingAds,
 } from '../../amp-ad/0.1/concurrent-load';
 import {adConfig} from '../../../ads/_config';
-import {adPreconnect} from '../../../ads/_config';
 import {signingServerURLs} from '../../../ads/_a4a-config';
-import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
@@ -334,22 +332,22 @@ export class AmpA4A extends AMP.BaseElement {
                           new Uint8Array(creativeParts.creative),
                           creativeParts.signature,
                           keyInfo).then(isValid => {
-                        // @param {boolean} isValid
-                        // @return {!Promise}
-                        if (isValid) {
-                          resolveValidation(creativeParts.creative);
-                        }
-                        return Promise.resolve();
-                      },
-                      err => {
-                        // @param {*} err
-                        // @return {!Promise}
-                        user().error('Amp Ad', err, this.element);
-                        return Promise.resolve();
-                      });
-                })
-              }))
-            })
+                            // @param {boolean} isValid
+                            // @return {!Promise}
+                            if (isValid) {
+                              resolveValidation(creativeParts.creative);
+                            }
+                            return Promise.resolve();
+                          },
+                          err => {
+                            // @param {*} err
+                            // @return {!Promise}
+                            user().error('Amp Ad', err, this.element);
+                            return Promise.resolve();
+                          });
+                });
+              }));
+            });
           })
       ).then(() => {
         // @return {!Promise<?ArrayBuffer>}
@@ -841,12 +839,6 @@ export class AmpA4A extends AMP.BaseElement {
    * Extracts the body portion of the creative, according to directions in the
    * metaData, and formats it for insertion into Shadow DOM.
    * @param {string} creative from which CSS is extracted
-   * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
-   *    reserialized creative.
-   * @returns {string}  Body of AMP creative, surrounded by {@code
-   *     <amp-ad-body>} tags, and suitable for injection into Shadow DOM.
-   * @private
-   *
    * @param {!CreativeMetaDataDef} metaData Metadata object extracted from the
    *    reserialized creative.
    * @returns {string}  Body of AMP creative, surrounded by {@code
