@@ -246,12 +246,14 @@ function Validator(scriptContents) {
 
 /**
  * @param {!string} inputString
+ * @param {string=} htmlFormat
  * @returns {!ValidationResult}
  * @export
  */
 Validator.prototype.validateString =
-    function(inputString) {
-  var internalResult = this.sandbox.amp.validator.validateString(inputString);
+    function(inputString, htmlFormat) {
+  var internalResult = this.sandbox.amp.validator.validateString(
+      inputString, htmlFormat);
   var result = new ValidationResult();
   result.status = internalResult.status;
   for (var ii = 0; ii < internalResult.errors.length; ii++) {
@@ -356,6 +358,12 @@ function main() {
               '  for development.',
           'https://cdn.ampproject.org/v0/validator.js')
       .option(
+          '--html_format <AMP|AMP4ADS>', 'The input format to be validated.\n' +
+          '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
+          '  still in draft; this requires specifying \n' +
+          '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
+          'AMP')
+      .option(
           '--format <color|text|json>', 'How to format the output.\n' +
               '  "color" displays errors/warnings/success in\n' +
               '          red/orange/green.\n' +
@@ -387,7 +395,8 @@ function main() {
               var jsonOut = {};
               for (var ii = 0; ii < resolvedInputs.length; ii++) {
                 var validationResult =
-                    validator.validateString(resolvedInputs[ii]);
+                    validator.validateString(resolvedInputs[ii],
+                                             program.html_format);
                 if (program.format === 'json') {
                   jsonOut[program.args[ii]] = validationResult;
                 } else {
