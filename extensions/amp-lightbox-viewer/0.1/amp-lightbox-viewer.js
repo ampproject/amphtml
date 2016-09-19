@@ -16,7 +16,7 @@
 
 
 import {CSS} from '../../../build/amp-lightbox-viewer-0.1.css';
-import {ampdocFor} from '../../../src/ampdoc';
+import {ampdocServiceFor} from '../../../src/ampdoc';
 import {ancestorElements} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {Layout} from '../../../src/layout';
@@ -484,7 +484,7 @@ export function installLightboxManager(win) {
   if (isExperimentOn(win, TAG)) {
     // TODO(aghassemi): This only works for singleDoc mode. We will move
     // installation of LightboxManager to core after the experiment, okay for now.
-    const ampdoc = ampdocFor(win).getAmpDoc();
+    const ampdoc = ampdocServiceFor(win).getAmpDoc();
     manager_ = new LightboxManager(ampdoc);
   }
 }

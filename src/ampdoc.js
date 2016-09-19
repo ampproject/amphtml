@@ -23,7 +23,7 @@ import {getExistingServiceForWindow} from './service';
  * @param {!Window} window
  * @return {!./service/ampdoc-impl.AmpDocService}
  */
-export function ampdocFor(window) {
+export function ampdocServiceFor(window) {
   return /** @type {!./service/ampdoc-impl.AmpDocService} */ (
       getExistingServiceForWindow(window, 'ampdoc'));
 }
