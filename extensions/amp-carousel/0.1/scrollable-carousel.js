@@ -270,8 +270,15 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const options = {
       passive: true,
     };
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
-    }, options);
+
+    /**
+     * TODO(aghassemi, #5105): Type check
+     * @suppress {checkTypes}
+     */
+    (() => {
+      this.element.addEventListener('touchmove', event => {
+        event.stopPropagation();
+      }, options);
+    })();
   }
 }

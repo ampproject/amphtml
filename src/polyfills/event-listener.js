@@ -14,8 +14,48 @@
  * limitations under the License.
  */
 
+
+/**
+ * Provides a polyfill so that the third argument to `addEventListener` can
+ * always be an `options` object even for browsers that only support the boolean
+ * `capture` as the third argument.
+ *
+ * See MDN for details on the new options argument for event listeners.
+ * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+ *
+ * Note that we do NOT polyfill the actual behaviour of different options. For
+ * example, it is impossible to truly polyfill `passive` option, so the options
+ * would only work in browsers that support them.
+ *
+ * @private Visible for testing.
+ * @param {!Window} win
+ */
+export function polyfillOptionsSupport(win) {
+  const eventInterface = win.EventTarget || win.Element;
+  const eventPrototype = eventInterface.prototype;
+  const originalAdd = eventPrototype.addEventListener;
+  const originalRemove = eventPrototype.removeEventListener;
+
+  eventPrototype.addEventListener = function(type, listener, options) {
+    return originalAdd.call(this, type, listener, useCapture(options));
+  };
+
+  eventPrototype.removeEventListener = function(type, listener, options) {
+    return originalRemove.call(this, type, listener, useCapture(options));
+  };
+}
+
+/**
+ * Whether options as third-argument is already supported by the browser.
+ * @private Visible for testing.
+ * @param {!Window} win
+ * @return {boolean}
+ */
 export function supportsOptions(win) {
   let supportsOptions = false;
+
+  // If browser tries to access one of the known properties on the options
+  // object, then it supports it.
   win.document.createElement('div').addEventListener('test', function() {}, {
     get passive() {
       supportsOptions = true;
@@ -33,31 +73,20 @@ export function supportsOptions(win) {
   return supportsOptions;
 }
 
-export function polyfillOptionsSupport(win) {
-  const eventInterface = win.EventTarget || win.Element;
-  const eventPrototype = eventInterface.prototype;
-  const originalAdd = eventPrototype.addEventListener;
-  const originalRemove = eventPrototype.removeEventListener;
-
-  eventPrototype.addEventListener = function(type, listener, options) {
-    return originalAdd.call(this, type, listener, useCapture(options));
-  };
-
-  eventPrototype.removeEventListener = function(type, listener, options) {
-    return originalRemove.call(this, type, listener, useCapture(options));
-  };
-}
-
-export function useCapture(options) {
-  if (typeof(options) === 'object') {
-    return !!options.capture;
+/**
+ * Decides whether capture argument should be true/false based on the value of
+ * given options argument.
+ * @param {*} options
+ */
+function useCapture(options) {
+  if (typeof options === 'object' && options) {
+    return !!(options.capture);
   } else {
-    return !!options;
+    return options;
   }
 }
 
 /**
- *
  * @param {!Window} win
  */
 export function install(win) {

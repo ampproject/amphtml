@@ -515,10 +515,16 @@ export class AmpSlideScroll extends BaseSlides {
     // touchmove events.
     const options = {
       passive: true,
-      capture: true,
     };
-    this.element.addEventListener('touchmove', event => {
-      event.stopPropagation();
-    }, options);
+
+    /**
+     * TODO(aghassemi, #5105): Type check
+     * @suppress {checkTypes}
+     */
+    (() => {
+      this.element.addEventListener('touchmove', event => {
+        event.stopPropagation();
+      }, options);
+    })();
   }
 }
