@@ -36,7 +36,7 @@ const TAG = 'UrlReplacements';
 const EXPERIMENT_DELIMITER = '!';
 const VARIANT_DELIMITER = '.';
 
-/** @typedef {string|number|boolean|undefined} */
+/** @typedef {string|number|boolean|undefined|null} */
 let ResolverReturnDef;
 
 /** @typedef {function(...*):ResolverReturnDef} */
