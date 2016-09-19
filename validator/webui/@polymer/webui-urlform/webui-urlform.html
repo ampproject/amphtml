@@ -36,7 +36,7 @@
       min-width: auto;
       right: 0;
     }
-    #formatDropdown {
+    #htmlFormatDropdown {
       min-width: 120px;
       max-width: 120px;
     }
@@ -52,12 +52,12 @@
         </paper-input>
       </paper-material>
       <paper-material elevation="0">
-        <paper-dropdown-menu label="Format" id="formatDropdown">
+        <paper-dropdown-menu label="HTML Format" id="htmlFormatDropdown">
           <paper-listbox class="dropdown-content" selected="AMP"
-                         id="formatSelector" attr-for-selected="format"
-                         on-iron-select="formatChange">
-            <paper-item format="AMP">AMP</paper-item>
-            <paper-item format="AMP4ADS">AMP4ADS</paper-item>
+                         id="htmlFormatSelector" attr-for-selected="htmlFormat"
+                         on-iron-select="htmlFormatChange">
+            <paper-item htmlFormat="AMP">AMP</paper-item>
+            <paper-item htmlFormat="AMP4ADS">AMP4ADS</paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
       </paper-material>
@@ -76,9 +76,9 @@
           value: false
         }
       },
-      formatChange: function() {
-        this.fire('webui-urlform-format-changes',
-                  {'format': this.$.formatSelector.selected});
+      htmlFormatChange: function() {
+        this.fire('webui-urlform-html-format-changes',
+                  {'htmlFormat': this.$.htmlFormatSelector.selected});
       },
       checkURL: function(e) {
         this.validURL = !this.$.urlToFetch.invalid;
@@ -98,11 +98,11 @@
         this.$.urlToFetch.validate();
         this.$.validateButton.click();
       },
-      getFormat: function() {
-        return this.$.formatSelector.selected;
+      getHtmlFormat: function() {
+        return this.$.htmlFormatSelector.selected;
       },
-      setFormat: function(htmlFormat) {
-        this.$.formatSelector.selected = htmlFormat;
+      setHtmlFormat: function(htmlFormat) {
+        this.$.htmlFormatSelector.selected = htmlFormat;
       }
     });
   </script>
