@@ -94,9 +94,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
     this.boundNoContentHandler_ = () => this.noContentHandler_();
 
     const adType = this.element.getAttribute('type');
-    // TODO(lannka): this should be never null in real.
-    /** {?Object} */
+    /** {!Object} */
     this.config = adConfig[adType];
+    user().assert(this.config, `Type "${adType}" is not supported in amp-ad`);
 
     setupA2AListener(this.win);
 
@@ -111,19 +111,17 @@ export class AmpAd3PImpl extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // We always need the bootstrap.
     preloadBootstrap(this.win);
-    const prefetch = this.config ? this.config.prefetch : null;
-    const preconnect = this.config ? this.config.preconnect : null;
-    if (typeof prefetch == 'string') {
-      this.preconnect.preload(prefetch, 'script');
-    } else if (prefetch) {
-      prefetch.forEach(p => {
+    if (typeof this.config.prefetch == 'string') {
+      this.preconnect.preload(this.config.prefetch, 'script');
+    } else if (this.config.prefetch) {
+      this.config.prefetch.forEach(p => {
         this.preconnect.preload(p, 'script');
       });
     }
-    if (typeof preconnect == 'string') {
-      this.preconnect.url(preconnect, onLayout);
-    } else if (preconnect) {
-      preconnect.forEach(p => {
+    if (typeof this.config.preconnect == 'string') {
+      this.preconnect.url(this.config.preconnect, onLayout);
+    } else if (this.config.preconnect) {
+      this.config.preconnect.forEach(p => {
         this.preconnect.url(p, onLayout);
       });
     }

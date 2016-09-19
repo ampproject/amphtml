@@ -167,6 +167,14 @@ function tests(name) {
       }, null)).to.be.rejectedWith(/type/);
     });
 
+    it('should reject unknown type', () => {
+      return expect(getAd({
+        width: 300,
+        height: 250,
+        type: 'unknownType',
+      }, null)).to.be.rejectedWith(/unknownType/);
+    });
+
     it('must not be position:fixed', () => {
       return expect(getAd({
         width: 300,
