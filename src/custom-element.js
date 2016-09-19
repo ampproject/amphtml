@@ -499,7 +499,8 @@ function createBaseAmpElementProto(win) {
    * @package
    */
   ElementProto.getResources = function() {
-    return dev().assert(this.resources_, 'no resources yet');
+    return /** @typedef {!./service/resources-impl.Resources} */ (
+        dev().assert(this.resources_, 'no resources yet'));
   };
 
   /**
