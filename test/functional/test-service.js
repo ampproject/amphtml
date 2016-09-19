@@ -18,12 +18,15 @@ import {
   fromClass,
   getExistingServiceForWindow,
   getExistingServiceForDoc,
+  getParentWindowFrameElement,
   getService,
   getServicePromise,
   getServiceForDoc,
   getServicePromiseForDoc,
   resetServiceForTesting,
+  setParentWindow,
 } from '../../src/service';
+import {loadPromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
 
@@ -129,6 +132,22 @@ describe('service', () => {
           expect(factory.callCount).to.equal(0);
         });
       });
+    });
+
+    it('should resolve service for a child window', () => {
+      const c = getService(window, 'c', factory);
+
+      // A child.
+      const child = {};
+      setParentWindow(child, window);
+      expect(getService(child, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForWindow(child, 'c')).to.equal(c);
+
+      // A grandchild.
+      const grandchild = {};
+      setParentWindow(grandchild, child);
+      expect(getService(grandchild, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForWindow(grandchild, 'c')).to.equal(c);
     });
   });
 
@@ -249,6 +268,81 @@ describe('service', () => {
           expect(factory.callCount).to.equal(0);
         });
       });
+    });
+
+    it('should resolve service for a child window', () => {
+      ampdocMock.expects('isSingleDoc').returns(true).atLeast(1);
+      const c = getServiceForDoc(node, 'c', factory);
+
+      // A child.
+      const childWin = {};
+      const childWinNode =
+          {nodeType: 1, ownerDocument: {defaultView: childWin}};
+      setParentWindow(childWin, windowApi);
+      expect(getServiceForDoc(childWinNode, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForDoc(childWinNode, 'c')).to.equal(c);
+
+      // A grandchild.
+      const grandchildWin = {};
+      const grandChildWinNode =
+          {nodeType: 1, ownerDocument: {defaultView: grandchildWin}};
+      setParentWindow(grandchildWin, childWin);
+      expect(getServiceForDoc(grandChildWinNode, 'c', factory)).to.equal(c);
+      expect(getExistingServiceForDoc(grandChildWinNode, 'c')).to.equal(c);
+    });
+  });
+
+
+  describe('getParentWindowFrameElement', () => {
+    let iframe;
+
+    beforeEach(() => {
+      iframe = document.createElement('iframe');
+      const promise = loadPromise(iframe);
+      const html = '<div id="one"></div>';
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+        document.body.appendChild(iframe);
+      } else {
+        iframe.src = 'about:blank';
+        document.body.appendChild(iframe);
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+      }
+      return promise.then(() => {
+        setParentWindow(iframe.contentWindow, window);
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+    });
+
+    it('should return frameElement', () => {
+      const div = iframe.contentWindow.document.getElementById('one');
+      expect(getParentWindowFrameElement(div, window)).to.equal(iframe);
+    });
+
+    it('should return null when not parented', () => {
+      iframe.contentWindow.__AMP_TOP = null;
+      const div = iframe.contentWindow.document.getElementById('one');
+      expect(getParentWindowFrameElement(div, window)).to.equal(null);
+    });
+
+    it('should survive exceptions', () => {
+      const childWin = {};
+      Object.defineProperties(childWin, {
+        frameElement: {
+          get: () => {throw new Error('intentional');},
+        },
+      });
+      setParentWindow(childWin, window);
+      const el = {ownerDocument: {defaultView: childWin}};
+      expect(getParentWindowFrameElement(el, window)).to.equal(null);
     });
   });
 });

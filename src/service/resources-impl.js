@@ -21,10 +21,9 @@ import {Resource, ResourceState} from './resource';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
-import {closest, hasNextNodeInDocumentOrder, waitForBody} from '../dom';
-import {onDocumentReady} from '../document-ready';
+import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {expandLayoutRect} from '../layout-rect';
-import {fromClass} from '../service';
+import {fromClassForDoc} from '../service';
 import {inputFor} from '../input';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
@@ -32,7 +31,7 @@ import {installVsyncService} from './vsync-impl';
 import {isArray} from '../types';
 import {dev} from '../log';
 import {reportError} from '../error';
-import {toggle} from '../style';
+import {filterSplice} from '../utils/array';
 
 
 const TAG_ = 'Resources';
@@ -55,21 +54,24 @@ const FOUR_FRAME_DELAY_ = 70;
  *   newHeight: (number|undefined),
  *   newWidth: (number|undefined),
  *   force: boolean,
- *   callback: (function()|undefined)
+ *   callback: (function(boolean)|undefined)
  * }}
  */
 let ChangeSizeRequestDef;
 
 export class Resources {
   /**
-   * @param {!Window} window
+   * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
-  constructor(window) {
+  constructor(ampdoc) {
+    /** @const {!./ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampdoc;
+
     /** @const {!Window} */
-    this.win = window;
+    this.win = ampdoc.win;
 
     /** @const @private {!./viewer-impl.Viewer} */
-    this.viewer_ = installViewerService(window);
+    this.viewer_ = installViewerService(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -191,8 +193,10 @@ export class Resources {
       this.checkPendingChangeSize_(element);
     });
 
+    this.schedulePass();
+
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.ampdoc.whenReady().then(() => {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
@@ -209,8 +213,6 @@ export class Resources {
       this.schedulePass();
       this.monitorInput_();
     });
-
-    this.schedulePass();
   }
 
   /**
@@ -270,9 +272,9 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    waitForBody(this.win.document, () => {
+    this.ampdoc.whenBodyAvailable().then(body => {
       this.vsync_.mutate(() => {
-        this.win.document.body.classList.toggle(clazz, on);
+        body.classList.toggle(clazz, on);
       });
     });
   }
@@ -299,7 +301,6 @@ export class Resources {
    * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
    * @return {!Resource}
-   * @package
    */
   getResourceForElement(element) {
     return Resource.forElement(element);
@@ -328,7 +329,6 @@ export class Resources {
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   add(element) {
     const resource = new Resource((++this.resourceIdCounter_), element, this);
@@ -408,14 +408,21 @@ export class Resources {
    * Signals that an element has been removed to the DOM. Resources manager
    * will stop tracking it from this point on.
    * @param {!AmpElement} element
-   * @package
    */
   remove(element) {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
     }
-    const index = resource ? this.resources_.indexOf(resource) : -1;
+    this.removeResource_(resource);
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  removeResource_(resource) {
+    const index = this.resources_.indexOf(resource);
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
@@ -425,10 +432,18 @@ export class Resources {
   }
 
   /**
+   * Removes all resources belonging to the specified child window.
+   * @param {!Window} childWin
+   */
+  removeForChildWindow(childWin) {
+    const toRemove = this.resources_.filter(r => r.hostWin == childWin);
+    toRemove.forEach(r => this.removeResource_(r));
+  }
+
+  /**
    * Signals that an element has been upgraded to the DOM. Resources manager
    * will perform build and enable layout/viewport signals for this element.
    * @param {!AmpElement} element
-   * @package
    */
   upgraded(element) {
     const resource = Resource.forElement(element);
@@ -656,13 +671,18 @@ export class Resources {
     });
   }
 
+  /**
+   * Collapses the element: ensures that it's `display:none`, notifies its
+   * owner and updates the layout box.
+   * @param {!Element} element
+   */
   collapseElement(element) {
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       this.setRelayoutTop_(box.top);
     }
-    toggle(element, false);
+    resource.completeCollapse();
 
     const owner = resource.getOwner();
     if (owner) {
@@ -1103,13 +1123,13 @@ export class Resources {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        task.promise = task.callback(visibility);
+        task.promise = task.callback(visibility == 'visible');
         task.startTime = now;
         dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
         this.exec_.enqueue(task);
         task.promise.then(this.taskComplete_.bind(this, task, true),
             this.taskComplete_.bind(this, task, false))
-            .catch(reportError);
+            .catch(/** @type {function (*)} */ (reportError));
       }
 
       task = this.queue_.peek(this.boundTaskScorer_);
@@ -1248,7 +1268,7 @@ export class Resources {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {boolean} force
-   * @param {function()=} opt_callback A callback function
+   * @param {function(boolean)=} opt_callback A callback function
    * @private
    */
   scheduleChangeSize_(resource, newHeight, newWidth, force,
@@ -1376,7 +1396,7 @@ export class Resources {
    * @param {string} localId
    * @param {number} priorityOffset
    * @param {number} parentPriority
-   * @param {function():!Promise} callback
+   * @param {function(boolean):!Promise} callback
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
@@ -1470,7 +1490,7 @@ export class Resources {
 
   /**
    * Calls iterator on each sub-resource
-   * @param {function(!Resource, number)} iterator
+   * @param {!FiniteStateMachine<!VisibilityState>} vsm
    */
   setupVisibilityStateMachine_(vsm) {
     const prerender = VisibilityState.PRERENDER;
@@ -1558,8 +1578,9 @@ export class Resources {
 
   /**
    * Cleanup task queues from tasks for elements that has been unloaded.
-   * @param resource
-   * @param opt_removePending Whether to remove from pending build resources.
+   * @param {Resource} resource
+   * @param {boolean=} opt_removePending Whether to remove from pending
+   *     build resources.
    * @private
    */
   cleanupTasks_(resource, opt_removePending) {
@@ -1575,8 +1596,9 @@ export class Resources {
       this.exec_.purge(task => {
         return task.resource == resource;
       });
-      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
-          request => request.resource != resource);
+      filterSplice(this.requestsChangeSize_, request => {
+        return request.resource != resource;
+      });
     }
 
     if (resource.getState() == ResourceState.NOT_BUILT && opt_removePending &&
@@ -1595,7 +1617,8 @@ export class Resources {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  return isArray(elements) ? elements : [elements];
+  return /** @type {!Array<!Element>} */ (
+      isArray(elements) ? elements : [elements]);
 }
 
 
@@ -1610,9 +1633,9 @@ function elements_(elements) {
 export let SizeDef;
 
 /**
- * @param {!Window} win
+ * @param {!./ampdoc-impl.AmpDoc} ampdoc
  * @return {!Resources}
  */
-export function installResourcesService(win) {
-  return fromClass(win, 'resources', Resources);
+export function installResourcesServiceForDoc(ampdoc) {
+  return fromClassForDoc(ampdoc, 'resources', Resources);
 };

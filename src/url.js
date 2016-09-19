@@ -18,6 +18,7 @@ import {endsWith} from './string';
 import {user} from './log';
 import {getMode} from './mode';
 import {urls} from './config';
+import {isArray} from './types';
 
 /**
  * Cached a-tag to avoid memory allocation during URL parsing.
@@ -35,6 +36,9 @@ let cache;
 
 /** @private @const Matches amp_js_* paramters in query string. */
 const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
+/** @const {string} */
+export const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /**
  * @typedef {({
@@ -160,7 +164,7 @@ export function addParamToUrl(url, key, value, opt_addToFront) {
  * Appends query string fields and values to a url. The `params` objects'
  * `key`s and `value`s will be transformed into query string keys/values.
  * @param {string} url
- * @param {!Object<string, string>} params
+ * @param {!Object<string, string|!Array<string>>} params
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
@@ -170,7 +174,7 @@ export function addParamsToUrl(url, params) {
 /**
  * Serializes the passed parameter map into a query string with both keys
  * and values encoded.
- * @param {!Object<string, string>} params
+ * @param {!Object<string, string|!Array<string>>} params
  * @return {string}
  */
 export function serializeQueryString(params) {
@@ -179,8 +183,15 @@ export function serializeQueryString(params) {
     const v = params[k];
     if (v == null) {
       continue;
+    } else if (isArray(v)) {
+      for (let i = 0; i < v.length; i++) {
+        const sv = /** @type {string} */ (v[i]);
+        s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
+      }
+    } else {
+      const sv = /** @type {string} */ (v);
+      s.push(`${encodeURIComponent(k)}=${encodeURIComponent(sv)}`);
     }
-    s.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
   }
   return s.join('&');
 }
@@ -229,7 +240,7 @@ export function assertAbsoluteHttpOrHttpsUrl(urlString) {
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
- * @return {!Object<string, string>}
+ * @return {!Object<string>}
  */
 export function parseQueryString(queryString) {
   const params = Object.create(null);
@@ -405,4 +416,29 @@ export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
           basePath.slice(0, basePath.length - 1).join('/') :
           '') +
       '/' + relativeUrlString;
+}
+
+
+/**
+ * Add "__amp_source_origin" query parameter to the URL.
+ * @param {!Window} win
+ * @param {string} url
+ * @return {string}
+ */
+export function getCorsUrl(win, url) {
+  checkCorsUrl(url);
+  const sourceOrigin = getSourceOrigin(win.location.href);
+  return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+}
+
+
+/**
+ * Checks if the url have __amp_source_origin and throws if it does.
+ * @param {string} url
+ */
+export function checkCorsUrl(url) {
+  const parsedUrl = parseUrl(url);
+  const query = parseQueryString(parsedUrl.search);
+  user().assert(!(SOURCE_ORIGIN_PARAM in query),
+      'Source origin is not allowed in %s', url);
 }

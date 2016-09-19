@@ -48,24 +48,68 @@ describe('test-document-submit onDocumentFormSubmit_', () => {
         /form action attribute is required/);
 
     tgt.setAttribute('action', 'http://example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form action must start with "https:/);
 
     tgt.setAttribute('action', 'https://cdn.ampproject.org');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form action should not be on AMP CDN/);
 
     tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.removeAttribute('target');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form target attribute is required/);
 
+    tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.setAttribute('target', '_self');
     expect(() => onDocumentFormSubmit_(evt)).to.throw(
         /form target=_self is invalid/);
 
+    tgt.setAttribute('action', 'https://valid.example.com');
+    tgt.__AMP_INIT_ACTION__ = undefined;
     tgt.setAttribute('target', '_blank');
     expect(() => onDocumentFormSubmit_(evt)).to.not.throw;
+  });
+
+  it('should assert none of the inputs named __amp_source_origin', () => {
+    const illegalInput = document.createElement('input');
+    illegalInput.setAttribute('type', 'hidden');
+    illegalInput.setAttribute('name', '__amp_source_origin');
+    illegalInput.value = 'https://example.com';
+    tgt.appendChild(illegalInput);
+    expect(() => onDocumentFormSubmit_(evt)).to.throw(
+        /Illegal input name, __amp_source_origin found/);
+  });
+
+  it('should assert __amp_source_origin is not set in action', () => {
+    evt.target.setAttribute('action',
+        'https://example.com/?__amp_source_origin=12');
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/Source origin is not allowed in/);
+  });
+
+  it('should fail when POST and action-xhr is not set', () => {
+    evt.target.removeAttribute('action');
+    evt.target.setAttribute('method', 'post');
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/Only XHR based \(via action-xhr attribute\) submissions/);
+    expect(preventDefaultSpy.callCount).to.equal(1);
+
+    evt.target.setAttribute('method', 'post');
+    evt.target.setAttribute('action-xhr', 'https://example.com');
+    expect(() => onDocumentFormSubmit_(evt)).to.not.throw();
+    expect(preventDefaultSpy.callCount).to.equal(2);
+  });
+
+  it('should fail when action is provided for POST', () => {
+    evt.target.setAttribute('method', 'post');
+    expect(() => onDocumentFormSubmit_(evt))
+        .to.throw(/form action attribute is invalid for method=POST/);
+    expect(preventDefaultSpy.callCount).to.equal(1);
   });
 
   it('should do nothing if already prevented', () => {

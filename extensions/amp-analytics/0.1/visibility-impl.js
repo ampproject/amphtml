@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import {closestByTag} from '../../../src/dom';
 import {dev} from '../../../src/log';
 import {fromClass} from '../../../src/service';
 import {rectIntersection} from '../../../src/layout-rect';
-import {resourcesFor} from '../../../src/resources';
+import {resourcesForDoc} from '../../../src/resources';
 import {timerFor} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewportFor} from '../../../src/viewport';
@@ -59,6 +60,7 @@ const TOTAL_TIME_MIN = 'totalTimeMin';
 const VISIBLE_PERCENTAGE_MIN = 'visiblePercentageMin';
 const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
+const TAG_ = 'Analytics.Visibility';
 /**
  * Checks if the value is undefined or positive number like.
  * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
@@ -70,7 +72,7 @@ const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
  * @private
  */
 export function isPositiveNumber_(num) {
-  return num === undefined || Math.sign(num) >= 0;
+  return num === undefined || (typeof num == 'number' && Math.sign(num) >= 0);
 }
 
 /**
@@ -83,7 +85,8 @@ export function isPositiveNumber_(num) {
  * @return {boolean}
  */
 export function isValidPercentage_(num) {
-  return num === undefined || (Math.sign(num) >= 0 && num <= 100);
+  return num === undefined ||
+      (typeof num == 'number' && Math.sign(num) >= 0 && num <= 100);
 }
 
 /**
@@ -98,8 +101,10 @@ export function isVisibilitySpecValid(config) {
   }
 
   const spec = config['visibilitySpec'];
-  if (!spec['selector'] || spec['selector'][0] != '#') {
-    user().error('Visibility spec requires an id selector');
+  const selector = spec['selector'];
+  if (!selector || (selector[0] != '#' && selector.indexOf('amp-') != 0)) {
+    user().error(TAG_, 'Visibility spec requires an id selector or a tag ' +
+        'name starting with "amp-"');
     return false;
   }
 
@@ -110,7 +115,7 @@ export function isVisibilitySpecValid(config) {
 
   if (!isPositiveNumber_(ctMin) || !isPositiveNumber_(ctMax) ||
       !isPositiveNumber_(ttMin) || !isPositiveNumber_(ttMax)) {
-    user().error(
+    user().error(TAG_,
         'Timing conditions should be positive integers when specified.');
     return false;
   }
@@ -123,18 +128,43 @@ export function isVisibilitySpecValid(config) {
 
   if (!isValidPercentage_(spec[VISIBLE_PERCENTAGE_MAX]) ||
       !isValidPercentage_(spec[VISIBLE_PERCENTAGE_MIN])) {
-    user().error('visiblePercentage conditions should be between 0 and 100.');
+    user().error(TAG_,
+        'visiblePercentage conditions should be between 0 and 100.');
     return false;
   }
 
   if (spec[VISIBLE_PERCENTAGE_MAX] < spec[VISIBLE_PERCENTAGE_MIN]) {
-    user().error('visiblePercentageMax should be greater than ' +
+    user().error(TAG_, 'visiblePercentageMax should be greater than ' +
         'visiblePercentageMin');
     return false;
   }
   return true;
 }
 
+/**
+ * Returns the element that matches the selector. If the selector is an
+ * id, the element with that id is returned. If the selector is a tag name, an
+ * ancestor of the analytics element with that tag name is returned.
+ *
+ * @param {string} selector The selector for the element to track.
+ * @param {!Element} el Element whose ancestors to search.
+ * @param {!String} selectionMethod The method to use to find the element..
+ * @return {?Element} Element corresponding to the selector if found.
+ */
+export function getElement(selector, el, selectionMethod) {
+  if (!el) {
+    return null;
+  }
+  if (selectionMethod == 'closest') {
+    // Only tag names are supported currently.
+    return closestByTag(el, selector);
+  } else if (selectionMethod == 'scope') {
+    return el.parentElement.querySelector(selector);
+  } else if (selector[0] == '#') {
+    return el.ownerDocument.getElementById(selector.slice(1));
+  }
+  return null;
+}
 
 /**
  * This type signifies a callback that gets called when visibility conditions
@@ -188,7 +218,7 @@ export class Visibility {
     this.visibilityListenerRegistered_ = false;
 
     /** @private {!Resources} */
-    this.resourcesService_ = resourcesFor(this.win_);
+    this.resourcesService_ = resourcesForDoc(this.win_.document);
 
     /** @private {number|string} */
     this.scheduledRunId_ = null;
@@ -236,11 +266,22 @@ export class Visibility {
    * @param {!VisibilityListenerCallbackDef} callback
    * @param {boolean} shouldBeVisible True if the element should be visible
    *  when callback is called. False otherwise.
+   * @param {Element} analyticsElement The amp-analytics element that the
+   *  config is associated with.
    */
-  listenOnce(config, callback, shouldBeVisible) {
-    const element = this.win_.document.getElementById(config['selector']
-        .slice(1));
-    const res = this.resourcesService_.getResourceForElement(element);
+  listenOnce(config, callback, shouldBeVisible, analyticsElement) {
+    const selector = config['selector'];
+    const element = getElement(selector, analyticsElement,
+        config['selectionMethod']);
+    user().assert(element, 'Element not found for visibilitySpec: ' + selector);
+    let res = null;
+    try {
+      res = this.resourcesService_.getResourceForElement(element);
+    } catch (e) {
+      user().assert(res,
+          'Visibility tracking not supported on element: ', element);
+    }
+
     const resId = res.getId();
 
     this.registerForViewportEvents_();
@@ -281,15 +322,16 @@ export class Visibility {
 
     for (let r = this.resources_.length - 1; r >= 0; r--) {
       const res = this.resources_[r];
-      if (res.isLayoutPending()) {
-        loadedPromises.push(res.loaded());
+      if (!res.hasLoadedOnce()) {
+        loadedPromises.push(res.loadedOnce());
         continue;
       }
 
       const change = res.element.getIntersectionChangeEntry();
       const ir = change.intersectionRect;
       const br = change.boundingClientRect;
-      const visible = ir.width * ir.height * 100 / (br.height * br.width);
+      const visible = br.height * br.width == 0 ? 0 :
+          ir.width * ir.height * 100 / (br.height * br.width);
 
       const listeners = this.listeners_[res.getId()];
       for (let c = listeners.length - 1; c >= 0; c--) {

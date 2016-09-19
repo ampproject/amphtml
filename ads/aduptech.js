@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function aduptech(global, data) {
-  // read data
-  checkData(data, ['placementkey', 'query', 'mincpc', 'adtest']);
-
-  // validate data
-  validateDataExists(data, ['placementkey']);
+  validateData(data, ['placementkey'], ['query', 'mincpc', 'adtest']);
 
   // add id attriubte to given container (required)
   global.document.getElementById('c').setAttribute('id', 'aduptech');

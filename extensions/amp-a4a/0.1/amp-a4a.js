@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {
   allowRenderOutsideViewport,
   decrementLoadingAds,
-  incrementLoadingAds} from '../../amp-ad/0.1/amp-ad-3p-impl';
-import {AmpAdApiHandler} from '../../amp-ad/0.1/amp-ad-api-handler';
-import {adPreconnect} from '../../../ads/_config';
+  incrementLoadingAds,
+} from '../../amp-ad/0.1/concurrent-load';
+import {adConfig} from '../../../ads/_config';
 import {removeElement, removeChildren} from '../../../src/dom';
 import {cancellation} from '../../../src/error';
 import {createShadowEmbedRoot} from '../../../src/shadow-embed';
@@ -147,6 +146,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
+    dev().assert(AMP.AmpAdApiHandler);
 
     /** @private {?Promise<!boolean>} */
     this.adPromise_ = null;
@@ -237,7 +237,9 @@ export class AmpA4A extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(unusedOnLayout) {
-    const preconnect = adPreconnect[this.element.getAttribute('type')];
+    const config = adConfig[this.element.getAttribute('type')];
+    // TODO(lannka): config should be never null in real.
+    const preconnect = config ? config.preconnect : null;
     // NOTE(keithwrightbos): using onLayout to indicate if preconnect should be
     // given preferential treatment.  Currently this would be false when
     // relevant (i.e. want to preconnect on or before onLayoutMeasure) which
@@ -527,11 +529,10 @@ export class AmpA4A extends AMP.BaseElement {
     return xhrFor(this.win)
         .fetch(adUrl, xhrInit)
         .catch(unusedReason => {
-          // Error so set rendered_ so iframe will not be written on
-          // layoutCallback.
-          // TODO: is this the appropriate action?  Perhaps we should just allow
-          // the ad to be rendered via iframe.
-          this.rendered_ = true;
+          // If an error occurs, let the ad be rendered via iframe after delay.
+          // TODO(taymonbeal): Figure out a more sophisticated test for deciding
+          // whether to retry with an iframe after an ad request failure or just
+          // give up and render the fallback content (or collapse the ad slot).
           return null;
         });
   }
@@ -674,7 +675,7 @@ export class AmpA4A extends AMP.BaseElement {
       'src', xhrFor(this.win).getCorsUrl(this.win, this.adUrl_));
     this.vsync_.mutate(() => {
       // TODO(keithwrightbos): noContentCallback?
-      this.apiHandler_ = new AmpAdApiHandler(this, this.element);
+      this.apiHandler_ = new AMP.AmpAdApiHandler(this, this.element);
       // TODO(keithwrightbos): startup returns load event, do we need to wait?
       // Set opt_defaultVisible to true as 3p draw code never executed causing
       // render-start event never to fire which will remove visiblity hidden.

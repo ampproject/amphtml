@@ -17,6 +17,11 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platformFor} from '../../src/platform';
+import {installPlatformService} from '../../src/service/platform-impl';
+import {installPerformanceService} from '../../src/service/performance-impl';
+import {resetServiceForTesting} from '../../src/service';
+import {timerFor} from '../../src/timer';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -49,6 +54,8 @@ describe('Viewer', () => {
     clock = sandbox.useFakeTimers();
     const WindowApi = function() {};
     windowApi = new WindowApi();
+    installPerformanceService(windowApi);
+    installPerformanceService(window);
     windowApi.setTimeout = window.setTimeout;
     windowApi.clearTimeout = window.clearTimeout;
     windowApi.location = {
@@ -71,6 +78,8 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
+    installPlatformService(windowApi);
+    installTimerService(windowApi);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
@@ -79,6 +88,8 @@ describe('Viewer', () => {
   });
 
   afterEach(() => {
+    resetServiceForTesting(windowApi, 'performance');
+    resetServiceForTesting(window, 'performance');
     windowMock.verify();
     sandbox.restore();
   });
@@ -507,8 +518,10 @@ describe('Viewer', () => {
     });
     let trustedViewer;
     let persistedCidData;
+    let shouldTimeout;
 
     beforeEach(() => {
+      shouldTimeout = false;
       clock.tick(100);
       trustedViewer = true;
       persistedCidData = cidData;
@@ -518,6 +531,9 @@ describe('Viewer', () => {
         if (message != 'cid') {
           return Promise.reject();
         }
+        if (shouldTimeout) {
+          return timerFor(window).promise(15000);
+        }
         if (payload) {
           persistedCidData = payload;
         }
@@ -526,22 +542,43 @@ describe('Viewer', () => {
     });
 
     it('should return CID', () => {
-      expect(viewer.baseCid()).to.eventually.equal(cidData);
+      const p = expect(viewer.baseCid()).to.eventually.equal(cidData);
+      p.then(() => {
+        // This should not trigger a timeout.
+        clock.tick(100000);
+      });
+      return p;
     });
 
     it('should not request cid for untrusted viewer', () => {
       trustedViewer = false;
-      expect(viewer.baseCid()).to.eventually.be.undefined;
+      return expect(viewer.baseCid()).to.eventually.be.undefined;
     });
 
     it('should convert CID returned by legacy API to new format', () => {
       persistedCidData = 'cid-123';
-      expect(viewer.baseCid()).to.eventually.equal(cidData);
+      return expect(viewer.baseCid()).to.eventually.equal(cidData);
     });
 
     it('should send message to store cid', () => {
       const newCidData = JSON.stringify({time: 101, cid: 'cid-456'});
-      expect(viewer.baseCid(newCidData)).to.eventually.equal(newCidData);
+      return expect(viewer.baseCid(newCidData))
+          .to.eventually.equal(newCidData);
+    });
+
+    it('should time out', () => {
+      shouldTimeout = true;
+      const p = expect(viewer.baseCid()).to.eventually.be.undefined;
+      Promise.resolve().then(() => {
+        clock.tick(9999);
+        Promise.resolve().then(() => {
+          clock.tick(1);
+        });
+      });
+      return p.then(() => {
+        // Ticked 100 at start.
+        expect(Date.now()).to.equal(10100);
+      });
     });
   });
 

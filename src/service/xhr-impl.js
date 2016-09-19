@@ -17,9 +17,8 @@
 import {dev, user} from '../log';
 import {fromClass} from '../service';
 import {
-  addParamToUrl,
   getSourceOrigin,
-  parseQueryString,
+  getCorsUrl,
   parseUrl,
 } from '../url';
 import {isArray, isObject, isFormData} from '../types';
@@ -53,9 +52,6 @@ const allowedFetchTypes_ = {
   text: 2,
   arraybuffer: 3,
 };
-
-/** @private @const {string} */
-const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
 
 /** @private @const {string} */
 const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
@@ -117,8 +113,17 @@ export class Xhr {
    * @private
    */
   fetchAmpCors_(input, opt_init) {
+    const init = opt_init || {};
     input = this.getCorsUrl(this.win, input);
-    return this.fetch_(input, opt_init).then(response => {
+    // For some same origin requests, add AMP-Same-Origin: true header to allow
+    // publishers to validate that this request came from their own origin.
+    const currentOrigin = parseUrl(this.win.location.href).origin;
+    const targetOrigin = parseUrl(input).origin;
+    if (currentOrigin == targetOrigin) {
+      init['headers'] = init['headers'] || {};
+      init['headers']['AMP-Same-Origin'] = 'true';
+    }
+    return this.fetch_(input, init).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
@@ -129,7 +134,7 @@ export class Xhr {
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-      } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
+      } else if (init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
         user().assert(false, `Response must contain the` +
@@ -248,12 +253,7 @@ export class Xhr {
    * @return {string}
    */
   getCorsUrl(win, url) {
-    const sourceOrigin = getSourceOrigin(win.location.href);
-    const parsedUrl = parseUrl(url);
-    const query = parseQueryString(parsedUrl.search);
-    user().assert(!(SOURCE_ORIGIN_PARAM in query),
-        'Source origin is not allowed in %s', url);
-    return addParamToUrl(url, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    return getCorsUrl(win, url);
   }
 
 }
@@ -494,7 +494,8 @@ export class FetchResponse {
     user().assert(this.xhr_.responseXML,
         'responseXML should exist. Make sure to return ' +
         'Content-Type: text/html header.');
-    return Promise.resolve(this.xhr_.responseXML);
+    return /** @type {!Promise<!Document>} */ (
+        Promise.resolve(dev().assert(this.xhr_.responseXML)));
   }
 
   /**

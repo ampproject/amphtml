@@ -22,7 +22,6 @@ import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from './cid-impl';
 import {installCryptoService} from './crypto-impl';
-import {installStorageService} from './storage-impl';
 import {installActivityService} from './activity-impl';
 import {installVisibilityService} from './visibility-impl';
 import {isArray, isObject} from '../../../src/types';
@@ -36,7 +35,6 @@ import {toggle} from '../../../src/style';
 installActivityService(AMP.win);
 installCidService(AMP.win);
 installCryptoService(AMP.win);
-installStorageService(AMP.win);
 installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
@@ -173,11 +171,11 @@ export class AmpAnalytics extends AMP.BaseElement {
                 trigger, /* arg*/ undefined, /* arg */ undefined,
                 /* arg*/ false);
             addListener(this.win, trigger, this.handleEvent_.bind(this,
-                  trigger));
+                  trigger), this.element);
 
           } else {
             addListener(this.win, trigger,
-                this.handleEvent_.bind(this, trigger));
+                this.handleEvent_.bind(this, trigger), this.element);
           }
         }));
       }
@@ -363,15 +361,35 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * Callback for events that are registered by the config's triggers. This
-   * method generates the request and sends the request out.
+   * method generates requests and sends them out.
    *
    * @param {!JSONType} trigger JSON config block that resulted in this event.
    * @param {!Object} event Object with details about the event.
-   * @return {!Promise.<string|undefined>} The request that was sent out.
+   * @return {!Promise<string|undefined>} The request that was sent out.
    * @private
    */
   handleEvent_(trigger, event) {
-    let request = this.requests_[trigger['request']];
+    const requests = isArray(trigger['request'])
+        ? trigger['request'] : [trigger['request']];
+
+    const resultPromises = [];
+    for (let r = 0; r < requests.length; r++) {
+      const request = this.requests_[requests[r]];
+      resultPromises.push(this.handleRequestForEvent_(request, trigger, event));
+    }
+    return Promise.all(resultPromises);
+  }
+
+  /**
+   * Processes a request for an event callback and sends it out.
+   *
+   * @param {string} request The request to process.
+   * @param {!JSONType} trigger JSON config block that resulted in this event.
+   * @param {!Object} event Object with details about the event.
+   * @return {!Promise<string|undefined>} The request that was sent out.
+   * @private
+   */
+  handleRequestForEvent_(request, trigger, event) {
     if (!request) {
       user().error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
@@ -380,9 +398,14 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     // Add any given extraUrlParams as query string param
     if (this.config_['extraUrlParams'] || trigger['extraUrlParams']) {
-      const params = {};
+      const params = Object.create(null);
       Object.assign(params, this.config_['extraUrlParams'],
           trigger['extraUrlParams']);
+      for (const k in params) {
+        if (typeof params[k] == 'string') {
+          params[k] = this.expandTemplate_(params[k], trigger, event);
+        }
+      }
       if (request.indexOf('${extraUrlParams}') >= 0) {
         const extraUrlParams = addParamsToUrl('', params).substr(1);
         request = request.replace('${extraUrlParams}', extraUrlParams);
@@ -403,7 +426,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /**
    * @param {!JSONType} trigger The config to use to determine sampling.
-   * @return {!Promise.<boolean>} Whether the request should be sampled in or
+   * @return {!Promise<boolean>} Whether the request should be sampled in or
    * not based on sampleSpec.
    * @private
    */

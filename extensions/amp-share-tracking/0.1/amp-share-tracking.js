@@ -19,15 +19,32 @@ import {xhrFor} from '../../../src/xhr';
 import {viewerFor} from '../../../src/viewer';
 import {getService} from '../../../src/service';
 import {Layout} from '../../../src/layout';
+import {base64UrlEncodeFromBytes} from '../../../src/utils/base64';
+import {getCryptoRandomBytesArray} from '../../../src/utils/bytes';
 import {dev, user} from '../../../src/log';
 
 /** @private @const {string} */
 const TAG = 'amp-share-tracking';
 
+/** @private @const {number} */
+const SHARE_TRACKING_NUMBER_OF_BYTES = 6;
+
 /**
  * @visibleForTesting
  */
 export class AmpShareTracking extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.vendorHref_ = '';
+
+    /** @private {?Promise<!Object<string, string>>} */
+    this.shareTrackingFragments_ = null;
+  }
+
   /**
     * @return {boolean}
     * @private
@@ -49,11 +66,9 @@ export class AmpShareTracking extends AMP.BaseElement {
       user().assert(false, `${TAG} experiment is disabled`);
     }
 
-    /** @private {string} */
     this.vendorHref_ = this.element.getAttribute('data-href');
     dev().fine(TAG, 'vendorHref_: ', this.vendorHref_);
 
-    /** @private {!Promise<!Object<string, string>>} */
     this.shareTrackingFragments_ = Promise.all([
       this.getIncomingFragment_(),
       this.getOutgoingFragment_()]).then(results => {
@@ -91,7 +106,8 @@ export class AmpShareTracking extends AMP.BaseElement {
     if (this.vendorHref_) {
       return this.getOutgoingFragmentFromVendor_(this.vendorHref_);
     }
-    return this.getOutgoingRandomFragment_();
+    return Promise.resolve(base64UrlEncodeFromBytes(
+        this.getShareTrackingRandomBytes_()));
   }
 
   /**
@@ -122,14 +138,28 @@ export class AmpShareTracking extends AMP.BaseElement {
   }
 
   /**
-   * Get a random outgoing share-tracking fragment
-   * @return {!Promise<string>}
+   * Get a random bytes array that has 48 bits (6 bytes).
+   * Use win.crypto.getRandomValues if it is available.
+   * Otherwise, use Math.random as fallback.
+   * @return {!Uint8Array}
    * @private
    */
-  getOutgoingRandomFragment_() {
-    // TODO(yuxichen): Generate random outgoing fragment
-    const randomFragment = 'rAmDoM';
-    return Promise.resolve(randomFragment);
+  getShareTrackingRandomBytes_() {
+    // Use win.crypto.getRandomValues to get 48 bits of random value
+    let bytes = getCryptoRandomBytesArray(this.win,
+        SHARE_TRACKING_NUMBER_OF_BYTES); // 48 bit
+
+    // Support for legacy browsers
+    if (!bytes) {
+      bytes = new Uint8Array(SHARE_TRACKING_NUMBER_OF_BYTES);
+      let random = Math.random();
+      for (let i = 0; i < SHARE_TRACKING_NUMBER_OF_BYTES; i++) {
+        random *= 256;
+        bytes[i] = Math.floor(random);
+        random -= bytes[i];
+      }
+    }
+    return bytes;
   }
 }
 

@@ -22,6 +22,7 @@ import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {installCryptoService,} from
     '../../extensions/amp-analytics/0.1/crypto-impl';
+import {installDocService} from '../../src/service/ampdoc-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
@@ -113,7 +114,14 @@ describe('UrlReplacements', () => {
       removeEventListener: function(type, callback) {
         loadObservable.remove(callback);
       },
+      document: {
+        nodeType: /* document */ 9,
+        querySelector: () => {return {href: 'https://example.com/doc1'};},
+      },
+      Math: window.Math,
     };
+    win.document.defaultView = win;
+    installDocService(win, true);
     return win;
   }
 

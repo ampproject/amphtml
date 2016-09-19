@@ -19,6 +19,7 @@ import {cancellation} from '../error';
 import {getService} from '../service';
 import {dev} from '../log';
 import {installViewerService} from './viewer-impl';
+import {installTimerService} from './timer-impl';
 
 
 /** @const {time} */
@@ -125,11 +126,11 @@ export class Vsync {
    * will be undefined.
    *
    * @param {!VsyncTaskSpecDef} task
-   * @param {VsyncStateDef=} opt_state
+   * @param {!VsyncStateDef=} opt_state
    */
   run(task, opt_state) {
     this.tasks_.push(task);
-    this.states_.push(opt_state);
+    this.states_.push(opt_state || undefined);
     this.schedule_();
   }
 
@@ -160,9 +161,9 @@ export class Vsync {
    * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
-    return opt_state => {
+    return /** @type {function(!VsyncStateDef=)} */ (opt_state => {
       this.run(task, opt_state);
-    };
+    });
   }
 
   /**
@@ -259,9 +260,10 @@ export class Vsync {
    * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(contextNode, task) {
-    return opt_state => {
-      return this.runAnim(contextNode, task, opt_state);
-    };
+    return /** @type {function(!VsyncStateDef=):boolean} */ (
+        opt_state => {
+          return this.runAnim(contextNode, task, opt_state);
+        });
   }
 
   /**
@@ -385,7 +387,8 @@ export class Vsync {
  * @return {!Vsync}
  */
 export function installVsyncService(window) {
-  return getService(window, 'vsync', () => {
+  return /** @type {!Vsync} */ (getService(window, 'vsync', () => {
+    installTimerService(window);
     return new Vsync(window, installViewerService(window));
-  });
+  }));
 };

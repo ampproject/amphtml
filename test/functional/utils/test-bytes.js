@@ -16,9 +16,25 @@
 
 import {
   stringToBytes,
+  bytesToString,
+  getCryptoRandomBytesArray,
 } from '../../../src/utils/bytes';
 
 describe('stringToBytes', function() {
+  let fakeWin;
+
+  beforeEach(() => {
+    fakeWin = {
+      crypto: {
+        getRandomValues: array => {
+          for (let i = 0; i < array.length; i++) {
+            array[i] = i + 1;
+          }
+        },
+      },
+    };
+  });
+
   it('should map a sample string appropriately', () => {
     const bytes = stringToBytes('abÿ');
     expect(bytes.length).to.equal(3);
@@ -33,4 +49,23 @@ describe('stringToBytes', function() {
     }).to.throw();
   });
 
+  it('should convert bytes array to string', () => {
+    const str = bytesToString(new Uint8Array([102, 111, 111]));
+    expect(str).to.equal('foo');
+  });
+
+  it('should generate random bytes array when win.crypto is availble', () => {
+    expect(getCryptoRandomBytesArray(fakeWin, 1)).to.deep
+      .equal(new Uint8Array([1]));
+    expect(getCryptoRandomBytesArray(fakeWin, 2)).to.deep
+      .equal(new Uint8Array([1, 2]));
+    expect(getCryptoRandomBytesArray(fakeWin, 3)).to.deep
+      .equal(new Uint8Array([1, 2, 3]));
+  });
+
+  it('should return null when trying to generate random bytes array if ' +
+      'win.crypto is not availble', () => {
+    fakeWin.crypto = undefined;
+    expect(getCryptoRandomBytesArray(fakeWin, 1)).to.be.null;
+  });
 });

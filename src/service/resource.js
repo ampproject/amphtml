@@ -16,6 +16,7 @@
 
 import {layoutRectLtwh, layoutRectsOverlap} from '../layout-rect';
 import {dev} from '../log';
+import {toggle} from '../style';
 
 const TAG = 'Resource';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -73,8 +74,9 @@ export class Resource {
    * @return {!Resource}
    */
   static forElement(element) {
-    return dev().assert(Resource.forElementOptional(element),
-        'Missing resource prop on %s', element);
+    return /** @type {!Resource} */ (
+        dev().assert(Resource.forElementOptional(element),
+            'Missing resource prop on %s', element));
   }
 
   /**
@@ -113,13 +115,16 @@ export class Resource {
     /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /** @const {!Window} */
+    this.hostWin = element.ownerDocument.defaultView;
+
     /** @private {!./resources-impl.Resources} */
     this.resources_ = resources;
 
     /** @private {boolean} */
     this.blacklisted_ = false;
 
-    /** @const {!AmpElement|undefined|null} */
+    /** @private {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
     /** @private {!ResourceState} */
@@ -153,10 +158,17 @@ export class Resource {
     */
     this.pendingChangeSize_ = undefined;
 
+    /** @private {boolean} */
+    this.loadedOnce_ = false;
+
+    /** @private {?Function} */
+    this.loadPromiseResolve_ = null;
+
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
-      /** @const  */
       this.loadPromiseResolve_ = resolve;
+    }).then(() => {
+      this.loadedOnce_ = true;
     });
 
     /** @private {boolean} */
@@ -330,6 +342,20 @@ export class Resource {
     this.isFixed_ = isFixed;
 
     this.element.updateLayoutBox(box);
+  }
+
+  /**
+   * Completes collapse: ensures that the element is `display:none` and
+   * updates layout box.
+   */
+  completeCollapse() {
+    toggle(this.element, false);
+    this.layoutBox_ = layoutRectLtwh(
+        this.layoutBox_.left,
+        this.layoutBox_.top,
+        0, 0);
+    this.isFixed_ = false;
+    this.element.updateLayoutBox(this.layoutBox_);
   }
 
   /**
@@ -558,11 +584,20 @@ export class Resource {
 
   /**
    * Returns a promise that is resolved when this resource is laid out
-   * for the first time and the resource was loaded.
+   * for the first time and the resource was loaded. Note that the resource
+   * could be unloaded subsequently. This method returns resolved promise for
+   * sunch unloaded elements.
    * @return {!Promise}
    */
-  loaded() {
+  loadedOnce() {
     return this.loadPromise_;
+  }
+
+  /**
+   * @return {boolean} true if the resource has been loaded at least once.
+   */
+  hasLoadedOnce() {
+    return this.loadedOnce_;
   }
 
   /**

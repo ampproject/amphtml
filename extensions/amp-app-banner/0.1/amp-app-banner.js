@@ -19,7 +19,7 @@ import {user, dev, rethrowAsync} from '../../../src/log';
 import {platformFor} from '../../../src/platform';
 import {viewerFor} from '../../../src/viewer';
 import {CSS} from '../../../build/amp-app-banner-0.1.css';
-import {documentInfoFor} from '../../../src/document-info';
+import {documentInfoForDoc} from '../../../src/document-info';
 import {xhrFor} from '../../../src/xhr';
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
@@ -381,7 +381,7 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
 
   /** @private */
   getAndroidIntentForUrl_(appId) {
-    const canonicalUrl = documentInfoFor(this.win).canonicalUrl;
+    const canonicalUrl = documentInfoForDoc(this.element).canonicalUrl;
     const parsedUrl = parseUrl(canonicalUrl);
     const cleanProtocol = parsedUrl.protocol.replace(':', '');
     const host = parsedUrl.host;

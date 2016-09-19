@@ -18,7 +18,6 @@ import * as sinon from 'sinon';
 import {AmpLiveList, getNumberMaxOrDefault} from '../amp-live-list';
 import {LiveListManager} from '../live-list-manager';
 import {adopt} from '../../../../src/runtime';
-import {toggleExperiment} from '../../../../src/experiments';
 
 adopt(window);
 
@@ -30,7 +29,6 @@ describe('amp-live-list', () => {
   let itemsSlot;
 
   beforeEach(() => {
-    toggleExperiment(window, 'amp-live-list', true);
     sandbox = sinon.sandbox.create();
     elem = document.createElement('amp-live-list');
     const updateSlot = document.createElement('button');
@@ -48,7 +46,6 @@ describe('amp-live-list', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'amp-live-list', false);
     sandbox.restore();
   });
 
@@ -85,9 +82,10 @@ describe('amp-live-list', () => {
 
   /**
    * @param {!Array<number>} childIds
+   * @param {!Element=} opt_pagination
    * @return {!Element<!Element>}
    */
-  function createFromServer(childAttrs = []) {
+  function createFromServer(childAttrs = [], opt_pagination) {
     const parent = document.createElement('div');
     const itemsCont = document.createElement('div');
     itemsCont.setAttribute('items', '');
@@ -105,6 +103,10 @@ describe('amp-live-list', () => {
         child.setAttribute('data-tombstone', '');
       }
       itemsCont.appendChild(child);
+    }
+    if (opt_pagination) {
+      opt_pagination.setAttribute('pagination', '');
+      parent.appendChild(opt_pagination);
     }
     return parent;
   }
@@ -620,6 +622,87 @@ describe('amp-live-list', () => {
         .to.equal('127');
 
     expect(spy.callCount).to.equal(0);
+  });
+
+  it('should replace pagination section', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    const originalPagination = document.createElement('div');
+    originalPagination.setAttribute('pagination', '');
+    elem.appendChild(originalPagination);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+    expect(liveList.pendingPagination_).to.equal(null);
+
+    const newPagination = document.createElement('div');
+    const fromServer1 = createFromServer([
+      {id: 'id1', tombstone: null},
+      {id: 'id3'},
+      {id: 'id2', tombstone: null},
+    ], newPagination);
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingPagination_).to.equal(newPagination);
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+
+    return liveList.updateAction_().then(() => {
+      expect(liveList.pendingPagination_).to.equal(null);
+      expect(liveList.paginationSlot_).to.equal(newPagination);
+
+      const newPagination2 = document.createElement('div');
+      const fromServer2 = createFromServer([
+        {id: 'id6'},
+      ], newPagination2);
+      liveList.update(fromServer2);
+
+      expect(liveList.pendingPagination_).to.equal(newPagination2);
+      expect(liveList.paginationSlot_).to.equal(newPagination);
+      return liveList.updateAction_().then(() => {
+        expect(liveList.pendingPagination_).to.equal(null);
+        expect(liveList.paginationSlot_).to.equal(newPagination2);
+      });
+    });
+  });
+
+  it('should not replace pagination if only no insert or tombstone', () => {
+    const child1 = document.createElement('div');
+    const child2 = document.createElement('div');
+    child1.setAttribute('id', 'id1');
+    child2.setAttribute('id', 'id2');
+    child1.setAttribute('data-sort-time', '123');
+    child2.setAttribute('data-sort-time', '124');
+    itemsSlot.appendChild(child1);
+    itemsSlot.appendChild(child2);
+    const originalPagination = document.createElement('div');
+    originalPagination.setAttribute('pagination', '');
+    elem.appendChild(originalPagination);
+    buildElement(elem, dftAttrs);
+    liveList.buildCallback();
+
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+    expect(liveList.pendingPagination_).to.equal(null);
+
+    const newPagination = document.createElement('div');
+    const fromServer1 = createFromServer([
+      {id: 'id1', updateTime: 999},
+    ], newPagination);
+    liveList.update(fromServer1);
+
+    expect(liveList.pendingPagination_).to.equal(newPagination);
+    expect(liveList.paginationSlot_).to.equal(originalPagination);
+
+    return liveList.updateAction_().then(() => {
+      expect(liveList.pendingPagination_).to.equal(null);
+      expect(liveList.paginationSlot_).to.equal(originalPagination);
+    });
   });
 
   it('should find items to tombstone', () => {

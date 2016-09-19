@@ -53,6 +53,7 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     'analytics-notification.amp.html',
     'everything.amp.html',
     'facebook.amp.html',
+    'gfycat.amp.html',
     'instagram.amp.html',
     'ooyala.amp.html',
     'released.amp.html',
@@ -80,6 +81,8 @@ describe.configure().retryOnSaucelabs().run('example', function() {
     /GENERAL_DISALLOWED_TAG script amp-app-banner.js/,
     /DISALLOWED_TAG amp-app-banner/,
     /DISALLOWED_ATTR open-link a/,
+    /DISALLOWED_TAG amp-gfycat/,
+    /GENERAL_DISALLOWED_TAG script amp-gfycat/,
   ];
 
   const usedWhitelist = [];

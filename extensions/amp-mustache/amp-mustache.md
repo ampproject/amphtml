@@ -36,10 +36,10 @@ limitations under the License.
 Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/)
 for more details. Some of the core Mustache tags are:
 
-- \{\{variable\}\} - variable tag. It outputs the the HTML-escaped value of a variable;
-- \{\{#section\}\}\{\{/section\}\} - section tag. It can test existance of a variable and iterate over it if
+- `{{variable}}` - variable tag. It outputs the the HTML-escaped value of a variable;
+- `{{#section}}{{/section}}` - section tag. It can test existance of a variable and iterate over it if
 it's an array;
-- \{\{^section\}\}\{\{/section\}\} - inverted tag. It can test non-existance of a variable.
+- `{{^section}}{{/section}}` - inverted tag. It can test non-existance of a variable.
 
 ## Usage
 

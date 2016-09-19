@@ -22,9 +22,10 @@ import './polyfills';
 import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {installGlobalClickListener} from './document-click';
-import {installStyles, makeBodyVisible} from './styles';
+import {installStyles, makeBodyVisible} from './style-installer';
 import {installErrorReporting} from './error';
 import {installDocService} from './service/ampdoc-impl';
+import {installCacheServiceWorker} from './service-worker/install';
 import {stubElements} from './custom-element';
 import {
   installAmpdocServices,
@@ -50,7 +51,7 @@ try {
 
   const perf = installPerformanceService(self);
   perf.tick('is');
-  installStyles(document, cssText, () => {
+  installStyles(self.document, cssText, () => {
     try {
       // Core services.
       installRuntimeServices(self);
@@ -70,9 +71,10 @@ try {
       installGlobalClickListener(self);
 
       maybeValidate(self);
-      makeBodyVisible(document, /* waitForExtensions */ true);
+      makeBodyVisible(self.document, /* waitForServices */ true);
+      installCacheServiceWorker(self);
     } catch (e) {
-      makeBodyVisible(document);
+      makeBodyVisible(self.document);
       throw e;
     } finally {
       perf.tick('e_is');
@@ -83,7 +85,7 @@ try {
   }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
-  makeBodyVisible(document);
+  makeBodyVisible(self.document);
   throw e;
 }
 

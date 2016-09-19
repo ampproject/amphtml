@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
-    <td>FILL, FIXED, FIXED_HEIGHT, FLEX_ITEM, NODISPLAY, RESPONSIVE</td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
@@ -90,6 +90,7 @@ The value of `delay` must be a number of milliseconds, e.g. `delay=5000`.
 
 ## Styling
 - You may use the `amp-carousel` element selector to style it freely.
+- You may use the `.amp-carousel-slide` class selector to target carousel items.
 - `.amp-carousel-button` by default uses an inlined SVG as the background-image of the buttons.
 You may override this with your own SVG or image like so:
 

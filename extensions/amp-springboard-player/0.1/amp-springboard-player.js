@@ -15,16 +15,35 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
 
-  /** @override */
-  createdCallback() {
-    this.preconnect.url('https://cms.springboardplatform.com');
-    this.preconnect.url('https://www.springboardplatform.com');
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {string} */
+    this.mode_ = '';
+
+    /** @private {string} */
+    this.contentId_ = '';
+
+    /** @private {string} */
+    this.domain_ = '';
+
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+ /**
+  * @param {boolean=} opt_onLayout
+  * @override
+  */
+  preconnectCallback(opt_onLayout) {
+    this.preconnect.url('https://cms.springboardplatform.com', opt_onLayout);
+    this.preconnect.url('https://www.springboardplatform.com', opt_onLayout);
   }
 
   /** @override */
@@ -34,32 +53,19 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const mode = user().assert(
+    this.mode_ = user().assert(
         this.element.getAttribute('data-mode'),
         'The data-mode attribute is required for <amp-springboard-player> %s',
         this.element);
-    const contentId = user().assert(
+    this.contentId_ = user().assert(
         this.element.getAttribute('data-content-id'),
         'The data-content-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    const domain = user().assert(
+    this.domain_ = user().assert(
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
-
-    /** @private @const {number} */
-    this.width_ = width;
-    /** @private @const {number} */
-    this.height_ = height;
-    /** @private @const {string} */
-    this.mode_ = mode;
-    /** @private @const {number} */
-    this.contentId_ = contentId;
-    /** @private @const {string} */
-    this.domain_ = domain;
 
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
@@ -85,17 +91,16 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.id = playerId + '_' + this.contentId_;
     iframe.src = 'https://cms.springboardplatform.com/embed_iframe/' +
-    	encodeURIComponent(siteId) + '/' + encodeURIComponent(this.mode_) +
-    	'/' + encodeURIComponent(this.contentId_) + '/' +
-    	encodeURIComponent(playerId) + '/' + encodeURIComponent(this.domain_) +
-    	'/' + encodeURIComponent(items);
+        encodeURIComponent(siteId) + '/' +
+        encodeURIComponent(this.mode_) +
+        '/' + encodeURIComponent(this.contentId_) + '/' +
+        encodeURIComponent(playerId) + '/' +
+        encodeURIComponent(this.domain_) +
+        '/' + encodeURIComponent(items);
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
-    /** @private {?Element} */
     this.iframe_ = iframe;
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -118,8 +123,8 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
     });
 
     imgPlaceholder.src = 'https://www.springboardplatform.com/storage/' +
-    	encodeURIComponent(this.domain_) + '/snapshots/' +
-    	encodeURIComponent(this.contentId_) + '.jpg';
+        encodeURIComponent(this.domain_) + '/snapshots/' +
+        encodeURIComponent(this.contentId_) + '.jpg';
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
       imgPlaceholder.src =
@@ -127,14 +132,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
         'snapshots/default_snapshot.png';
     }
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
-
-    this.element.appendChild(imgPlaceholder);
-    this.applyFillContent(imgPlaceholder);
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
-    loadPromise(imgPlaceholder).then(() => {
+    this.applyFillContent(imgPlaceholder);
+    this.element.appendChild(imgPlaceholder);
+
+    this.loadPromise(imgPlaceholder).then(() => {
       setStyles(imgPlaceholder, {
         'visibility': '',
       });

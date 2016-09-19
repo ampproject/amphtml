@@ -134,13 +134,16 @@ describe('iframe-helper', function() {
     });
   });
 
-  it('should un-listen after first hit', () => {
+  it('should un-listen and resolve promise after first hit', () => {
     let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOnce(testIframe, 'send-intersections', () => {
-        calls++;
-        resolve();
-      });
+      IframeHelper.listenForOncePromise(testIframe,
+          ['no-msg', 'send-intersections'])
+          .then(obj => {
+            expect(obj.message = 'send-intersections');
+            calls++;
+            resolve();
+          });
       insert(testIframe);
     }).then(() => {
       const total = calls;
@@ -148,6 +151,7 @@ describe('iframe-helper', function() {
         setTimeout(resolve, 50);
       }).then(() => {
         expect(calls).to.equal(total);
+        expect(total).to.equal(1);
       });
     });
   });

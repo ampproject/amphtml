@@ -16,6 +16,7 @@
 
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-experiment
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .js script"
   mandatory_parent: "HEAD"
@@ -48,6 +49,7 @@ tags: {  # amp-experiment
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
 }
 tags: {  # amp-experiment (json)
+  html_format: AMP
   tag_name: "SCRIPT"
   spec_name: "amp-experiment extension .json script"
   mandatory_parent: "AMP-EXPERIMENT"
@@ -66,6 +68,7 @@ tags: {  # amp-experiment (json)
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-experiment.html"
 }
 tags: {  # <amp-experiment>
+  html_format: AMP
   tag_name: "AMP-EXPERIMENT"
   disallowed_ancestor: "AMP-SIDEBAR"
   also_requires_tag: "amp-experiment extension .js script"

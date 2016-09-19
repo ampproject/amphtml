@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import {clientIdScope} from '../../ads/_config';
+import {adConfig} from '../../ads/_config';
 import {createAdPromise} from '../../testing/ad-iframe';
 import {installCidService} from '../../extensions/amp-analytics/0.1/cid-impl';
 import {
   installUserNotificationManager,
 } from '../../extensions/amp-user-notification/0.1/amp-user-notification';
+import {getAdCid} from '../../src/ad-cid';
 import {setCookie} from '../../src/cookies';
+import {timerFor} from '../../src/timer';
 import * as sinon from 'sinon';
 
 
@@ -52,16 +54,63 @@ function tests(name) {
 
       afterEach(() => {
         sandbox.restore();
-        delete clientIdScope['with_cid'];
+        delete adConfig['_ping_'];
         setCookie(window, cidScope, '', Date.now() - 5000);
       });
 
+      describe('unit test', () => {
+        let clock;
+        let element;
+        let adElement;
+        beforeEach(() => {
+          clock = sandbox.useFakeTimers();
+          element = document.createElement('amp-ad');
+          element.setAttribute('type', '_ping_');
+          adElement = {
+            element,
+            win: window,
+          };
+        });
+
+        it('provides cid to ad', () => {
+          adConfig['_ping_'] = {clientIdScope: cidScope};
+
+          const s = installCidService(window);
+          sandbox.stub(s, 'get', scope => {
+            expect(scope).to.equal(cidScope);
+            return Promise.resolve('test123');
+          });
+          return getAdCid(adElement).then(cid => {
+            expect(cid).to.equal('test123');
+          });
+        });
+
+        it('times out', () => {
+          adConfig['_ping_'] = {clientIdScope: cidScope};
+          const s = installCidService(window);
+          sandbox.stub(s, 'get', scope => {
+            expect(scope).to.equal(cidScope);
+            return timerFor(window).promise(2000);
+          });
+          const p = getAdCid(adElement).then(cid => {
+            expect(cid).to.be.undefined;
+            expect(Date.now()).to.equal(1000);
+          });
+          clock.tick(999);
+          // Let promises resolve before ticking 1 more ms.
+          Promise.resolve().then(() => {
+            clock.tick(1);
+          });
+          return p;
+        });
+      });
+
       it('provides cid to ad', () => {
-        clientIdScope['with_cid'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -70,16 +119,17 @@ function tests(name) {
           installCidService(win);
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"sentinel123"');
         });
       });
 
       it('proceeds on failed CID', () => {
-        clientIdScope['with_cid'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -88,16 +138,17 @@ function tests(name) {
               () => Promise.reject(new Error('nope')));
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
 
       it('waits for consent', () => {
-        clientIdScope['with_cid'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
           'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
@@ -116,7 +167,8 @@ function tests(name) {
           });
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent-cid');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"consent-cid"');
         });
       });
 
@@ -124,7 +176,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
           'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
@@ -143,7 +195,8 @@ function tests(name) {
           });
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent');
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"consent"');
         });
       });
 
@@ -152,7 +205,7 @@ function tests(name) {
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
@@ -168,23 +221,24 @@ function tests(name) {
           return ad;
         }).then(ad => {
           expect(uidSpy.callCount).to.equal(0);
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
 
       it('provides null if cid service not available', () => {
-        clientIdScope['with_cid'] = cidScope;
+        adConfig['_ping_'] = {clientIdScope: cidScope};
         return getAd({
           width: 300,
           height: 250,
-          type: 'with_cid',
+          type: '_ping_',
           src: 'testsrc',
         }, 'https://schema.org', function(ad) {
-          setCookie(window, cidScope, 'XXX',
-              Date.now() + 5000);
+          setCookie(window, cidScope, 'XXX', Date.now() + 5000);
           return ad;
         }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
         });
       });
     });

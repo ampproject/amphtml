@@ -62,6 +62,17 @@ export function isObject(value) {
 }
 
 /**
+ * Determines if value is of number type and finite.
+ * NaN and Infinity are not considered a finite number.
+ * String numbers are not considered numbers.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isFiniteNumber(value) {
+  return (typeof value === 'number' && isFinite(value));
+}
+
+/**
  * Determines if value is of FormData type.
  * @param {*} value
  * @return {boolean}
@@ -78,6 +89,9 @@ export function isFormData(value) {
 export function isShadowRoot(value) {
   // Node.nodeType == DOCUMENT_FRAGMENT to speed up the tests. Unfortunately,
   // nodeType of DOCUMENT_FRAGMENT is used currently for ShadowRoot nodes.
+  if (value && value.tagName == 'I-AMP-SHADOW-ROOT') {
+    return true;
+  }
   return (!!value &&
       value.nodeType == /* DOCUMENT_FRAGMENT */ 11 &&
       toString(value) === '[object ShadowRoot]');

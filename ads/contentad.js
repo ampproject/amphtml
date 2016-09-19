@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../3p/3p';
+import {writeScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function contentad(global, data) {
-  checkData(data, ['id', 'd', 'wid', 'url']);
+  // TODO: check mandatory fields
+  validateData(data, [], ['id', 'd', 'wid', 'url']);
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.id = data.id;
   global.d = data.d;

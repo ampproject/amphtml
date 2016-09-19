@@ -26,6 +26,7 @@ import {isGoogleAdsA4AValidEnvironment} from './utils';
 import {isExperimentOn, toggleExperiment} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {getMode} from '../../../src/mode';
+import {viewerFor} from '../../../src/viewer';
 import {parseQueryString} from '../../../src/url';
 
 /** @typedef {{string: {branches: !Branches}}} */
@@ -64,7 +65,7 @@ const MANUAL_EXPERIMENT_ID = '117152632';
  */
 export function googleAdsIsA4AEnabled(win, element, experimentName,
     externalBranches, internalBranches) {
-  if (isGoogleAdsA4AValidEnvironment(win)) {
+  if (isGoogleAdsA4AValidEnvironment(win, element)) {
     maybeSetExperimentFromUrl(win, experimentName, externalBranches.control,
         externalBranches.experiment, MANUAL_EXPERIMENT_ID);
     const experimentInfo = {};
@@ -121,12 +122,13 @@ export function googleAdsIsA4AEnabled(win, element, experimentName,
  */
 function maybeSetExperimentFromUrl(win, experimentName,
     controlBranchId, treatmentBranchId, manualId) {
-  const expParam = parseQueryString(win.location.search)['exp'];
+  const expParam = viewerFor(win).getParam('exp') ||
+      parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return;
   }
-  const a4aParam = expParam.split(',').find(
-      x => { return x.indexOf('a4a:') == 0; });
+  const match = /(^|,)(a4a:[^,]*)/.exec(expParam);
+  const a4aParam = match && match[2];
   if (!a4aParam) {
     return;
   }

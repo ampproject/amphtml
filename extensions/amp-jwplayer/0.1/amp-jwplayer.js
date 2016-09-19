@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {setStyles} from '../../../src/style';
 import {user} from '../../../src/log';
 
@@ -36,15 +35,6 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
     /** @private @const {string} */
     this.contentid_ = user().assert(
       (this.element.getAttribute('data-playlist-id') ||
@@ -76,12 +66,10 @@ class AmpJWPlayer extends AMP.BaseElement {
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -105,15 +93,13 @@ class AmpJWPlayer extends AMP.BaseElement {
     imgPlaceholder.src = 'https://content.jwplatform.com/thumbs/' +
         encodeURIComponent(this.contentid_) + '-720.jpg';
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
     imgPlaceholder.setAttribute('referrerpolicy', 'origin');
 
     this.applyFillContent(imgPlaceholder);
 
     // Not every media item has a thumbnail image.  If no image is found,
     // don't add the placeholder to the DOM.
-    loadPromise(imgPlaceholder).then(() => {
+    this.loadPromise(imgPlaceholder).then(() => {
       this.element.appendChild(imgPlaceholder);
     }).catch(() => {
       // If the thumbnail image isn't available, we can safely ignore this

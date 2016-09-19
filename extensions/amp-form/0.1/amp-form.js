@@ -16,7 +16,11 @@
 
 import {isExperimentOn} from '../../../src/experiments';
 import {getService} from '../../../src/service';
-import {assertHttpsUrl} from '../../../src/url';
+import {
+  assertHttpsUrl,
+  addParamsToUrl,
+  SOURCE_ORIGIN_PARAM,
+} from '../../../src/url';
 import {user, rethrowAsync} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
@@ -28,7 +32,7 @@ import {
   childElementByAttr,
   ancestorElementsByTag,
 } from '../../../src/dom';
-import {installStyles} from '../../../src/styles';
+import {installStyles} from '../../../src/style-installer';
 import {CSS} from '../../../build/amp-form-0.1.css';
 import {ValidationBubble} from './validation-bubble';
 import {vsyncFor} from '../../../src/vsync';
@@ -90,8 +94,12 @@ export class AmpForm {
   /**
    * Adds functionality to the passed form element and listens to submit event.
    * @param {!HTMLFormElement} element
+   * @param {string} id
    */
-  constructor(element) {
+  constructor(element, id) {
+    /** @private @const {string} */
+    this.id_ = id;
+
     /** @const @private {!Window} */
     this.win_ = element.ownerDocument.defaultView;
 
@@ -111,7 +119,7 @@ export class AmpForm {
     this.actions_ = actionServiceForDoc(this.win_.document.documentElement);
 
     /** @const @private {string} */
-    this.method_ = this.form_.getAttribute('method') || 'GET';
+    this.method_ = (this.form_.getAttribute('method') || 'GET').toUpperCase();
 
     /** @const @private {string} */
     this.target_ = this.form_.getAttribute('target');
@@ -145,6 +153,13 @@ export class AmpForm {
 
     /** @private {?string} */
     this.state_ = null;
+
+    const inputs = this.form_.elements;
+    for (let i = 0; i < inputs.length; i++) {
+      user().assert(!inputs[i].name ||
+          inputs[i].name != SOURCE_ORIGIN_PARAM,
+          'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
+    }
 
     this.installSubmitHandler_();
   }
@@ -194,8 +209,13 @@ export class AmpForm {
       e.preventDefault();
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
-      this.xhr_.fetchJson(this.xhrAction_, {
-        body: new FormData(this.form_),
+      const isHeadOrGet = this.method_ == 'GET' || this.method_ == 'HEAD';
+      let xhrUrl = this.xhrAction_;
+      if (isHeadOrGet) {
+        xhrUrl = addParamsToUrl(this.xhrAction_, this.getFormAsObject_());
+      }
+      this.xhr_.fetchJson(xhrUrl, {
+        body: isHeadOrGet ? null : new FormData(this.form_),
         method: this.method_,
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
@@ -213,6 +233,34 @@ export class AmpForm {
       this.cleanupRenderedTemplate_();
       this.setState_(FormState_.SUBMITTING);
     }
+  }
+
+  /**
+   * Returns form data as an object.
+   * @return {!Object}
+   * @private
+   */
+  getFormAsObject_() {
+    const data = {};
+    const inputs = this.form_.elements;
+    const submittableTagsRegex = /^(?:input|select|textarea)$/i;
+    const unsubmittableTypesRegex = /^(?:button|image|file|reset)$/i;
+    const checkableType = /^(?:checkbox|radio)$/i;
+    for (let i = 0; i < inputs.length; i++) {
+      const input = inputs[i];
+      if (!input.name || isDisabled_(input) ||
+          !submittableTagsRegex.test(input.tagName) ||
+          unsubmittableTypesRegex.test(input.type) ||
+          (checkableType.test(input.type) && !input.checked)) {
+        continue;
+      }
+
+      if (data[input.name] === undefined) {
+        data[input.name] = [];
+      }
+      data[input.name].push(input.value);
+    }
+    return data;
   }
 
   /**
@@ -241,8 +289,13 @@ export class AmpForm {
   renderTemplate_(data = {}) {
     const container = this.form_.querySelector(`[${this.state_}]`);
     if (container) {
+      const messageId = `rendered-message-${this.id_}`;
+      container.setAttribute('role', 'alert');
+      container.setAttribute('aria-labeledby', messageId);
+      container.setAttribute('aria-live', 'assertive');
       return this.templates_.findAndRenderTemplate(container, data)
           .then(rendered => {
+            rendered.id = messageId;
             rendered.setAttribute('i-amp-rendered', '');
             container.appendChild(rendered);
           });
@@ -295,8 +348,10 @@ function reportFormValidity(form) {
  */
 function onInvalidInputKeyUp_(event) {
   if (event.target.checkValidity()) {
+    event.target.removeAttribute('aria-invalid');
     validationBubble.hide();
   } else {
+    event.target.setAttribute('aria-invalid', 'true');
     validationBubble.show(event.target, event.target.validationMessage);
   }
 }
@@ -433,13 +488,33 @@ export function onInputInteraction_(e) {
 
 
 /**
+ * Checks if a field is disabled.
+ * @param {!HTMLInputElement|!HTMLSelectElement|!HTMLTextAreaElement} element
+ * @private
+ */
+function isDisabled_(element) {
+  if (element.disabled) {
+    return true;
+  }
+
+  const ancestors = ancestorElementsByTag(element, 'fieldset');
+  for (let i = 0; i < ancestors.length; i++) {
+    if (ancestors[i].disabled) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+/**
  * Installs submission handler on all forms in the document.
  * @param {!Window} win
  */
 function installSubmissionHandlers(win) {
   onDocumentReady(win.document, doc => {
-    toArray(doc.forms).forEach(form => {
-      new AmpForm(form);
+    toArray(doc.forms).forEach((form, index) => {
+      new AmpForm(form, `amp-form-${index}`);
     });
   });
 }
@@ -453,7 +528,7 @@ export function installAmpForm(win) {
   return getService(win, 'amp-form', () => {
     if (isExperimentOn(win, TAG)) {
       installStyles(win.document, CSS, () => {
-        validationBubble = new ValidationBubble(win);
+        validationBubble = new ValidationBubble(win, 'amp-validation-bubble');
         installSubmissionHandlers(win);
       });
     }

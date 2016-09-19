@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
+import {timerFor} from '../../../../src/timer';
 import {
   AmpIframe,
   isAdLike,
@@ -37,7 +37,7 @@ describe('amp-iframe', () => {
   const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
       '/test/fixtures/served/iframe-clicktoplay.html';
 
-  const timer = new Timer(window);
+  const timer = timerFor(window);
   let ranJs = 0;
   let sandbox;
 
@@ -539,10 +539,11 @@ describe('amp-iframe', () => {
 
   it('should correctly classify ads', () => {
     function e(width, height) {
-      const element = document.createElement('test');
-      element.setAttribute('width', width);
-      element.setAttribute('height', height);
-      return element;
+      return {
+        getIntersectionElementLayoutBox() {
+          return {width, height};
+        },
+      };
     }
     expect(isAdLike(e(300, 250))).to.be.true;
     expect(isAdLike(e(320, 270))).to.be.true;

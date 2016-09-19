@@ -19,75 +19,83 @@
 <body>
   <h1>Vega Visualization</h1>
 
-  <h2>Fixed size with remote data</h2>
-  <amp-viz-vega width="400" height="200" layout="fixed" src="vega-data/bar.json">
+  <h2>Responsive size with remote data</h2>
+  <amp-viz-vega width="400" height="200" layout="responsive" src="vega-data/bar.json">
   </amp-viz-vega>
 
   <h2>Responsive size with inline data</h2>
-  <amp-viz-vega width="400" height="200" layout="responsive">
-    <!-- http://vega.github.io/vega-editor/index.html?mode=vega&spec=arc -->
+  <amp-viz-vega width="400" height="400" layout="responsive">
+    <!-- https://github.com/vega/vega/blob/master/examples/arc.json -->
     <script type="application/json">
-        {
-          "width": 400,
-          "height": 200,
-          "data": [
-            {
-              "name": "table",
-              "values": [12, 23, 47, 6, 52, 19],
-              "transform": [{"type": "pie", "field": "data"}]
-            }
-          ],
-          "scales": [
-            {
-              "name": "r",
-              "type": "sqrt",
-              "domain": {"data": "table", "field": "data"},
-              "range": [20, 100]
-            }
-          ],
-          "marks": [
-            {
-              "type": "arc",
-              "from": {"data": "table"},
-              "properties": {
-                "enter": {
-                  "x": {"field": {"group": "width"}, "mult": 0.5},
-                  "y": {"field": {"group": "height"}, "mult": 0.5},
-                  "startAngle": {"field": "layout_start"},
-                  "endAngle": {"field": "layout_end"},
-                  "innerRadius": {"value": 20},
-                  "outerRadius": {"scale": "r", "field": "data"},
-                  "stroke": {"value": "#fff"}
-                },
-                "update": {
-                  "fill": {"value": "#ccc"}
-                },
-                "hover": {
-                  "fill": {"value": "pink"}
-                }
-              }
-            },
-            {
-              "type": "text",
-              "from": {"data": "table"},
-              "properties": {
-                "enter": {
-                  "x": {"field": {"group": "width"}, "mult": 0.5},
-                  "y": {"field": {"group": "height"}, "mult": 0.5},
-                  "radius": {"scale": "r", "field": "data", "offset": 8},
-                  "theta": {"field": "layout_mid"},
-                  "fill": {"value": "#000"},
-                  "align": {"value": "center"},
-                  "baseline": {"value": "middle"},
-                  "text": {"field": "data"}
-                }
+      {
+        "width": 400,
+        "height": 400,
+        "data": [
+          {
+            "name": "table",
+            "values": [12, 23, 47, 6, 52, 19],
+            "transform": [{"type": "pie", "field": "data"}]
+          }
+        ],
+        "scales": [
+          {
+            "name": "r",
+            "type": "sqrt",
+            "domain": {"data": "table", "field": "data"},
+            "range": [20, 100]
+          }
+        ],
+        "marks": [
+          {
+            "type": "arc",
+            "from": {"data": "table"},
+            "properties": {
+              "enter": {
+                "x": {"field": {"group": "width"}, "mult": 0.5},
+                "y": {"field": {"group": "height"}, "mult": 0.5},
+                "startAngle": {"field": "layout_start"},
+                "endAngle": {"field": "layout_end"},
+                "innerRadius": {"value": 20},
+                "outerRadius": {"scale": "r", "field": "data"},
+                "stroke": {"value": "#fff"}
+              },
+              "update": {
+                "fill": {"value": "#ccc"}
+              },
+              "hover": {
+                "fill": {"value": "pink"}
               }
             }
-          ]
-        }
-      </script>
-    <amp-img placeholder width="400" height="200" layout="responsive" src="https://placehold.it/400x200?text=Custom Placeholder">
+          },
+          {
+            "type": "text",
+            "from": {"data": "table"},
+            "properties": {
+              "enter": {
+                "x": {"field": {"group": "width"}, "mult": 0.5},
+                "y": {"field": {"group": "height"}, "mult": 0.5},
+                "radius": {"scale": "r", "field": "data", "offset": 8},
+                "theta": {"field": "layout_mid"},
+                "fill": {"value": "#000"},
+                "align": {"value": "center"},
+                "baseline": {"value": "middle"},
+                "text": {"field": "data"}
+              }
+            }
+          }
+        ]
+      }
+    </script>
+  </amp-viz-vega>
+
+  <h2>fixed-height size world map with remote data pointing to remote data using topojson</h2>
+  <amp-viz-vega use-data-width height="500" layout="fixed-height" src="vega-data/map.json">
+    <amp-img placeholder height="500" layout="fixed-height" src="https://placehold.it/400x200?text=Custom Placeholder">
     </amp-img>
+  </amp-viz-vega>
+
+  <h2>Responsive size interactive graph with remote data</h2>
+  <amp-viz-vega width="2" height="1.5" layout="responsive" src="vega-data/nodes.json">
   </amp-viz-vega>
 
   <h2>Responsive size inside lightbox</h2>
