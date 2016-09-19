@@ -44,6 +44,8 @@ describe('test-ads-config', () => {
     // Google's ad networks.
     expect(adConfig).to.include.key('adsense');
     expect(adConfig).to.include.key('doubleclick');
+
+    expect(adConfig).to.include.key('_ping_');
   });
 
   it('should sort adConfig in alphabetic order', () => {
