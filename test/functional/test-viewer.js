@@ -300,10 +300,6 @@ describe('Viewer', () => {
   });
 
   describe('should receive the visibilitychange event', () => {
-    beforeEach(() => {
-      viewer.isEmbedded_ = true;
-    });
-
     it('should change prerenderSize', () => {
       viewer.receiveMessage('visibilitychange', {
         prerenderSize: 4,
