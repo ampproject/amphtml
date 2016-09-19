@@ -409,8 +409,11 @@ function createBaseAmpElementProto(win) {
     this.readyState = 'loading';
     this.everAttached = false;
 
-    /** @private @const {!./service/resources-impl.Resources}  */
-    this.resources_ = resourcesForDoc(this);
+    /**
+     * Resources can only be looked up when an element is attached.
+     * @private @const {?./service/resources-impl.Resources}
+     */
+    this.resources_ = null;
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
@@ -496,7 +499,7 @@ function createBaseAmpElementProto(win) {
    * @package
    */
   ElementProto.getResources = function() {
-    return this.resources_;
+    return dev().assert(this.resources_, 'no resources yet');
   };
 
   /**
@@ -547,7 +550,7 @@ function createBaseAmpElementProto(win) {
       this.dispatchCustomEventForTesting('amp:attached');
       // For a never-added resource, the build will be done automatically
       // via `resources.add` on the first attach.
-      this.resources_.upgraded(this);
+      this.getResources().upgraded(this);
     }
   };
 
@@ -761,6 +764,9 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
+    if (!this.resources_) {
+      this.resources_ = resourcesForDoc(this);
+    }
     if (!this.everAttached) {
       if (!isStub(this.implementation_)) {
         this.tryUpgrade_(this.implementation_);
@@ -792,7 +798,7 @@ function createBaseAmpElementProto(win) {
       // `resources.add` called twice if upgrade happens immediately.
       this.everAttached = true;
     }
-    this.resources_.add(this);
+    this.getResources().add(this);
   };
 
   /**
@@ -836,7 +842,7 @@ function createBaseAmpElementProto(win) {
     if (this.isInTemplate_) {
       return;
     }
-    this.resources_.remove(this);
+    this.getResources().remove(this);
     this.implementation_.detachedCallback();
   };
 
@@ -904,7 +910,7 @@ function createBaseAmpElementProto(win) {
    * @final @this {!Element}
    */
   ElementProto.getLayoutBox = function() {
-    return this.resources_.getResourceForElement(this).getLayoutBox();
+    return this.getResources().getResourceForElement(this).getLayoutBox();
   };
 
  /**
@@ -915,7 +921,7 @@ function createBaseAmpElementProto(win) {
   */
   ElementProto.getIntersectionChangeEntry = function() {
     const box = this.implementation_.getIntersectionElementLayoutBox();
-    const owner = this.resources_.getResourceForElement(this).getOwner();
+    const owner = this.getResources().getResourceForElement(this).getOwner();
     const viewportBox = this.implementation_.getViewport().getRect();
     // TODO(jridgewell, #4826): We may need to make this recursive.
     const ownerBox = owner && owner.getLayoutBox();
@@ -1226,7 +1232,7 @@ function createBaseAmpElementProto(win) {
     if (state == true) {
       const fallbackElement = this.getFallback();
       if (fallbackElement) {
-        this.resources_.scheduleLayout(this, fallbackElement);
+        this.getResources().scheduleLayout(this, fallbackElement);
       }
     }
   };
@@ -1319,7 +1325,7 @@ function createBaseAmpElementProto(win) {
         const loadingContainer = this.loadingContainer_;
         this.loadingContainer_ = null;
         this.loadingElement_ = null;
-        this.resources_.deferMutate(this, () => {
+        this.getResources().deferMutate(this, () => {
           dom.removeElement(loadingContainer);
         });
       }
@@ -1367,7 +1373,7 @@ function createBaseAmpElementProto(win) {
 
       if (overflown) {
         this.overflowElement_.onclick = () => {
-          this.resources_./*OK*/changeSize(
+          this.getResources()./*OK*/changeSize(
               this, requestedHeight, requestedWidth);
           getVsync(this).mutate(() => {
             this.overflowCallback(
