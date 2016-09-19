@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import {closestNode} from '../dom';
 import {dev} from '../log';
 import {
   getParentWindowFrameElement,
   getService,
 } from '../service';
-import {isShadowRoot} from '../types';
+import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {waitForBodyPromise} from '../dom';
 
@@ -129,7 +128,7 @@ export class AmpDocService {
 
       // Shadow doc.
       // TODO(dvoytenko): Replace with `getRootNode()` API when it's available.
-      const shadowRoot = closestNode(n, n => isShadowRoot(n));
+      const shadowRoot = getShadowRootNode(n);
       if (!shadowRoot) {
         break;
       }
