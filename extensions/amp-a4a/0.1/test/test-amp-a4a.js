@@ -731,9 +731,3 @@ describe('amp-a4a', () => {
   // Other cases to handle for body reformatting:
   //   - All
 });
-<<<<<<< 46f4b95fa3e475943302dca73cf80dee1f1f79e8
-=======
-
-
-
->>>>>>> Fixed unit tests for amp-a4a and crypto-verifier.
