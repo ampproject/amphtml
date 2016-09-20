@@ -7,7 +7,7 @@
 - [The iframe sandbox](#the-iframe-sandbox)
     - [Available information](#available-information)
     - [Available APIs](#available-apis)
-    - [Exceptions to iframe sandbox methods and information](#exceptions-to-iframe-sandbox-methods-and-information)
+    - [Exceptions to available APIs and information](#exceptions-to-available-apis-and-information)
     - [Ad viewability](#ad-viewability)
     - [Ad resizing](#ad-resizing)
     - [Support for multi-size ad requests](#support-for-multi-size-ad-requests)
@@ -67,7 +67,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 - `window.context.noContentAvailable()` is a function that the ad system should call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
 - `window.context.reportRenderedEntityIdentifier()` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
-### Exceptions to iframe sandbox APIs and information
+### Exceptions to available APIs and information
 Depending on the ad server / provider some methods of rendering ads involve a second iframe inside the AMP iframe. In these cases, the iframe sandbox methods and information will be unavailable to the ad. We are working on a creative level API that will enable this information to be accessible in such iframed cases and this README will be updated when that is available. Refer to the documentation for the relevant ad servers / providers (e.g., [doubleclick.md](./google/doubleclick.md)) for more details on how to handle such cases.
 
 ### Ad viewability
