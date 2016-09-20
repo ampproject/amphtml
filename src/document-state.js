@@ -17,6 +17,7 @@
 import {Observable} from './observable';
 import {fromClass} from './service';
 import {getVendorJsPropertyName} from './style';
+import {waitForChild} from './dom';
 
 
 /**
@@ -65,6 +66,9 @@ export class DocumentState {
       this.document_.addEventListener(this.visibilityChangeEvent_,
           this.boundOnVisibilityChanged_);
     }
+
+    /** @private @const {?Observable} */
+    this.bodyAvailableObservable_ = null;
   }
 
   /** @private */
@@ -111,6 +115,33 @@ export class DocumentState {
   /** @private */
   onVisibilityChanged_() {
     this.visibilityObservable_.fire();
+  }
+
+  /**
+   * If body is already available, callback is called synchronously and null
+   * is returned.
+   * @param {function()} handler
+   * @return {?UnlistenDef}
+   */
+  onBodyAvailable(handler) {
+    const doc = this.document_;
+    if (doc.body) {
+      handler();
+      return null;
+    }
+    if (!this.bodyAvailableObservable_) {
+      this.bodyAvailableObservable_ = new Observable();
+      waitForChild(doc.documentElement, () => !!doc.body,
+          this.onBodyAvailable_.bind(this));
+    }
+    return this.bodyAvailableObservable_.add(handler);
+  }
+
+  /** @private */
+  onBodyAvailable_() {
+    this.bodyAvailableObservable_.fire();
+    this.bodyAvailableObservable_.removeAll();
+    this.bodyAvailableObservable_ = null;
   }
 }
 

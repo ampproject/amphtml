@@ -53,6 +53,7 @@ describe('dynamic classes are inserted at runtime', () => {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
     };
+    mockWin.document.defaultView = mockWin;
   });
 
   function setup(embeded, userAgent, referrer) {

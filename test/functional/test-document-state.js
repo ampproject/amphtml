@@ -15,6 +15,7 @@
  */
 
 import {DocumentState} from '../../src/document-state';
+import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 
@@ -106,5 +107,25 @@ describe('DocumentState', () => {
     expect(docState.isHidden()).to.equal(true);
     expect(docState.getVisibilityState()).to.equal('invisible');
     expect(callback.callCount).to.equal(1);
+  });
+
+  it('should fire body availability change', () => {
+    const callback = sandbox.spy();
+    sandbox.stub(dom, 'waitForChild');
+
+    expect(testDoc.body).to.equal(undefined);
+
+    const first = docState.onBodyAvailable(callback);
+    expect(first).to.not.equal(null);
+    expect(callback.callCount).to.equal(0);
+
+    testDoc.body = {};
+    docState.onBodyAvailable_();
+
+    expect(callback.callCount).to.equal(1);
+
+    const second = docState.onBodyAvailable(callback);
+    expect(second).to.equal(null);
+    expect(callback.callCount).to.equal(2);
   });
 });
