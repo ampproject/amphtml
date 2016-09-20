@@ -52,7 +52,7 @@ export class History {
    * @param {!HistoryBindingInterface} binding
    */
   constructor(win, binding) {
-    /** @private @const {!../timer.Timer} */
+    /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
 
     /** @private @const {!HistoryBindingInterface} */
@@ -244,7 +244,7 @@ export class HistoryBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {!../timer.Timer} */
+    /** @private @const {!../service/timer-impl.Timer} */
     this.timer_ = timerFor(win);
 
     const history = this.win.history;

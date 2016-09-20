@@ -25,8 +25,19 @@ import * as lolex from 'lolex';
 describe('amp-ad-3p-impl', tests('amp-ad'));
 
 function tests(name) {
-  function getAd(attributes, canonical, opt_handleElement,
+  // Please note undefined and null are differnt
+  function getAd(opt_attributes, opt_canonical, opt_handleElement,
       opt_beforeLayoutCallback) {
+    const attributes = opt_attributes || {
+      width: 300,
+      height: 250,
+      type: '_ping_',
+      src: 'https://testsrc',
+    };
+    let canonical = opt_canonical;
+    if (opt_canonical === undefined) {
+      canonical = 'https://schema.org';
+    }
     return createAdPromise(name, attributes, canonical,
         opt_handleElement, opt_beforeLayoutCallback);
   }
@@ -41,6 +52,10 @@ function tests(name) {
         type: '_ping_',
         src: 'testsrc',
       });
+      const link = iframe.doc.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', 'blah');
+      iframe.doc.head.appendChild(link);
       adContainer.appendChild(ampAd);
       return iframe.addElement(adContainer).then(() => {
         return Promise.resolve({
@@ -69,7 +84,7 @@ function tests(name) {
         src: 'https://testsrc',
         // Test precedence
         'data-width': '6666',
-      }, 'https://schema.org').then(ad => {
+      }).then(ad => {
         expect(ad.implementation_).to.be.instanceof(AmpAd3PImpl);
 
         const iframe = ad.firstChild;
@@ -121,7 +136,7 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
           resizable: '',
-        }, 'https://schema.org').then(element => {
+        }).then(element => {
           const impl = element.implementation_;
           const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217, 114);
@@ -138,7 +153,7 @@ function tests(name) {
           type: '_ping_',
           src: 'testsrc',
           resizable: '',
-        }, 'https://schema.org').then(element => {
+        }).then(element => {
           const impl = element.implementation_;
           const attemptChangeSizeSpy = sandbox.spy(impl, 'attemptChangeSize');
           impl.apiHandler_.updateSize_(217);
@@ -160,28 +175,26 @@ function tests(name) {
       return expect(getAd({
         width: 300,
         height: 250,
-      }, null)).to.be.rejectedWith(/type/);
+      })).to.be.rejectedWith(/type/);
     });
 
-    it('must not be position:fixed', () => {
+    it('should reject unknown type', () => {
       return expect(getAd({
         width: 300,
         height: 250,
-        type: '_ping_',
-        src: 'testsrc',
-      }, 'https://schema.org', function(ad) {
+        type: 'unknownType',
+      })).to.be.rejectedWith(/unknownType/);
+    });
+
+    it('must not be position:fixed', () => {
+      return expect(getAd(undefined, undefined, function(ad) {
         ad.style.position = 'fixed';
         return ad;
       })).to.be.rejectedWith(/fixed/);
     });
 
     it('parent must not be position:fixed', () => {
-      return expect(getAd({
-        width: 300,
-        height: 250,
-        type: '_ping_',
-        src: 'testsrc',
-      }, 'https://schema.org', function(ad) {
+      return expect(getAd(undefined, undefined, function(ad) {
         const s = document.createElement('style');
         s.textContent = '.fixed {position:fixed;}';
         ad.ownerDocument.body.appendChild(s);
@@ -192,12 +205,7 @@ function tests(name) {
     });
 
     it('amp-lightbox can be position:fixed', () => {
-      return expect(getAd({
-        width: 300,
-        height: 250,
-        type: '_ping_',
-        src: 'testsrc',
-      }, 'https://schema.org', function(ad) {
+      return expect(getAd(undefined, undefined, function(ad) {
         const lightbox = document.createElement('amp-lightbox');
         lightbox.style.position = 'fixed';
         const p = ad.ownerDocument.getElementById('parent');
@@ -208,14 +216,23 @@ function tests(name) {
       })).to.be.not.be.rejected;
     });
 
+    it('should only layout once', () => {
+      return getAd().then(ad => {
+        ad.implementation_.unlayoutCallback();
+
+        const firstLayout = ad.implementation_.layoutCallback();
+        const secondLayout = ad.implementation_.layoutCallback();
+        expect(firstLayout).to.equal(secondLayout);
+
+        ad.implementation_.unlayoutCallback();
+        const newLayout = ad.implementation_.layoutCallback();
+        expect(newLayout).to.not.equal(secondLayout);
+      });
+    });
+
     describe('has no-content', () => {
       it('should display fallback', () => {
-        return getAd({
-          width: 300,
-          height: 250,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           const fallback = document.createElement('div');
           fallback.setAttribute('fallback', '');
           ad.appendChild(fallback);
@@ -232,12 +249,7 @@ function tests(name) {
       });
 
       it('should attemptChangeHeight to 0 when there is no fallback', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           return ad;
         }).then(ad => {
           const attemptChangeHeight = sandbox.stub(ad.implementation_,
@@ -255,12 +267,7 @@ function tests(name) {
       });
 
       it('should collapse when attemptChangeHeight succeeds', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           return ad;
         }).then(ad => {
           sandbox.stub(
@@ -286,12 +293,7 @@ function tests(name) {
 
 
       it('should hide placeholder when ad falls back', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -313,12 +315,7 @@ function tests(name) {
       });
 
       it('should destroy non-master iframe', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -341,12 +338,7 @@ function tests(name) {
       });
 
       it('should not destroy a master iframe', () => {
-        return getAd({
-          width: 300,
-          height: 750,
-          type: '_ping_',
-          src: 'testsrc',
-        }, 'https://schema.org', ad => {
+        return getAd(undefined, undefined, ad => {
           const placeholder = document.createElement('div');
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
@@ -382,7 +374,7 @@ function tests(name) {
         if (opt_loadingStrategy) {
           attributes['data-loading-strategy'] = opt_loadingStrategy;
         }
-        return getAd(attributes, 'https://schema.org', element => {
+        return getAd(attributes, undefined, element => {
           cb(element.implementation_);
           return element;
         });
@@ -422,10 +414,13 @@ function tests(name) {
     it('should add container info when ad has a container', () => {
       return getAdInAdContainer().then(obj => {
         const ampAd = obj.ampAd;
+        const impl = ampAd.implementation_;
         expect(ampAd.getAttribute('amp-container-element')).to.be.null;
-        ampAd.implementation_.onLayoutMeasure();
-        expect(ampAd.getAttribute('amp-container-element'))
-            .to.equal('AMP-STICKY-AD');
+        impl.onLayoutMeasure();
+        return impl.layoutCallback().then(() => {
+          const src = ampAd.firstChild.getAttribute('src');
+          expect(src).to.contain('"container":"AMP-STICKY-AD"');
+        });
       });
     });
   };

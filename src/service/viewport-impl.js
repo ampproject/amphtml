@@ -19,7 +19,10 @@ import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {checkAndFix as checkAndFixIosScrollfreezeBug,} from
     './ios-scrollfreeze-bug';
-import {getService} from '../service';
+import {
+  getParentWindowFrameElement,
+  getService,
+} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {dev} from '../log';
 import {numeric} from '../transition';
@@ -29,8 +32,8 @@ import {px, setStyle, setStyles} from '../style';
 import {timerFor} from '../timer';
 import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
-import {waitForBody} from '../dom';
 import {isExperimentOn} from '../experiments';
+import {waitForBody} from '../dom';
 
 
 const TAG_ = 'Viewport';
@@ -286,8 +289,22 @@ export class Viewport {
    * @return {!../layout-rect.LayoutRectDef}}
    */
   getLayoutRect(el) {
-    return this.binding_.getLayoutRect(el,
-        this.getScrollLeft(), this.getScrollTop());
+    const scrollLeft = this.getScrollLeft();
+    const scrollTop = this.getScrollTop();
+
+    // Go up the window hierarchy through friendly iframes.
+    const frameElement = getParentWindowFrameElement(el, this.win_);
+    if (frameElement) {
+      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const c = this.binding_.getLayoutRect(
+          frameElement, scrollLeft, scrollTop);
+      return layoutRectLtwh(Math.round(b.left + c.left),
+          Math.round(b.top + c.top),
+          Math.round(b.width),
+          Math.round(b.height));
+    }
+
+    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
   }
 
   /**
@@ -763,7 +780,7 @@ export class ViewportBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {!../platform.Platform} */
+    /** @const {!../service/platform-impl.Platform} */
     this.platform_ = platformFor(win);
 
     /** @private @const {!./viewer-impl.Viewer} */
@@ -784,9 +801,8 @@ export class ViewportBindingNatural_ {
     if (this.win.document.defaultView) {
       waitForBody(this.win.document, () => {
         this.win.document.body.style.overflow = 'visible';
-        if (isExperimentOn(this.win, 'amp-ios-overflow-x') &&
-                this.platform_.isIos() &&
-                this.viewer_.getParam('webview') === '1') {
+        if (this.platform_.isIos() &&
+            this.viewer_.getParam('webview') === '1') {
           setStyles(this.win.document.body, {
             overflowX: 'hidden',
             overflowY: 'visible',

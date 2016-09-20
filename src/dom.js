@@ -18,6 +18,16 @@ import {dev} from './log';
 import {cssEscape} from '../third_party/css-escape/css-escape';
 import {toArray} from './types';
 
+const HTML_ESCAPE_CHARS = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#x27;',
+  '`': '&#x60;',
+};
+const HTML_ESCAPE_REGEX = /(&|<|>|"|'|`)/g;
+
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -294,13 +304,13 @@ export function childNodes(parent, callback) {
 
 /**
  * @type {boolean|undefined}
- * @visiblefortesting
+ * @visibleForTesting
  */
 let scopeSelectorSupported;
 
 /**
  * @param {boolean|undefined} val
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function setScopeSelectorSupportedForTesting(val) {
   scopeSelectorSupported = val;
@@ -414,7 +424,7 @@ export function childElementsByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ * @param {function(string):string=} opt_computeParamNameFunc to compute the parameter
  *    name, get passed the camel-case parameter name.
  * @param {string=} opt_paramPattern Regex pattern to match data attributes.
  * @return {!Object<string, string>}
@@ -543,4 +553,25 @@ export function escapeCssSelectorIdent(win, ident) {
   }
   // Polyfill.
   return cssEscape(ident);
+}
+
+
+/**
+ * Escapes `<`, `>` and other HTML charcaters with their escaped forms.
+ * @param {string} text
+ * @return {string}
+ */
+export function escapeHtml(text) {
+  if (!text) {
+    return text;
+  }
+  return text.replace(HTML_ESCAPE_REGEX, escapeHtmlChar);
+}
+
+/**
+ * @param {string} c
+ * @return string
+ */
+function escapeHtmlChar(c) {
+  return HTML_ESCAPE_CHARS[c];
 }

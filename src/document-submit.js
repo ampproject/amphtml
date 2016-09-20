@@ -15,8 +15,8 @@
  */
 
 import {startsWith} from './string';
-import {dev, user} from './log';
-import {assertHttpsUrl, getCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
+import {user} from './log';
+import {assertHttpsUrl, checkCorsUrl, SOURCE_ORIGIN_PARAM} from './url';
 import {urls} from './config';
 
 
@@ -59,21 +59,28 @@ export function onDocumentFormSubmit_(e) {
         'Illegal input name, %s found: %s', SOURCE_ORIGIN_PARAM, inputs[i]);
   }
 
-  const win = form.ownerDocument.defaultView;
-  let action = form.getAttribute('action');
-  if (!form.__AMP_INIT_ACTION__) {
-    form.__AMP_INIT_ACTION__ = action;
-  } else {
-    action = form.__AMP_INIT_ACTION__;
+  const action = form.getAttribute('action');
+  const actionXhr = form.getAttribute('action-xhr');
+  const method = (form.getAttribute('method') || 'GET').toUpperCase();
+  if (method == 'GET') {
+    user().assert(action,
+        'form action attribute is required for method=GET: %s', form);
+    assertHttpsUrl(action, /** @type {!Element} */ (form), 'action');
+    user().assert(!startsWith(action, urls.cdn),
+        'form action should not be on AMP CDN: %s', form);
+    checkCorsUrl(action);
+  } else if (action) {
+    e.preventDefault();
+    user().assert(false,
+        'form action attribute is invalid for method=POST: %s', form);
+  } else if (!actionXhr) {
+    e.preventDefault();
+    user().assert(false,
+        'Only XHR based (via action-xhr attribute) submissions are support ' +
+        'for POST requests. %s',
+        form);
   }
-  user().assert(action, 'form action attribute is required: %s', form);
-  assertHttpsUrl(action, dev().assertElement(form), 'action');
-  user().assert(!startsWith(action, urls.cdn),
-      'form action should not be on AMP CDN: %s', form);
-
-  // Update the form non-xhr action to add `__amp_source_origin` parameter.
-  // This allows publishers to understand where the request is coming from.
-  form.setAttribute('action', getCorsUrl(win, action));
+  checkCorsUrl(actionXhr);
 
   const target = form.getAttribute('target');
   user().assert(target, 'form target attribute is required: %s', form);

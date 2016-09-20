@@ -286,6 +286,21 @@ export class Log {
   }
 
   /**
+   * Throws an error if the first argument isn't a number.
+   *
+   * Otherwise see `assert` for usage
+   *
+   * @param {*} shouldBeNumber
+   * @param {string=} opt_message The assertion message
+   * @return {number} The value of shouldBeTrueish.
+   */
+  assertNumber(shouldBeNumber, opt_message) {
+    this.assert(typeof shouldBeNumber == 'number',
+        (opt_message || 'Number expected') + ': %s', shouldBeNumber);
+    return /** @type {number} */ (shouldBeNumber);
+  }
+
+  /**
    * Asserts and returns the enum value. If the enum doesn't contain such a value,
    * the error is thrown.
    *
@@ -386,11 +401,33 @@ export function rethrowAsync(var_args) {
 
 
 /**
- * A cached user log. We do not use a Service since the service module depends
+ * Cache for logs. We do not use a Service since the service module depends
  * on Log and closure literally can't even.
- * @type {Log}
+ * @type {{user: ?Log, dev: ?Log}}
  */
-let userLog;
+const logs = self.log = (self.log || {
+  user: null,
+  dev: null,
+});
+
+
+/**
+ * Eventually holds a constructor for Log objects. Lazily initialized, so we
+ * can avoid ever referencing the real constructor except in JS binaries
+ * that actually want to include the implementation.
+ * @typedef {?Function}
+ */
+let logConstructor = null;
+
+
+export function initLogConstructor() {
+  logConstructor = Log;
+}
+
+export function resetLogConstructorForTesting() {
+  logConstructor = null;
+}
+
 
 /**
  * Publisher level log.
@@ -403,10 +440,13 @@ let userLog;
  * @return {!Log}
  */
 export function user() {
-  if (userLog) {
-    return userLog;
+  if (logs.user) {
+    return logs.user;
   }
-  return userLog = new Log(self, mode => {
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return logs.user = new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (mode.development || logNum >= 1) {
       return LogLevel.FINE;
@@ -415,13 +455,6 @@ export function user() {
   }, USER_ERROR_SENTINEL);
 }
 
-
-/**
- * A cached dev log. We do not use a Service since the service module depends
- * on Log and closure literally can't even.
- * @type {Log}
- */
-let devLog;
 
 /**
  * AMP development log. Calls to `devLog().assert` and `dev.fine` are stripped in
@@ -434,10 +467,13 @@ let devLog;
  * @return {!Log}
  */
 export function dev() {
-  if (devLog) {
-    return devLog;
+  if (logs.dev) {
+    return logs.dev;
   }
-  return devLog = new Log(self, mode => {
+  if (!logConstructor) {
+    throw new Error('failed to call initLogConstructor');
+  }
+  return logs.dev = new logConstructor(self, mode => {
     const logNum = parseInt(mode.log, 10);
     if (logNum >= 3) {
       return LogLevel.FINE;

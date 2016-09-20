@@ -29,7 +29,7 @@ import {computeInMasterFrame, nextTick, register, run} from './3p';
 import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
-import {user} from '../src/log';
+import {initLogConstructor, user} from '../src/log';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
@@ -69,6 +69,7 @@ import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
 import {imobile} from '../ads/imobile';
 import {improvedigital} from '../ads/improvedigital';
+import {inmobi} from '../ads/inmobi';
 import {kargo} from '../ads/kargo';
 import {mads} from '../ads/mads';
 import {mantisDisplay, mantisRecommend} from '../ads/mantis';
@@ -100,6 +101,7 @@ import {yieldmo} from '../ads/yieldmo';
 import {yieldone} from '../ads/yieldone';
 import {zergnet} from '../ads/zergnet';
 
+initLogConstructor();
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -115,6 +117,9 @@ const AMP_EMBED_ALLOWED = {
 
 // used for extracting fakead3p from production code.
 const IS_DEV = true;
+
+const data = parseFragment(location.hash);
+window.context = data._context;
 
 // Keep the list in alphabetic order
 register('a9', a9);
@@ -151,6 +156,7 @@ register('gmossp', gmossp);
 register('imobile', imobile);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
+register('inmobi', inmobi);
 register('kargo', kargo);
 register('mads', mads);
 register('mantis-display', mantisDisplay);
@@ -200,14 +206,6 @@ const defaultAllowedTypesInCustomFrame = [
   'doubleclick',
   'yieldbot',
   '_ping_',
-];
-
-// List of ad networks that will manually call `window.context.renderStart` to
-// emit render-start event when ad actually starts rendering. Please add
-// yourself here if you'd like to do so (which we encourage).
-export const waitForRenderStart = [
-  'doubleclick',
-  'fakead3p',
 ];
 
 /**
@@ -287,8 +285,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
-    const data = parseFragment(location.hash);
-    window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
@@ -472,7 +468,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   const thirdPartyHost = parseUrl(urls.thirdParty).hostname;
@@ -498,7 +494,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
  * Check that parent host name was whitelisted.
  * @param {!Window} window
  * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
   if (!window.document.referrer) {
@@ -534,7 +530,7 @@ export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
 /**
  * Throws if this window is a top level window.
  * @param {!Window} window
- * @visiblefortesting
+ * @visibleForTesting
  */
 export function ensureFramed(window) {
   if (window == window.parent) {

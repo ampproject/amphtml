@@ -43,11 +43,12 @@ import com.google.javascript.rhino.Node;
 class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   final AbstractCompiler compiler;
-  private final Set<String> stripTypeSuffixes;
+  private final Map<String, Set<String>> stripTypeSuffixes;
   private final Map<String, Node> assignmentReplacements;
   final boolean isProd;
 
-  public AmpPass(AbstractCompiler compiler, boolean isProd, Set<String> stripTypeSuffixes,
+  public AmpPass(AbstractCompiler compiler, boolean isProd,
+        Map<String, Set<String>> stripTypeSuffixes,
         Map<String, Node> assignmentReplacements) {
     this.compiler = compiler;
     this.stripTypeSuffixes = stripTypeSuffixes;
@@ -65,14 +66,8 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
 
   @Override public void visit(NodeTraversal t, Node n, Node parent) {
     if (isCallRemovable(n)) {
-      Node call = n.getGrandparent();
-      maybeEliminateCallExceptFirstParam(call, call.getParent());
-    // Remove `dev.assert` calls and preserve first argument if any.
-    } else if (isNameStripType(n, ImmutableSet.of( "dev.assert"))) {
-      maybeEliminateCallExceptFirstParam(n, parent);
-    // Remove any `stripTypes` passed in outright like `dev.fine`.
-    } else if (isNameStripType(n, stripTypeSuffixes)) {
-      removeExpression(n, parent);
+      Node rootcall = n.getGrandparent();
+      maybeEliminateCallExceptFirstParam(rootcall, rootcall.getParent());
     // Remove any `getMode().localDev` and `getMode().test` calls and replace it with `false`.
     } else if (isProd && isFunctionInvokeAndPropAccess(n, "$mode.getMode",
         ImmutableSet.of("localDev", "test"))) {
@@ -85,24 +80,46 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
       maybeReplaceRValueInVar(n, assignmentReplacements);
     }
   }
-  
+
+  /**
+   * For a function that looks like:
+   * function fun(val) {
+   *   return dev().assert(val);
+   * }
+   *
+   * The AST would look like:
+   * RETURN 24 [length: 25] [source_file: ./src/main.js]
+   *   CALL 24 [length: 17] [source_file: ./src/main.js]
+   *     GETPROP 24 [length: 12] [source_file: ./src/main.js]
+   *       CALL 24 [length: 5] [source_file: ./src/main.js]
+   *         NAME $dev$$module$src$log$$ 38 [length: 3] [originalname: dev] [source_file: ./src/log.js]
+   *         STRING assert 24 [length: 6] [source_file: ./src/main.js]
+   *     NAME $val$$ 24 [length: 3] [source_file: ./src/main.js]
+   *
+   * We are looking for the `CALL` that has a child NAME "$dev$$module$src$log$$" (or any signature from keys)
+   * and a child STRING "assert" (or any other signature from Set<String> value)
+   */
   private boolean isCallRemovable(Node n) {
-    // Looks for a label named "assert" or "fine" then traverses up
-    // looking for a "Call". This more or less looks for
-    // module$src$log.dev().assert(); or module$src$log.dev().fine();
-    if (n != null && n.isString() &&
-        // Refactor to read this in from passed in from command line runner instead
-        (n.getString() == "assert" || n.getString() == "fine")) {
-      Node call = n.getGrandparent();
-      if (call == null || !call.isCall()) {
+    if (n != null && n.isCall()) {
+      Node grandparent = n.getGrandparent();
+      // We want to make sure an `Log.prototype` method is actually invoked and not just
+      // a pointer to it.
+      if (grandparent == null || !grandparent.isCall()) {
         return false;
       }
-      // Look for a module named src/log.js and a `dev` export that is called.
-      Node siblingcall = n.getParent().getFirstChild();
-      if (siblingcall.isCall()) {
-        Node getprop = siblingcall.getFirstChild();
-        return getprop != null && getprop.isGetProp() &&
-            getprop.matchesQualifiedName("module$src$log.dev");
+      Node callname = n.getFirstChild();
+      Node getprop = n.getNext();
+      if (callname != null && callname.isGetProp()) {
+       Set<String> methodCallNames = stripTypeSuffixes
+          .get(callname.getQualifiedName());
+       if (methodCallNames != null) {
+         for (String methodCallName : methodCallNames) {
+           if (getprop != null && getprop.isString() &&
+               methodCallName == getprop.getString()) {
+             return true;
+           }
+         }
+       }
       }
     }
     return false;
@@ -168,23 +185,6 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
     compiler.reportCodeChange();
   }
 
-  /**
-   * Checks if expression is a GETPROP() (method invocation) and the property
-   * name ends with one of the items in stripTypeSuffixes.
-   * This method does not do a deep check and will only do a shallow
-   * expression -> property -> call check.
-   */
-  private boolean isNameStripType(Node n, Set<String> suffixes) {
-    if (!n.isCall()) {
-      return false;
-    }
-    Node getprop = n.getFirstChild();
-    if (getprop == null || !getprop.isGetProp()) {
-      return false;
-    }
-    return qualifiedNameEndsWithStripType(getprop, suffixes);
-  }
-
   private void removeExpression(Node n, Node parent) {
     if (parent.isExprResult()) {
       Node grandparent = parent.getParent();
@@ -196,11 +196,13 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   private void maybeEliminateCallExceptFirstParam(Node call, Node p) {
+    if (call == null) {
+      return;
+    }
     Node getprop = call.getFirstChild();
     if (getprop == null) {
       return;
     }
-
     Node firstArg = getprop.getNext();
     if (firstArg == null) {
       removeExpression(call, p);

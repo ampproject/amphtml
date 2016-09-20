@@ -22,7 +22,8 @@ import {dev} from '../src/log';
  */
 export function fakead3p(global, data) {
   if (data.ad_container) {
-    dev().assert(data.container == data.ad_container, 'wrong container');
+    dev().assert(
+        global.context.container == data.ad_container, 'wrong container');
   }
   if (data.valid && data.valid == 'true') {
     const img = document.createElement('img');

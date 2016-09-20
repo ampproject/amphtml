@@ -15,7 +15,6 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
 import {user} from '../../../src/log';
 
 class AmpO2Player extends AMP.BaseElement {
@@ -92,7 +91,7 @@ class AmpO2Player extends AMP.BaseElement {
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */

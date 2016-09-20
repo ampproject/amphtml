@@ -27,6 +27,26 @@ const TAG = 'amp-scrollable-carousel';
 
 export class AmpScrollableCarousel extends BaseCarousel {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {number} */
+    this.pos_ = 0;
+
+    /** @private {number} */
+    this.oldPos_ = 0;
+
+    /** @private {?Array<!Element>} */
+    this.cells_ = null;
+
+    /** @private {?Element} */
+    this.container_ = null;
+
+    /** @private {?number} */
+    this.scrollTimerId_ = null;
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
@@ -34,15 +54,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
-    /** @private {number} */
-    this.pos_ = 0;
-
-    this.oldPos_ = 0;
-
-    /** @private {!Array<!Element>} */
     this.cells_ = this.getRealChildren();
 
-    /** @private {!Element} */
     this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       'white-space': 'nowrap',
@@ -62,9 +75,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
       }
       this.container_.appendChild(cell);
     });
-
-    /** @private {?number} */
-    this.scrollTimerId_ = null;
 
     this.cancelTouchEvents_();
 
@@ -117,7 +127,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
     const currentScrollLeft = this.container_./*OK*/scrollLeft;
     this.pos_ = currentScrollLeft;
 
-    if (this.scrollTimerId_ == null) {
+    if (this.scrollTimerId_ === null) {
       this.waitForScroll_(currentScrollLeft);
     }
   }
@@ -177,7 +187,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
-   * @param {function()} callback
+   * @param {function(!Element)} callback
    * @private
    */
   withinWindow_(pos, callback) {

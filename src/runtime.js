@@ -20,11 +20,12 @@ import {
   addDocFactoryToExtension,
   addElementToExtension,
   addShadowRootFactoryToExtension,
+  installBuiltinElements,
   installExtensionsInShadowDoc,
   installExtensionsService,
   registerExtension,
 } from './service/extensions-impl';
-import {ampdocFor} from './ampdoc';
+import {ampdocServiceFor} from './ampdoc';
 import {cssText} from '../build/css';
 import {dev, user} from './log';
 import {fromClassForDoc, getService, getServiceForDoc} from './service';
@@ -39,8 +40,7 @@ import {installActionServiceForDoc} from './service/action-impl';
 import {installGlobalSubmitListener} from './document-submit';
 import {extensionsFor} from './extensions';
 import {installHistoryService} from './service/history-impl';
-import {installImg} from '../builtins/amp-img';
-import {installPixel} from '../builtins/amp-pixel';
+import {installPlatformService} from './service/platform-impl';
 import {installResourcesServiceForDoc} from './service/resources-impl';
 import {
   installShadowDoc,
@@ -48,15 +48,18 @@ import {
   shadowDocReady,
 } from './service/ampdoc-impl';
 import {installStandardActionsForDoc} from './service/standard-actions-impl';
+import {installStorageService} from './service/storage-impl';
 import {installStyles} from './style-installer';
+import {installTimerService} from './service/timer-impl';
 import {installTemplatesService} from './service/template-impl';
 import {installUrlReplacementsService} from './service/url-replacements-impl';
-import {installVideo} from '../builtins/amp-video';
+import {installVideoManagerForDoc} from './service/video-manager-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
 import {installXhrService} from './service/xhr-impl';
 import {isExperimentOn, toggleExperiment} from './experiments';
+import {initLogConstructor} from './log';
 import {platformFor} from './platform';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -67,6 +70,7 @@ import {viewportFor} from './viewport';
 import {waitForBody} from './dom';
 import * as config from './config';
 
+initLogConstructor();
 
 /** @const @private {string} */
 const TAG = 'runtime';
@@ -80,9 +84,12 @@ const elementsForTesting = {};
  */
 export function installRuntimeServices(global) {
   // TODO(dvoytenko, #3742): Split into runtime and ampdoc services.
+  installPlatformService(global);
+  installTimerService(global);
   installViewerService(global);
   installViewportService(global);
   installHistoryService(global);
+  installStorageService(global);
   installVsyncService(global);
   installUrlReplacementsService(global);
   installXhrService(global);
@@ -102,6 +109,7 @@ export function installAmpdocServices(ampdoc) {
   installResourcesServiceForDoc(ampdoc);
   installActionServiceForDoc(ampdoc);
   installStandardActionsForDoc(ampdoc);
+  installVideoManagerForDoc(ampdoc);
 }
 
 
@@ -110,9 +118,7 @@ export function installAmpdocServices(ampdoc) {
  * @param {!Window} global Global scope to adopt.
  */
 export function installBuiltins(global) {
-  installImg(global);
-  installPixel(global);
-  installVideo(global);
+  installBuiltinElements(global);
 }
 
 
@@ -328,7 +334,7 @@ export function adoptShadowMode(global) {
  */
 function prepareAndRegisterElement(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   if (opt_css) {
     installStyles(global.document, opt_css, () => {
       registerElementClass(global, name, implementationClass, opt_css);
@@ -349,7 +355,7 @@ function prepareAndRegisterElement(global, extensions,
  */
 function prepareAndRegisterElementShadowMode(global, extensions,
     name, implementationClass, opt_css) {
-  addElementToExtension(extensions, name, implementationClass);
+  addElementToExtension(extensions, name, implementationClass, opt_css);
   registerElementClass(global, name, implementationClass, opt_css);
   if (opt_css) {
     addShadowRootFactoryToExtension(extensions, shadowRoot => {
@@ -392,7 +398,7 @@ function registerElementClass(global, name, implementationClass, opt_css) {
  */
 function prepareAndRegisterServiceForDoc(global, extensions,
     name, opt_ctor, opt_factory) {
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
   const ampdoc = ampdocService.getAmpDoc();
   registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory);
 }
@@ -443,7 +449,7 @@ function registerServiceForDoc(ampdoc, name, opt_ctor, opt_factory) {
  */
 function prepareAndAttachShadowDoc(global, extensions, hostElement, doc, url) {
   dev().fine(TAG, 'Attach shadow doc:', doc);
-  const ampdocService = ampdocFor(global);
+  const ampdocService = ampdocServiceFor(global);
 
   hostElement.style.visibility = 'hidden';
   const shadowRoot = createShadowRoot(hostElement);

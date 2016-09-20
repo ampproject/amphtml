@@ -42,42 +42,21 @@ window.AMP_CONFIG.thirdPartyFrameRegex;
 window.AMP_CONFIG.cdnUrl;
 window.AMP_CONFIG.errorReportingUrl;
 
+// amp-viz-vega related externs.
+/**
+ * @typedef {{spec: function(!JSONType, function())}}
+ */
+let VegaParser;
+/**
+ * @typedef {{parse: VegaParser}}
+ */
+let VegaObject;
+/* @type {VegaObject} */
+window.vg;
+
 // Should have been defined in the closure compiler's extern file for
 // IntersectionObserverEntry, but appears to have been omitted.
 IntersectionObserverEntry.prototype.rootBounds;
-
-// Externed explicitly because we do not export Class shaped names
-// by default.
-/**
- * @constructor
- */
-window.AMP.BaseElement = function(element) {};
-
-/*
-     \   \  /  \  /   / /   \     |   _  \     |  \ |  | |  | |  \ |  |  /  _____|
- \   \/    \/   / /  ^  \    |  |_)  |    |   \|  | |  | |   \|  | |  |  __
-  \            / /  /_\  \   |      /     |  . `  | |  | |  . `  | |  | |_ |
-   \    /\    / /  _____  \  |  |\  \----.|  |\   | |  | |  |\   | |  |__| |
-    \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
-
-  Any private property for BaseElement should be declared in
-  build-system/amp.extern.js, this is so closure compiler doesn't rename
-  the private properties of BaseElement since if it did there is a
-  possibility that the private property's new symbol in the core compilation
-  unit would collide with a renamed private property in the inheriting class
-  in extensions.
- */
-window.AMP.BaseElement.prototype.layout_;
-
-/** @type {number} */
-window.AMP.BaseElement.prototype.layoutWidth_;
-
-/** @type {boolean} */
-window.AMP.BaseElement.prototype.inViewport_;
-
-window.AMP.BaseElement.prototype.actionMap_;
-
-window.AMP.BaseTemplate;
 
 // Externed explicitly because this private property is read across
 // binaries.

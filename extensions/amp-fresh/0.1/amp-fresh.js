@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-fresh-0.1.css';
+import {copyChildren} from '../../../src/dom';
+import {getOrInsallAmpFreshManager} from './amp-fresh-manager';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 
 
 /** @const */
@@ -24,17 +27,60 @@ const TAG = 'amp-fresh';
 
 export class AmpFresh extends AMP.BaseElement {
 
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {boolean} */
+    this.isExperimentOn_ = false;
+
+    /** @private {string} */
+    this.ampFreshId_ = '';
+
+    /** @private {?./amp-fresh-manager.AmpFreshManager} */
+    this.manager_ = null;
+  }
+
   /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+  isLayoutSupported() {
+    return true;
   }
 
   buildCallback() {
-    /** @private @const {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.win, TAG);
 
     user().assert(this.isExperimentOn_, `Experiment ${TAG} disabled`);
+
+    this.ampFreshId_ = user().assert(this.element.getAttribute('id'),
+        'amp-fresh must have an id.');
+
+    this.manager_ = getOrInsallAmpFreshManager(this.element);
+
+    this.manager_.register(this.ampFreshId_, this);
+  }
+
+  /**
+   * @param {!Element} surrogateAmpFresh
+   */
+  update(surrogateAmpFresh) {
+    // Never reparent the surrogate to the current document's subtree
+    // as this will trigger custom element life cycles,
+    // importing it shouldn't trigger.
+    const orphanSurrogate = dev().assertElement(
+      this.win.document.adoptNode(surrogateAmpFresh));
+    this.mutateElement(() => {
+      this.element.textContent = '';
+      copyChildren(orphanSurrogate, this.element);
+      this.setFreshReady();
+    });
+  }
+
+  /**
+   * Toggles the element to be visible and active.
+   */
+  setFreshReady() {
+    this.element.classList.add('amp-fresh-ready');
   }
 }
 
-AMP.registerElement('amp-fresh', AmpFresh);
+AMP.registerElement('amp-fresh', AmpFresh, CSS);

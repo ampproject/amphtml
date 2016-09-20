@@ -22,7 +22,6 @@ import {
   listenForOncePromise,
   postMessageToWindows,
 } from '../../../src/iframe-helper';
-import {waitForRenderStart} from '../../../3p/integration';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {viewerFor} from '../../../src/viewer';
 import {user} from '../../../src/log';
@@ -103,10 +102,8 @@ export class AmpAdApiHandler {
         }, this.is3p_, this.is3p_));
 
     // Install API that listen to ad response
-    const renderStartImplemented =
-        (waitForRenderStart.indexOf(this.baseInstance_.adType) >= 0);
-
-    if (renderStartImplemented) {
+    if (this.baseInstance_.config
+        && this.baseInstance_.config.renderStartImplemented) {
       // If support render-start, create a race between render-start no-content
       this.adResponsePromise_ = listenForOncePromise(this.iframe_,
         ['render-start', 'no-content'], this.is3p_).then(info => {
@@ -283,3 +280,7 @@ export class AmpAdApiHandler {
     }
   }
 }
+
+// Make the class available to other late loaded amp-ad implementations
+// without them having to depend on it directly.
+AMP.AmpAdApiHandler = AmpAdApiHandler;

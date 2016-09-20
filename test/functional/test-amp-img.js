@@ -120,7 +120,7 @@ describe('amp-img', () => {
     });
 
     it('should not display fallback if loading succeeds', () => {
-      sandbox.stub(impl, 'loadPromise_').returns(Promise.resolve());
+      sandbox.stub(impl, 'loadPromise').returns(Promise.resolve());
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
@@ -137,7 +137,7 @@ describe('amp-img', () => {
     });
 
     it('should display fallback if loading fails', () => {
-      sandbox.stub(impl, 'loadPromise_').returns(Promise.reject());
+      sandbox.stub(impl, 'loadPromise').returns(Promise.reject());
       const errorSpy = sandbox.spy(impl, 'onImgLoadingError_');
       const toggleSpy = sandbox.spy(impl, 'toggleFallback');
       impl.buildCallback();
@@ -154,7 +154,7 @@ describe('amp-img', () => {
     });
 
     it('should fallback only once', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise_');
+      const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub
           .onCall(0).returns(Promise.reject())
           .onCall(1).returns(Promise.resolve());
@@ -187,7 +187,7 @@ describe('amp-img', () => {
     });
 
     it('should remove the fallback if src is successfully updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise_');
+      const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub.onCall(0).returns(Promise.reject());
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
@@ -208,7 +208,7 @@ describe('amp-img', () => {
     });
 
     it('should not remove the fallback if src is not updated', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise_');
+      const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub.onCall(0).returns(Promise.reject());
       loadStub.returns(Promise.resolve());
       impl.buildCallback();
@@ -228,7 +228,7 @@ describe('amp-img', () => {
 
     it('should not remove the fallback if src is updated but ' +
        'fails fetching', () => {
-      const loadStub = sandbox.stub(impl, 'loadPromise_');
+      const loadStub = sandbox.stub(impl, 'loadPromise');
       loadStub.returns(Promise.reject());
       impl.buildCallback();
 

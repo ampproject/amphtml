@@ -17,6 +17,7 @@
 import {installActivityService,} from
     '../../extensions/amp-analytics/0.1/activity-impl';
 import {activityFor} from '../../src/activity';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {viewerFor} from '../../src/viewer';
 import {installViewportService} from '../../src/service/viewport-impl';
@@ -78,6 +79,7 @@ describe('Activity getTotalEngagedTime', () => {
       addEventListener: () => {},
     };
 
+    installPlatformService(fakeWin);
     installViewerService(fakeWin);
     viewer = viewerFor(fakeWin);
 

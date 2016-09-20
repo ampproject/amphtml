@@ -914,33 +914,6 @@ describe('empty Slides functional', () => {
     }).to.throw(/should have at least 1 slide/);
   });
 
-  it('should not throw an error on layoutCallback', () => {
-    expect(() => {
-      slides.buildCallback();
-    }).to.throw(/should have at least 1 slide/);
-    expect(() => {
-      slides.layoutCallback();
-    }).to.not.throw();
-  });
-
-  it('should not throw an error on viewportCallback', () => {
-    expect(() => {
-      slides.buildCallback();
-    }).to.throw(/should have at least 1 slide/);
-    expect(() => {
-      slides.viewportCallback();
-    }).to.not.throw();
-  });
-
-  it('should not throw an error on goCallback', () => {
-    expect(() => {
-      slides.buildCallback();
-    }).to.throw(/should have at least 1 slide/);
-    expect(() => {
-      slides.goCallback();
-    }).to.not.throw();
-  });
-
   it('should not have any controls', () => {
     expect(() => {
       slides.buildCallback();

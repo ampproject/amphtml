@@ -27,7 +27,7 @@ import {
 } from '../amp-app-banner';
 
 import {xhrFor} from '../../../../src/xhr';
-import {installStorageService} from '../../../amp-analytics/0.1/storage-impl';
+import {installStorageService} from '../../../../src/service/storage-impl';
 import '../../../amp-analytics/0.1/amp-analytics';
 import {timerFor} from '../../../../src/timer';
 

@@ -30,6 +30,14 @@ const TAG = 'amp-install-serviceworker';
  * of the current page.
  */
 class AmpInstallServiceWorker extends AMP.BaseElement {
+
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
+
+    /** @private {?string}  */
+    this.iframeSrc_ = null;
+  }
   /** @override */
   buildCallback() {
     const win = this.win;
@@ -38,9 +46,6 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     }
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
-
-    /** @private {?string}  */
-    this.iframeSrc_ = null;
 
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
       const iframeSrc = this.element.getAttribute('data-iframe-src');
@@ -91,7 +96,6 @@ class AmpInstallServiceWorker extends AMP.BaseElement {
     if (!viewerFor(this.win).isVisible()) {
       return;
     }
-    this.insertedIframe_ = true;
     // The iframe will stil be loaded.
     this.element.style.display = 'none';
     const iframe = /*OK*/document.createElement('iframe');

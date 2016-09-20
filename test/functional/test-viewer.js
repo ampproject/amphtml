@@ -17,9 +17,11 @@
 import {Viewer} from '../../src/service/viewer-impl';
 import {dev} from '../../src/log';
 import {platformFor} from '../../src/platform';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installPerformanceService} from '../../src/service/performance-impl';
 import {resetServiceForTesting} from '../../src/service';
 import {timerFor} from '../../src/timer';
+import {installTimerService} from '../../src/service/timer-impl';
 import * as sinon from 'sinon';
 
 
@@ -76,6 +78,8 @@ describe('Viewer', () => {
     windowApi.history = {
       replaceState: sandbox.spy(),
     };
+    installPlatformService(windowApi);
+    installTimerService(windowApi);
     events = {};
     errorStub = sandbox.stub(dev(), 'error');
     windowMock = sandbox.mock(windowApi);
@@ -296,10 +300,6 @@ describe('Viewer', () => {
   });
 
   describe('should receive the visibilitychange event', () => {
-    beforeEach(() => {
-      viewer.isEmbedded_ = true;
-    });
-
     it('should change prerenderSize', () => {
       viewer.receiveMessage('visibilitychange', {
         prerenderSize: 4,

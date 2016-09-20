@@ -24,7 +24,10 @@ import {
   updateViewportMetaString,
 } from '../../src/service/viewport-impl';
 import {getStyle} from '../../src/style';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {loadPromise} from '../../src/event-helper';
+import {setParentWindow} from '../../src/service';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
@@ -67,6 +70,7 @@ describe('Viewport', () => {
       clearTimeout: window.clearTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
+    installPlatformService(windowApi);
     installViewerService(windowApi);
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
@@ -467,6 +471,79 @@ describe('Viewport', () => {
     expect(windowApi.document.documentElement.style['touch-action'])
         .to.equal('pan-y');
   });
+
+  describe('for child window', () => {
+    let viewport;
+    let bindingMock;
+    let iframe;
+    let iframeWin;
+
+    beforeEach(() => {
+      viewport = new Viewport(window, binding, viewer);
+      bindingMock = sandbox.mock(binding);
+      iframe = document.createElement('iframe');
+      const html = '<div id="one"></div>';
+      let promise;
+      if ('srcdoc' in iframe) {
+        iframe.srcdoc = html;
+        promise = loadPromise(iframe);
+        document.body.appendChild(iframe);
+      } else {
+        iframe.src = 'about:blank';
+        document.body.appendChild(iframe);
+        const childDoc = iframe.contentWindow.document;
+        childDoc.open();
+        childDoc.write(html);
+        childDoc.close();
+        promise = Promise.resolve();
+      }
+      return promise.then(() => {
+        iframeWin = iframe.contentWindow;
+        setParentWindow(iframeWin, window);
+      });
+    });
+
+    afterEach(() => {
+      if (iframe.parentElement) {
+        iframe.parentElement.removeChild(iframe);
+      }
+      bindingMock.verify();
+    });
+
+    it('should calculate child window element rect via parent', () => {
+      viewport.scrollLeft_ = 0;
+      viewport.scrollTop_ = 0;
+      const element = iframeWin.document.createElement('div');
+      iframeWin.document.body.appendChild(element);
+      bindingMock.expects('getLayoutRect')
+          .withExactArgs(element, 0, 0)
+          .returns({left: 20, top: 10}).once();
+      bindingMock.expects('getLayoutRect')
+          .withExactArgs(iframe, 0, 0)
+          .returns({left: 211, top: 111}).once();
+
+      const rect = viewport.getLayoutRect(element);
+      expect(rect.left).to.equal(211 + 20);
+      expect(rect.top).to.equal(111 + 10);
+    });
+
+    it('should offset child window element with parent scroll pos', () => {
+      viewport.scrollLeft_ = 200;
+      viewport.scrollTop_ = 100;
+      const element = iframeWin.document.createElement('div');
+      iframeWin.document.body.appendChild(element);
+      bindingMock.expects('getLayoutRect')
+          .withExactArgs(element, 0, 0)
+          .returns({left: 20, top: 10}).once();
+      bindingMock.expects('getLayoutRect')
+          .withExactArgs(iframe, 200, 100)
+          .returns({left: 211, top: 111}).once();
+
+      const rect = viewport.getLayoutRect(element);
+      expect(rect.left).to.equal(211 + 20);
+      expect(rect.top).to.equal(111 + 10);
+    });
+  });
 });
 
 
@@ -657,6 +734,7 @@ describe('Viewport META', () => {
         clearTimeout: window.clearTimeout,
         location: {},
       };
+      installPlatformService(windowApi);
       installViewerService(windowApi);
       binding = new ViewportBindingDef();
       viewport = new Viewport(windowApi, binding, viewer);
@@ -756,6 +834,7 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+
     documentElement = {
       style: {},
     };
@@ -767,7 +846,9 @@ describe('ViewportBindingNatural', () => {
       body: documentBody,
       defaultView: windowApi,
     };
+    windowApi.navigator = {userAgent: ''};
     windowMock = sandbox.mock(windowApi);
+    installPlatformService(windowApi);
     viewer = {
       isEmbedded: () => false,
       getPaddingTop: () => 19,
