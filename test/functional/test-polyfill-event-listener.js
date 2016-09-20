@@ -16,10 +16,121 @@
 
 import {
   polyfillOptionsSupport,
-  supportsOptions
+  supportsOptions,
 } from '../../src/polyfills/event-listener';
-
 import * as sinon from 'sinon';
+
+describe('polyfillOptionsSupport', () => {
+  let sandbox;
+  let win;
+  let originalAdd;
+  let originalRemove;
+
+  it('should override original (add|remove)EventHandler methods', () => {
+    const proto = win.EventTarget.prototype;
+
+    expect(proto.addEventListener).to.equal(originalAdd);
+    expect(proto.removeEventListener).to.equal(originalRemove);
+
+    polyfillOptionsSupport(win);
+
+    expect(proto.addEventListener).to.not.equal(originalAdd);
+    expect(proto.removeEventListener).to.not.equal(originalRemove);
+  });
+
+  it('should fallback to Element if EventTarget is not present', () => {
+    win.EventTarget = undefined;
+    const proto = win.Element.prototype;
+
+    expect(proto.addEventListener).to.equal(originalAdd);
+    expect(proto.removeEventListener).to.equal(originalRemove);
+
+    polyfillOptionsSupport(win);
+
+    expect(proto.addEventListener).to.not.equal(originalAdd);
+    expect(proto.removeEventListener).to.not.equal(originalRemove);
+  });
+
+  it('third arg of original method should be false if empty options', () => {
+    polyfillOptionsSupport(win);
+    const eventTarget = new win.EventTarget();
+
+    eventTarget.addEventListener('', '', {});
+    expect(originalAdd.calledWithExactly('', '', false)).to.be.true;
+
+    eventTarget.removeEventListener('', '', {});
+    expect(originalRemove.calledWithExactly('', '', false)).to.be.true;
+  });
+
+  it('third arg of original method should be true if options.capture is ' +
+      'true', () => {
+    polyfillOptionsSupport(win);
+    const eventTarget = new win.EventTarget();
+    const options = {capture: true};
+
+    eventTarget.addEventListener('', '', options);
+    expect(originalAdd.calledWithExactly('', '', true)).to.be.true;
+
+    eventTarget.removeEventListener('', '', options);
+    expect(originalRemove.calledWithExactly('', '', true)).to.be.true;
+  });
+
+  it('third arg of original method should be false if options.capture is ' +
+      'false', () => {
+    polyfillOptionsSupport(win);
+    const eventTarget = new win.EventTarget();
+    const options = {capture: false};
+
+    eventTarget.addEventListener('', '', options);
+    expect(originalAdd.calledWithExactly('', '', false)).to.be.true;
+
+    eventTarget.removeEventListener('', '', options);
+    expect(originalRemove.calledWithExactly('', '', false)).to.be.true;
+  });
+
+  it('third arg of original method should not be changed if options' +
+      'is not an object', () => {
+
+    polyfillOptionsSupport(win);
+
+    test('');
+    test(42);
+    test(false);
+    test(true);
+    test(null);
+    test(undefined);
+
+    function test(options) {
+      const eventTarget = new win.EventTarget();
+      eventTarget.addEventListener('', '', options);
+      expect(originalAdd.calledWithExactly('', '', options)).to.be.true;
+
+      eventTarget.removeEventListener('', '', options);
+      expect(originalRemove.calledWithExactly('', '', options)).to.be.true;
+
+      originalAdd.reset();
+      originalRemove.reset();
+    }
+  });
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    win = sandbox.mock();
+    originalAdd = sandbox.spy();
+    originalRemove = sandbox.spy();
+
+    function EventTarget() {};
+    EventTarget.prototype.addEventListener = originalAdd;
+    EventTarget.prototype.removeEventListener = originalRemove;
+
+    win.EventTarget = EventTarget;
+    win.Element = EventTarget;
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+});
 
 describe('supportsOptions', () => {
   let sandbox;
@@ -54,118 +165,4 @@ describe('supportsOptions', () => {
       }
     });
   }
-});
-
-describe('polyfillOptionsSupport', () => {
-  let sandbox;
-  let win;
-  let originalAdd;
-  let originalRemove;
-
-  it('should override original add/remove event handler methods', () => {
-    const proto = win.EventTarget.prototype;
-
-    expect(proto.addEventListener).to.equal(originalAdd);
-    expect(proto.removeEventListener).to.equal(originalRemove);
-
-    polyfillOptionsSupport(win);
-
-    expect(proto.addEventListener).to.not.equal(originalAdd);
-    expect(proto.removeEventListener).to.not.equal(originalRemove);
-  });
-
-  it('should fallback to Element if EventTarget is not supported', () => {
-    win.EventTarget = undefined;
-    const proto = win.Element.prototype;
-
-    expect(proto.addEventListener).to.equal(originalAdd);
-    expect(proto.removeEventListener).to.equal(originalRemove);
-
-    polyfillOptionsSupport(win);
-
-    expect(proto.addEventListener).to.not.equal(originalAdd);
-    expect(proto.removeEventListener).to.not.equal(originalRemove);
-  });
-
-  it('third arg of original method should be false if empty options', () => {
-    polyfillOptionsSupport(win);
-    const eventTarget = new win.EventTarget();
-
-    eventTarget.addEventListener('', '', {});
-    expect(originalAdd.calledWithExactly('', '', false)).to.be.true;
-
-    eventTarget.removeEventListener('', '', {});
-    expect(originalRemove.calledWithExactly('', '', false)).to.be.true;
-  });
-
-  it('third arg of original method should be true if options.capture is '
-      + 'true', () => {
-    polyfillOptionsSupport(win);
-    const eventTarget = new win.EventTarget();
-    const options = {capture: true};
-
-    eventTarget.addEventListener('', '', options);
-    expect(originalAdd.calledWithExactly('', '', true)).to.be.true;
-
-    eventTarget.removeEventListener('', '', options);
-    expect(originalRemove.calledWithExactly('', '', true)).to.be.true;
-  });
-
-  it('third arg of original method should be true if options.capture is '
-      + 'false', () => {
-    polyfillOptionsSupport(win);
-    const eventTarget = new win.EventTarget();
-    const options = {capture: false};
-
-    eventTarget.addEventListener('', '', options);
-    expect(originalAdd.calledWithExactly('', '', false)).to.be.true;
-
-    eventTarget.removeEventListener('', '', options);
-    expect(originalRemove.calledWithExactly('', '', false)).to.be.true;
-  });
-
-  it('third arg of original method should not be changed if options' +
-      'is not an object', () => {
-
-    polyfillOptionsSupport(win);
-
-    test('');
-    test(10);
-    test(false);
-    test(true);
-    test(null);
-    test(undefined);
-
-    function test(options) {
-      const eventTarget = new win.EventTarget();
-      eventTarget.addEventListener('', '', options);
-      expect(originalAdd.calledWithExactly('', '', options)).to.be.true;
-
-      eventTarget.removeEventListener('', '', options);
-      expect(originalRemove.calledWithExactly('', '', options)).to.be.true;
-
-      originalAdd.reset();
-      originalRemove.reset();
-    }
-
-
-  });
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    win = sandbox.mock();
-    originalAdd = sandbox.spy();
-    originalRemove = sandbox.spy();
-
-    function EventTarget() {};
-    EventTarget.prototype.addEventListener = originalAdd;
-    EventTarget.prototype.removeEventListener = originalRemove;
-
-    win.EventTarget = EventTarget;
-    win.Element = EventTarget;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
 });

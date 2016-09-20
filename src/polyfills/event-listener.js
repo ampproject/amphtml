@@ -24,29 +24,36 @@
  * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
  *
  * Note that we do NOT polyfill the actual behaviour of different options. For
- * example, it is impossible to truly polyfill `passive` option, so the options
- * would only work in browsers that support them.
+ * example, it is impossible to truly polyfill `passive` option, so the
+ * individual options would only work in browsers that support them.
  *
  * @private Visible for testing.
  * @param {!Window} win
  */
 export function polyfillOptionsSupport(win) {
+  // In Safari, EventListener methods are on the Element prototype.
   const eventInterface = win.EventTarget || win.Element;
   const eventPrototype = eventInterface.prototype;
   const originalAdd = eventPrototype.addEventListener;
   const originalRemove = eventPrototype.removeEventListener;
 
+  /**
+   * @override
+   */
   eventPrototype.addEventListener = function(type, listener, options) {
     return originalAdd.call(this, type, listener, useCapture(options));
   };
 
+  /**
+   * @override
+   */
   eventPrototype.removeEventListener = function(type, listener, options) {
     return originalRemove.call(this, type, listener, useCapture(options));
   };
 }
 
 /**
- * Whether options as third-argument is already supported by the browser.
+ * Whether options-as-third-argument is already supported by the browser.
  * @private Visible for testing.
  * @param {!Window} win
  * @return {boolean}
@@ -75,7 +82,7 @@ export function supportsOptions(win) {
 
 /**
  * Decides whether capture argument should be true/false based on the value of
- * given options argument.
+ * then given options argument.
  * @param {*} options
  */
 function useCapture(options) {

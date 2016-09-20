@@ -129,10 +129,28 @@ export class Gestures {
     /** @private @const {function(!Event)} */
     this.boundOnTouchCancel_ = this.onTouchCancel_.bind(this);
 
-    this.element_.addEventListener('touchstart', this.boundOnTouchStart_);
-    this.element_.addEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.addEventListener('touchmove', this.boundOnTouchMove_);
-    this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_);
+    /**
+     * If not preventing default, tell the browser to optimize scrolling.
+     * @private @const {!Object|undefined}
+     */
+    this.eventListenerOptions_ = {
+      passive: !!this.shouldNotPreventDefault_,
+    };
+
+    /**
+     * TODO(aghassemi, #5105): Type check
+     * @suppress {checkTypes}
+     */
+    (() => {
+      this.element_.addEventListener('touchstart', this.boundOnTouchStart_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchend', this.boundOnTouchEnd_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchmove', this.boundOnTouchMove_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_,
+          this.eventListenerOptions_);
+    })();
 
     /** @private {boolean} */
     this.passAfterEvent_ = false;
@@ -142,10 +160,20 @@ export class Gestures {
    * Unsubscribes from all pointer events.
    */
   cleanup() {
-    this.element_.removeEventListener('touchstart', this.boundOnTouchStart_);
-    this.element_.removeEventListener('touchend', this.boundOnTouchEnd_);
-    this.element_.removeEventListener('touchmove', this.boundOnTouchMove_);
-    this.element_.removeEventListener('touchcancel', this.boundOnTouchCancel_);
+    /**
+     * TODO(aghassemi, #5105): Type check
+     * @suppress {checkTypes}
+     */
+    (() => {
+      this.element_.addEventListener('touchstart', this.boundOnTouchStart_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchend', this.boundOnTouchEnd_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchmove', this.boundOnTouchMove_,
+          this.eventListenerOptions_);
+      this.element_.addEventListener('touchcancel', this.boundOnTouchCancel_,
+          this.eventListenerOptions_);
+    })();
     this.pass_.cancel();
   }
 

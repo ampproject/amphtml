@@ -513,6 +513,8 @@ export class AmpSlideScroll extends BaseSlides {
   cancelTouchEvents_() {
     // TODO(aghassemi, #4754): Ideally we only stop propagation of horizontal
     // touchmove events.
+
+    // We don't preventDefault, tell the browser to optimize scrolling.
     const options = {
       passive: true,
     };
