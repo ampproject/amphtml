@@ -463,12 +463,11 @@ export class UrlReplacements {
    * @private
    */
   getTimingDataAsync_(startEvent, endEvent) {
-    let metric = this.getTimingDataSync_(startEvent, endEvent);
+    const metric = this.getTimingDataSync_(startEvent, endEvent);
     if (metric === '') {
       // Metric is not yet available. Retry after a delay.
       return loadPromise(this.win_).then(() => {
-        metric = this.getTimingDataSync_(startEvent, endEvent);
-        return metric === '' ? undefined : metric;
+        return this.getTimingDataSync_(startEvent, endEvent);
       });
     }
     return Promise.resolve(metric);
@@ -518,7 +517,7 @@ export class UrlReplacements {
         && this.win_['performance']['navigation'];
     if (!navigationInfo || navigationInfo[attribute] === undefined) {
       // PerformanceNavigation interface is not supported or attribute is not implemented.
-      return ;
+      return;
     }
 
     return navigationInfo[attribute];
