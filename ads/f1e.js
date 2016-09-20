@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix} from '../src/3p';
+import {writeScript, validateSrcPrefix} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -22,6 +22,6 @@ import {writeScript, validateSrcPrefix} from '../src/3p';
  */
 export function f1e(global, data) {
   validateSrcPrefix('https:', data.url);
-  global.f1e_data = data;
-  writeScript(global, "https://img.ak.impact-ad.jp/util/f1e_amp.min.js");
+  global.f1eData = data;
+  writeScript(global, 'https://img.ak.impact-ad.jp/util/f1e_amp.min.js');
 }
