@@ -231,6 +231,21 @@ describe('CustomElement', () => {
   });
 
 
+  it('should initialize ampdoc and resources on attach only', () => {
+    const element = new ElementClass();
+    expect(element.ampdoc_).to.be.null;
+    expect(() => element.getAmpDoc()).to.throw(/no ampdoc yet/);
+    expect(element.resources_).to.be.null;
+    expect(() => element.getResources()).to.throw(/no resources yet/);
+
+    // Resources available after attachment.
+    element.attachedCallback();
+    expect(element.ampdoc_).to.be.ok;
+    expect(element.getAmpDoc()).to.be.ok;
+    expect(element.resources_).to.be.ok;
+    expect(element.getResources()).to.be.ok;
+  });
+
   it('Element - createdCallback', () => {
     const element = new ElementClass();
     expect(element).to.have.class('-amp-element');
@@ -315,6 +330,7 @@ describe('CustomElement', () => {
     element.layout_ = Layout.FILL;
     element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     element.everAttached = true;
+    element.resources_ = resources;
     resourcesMock.expects('upgraded').withExactArgs(element).once();
 
     element.upgrade(TestElement);
@@ -723,6 +739,7 @@ describe('CustomElement', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
     element.everAttached = true;
+    element.resources_ = resources;
     resourcesMock.expects('upgraded').withExactArgs(element).once();
     element.upgrade(TestElement);
     element.build();
@@ -1069,6 +1086,7 @@ describe('CustomElement', () => {
       const element = new StubElementClass();
       element.setAttribute('layout', 'fill');
       element.everAttached = true;
+      element.resources_ = resources;
       resourcesMock.expects('upgraded').withExactArgs(element).once();
       element.upgrade(TestElement);
       element.build();
@@ -1249,6 +1267,7 @@ describe('CustomElement Loading Indicator', () => {
     element = new ElementClass();
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
+    element.resources_ = resources;
     vsync = vsyncFor(window);
     savedMutate = vsync.mutate;
     vsyncTasks = [];
@@ -1523,6 +1542,7 @@ describe('CustomElement Overflow Element', () => {
     element = new ElementClass();
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
+    element.resources_ = resources;
     overflowElement = document.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
