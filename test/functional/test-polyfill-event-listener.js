@@ -90,7 +90,6 @@ describe('polyfillOptionsSupport', () => {
 
   it('third arg of original method should not be changed if options' +
       'is not an object', () => {
-
     polyfillOptionsSupport(win);
 
     test('');
