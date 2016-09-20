@@ -332,8 +332,8 @@ export class AmpA4A extends AMP.BaseElement {
                 return keyInfoPromise.then(keyInfo => {
                   // @param {?PublicKeyInfoDef} keyInfo
                   // @return {!Promise}
-                  return !keyInfo ? Promise.resolve() :
-                    verifySignature(
+                  if (keyInfo) {
+                    return verifySignature(
                         new Uint8Array(creativeParts.creative),
                         creativeParts.signature,
                         keyInfo)
@@ -349,6 +349,8 @@ export class AmpA4A extends AMP.BaseElement {
                       // @return {!Promise}
                       user().error('Amp Ad', err, this.element);
                     });
+                  }
+                  return Promise.resolve();
                 });
               }));
             });
@@ -608,7 +610,7 @@ export class AmpA4A extends AMP.BaseElement {
           jwkSet.map(jwk =>
             importPublicKey(jwk).catch(err => {
               user().error('Amp Ad', err, this.element);
-              return Promise.resolve(null);
+              return null;
             }))));
   }
 
