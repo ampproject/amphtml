@@ -246,4 +246,4 @@ If you have non-trivial logic in `/ads/yournetwork.js`, adding a unit test at `/
 
 ### Other tips
 
-Please consider implement the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which will help AMP to provide user a much better ad loading experience. 
+Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience. 
