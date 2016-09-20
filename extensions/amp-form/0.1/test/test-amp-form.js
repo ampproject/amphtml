@@ -120,24 +120,15 @@ describe('amp-form', () => {
         /Illegal input name, __amp_source_origin found/);
   });
 
-  it('should listen to submit event and inputs blur and input events', () => {
+  it('should listen to submit, blur and input events', () => {
     const form = getForm();
-    const nameInput = form.querySelector('input[name=name]');
-    nameInput.addEventListener = sandbox.spy();
-    const emailInput = document.createElement('input');
-    emailInput.addEventListener = sandbox.spy();
-    form.addEventListener = sandbox.spy();
-    emailInput.setAttribute('type', 'email');
-    form.appendChild(emailInput);
     form.addEventListener = sandbox.spy();
     form.setAttribute('action-xhr', 'https://example.com');
     new AmpForm(form);
     expect(form.addEventListener.called).to.be.true;
-    expect(form.addEventListener.calledWith('submit')).to.be.true;
-    expect(nameInput.addEventListener.calledWith('blur')).to.be.true;
-    expect(nameInput.addEventListener.calledWith('input')).to.be.true;
-    expect(emailInput.addEventListener.calledWith('blur')).to.be.true;
-    expect(emailInput.addEventListener.calledWith('input')).to.be.true;
+    expect(form.addEventListener).to.be.calledWith('submit');
+    expect(form.addEventListener).to.be.calledWith('blur');
+    expect(form.addEventListener).to.be.calledWith('input');
     expect(form.className).to.contain('-amp-form');
   });
 

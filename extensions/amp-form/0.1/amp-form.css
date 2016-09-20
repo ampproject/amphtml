@@ -50,5 +50,5 @@ form.amp-form-submit-error [submit-error] {
 }
 
 [visible-when-invalid].visible {
-  display: block;
+  display: initial;
 }

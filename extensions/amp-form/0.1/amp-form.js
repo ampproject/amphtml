@@ -140,17 +140,14 @@ export class AmpForm {
   /** @private */
   installSubmitHandler_() {
     this.form_.addEventListener('submit', e => this.handleSubmit_(e), true);
-    const inputs = this.form_.querySelectorAll('input,select,textarea');
-    for (let i = 0; i < inputs.length; i++) {
-      inputs[i].addEventListener('blur', e => {
-        onInputInteraction_(e);
-        this.validator_.onBlur(e);
-      });
-      inputs[i].addEventListener('input', e => {
-        onInputInteraction_(e);
-        this.validator_.onInput(e);
-      });
-    }
+    this.form_.addEventListener('blur', e => {
+      onInputInteraction_(e);
+      this.validator_.onBlur(e);
+    }, true);
+    this.form_.addEventListener('input', e => {
+      onInputInteraction_(e);
+      this.validator_.onInput(e);
+    });
   }
 
   /**

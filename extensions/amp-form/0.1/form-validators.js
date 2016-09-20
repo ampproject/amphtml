@@ -145,7 +145,7 @@ export class AbstractCustomValidator extends FormValidator {
     /** @private @const {!Object<string, !Element>} */
     this.inputValidationsDict_ = {};
 
-    /** @private @const {!Array<!Element>} */
+    /** @private @const {!Object<string, !Element>} */
     this.inputVisibleValidationDict_ = {};
   }
 
@@ -163,9 +163,9 @@ export class AbstractCustomValidator extends FormValidator {
    * Hides all validation messages.
    */
   hideAllValidations() {
-    const inputs = this.form.querySelectorAll('input,select,textarea');
-    for (let i = 0; i < inputs.length; i++) {
-      this.hideValidationFor(inputs[i]);
+    for (const id in this.inputVisibleValidationDict_) {
+      const input = this.doc.getElementById(id);
+      this.hideValidationFor(input);
     }
   }
 
@@ -213,7 +213,6 @@ export class AbstractCustomValidator extends FormValidator {
     if (!visibleValidation) {
       return;
     }
-
     input.removeAttribute('aria-invalid');
     visibleValidation.classList.remove('visible');
     delete this.inputVisibleValidationDict_[input.id];
