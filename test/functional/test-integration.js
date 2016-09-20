@@ -35,10 +35,6 @@ describe('3p integration.js', () => {
 
   it('should register integrations', () => {
     window.ampTestRuntimeConfig.adTypes.forEach(adType => {
-      // TODO: remove this once we register fakead3p as normal networks.
-      if (adType == 'fakead3p') {
-        return;
-      }
       expect(registrations, `Missing registration for [${adType}]`)
           .to.contain.key(adType);
     });
