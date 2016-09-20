@@ -64,7 +64,7 @@ class AmpSocialShare extends AMP.BaseElement {
 
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = urlReplacementsFor(this.win);
-    urlReplacements.expand(hrefWithVars).then(href => {
+    urlReplacements.expandAsync(hrefWithVars).then(href => {
       this.href_ = href;
       // mailto: protocol breaks when opened in _blank on iOS Safari.
       const isMailTo = /^mailto:$/.test(parseUrl(href).protocol);
