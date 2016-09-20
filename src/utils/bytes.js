@@ -25,18 +25,17 @@ import {dev} from '../log';
 export function utf8Decode(bytes) {
   if (TextDecoder) {
     return Promise.resolve(new TextDecoder('utf-8').decode(bytes));
-  } else {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-      reader.onloadend = () => {
-        resolve(reader.result);
-      };
-      reader.readAsText(new Blob([bytes]));
-    });
   }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => {
+      reject(reader.error);
+    };
+    reader.onloadend = () => {
+      resolve(reader.result);
+    };
+    reader.readAsText(new Blob([bytes]));
+  });
 }
 
 /**
@@ -47,20 +46,19 @@ export function utf8Decode(bytes) {
 export function utf8Encode(string) {
   if (TextEncoder) {
     return Promise.resolve(new TextEncoder('utf-8').encode(string));
-  } else {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => {
-        reject(reader.error);
-      };
-      reader.onloadend = () => {
-        // Because we used readAsArrayBuffer, we know the result must be an
-        // ArrayBuffer.
-        resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
-      };
-      reader.readAsArrayBuffer(new Blob([string]));
-    });
   }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => {
+      reject(reader.error);
+    };
+    reader.onloadend = () => {
+      // Because we used readAsArrayBuffer, we know the result must be an
+      // ArrayBuffer.
+      resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
+    };
+    reader.readAsArrayBuffer(new Blob([string]));
+  });
 }
 
 /**

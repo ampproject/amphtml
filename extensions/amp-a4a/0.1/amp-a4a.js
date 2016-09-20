@@ -574,14 +574,10 @@ export class AmpA4A extends AMP.BaseElement {
       return [];
     }
     const jwkSetPromises = this.getSigningServiceNames().map(serviceName => {
-      // @param {string} serviceName
-      // @return {!Promise<!Array<!Object>>}
       const url = signingServerURLs[serviceName];
       if (url) {
         return xhrFor(this.win).fetchJson(url, {mode: 'cors', method: 'GET'})
             .then(jwkSetObj => {
-              // @param {*} jwkSetObj
-              // @return {!Promise<!Array<!Object>>}
               if (isObject(jwkSetObj) && Array.isArray(jwkSetObj.keys) &&
                   jwkSetObj.keys.every(isObject)) {
                 return jwkSetObj.keys;
@@ -593,8 +589,6 @@ export class AmpA4A extends AMP.BaseElement {
                 return [];
               }
             }).catch(err => {
-              // @param {*} err
-              // @return {!Promise<!Array<*>>}
               user().error('Amp Ad', err, this.element);
               return [];
             });
@@ -610,20 +604,12 @@ export class AmpA4A extends AMP.BaseElement {
       jwkSetPromises.push(Promise.resolve(devJwkSet));
     }
     return jwkSetPromises.map(jwkSetPromise =>
-        // @param {!Promise<!Array<!Object>>} jwkSetPromise
-        // @return {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
         jwkSetPromise.then(jwkSet =>
-        // @param {!Array<!Object>} jwkSet
-        // @return {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
-        Promise.resolve(jwkSet.map(jwk =>
-        // @param {!Object} jwk
-        // @return {!Promise<?PublicKeyInfoDef>}
-        importPublicKey(jwk).catch(err => {
-          // @param {*} err
-          // @return {!Promise<?PublicKeyInfoDef>}
-          user().error('Amp Ad', err, this.element);
-          return Promise.resolve(null);
-        })))));
+          jwkSet.map(jwk =>
+            importPublicKey(jwk).catch(err => {
+              user().error('Amp Ad', err, this.element);
+              return Promise.resolve(null);
+            }))));
   }
 
   /**
