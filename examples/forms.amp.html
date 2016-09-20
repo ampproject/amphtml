@@ -140,11 +140,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name1" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email1" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -170,11 +170,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name2" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email2" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -201,11 +201,11 @@
     <fieldset>
         <label>
             <span>Your name</span>
-            <input type="text" name="name" required>
+            <input type="text" name="name" id="name3" required>
         </label>
         <label>
             <span>Your email</span>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email3" required>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
@@ -259,6 +259,114 @@
         <label>
             <span>Subscribe</span>
             <input type="email" name="email" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h1>Custom Validations</h1>
+<h4>Show First Validation On Submit</h4>
+
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-first-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name4" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name4"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name4">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email4" required>
+            <span visible-when-invalid="valueMissing" validation-for="email4"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email4"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name5" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name5"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name5">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email5" required>
+            <span visible-when-invalid="valueMissing" validation-for="email5"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email5"></span>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show All Invalid Messages On Submit (Summary)</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="show-all-on-submit">
+    <div>
+        <ol>
+            <li visible-when-invalid="valueMissing" validation-for="name51">
+                Name is a required field. Please fill it out.
+            </li>
+            <li visible-when-invalid="patternMismatch" validation-for="name51">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </li>
+            <li visible-when-invalid="valueMissing" validation-for="email51">
+                We need your email to send you coolness!
+            </li>
+            <li visible-when-invalid="typeMismatch" validation-for="email51">
+                That doesn't look like an email. Please fix it.
+            </li>
+        </ol>
+    </div>
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name51" required pattern="\w+\s\w+">
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email51" required>
+        </label>
+        <input type="submit" value="Subscribe">
+    </fieldset>
+</form>
+
+<h4>Show As You Go Messages On Submit</h4>
+<form method="post"
+      action-xhr="/form/echo-json/post"
+      target="_blank"
+      custom-validation-reporting="as-you-go">
+    <fieldset>
+        <label>
+            <span>Your name</span>
+            <input type="text" name="name" id="name6" required pattern="\w+\s\w+">
+            <span visible-when-invalid="valueMissing" validation-for="name6"></span>
+            <span visible-when-invalid="patternMismatch" validation-for="name6">
+                Please enter your first and last name separated by a space (e.g. Jane Miller)
+            </span>
+        </label>
+        <label>
+            <span>Your email</span>
+            <input type="email" name="email" id="email6" required>
+            <span visible-when-invalid="valueMissing" validation-for="email6"></span>
+            <span visible-when-invalid="typeMismatch" validation-for="email6"></span>
         </label>
         <input type="submit" value="Subscribe">
     </fieldset>
