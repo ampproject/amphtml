@@ -482,7 +482,7 @@ export class UrlReplacements {
    * Enforces synchronous evaluation.
    * @param {string} startEvent
    * @param {string=} endEvent
-   * @return {string|undefined} undefined if API is not available, empty string
+   * @return {ResolverReturnDef} undefined if API is not available, empty string
    *    if it is not yet available, or value as string
    */
   getTimingDataSync_(startEvent, endEvent) {
@@ -510,7 +510,7 @@ export class UrlReplacements {
   /**
    * Returns navigation information from the current browsing context.
    * @param {string} attribute
-   * @return {string|undefined}
+   * @return {ResolverReturnDef}
    * @private
    */
   getNavigationData_(attribute) {
