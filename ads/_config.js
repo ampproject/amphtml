@@ -36,9 +36,7 @@
  * }
  */
 export const adConfig = {
-  _ping_: {},
-
-  fakead3p: {
+  _ping_: {
     renderStartImplemented: true,
   },
 

@@ -30,12 +30,14 @@ import {urls} from '../src/config';
 import {endsWith} from '../src/string';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {initLogConstructor, user} from '../src/log';
+import {getMode} from '../src/mode';
 
 // 3P - please keep in alphabetic order
 import {facebook} from './facebook';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
+import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
@@ -62,7 +64,6 @@ import {ezoic} from '../ads/ezoic';
 import {dotandads} from '../ads/dotandads';
 import {doubleclick} from '../ads/google/doubleclick';
 import {eplanning} from '../ads/eplanning';
-import {fakead3p} from '../ads/fakead3p';
 import {flite} from '../ads/flite';
 import {genieessp} from '../ads/genieessp';
 import {gmossp} from '../ads/gmossp';
@@ -115,11 +116,12 @@ const AMP_EMBED_ALLOWED = {
   _ping_: true,
 };
 
-// used for extracting fakead3p from production code.
-const IS_DEV = true;
-
 const data = parseFragment(location.hash);
 window.context = data._context;
+
+if (getMode().test || getMode().localDev) {
+  register('_ping_', _ping_);
+}
 
 // Keep the list in alphabetic order
 register('a9', a9);
@@ -189,10 +191,6 @@ register('yieldbot', yieldbot);
 register('yieldmo', yieldmo);
 register('zergnet', zergnet);
 register('yieldone', yieldone);
-
-register('_ping_', function(win, data) {
-  win.document.getElementById('c').textContent = data.ping;
-});
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -304,10 +302,6 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     window.context.noContentAvailable = triggerNoContentAvailable;
     window.context.requestResize = triggerResizeRequest;
     window.context.renderStart = triggerRenderStart;
-
-    if (IS_DEV && data.type === 'fakead3p' && window.context.mode.localDev) {
-      register('fakead3p', fakead3p);
-    }
 
     if (data.type === 'facebook' || data.type === 'twitter') {
       // Only make this available to selected embeds until the

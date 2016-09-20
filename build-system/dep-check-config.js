@@ -66,6 +66,7 @@ exports.rules = [
       '3p/**->src/string.js',
       '3p/**->src/url.js',
       '3p/**->src/config.js',
+      '3p/**->src/mode.js',
     ],
   },
   {
