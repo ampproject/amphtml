@@ -249,6 +249,8 @@ function Validator(scriptContents) {
 }
 
 /**
+ * Validates the provided inputString; the htmlFormat can be 'AMP' or
+ * 'AMP4ADS'; it defaults to 'AMP' if not specified.
  * @param {!string} inputString
  * @param {string=} htmlFormat
  * @returns {!ValidationResult}
