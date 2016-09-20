@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpDocSingle} from '../../src/service/ampdoc-impl';
 import {
   History,
   HistoryBindingNatural_,
@@ -46,7 +47,7 @@ describe('History', () => {
     };
     bindingMock = sandbox.mock(binding);
 
-    history = new History(window, binding);
+    history = new History(new AmpDocSingle(window), binding);
   });
 
   afterEach(() => {

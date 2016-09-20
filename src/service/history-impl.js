@@ -664,7 +664,8 @@ function createHistory_(ampdoc) {
  * @return {!History}
  */
 export function installHistoryServiceForDoc(ampdoc) {
-  return getServiceForDoc(ampdoc, 'history', ampdoc => {
-    return createHistory_(ampdoc);
-  });
+  return /** @type {!History} */ (getServiceForDoc(ampdoc, 'history',
+      ampdoc => {
+        return createHistory_(ampdoc);
+      }));
 }
