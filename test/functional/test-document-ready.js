@@ -48,7 +48,7 @@ describe('documentReady', () => {
 
   });
 
-  it('should interprete readyState correctly', () => {
+  it('should interpret readyState correctly', () => {
     expect(isDocumentReady(testDoc)).to.equal(false);
 
     testDoc.readyState = 'interactive';

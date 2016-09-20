@@ -15,9 +15,8 @@
  */
 
 import {documentInfoForDoc} from '../document-info';
-import {whenDocumentReady} from '../document-ready';
+import {whenDocumentReady, whenDocumentComplete} from '../document-ready';
 import {fromClass} from '../service';
-import {loadPromise} from '../event-helper';
 import {resourcesForDoc} from '../resources';
 import {viewerFor} from '../viewer';
 
@@ -97,7 +96,7 @@ export class Performance {
         });
 
     // Tick window.onload event.
-    loadPromise(win.document).then(() => {
+    whenDocumentComplete(win.document).then(() => {
       this.tick('ol');
       this.flush();
     });
