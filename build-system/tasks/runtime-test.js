@@ -57,16 +57,36 @@ function getConfig() {
   return extend(obj, karmaConfig.default);
 }
 
-function getAdExtensions() {
-  const adNetworks = [];
+function getAdTypes() {
+  const namingExceptions = {
+    // We recommend 3P ad networks use the same string for filename and type.
+    // Write exceptions here in alphabetic order.
+    // filename: [type1, type2, ... ]
+    adblade: ['adblade', 'industrybrains'],
+    mantis: ['mantis-display', 'mantis-recommend'],
+    weborama: ['weborama-display'],
+  };
+
+  // Start with Google ad types
+  const adTypes = ['adsense', 'doubleclick'];
+
+  // Add all other ad types
   const files = fs.readdirSync('./ads/');
   for (var i = 0; i < files.length; i++) {
     if (path.extname(files[i]) == '.js'
         && files[i][0] != '_' && files[i] != 'ads.extern.js') {
-      adNetworks.push(path.basename(files[i], '.js'));
+      const adType = path.basename(files[i], '.js');
+      const expanded = namingExceptions[adType];
+      if (expanded) {
+        for (var j = 0; j < expanded.length; j++) {
+          adTypes.push(expanded[j]);
+        }
+      } else {
+        adTypes.push(adType);
+      }
     }
   }
-  return adNetworks;
+  return adTypes;
 }
 
 /**
@@ -108,7 +128,7 @@ gulp.task('test', 'Runs tests', argv.nobuild ? [] : ['build'], function(done) {
   c.client.amp = {
     useCompiledJs: !!argv.compiled,
     saucelabs: !!argv.saucelabs,
-    adExtensions: getAdExtensions(),
+    adTypes: getAdTypes(),
   };
 
   if (argv.grep) {
