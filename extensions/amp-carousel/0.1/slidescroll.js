@@ -188,14 +188,12 @@ export class AmpSlideScroll extends BaseSlides {
   /** @override */
   onLayoutMeasure() {
     this.slideWidth_ = this.getLayoutWidth();
-
-    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
-
     if (this.slideIndex_ !== null) {
       // Reset scrollLeft on orientationChange.
-      this.slidesContainer_./*REVIEW*/scrollLeft =
+      this.slidesContainer_./*OK*/scrollLeft =
           this.getScrollLeftForIndex_(dev().assertNumber(this.slideIndex_));
     }
+    this.previousScrollLeft_ = this.slidesContainer_./*OK*/scrollLeft;
   }
 
   /** @override */
