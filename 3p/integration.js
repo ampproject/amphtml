@@ -37,7 +37,7 @@ import {facebook} from './facebook';
 import {twitter} from './twitter';
 
 // 3P Ad Networks - please keep in alphabetic order
-import {_ping_} from '../ads/_ping_.js';
+import {_ping_} from '../ads/_ping_';
 import {a9} from '../ads/a9';
 import {accesstrade} from '../ads/accesstrade';
 import {adblade, industrybrains} from '../ads/adblade';
