@@ -56,6 +56,13 @@ export class ValidationBubble {
   }
 
   /**
+   * @return {boolean}
+   */
+  isActiveOn(element) {
+    return this.isVisible_ && element == this.currentTargetElement_;
+  }
+
+  /**
    * Hides the bubble off screen.
    */
   hide() {
@@ -82,8 +89,7 @@ export class ValidationBubble {
    * @param {string} message
    */
   show(targetElement, message) {
-    if (this.isVisible_ && targetElement == this.currentTargetElement_ &&
-        message == this.currentMessage_) {
+    if (this.isActiveOn(targetElement) && message == this.currentMessage_) {
       return;
     }
 
