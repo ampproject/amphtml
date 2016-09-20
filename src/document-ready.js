@@ -45,7 +45,7 @@ export function onDocumentReady(doc, callback) {
 /**
  * Calls the callback when document's state satisfies the stateFn.
  * @param {!Document} doc
- * @param {function(!Document)} stateFn
+ * @param {function(!Document):boolean} stateFn
  * @param {function(!Document)} callback
  */
 function onDocumentState(doc, stateFn, callback) {
