@@ -20,6 +20,7 @@ import {
   validateSrcContains,
   nextTick,
   validateData,
+  loadScript,
 } from '../../3p/3p';
 import * as sinon from 'sinon';
 
@@ -238,4 +239,33 @@ describe('3p', () => {
     expect(progress).to.equal(';slave0;master;slave1;slave2');
     expect(workCalls).to.equal(1);
   });
+
+  describe('loadScript', () => {
+
+    it('should add <script /> with url to the body', () => {
+      const url = 'http://test.com/example.js';
+      let s = window.document.body.querySelector(`script[src="${url}"]`);
+      expect(s).to.equal(null);
+      loadScript(window, url);
+      s = window.document.body.querySelector(`script[src="${url}"]`);
+      expect(s.src).to.equal(url);
+    });
+
+    it('should handle onSuccess callback', done => {
+      loadScript(window, 'http://localhost:9876/test/functional/test-3p.js', () => {
+        done();
+      }, () => {
+        done('onError should not be called!');
+      });
+    });
+
+    it('should handle onFailure callback', done => {
+      loadScript(window, 'http://localhost:9876/404', () => {
+        done('onSuccess should not be called');
+      }, () => {
+        done();
+      });
+    });
+  });
+
 });

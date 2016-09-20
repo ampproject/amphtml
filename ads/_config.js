@@ -229,6 +229,10 @@ export const adConfig = {
     prefetch: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   },
 
+  meg: {
+    renderStartImplemented: true,
+  },
+
   microad: {
     prefetch: 'https://j.microad.net/js/camp.js',
     preconnect: [
