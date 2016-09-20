@@ -237,7 +237,7 @@ To verify the examples that you have put in `/examples/ads.amp.html`, you will n
 
 Please make sure your changes pass the tests:
 
-```bash
+```
 gulp test --watch --nobuild --files=test/functional/{test-ads-config.js,test-integration.js}
 
 ```
