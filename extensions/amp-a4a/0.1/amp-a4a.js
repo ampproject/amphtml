@@ -252,138 +252,133 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
     this.adPromise_ = viewerFor(this.win).whenFirstVisible()
-    // This block returns the ad URL, if one is available.
-    /** @return {!Promise<?string>} */
-    .then(() => {
-      checkStillCurrent(promiseId);
-      return this.getAdUrl();
-    })
-    // This block returns the (possibly empty) response to the XHR request.
-    /** @return {!Promise<?Response>} */
-    .then(adUrl => {
-      checkStillCurrent(promiseId);
-      this.adUrl_ = adUrl;
-      return adUrl && this.sendXhrRequest_(adUrl);
-    })
-    // The following block returns either the response (as a {bytes, headers}
-    // object), or null if no response is available / response is empty.
-    /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
-    .then(fetchResponse => {
-      checkStillCurrent(promiseId);
-      if (!fetchResponse || !fetchResponse.arrayBuffer) {
-        return null;
-      }
-      // Note: Resolving a .then inside a .then because we need to capture
-      // two fields of fetchResponse, one of which is, itself, a promise,
-      // and one of which isn't.  If we just return
-      // fetchResponse.arrayBuffer(), the next step in the chain will
-      // resolve it to a concrete value, but we'll lose track of
-      // fetchResponse.headers.
-      return fetchResponse.arrayBuffer().then(bytes => {
-        return {
-          bytes,
-          headers: fetchResponse.headers,
-        };
-      });
-    })
-    // This block returns the ad creative and signature, if available; null
-    // otherwise.
-    /**
-     * @return {!Promise<?AdResponseDef>}
-     */
-    .then(responseParts => {
-      checkStillCurrent(promiseId);
-      return responseParts && this.extractCreativeAndSignature(
-          responseParts.bytes, responseParts.headers);
-    })
-    // This block returns the ad creative if it exists and validates as AMP;
-    // null otherwise.
-    /** @return {!Promise<?ArrayBuffer>} */
-    .then(creativeParts => {
-      checkStillCurrent(promiseId);
-      if (!creativeParts || !creativeParts.signature) {
-        return null;
-      }
+        // This block returns the ad URL, if one is available.
+        .then(() => {
+          checkStillCurrent(promiseId);
+          /** @return {!Promise<?string>} */
+          return this.getAdUrl();
+        })
+        // This block returns the (possibly empty) response to the XHR request.
+        .then(adUrl => {
+          checkStillCurrent(promiseId);
+          this.adUrl_ = adUrl;
+          /** @return {!Promise<?Response>} */
+          return adUrl && this.sendXhrRequest_(adUrl);
+        })
+        // The following block returns either the response (as a {bytes, headers}
+        // object), or null if no response is available / response is empty.
+        .then(fetchResponse => {
+          checkStillCurrent(promiseId);
+          if (!fetchResponse || !fetchResponse.arrayBuffer) {
+            return null;
+          }
+          // Note: Resolving a .then inside a .then because we need to capture
+          // two fields of fetchResponse, one of which is, itself, a promise,
+          // and one of which isn't.  If we just return
+          // fetchResponse.arrayBuffer(), the next step in the chain will
+          // resolve it to a concrete value, but we'll lose track of
+          // fetchResponse.headers.
+          /** @return {!Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+          return fetchResponse.arrayBuffer().then(bytes => {
+            return {
+              bytes,
+              headers: fetchResponse.headers,
+            };
+          });
+        })
+        // This block returns the ad creative and signature, if available; null
+        // otherwise.
+        .then(responseParts => {
+          checkStillCurrent(promiseId);
+          /** @return {!Promise<?AdResponseDef>} */
+          return responseParts && this.extractCreativeAndSignature(
+              responseParts.bytes, responseParts.headers);
+        })
+        // This block returns the ad creative if it exists and validates as AMP;
+        // null otherwise.
+        .then(creativeParts => {
+          checkStillCurrent(promiseId);
+          if (!creativeParts || !creativeParts.signature) {
+            return null;
+          }
 
-      // Alias for validCreativePromise's resolve function. This will be called
-      // if any of the fetched keys successfully validate the creative.
-      let resolveValidation;
-      // Promise that will resolve upon any successful validation.
-      const validCreativePromise = new Promise(resolve => {
-        // @param {!function(?ArrayBuffer)} resolve
-        resolveValidation = resolve;
-      });
-
-      // The following block defines an Array of Promises of ArrayBuffers, none
-      // of which will ever resolve. In the first instance of a successful
-      // creative verification, resolveValidation will be called with the
-      // creative as the argument.
-      const signatureVerificationPromises = this.keyInfoSetPromises_.map(
-          keyInfoSetPromise => {
-            // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
-            // keyInfoSetPromise
-            // @return {!Promise}
-            return keyInfoSetPromise.then(keyInfoSet => {
-              // @param {!Array<!Promise<?PublicKeyInfoDef>>} keyInfoSet
-              // @return {!Promise}
-              return Promise.all(keyInfoSet.map(keyInfoPromise => {
-                // @param {!Promise<?PublicKeyInfoDef>} keyInfoPromise
-                // @return {!Promise}
-                return keyInfoPromise.then(keyInfo => {
-                  // @param {?PublicKeyInfoDef} keyInfo
-                  // @return {!Promise}
-                  if (keyInfo) {
-                    return verifySignature(
-                        new Uint8Array(creativeParts.creative),
-                        creativeParts.signature,
-                        keyInfo)
-                    .then(isValid => {
-                      // @param {boolean} isValid
-                      // @return {!Promise}
-                      if (isValid) {
-                        resolveValidation(creativeParts.creative);
-                      }
-                    },
-                    err => {
-                      // @param {*} err
-                      // @return {!Promise}
-                      user().error('Amp Ad', err, this.element);
-                    });
-                  }
-                  return Promise.resolve();
-                });
-              }));
-            });
+          // Alias for validCreativePromise's resolve function. This will be called
+          // if any of the fetched keys successfully validate the creative.
+          let resolveValidation;
+          // Promise that will resolve upon any successful validation.
+          const validCreativePromise = new Promise(resolve => {
+            // @param {!function(?ArrayBuffer)} resolve
+            resolveValidation = resolve;
           });
 
-      // Promise that will resolve to null after all keys have been checked.
-      // Will call resolveValidation if a successful validation does happen.
-      const allKeysCheckedPromise = Promise.all(signatureVerificationPromises)
-          // @return {!Promise<?ArrayBuffer>}
-          .then(() => Promise.resolve(null));
+          // The following block defines an Array of Promises of ArrayBuffers,
+          // none of which will ever resolve. In the first instance of a
+          // successful creative verification, resolveValidation will be
+          // called with the creative as the argument.
+          const signatureVerificationPromises = this.keyInfoSetPromises_.map(
+              keyInfoSetPromise => {
+                // @param {!Promise<!Array<!Promise<?PublicKeyInfoDef>>>}
+                // keyInfoSetPromise
+                // @return {!Promise}
+                return keyInfoSetPromise.then(keyInfoSet => {
+                  // @param {!Array<!Promise<?PublicKeyInfoDef>>} keyInfoSet
+                  // @return {!Promise}
+                  return Promise.all(keyInfoSet.map(keyInfoPromise => {
+                    // @param {!Promise<?PublicKeyInfoDef>} keyInfoPromise
+                    // @return {!Promise}
+                    return keyInfoPromise.then(keyInfo => {
+                      // @param {?PublicKeyInfoDef} keyInfo
+                      // @return {!Promise}
+                      if (keyInfo) {
+                        return verifySignature(
+                            new Uint8Array(creativeParts.creative),
+                            creativeParts.signature,
+                            keyInfo)
+                        .then(isValid => {
+                          // @param {boolean} isValid
+                          // @return {!Promise}
+                          if (isValid) {
+                            resolveValidation(creativeParts.creative);
+                          }
+                        },
+                        err => {
+                          // @param {*} err
+                          // @return {!Promise}
+                          user().error('Amp Ad', err, this.element);
+                        });
+                      }
+                    });
+                  }));
+                });
+              });
 
+          // Promise that will resolve to null after all keys have been checked.
+          // Will call resolveValidation if a successful validation does happen.
+          const allKeysCheckedPromise = Promise.all(
+              signatureVerificationPromises).then(() => Promise.resolve(null));
 
-      // Race the two promises: Either validCreativePromise will resolve if a
-      // successful validation occurs, or allKeysCheckedPromise will resolve to
-      // null.
-      return Promise.race([validCreativePromise, allKeysCheckedPromise]);
-    })
-    // This block returns true iff the creative was rendered in the shadow
-    // DOM.
-    /** @return {!Promise<!boolean>} */
-    .then(creative => {
-      checkStillCurrent(promiseId);
-      // Note: It's critical that #maybeRenderAmpAd_ be called
-      // on precisely the same creative that was validated
-      // via #validateAdResponse_.  See GitHub issue
-      // https://github.com/ampproject/amphtml/issues/4187
+          // Race the two promises: Either validCreativePromise will resolve if
+          // a successful validation occurs, or allKeysCheckedPromise will
+          // resolve to null.
+          /** @return {!Promise<?ArrayBuffer>} */
+          return Promise.race([validCreativePromise, allKeysCheckedPromise]);
+        })
+        // This block returns true iff the creative was rendered in the shadow
+        // DOM.
+        /** @return {!Promise<!boolean>} */
+        .then(creative => {
+          checkStillCurrent(promiseId);
+          // Note: It's critical that #maybeRenderAmpAd_ be called
+          // on precisely the same creative that was validated
+          // via #validateAdResponse_.  See GitHub issue
+          // https://github.com/ampproject/amphtml/issues/4187
 
-      // TODO(levitzky) If creative comes back null, we should consider re-
-      // fetching the signing server public keys and try the verification
-      // step again.
-      return creative && this.maybeRenderAmpAd_(creative);
-    })
-    .catch(error => this.promiseErrorHandler_(error));
+          // TODO(levitzky) If creative comes back null, we should consider re-
+          // fetching the signing server public keys and try the verification
+          // step again.
+          return creative && this.maybeRenderAmpAd_(creative);
+        })
+        .catch(error => this.promiseErrorHandler_(error));
   }
 
   /**
