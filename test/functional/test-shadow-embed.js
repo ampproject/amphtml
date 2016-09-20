@@ -174,12 +174,7 @@ describe('shadow-embed', () => {
       }
     });
 
-    it('should yield false for non-document-fragment shadow root', () => {
-      const element = document.createElement('div');
-      expect(isShadowRoot(element)).to.be.false;
-    });
-
-    it('should yield false for document-fragment shadow root', () => {
+    it('should yield false for document-fragment non-shadow-root node', () => {
       const fragment = document.createDocumentFragment();
       expect(isShadowRoot(fragment)).to.be.false;
     });

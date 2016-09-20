@@ -23,6 +23,7 @@ import {insertStyleElement} from './style-installer';
 
 /**
  * Used for non-composed root-node search. See `getRootNode`.
+ * @const {!GetRootNodeOptions}
  */
 const UNCOMPOSED_SEARCH = {composed: false};
 
