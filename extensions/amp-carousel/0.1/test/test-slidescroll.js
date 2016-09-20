@@ -514,6 +514,27 @@ describe('SlideScroll', () => {
     });
   });
 
+  it('should handle layout measures (orientation changes)', () => {
+    return getAmpSlideScroll().then(obj => {
+      const ampSlideScroll = obj.ampSlideScroll;
+      const impl = ampSlideScroll.implementation_;
+      const getLayoutWidthSpy = sandbox.stub(impl, 'getLayoutWidth', () => {
+        return impl.slideWidth_ == 400 ? 200 : 400;
+      });
+      impl.slideIndex_ = null;
+      impl.onLayoutMeasure();
+      expect(getLayoutWidthSpy).to.have.been.called;
+      expect(impl.slideWidth_).to.equal(400);
+
+      impl.showSlide_(1);
+      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(400);
+      impl.onLayoutMeasure();
+      expect(getLayoutWidthSpy.callCount).to.equal(2);
+      expect(impl.slideWidth_).to.equal200;
+      expect(impl.slidesContainer_./*OK*/scrollLeft).to.equal(200);
+    });
+  });
+
   describe('Looping', () => {
     beforeEach(() => {
       toggleExperiment(window, 'amp-slidescroll', true);
