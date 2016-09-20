@@ -302,7 +302,7 @@ export class AmpA4A extends AMP.BaseElement {
     .then(creativeParts => {
       checkStillCurrent(promiseId);
       if (!creativeParts || !creativeParts.signature) {
-        return Promise.resolve(null);
+        return null;
       }
 
       // Alias for validCreativePromise's resolve function. This will be called
