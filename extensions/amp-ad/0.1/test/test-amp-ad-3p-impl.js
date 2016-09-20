@@ -18,6 +18,7 @@ import {AmpAd3PImpl} from '../amp-ad-3p-impl';
 import {createAdPromise} from '../../../../testing/ad-iframe';
 import {createIframePromise} from '../../../../testing/iframe';
 import {createElementWithAttributes} from '../../../../src/dom';
+import * as adCid from '../../../../src/ad-cid';
 import '../../../amp-sticky-ad/0.1/amp-sticky-ad';
 import * as sinon from 'sinon';
 import * as lolex from 'lolex';
@@ -227,6 +228,28 @@ function tests(name) {
         ad.implementation_.unlayoutCallback();
         const newLayout = ad.implementation_.layoutCallback();
         expect(newLayout).to.not.equal(secondLayout);
+      });
+    });
+
+    describe('get CID', () => {
+      it('should propagete CID to ad iframe', () => {
+        sandbox.stub(adCid, 'getAdCid', () => {
+          return Promise.resolve('sentinel123');
+        });
+        return getAd().then(ad => {
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":"sentinel123"');
+        });
+      });
+
+      it('should proceed w/o CID', () => {
+        sandbox.stub(adCid, 'getAdCid', () => {
+          return Promise.resolve(undefined);
+        });
+        return getAd().then(ad => {
+          const src = ad.firstChild.getAttribute('src');
+          expect(src).to.contain('"clientId":null');
+        });
       });
     });
 
