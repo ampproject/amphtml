@@ -253,7 +253,7 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private @return {!History}
    */
   getHistory_() {
-    return historyForDoc(new AmpDoc(this.win));//XXX
+    return historyForDoc(this.getAmpDoc());
   }
 }
 

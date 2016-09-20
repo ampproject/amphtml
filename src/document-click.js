@@ -76,7 +76,7 @@ export class ClickHandler {
     this.viewer_ = viewerFor(this.win);
 
     /** @private @const {!./service/history-impl.History} */
-    this.history_ = historyForDoc(new AmpDoc(this.win));//XXX
+    this.history_ = historyForDoc(this.win.document);
 
     const platform = platformFor(this.win);
     /** @private @const {boolean} */

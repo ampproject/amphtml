@@ -997,7 +997,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
   /** @private @return {!History} */
   getHistory_() {
-    return historyForDoc(new AmpDoc(this.element.ownerDocument.defaultView));//XXX
+    return historyForDoc(this.getAmpDoc());
   }
 }
 
