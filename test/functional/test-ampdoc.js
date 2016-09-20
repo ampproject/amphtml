@@ -82,7 +82,7 @@ describe('AmpDocService', () => {
 
     it('should yield custom-element shadow-doc when exists', () => {
       const ampDoc = {};
-      content.getAmpDoc = () => ampDoc;
+      content.ampdoc_ = ampDoc;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
@@ -97,11 +97,11 @@ describe('AmpDocService', () => {
 
       // Override via custom element.
       const ampDoc2 = {};
-      content.getAmpDoc = () => ampDoc2;
+      content.ampdoc_ = ampDoc2;
       expect(service.getAmpDoc(content)).to.equal(ampDoc2);
 
       // Fallback to cached version when custom element returns null.
-      content.getAmpDoc = () => null;
+      content.ampdoc_ = null;
       expect(service.getAmpDoc(content)).to.equal(ampDoc);
     });
 
