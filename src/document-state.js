@@ -33,13 +33,13 @@ export class DocumentState {
     /** @private @const {!Document} */
     this.document_ = win.document;
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.hiddenProp_ = getVendorJsPropertyName(this.document_, 'hidden', true);
     if (this.document_[this.hiddenProp_] === undefined) {
       this.hiddenProp_ = null;
     }
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
         'visibilityState', true);
     if (this.document_[this.visibilityStateProp_] === undefined) {
@@ -49,7 +49,7 @@ export class DocumentState {
     /** @private @const */
     this.visibilityObservable_ = new Observable();
 
-    /** @private @const {string|null} */
+    /** @private {string|null} */
     this.visibilityChangeEvent_ = null;
     if (this.hiddenProp_) {
       this.visibilityChangeEvent_ = 'visibilitychange';
