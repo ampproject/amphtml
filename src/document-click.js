@@ -163,7 +163,8 @@ export class CaptureClickHandler {
 export function getElementByTagNameFromEventShadowDomPath_(e, tagName) {
   for (let i = 0; i < (e.path ? e.path.length : 0); i++) {
     const element = e.path[i];
-    if (element && element.tagName.toUpperCase() == tagName) {
+    if (element && element.tagName &&
+        element.tagName.toUpperCase() == tagName) {
       return element;
     }
   }
