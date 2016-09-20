@@ -77,8 +77,12 @@ function readFromReadable(name, readable) {
   return new Promise(function(resolve, reject) {
     var chunks = [];
     readable.setEncoding('utf8');
-    readable.on('data', function(chunk) { chunks.push(chunk); });
-    readable.on('end', function() { resolve(chunks.join('')); });
+    readable.on('data', function(chunk) {
+      chunks.push(chunk);
+    });
+    readable.on('end', function() {
+      resolve(chunks.join(''));
+    });
     readable.on('error', function(error) {
       reject(new Error('Could not read from ' + name + ' - ' + error.message));
     });
@@ -250,10 +254,9 @@ function Validator(scriptContents) {
  * @returns {!ValidationResult}
  * @export
  */
-Validator.prototype.validateString =
-    function(inputString, htmlFormat) {
-  var internalResult = this.sandbox.amp.validator.validateString(
-      inputString, htmlFormat);
+Validator.prototype.validateString = function(inputString, htmlFormat) {
+  var internalResult =
+      this.sandbox.amp.validator.validateString(inputString, htmlFormat);
   var result = new ValidationResult();
   result.status = internalResult.status;
   for (var ii = 0; ii < internalResult.errors.length; ii++) {
@@ -319,8 +322,7 @@ exports.getInstance = getInstance;
  */
 function logValidationResult(filename, validationResult, color) {
   if (validationResult.status === 'PASS') {
-    console.log(
-        filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
+    console.log(filename + ': ' + (color ? colors.green('PASS') : 'PASS'));
   }
   for (var ii = 0; ii < validationResult.errors.length; ii++) {
     var error = validationResult.errors[ii];
@@ -359,9 +361,9 @@ function main() {
           'https://cdn.ampproject.org/v0/validator.js')
       .option(
           '--html_format <AMP|AMP4ADS>', 'The input format to be validated.\n' +
-          '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
-          '  still in draft; this requires specifying \n' +
-          '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
+              '  AMP by default. AMP4ADS is a format for ads creatives that is\n' +
+              '  still in draft; this requires specifying \n' +
+              '  https://cdn.ampproject.org/v0/validator-canary.js as validator.js.',
           'AMP')
       .option(
           '--format <color|text|json>', 'How to format the output.\n' +
@@ -394,9 +396,8 @@ function main() {
             .then(function(resolvedInputs) {
               var jsonOut = {};
               for (var ii = 0; ii < resolvedInputs.length; ii++) {
-                var validationResult =
-                    validator.validateString(resolvedInputs[ii],
-                                             program.html_format);
+                var validationResult = validator.validateString(
+                    resolvedInputs[ii], program.html_format);
                 if (program.format === 'json') {
                   jsonOut[program.args[ii]] = validationResult;
                 } else {
