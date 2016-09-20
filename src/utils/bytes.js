@@ -118,8 +118,8 @@ export function getCryptoRandomBytesArray(win, length) {
  * @return {!ArrayBuffer}
  */
 export function stringToArrayBuffer(string) {
-  const buffer = new ArrayBuffer(string.length);
-  const bufferView = new Uint8Array(buffer);
+  const buffer = new ArrayBuffer(string.length * 2);
+  const bufferView = new Uint16Array(buffer);
   for (let i = 0; i < string.length; i++) {
     bufferView[i] = string.charCodeAt(i);
   }
