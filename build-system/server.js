@@ -390,7 +390,7 @@ app.use('/examples/live-blog(-non-floating-button)?.amp.(min.|max.)?html',
 });
 
 app.use('/examples/amp-fresh.amp.(min.|max.)?html', function(req, res, next) {
-    if ('amp-fresh' in req.query && req.query['amp-fresh'] == '1') {
+    if ('amp-fresh' in req.query && req.query['amp-fresh']) {
       res.setHeader('Content-Type', 'text/html');
       res.end(`<!doctype html>
           <html ⚡>
