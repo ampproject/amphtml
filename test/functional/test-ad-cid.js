@@ -46,6 +46,7 @@ function tests(name) {
   return () => {
     describe('cid-ad support', () => {
       const cidScope = 'cid-in-ads-test';
+      const config = adConfig['_ping_'];
       let sandbox;
 
       beforeEach(() => {
@@ -54,7 +55,6 @@ function tests(name) {
 
       afterEach(() => {
         sandbox.restore();
-        delete adConfig['_ping_'];
         setCookie(window, cidScope, '', Date.now() - 5000);
       });
 
@@ -73,7 +73,7 @@ function tests(name) {
         });
 
         it('provides cid to ad', () => {
-          adConfig['_ping_'] = {clientIdScope: cidScope};
+          config.clientIdScope = cidScope;
 
           const s = installCidService(window);
           sandbox.stub(s, 'get', scope => {
@@ -86,7 +86,7 @@ function tests(name) {
         });
 
         it('times out', () => {
-          adConfig['_ping_'] = {clientIdScope: cidScope};
+          config.clientIdScope = cidScope;
           const s = installCidService(window);
           sandbox.stub(s, 'get', scope => {
             expect(scope).to.equal(cidScope);
@@ -106,7 +106,7 @@ function tests(name) {
       });
 
       it('provides cid to ad', () => {
-        adConfig['_ping_'] = {clientIdScope: cidScope};
+        config.clientIdScope = cidScope;
         return getAd({
           width: 300,
           height: 250,
@@ -125,7 +125,7 @@ function tests(name) {
       });
 
       it('proceeds on failed CID', () => {
-        adConfig['_ping_'] = {clientIdScope: cidScope};
+        config.clientIdScope = cidScope;
         return getAd({
           width: 300,
           height: 250,
@@ -144,7 +144,7 @@ function tests(name) {
       });
 
       it('waits for consent', () => {
-        adConfig['_ping_'] = {clientIdScope: cidScope};
+        config.clientIdScope = cidScope;
         return getAd({
           width: 300,
           height: 250,
@@ -173,6 +173,7 @@ function tests(name) {
       });
 
       it('waits for consent w/o cidScope', () => {
+        config.clientIdScope = null;
         return getAd({
           width: 300,
           height: 250,
@@ -201,6 +202,7 @@ function tests(name) {
       });
 
       it('provide null if notification and cid is not provided', () => {
+        config.clientIdScope = null;
         let uidSpy = null;
         return getAd({
           width: 300,
@@ -227,7 +229,7 @@ function tests(name) {
       });
 
       it('provides null if cid service not available', () => {
-        adConfig['_ping_'] = {clientIdScope: cidScope};
+        config.clientIdScope = cidScope;
         return getAd({
           width: 300,
           height: 250,

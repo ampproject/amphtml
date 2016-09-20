@@ -36,6 +36,8 @@
  * }
  */
 export const adConfig = {
+  _ping_: {},
+
   fakead3p: {
     renderStartImplemented: true,
   },
@@ -56,9 +58,17 @@ export const adConfig = {
     ],
   },
 
+  adform: {},
+
   adgeneration: {
     prefetch: 'https://i.socdm.com/sdk/js/adg-script-loader.js',
   },
+
+  adition: {},
+
+  adman: {},
+
+  adreactor: {},
 
   adsense: {
     prefetch: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
@@ -70,6 +80,8 @@ export const adConfig = {
     prefetch: 'https://static.adsnative.com/static/js/render.v1.js',
     preconnect: 'https://api.adsnative.com',
   },
+
+  adspirit: {},
 
   adstir: {
     prefetch: 'https://js.ad-stir.com/js/adstir_async.js',
@@ -118,9 +130,13 @@ export const adConfig = {
     preconnect: 'https://ad.caprofitx.adtdp.com',
   },
 
+  chargeads: {},
+
   colombia: {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   },
+
+  contentad: {},
 
   criteo: {
     prefetch: 'https://static.criteo.net/js/ld/publishertag.js',
@@ -156,6 +172,8 @@ export const adConfig = {
     ],
   },
 
+  flite: {},
+
   genieessp: {
     prefetch: 'https://js.gsspcln.jp/l/amp.js',
   },
@@ -169,6 +187,8 @@ export const adConfig = {
     preconnect: 'https://spad.i-mobile.co.jp',
   },
 
+  improvedigital: {},
+
   industrybrains: {
     prefetch: 'https://web.industrybrains.com/js/ads/async/show.js',
     preconnect: [
@@ -181,6 +201,8 @@ export const adConfig = {
     prefetch: 'https://cf.cdn.inmobi.com/ad/inmobi.secure.js',
     renderStartImplemented: true,
   },
+
+  kargo: {},
 
   mads: {
     prefetch: 'https://eu2.madsone.com/js/tags.js',
@@ -230,6 +252,8 @@ export const adConfig = {
     ],
   },
 
+  openadstream: {},
+
   openx: {
     prefetch: 'https://www.googletagservices.com/tag/js/gpt.js',
     preconnect: [
@@ -238,6 +262,8 @@ export const adConfig = {
       'https://tpc.googlesyndication.com',
     ],
   },
+
+  plista: {},
 
   pubmatic: {
     prefetch: 'https://ads.pubmatic.com/AdServer/js/amp.js',
@@ -261,6 +287,10 @@ export const adConfig = {
     ],
   },
 
+  rubicon: {},
+
+  sharethrough: {},
+
   smartadserver: {
     prefetch: 'https://ec-ns.sascdn.com/diff/js/amp.v0.js',
     preconnect: 'https://static.sascdn.com',
@@ -281,6 +311,8 @@ export const adConfig = {
     prefetch: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   },
 
+  taboola: {},
+
   teads: {
     prefetch: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
     preconnect: [
@@ -290,12 +322,18 @@ export const adConfig = {
     ],
   },
 
+  triplelift: {},
+
+  webediads: {},
+
   'weborama-display': {
     prefetch: [
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
     ],
   },
+
+  widespace: {},
 
   yahoojp: {
     prefetch: [
@@ -324,4 +362,6 @@ export const adConfig = {
   yieldone: {
     prefetch: 'https://img.ak.impact-ad.jp/ic/pone/commonjs/yone-amp.js',
   },
+
+  zergnet: {},
 };
