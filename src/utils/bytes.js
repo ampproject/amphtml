@@ -54,14 +54,9 @@ export function utf8Encode(string) {
         reject(reader.error);
       };
       reader.onloadend = () => {
-        if (typeof reader.result == 'string') {
-          resolve(new Uint8Array(stringToArrayBuffer(reader.result)));
-        }
-        else if (typeof reader.result == 'object') {
-          // Reader.result must be of type ArrayBuffer if it's not a string.
-          const buffer = /** @type {ArrayBuffer} */ (reader.result);
-          resolve(new Uint8Array(buffer));
-        }
+        // Because we used readAsArrayBuffer, we know the result must be an
+        // ArrayBuffer.
+        resolve(new Uint8Array(/** @type {ArrayBuffer} */ (reader.result)));
       };
       reader.readAsArrayBuffer(new Blob([string]));
     });
@@ -110,18 +105,4 @@ export function getCryptoRandomBytesArray(win, length) {
   const uint8array = new Uint8Array(length);
   win.crypto.getRandomValues(uint8array);
   return uint8array;
-}
-
-/**
- * Generates an ArrayBuffer from the given string.
- * @param {!string} string The String to be converted.
- * @return {!ArrayBuffer}
- */
-export function stringToArrayBuffer(string) {
-  const buffer = new ArrayBuffer(string.length * 2);
-  const bufferView = new Uint16Array(buffer);
-  for (let i = 0; i < string.length; i++) {
-    bufferView[i] = string.charCodeAt(i);
-  }
-  return buffer;
 }
