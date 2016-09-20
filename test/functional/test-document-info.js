@@ -17,8 +17,19 @@
 import {createIframePromise} from '../../testing/iframe';
 import {documentInfoForDoc} from '../../src/document-info';
 import {installDocService} from '../../src/service/ampdoc-impl';
+import * as sinon from 'sinon';
 
 describe('document-info', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   function getWin(canonical) {
     return createIframePromise().then(iframe => {
       if (canonical) {
@@ -60,9 +71,7 @@ describe('document-info', () => {
 
   it('should provide the pageViewId', () => {
     return getWin('https://twitter.com/').then(win => {
-      win.Math.random = () => {
-        return 0.123456789;
-      };
+      sandbox.stub(win.Math, 'random', () => 0.123456789);
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
       expect(documentInfoForDoc(win.document).pageViewId).to.equal('1234');
     });
