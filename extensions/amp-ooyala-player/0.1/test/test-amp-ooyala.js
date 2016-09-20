@@ -30,8 +30,6 @@ describe('amp-ooyala-player', function() {
     return createIframePromise(true).then(iframe => {
       doNotLoadExternalResourcesInTest(iframe.win);
       const player = iframe.doc.createElement('amp-ooyala-player');
-      player.setAttribute('width', '300');
-      player.setAttribute('height', '301');
       if (embedCode) {
         player.setAttribute('data-embedcode', embedCode);
       }
@@ -67,8 +65,6 @@ describe('amp-ooyala-player', function() {
         expect(playerIframe.src).to.equal('https://player.ooyala.com/iframe.html' +
         '?platform=html5-priority&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
         '&pbid=6440813504804d76ba35c8c787a4b33c');
-        expect(playerIframe.getAttribute('height')).to.be.equal('301');
-        expect(playerIframe.getAttribute('width')).to.be.equal('300');
       });
   });
 
@@ -84,8 +80,6 @@ describe('amp-ooyala-player', function() {
           '?pcode=5zb2wxOlZcNCe_HVT3a6cawW298X' +
           '&ec=Vxc2k0MDE6Y_C7J5podo3UDxlFxGaZrQ' +
           '&pbid=6440813504804d76ba35c8c787a4b33c');
-        expect(playerIframe.getAttribute('height')).to.be.equal('301');
-        expect(playerIframe.getAttribute('width')).to.be.equal('300');
       });
   });
 
